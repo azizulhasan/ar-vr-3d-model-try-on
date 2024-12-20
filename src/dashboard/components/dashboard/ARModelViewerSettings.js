@@ -21,14 +21,14 @@ const ARModelViewerSettings = () => {
                     className="w-full border rounded p-2 text-sm mt-1"
                 >
                     <option value="">None</option>
-                    <option value="1">wordpress_before_single_product_summary</option>
-                    <option value="2">wordpress_after_single_product_summary</option>
+                    <option value="1">woocommerce_before_single_product_summary</option>
+                    <option value="2">woocommerce_after_single_product_summary</option>
                     <option value="3" selected>
-                        wordpress_before_single_product
+                        woocommerce_before_single_product
                     </option>
-                    <option value="4">wordpress_after_single_product</option>
-                    <option value="5">wordpress_after_add_to_cart_form</option>
-                    <option value="6">wordpress_before_add_to_cart_form</option>
+                    <option value="4">woocommerce_after_single_product</option>
+                    <option value="5">woocommerce_after_add_to_cart_form</option>
+                    <option value="6">woocommerce_before_add_to_cart_form</option>
                 </select>
             </div>
 

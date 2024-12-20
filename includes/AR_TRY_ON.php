@@ -86,7 +86,7 @@ class AR_TRY_ON {
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name   = 'ar-try-on-for-wordpress';
+		$this->plugin_name   = 'ar-vr-3d-try-on-for-wordpress';
 		$this->plugin_prefix = 'ar_try_on_';
 
 
@@ -162,22 +162,22 @@ class AR_TRY_ON {
 
 		switch ( true ) {
 			case 1:
-				$this->loader->add_action( 'wordpress_before_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_before_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
 				break;
 			case 2:
-				$this->loader->add_action( 'wordpress_after_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_after_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
 				break;
 			case 3:
-				$this->loader->add_action( 'wordpress_before_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_before_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
 				break;
 			case 4:
-				$this->loader->add_action( 'wordpress_after_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_after_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
 				break;
 			case 5:
-				$this->loader->add_action( 'wordpress_after_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
 				break;
 			case 6:
-				$this->loader->add_action( 'wordpress_before_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
 				break;
 		}
 

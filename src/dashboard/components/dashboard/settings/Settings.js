@@ -143,13 +143,13 @@ export default function Settings() {
                                 onChange={handleChange}
                             >
                                 <option value="">None</option>
-                                <option value="1">wordpress_before_single_product_summary</option>
-                                <option value="2">wordpress_after_single_product_summary</option>
-                                <option value="3">wordpress_before_single_product</option>
-                                <option value="4">wordpress_after_single_product</option>
-                                <option value="5">wordpress_after_add_to_cart_form</option>
+                                <option value="1">woocommerce_before_single_product_summary</option>
+                                <option value="2">woocommerce_after_single_product_summary</option>
+                                <option value="3">woocommerce_before_single_product</option>
+                                <option value="4">woocommerce_after_single_product</option>
+                                <option value="5">woocommerce_after_add_to_cart_form</option>
                                 <option value="6">
-                                    wordpress_before_add_to_cart_form
+                                    woocommerce_before_add_to_cart_form
                                 </option>
                             </select>
                         </div>

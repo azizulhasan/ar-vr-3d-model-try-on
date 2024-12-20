@@ -78,8 +78,8 @@ class AR_TRY_ON_Public {
 	 */
 	public function enqueue_styles() {
 		if ( AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_style( 'ar-try-on-for-wordpress', plugin_dir_url( __FILE__ ) . 'css/ar-try-on.css', array(), $this->version, 'all' );
-			wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ar-try-on-for-wordpress-public.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'ar-vr-3d-try-on-for-wordpress', plugin_dir_url( __FILE__ ) . 'css/ar-try-on.css', array(), $this->version, 'all' );
+			wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ar-vr-3d-try-on-for-wordpress-public.css', array(), $this->version, 'all' );
 			wp_enqueue_style( 'jquery-ui-theme', plugin_dir_url( __FILE__ ) . 'css/jquery-ui.min.css', array(), $this->version, 'all' );
 		}
 	}
@@ -91,7 +91,7 @@ class AR_TRY_ON_Public {
 	 */
 	public function enqueue_scripts() {
 		if ( AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ar-try-on-for-wordpress-public-dist.js', array( 'jquery' ), $this->version, true );
+			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ar-vr-3d-try-on-for-wordpress-public-dist.js', array( 'jquery' ), $this->version, true );
 			wp_enqueue_script( 'jquery-ui-dialog' );
 		}
 	}
