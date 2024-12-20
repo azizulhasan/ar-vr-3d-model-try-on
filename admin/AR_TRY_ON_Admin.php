@@ -93,7 +93,7 @@ class AR_TRY_ON_Admin {
 	 */
 	public function enqueue_styles() {
 		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() || AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_style( 'ar-vr-3d-try-on-for-wordpress', plugin_dir_url( dirname( __FILE__ ) ) . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', plugin_dir_url( dirname( __FILE__ ) ) . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 	}
 
@@ -146,9 +146,9 @@ class AR_TRY_ON_Admin {
 			'AR Try-On',
 			'AR Try-On',
 			'manage_options',
-			'ar-vr-3d-try-on-for-wordpress',
+			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
-			plugins_url('ar-vr-3d-try-on-for-wordpress') . '/admin/images/ar-try-on-logo-resized-30x34.png',
+			plugins_url('ar-vr-3d-model-try-on') . '/admin/images/ar-try-on-logo-resized-30x34.png',
 			20
 		);
 	}

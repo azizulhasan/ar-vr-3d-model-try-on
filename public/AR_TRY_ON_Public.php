@@ -78,8 +78,8 @@ class AR_TRY_ON_Public {
 	 */
 	public function enqueue_styles() {
 		if ( AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_style( 'ar-vr-3d-try-on-for-wordpress', plugin_dir_url( __FILE__ ) . 'css/ar-try-on.css', array(), $this->version, 'all' );
-			wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ar-vr-3d-try-on-for-wordpress-public.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', plugin_dir_url( __FILE__ ) . 'css/ar-try-on.css', array(), $this->version, 'all' );
+			wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
 			wp_enqueue_style( 'jquery-ui-theme', plugin_dir_url( __FILE__ ) . 'css/jquery-ui.min.css', array(), $this->version, 'all' );
 		}
 	}
@@ -91,7 +91,7 @@ class AR_TRY_ON_Public {
 	 */
 	public function enqueue_scripts() {
 		if ( AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ar-vr-3d-try-on-for-wordpress-public-dist.js', array( 'jquery' ), $this->version, true );
+			wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ar-vr-3d-model-try-on-public-dist.js', array( 'jquery' ), $this->version, true );
 			wp_enqueue_script( 'jquery-ui-dialog' );
 		}
 	}
@@ -292,16 +292,16 @@ class AR_TRY_ON_Public {
             <button id="ar_try_on_for_wordpress_btn">View in 3D</button>
 
             <div id="dialog" title="<?php echo esc_attr( $product->get_name() ) ?>">
-                <!-- AR Model Viewer for wordpress - Styles -->
+                <!--  - Styles -->
                 <style type="text/css">
                     model-viewer#reveal {
                         --poster-color: <?php echo esc_js($this->ar_try_on_for_wordpress_poster_color($poster_color_type));
                 ?>;
                     }
                 </style>
-                <!-- AR Model Viewer for Wordpress - Styles -->
+                <!--  - Styles -->
 
-                <!-- AR Model Viewer for Wordpress - HTML -->
+                <!--  - HTML -->
                 <model-viewer id="reveal"
                               alt="<?php echo esc_attr( $alt_description ) ?>"
                               src="<?php echo esc_url( $android_file_url ); ?>"
@@ -318,7 +318,7 @@ class AR_TRY_ON_Public {
                               camera-controls
                               enable-pan>
                 </model-viewer>
-                <!-- AR Model Viewer for Wordpress - HTML -->
+                <!--  - HTML -->
 
                 <!-- AR Custom Button -->
 				<?php if ( esc_html( $ar_btn_custom ) == true ): ?>

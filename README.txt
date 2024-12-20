@@ -1,6 +1,6 @@
-=== AR VR 3D Try On for WordPress ===
+=== AR VR 3D Model Try On  ===
 Contributors: hasanazizul
-Tags: 3d, model viewer, AR, Augmented Reality, wordpress
+Tags: AR, VR, 3D, Try on, Augmented Reality
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4

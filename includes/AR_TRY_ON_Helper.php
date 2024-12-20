@@ -35,7 +35,7 @@ class AR_TRY_ON_Helper {
 			// Get the current screen object
 			$screen = get_current_screen();
 			// Check if we are on the "ar-try-on" page
-			if ( $screen && $screen->id === 'toplevel_page_ar-vr-3d-try-on-for-wordpress' ) {
+			if ( $screen && $screen->id === 'toplevel_page_ar-vr-3d-model-try-on' ) {
 				return true;
 			}
 

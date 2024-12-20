@@ -34,7 +34,7 @@ class AR_TRY_ON_i18n {
     public function load_plugin_textdomain() {
 
         load_plugin_textdomain(
-            'ar-vr-3d-try-on-for-wordpress',
+            'ar-vr-3d-model-try-on',
             false,
 	        dirname( plugin_basename( __FILE__ ), 2 ) . '/languages/'
         );

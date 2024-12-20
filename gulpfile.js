@@ -68,19 +68,19 @@ const config = {
 	},
 	pot: {
 		src: '**/*.php',
-		dist: 'languages/ar-vr-3d-try-on-for-wordpress.pot',
+		dist: 'languages/ar-vr-3d-model-try-on.pot',
 		options: {
-			domain: 'ar-vr-3d-try-on-for-wordpress',
+			domain: 'ar-vr-3d-model-try-on',
 			package: 'AR VR 3D Try On for WordPress',
 			bugReport: '',
 			headers: {
-				'X-Domain': 'ar-vr-3d-try-on-for-wordpress'
+				'X-Domain': 'ar-vr-3d-model-try-on'
 			}
 		}
 	},
 	zip: {
 		src: productionSrc,
-		file_name: 'ar-vr-3d-try-on-for-wordpress',
+		file_name: 'ar-vr-3d-model-try-on',
 		dist: 'production',
 		options: {
 			compress: true,
@@ -89,7 +89,7 @@ const config = {
 	},
 	copy: {
 		src: productionSrc,
-		output: 'production/ar-vr-3d-try-on-for-wordpress/',
+		output: 'production/ar-vr-3d-model-try-on/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -97,7 +97,7 @@ const config = {
 	},
 	release: {
 		src: productionSrc,
-		output: 'D://xampp/htdocs/azizulhasan/news/wp-content/plugins/ar-vr-3d-try-on-for-wordpress/',
+		output: 'D://xampp/htdocs/azizulhasan/news/wp-content/plugins/ar-vr-3d-model-try-on/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -251,7 +251,7 @@ gulp.task('checktextdomain', function () {
 	return gulp
 		.src('**/*.php')
 		.pipe(checktextdomain({
-			text_domain: 'ar-vr-3d-try-on-for-wordpress', //Specify allowed domain(s)
+			text_domain: 'ar-vr-3d-model-try-on', //Specify allowed domain(s)
 			keywords: [ //List keyword specifications
 				'__:1,2d',
 				'_e:1,2d',

@@ -11,13 +11,13 @@
  * @package           AR_TRY_ON
  *
  * @wordpress-plugin
- * Plugin Name:       AR VR 3D Try On for WordPress
+ * Plugin Name:       AR VR 3D Model Try On
  * Description:       An augmented reality try-on plugin for wordpress products using ThreeJS,  WebXR.
  * Version:           1.0.0
  * Author:            Azizul Hasan
  * License:           GPL-3.0+
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.txt
- * Text Domain:       ar-vr-3d-try-on-for-wordpress
+ * Text Domain:       ar-vr-3d-model-try-on
  * Domain Path:       /languages
  * Requires PHP:      7.4
  * Requires at least: 5.6
@@ -52,7 +52,7 @@ if ( ! defined( 'AR_TRY_ON_NONCE' ) ) {
 
 if ( ! defined( 'AR_TRY_ON_TEXT_DOMAIN' ) ) {
 
-	define( 'AR_TRY_ON_TEXT_DOMAIN', 'ar-vr-3d-try-on-for-wordpress' );
+	define( 'AR_TRY_ON_TEXT_DOMAIN', 'ar-vr-3d-model-try-on' );
 }
 
 if ( ! defined( 'AR_TRY_ON_ROOT_FILE' ) ) {

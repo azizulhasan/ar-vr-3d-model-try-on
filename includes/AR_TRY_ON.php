@@ -86,7 +86,7 @@ class AR_TRY_ON {
 		} else {
 			$this->version = '1.0.0';
 		}
-		$this->plugin_name   = 'ar-vr-3d-try-on-for-wordpress';
+		$this->plugin_name   = 'ar-vr-3d-model-try-on';
 		$this->plugin_prefix = 'ar_try_on_';
 
 
