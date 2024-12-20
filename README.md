@@ -1,1 +1,2 @@
-# ar-try-on-for-wordpress
+# ar_try_on
+Augmented Reality

@@ -1,0 +1,19 @@
+{
+    "name": "azizulhasan/ar-try-on",
+    "type": "plugin",
+    "authors": [
+        {
+            "name": "Azizul Hasan",
+            "email": "azizulhasan.cr@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "AR_TRY_ON\\": "includes",
+            "AR_TRY_ON_Admin\\": "admin",
+            "AR_TRY_ON_Public\\": "public",
+            "AR_TRY_ON_API\\": "api"
+        }
+    },
+    "require": {}
+}
