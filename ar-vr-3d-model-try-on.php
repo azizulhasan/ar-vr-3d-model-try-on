@@ -151,8 +151,8 @@ register_activation_hook( __FILE__, function () {
 } );
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/AR_TRY_ON_Deactivator.php
+ * This action is documented in includes/AR_TRY_ON_Deactivate.php
  */
 register_deactivation_hook( __FILE__, function () {
-	AR_TRY_ON_Deactivator::deactivate();
+	AR_TRY_ON_Deactivate::deactivate();
 } );
