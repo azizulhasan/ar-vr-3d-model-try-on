@@ -1,53 +1,54 @@
 name: FTP Deployment
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  deploy:
-    name: Deploy to FTP
-    runs-on: ubuntu-latest
+    deploy:
+        name: Deploy to FTP
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v3
 
-    - name: Deploy via FTP to https://stage2.atlasaidev.com/ testing server.
-      uses: SamKirkland/FTP-Deploy-Action@4.3.2
-      with:
-        server: ${{ secrets.FTP_HOST }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        port: ${{ secrets.FTP_PORT || 21 }}
-        protocol: ftp
-        local-dir: ./ # Path to your plugin folder
-        server-dir: /wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
-        log-level: verbose
-        exclude: |
-          .git*
-          .github*
-          node_modules
-          tests
-          *.md
-          .git/**
-          .husky/**
-          node_modules/**
-          production/**
-          .browserslistrc
-          .eslintrc
-          .gitignore
-          gulpfile.js
-          package.json
-          composer.json
-          composer.lock
-          phpcs.xml
-          .cpanel.yml
-          package-lock.json
-          mix-manifest.json
-          webpack.mix.js
-          tailwind.config.js
-          README.md
+            -   name: Deploy via FTP to https://stage2.atlasaidev.com/ testing server.
+                uses: SamKirkland/FTP-Deploy-Action@4.3.2
+                with:
+                    server: ${{ secrets.FTP_HOST }}
+                    username: ${{ secrets.FTP_USERNAME }}
+                    password: ${{ secrets.FTP_PASSWORD }}
+                    port: ${{ secrets.FTP_PORT || 21 }}
+                    protocol: ftp
+                    local-dir: ./ # Path to your plugin folder
+                    server-dir: /wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
+                    log-level: verbose
+                    exclude: |
+                        .git*
+                        .github
+                        node_modules
+                        tests
+                        *.md
+                        .git/**
+                        .husky/**
+                        node_modules/**
+                        production/**
+                        .browserslistrc
+                        .eslintrc
+                        .gitignore
+                        gulpfile.js
+                        package.json
+                        composer.json
+                        composer.lock
+                        phpcs.xml
+                        .cpanel.yml
+                        package-lock.json
+                        mix-manifest.json
+                        webpack.mix.js
+                        tailwind.config.js
+                        README.md
+                        .ftp-deploy-sync-state.json
 
 
