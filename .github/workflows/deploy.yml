@@ -26,8 +26,9 @@ jobs:
                     server-dir: /wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
                     log-level: verbose
                     exclude: |
+                        .github/**
+                        .ftp-deploy-sync-state.json
                         .git*
-                        .github
                         node_modules
                         tests
                         *.md
@@ -49,6 +50,6 @@ jobs:
                         webpack.mix.js
                         tailwind.config.js
                         README.md
-                        .ftp-deploy-sync-state.json
+                        
 
 
