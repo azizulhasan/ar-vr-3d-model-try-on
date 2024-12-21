@@ -14,7 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Deploy via FTP
+    - name: Deploy via FTP to https://stage2.atlasaidev.com/ testing server.
       uses: SamKirkland/FTP-Deploy-Action@4.3.2
       with:
         server: ${{ secrets.FTP_HOST }}
