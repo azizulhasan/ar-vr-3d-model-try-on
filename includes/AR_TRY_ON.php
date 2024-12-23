@@ -91,7 +91,6 @@ class AR_TRY_ON {
 
 
 		$this->load_dependencies();
-		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 	}
@@ -104,27 +103,12 @@ class AR_TRY_ON {
 	 */
 	private function load_dependencies() {
 
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/AR_TRY_ON_Hooks.php';
+		require_once AR_TRY_ON_PLUGIN_PATH . '/includes/AR_TRY_ON_Hooks.php';
 
 		$this->loader = new AR_TRY_ON_Loader();
 
 	}
 
-	/**
-	 * Define the locale for this plugin for internationalization.
-	 *
-	 * Uses the AR_TRY_ON_i18n class in order to set the domain and to register the hook
-	 * with WordPress.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function set_locale() {
-
-		$plugin_i18n = new AR_TRY_ON_i18n();
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
-	}
 
 	/**
 	 * Register all of the hooks related to the admin area functionality

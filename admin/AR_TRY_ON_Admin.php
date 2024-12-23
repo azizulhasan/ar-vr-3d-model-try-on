@@ -67,11 +67,11 @@ class AR_TRY_ON_Admin {
 		$this->version     = $version;
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include ABSPATH . 'wp-admin/includes/plugin.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		if ( ! function_exists( 'wp_is_mobile' ) ) {
-			include_once ABSPATH . 'wp-includes/vars.php';
+			require_once ABSPATH . 'wp-includes/vars.php';
 		}
 
 		$this->localize_data = [
@@ -93,7 +93,7 @@ class AR_TRY_ON_Admin {
 	 */
 	public function enqueue_styles() {
 		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() || AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_style( 'ar-vr-3d-model-try-on', plugin_dir_url( dirname( __FILE__ ) ) . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 	}
 
@@ -109,7 +109,7 @@ class AR_TRY_ON_Admin {
 		 */
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include ABSPATH . 'wp-admin/includes/plugin.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		do_action( 'AR_TRY_ON_enqueue_pro_dashboard_scripts' );
@@ -117,7 +117,7 @@ class AR_TRY_ON_Admin {
 
 //		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() ) {
 			/* Load react js */
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', plugin_dir_url( __FILE__ ) . 'js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
 			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
 //		}
 
@@ -125,13 +125,13 @@ class AR_TRY_ON_Admin {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script(
 				'ar-try-on-media-library',
-				plugin_dir_url( __FILE__ ) . 'js/build/ar-try-on-media-library.min.js', // Path to your JS file
+				AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
 				[ 'wp-hooks' ], // Dependencies
 				$this->version,
 				true
 			);
 
-			wp_enqueue_script( 'ar-try-on-metabox-ui', plugin_dir_url( __FILE__ ) . 'js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-metabox-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
 		}
 
@@ -148,7 +148,7 @@ class AR_TRY_ON_Admin {
 			'manage_options',
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
-			plugins_url('ar-vr-3d-model-try-on') . '/admin/images/ar-try-on-logo-resized-30x34.png',
+			AR_TRY_ON_PLUGIN_URL . '/admin/images/ar-try-on-logo-resized-30x34.png',
 			20
 		);
 	}

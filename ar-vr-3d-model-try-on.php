@@ -22,22 +22,26 @@
  * Requires PHP:      7.4
  * Requires at least: 5.6
  */
-include 'vendor/autoload.php';
+
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
+}
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+require_once 'vendor/autoload.php';
 
 use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
 
-// If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
 
-// Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
-}
+
+
 
 /**
  * Currently plugin version.
@@ -64,11 +68,6 @@ if ( ! defined( 'AR_TRY_ON_ROOT_FILE_NAME' ) ) {
 	$path = explode( DIRECTORY_SEPARATOR, AR_TRY_ON_ROOT_FILE );
 	$file = end( $path );
 	define( 'AR_TRY_ON_ROOT_FILE_NAME', $file );
-}
-
-if ( ! defined( 'AR_TRY_ON_LIBS_PATH' ) ) {
-
-	define( 'AR_TRY_ON_LIBS_PATH', dirname( AR_TRY_ON_ROOT_FILE ) . '/libs/' );
 }
 
 if ( ! defined( 'AR_TRY_ON_ADMIN_PATH' ) ) {

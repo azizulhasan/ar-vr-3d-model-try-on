@@ -30,7 +30,7 @@ class AR_TRY_ON_Helper {
 		// Ensure we are in the admin area
 		if ( is_admin() ) {
 			if ( ! function_exists( 'get_current_screen' ) ) {
-				include_once ABSPATH . 'wp-admin/includes/screen.php';
+				require_once ABSPATH . 'wp-admin/includes/screen.php';
 			}
 			// Get the current screen object
 			$screen = get_current_screen();
@@ -46,7 +46,7 @@ class AR_TRY_ON_Helper {
 
 	public static function is_product_page() {
 		if ( ! function_exists( 'get_current_screen' ) ) {
-			include_once ABSPATH . 'wp-admin/includes/screen.php';
+			require_once ABSPATH . 'wp-admin/includes/screen.php';
 		}
 		$screen = get_current_screen();
 
