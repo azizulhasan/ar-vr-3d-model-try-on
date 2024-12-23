@@ -75,14 +75,15 @@ class AR_TRY_ON_Admin {
 		}
 
 		$this->localize_data = [
-			'api_url'                  => esc_url_raw( rest_url() ),
-			'api_namespace'            => 'ar_try_on',
-			'api_version'              => 'v1',
-			'nonce'                    => wp_create_nonce( AR_TRY_ON_NONCE ),
-			'plugin_name'              => AR_TRY_ON_PLUGIN_NAME,
-			'rest_nonce'               => wp_create_nonce( 'wp_rest' ),
-			'VERSION'                  =>  AR_TRY_ON_VERSION,
-			'plugin_url'                  => AR_TRY_ON_PLUGIN_URL,
+			'api_url'       => esc_url_raw( rest_url() ),
+			'api_namespace' => 'ar_try_on',
+			'api_version'   => 'v1',
+			'nonce'         => wp_create_nonce( AR_TRY_ON_NONCE ),
+			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
+			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
+			'VERSION'       => AR_TRY_ON_VERSION,
+			'plugin_url'    => AR_TRY_ON_PLUGIN_URL,
+			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 		];
 	}
 
@@ -117,9 +118,9 @@ class AR_TRY_ON_Admin {
 
 
 //		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() ) {
-			/* Load react js */
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
-			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
+		/* Load react js */
+		wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
+		wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
 //		}
 
 		if ( AR_TRY_ON_Helper::is_product_page() ) {

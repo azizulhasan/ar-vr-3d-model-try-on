@@ -25,6 +25,18 @@ class AR_TRY_ON_Hooks {
 
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'add_custom_meta_box' ) );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
 	}
 
 	/**

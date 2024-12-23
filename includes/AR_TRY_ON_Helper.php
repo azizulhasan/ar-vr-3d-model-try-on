@@ -57,5 +57,20 @@ class AR_TRY_ON_Helper {
 		return false;
 	}
 
+	public static function get_post_types() {
+		$cache_key   = AR_TRY_ON_Cache::get_key( 'get_post_types' );
+		$cache_value = AR_TRY_ON_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+		$post_types = get_post_types( array(
+			'public' => 1, // Only get public post types
+		), 'array' );
+
+		AR_TRY_ON_Cache::set( $cache_key, $post_types );
+
+		return apply_filters( 'ar_try_on_get_post_types', $post_types );
+	}
+
 
 }
