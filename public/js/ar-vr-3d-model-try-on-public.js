@@ -1,4 +1,3 @@
-import '@google/model-viewer';
 
 document.addEventListener('DOMContentLoaded', function () {
 	// Create a dialog element
