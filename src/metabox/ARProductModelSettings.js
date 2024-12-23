@@ -91,7 +91,7 @@ const ARProductModelSettings = () => {
                 <div className="mb-6">
                     <h5 className="text-lg font-bold flex items-center gap-2">
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-3d-object-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "/admin/images/icons8-3d-object-18.png"}
                             alt="3D Model Icon"
                             className="w-6 h-6"
                         />
@@ -111,7 +111,7 @@ const ARProductModelSettings = () => {
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-android-os-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "/admin/images/icons8-android-os-18.png"}
                             alt="Android Icon"
                             className="w-6 h-6"
                         />
@@ -140,7 +140,7 @@ const ARProductModelSettings = () => {
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-mac-client-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "/admin/images/icons8-mac-client-18.png"}
                             alt="iOS Icon"
                             className="w-6 h-6"
                         />
@@ -195,7 +195,7 @@ const ARProductModelSettings = () => {
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-web-accessibility-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "/admin/images/icons8-web-accessibility-18.png"}
                             alt="Accessibility Icon"
                             className="w-6 h-6"
                         />

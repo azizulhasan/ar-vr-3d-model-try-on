@@ -82,6 +82,7 @@ class AR_TRY_ON_Admin {
 			'plugin_name'              => AR_TRY_ON_PLUGIN_NAME,
 			'rest_nonce'               => wp_create_nonce( 'wp_rest' ),
 			'VERSION'                  =>  AR_TRY_ON_VERSION,
+			'plugin_url'                  => AR_TRY_ON_PLUGIN_URL,
 		];
 	}
 
