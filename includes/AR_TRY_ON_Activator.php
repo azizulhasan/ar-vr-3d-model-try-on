@@ -37,7 +37,7 @@ class AR_TRY_ON_Activator {
 		 */
 		if ( $renew_all_settings || ! get_option( 'ar_try_on_for_wordpress_settings' ) ) {
 			update_option( 'ar_try_on_for_wordpress_settings', array(
-				"ar_try_on_for_wordpress_btn"                        => "3",
+				"ar_vr_3d_model_try_on"                        => "3",
 				"ar_try_on_for_wordpress_single_product_tabs"        => "yes",
 				"ar_try_on_for_wordpress_loading"                    => "auto",
 				"ar_try_on_for_wordpress_reveal"                     => "auto",

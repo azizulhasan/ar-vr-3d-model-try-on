@@ -77,8 +77,11 @@ class AR_TRY_ON_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_product_page() ) {
+		if ( is_admin() && AR_TRY_ON_Helper::is_product_page() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
+		}
+
+		if ( AR_TRY_ON_Helper::is_product_page() ) {
 			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
 			wp_enqueue_style( 'jquery-ui-theme', AR_TRY_ON_PLUGIN_URL . '/public/css/jquery-ui.min.css', array(), $this->version, 'all' );
 		}
@@ -289,17 +292,20 @@ class AR_TRY_ON_Public {
 			 */
 			?>
             <!-- This file should primarily consist of HTML with a little bit of PHP. -->
-            <button id="ar_try_on_for_wordpress_btn">View in 3D</button>
+            <button id="ar_vr_3d_model_try_on">View in 3D</button>
 
             <div id="dialog" title="<?php echo esc_attr( $product->get_name() ) ?>">
-                <!--  - Styles -->
-                <style type="text/css">
-                    model-viewer#reveal {
-                        --poster-color: <?php echo esc_js($this->ar_try_on_for_wordpress_poster_color($poster_color_type));
-                ?>;
-                    }
-                </style>
-                <!--  - Styles -->
+				<?php
+				$poster_color = esc_js( $this->ar_try_on_for_wordpress_poster_color( $poster_color_type ) );
+
+				$custom_css = "
+                model-viewer#reveal{
+                        --poster-color: {$poster_color};
+                }";
+
+				wp_add_inline_style( $this->plugin_name, $custom_css )
+
+				?>
 
                 <!--  - HTML -->
                 <model-viewer id="reveal"

@@ -29,6 +29,7 @@
   "author": "Azizul Hasan <azizulhasan.cr@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "@google/model-viewer": "^1.12.0",
     "@wordpress/hooks": "^3.28.0",
     "history": "^5.2.0",
     "prop-types": "^15.8.1",

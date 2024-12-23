@@ -8,7 +8,7 @@ import toast from '../../../../context/Notify';
 
 export default function Settings() {
     const [settings, setSettings] = useState({
-        ar_try_on_for_wordpress_btn: "3",
+        ar_vr_3d_model_try_on: "3",
         ar_try_on_for_wordpress_single_product_tabs: "yes",
         ar_try_on_for_wordpress_loading: "auto",
         ar_try_on_for_wordpress_reveal: "auto",
@@ -130,16 +130,16 @@ export default function Settings() {
                         {/* Dropdown Section */}
                         <div className="space-y-4">
                             <label
-                                htmlFor="ar_try_on_for_wordpress_btn"
+                                htmlFor="ar_vr_3d_model_try_on"
                                 className="block font-medium"
                             >
                                 Show button in
                             </label>
                             <select
-                                id="ar_try_on_for_wordpress_btn"
-                                name="ar_try_on_for_wordpress_btn"
+                                id="ar_vr_3d_model_try_on"
+                                name="ar_vr_3d_model_try_on"
                                 className="block w-full p-2 border rounded"
-                                value={settings.ar_try_on_for_wordpress_btn}
+                                value={settings.ar_vr_3d_model_try_on}
                                 onChange={handleChange}
                             >
                                 <option value="">None</option>
