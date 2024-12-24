@@ -94,7 +94,7 @@ class AR_TRY_ON_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() || AR_TRY_ON_Helper::is_product_page() ) {
+		if ( AR_TRY_ON_Helper::is_ar_try_on_page() || AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 	}
@@ -117,13 +117,13 @@ class AR_TRY_ON_Admin {
 		do_action( 'AR_TRY_ON_enqueue_pro_dashboard_scripts' );
 
 
-//		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() ) {
+//		if ( AR_TRY_ON_Helper::is_ar_try_on_page() ) {
 		/* Load react js */
 		wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
 		wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
 //		}
 
-		if ( AR_TRY_ON_Helper::is_product_page() ) {
+		if ( AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script(
 				'ar-try-on-media-library',

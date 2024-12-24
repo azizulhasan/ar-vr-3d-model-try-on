@@ -40,9 +40,6 @@ use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
 
 
-
-
-
 /**
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - https://semver.org
@@ -127,6 +124,14 @@ class AR_TRY_ON_Init {
 	public function run() {
 		$plugin = new AR_TRY_ON();
 		$plugin->run();
+		//HPOS compatibility
+		if( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			add_action( 'before_woocommerce_init', function () {
+				if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+					\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+				}
+			} );
+		}
 	}
 }
 

@@ -35,22 +35,22 @@ class AR_TRY_ON_Activator {
 		/**
 		 * Customization settings.
 		 */
-		if ( $renew_all_settings || ! get_option( 'ar_try_on_for_wordpress_settings' ) ) {
-			update_option( 'ar_try_on_for_wordpress_settings', array(
+		if ( $renew_all_settings || ! get_option( 'ar_try_on_settings' ) ) {
+			update_option( 'ar_try_on_settings', array(
 				"ar_vr_3d_model_try_on"                        => "3",
-				"ar_try_on_for_wordpress_single_product_tabs"        => "yes",
-				"ar_try_on_for_wordpress_loading"                    => "auto",
-				"ar_try_on_for_wordpress_reveal"                     => "auto",
-				"ar_try_on_for_wordpress_poster_color"               => "rgba(78,186,79,0)",
-				"ar_try_on_for_wordpress_ar"                         => "activate",
-				"ar_try_on_for_wordpress_ar_modes"                   => [ "1", "2", "3" ],
-				"ar_try_on_for_wordpress_ar_scale"                   => "auto",
-				"ar_try_on_for_wordpress_ar_placement"               => "floor",
-				"ar_try_on_for_wordpress_xr_environment"             => "activate",
-				"ar_try_on_for_wordpress_ar_button"                  => "activate",
-				"ar_try_on_for_wordpress_ar_button_text"             => "Activate AR",
-				"ar_try_on_for_wordpress_ar_button_background_color" => "#3a3a3a",
-				"ar_try_on_for_wordpress_ar_button_text_color"       => "#ffffff"
+				"ar_try_on_single_product_tabs"        => "yes",
+				"ar_try_on_loading_type"                    => "auto",
+				"ar_try_on_reveal_type"                     => "auto",
+				"ar_try_on_poster_color"               => "rgba(78,186,79,0)",
+				"ar_try_on_ar"                         => "activate",
+				"ar_try_on_ar_modes"                   => [ "1", "2", "3" ],
+				"ar_try_on_ar_scale"                   => "auto",
+				"ar_try_on_ar_placement"               => "floor",
+				"ar_try_on_xr_environment"             => "activate",
+				"ar_try_on_ar_button"                  => "activate",
+				"ar_try_on_ar_button_text"             => "Activate AR",
+				"ar_try_on_ar_button_background_color" => "#3a3a3a",
+				"ar_try_on_ar_button_text_color"       => "#ffffff"
 			) );
 		}
 

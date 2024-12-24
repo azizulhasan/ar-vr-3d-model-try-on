@@ -26,7 +26,7 @@ use function Symfony\Component\Translation\t;
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 class AR_TRY_ON_Helper {
-	public static function is_ar_try_on_for_wordpress_page() {
+	public static function is_ar_try_on_page() {
 		// Ensure we are in the admin area
 		if ( is_admin() ) {
 			if ( ! function_exists( 'get_current_screen' ) ) {
@@ -72,5 +72,70 @@ class AR_TRY_ON_Helper {
 		return apply_filters( 'ar_try_on_get_post_types', $post_types );
 	}
 
+	public static function ar_try_on_should_load_button($post_status = '') {
+		$should_load_button = false;
+		global $post;
+		// is_home() || is_archive() || is_front_page() || is_category()
+		if ( \is_single() || \is_singular() ) {
+			$should_load_button = true;
+		}
+
+		$settings = (array) get_option( 'ar_try_on_settings' );
+
+		if (
+			! isset( $settings['ar_try_on_allowed_post_types'] )
+			|| count( $settings['ar_try_on_allowed_post_types'] ) === 0
+			|| ! is_array( $settings['ar_try_on_allowed_post_types'] )
+			|| ! in_array( self::ar_try_on_post_type(), $settings['ar_try_on_allowed_post_types'] )
+
+		) {
+			$should_load_button = false;
+		}
+
+		if ( self::is_edit_page() ) {
+			$should_load_button = true;
+			if (
+				! isset( $settings['ar_try_on_allowed_post_types'] )
+				|| count( $settings['ar_try_on_allowed_post_types'] ) === 0
+				|| ! is_array( $settings['ar_try_on_allowed_post_types'] )
+				|| ! in_array( self::ar_try_on_post_type(), $settings['ar_try_on_allowed_post_types'] )
+			) {
+				$should_load_button = false;
+			}
+		}
+
+//		if (  $should_load_button && ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+//			$should_load_button = false;
+//		}
+
+
+		return apply_filters( 'ar_try_on_should_load_button', $should_load_button, $post );
+	}
+
+	/**
+	 * Get post type
+	 *
+	 * @see
+	 */
+
+	public static function ar_try_on_post_type() {
+		global $post;
+
+		return isset( $post->post_type ) ? $post->post_type : '';
+	}
+
+
+	public static function is_edit_page() {
+		global $pagenow;
+
+		// Check if we are in the admin area and on the edit post/page screen
+		if ( is_admin() ) {
+			if ( $pagenow === 'post.php' || $pagenow === 'post-new.php' ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 }

@@ -3,10 +3,10 @@ import {getPostID, getURL, postWithoutImage} from "../context/utilities";
 
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
-        ar_try_on_for_wordpress_file_android: '',
-        ar_try_on_for_wordpress_file_ios: '',
-        ar_try_on_for_wordpress_file_poster: '',
-        ar_try_on_for_wordpress_file_alt: 'test',
+        ar_try_on_file_android: '',
+        ar_try_on_file_ios: '',
+        ar_try_on_file_poster: '',
+        ar_try_on_file_alt: 'test',
     });
     const [currentValue, setCurrentValue] = useState({});
 
@@ -107,7 +107,7 @@ const ARProductModelSettings = () => {
                 {/* File for Android */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_android"
+                        htmlFor="ar_try_on_file_android"
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
@@ -120,9 +120,9 @@ const ARProductModelSettings = () => {
                     <input
                         type="text"
                         onChange={handleChange}
-                        id="ar_try_on_for_wordpress_file_android"
-                        name="ar_try_on_for_wordpress_file_android"
-                        value={productModel.ar_try_on_for_wordpress_file_android}
+                        id="ar_try_on_file_android"
+                        name="ar_try_on_file_android"
+                        value={productModel.ar_try_on_file_android}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded ar-try-on-open-media-library">
@@ -136,7 +136,7 @@ const ARProductModelSettings = () => {
                 {/* File for iOS */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_ios"
+                        htmlFor="ar_try_on_file_ios"
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
@@ -148,10 +148,10 @@ const ARProductModelSettings = () => {
                     </label>
                     <input
                         type="text"
-                        id="ar_try_on_for_wordpress_file_ios"
-                        name="ar_try_on_for_wordpress_file_ios"
+                        id="ar_try_on_file_ios"
+                        name="ar_try_on_file_ios"
                         onChange={handleChange}
-                        value={productModel.ar_try_on_for_wordpress_file_ios}
+                        value={productModel.ar_try_on_file_ios}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded ar-try-on-open-media-library">
@@ -166,17 +166,17 @@ const ARProductModelSettings = () => {
                 {/* Poster */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_poster"
+                        htmlFor="ar_try_on_file_poster"
                         className="block text-sm font-medium"
                     >
                         Poster
                     </label>
                     <input
                         type="text"
-                        id="ar_try_on_for_wordpress_file_poster"
-                        name="ar_try_on_for_wordpress_file_poster"
+                        id="ar_try_on_file_poster"
+                        name="ar_try_on_file_poster"
                         onChange={handleChange}
-                        value={productModel.ar_try_on_for_wordpress_file_poster}
+                        value={productModel.ar_try_on_file_poster}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded ar-try-on-open-media-library">
@@ -191,7 +191,7 @@ const ARProductModelSettings = () => {
                 {/* Alt Text */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_alt"
+                        htmlFor="ar_try_on_file_alt"
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
@@ -203,10 +203,10 @@ const ARProductModelSettings = () => {
                     </label>
                     <input
                         type="text"
-                        id="ar_try_on_for_wordpress_file_alt"
-                        name="ar_try_on_for_wordpress_file_alt"
+                        id="ar_try_on_file_alt"
+                        name="ar_try_on_file_alt"
                         onChange={handleChange}
-                        value={productModel.ar_try_on_for_wordpress_file_alt}
+                        value={productModel.ar_try_on_file_alt}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <p className="text-sm text-gray-600 mt-2">

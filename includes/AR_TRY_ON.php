@@ -93,6 +93,7 @@ class AR_TRY_ON {
 		$this->load_dependencies();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+
 	}
 
 	/**
@@ -139,30 +140,40 @@ class AR_TRY_ON {
 
 		$plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
 
-			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 99999 );
 
-			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 99999 );
 
 
-		switch ( true ) {
-			case 1:
-				$this->loader->add_action( 'woocommerce_before_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
-				break;
-			case 2:
-				$this->loader->add_action( 'woocommerce_after_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
-				break;
-			case 3:
-				$this->loader->add_action( 'woocommerce_before_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
-				break;
-			case 4:
-				$this->loader->add_action( 'woocommerce_after_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
-				break;
-			case 5:
-				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
-				break;
-			case 6:
-				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
-				break;
+		$settings = (array) get_option( 'ar_try_on_settings' );
+
+		$wc_hook_id = $settings['ar_try_on_wc_hook_position'];
+
+		if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			switch ( $wc_hook_id ) {
+				case 1:
+					$this->loader->add_action( 'woocommerce_before_single_product_summary', $plugin_public, 'ar_try_on_button' );
+					break;
+				case 2:
+					$this->loader->add_action( 'woocommerce_after_single_product_summary', $plugin_public, 'ar_try_on_button' );
+					break;
+				case 3:
+					$this->loader->add_action( 'woocommerce_before_single_product', $plugin_public, 'ar_try_on_button' );
+					break;
+				case 4:
+					$this->loader->add_action( 'woocommerce_after_single_product', $plugin_public, 'ar_try_on_button' );
+					break;
+				case 5:
+					$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $plugin_public, 'ar_try_on_button' );
+					break;
+				case 6:
+					$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $plugin_public, 'ar_try_on_button' );
+					break;
+				default:
+					add_action('the_content', function ($content) {
+
+					});
+			}
 		}
 
 

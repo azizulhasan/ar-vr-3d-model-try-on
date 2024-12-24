@@ -87,14 +87,13 @@ class AR_TRY_ON_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( is_admin() && AR_TRY_ON_Helper::is_product_page() ) {
+		if ( is_admin() && AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 
-		if ( AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
-			wp_enqueue_style( 'jquery-ui-theme', AR_TRY_ON_PLUGIN_URL . '/public/css/jquery-ui.min.css', array(), $this->version, 'all' );
-		}
+        wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
+        wp_enqueue_style( 'jquery-ui-theme', AR_TRY_ON_PLUGIN_URL . '/public/css/jquery-ui.min.css', array(), $this->version, 'all' );
+
 	}
 
 	/**
@@ -103,15 +102,14 @@ class AR_TRY_ON_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		if ( AR_TRY_ON_Helper::is_product_page() ) {
 			wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . '/public/js/google-model-viewer.js', array(), $this->version, true );
 			wp_enqueue_script( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/js/ar-vr-3d-model-try-on-public-dist.js', array( 'ar-try-on-google-model-viewer' ), $this->version, true );
 			wp_enqueue_script( 'jquery-ui-dialog' );
-		}
+
 	}
 
 
-	public function ar_try_on_for_wordpress_button() {
+	public function ar_try_on_button() {
 		// Global product variable
 		global $product;
 		$get_poster       = '';
@@ -122,23 +120,23 @@ class AR_TRY_ON_Public {
 		$product_settings = (array) get_post_meta( $product->get_id(), 'ar_try_on_product_settings', true );
 
 		//Get the file url for android
-		if ( isset( $product_settings['ar_try_on_for_wordpress_file_android'] ) && $product_settings['ar_try_on_for_wordpress_file_android'] ) {
-			$get_android_file = $product_settings['ar_try_on_for_wordpress_file_android'];
+		if ( isset( $product_settings['ar_try_on_file_android'] ) && $product_settings['ar_try_on_file_android'] ) {
+			$get_android_file = $product_settings['ar_try_on_file_android'];
 		}
 
 		//Get the fiel url for IOS
-		if ( isset( $product_settings['ar_try_on_for_wordpress_file_ios'] ) && $product_settings['ar_try_on_for_wordpress_file_ios'] ) {
-			$get_ios_file = $product_settings['ar_try_on_for_wordpress_file_ios'];
+		if ( isset( $product_settings['ar_try_on_file_ios'] ) && $product_settings['ar_try_on_file_ios'] ) {
+			$get_ios_file = $product_settings['ar_try_on_file_ios'];
 		}
 
 		//Get the alt for web accessibility
-		if ( isset( $product_settings['ar_try_on_for_wordpress_file_alt'] ) && $product_settings['ar_try_on_for_wordpress_file_alt'] ) {
-			$get_alt = $product_settings['ar_try_on_for_wordpress_file_alt'];
+		if ( isset( $product_settings['ar_try_on_file_alt'] ) && $product_settings['ar_try_on_file_alt'] ) {
+			$get_alt = $product_settings['ar_try_on_file_alt'];
 		}
 
 		//Get the Poster
-		if ( isset( $product_settings['ar_try_on_for_wordpress_file_poster'] ) && $product_settings['ar_try_on_for_wordpress_file_poster'] ) {
-			$get_poster = $product_settings['ar_try_on_for_wordpress_file_poster'];
+		if ( isset( $product_settings['ar_try_on_file_poster'] ) && $product_settings['ar_try_on_file_poster'] ) {
+			$get_poster = $product_settings['ar_try_on_file_poster'];
 		}
 
 		// Check if the customs fields has a value.
@@ -166,43 +164,43 @@ class AR_TRY_ON_Public {
 			/**
 			 * Get the CMB2 Options or plugin options
 			 */
-			$ar_try_on_settings = (array) get_option( 'ar_try_on_for_wordpress_settings' );
+			$ar_try_on_settings = (array) get_option( 'ar_try_on_settings' );
 
 			/**
 			 * Get the Loading Type from plugin settings
 			 * @see: https://modelviewer.dev/docs/#entrydocs-loading-attributes-loading
 			 */
-			$loading_type = $ar_try_on_settings['ar_try_on_for_wordpress_loading'];
+			$loading_type = $ar_try_on_settings['ar_try_on_loading_type'];
 			/**
 			 * Check the value of $loading_type and return the $loading_type
 			 *
 			 * @param string $loading_type
 			 */
-			$loading_type = $this->ar_try_on_for_wordpress_loading_type( $loading_type );
+			$loading_type = $this->ar_try_on_loading_type( $loading_type );
 
 			/**
 			 * Get th Reveal Type from plugin settings
 			 * @see: https://modelviewer.dev/docs/#entrydocs-loading-attributes-reveal
 			 */
-			$reveal_type = $ar_try_on_settings['ar_try_on_for_wordpress_reveal'];
+			$reveal_type = $ar_try_on_settings['ar_try_on_reveal_type'];
 			/**
 			 * Check the value of $reveal_type and return the $reveal_type
 			 *
 			 * @param string $reveal_type
 			 */
-			$reveal_type = $this->ar_try_on_for_wordpress_reveal_type( $reveal_type );
+			$reveal_type = $this->ar_try_on_reveal_type( $reveal_type );
 
 			/**
 			 * Get the --poster-color from plugin settings
 			 * @see: https://modelviewer.dev/docs/#entrydocs-loading-attributes-reveal
 			 */
-			$poster_color_type = $ar_try_on_settings['ar_try_on_for_wordpress_poster_color'];
+			$poster_color_type = $ar_try_on_settings['ar_try_on_poster_color'];
 			/**
 			 * Check the value of $poster_color_type and return the $poster_color_type
 			 *
 			 * @param string $poster_color_type
 			 */
-			$poster_color_type = $this->ar_try_on_for_wordpress_poster_color( $poster_color_type );
+			$poster_color_type = $this->ar_try_on_poster_color( $poster_color_type );
 
 			/**
 			 * AR Settings
@@ -212,61 +210,61 @@ class AR_TRY_ON_Public {
 			 * Get the --poster-color from plugin settings
 			 * @see: https://modelviewer.dev/docs/#entrydocs-augmentedreality-attributes-ar
 			 */
-			$ar_active = $ar_try_on_settings['ar_try_on_for_wordpress_ar'];
+			$ar_active = $ar_try_on_settings['ar_try_on_ar'];
 			/**
 			 * Check the value of $ar_active and return the $ar_active
 			 *
 			 * @param string $ar_active
 			 */
-			$ar_active = $this->ar_try_on_for_wordpress_ar( $ar_active );
+			$ar_active = $this->ar_try_on_ar( $ar_active );
 
 			/**
 			 * Get the ar-modes from plugin settings
 			 * @see: https://modelviewer.dev/docs/#entrydocs-augmentedreality-attributes-arModes
 			 */
-			$ar_mode = $ar_try_on_settings['ar_try_on_for_wordpress_ar_modes'];
+			$ar_mode = $ar_try_on_settings['ar_try_on_ar_modes'];
 			/**
 			 * Check the value of $ar_active and return the $ar_active
 			 *
 			 * @param string $ar_active
 			 */
-			$ar_mode = $this->ar_try_on_for_wordpress_ar_modes( $ar_mode );
+			$ar_mode = $this->ar_try_on_ar_modes( $ar_mode );
 
 			/**
 			 * Get the ar scale from plugin settings
 			 * @see: https://modelviewer.dev/docs/index.html#entrydocs-augmentedreality-attributes-arScale
 			 */
-			$ar_scale = $ar_try_on_settings['ar_try_on_for_wordpress_ar_scale'];
+			$ar_scale = $ar_try_on_settings['ar_try_on_ar_scale'];
 			/**
 			 * Check the value of $ar_scale and return the $ar_scale
 			 *
 			 * @param string $ar_scale
 			 */
-			$ar_scale = $this->ar_try_on_for_wordpress_ar_scale( $ar_scale );
+			$ar_scale = $this->ar_try_on_ar_scale( $ar_scale );
 
 			/**
 			 * Get the ar placement from plugin settings
 			 * @see: https://modelviewer.dev/docs/index.html#entrydocs-augmentedreality-attributes-arPlacement
 			 */
-			$ar_placement = $ar_try_on_settings['ar_try_on_for_wordpress_ar_placement'];
+			$ar_placement = $ar_try_on_settings['ar_try_on_ar_placement'];
 			/**
 			 * Check the value of $ar_placement and return the $ar_placement
 			 *
 			 * @param string $ar_placement
 			 */
-			$ar_placement = $this->ar_try_on_for_wordpress_ar_placement( $ar_placement );
+			$ar_placement = $this->ar_try_on_ar_placement( $ar_placement );
 
 			/**
 			 * Get the xr_enviroment from plugin settings
 			 * @see: https://modelviewer.dev/docs/index.html#entrydocs-augmentedreality-attributes-xrEnvironment
 			 */
-			$xr_enviroment = $ar_try_on_settings['ar_try_on_for_wordpress_xr_environment'];
+			$xr_enviroment = $ar_try_on_settings['ar_try_on_xr_environment'];
 			/**
 			 * Check the value of xr_enviroment and return the $xr_enviroment
 			 *
 			 * @param string $xr_enviroment
 			 */
-			$xr_enviroment = $this->ar_try_on_for_wordpress_ar_xr_environment( $xr_enviroment );
+			$xr_enviroment = $this->ar_try_on_ar_xr_environment( $xr_enviroment );
 
 			/**
 			 * AR Button Settings
@@ -276,18 +274,18 @@ class AR_TRY_ON_Public {
 			 * Get the custom btn option from plugin settings
 			 * @see: https://modelviewer.dev/docs/#entrydocs-augmentedreality-slots-arButton
 			 */
-			$ar_btn_custom = $ar_try_on_settings['ar_try_on_for_wordpress_ar_button'];
+			$ar_btn_custom = $ar_try_on_settings['ar_try_on_ar_button'];
 			/**
 			 * Check ar button custom is active
 			 */
-			$ar_btn_custom = $this->ar_try_on_for_wordpress_ar_btn_custom( $ar_btn_custom );
+			$ar_btn_custom = $this->ar_try_on_ar_btn_custom( $ar_btn_custom );
 
 			// Get the custom text btn
-			$ar_btn_custom_text = $ar_try_on_settings['ar_try_on_for_wordpress_ar_button_text'];
+			$ar_btn_custom_text = $ar_try_on_settings['ar_try_on_ar_button_text'];
 			// Get the custom backgrund btn
-			$ar_btn_custom_background = $ar_try_on_settings['ar_try_on_for_wordpress_ar_button_background_color'];
+			$ar_btn_custom_background = $ar_try_on_settings['ar_try_on_ar_button_background_color'];
 			// Get the custom text color btn
-			$ar_btn_custom_text_color = $ar_try_on_settings['ar_try_on_for_wordpress_ar_button_text_color'];
+			$ar_btn_custom_text_color = $ar_try_on_settings['ar_try_on_ar_button_text_color'];
 
 			//Include the HTML for display the modal and the HTML content with a little bit PHP
 			/**
@@ -307,7 +305,7 @@ class AR_TRY_ON_Public {
 
             <div id="dialog" title="<?php echo esc_attr( $product->get_name() ) ?>">
 				<?php
-				$poster_color = esc_js( $this->ar_try_on_for_wordpress_poster_color( $poster_color_type ) );
+				$poster_color = esc_js( $this->ar_try_on_poster_color( $poster_color_type ) );
 
 				$custom_css = "
                 model-viewer#reveal{
@@ -358,7 +356,7 @@ class AR_TRY_ON_Public {
 		<?php
 	}
 
-	public function ar_try_on_for_wordpress_loading_type( $loading ) {
+	public function ar_try_on_loading_type( $loading ) {
 		switch ( $loading ) {
 			case 1:
 				# code...
@@ -381,7 +379,7 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_reveal_type( $reveal ) {
+	public function ar_try_on_reveal_type( $reveal ) {
 		switch ( $reveal ) {
 			case 1:
 				# code...
@@ -402,7 +400,7 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_poster_color( $poster_color ) {
+	public function ar_try_on_poster_color( $poster_color ) {
 		if ( isset( $poster_color ) ) {
 			return $poster_color;
 		} else {
@@ -412,7 +410,7 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_ar( $ar ) {
+	public function ar_try_on_ar( $ar ) {
 		if ( isset( $ar ) & $ar == 1 ) {
 			return 'ar';
 		} else {
@@ -420,16 +418,16 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_ar_modes( $ar_mode ) {
+	public function ar_try_on_ar_modes( $ar_mode ) {
 		foreach ( $ar_mode as $mode_for_ar ) {
 			$mode = $mode_for_ar;
-			if ( $mode == 1 ) {
+			if ( $mode == 'webxr' ) {
 				$mode_webxr = 'webxr';
 			}
-			if ( $mode == 2 ) {
+			if ( $mode == 'scene-viewer' ) {
 				$mode_scene = 'scene-viewer';
 			}
-			if ( $mode == 3 ) {
+			if ( $mode == 'quick-look' ) {
 				$mode_quick = 'quick-look';
 			}
 		}
@@ -438,7 +436,7 @@ class AR_TRY_ON_Public {
 		return $ar_mode;
 	}
 
-	public function ar_try_on_for_wordpress_ar_scale( $scale ) {
+	public function ar_try_on_ar_scale( $scale ) {
 		switch ( $scale ) {
 			case 1:
 				# code...
@@ -455,7 +453,7 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_ar_placement( $placement ) {
+	public function ar_try_on_ar_placement( $placement ) {
 		switch ( $placement ) {
 			case 1:
 				# code...
@@ -471,7 +469,7 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_ar_xr_environment( $xr ) {
+	public function ar_try_on_ar_xr_environment( $xr ) {
 		switch ( $xr ) {
 			case 1:
 				# code...
@@ -488,7 +486,7 @@ class AR_TRY_ON_Public {
 		}
 	}
 
-	public function ar_try_on_for_wordpress_ar_btn_custom( $btn_custom ) {
+	public function ar_try_on_ar_btn_custom( $btn_custom ) {
 		if ( $btn_custom == 1 ) {
 			return true;
 		} else {
