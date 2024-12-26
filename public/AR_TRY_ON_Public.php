@@ -111,6 +111,10 @@ class AR_TRY_ON_Public {
 
 	public function ar_try_on_button( $content ) {
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			if ( current_filter() === 'the_content' ) {
+				return $content;
+			}
+
 			return;
 		}
 
@@ -373,8 +377,14 @@ class AR_TRY_ON_Public {
 				return $content . $ar_button_content;
 			} else {
 				echo $ar_button_content;
+
+				return;
 			}
+
+			return $content;
 		}
+
+		return $content;
 	}
 
 

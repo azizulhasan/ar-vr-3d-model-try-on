@@ -140,7 +140,7 @@ class AR_TRY_ON_Helper {
 
 	public static function is_ar_supported_post_type() {
 		global $post;
-		if ( ! $post ) {
+		if ( ! $post  ) {
 			return false;
 		}
 		$settings = (array) get_option( 'ar_try_on_settings' );
@@ -156,8 +156,6 @@ class AR_TRY_ON_Helper {
 		if ( $post->post_type == 'product' && $result && $current_hook === 'the_content' ) {
 			$result = false;
 		}
-
-		error_log( print_r( [ $current_hook, $result ], 1 ) );
 
 		return $result;
 	}
