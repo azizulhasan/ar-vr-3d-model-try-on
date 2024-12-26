@@ -159,9 +159,7 @@ class AR_TRY_ON {
 
 	public function add_frontend_ar_button() {
 		global $post;
-
 		if ( $post->post_type != 'product' ) {
-			$this->loader->add_filter( 'the_content', $this->plugin_public, 'ar_try_on_button', 99999999 );
 		}
 	}
 
@@ -190,6 +188,9 @@ class AR_TRY_ON {
 				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 		}
+
+		$this->loader->add_filter( 'the_content', $this->plugin_public, 'ar_try_on_button', 99999999 );
+
 	}
 
 	/**

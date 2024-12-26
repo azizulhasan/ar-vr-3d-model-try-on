@@ -152,6 +152,12 @@ class AR_TRY_ON_Helper {
 		if ( $post->post_type == 'product' && in_array( $post->post_type, $post_types ) && $result && ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			$result = false;
 		}
+		$current_hook = current_filter();
+		if ( $post->post_type == 'product' && $result && $current_hook === 'the_content' ) {
+			$result = false;
+		}
+
+		error_log( print_r( [ $current_hook, $result ], 1 ) );
 
 		return $result;
 	}
