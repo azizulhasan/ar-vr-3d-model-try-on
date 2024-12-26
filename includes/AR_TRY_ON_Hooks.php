@@ -43,25 +43,26 @@ class AR_TRY_ON_Hooks {
 	 * Register MetaBox to add PDF Download Button
 	 */
 	public function add_custom_meta_box() {
-
-        if(!AR_TRY_ON_Helper::is_product_page()) {
-            return;
-        }
-
-
 		$plugin_name = 'AR Try-On';
-		add_meta_box(
-			'ar_try_on-meta-box',
-			$plugin_name,
-			array(
-				$this,
-				'ar_try_on_meta_box',
-			),
-			get_current_screen()->post_type,
-			'advanced',
-			'high',
-			null
-		);
+
+		global $post;
+		if ($post && AR_TRY_ON_Helper::is_ar_supported_post_type()) {
+			add_meta_box(
+				'ar_try_on-meta-box',
+				$plugin_name,
+				array(
+					$this,
+					'ar_try_on_meta_box',
+				),
+				get_current_screen()->post_type,
+				'advanced',
+				'high',
+				null
+			);
+		}
+
+
+
 
 	}
 

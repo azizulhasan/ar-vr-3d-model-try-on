@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from "react";
 import {getPostID, getURL, postWithoutImage} from "../context/utilities";
 
+import toast from '../context/Notify';
+
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
         ar_try_on_file_android: '',
@@ -18,6 +20,7 @@ const ARProductModelSettings = () => {
         let value = '';
         value = e.target.value
         if (!e.target.name) return;
+        console.log({name: e.target.name, value})
 
         setProductModel({
             ...productModel,
@@ -33,7 +36,7 @@ const ARProductModelSettings = () => {
     }, []);
     useEffect(() => {
         if (Object.keys(currentValue).length) {
-            console.log(productModel)
+            console.log(currentValue)
             setProductModel({
                 ...productModel,
                 ...{[currentValue.name]: currentValue.url}
@@ -41,9 +44,6 @@ const ARProductModelSettings = () => {
         }
     }, [currentValue]);
 
-    useEffect(() => {
-        console.log(productModel)
-    }, [productModel]);
 
     useEffect(() => {
         const postId = getPostID()
@@ -57,7 +57,6 @@ const ARProductModelSettings = () => {
             (res) => {
                 console.log(res)
                 setProductModel({...productModel, ...res.data});
-                // setIsDataLoaded(true)
             });
     }, []);
     /**
@@ -75,9 +74,8 @@ const ARProductModelSettings = () => {
         postWithoutImage(getURL('product_settings'), formData)
             .then((res) => {
                 setProductModel({...productModel, ...res.data});
-                // toast('Successfully Saved. Now go to the "Integrations" menu if you\'re a pro user. Otherwise go to the "Customization" menu.', 'info', {
-                //     autoClose: 15000
-                // });
+
+                alert('Successfully Saved Data.')
                 // setIsDataLoaded(true)
             })
             .catch((err) => {

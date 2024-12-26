@@ -138,15 +138,15 @@ class AR_TRY_ON_Init {
 
 function ar_try_on_run() {
 	new AR_TRY_ON_Init();
+	new AR_TRY_ON_Api_Routes();
 }
-ar_try_on_run();
 
 
 
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
 
 add_action( 'init', function () {
-	new AR_TRY_ON_Api_Routes();
+	ar_try_on_run();
 } );
 /**
  * The code that runs during plugin activation.
