@@ -70,6 +70,14 @@ class AR_TRY_ON {
 	 * @var      string $plugin_prefix The string used to uniquely prefix technical functions of this plugin.
 	 */
 	protected $plugin_prefix;
+	/**
+	 * plugin public object
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      AR_TRY_ON_Public $plugin_public The string used to uniquely prefix technical functions of this plugin.
+	 */
+	protected $plugin_public;
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -93,6 +101,9 @@ class AR_TRY_ON {
 		$this->load_dependencies();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
+		$this->define_wc_hooks();
+
 
 	}
 
@@ -138,45 +149,47 @@ class AR_TRY_ON {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
+		$this->plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_styles', 99999 );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_scripts', 99999 );
 
+	}
+
+	public function add_frontend_ar_button() {
+		global $post;
+
+		if ( $post->post_type != 'product' ) {
+			$this->loader->add_filter( 'the_content', $this->plugin_public, 'ar_try_on_button', 99999999 );
+		}
+	}
+
+	public function define_wc_hooks() {
 
 		$settings = (array) get_option( 'ar_try_on_settings' );
 
-		$wc_hook_id = $settings['ar_try_on_wc_hook_position'];
-
-		if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-			switch ( $wc_hook_id ) {
-				case 1:
-					$this->loader->add_action( 'woocommerce_before_single_product_summary', $plugin_public, 'ar_try_on_button' );
-					break;
-				case 2:
-					$this->loader->add_action( 'woocommerce_after_single_product_summary', $plugin_public, 'ar_try_on_button' );
-					break;
-				case 3:
-					$this->loader->add_action( 'woocommerce_before_single_product', $plugin_public, 'ar_try_on_button' );
-					break;
-				case 4:
-					$this->loader->add_action( 'woocommerce_after_single_product', $plugin_public, 'ar_try_on_button' );
-					break;
-				case 5:
-					$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $plugin_public, 'ar_try_on_button' );
-					break;
-				case 6:
-					$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $plugin_public, 'ar_try_on_button' );
-					break;
-				default:
-					add_action('the_content', function ($content) {
-
-					});
-			}
+		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : false;
+		switch ( $wc_hook_id ) {
+			case 1:
+				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				break;
+			case 2:
+				$this->loader->add_action( 'woocommerce_after_single_product_summary', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				break;
+			case 3:
+				$this->loader->add_action( 'woocommerce_before_single_product', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				break;
+			case 4:
+				$this->loader->add_action( 'woocommerce_after_single_product', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				break;
+			case 5:
+				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				break;
+			case 6:
+				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				break;
 		}
-
-
 	}
 
 	/**

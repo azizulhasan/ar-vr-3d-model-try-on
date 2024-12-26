@@ -75,12 +75,12 @@ class AR_TRY_ON_Admin {
 		}
 
 		$this->localize_data = [
-			'api_url'       => esc_url_raw( rest_url() ),
+//			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
 			'api_version'   => 'v1',
-			'nonce'         => wp_create_nonce( AR_TRY_ON_NONCE ),
+//			'nonce'         => wp_create_nonce( AR_TRY_ON_NONCE ),
 			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
-			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
+//			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => AR_TRY_ON_VERSION,
 			'plugin_url'    => AR_TRY_ON_PLUGIN_URL,
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),

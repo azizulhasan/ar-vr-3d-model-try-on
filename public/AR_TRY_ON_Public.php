@@ -110,6 +110,10 @@ class AR_TRY_ON_Public {
 
 
 	public function ar_try_on_button() {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			return;
+		}
+
 		// Global product variable
 		global $product;
 		$get_poster       = '';
@@ -156,6 +160,7 @@ class AR_TRY_ON_Public {
 		} else {
 			$poster_file_url = wp_get_attachment_url( $product->get_image_id() );
 		}
+
 
 		/**
 		 * If product not have a 3D Model - Hide the button

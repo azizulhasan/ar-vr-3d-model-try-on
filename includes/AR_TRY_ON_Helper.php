@@ -72,7 +72,7 @@ class AR_TRY_ON_Helper {
 		return apply_filters( 'ar_try_on_get_post_types', $post_types );
 	}
 
-	public static function ar_try_on_should_load_button($post_status = '') {
+	public static function ar_try_on_should_load_button( $post_status = '' ) {
 		$should_load_button = false;
 		global $post;
 		// is_home() || is_archive() || is_front_page() || is_category()
@@ -136,6 +136,24 @@ class AR_TRY_ON_Helper {
 		}
 
 		return false;
+	}
+
+	public static function is_ar_supported_post_type() {
+		global $post;
+		if ( ! $post ) {
+			return false;
+		}
+		$settings = (array) get_option( 'ar_try_on_settings' );
+
+		$post_types = $settings['ar_try_on_allowed_post_types'];
+
+		$result = in_array( $post->post_type, $post_types );
+
+		if ( $post->post_type == 'product' && in_array( $post->post_type, $post_types ) && $result && ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			$result = false;
+		}
+
+		return $result;
 	}
 
 }
