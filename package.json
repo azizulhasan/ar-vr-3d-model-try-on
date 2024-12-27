@@ -30,6 +30,7 @@
   "author": "Azizul Hasan <azizulhasan.cr@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "@babel/preset-env": "^7.26.0",
     "@wordpress/i18n": "^5.14.0",
     "@wordpress/scripts": "^30.7.0",
     "react": "^18.3.0",

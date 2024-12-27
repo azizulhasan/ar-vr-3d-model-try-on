@@ -14,11 +14,30 @@ const wpPot = require('gulp-wp-pot');
 const zip = require('gulp-zip');
 const notify = require('gulp-notify');
 const checktextdomain = require('gulp-checktextdomain');
+const gulpCopy = require('gulp-copy');
 // var env = require('gulp-env');
 // env({file: '.env.json'});
 // const gutil = require('gutil');
 // const ftp = require('vinyl-ftp');
-const gulpCopy = require('gulp-copy');
+
+// import gulp from 'gulp';
+// import eslint from 'gulp-eslint';
+// import babel from 'gulp-babel';
+// import prettify from 'gulp-js-prettify';
+// import uglify from 'gulp-uglify';
+// import concat from 'gulp-concat';
+// import beautify from 'gulp-beautify';
+// import rename from 'gulp-rename';
+// import sass from 'gulp-sass';
+// import sourcemaps from 'gulp-sourcemaps';
+// import minifyCSS from 'gulp-clean-css';
+// import autoprefixer from 'gulp-autoprefixer';
+// import wpPot from 'gulp-wp-pot';
+// import zip from 'gulp-zip';
+// import notify from 'gulp-notify';
+// import checktextdomain from 'gulp-checktextdomain';
+// import gulpCopy from 'gulp-copy';
+
 const productionSrc = [
 	'**/*',
 	'!.git/**',

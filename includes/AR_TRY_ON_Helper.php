@@ -140,9 +140,14 @@ class AR_TRY_ON_Helper {
 
 	public static function is_ar_supported_post_type() {
 		global $post;
-		if ( ! $post || ! ( is_singular() && is_single() ) ) {
+		if ( ! $post ) {
 			return false;
 		}
+
+		if ( ! is_admin() && ! ( is_singular() && is_single() ) ) {
+			return false;
+		}
+
 		$settings = (array) get_option( 'ar_try_on_settings' );
 
 		$post_types = $settings['ar_try_on_allowed_post_types'];
