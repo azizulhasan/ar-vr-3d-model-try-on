@@ -122,55 +122,37 @@ To build the files, you need to have Node.js and npm installed on your system. O
 
 ``# Run the build command
 
-``npm run publish
+``npm run production
 
-= PHP Libraries Used =
-
-This plugin uses several PHP libraries to provide its functionality. Below is a list of these libraries, along with links to their respective source code:
-
-1. **Inpsyde Assets**: This library manages and integrates assets in WordPress. It provides a convenient way to register and enqueue scripts and styles. [Source Code](https://github.com/inpsyde/assets)
-
-2. **Inpsyde WP Context**: This library provides a set of classes to help determine the current WordPress context. [Source Code](https://github.com/inpsyde/wp-context)
-
-3. **Micropackage Requirements**: This library checks server requirements for plugins or themes. [Source Code](https://github.com/micropackage/requirements)
-
-4. **Seravo WP Custom Bulk Actions**: This library allows you to create custom bulk actions in WordPress easily. [Source Code](https://github.com/Seravo/wp-custom-bulk-actions)
-
+``npm run makeZip
 
 
 = JS Libraries Used =
 
-The non-compiled version of JavaScript and/or CSS-related source code for each package can be found at the following links:
+The non-compiled version of JavaScript source code for each package can be found at the following links:
 
-1. **uuid**: For the creation of RFC4122 UUIDs. [Source Code](https://www.npmjs.com/package/uuid)
+## JavaScript Dependencies
 
-2. **@headlessui/react**: A completely unstyled, fully accessible UI component library, designed to integrate beautifully with Tailwind CSS. [Source Code](https://www.npmjs.com/package/@headlessui/react)
+This plugin utilizes several JavaScript libraries and tools to provide its functionality. Below is a list of the key dependencies used, along with a brief description and link to their source code:
 
-3. **@heroicons/react**: A set of free MIT-licensed high-quality SVG icons for UI development. [Source Code](https://www.npmjs.com/package/@heroicons/react)
+1. **@wordpress/i18n**: Internationalization utilities for client-side localization.
+   [Source Code](https://www.npmjs.com/package/@wordpress/i18n)
 
-4. **@reduxjs/toolkit**: The official, opinionated, batteries-included toolset for efficient Redux development. [Source Code](https://www.npmjs.com/package/@reduxjs/toolkit)
+2. **@wordpress/scripts**: A collection of reusable scripts and configurations to ease WordPress development.
+   [Source Code](https://www.npmjs.com/package/@wordpress/scripts)
 
-5. **@wordpress/i18n**: Internationalization utilities for client-side localization. [Source Code](https://www.npmjs.com/package/@wordpress/i18n)
+3. **react**: A JavaScript library for building user interfaces.
+   [Source Code](https://www.npmjs.com/package/react)
 
-6. **classnames**: A simple JavaScript utility for conditionally joining classNames together. [Source Code](https://www.npmjs.com/package/classnames)
+4. **react-dom**: Serves as the entry point to the DOM and server renderers for React.
+   [Source Code](https://www.npmjs.com/package/react-dom)
 
-7. **moment**: A JavaScript date library for parsing, validating, manipulating, and formatting dates. [Source Code](https://www.npmjs.com/package/moment)
+5. **react-router-dom**: DOM bindings for React Router, providing declarative routing for React applications.
+   [Source Code](https://www.npmjs.com/package/react-router-dom)
 
-8. **react**: A JavaScript library for building user interfaces. [Source Code](https://www.npmjs.com/package/react)
+6. **react-scripts**: Configuration and scripts for creating React applications.
+   [Source Code](https://www.npmjs.com/package/react-scripts)
 
-9. **react-beautiful-dnd**: Beautiful and accessible drag and drop for lists with React.js. [Source Code](https://www.npmjs.com/package/react-beautiful-dnd)
-
-10. **react-color**: A Collection of Color Pickers from Sketch, Photoshop, Chrome, Github, Twitter, Material Design & more. [Source Code](https://www.npmjs.com/package/react-color)
-
-11. **react-dom**: Serves as the entry point to the DOM and server renderers for React. [Source Code](https://www.npmjs.com/package/react-dom)
-
-12. **react-redux**: Official React bindings for Redux. [Source Code](https://www.npmjs.com/package/react-redux)
-
-13. **react-router-dom**: DOM bindings for React Router. [Source Code](https://www.npmjs.com/package/react-router-dom)
-
-14. **react-select**: A flexible and customizable Select Input control for ReactJS with multiselect, autocomplete and ajax support. [Source Code](https://www.npmjs.com/package/react-select)
-
-15. **react-toastify**: Allows you to add notifications to your app with ease. [Source Code](https://www.npmjs.com/package/react-toastify)
-
-16. **tinycolor2**: A tiny color manipulation library for JavaScript. [Source Code](https://www.npmjs.com/package/tinycolor2)
+7. **react-toastify**: Enables adding customizable and flexible toast notifications to your app with ease.
+   [Source Code](https://www.npmjs.com/package/react-toastify)
 
