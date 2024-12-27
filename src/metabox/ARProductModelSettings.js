@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {getPostID, getURL, postWithoutImage} from "../context/utilities";
 
-import toast from '../context/Notify';
 
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
