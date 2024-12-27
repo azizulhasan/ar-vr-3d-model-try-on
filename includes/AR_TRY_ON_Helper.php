@@ -140,7 +140,7 @@ class AR_TRY_ON_Helper {
 
 	public static function is_ar_supported_post_type() {
 		global $post;
-		if ( ! $post  ) {
+		if ( ! $post || ! ( is_singular() && is_single() ) ) {
 			return false;
 		}
 		$settings = (array) get_option( 'ar_try_on_settings' );

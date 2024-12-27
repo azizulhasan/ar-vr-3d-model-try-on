@@ -101,7 +101,6 @@ class AR_TRY_ON {
 		$this->load_dependencies();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-		add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
 		$this->define_wc_hooks();
 
 
@@ -155,12 +154,6 @@ class AR_TRY_ON {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_scripts', 99999 );
 
-	}
-
-	public function add_frontend_ar_button() {
-		global $post;
-		if ( $post->post_type != 'product' ) {
-		}
 	}
 
 	public function define_wc_hooks() {

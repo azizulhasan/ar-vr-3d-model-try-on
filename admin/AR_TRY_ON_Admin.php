@@ -78,7 +78,6 @@ class AR_TRY_ON_Admin {
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
 			'api_version'   => 'v1',
-			'nonce'         => wp_create_nonce( AR_TRY_ON_NONCE ),
 			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => AR_TRY_ON_VERSION,
@@ -156,7 +155,12 @@ class AR_TRY_ON_Admin {
 	}
 
 	public function ar_try_on_settings() {
-		echo "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>";
+		echo wp_kses( "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>", array(
+			'div' => array(
+				'id'    => array(),
+				'class' => array(),
+			)
+		) );
 	}
 
 }

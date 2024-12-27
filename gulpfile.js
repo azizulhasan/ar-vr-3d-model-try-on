@@ -30,7 +30,6 @@ const productionSrc = [
 	'!.gitignore',
 	'!gulpfile.js',
 	'!package.json',
-	'!composer.json',
 	'!composer.lock',
 	'!phpcs.xml',
 	'!.cpanel.yml',

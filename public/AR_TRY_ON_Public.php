@@ -325,9 +325,7 @@ class AR_TRY_ON_Public {
 			 */
 			ob_start();
 			?>
-            <!-- This file should primarily consist of HTML with a little bit of PHP. -->
             <button id="ar_vr_3d_model_try_on">View in 3D</button>
-
             <div id="dialog" title="<?php echo esc_attr( $post_title ) ?>">
 				<?php
 				$poster_color = esc_js( $this->ar_try_on_poster_color( $poster_color_type ) );
@@ -341,7 +339,6 @@ class AR_TRY_ON_Public {
 
 				?>
 
-                <!--  - HTML -->
                 <model-viewer id="reveal"
                               alt="<?php echo esc_attr( $alt_description ) ?>"
                               src="<?php echo esc_url( $android_file_url ); ?>"
@@ -358,16 +355,13 @@ class AR_TRY_ON_Public {
                               camera-controls
                               enable-pan>
                 </model-viewer>
-                <!--  - HTML -->
 
-                <!-- AR Custom Button -->
 				<?php if ( esc_html( $ar_btn_custom ) == true ): ?>
                     <button slot="ar-button"
                             style="background-color: <?php echo esc_attr( $ar_btn_custom_background ); ?>; color: <?php echo esc_attr( $ar_btn_custom_text_color ); ?>; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
 						<?php echo esc_html( $ar_btn_custom_text ); ?>
                     </button>
 				<?php endif; ?>
-                <!-- AR Custom Button -->
             </div>
 			<?php
 			$ar_button_content = ob_get_contents();

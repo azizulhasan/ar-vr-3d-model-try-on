@@ -95,11 +95,6 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
-### TRANSLATION REQUEST
-We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
-Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
-
-
 = 1.0.0  =
 * Initial release
 
