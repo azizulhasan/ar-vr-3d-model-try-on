@@ -149,7 +149,7 @@ class AR_TRY_ON_Admin {
 			'manage_options',
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
-			AR_TRY_ON_PLUGIN_URL . '/admin/images/ar-try-on-logo-resized-30x34.png',
+			AR_TRY_ON_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
 			20
 		);
 	}
@@ -161,6 +161,45 @@ class AR_TRY_ON_Admin {
 				'class' => array(),
 			)
 		) );
+	}
+
+
+	/**
+	 * Sets the extension and mime type for Android - .gbl and IOS - .usdz files.
+	 * @param array  $wp_check_filetype_and_ext File data array containing 'ext', 'type', and 'proper_filename' keys.
+	 * @param string $file                      Full path to the file.
+	 * @param string $filename                  The name of the file (may differ from $file due to $file being in a tmp directory).
+	 * @param array  $mimes                     Key is the file extension with value as the mime type.
+	 */
+	public function ar_try_on_for_woocommerce_file_and_ext($types, $file, $filename, $mimes)
+	{
+		if (false !== strpos($filename, '.glb')) {
+			$types['ext'] = 'glb';
+			$types['type'] = 'model/gltf-binary';
+		}
+		if (false !== strpos($filename, '.gltf')) {
+			$types['ext'] = 'gltf';
+			$types['type'] = 'model/gltf-binary';
+		}
+		if (false !== strpos($filename, '.usdz')) {
+			$types['ext'] = 'usdz';
+			$types['type'] = 'model/vnd.usdz+zip';
+		}
+		return $types;
+	}
+
+	/**
+	 * Adds Android - .gbl and IOS - .usdz filetype to allowed mimes
+	 * @see https://codex.wordpress.org/Plugin_API/Filter_Reference/upload_mimes
+	 * @param array $mimes Mime types keyed by the file extension regex corresponding tothose types. 'swf' and 'exe' removed from full list. 'htm|html' also removed depending on '$user' capabilities.
+	 * @return array
+	 */
+	public function ar_try_on_for_woocommerce_mime_types($mimes)
+	{
+		$mimes['glb'] = 'model/gltf-binary'; //Adding gbl extension
+		$mimes['gltf'] = 'model/gltf-binary'; //Adding gbl extension
+		$mimes['usdz'] = 'model/vnd.usdz+zip'; //Adding usdz extension
+		return $mimes;
 	}
 
 }

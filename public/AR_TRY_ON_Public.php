@@ -326,46 +326,47 @@ class AR_TRY_ON_Public {
 			ob_start();
 			?>
             <button id="ar_vr_3d_model_try_on">View in 3D</button>
-            <div id="dialog" title="<?php echo esc_attr( $post_title ) ?>">
+            <div id="dialog" title="<?php echo esc_attr( $post_title ); ?>">
 				<?php
 				$poster_color = esc_js( $this->ar_try_on_poster_color( $poster_color_type ) );
 
 				$custom_css = "
-                model-viewer#reveal{
-                        --poster-color: {$poster_color};
-                }";
+    model-viewer#reveal{
+        --poster-color: {$poster_color};
+    }";
 
-				wp_add_inline_style( $this->plugin_name, $custom_css )
-
+				wp_add_inline_style( $this->plugin_name, $custom_css );
 				?>
 
-                <model-viewer id="reveal"
-                              alt="<?php echo esc_attr( $alt_description ) ?>"
-                              src="<?php echo esc_url( $android_file_url ); ?>"
-                              ios-src="<?php echo esc_url( $ios_file_url ); ?>"
-                              poster="<?php echo esc_url( $poster_file_url ); ?>"
-					<?php echo esc_attr( $loading_type ); ?>
-					<?php echo esc_attr( $reveal_type ); ?>
-					<?php echo esc_attr( $ar_active ); ?>
-                              ar-modes="<?php echo esc_attr( $ar_mode ); ?>"
-					<?php echo esc_attr( $ar_scale ); ?>
-					<?php echo esc_attr( $ar_placement ); ?>
-					<?php echo esc_attr( $xr_enviroment ); ?>
-                              seamless-poster
-                              camera-controls
-                              enable-pan>
+                <model-viewer
+                        id="reveal"
+                        alt="<?php echo esc_attr( $alt_description ); ?>"
+                        src="<?php echo esc_url( $android_file_url ); ?>"
+                        ios-src="<?php echo esc_url( $ios_file_url ); ?>"
+                        poster="<?php echo esc_url( $poster_file_url ); ?>"
+                        loading="<?php echo esc_attr( $loading_type ); ?>"
+                        reveal="<?php echo esc_attr( $reveal_type ); ?>"
+					<?php echo $ar_active ? 'ar' : ''; ?>
+                        ar-modes="<?php echo esc_attr( $ar_mode ); ?>"
+                        ar-scale="<?php echo esc_attr( $ar_scale ); ?>"
+                        ar-placement="<?php echo esc_attr( $ar_placement ); ?>"
+					<?php echo $xr_enviroment ? 'xr-environment' : ''; ?>
+                        seamless-poster
+                        camera-controls
+                        enable-pan>
                 </model-viewer>
 
-				<?php if ( esc_html( $ar_btn_custom ) == true ): ?>
+				<?php if ( $ar_btn_custom ): ?>
                     <button slot="ar-button"
-                            style="background-color: <?php echo esc_attr( $ar_btn_custom_background ); ?>; color: <?php echo esc_attr( $ar_btn_custom_text_color ); ?>; border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px; ">
+                            style="background-color: <?php echo esc_attr( $ar_btn_custom_background ); ?>;
+                                    color: <?php echo esc_attr( $ar_btn_custom_text_color ); ?>;
+                                    border-radius: 4px; border: none; position: absolute; top: 16px; right: 16px;">
 						<?php echo esc_html( $ar_btn_custom_text ); ?>
                     </button>
 				<?php endif; ?>
             </div>
 			<?php
-			$ar_button_content = ob_get_contents();
-			ob_end_clean();
+			$ar_button_content = ob_get_clean();
 
 			if ( $post->post_type != 'product' ) {
 				return $content . $ar_button_content;
@@ -374,8 +375,6 @@ class AR_TRY_ON_Public {
 
 				return;
 			}
-
-			return $content;
 		}
 
 		return $content;
