@@ -24,9 +24,8 @@
  */
 
 // Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
-}
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
