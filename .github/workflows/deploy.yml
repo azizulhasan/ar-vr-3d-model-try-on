@@ -4,6 +4,10 @@ on:
     push:
         branches:
             - main
+            - develop
+            - staging
+          # Add more branches as needed
+            - feature/*
 
 jobs:
     deploy:
