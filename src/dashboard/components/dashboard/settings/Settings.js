@@ -5,27 +5,36 @@ import React, {useState, useEffect} from 'react';
  */
 import {getURL, postWithoutImage} from '../../../../context/utilities';
 import toast from '../../../../context/Notify';
+import MultiSelect from '../../../../context/MultiSelect';
 
 export default function Settings() {
     const [settings, setSettings] = useState({
-        ar_try_on_for_wordpress_btn: "3",
-        ar_try_on_for_wordpress_single_product_tabs: "yes",
-        ar_try_on_for_wordpress_loading: "auto",
-        ar_try_on_for_wordpress_reveal: "auto",
-        ar_try_on_for_wordpress_poster_color: "rgba(78,186,79,0)",
-        ar_try_on_for_wordpress_ar: "activate",
-        ar_try_on_for_wordpress_ar_modes: ["1", "2", "3"],
-        ar_try_on_for_wordpress_ar_scale: "auto",
-        ar_try_on_for_wordpress_ar_placement: "floor",
-        ar_try_on_for_wordpress_xr_environment: "activate",
-        ar_try_on_for_wordpress_ar_button: "activate",
-        ar_try_on_for_wordpress_ar_button_text: "Activate AR",
-        ar_try_on_for_wordpress_ar_button_background_color: "#3a3a3a",
-        ar_try_on_for_wordpress_ar_button_text_color: "#ffffff"
+        ar_try_on_allowed_post_types: ['post'],
+        ar_try_on_wc_hook_position: "3",
+        ar_try_on_single_product_tabs: "yes",
+        ar_try_on_loading_type: "auto",
+        ar_try_on_reveal_type: "auto",
+        ar_try_on_poster_color: "rgba(78,186,79,0)",
+        ar_try_on_ar: "activate",
+        ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
+        ar_try_on_ar_scale: "auto",
+        ar_try_on_ar_placement: "floor",
+        ar_try_on_xr_environment: "activate",
+        ar_try_on_ar_button: "activate",
+        ar_try_on_ar_button_text: "Activate AR",
+        ar_try_on_ar_button_background_color: "#3a3a3a",
+        ar_try_on_ar_button_text_color: "#ffffff"
     });
-    const [postTypes, setPostTypes] = useState([]);
+    const [postTypes, setPostTypes] = useState(['post']);
     const [isDataLoaded, setIsDataLoaded] = useState(true)
-    const [postsStatus, setPostsStatus] = useState([])
+
+
+    useEffect(() => {
+        if (window.hasOwnProperty('ar_try_on') && ar_try_on?.post_types) {
+            let tempPostTypes = wp.hooks.applyFilters('ar_try_on_allowed_post_types', structuredClone(Object.keys(ar_try_on.post_types)))
+            setPostTypes(tempPostTypes)
+        }
+    }, [window?.ar_try_on])
 
     useEffect(() => {
         /**
@@ -62,15 +71,15 @@ export default function Settings() {
             e.target.name = targetName;
         }
 
-        if (e.target.name == 'ar_try_on_for_wordpress_ar_modes') {
+        if (e.target.name == 'ar_try_on_ar_modes') {
             let status = e.target.checked
             let clonedVal = structuredClone(settings)
-            let tempVal = clonedVal.ar_try_on_for_wordpress_ar_modes
-            if(status) {
+            let tempVal = clonedVal.ar_try_on_ar_modes
+            if (status) {
                 tempVal.push(value)
                 value = tempVal
-            }else{
-                if(tempVal.includes(value)) {
+            } else {
+                if (tempVal.includes(value)) {
                     tempVal = tempVal.filter(item => item != value);
                 }
                 value = tempVal
@@ -116,7 +125,7 @@ export default function Settings() {
         isDataLoaded ? <React.Fragment>
                 <form onSubmit={handleSubmit}>
                     <div
-                        id="ar_try_on_for_wordpress_settings"
+                        id="ar_try_on_settings"
                         className="p-4 bg-gray-100 space-y-6"
                     >
                         {/* Title Section */}
@@ -127,19 +136,40 @@ export default function Settings() {
                             </h3>
                         </div>
 
+
+                        <div className="space-y-4">
+                            <label
+                                htmlFor="ar_try_on_allowed_post_types"
+                                className="block font-medium"
+                            >
+                                Enable AR For Post Types
+                            </label>
+                            {/*<MultiSelect*/}
+                            {/*    id="ar_vr_3d_model_try_on_enable_for_post_type"*/}
+                            {/*    name="ar_vr_3d_model_try_on_enable_for_post_type"*/}
+                            {/*    onChange={(e) => handleChange(e, 'ar_vr_3d_model_try_on_enable_for_post_type')}*/}
+                            {/*    selectedItems={settings.ar_vr_3d_model_try_on_enable_for_post_type}*/}
+                            {/*    options={postTypes}/>*/}
+                            <MultiSelect
+                                id="ar_try_on_allowed_post_types"
+                                selectedItems={settings.ar_try_on_allowed_post_types}
+                                options={postTypes}
+                                onChange={(e) => handleChange(e, 'ar_try_on_allowed_post_types')}/>
+                        </div>
+
                         {/* Dropdown Section */}
                         <div className="space-y-4">
                             <label
-                                htmlFor="ar_try_on_for_wordpress_btn"
+                                htmlFor="ar_try_on_wc_hook_position"
                                 className="block font-medium"
                             >
                                 Show button in
                             </label>
                             <select
-                                id="ar_try_on_for_wordpress_btn"
-                                name="ar_try_on_for_wordpress_btn"
+                                id="ar_try_on_wc_hook_position"
+                                name="ar_try_on_wc_hook_position"
                                 className="block w-full p-2 border rounded"
-                                value={settings.ar_try_on_for_wordpress_btn}
+                                value={settings.ar_try_on_wc_hook_position}
                                 onChange={handleChange}
                             >
                                 <option value="">None</option>
@@ -157,7 +187,7 @@ export default function Settings() {
                         {/* Radio Section */}
                         <div className="space-y-4">
                             <label
-                                htmlFor="ar_try_on_for_wordpress_single_product_tabs"
+                                htmlFor="ar_try_on_single_product_tabs"
                                 className="block font-medium"
                             >
                                 Show in Product Tabs
@@ -166,10 +196,10 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_single_product_tabs1"
-                                        name="ar_try_on_for_wordpress_single_product_tabs"
+                                        id="ar_try_on_single_product_tabs1"
+                                        name="ar_try_on_single_product_tabs"
                                         value="yes"
-                                        checked={settings.ar_try_on_for_wordpress_single_product_tabs == 'yes'}
+                                        checked={settings.ar_try_on_single_product_tabs == 'yes'}
                                         onChange={handleChange}
                                     />
                                     <span>Yes</span>
@@ -177,10 +207,10 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_single_product_tabs2"
-                                        name="ar_try_on_for_wordpress_single_product_tabs"
+                                        id="ar_try_on_single_product_tabs2"
+                                        name="ar_try_on_single_product_tabs"
                                         value="no"
-                                        checked={settings.ar_try_on_for_wordpress_single_product_tabs == 'no'}
+                                        checked={settings.ar_try_on_single_product_tabs == 'no'}
                                         onChange={handleChange}
                                     />
                                     <span>No</span>
@@ -195,7 +225,7 @@ export default function Settings() {
                                 Loading : Attributes
                             </h3>
                             <label
-                                htmlFor="ar_try_on_for_wordpress_loading"
+                                htmlFor="ar_try_on_loading_type"
                                 className="block font-medium"
                             >
                                 Loading
@@ -204,10 +234,10 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_loading1"
-                                        name="ar_try_on_for_wordpress_loading"
+                                        id="ar_try_on_loading1"
+                                        name="ar_try_on_loading_type"
                                         value="auto"
-                                        checked={settings.ar_try_on_for_wordpress_loading == 'auto'}
+                                        checked={settings.ar_try_on_loading_type == 'auto'}
                                         onChange={handleChange}
                                     />
                                     <span>Auto</span>
@@ -215,10 +245,10 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_loading2"
-                                        name="ar_try_on_for_wordpress_loading"
+                                        id="ar_try_on_loading2"
+                                        name="ar_try_on_loading_type"
                                         value="lazy"
-                                        checked={settings.ar_try_on_for_wordpress_loading == 'lazy'}
+                                        checked={settings.ar_try_on_loading_type == 'lazy'}
                                         onChange={handleChange}
                                     />
                                     <span>Lazy</span>
@@ -226,17 +256,22 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_loading3"
-                                        name="ar_try_on_for_wordpress_loading"
+                                        id="ar_try_on_loading3"
+                                        name="ar_try_on_loading_type"
                                         value="eager"
-                                        checked={settings.ar_try_on_for_wordpress_loading == 'eager'}
+                                        checked={settings.ar_try_on_loading_type == 'eager'}
                                         onChange={handleChange}
                                     />
                                     <span>Eager</span>
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                An enumerable attribute describing under what conditions the model should be preloaded. The supported values are "auto", "lazy" and "eager". Auto is equivalent to lazy, which loads the model when it is near the viewport for reveal="auto", and when interacted with for reveal="interaction". Eager loads the model immediately.
+                                An enumerable attribute describing under what conditions the model should be preloaded.
+                                The
+                                supported values are "auto", "lazy" and "eager". Auto is equivalent to lazy, which loads
+                                the
+                                model when it is near the viewport for reveal="auto", and when interacted with for
+                                reveal="interaction". Eager loads the model immediately.
                             </p>
                         </div>
 
@@ -247,7 +282,7 @@ export default function Settings() {
                                 Loading : Attributes
                             </h3>
                             <label
-                                htmlFor="ar_try_on_for_wordpress_reveal"
+                                htmlFor="ar_try_on_reveal_type"
                                 className="block font-medium"
                             >
                                 Reveal
@@ -256,10 +291,10 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_reveal1"
-                                        name="ar_try_on_for_wordpress_reveal"
+                                        id="ar_try_on_reveal1"
+                                        name="ar_try_on_reveal_type"
                                         value="auto"
-                                        checked={settings.ar_try_on_for_wordpress_reveal == 'auto'}
+                                        checked={settings.ar_try_on_reveal_type == 'auto'}
                                         onChange={handleChange}
                                     />
                                     <span>Auto</span>
@@ -267,10 +302,10 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_reveal2"
-                                        name="ar_try_on_for_wordpress_reveal"
+                                        id="ar_try_on_reveal2"
+                                        name="ar_try_on_reveal_type"
                                         value="interaction"
-                                        checked={settings.ar_try_on_for_wordpress_reveal == 'interaction'}
+                                        checked={settings.ar_try_on_reveal_type == 'interaction'}
                                         onChange={handleChange}
                                     />
                                     <span>Interaction</span>
@@ -278,24 +313,31 @@ export default function Settings() {
                                 <label className="flex items-center gap-2">
                                     <input
                                         type="radio"
-                                        id="ar_try_on_for_wordpress_reveal3"
-                                        name="ar_try_on_for_wordpress_reveal"
+                                        id="ar_try_on_reveal3"
+                                        name="ar_try_on_reveal_type"
                                         value="manual"
-                                        checked={settings.ar_try_on_for_wordpress_reveal == 'manual'}
+                                        checked={settings.ar_try_on_reveal_type == 'manual'}
                                         onChange={handleChange}
                                     />
                                     <span>Manual</span>
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                This attribute controls when the model should be revealed. It currently supports three values: "auto", "interaction", and "manual". If reveal is set to "interaction", will wait until the user interacts with the poster before loading and revealing the model. If reveal is set to "auto", the model will be revealed as soon as it is done loading and rendering. If reveal is set to "manual", the model will remain hidden until dismissPoster() is called.
+                                This attribute controls when the model should be revealed. It currently supports three
+                                values: "auto", "interaction", and "manual". If reveal is set to "interaction", will
+                                wait
+                                until the user interacts with the poster before loading and revealing the model. If
+                                reveal
+                                is set to "auto", the model will be revealed as soon as it is done loading and
+                                rendering. If
+                                reveal is set to "manual", the model will remain hidden until dismissPoster() is called.
                             </p>
                         </div>
 
                         {/* Poster Color */}
                         <div className="space-y-4">
                             <label
-                                htmlFor="ar_try_on_for_wordpress_poster_color"
+                                htmlFor="ar_try_on_poster_color"
                                 className="block font-medium"
                             >
                                 --poster-color
@@ -303,37 +345,40 @@ export default function Settings() {
                             <div className="flex items-center gap-2">
                                 <input
                                     type="text"
-                                    id="ar_try_on_for_wordpress_poster_color"
-                                    name="ar_try_on_for_wordpress_poster_color"
+                                    id="ar_try_on_poster_color"
+                                    name="ar_try_on_poster_color"
                                     className="block w-full p-2 border rounded"
-                                    value={settings.ar_try_on_for_wordpress_poster_color}
+                                    value={settings.ar_try_on_poster_color}
                                     onChange={handleChange}
                                 />
                                 <input
                                     type="color"
                                     className="p-2 bg-gray-300 rounded"
                                     style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
-                                    onChange={(e) => handleChange(e, 'ar_try_on_for_wordpress_poster_color')}
+                                    onChange={(e) => handleChange(e, 'ar_try_on_poster_color')}
                                 />
                             </div>
                             <p className="text-sm text-gray-500">
-                                Sets the background-color of the poster . You may wish to set this to transparent if you are using a seamless poster with transparency (so that the background color of shows through).
+                                Sets the background-color of the poster . You may wish to set this to transparent if you
+                                are
+                                using a seamless poster with transparency (so that the background color of shows
+                                through).
                             </p>
                         </div>
 
                         {/* Enable AR */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar" className="font-medium">
+                            <label htmlFor="ar_try_on_ar" className="font-medium">
                                 Enable AR
                             </label>
                             <div className="flex items-center space-x-4">
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar"
-                                        id="ar_try_on_for_wordpress_ar1"
+                                        name="ar_try_on_ar"
+                                        id="ar_try_on_ar1"
                                         value="activate"
-                                        checked={settings.ar_try_on_for_wordpress_ar == 'activate'}
+                                        checked={settings.ar_try_on_ar == 'activate'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -342,10 +387,10 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar"
-                                        id="ar_try_on_for_wordpress_ar2"
+                                        name="ar_try_on_ar"
+                                        id="ar_try_on_ar2"
                                         value="deactivate"
-                                        checked={settings.ar_try_on_for_wordpress_ar == 'deactivate'}
+                                        checked={settings.ar_try_on_ar == 'deactivate'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -359,7 +404,7 @@ export default function Settings() {
 
                         {/* AR Modes */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_modes" className="font-medium">
+                            <label htmlFor="ar_try_on_ar_modes" className="font-medium">
                                 AR Modes
                             </label>
                             <p className="text-sm text-gray-500">Select / Deselect All</p>
@@ -367,11 +412,11 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="ar_try_on_for_wordpress_ar_modes[]"
-                                        id="ar_try_on_for_wordpress_ar_modes1"
+                                        name="ar_try_on_ar_modes[]"
+                                        id="ar_try_on_ar_modes1"
                                         value="1"
-                                        checked={settings.ar_try_on_for_wordpress_ar_modes.includes('1')}
-                                        onChange={(e) => handleChange(e, 'ar_try_on_for_wordpress_ar_modes')}
+                                        checked={settings.ar_try_on_ar_modes.includes('1')}
+                                        onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
                                     <span>webxr</span>
@@ -379,11 +424,11 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="ar_try_on_for_wordpress_ar_modes[]"
-                                        id="ar_try_on_for_wordpress_ar_modes2"
+                                        name="ar_try_on_ar_modes[]"
+                                        id="ar_try_on_ar_modes2"
                                         value="2"
-                                        checked={settings.ar_try_on_for_wordpress_ar_modes.includes('2')}
-                                        onChange={(e) => handleChange(e, 'ar_try_on_for_wordpress_ar_modes')}
+                                        checked={settings.ar_try_on_ar_modes.includes('2')}
+                                        onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
                                     <span>scene-viewer</span>
@@ -391,34 +436,39 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="ar_try_on_for_wordpress_ar_modes[]"
-                                        id="ar_try_on_for_wordpress_ar_modes3"
+                                        name="ar_try_on_ar_modes[]"
+                                        id="ar_try_on_ar_modes3"
                                         value="3"
-                                        checked={settings.ar_try_on_for_wordpress_ar_modes.includes('3')}
-                                        onChange={(e) => handleChange(e, 'ar_try_on_for_wordpress_ar_modes')}
+                                        checked={settings.ar_try_on_ar_modes.includes('3')}
+                                        onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
                                     <span>quick-look</span>
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                A prioritized list of the types of AR experiences to enable. Allowed values are "webxr", to launch the AR experience in the browser, "scene-viewer", to launch the Scene Viewer app, "quick-look", to launch the iOS Quick Look app. Note that the presence of an ios-src will enable quick-look by itself.
+                                A prioritized list of the types of AR experiences to enable. Allowed values are "webxr",
+                                to
+                                launch the AR experience in the browser, "scene-viewer", to launch the Scene Viewer app,
+                                "quick-look", to launch the iOS Quick Look app. Note that the presence of an ios-src
+                                will
+                                enable quick-look by itself.
                             </p>
                         </div>
 
                         {/* AR Scale */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_scale" className="font-medium">
+                            <label htmlFor="ar_try_on_ar_scale" className="font-medium">
                                 AR Scale
                             </label>
                             <div className="flex items-center space-x-4">
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar_scale"
-                                        id="ar_try_on_for_wordpress_ar_scale1"
+                                        name="ar_try_on_ar_scale"
+                                        id="ar_try_on_ar_scale1"
                                         value="auto"
-                                        checked={settings.ar_try_on_for_wordpress_ar_scale == 'auto'}
+                                        checked={settings.ar_try_on_ar_scale == 'auto'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -427,10 +477,10 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar_scale"
-                                        id="ar_try_on_for_wordpress_ar_scale2"
+                                        name="ar_try_on_ar_scale"
+                                        id="ar_try_on_ar_scale2"
                                         value="fixed"
-                                        checked={settings.ar_try_on_for_wordpress_ar_scale == 'fixed'}
+                                        checked={settings.ar_try_on_ar_scale == 'fixed'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -438,23 +488,27 @@ export default function Settings() {
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                Controls the scaling behavior in AR mode. Set to "fixed" to disable scaling of the model, which sets it to always be at 100% scale. Defaults to "auto" which allows the model to be resized by pinch.
+                                Controls the scaling behavior in AR mode. Set to "fixed" to disable scaling of the
+                                model,
+                                which sets it to always be at 100% scale. Defaults to "auto" which allows the model to
+                                be
+                                resized by pinch.
                             </p>
                         </div>
 
                         {/* AR Placement */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_placement" className="font-medium">
+                            <label htmlFor="ar_try_on_ar_placement" className="font-medium">
                                 AR Placement
                             </label>
                             <div className="flex items-center space-x-4">
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar_placement"
-                                        id="ar_try_on_for_wordpress_ar_placement1"
+                                        name="ar_try_on_ar_placement"
+                                        id="ar_try_on_ar_placement1"
                                         value="floor"
-                                        checked={settings.ar_try_on_for_wordpress_ar_placement == 'floor'}
+                                        checked={settings.ar_try_on_ar_placement == 'floor'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -463,10 +517,10 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar_placement"
-                                        id="ar_try_on_for_wordpress_ar_placement2"
+                                        name="ar_try_on_ar_placement"
+                                        id="ar_try_on_ar_placement2"
                                         value="wall"
-                                        checked={settings.ar_try_on_for_wordpress_ar_placement == 'wall'}
+                                        checked={settings.ar_try_on_ar_placement == 'wall'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -474,23 +528,28 @@ export default function Settings() {
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                Selects whether to place the object on the floor (horizontal surface) or a wall (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be placed against the wall and the shadow will be put on this surface as well. Note that the different AR modes handle the placement UX differently.
+                                Selects whether to place the object on the floor (horizontal surface) or a wall
+                                (vertical
+                                surface) in AR. The back (negative Z) of the object´s bounding box will be placed
+                                against
+                                the wall and the shadow will be put on this surface as well. Note that the different AR
+                                modes handle the placement UX differently.
                             </p>
                         </div>
 
                         {/* XR Environment */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_xr_environment" className="font-medium">
+                            <label htmlFor="ar_try_on_xr_environment" className="font-medium">
                                 XR-Environment
                             </label>
                             <div className="flex items-center space-x-4">
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_xr_environment"
-                                        id="ar_try_on_for_wordpress_xr_environment1"
+                                        name="ar_try_on_xr_environment"
+                                        id="ar_try_on_xr_environment1"
                                         value="activate"
-                                        checked={settings.ar_try_on_for_wordpress_xr_environment == 'activate'}
+                                        checked={settings.ar_try_on_xr_environment == 'activate'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -499,10 +558,10 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_xr_environment"
-                                        id="ar_try_on_for_wordpress_xr_environment2"
+                                        name="ar_try_on_xr_environment"
+                                        id="ar_try_on_xr_environment2"
                                         value="deactivate"
-                                        checked={settings.ar_try_on_for_wordpress_xr_environment == 'deactivate'}
+                                        checked={settings.ar_try_on_xr_environment == 'deactivate'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -510,23 +569,26 @@ export default function Settings() {
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces the lighting selected with during an AR session. Known issues: sometimes too dark, sudden updates, shiny materials look matte.environment-image
+                                Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces
+                                the
+                                lighting selected with during an AR session. Known issues: sometimes too dark, sudden
+                                updates, shiny materials look matte.environment-image
                             </p>
                         </div>
 
                         {/* Custom AR Button */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_button" className="font-medium">
+                            <label htmlFor="ar_try_on_ar_button" className="font-medium">
                                 Custom AR Button
                             </label>
                             <div className="flex items-center space-x-4">
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar_button"
-                                        id="ar_try_on_for_wordpress_ar_button1"
+                                        name="ar_try_on_ar_button"
+                                        id="ar_try_on_ar_button1"
                                         value="activate"
-                                        checked={settings.ar_try_on_for_wordpress_ar_button == 'activate'}
+                                        checked={settings.ar_try_on_ar_button == 'activate'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -535,10 +597,10 @@ export default function Settings() {
                                 <label className="flex items-center space-x-2">
                                     <input
                                         type="radio"
-                                        name="ar_try_on_for_wordpress_ar_button"
-                                        id="ar_try_on_for_wordpress_ar_button2"
+                                        name="ar_try_on_ar_button"
+                                        id="ar_try_on_ar_button2"
                                         value="deactivate"
-                                        checked={settings.ar_try_on_for_wordpress_ar_button == 'deactivate'}
+                                        checked={settings.ar_try_on_ar_button == 'deactivate'}
                                         onChange={handleChange}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -546,20 +608,23 @@ export default function Settings() {
                                 </label>
                             </div>
                             <p className="text-sm text-gray-500">
-                                By placing a child element under with slot="ar-button", this element will replace the default "Enter AR" button, which is a icon in the lower right. This button will be visible if AR is potentially available (we will have some false positives until the user tries).
+                                By placing a child element under with slot="ar-button", this element will replace the
+                                default "Enter AR" button, which is a icon in the lower right. This button will be
+                                visible
+                                if AR is potentially available (we will have some false positives until the user tries).
                             </p>
                         </div>
 
                         {/* Button Text */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_button_text" className="font-medium">
+                            <label htmlFor="ar_try_on_ar_button_text" className="font-medium">
                                 Button Text
                             </label>
                             <input
                                 type="text"
-                                id="ar_try_on_for_wordpress_ar_button_text"
-                                name="ar_try_on_for_wordpress_ar_button_text"
-                                value={settings.ar_try_on_for_wordpress_ar_button_text}
+                                id="ar_try_on_ar_button_text"
+                                name="ar_try_on_ar_button_text"
+                                value={settings.ar_try_on_ar_button_text}
                                 onChange={handleChange}
                                 className="block w-full p-2 border rounded"
                             />
@@ -567,33 +632,33 @@ export default function Settings() {
 
                         {/* Button Color */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_button_background_color"
+                            <label htmlFor="ar_try_on_ar_button_background_color"
                                    className="font-medium">
                                 Button Color
                             </label>
                             <input
                                 type="color"
-                                id="ar_try_on_for_wordpress_ar_button_background_color"
-                                name="ar_try_on_for_wordpress_ar_button_background_color"
+                                id="ar_try_on_ar_button_background_color"
+                                name="ar_try_on_ar_button_background_color"
                                 style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
-                                value={settings.ar_try_on_for_wordpress_ar_button_background_color}
-                                onChange={(e) => handleChange(e, 'ar_try_on_for_wordpress_ar_button_background_color')}
+                                value={settings.ar_try_on_ar_button_background_color}
+                                onChange={(e) => handleChange(e, 'ar_try_on_ar_button_background_color')}
                                 className="block w-full p-2 border rounded"
                             />
                         </div>
                         {/* Button Text color Color */}
                         <div className="space-y-2">
-                            <label htmlFor="ar_try_on_for_wordpress_ar_button_text_color"
+                            <label htmlFor="ar_try_on_ar_button_text_color"
                                    className="font-medium">
                                 Button Color
                             </label>
                             <input
                                 type="color"
-                                id="ar_try_on_for_wordpress_ar_button_text_color"
-                                name="ar_try_on_for_wordpress_ar_button_text_color"
+                                id="ar_try_on_ar_button_text_color"
+                                name="ar_try_on_ar_button_text_color"
                                 style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
-                                value={settings.ar_try_on_for_wordpress_ar_button_text_color}
-                                onChange={(e) => handleChange(e, 'ar_try_on_for_wordpress_ar_button_text_color')}
+                                value={settings.ar_try_on_ar_button_text_color}
+                                onChange={(e) => handleChange(e, 'ar_try_on_ar_button_text_color')}
                                 className="block w-full p-2 border rounded"
                             />
                         </div>

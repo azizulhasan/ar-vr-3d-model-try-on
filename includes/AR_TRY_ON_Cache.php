@@ -64,4 +64,36 @@ class AR_TRY_ON_Cache {
 		return $wpdb->query( "DELETE FROM $wpdb->options WHERE ({$wpdb->options}.option_name LIKE '_transient_timeout___ar_try_on_cache_%') OR ({$wpdb->options}.option_name LIKE '_transient___ar_try_on_cache_%')" ); // phpcs:ignore
 	}
 
+	public static function get_key( $cache_key = 'all' ) {
+		// key will be method name and value will be cache key,
+		$cache_keys = [
+			'get_post_types'     => 'get_post_types',
+		];
+
+		if ( $cache_key == 'all' ) {
+			return $cache_keys;
+		}
+
+		return $cache_keys[ $cache_key ] ?? '';
+	}
+
+
+	// Static function to update cache for all post types
+	public static function update_post_type_cache( $post_id ) {
+		// Get the post type of the current post
+		$cache_key = self::get_key( 'get_post_types' );
+		self::delete( $cache_key );
+		// Only proceed if the post type is valid
+		AR_TRY_ON_Helper::get_post_types();
+	}
+
+	public static function update_transient_during_plugins_crud() {
+		$cache_key = self::get_key( 'is_pro_active' );
+		self::delete( $cache_key );
+
+		$cache_key = self::get_key( 'all_plugins' );
+		self::delete( $cache_key );
+
+	}
+
 }

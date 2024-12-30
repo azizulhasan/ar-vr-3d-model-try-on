@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from "react";
 import {getPostID, getURL, postWithoutImage} from "../context/utilities";
 
+
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
-        ar_try_on_for_wordpress_file_android: '',
-        ar_try_on_for_wordpress_file_ios: '',
-        ar_try_on_for_wordpress_file_poster: '',
-        ar_try_on_for_wordpress_file_alt: 'test',
+        ar_try_on_file_android: '',
+        ar_try_on_file_ios: '',
+        ar_try_on_file_poster: '',
+        ar_try_on_file_alt: 'test',
     });
     const [currentValue, setCurrentValue] = useState({});
 
@@ -18,6 +19,7 @@ const ARProductModelSettings = () => {
         let value = '';
         value = e.target.value
         if (!e.target.name) return;
+        console.log({name: e.target.name, value})
 
         setProductModel({
             ...productModel,
@@ -33,7 +35,7 @@ const ARProductModelSettings = () => {
     }, []);
     useEffect(() => {
         if (Object.keys(currentValue).length) {
-            console.log(productModel)
+            console.log(currentValue)
             setProductModel({
                 ...productModel,
                 ...{[currentValue.name]: currentValue.url}
@@ -41,9 +43,6 @@ const ARProductModelSettings = () => {
         }
     }, [currentValue]);
 
-    useEffect(() => {
-        console.log(productModel)
-    }, [productModel]);
 
     useEffect(() => {
         const postId = getPostID()
@@ -57,7 +56,6 @@ const ARProductModelSettings = () => {
             (res) => {
                 console.log(res)
                 setProductModel({...productModel, ...res.data});
-                // setIsDataLoaded(true)
             });
     }, []);
     /**
@@ -75,9 +73,8 @@ const ARProductModelSettings = () => {
         postWithoutImage(getURL('product_settings'), formData)
             .then((res) => {
                 setProductModel({...productModel, ...res.data});
-                // toast('Successfully Saved. Now go to the "Integrations" menu if you\'re a pro user. Otherwise go to the "Customization" menu.', 'info', {
-                //     autoClose: 15000
-                // });
+
+                alert('Successfully Saved Data.')
                 // setIsDataLoaded(true)
             })
             .catch((err) => {
@@ -91,7 +88,7 @@ const ARProductModelSettings = () => {
                 <div className="mb-6">
                     <h5 className="text-lg font-bold flex items-center gap-2">
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-3d-object-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "admin/images/icons8-3d-object-18.png"}
                             alt="3D Model Icon"
                             className="w-6 h-6"
                         />
@@ -107,11 +104,11 @@ const ARProductModelSettings = () => {
                 {/* File for Android */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_android"
+                        htmlFor="ar_try_on_file_android"
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-android-os-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "admin/images/icons8-android-os-18.png"}
                             alt="Android Icon"
                             className="w-6 h-6"
                         />
@@ -120,9 +117,9 @@ const ARProductModelSettings = () => {
                     <input
                         type="text"
                         onChange={handleChange}
-                        id="ar_try_on_for_wordpress_file_android"
-                        name="ar_try_on_for_wordpress_file_android"
-                        value={productModel.ar_try_on_for_wordpress_file_android}
+                        id="ar_try_on_file_android"
+                        name="ar_try_on_file_android"
+                        value={productModel.ar_try_on_file_android}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded ar-try-on-open-media-library">
@@ -136,11 +133,11 @@ const ARProductModelSettings = () => {
                 {/* File for iOS */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_ios"
+                        htmlFor="ar_try_on_file_ios"
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-mac-client-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "admin/images/icons8-mac-client-18.png"}
                             alt="iOS Icon"
                             className="w-6 h-6"
                         />
@@ -148,10 +145,10 @@ const ARProductModelSettings = () => {
                     </label>
                     <input
                         type="text"
-                        id="ar_try_on_for_wordpress_file_ios"
-                        name="ar_try_on_for_wordpress_file_ios"
+                        id="ar_try_on_file_ios"
+                        name="ar_try_on_file_ios"
                         onChange={handleChange}
-                        value={productModel.ar_try_on_for_wordpress_file_ios}
+                        value={productModel.ar_try_on_file_ios}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded ar-try-on-open-media-library">
@@ -166,17 +163,17 @@ const ARProductModelSettings = () => {
                 {/* Poster */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_poster"
+                        htmlFor="ar_try_on_file_poster"
                         className="block text-sm font-medium"
                     >
                         Poster
                     </label>
                     <input
                         type="text"
-                        id="ar_try_on_for_wordpress_file_poster"
-                        name="ar_try_on_for_wordpress_file_poster"
+                        id="ar_try_on_file_poster"
+                        name="ar_try_on_file_poster"
                         onChange={handleChange}
-                        value={productModel.ar_try_on_for_wordpress_file_poster}
+                        value={productModel.ar_try_on_file_poster}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded ar-try-on-open-media-library">
@@ -191,11 +188,11 @@ const ARProductModelSettings = () => {
                 {/* Alt Text */}
                 <div className="mb-6">
                     <label
-                        htmlFor="ar_try_on_for_wordpress_file_alt"
+                        htmlFor="ar_try_on_file_alt"
                         className="block text-sm font-medium flex items-center gap-2"
                     >
                         <img
-                            src="http://localhost/azizulhasan/ar/wp-content/plugins/ar-model-viewer-for-wordpress/admin/images/icons8-web-accessibility-18(-ldpi).png"
+                            src={ar_try_on.plugin_url + "admin/images/icons8-web-accessibility-18.png"}
                             alt="Accessibility Icon"
                             className="w-6 h-6"
                         />
@@ -203,10 +200,10 @@ const ARProductModelSettings = () => {
                     </label>
                     <input
                         type="text"
-                        id="ar_try_on_for_wordpress_file_alt"
-                        name="ar_try_on_for_wordpress_file_alt"
+                        id="ar_try_on_file_alt"
+                        name="ar_try_on_file_alt"
                         onChange={handleChange}
-                        value={productModel.ar_try_on_for_wordpress_file_alt}
+                        value={productModel.ar_try_on_file_alt}
                         className="border w-full mt-2 p-2 rounded"
                     />
                     <p className="text-sm text-gray-600 mt-2">

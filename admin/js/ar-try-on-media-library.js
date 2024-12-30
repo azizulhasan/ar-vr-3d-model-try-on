@@ -9,24 +9,10 @@ document.addEventListener('DOMContentLoaded', function () {
             // Get the previous sibling element
             let previousElementSibling = e.target.previousElementSibling;
             let name = previousElementSibling.name;
-            console.log(previousElementSibling);
 
             // If the media uploader instance already exists, reopen it
             if (mediaUploader) {
-
-                // When a media file is selected, this function runs
-                mediaUploader.on('select', function () {
-                    const attachment = mediaUploader.state().get('selection').first().toJSON();
-                    console.log('Selected file URL:', attachment.url);
-                    previousElementSibling.value = attachment.url;
-                    wp.hooks.doAction('ar_try_on_on_select_model_file', {
-                        name: name,
-                        url: attachment.url
-                    });
-                });
-
-                mediaUploader.open();
-                return;
+                mediaUploader = null;
             }
 
             // Create a new media uploader instance

@@ -95,11 +95,6 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
-### TRANSLATION REQUEST
-We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
-Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
-
-
 = 1.0.0  =
 * Initial release
 
@@ -107,4 +102,52 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 = 0.1 =
 This version fixes a security related bug. Upgrade immediately.
+
+
+== ☞  Build Process ==
+
+This plugin bundles the JavaScript files using Webpack. The source files are located in the `src`, `public/js`, `admin/js`  directories.
+
+To build the files, you need to have Node.js and npm installed on your system. Once you have these, you can install the dependencies and run the build command:
+
+
+``# Navigate to the plugin directory
+
+``cd wp-content/plugins/ar-vr-3d-model-try-on
+
+``# Run the build command
+
+``npm run production
+
+``npm run makeZip
+
+
+= JS Libraries Used =
+
+The non-compiled version of JavaScript source code for each package can be found at the following links:
+
+## JavaScript Dependencies
+
+This plugin utilizes several JavaScript libraries and tools to provide its functionality. Below is a list of the key dependencies used, along with a brief description and link to their source code:
+
+1. **@wordpress/i18n**: Internationalization utilities for client-side localization.
+   [Source Code](https://www.npmjs.com/package/@wordpress/i18n)
+
+2. **@wordpress/scripts**: A collection of reusable scripts and configurations to ease WordPress development.
+   [Source Code](https://www.npmjs.com/package/@wordpress/scripts)
+
+3. **react**: A JavaScript library for building user interfaces.
+   [Source Code](https://www.npmjs.com/package/react)
+
+4. **react-dom**: Serves as the entry point to the DOM and server renderers for React.
+   [Source Code](https://www.npmjs.com/package/react-dom)
+
+5. **react-router-dom**: DOM bindings for React Router, providing declarative routing for React applications.
+   [Source Code](https://www.npmjs.com/package/react-router-dom)
+
+6. **react-scripts**: Configuration and scripts for creating React applications.
+   [Source Code](https://www.npmjs.com/package/react-scripts)
+
+7. **react-toastify**: Enables adding customizable and flexible toast notifications to your app with ease.
+   [Source Code](https://www.npmjs.com/package/react-toastify)
 

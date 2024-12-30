@@ -70,6 +70,14 @@ class AR_TRY_ON {
 	 * @var      string $plugin_prefix The string used to uniquely prefix technical functions of this plugin.
 	 */
 	protected $plugin_prefix;
+	/**
+	 * plugin public object
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      AR_TRY_ON_Public $plugin_public The string used to uniquely prefix technical functions of this plugin.
+	 */
+	protected $plugin_public;
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -91,9 +99,11 @@ class AR_TRY_ON {
 
 
 		$this->load_dependencies();
-		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_wc_hooks();
+
+
 	}
 
 	/**
@@ -104,27 +114,12 @@ class AR_TRY_ON {
 	 */
 	private function load_dependencies() {
 
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/AR_TRY_ON_Hooks.php';
+		require_once AR_TRY_ON_PLUGIN_PATH . '/includes/AR_TRY_ON_Hooks.php';
 
 		$this->loader = new AR_TRY_ON_Loader();
 
 	}
 
-	/**
-	 * Define the locale for this plugin for internationalization.
-	 *
-	 * Uses the AR_TRY_ON_i18n class in order to set the domain and to register the hook
-	 * with WordPress.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function set_locale() {
-
-		$plugin_i18n = new AR_TRY_ON_i18n();
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
-	}
 
 	/**
 	 * Register all of the hooks related to the admin area functionality
@@ -140,6 +135,27 @@ class AR_TRY_ON {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999 );
 
+		/**
+		 * Enqueues the admin scripts for the WordPress admin dashboard.
+		 * The function `enqueue_scripts` in `$plugin_admin` will include the necessary JavaScript files for the plugin.
+		 */
+		// Set the extension and mime type for Android (.glb) and iOS (.usdz) files.
+		$this->loader->add_filter(
+			'wp_check_filetype_and_ext',
+			$plugin_admin,
+			'ar_try_on_for_woocommerce_file_and_ext',
+			10,
+			4
+		);
+		/**
+		 * Adds support for Android `.glb` and iOS `.usdz` file types by defining their extensions and mime types.
+		 * The function `ar_model_viewer_for_woocommerce_file_and_ext` checks the file type during upload and processing.
+		 * This ensures that the file types are correctly identified in WordPress.
+		 * It hooks into the `wp_check_filetype_and_ext` filter, with a priority of 10 and passes 4 arguments.
+		 */
+		// Allow Android (.glb) and iOS (.usdz) files to be uploaded by adding them to the allowed MIME types.
+		$this->loader->add_filter( 'upload_mimes', $plugin_admin, 'ar_try_on_for_woocommerce_mime_types' );
+
 
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'ar_try_on_menu' );
 	}
@@ -153,34 +169,41 @@ class AR_TRY_ON {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
+		$this->plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
 
-			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_styles', 99999 );
 
-			$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_scripts', 99999 );
 
+	}
 
-		switch ( true ) {
+	public function define_wc_hooks() {
+
+		$settings = (array) get_option( 'ar_try_on_settings' );
+
+		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : false;
+		switch ( $wc_hook_id ) {
 			case 1:
-				$this->loader->add_action( 'woocommerce_before_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 			case 2:
-				$this->loader->add_action( 'woocommerce_after_single_product_summary', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_after_single_product_summary', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 			case 3:
-				$this->loader->add_action( 'woocommerce_before_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_before_single_product', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 			case 4:
-				$this->loader->add_action( 'woocommerce_after_single_product', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_after_single_product', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 			case 5:
-				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 			case 6:
-				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $plugin_public, 'ar_try_on_for_wordpress_button' );
+				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
 				break;
 		}
 
+		$this->loader->add_filter( 'the_content', $this->plugin_public, 'ar_try_on_button', 99999999 );
 
 	}
 

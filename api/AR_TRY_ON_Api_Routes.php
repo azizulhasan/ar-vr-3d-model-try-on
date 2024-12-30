@@ -71,7 +71,7 @@ class AR_TRY_ON_Api_Routes {
 		// save data about recording.
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['fields'] );
-			update_option( 'ar_try_on_for_wordpress_settings', $fields );
+			update_option( 'ar_try_on_settings', $fields );
 			AR_TRY_ON_Cache::delete( 'settings' );
 			$response['data'] = $fields;
 			AR_TRY_ON_Cache::set( 'settings', $fields );
@@ -82,7 +82,7 @@ class AR_TRY_ON_Api_Routes {
 		// get data about recording.
 		if ( 'get' == $request['method'] ) {
 
-			$response['data'] = get_option( 'ar_try_on_for_wordpress_settings' );
+			$response['data'] = get_option( 'ar_try_on_settings' );
 
 			return rest_ensure_response( $response );
 		}

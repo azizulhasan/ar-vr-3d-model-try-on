@@ -22,22 +22,22 @@
  * Requires PHP:      7.4
  * Requires at least: 5.6
  */
-include 'vendor/autoload.php';
 
-use AR_TRY_ON\AR_TRY_ON;
-use AR_TRY_ON\AR_TRY_ON_Activator;
-use AR_TRY_ON\AR_TRY_ON_Deactivate;
-use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-// Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
-}
+require_once 'vendor/autoload.php';
+
+use AR_TRY_ON\AR_TRY_ON;
+use AR_TRY_ON\AR_TRY_ON_Activator;
+use AR_TRY_ON\AR_TRY_ON_Deactivate;
+use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
+
 
 /**
  * Currently plugin version.
@@ -64,11 +64,6 @@ if ( ! defined( 'AR_TRY_ON_ROOT_FILE_NAME' ) ) {
 	$path = explode( DIRECTORY_SEPARATOR, AR_TRY_ON_ROOT_FILE );
 	$file = end( $path );
 	define( 'AR_TRY_ON_ROOT_FILE_NAME', $file );
-}
-
-if ( ! defined( 'AR_TRY_ON_LIBS_PATH' ) ) {
-
-	define( 'AR_TRY_ON_LIBS_PATH', dirname( AR_TRY_ON_ROOT_FILE ) . '/libs/' );
 }
 
 if ( ! defined( 'AR_TRY_ON_ADMIN_PATH' ) ) {
@@ -128,6 +123,14 @@ class AR_TRY_ON_Init {
 	public function run() {
 		$plugin = new AR_TRY_ON();
 		$plugin->run();
+		//HPOS compatibility
+		if( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+			add_action( 'before_woocommerce_init', function () {
+				if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+					\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+				}
+			} );
+		}
 	}
 }
 
@@ -138,10 +141,12 @@ function ar_try_on_run() {
 }
 
 
+
+//add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
+
 add_action( 'init', function () {
 	ar_try_on_run();
 } );
-
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/AR_TRY_ON_Activator.php

@@ -25,31 +25,57 @@ class AR_TRY_ON_Hooks {
 
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'add_custom_meta_box' ) );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
+
+		add_filter( 'wp_kses_allowed_html', [ $this, 'allow_model_viewer_attributes' ], 10, 2 );
+	}
+
+	// Allow all attributes for the <model-viewer> tag
+	public function allow_model_viewer_attributes( $tags, $context ) {
+		// Check the context or directly apply changes
+		if ( ! isset( $tags['model-viewer'] ) ) {
+			$tags['model-viewer'] = [];
+		}
+
+		// Allow any attribute for <model-viewer>
+		$tags['model-viewer']['*'] = true;
+
+		return $tags;
 	}
 
 	/**
 	 * Register MetaBox to add PDF Download Button
 	 */
 	public function add_custom_meta_box() {
-
-        if(!AR_TRY_ON_Helper::is_product_page()) {
-            return;
-        }
-
-
 		$plugin_name = 'AR Try-On';
-		add_meta_box(
-			'ar_try_on-meta-box',
-			$plugin_name,
-			array(
-				$this,
-				'ar_try_on_meta_box',
-			),
-			get_current_screen()->post_type,
-			'advanced',
-			'high',
-			null
-		);
+
+		global $post;
+		if ( $post && AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			add_meta_box(
+				'ar_try_on-meta-box',
+				$plugin_name,
+				array(
+					$this,
+					'ar_try_on_meta_box',
+				),
+				get_current_screen()->post_type,
+				'advanced',
+				'high',
+				null
+			);
+		}
+
 
 	}
 
@@ -62,7 +88,7 @@ class AR_TRY_ON_Hooks {
 		?>
         <div class="tta_metabox">
             <div id="ar_try_on_product_model_settings"></div>
-            <?php  \do_action( 'ar_try_on_after_free_metabox_settings' );  ?>
+			<?php \do_action( 'ar_try_on_after_free_metabox_settings' ); ?>
             <div id="ar_try_on_analytics"></div>
         </div>
 		<?php

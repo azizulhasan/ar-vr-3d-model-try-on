@@ -67,21 +67,22 @@ class AR_TRY_ON_Admin {
 		$this->version     = $version;
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include ABSPATH . 'wp-admin/includes/plugin.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		if ( ! function_exists( 'wp_is_mobile' ) ) {
-			include_once ABSPATH . 'wp-includes/vars.php';
+			require_once ABSPATH . 'wp-includes/vars.php';
 		}
 
 		$this->localize_data = [
-			'api_url'                  => esc_url_raw( rest_url() ),
-			'api_namespace'            => 'ar_try_on',
-			'api_version'              => 'v1',
-			'nonce'                    => wp_create_nonce( AR_TRY_ON_NONCE ),
-			'plugin_name'              => AR_TRY_ON_PLUGIN_NAME,
-			'rest_nonce'               => wp_create_nonce( 'wp_rest' ),
-			'VERSION'                  =>  AR_TRY_ON_VERSION,
+			'api_url'       => esc_url_raw( rest_url() ),
+			'api_namespace' => 'ar_try_on',
+			'api_version'   => 'v1',
+			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
+			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
+			'VERSION'       => AR_TRY_ON_VERSION,
+			'plugin_url'    => AR_TRY_ON_PLUGIN_URL,
+			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 		];
 	}
 
@@ -92,8 +93,8 @@ class AR_TRY_ON_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() || AR_TRY_ON_Helper::is_product_page() ) {
-			wp_enqueue_style( 'ar-vr-3d-model-try-on', plugin_dir_url( dirname( __FILE__ ) ) . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
+		if ( AR_TRY_ON_Helper::is_ar_try_on_page() || AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 	}
 
@@ -109,29 +110,29 @@ class AR_TRY_ON_Admin {
 		 */
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include ABSPATH . 'wp-admin/includes/plugin.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		do_action( 'AR_TRY_ON_enqueue_pro_dashboard_scripts' );
 
 
-//		if ( AR_TRY_ON_Helper::is_ar_try_on_for_wordpress_page() ) {
-			/* Load react js */
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', plugin_dir_url( __FILE__ ) . 'js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
-			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
+//		if ( AR_TRY_ON_Helper::is_ar_try_on_page() ) {
+		/* Load react js */
+		wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
+		wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
 //		}
 
-		if ( AR_TRY_ON_Helper::is_product_page() ) {
+		if ( AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script(
 				'ar-try-on-media-library',
-				plugin_dir_url( __FILE__ ) . 'js/build/ar-try-on-media-library.min.js', // Path to your JS file
+				AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
 				[ 'wp-hooks' ], // Dependencies
 				$this->version,
 				true
 			);
 
-			wp_enqueue_script( 'ar-try-on-metabox-ui', plugin_dir_url( __FILE__ ) . 'js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-metabox-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
 		}
 
@@ -148,13 +149,57 @@ class AR_TRY_ON_Admin {
 			'manage_options',
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
-			plugins_url('ar-vr-3d-model-try-on') . '/admin/images/ar-try-on-logo-resized-30x34.png',
+			AR_TRY_ON_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
 			20
 		);
 	}
 
 	public function ar_try_on_settings() {
-		echo "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>";
+		echo wp_kses( "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>", array(
+			'div' => array(
+				'id'    => array(),
+				'class' => array(),
+			)
+		) );
+	}
+
+
+	/**
+	 * Sets the extension and mime type for Android - .gbl and IOS - .usdz files.
+	 * @param array  $wp_check_filetype_and_ext File data array containing 'ext', 'type', and 'proper_filename' keys.
+	 * @param string $file                      Full path to the file.
+	 * @param string $filename                  The name of the file (may differ from $file due to $file being in a tmp directory).
+	 * @param array  $mimes                     Key is the file extension with value as the mime type.
+	 */
+	public function ar_try_on_for_woocommerce_file_and_ext($types, $file, $filename, $mimes)
+	{
+		if (false !== strpos($filename, '.glb')) {
+			$types['ext'] = 'glb';
+			$types['type'] = 'model/gltf-binary';
+		}
+		if (false !== strpos($filename, '.gltf')) {
+			$types['ext'] = 'gltf';
+			$types['type'] = 'model/gltf-binary';
+		}
+		if (false !== strpos($filename, '.usdz')) {
+			$types['ext'] = 'usdz';
+			$types['type'] = 'model/vnd.usdz+zip';
+		}
+		return $types;
+	}
+
+	/**
+	 * Adds Android - .gbl and IOS - .usdz filetype to allowed mimes
+	 * @see https://codex.wordpress.org/Plugin_API/Filter_Reference/upload_mimes
+	 * @param array $mimes Mime types keyed by the file extension regex corresponding tothose types. 'swf' and 'exe' removed from full list. 'htm|html' also removed depending on '$user' capabilities.
+	 * @return array
+	 */
+	public function ar_try_on_for_woocommerce_mime_types($mimes)
+	{
+		$mimes['glb'] = 'model/gltf-binary'; //Adding gbl extension
+		$mimes['gltf'] = 'model/gltf-binary'; //Adding gbl extension
+		$mimes['usdz'] = 'model/vnd.usdz+zip'; //Adding usdz extension
+		return $mimes;
 	}
 
 }

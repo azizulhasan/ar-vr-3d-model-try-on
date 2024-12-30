@@ -1,49 +1,51 @@
-import '@google/model-viewer';
 
-(function ($) {
-	'use strict';
+document.addEventListener('DOMContentLoaded', function () {
+	// Create a dialog element
+	const dialog = document.getElementById('dialog');
+	const arVrButton = document.getElementById('ar_vr_3d_model_try_on');
 
-	/**
-	 * All of the code for your public-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).on('load', function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practice to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
-	 */
-	$(function () {
-		$("#dialog").dialog({
-			autoOpen: false,
-			modal: true,
-			//Set the responsive dialog
-			width: "auto",
-  			// maxWidth: 660, // This won't work
-			create: function( event, ui ) {
-				// Set maxWidth
-				$(this).css("maxWidth", "660px");
-			}
+	if (dialog) {
+		// Set up the dialog element
+		dialog.style.display = 'none';
+		dialog.style.maxWidth = '660px';
+		dialog.style.width = 'auto';
+		dialog.style.margin = '0 auto';
+		dialog.style.background = 'white';
+		dialog.style.padding = '20px';
+		dialog.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+		dialog.style.position = 'fixed';
+		dialog.style.top = '50%';
+		dialog.style.left = '50%';
+		dialog.style.transform = 'translate(-50%, -50%)';
+		dialog.style.zIndex = '1000';
+		dialog.style.border = '2px black';
+	}
+
+	// Function to open the dialog
+	function openDialog() {
+		if (dialog) {
+			dialog.style.display = 'block';
+		}
+	}
+
+	// Function to close the dialog (optional if you want a close button)
+	function closeDialog() {
+		if (dialog) {
+			dialog.style.display = 'none';
+		}
+	}
+
+	// Add a click event listener to the button
+	if (arVrButton) {
+		arVrButton.addEventListener('click', function () {
+			openDialog();
 		});
-		$("#ar_model_viewer_for_wordpress_btn").click(function () {
-			$("#dialog").dialog("open");
-		});
+	}
+
+	// Close the dialog when clicking outside of it
+	document.addEventListener('click', function (event) {
+		if (dialog && dialog.style.display === 'block' && !dialog.contains(event.target) && event.target !== arVrButton) {
+			closeDialog();
+		}
 	});
-})(jQuery);
+});
