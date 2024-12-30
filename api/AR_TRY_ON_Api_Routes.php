@@ -59,6 +59,20 @@ class AR_TRY_ON_Api_Routes {
 			)
 		);
 
+		// register get_model_and_settings route.
+		register_rest_route(
+			$this->namespace,
+			'/get_model_and_settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'get_model_and_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 
 	}
 
@@ -113,6 +127,142 @@ class AR_TRY_ON_Api_Routes {
 			return rest_ensure_response( $response );
 		}
 	}
+
+	public function get_model_and_settings( $request ) {
+
+		$product_id = json_decode( $request['product_id'] );
+		$product_id = intval( $product_id );
+
+		if ( empty( $product_id ) ) {
+			return rest_ensure_response( [
+				'success' => false,
+				'data'    => 'Invalid Product ID.'
+			] );
+		}
+
+		// Global product variable
+		global $product;
+		$model_poster     = '';
+		$model_alt        = '';
+		$get_ios_file     = '';
+		$model_3d_file    = '';
+		$loading          = '';
+		$reveal           = '';
+		$with_credentials = '';
+		$ar               = '';
+		$scale            = '';
+		$placement        = '';
+		$xr_environment   = '';
+		$ar_modes         = [ 'webxr', 'scene-viewer', 'quick-look' ];
+
+		$product_settings = (array) get_post_meta( $product_id, 'ar_try_on_product_settings', true );
+
+		//Get the file url for android
+		if ( isset( $product_settings['ar_try_on_file_android'] ) && $product_settings['ar_try_on_file_android'] ) {
+			$model_3d_file = $product_settings['ar_try_on_file_android'];
+		}
+
+		//Get the fiel url for IOS
+		if ( isset( $product_settings['ar_try_on_file_ios'] ) && $product_settings['ar_try_on_file_ios'] ) {
+			$get_ios_file = $product_settings['ar_try_on_file_ios'];
+		}
+
+
+		//Get the alt for web accessibility
+		if ( isset( $product_settings['ar_try_on_file_alt'] ) && $product_settings['ar_try_on_file_alt'] ) {
+			$model_alt = $product_settings['ar_try_on_file_alt'];
+		}
+
+		//Get the Poster
+		if ( isset( $product_settings['ar_try_on_file_poster'] ) && $product_settings['ar_try_on_file_poster'] ) {
+			$model_poster = $product_settings['ar_try_on_file_poster'];
+		}
+
+		$settings = (array) get_option( 'ar_try_on_settings' );
+
+
+		if ( isset( $settings['ar_try_on_poster_color'] ) && $settings['ar_try_on_poster_color'] ) {
+			$poster_color = $settings['ar_try_on_poster_color'];
+		}
+
+		if ( isset( $settings['ar_try_on_loading_type'] ) && $settings['ar_try_on_loading_type'] ) {
+			$loading = $settings['ar_try_on_loading_type'];
+		}
+
+		if ( isset( $settings['ar_try_on_reveal_type'] ) && $settings['ar_try_on_reveal_type'] ) {
+			$reveal = $settings['ar_try_on_reveal_type'];
+		}
+
+		if ( isset( $settings['ar_try_on_with_credentials'] ) && $settings['ar_try_on_with_credentials'] ) {
+			$with_credentials = $settings['ar_try_on_with_credentials'];
+		}
+
+
+		if ( isset( $settings['ar_try_on_ar'] ) && $settings['ar_try_on_ar'] ) {
+			$ar = $settings['ar_try_on_ar'];
+		}
+
+
+		if ( isset( $settings['ar_try_on_ar_scale'] ) && $settings['ar_try_on_ar_scale'] ) {
+			$scale = $settings['ar_try_on_ar_scale'];
+		}
+
+		if ( isset( $settings['ar_try_on_ar_placement'] ) && $settings['ar_try_on_ar_placement'] ) {
+			$placement = $settings['ar_try_on_ar_placement'];
+		}
+
+		if ( isset( $settings['ar_try_on_xr_environment'] ) && $settings['ar_try_on_xr_environment'] ) {
+			$xr_environment = $settings['ar_try_on_xr_environment'];
+		}
+
+		// TODO: make it dynamic.
+//		if ( isset( $settings['ar_try_on_ar_modes'] ) && $settings['ar_try_on_ar_modes'] ) {
+//			$ar_modes = $settings['ar_try_on_ar_modes'];
+//			$ar_modes = $this->ar_try_on_ar_modes( $ar_modes );
+//		}
+
+		// Check if the customs fields has a value.
+		if ( ! empty( $get_android_file ) ) {
+			$android_file_url = $get_android_file;
+		}
+
+
+		// Obtener el nombre del producto
+		$product_name = get_the_title( $product_id );
+
+		// Comprobar que el archivo 3D existe
+		if ( ! $model_3d_file ) {
+			return rest_ensure_response( [
+				'success' => false,
+				'data'    => '3D model file is missing.'
+			] );
+		}
+
+		// Preparar los datos para el retorno
+		$data = array(
+			'loading'          => $loading,
+			'reveal'           => $reveal,
+			'with_credentials' => $with_credentials,
+			'poster_color'     => $poster_color,
+			'ar'               => $ar,
+			'scale'            => $scale,
+			'placement'        => $placement,
+			'xr_environment'   => $xr_environment,
+			'ar_modes'         => $ar_modes,
+			'product_name'     => $product_name,
+			'model_3d_file'    => $model_3d_file,
+			'model_alt'        => $model_alt,
+			'model_poster'     => $model_poster,
+			'model_poster1'    => $_REQUEST,
+		);
+
+		// Enviar la respuesta en formato JSON
+		return rest_ensure_response( [
+			'success' => true,
+			'data'    => $data
+		] );
+	}
+
 
 
 	/*

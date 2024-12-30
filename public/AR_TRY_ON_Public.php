@@ -54,6 +54,8 @@ class AR_TRY_ON_Public {
 	 */
 	private $version;
 
+	private $localize_data = [];
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -68,6 +70,17 @@ class AR_TRY_ON_Public {
 		$this->plugin_name   = $plugin_name;
 		$this->plugin_prefix = $plugin_prefix;
 		$this->version       = $version;
+
+
+		$this->localize_data = [
+			'api_url'       => esc_url_raw( rest_url() ),
+			'api_namespace' => 'ar_try_on',
+			'api_version'   => 'v1',
+			'nonce'         => wp_create_nonce( AR_TRY_ON_NONCE ),
+			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
+			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
+			'VERSION'       => AR_TRY_ON_VERSION,
+		];
 
 
 		// Add "type=module" attribute
@@ -92,7 +105,6 @@ class AR_TRY_ON_Public {
 		}
 
 		wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
-		wp_enqueue_style( 'jquery-ui-theme', AR_TRY_ON_PLUGIN_URL . '/public/css/jquery-ui.min.css', array(), $this->version, 'all' );
 
 	}
 
@@ -104,12 +116,12 @@ class AR_TRY_ON_Public {
 	public function enqueue_scripts() {
 		wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . '/public/js/google-model-viewer.js', array(), $this->version, true );
 		wp_enqueue_script( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/js/ar-vr-3d-model-try-on-public-dist.js', array( 'ar-try-on-google-model-viewer' ), $this->version, true );
-		wp_enqueue_script( 'jquery-ui-dialog' );
+		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
 
 	}
 
 
-	public function ar_try_on_button( $content ) {
+	public function ar_try_on_button_old( $content ) {
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			if ( current_filter() === 'the_content' ) {
 				return $content;
@@ -126,10 +138,12 @@ class AR_TRY_ON_Public {
 		$get_ios_file     = '';
 		$get_android_file = '';
 		if ( $product ) {
-			$post_settings = (array) get_post_meta( $product->get_id(), 'ar_try_on_product_settings', true );
+			$post_id = $product->get_id();
 		} else {
-			$post_settings = (array) get_post_meta( $post->ID, 'ar_try_on_product_settings', true );
+			$post_id = $post->ID;
 		}
+
+		$post_settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
 
 		//Get the file url for android
 		if ( isset( $post_settings['ar_try_on_file_android'] ) && $post_settings['ar_try_on_file_android'] ) {
@@ -174,7 +188,7 @@ class AR_TRY_ON_Public {
 			if ( $product ) {
 				$poster_file_url = wp_get_attachment_url( $product->get_image_id() );
 			} else {
-				$thumbnail_id    = get_post_thumbnail_id( $post->ID ); // Get the featured image ID.
+				$thumbnail_id    = get_post_thumbnail_id( $post_id ); // Get the featured image ID.
 				$poster_file_url = wp_get_attachment_url( $thumbnail_id );
 			}
 
@@ -325,7 +339,7 @@ class AR_TRY_ON_Public {
 			 */
 			ob_start();
 			?>
-            <button id="ar_vr_3d_model_try_on">View in 3D</button>
+            <button product-id="<?php echo esc_attr( $post_id ) ?>" id="ar_vr_3d_model_try_on">View in 3D</button>
             <div id="dialog" title="<?php echo esc_attr( $post_title ); ?>">
 				<?php
 				$poster_color = esc_js( $this->ar_try_on_poster_color( $poster_color_type ) );
@@ -378,6 +392,36 @@ class AR_TRY_ON_Public {
 		}
 
 		return $content;
+	}
+
+	public function ar_try_on_button( $content ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			if ( current_filter() === 'the_content' ) {
+				return $content;
+			}
+
+			return;
+		}
+
+		// Global product variable
+		global $product;
+		global $post;
+		if ( $product ) {
+			$post_id = $product->get_id();
+		} else {
+			$post_id = $post->ID;
+		}
+		ob_start();
+		?>
+        <button product-id="<?php echo esc_attr( $post_id ) ?>" id="ar_vr_3d_model_try_on">View in 3D</button>
+		<?php
+		$ar_button_content = ob_get_clean();
+
+		if ( $post->post_type != 'product' ) {
+			return $content . $ar_button_content;
+		} else {
+			echo $ar_button_content;
+		}
 	}
 
 

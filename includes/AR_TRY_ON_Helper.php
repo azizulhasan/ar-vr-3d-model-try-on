@@ -144,8 +144,8 @@ class AR_TRY_ON_Helper {
 			return false;
 		}
 
-		if ( ! is_admin() && ! ( is_singular() && is_single() ) ) {
-			return false;
+		if ( ! is_admin() && ! ( is_singular() || is_single() ) ) {
+			return false; // The current page is singular or single on the frontend
 		}
 
 		$settings = (array) get_option( 'ar_try_on_settings' );
