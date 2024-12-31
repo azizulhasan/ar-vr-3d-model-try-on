@@ -30,7 +30,6 @@ const MultiSelect = ({options, onChange, selectedItems, id, name}) => {
             {/* Trigger button */}
             <div className="multi-select-trigger" onClick={toggleDropdown}>
                 {selectedOptions.length > 0 ? selectedOptions.join(', ') : 'Select...'}
-                <span className="arrow">{isDropdownOpen ? '▲' : '▼'}</span>
             </div>
 
             {/* Dropdown menu */}

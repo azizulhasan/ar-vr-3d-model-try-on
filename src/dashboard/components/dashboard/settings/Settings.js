@@ -23,7 +23,8 @@ export default function Settings() {
         ar_try_on_ar_button: "activate",
         ar_try_on_ar_button_text: "Activate AR",
         ar_try_on_ar_button_background_color: "#3a3a3a",
-        ar_try_on_ar_button_text_color: "#ffffff"
+        ar_try_on_ar_button_text_color: "#ffffff",
+        ar_try_on_clear_cache: false,
     });
     const [postTypes, setPostTypes] = useState(['post']);
     const [isDataLoaded, setIsDataLoaded] = useState(true)
@@ -31,6 +32,7 @@ export default function Settings() {
 
     useEffect(() => {
         if (window.hasOwnProperty('ar_try_on') && ar_try_on?.post_types) {
+            console.log(ar_try_on.post_types)
             let tempPostTypes = wp.hooks.applyFilters('ar_try_on_allowed_post_types', structuredClone(Object.keys(ar_try_on.post_types)))
             setPostTypes(tempPostTypes)
         }
@@ -57,6 +59,11 @@ export default function Settings() {
         let value = '';
         if (Array.isArray(e)) {
             value = e;
+
+            if(targetName === 'ar_try_on_allowed_post_types' && value.length > 1) {
+                toast('Multiple post type is only available in the pro version', 'error')
+                return;
+            }
             setSettings({
                 ...settings,
                 ...{[targetName]: value},
@@ -144,12 +151,6 @@ export default function Settings() {
                             >
                                 Enable AR For Post Types
                             </label>
-                            {/*<MultiSelect*/}
-                            {/*    id="ar_vr_3d_model_try_on_enable_for_post_type"*/}
-                            {/*    name="ar_vr_3d_model_try_on_enable_for_post_type"*/}
-                            {/*    onChange={(e) => handleChange(e, 'ar_vr_3d_model_try_on_enable_for_post_type')}*/}
-                            {/*    selectedItems={settings.ar_vr_3d_model_try_on_enable_for_post_type}*/}
-                            {/*    options={postTypes}/>*/}
                             <MultiSelect
                                 id="ar_try_on_allowed_post_types"
                                 selectedItems={settings.ar_try_on_allowed_post_types}
@@ -158,65 +159,67 @@ export default function Settings() {
                         </div>
 
                         {/* Dropdown Section */}
-                        <div className="space-y-4">
-                            <label
-                                htmlFor="ar_try_on_wc_hook_position"
-                                className="block font-medium"
-                            >
-                                Show button in
-                            </label>
-                            <select
-                                id="ar_try_on_wc_hook_position"
-                                name="ar_try_on_wc_hook_position"
-                                className="block w-full p-2 border rounded"
-                                value={settings.ar_try_on_wc_hook_position}
-                                onChange={handleChange}
-                            >
-                                <option value="">None</option>
-                                <option value="1">woocommerce_before_single_product_summary</option>
-                                <option value="2">woocommerce_after_single_product_summary</option>
-                                <option value="3">woocommerce_before_single_product</option>
-                                <option value="4">woocommerce_after_single_product</option>
-                                <option value="5">woocommerce_after_add_to_cart_form</option>
-                                <option value="6">
-                                    woocommerce_before_add_to_cart_form
-                                </option>
-                            </select>
-                        </div>
-
-                        {/* Radio Section */}
-                        <div className="space-y-4">
-                            <label
-                                htmlFor="ar_try_on_single_product_tabs"
-                                className="block font-medium"
-                            >
-                                Show in Product Tabs
-                            </label>
-                            <div className="flex space-x-4">
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        id="ar_try_on_single_product_tabs1"
-                                        name="ar_try_on_single_product_tabs"
-                                        value="yes"
-                                        checked={settings.ar_try_on_single_product_tabs == 'yes'}
-                                        onChange={handleChange}
-                                    />
-                                    <span>Yes</span>
+                        {
+                            ar_try_on.is_wc_active && <div className="space-y-4">
+                                <label
+                                    htmlFor="ar_try_on_wc_hook_position"
+                                    className="block font-medium"
+                                >
+                                    Show button in
                                 </label>
-                                <label className="flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        id="ar_try_on_single_product_tabs2"
-                                        name="ar_try_on_single_product_tabs"
-                                        value="no"
-                                        checked={settings.ar_try_on_single_product_tabs == 'no'}
-                                        onChange={handleChange}
-                                    />
-                                    <span>No</span>
-                                </label>
+                                <select
+                                    id="ar_try_on_wc_hook_position"
+                                    name="ar_try_on_wc_hook_position"
+                                    className="block w-full p-2 border rounded"
+                                    value={settings.ar_try_on_wc_hook_position}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">None</option>
+                                    <option value="1">woocommerce_before_single_product_summary</option>
+                                    <option value="2">woocommerce_after_single_product_summary</option>
+                                    <option value="3">woocommerce_before_single_product</option>
+                                    <option value="4">woocommerce_after_single_product</option>
+                                    <option value="5">woocommerce_after_add_to_cart_form</option>
+                                    <option value="6">
+                                        woocommerce_before_add_to_cart_form
+                                    </option>
+                                </select>
                             </div>
-                        </div>
+                        }
+                        {/*TODO:: add this feature in the next release.*/}
+                        {/* Radio Section */}
+                        {/*<div className="space-y-4">*/}
+                        {/*    <label*/}
+                        {/*        htmlFor="ar_try_on_single_product_tabs"*/}
+                        {/*        className="block font-medium"*/}
+                        {/*    >*/}
+                        {/*        Show in Product Tabs*/}
+                        {/*    </label>*/}
+                        {/*    <div className="flex space-x-4">*/}
+                        {/*        <label className="flex items-center gap-2">*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                id="ar_try_on_single_product_tabs1"*/}
+                        {/*                name="ar_try_on_single_product_tabs"*/}
+                        {/*                value="yes"*/}
+                        {/*                checked={settings.ar_try_on_single_product_tabs == 'yes'}*/}
+                        {/*                onChange={handleChange}*/}
+                        {/*            />*/}
+                        {/*            <span>Yes</span>*/}
+                        {/*        </label>*/}
+                        {/*        <label className="flex items-center gap-2">*/}
+                        {/*            <input*/}
+                        {/*                type="radio"*/}
+                        {/*                id="ar_try_on_single_product_tabs2"*/}
+                        {/*                name="ar_try_on_single_product_tabs"*/}
+                        {/*                value="no"*/}
+                        {/*                checked={settings.ar_try_on_single_product_tabs == 'no'}*/}
+                        {/*                onChange={handleChange}*/}
+                        {/*            />*/}
+                        {/*            <span>No</span>*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Loading Attributes */}
                         <div className="space-y-4">
@@ -347,7 +350,7 @@ export default function Settings() {
                                     type="text"
                                     id="ar_try_on_poster_color"
                                     name="ar_try_on_poster_color"
-                                    className="block w-full p-2 border rounded"
+                                    className="block  p-2 border rounded"
                                     value={settings.ar_try_on_poster_color}
                                     onChange={handleChange}
                                 />
@@ -626,7 +629,7 @@ export default function Settings() {
                                 name="ar_try_on_ar_button_text"
                                 value={settings.ar_try_on_ar_button_text}
                                 onChange={handleChange}
-                                className="block w-full p-2 border rounded"
+                                className="block  p-2 border rounded"
                             />
                         </div>
 
@@ -643,7 +646,7 @@ export default function Settings() {
                                 style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
                                 value={settings.ar_try_on_ar_button_background_color}
                                 onChange={(e) => handleChange(e, 'ar_try_on_ar_button_background_color')}
-                                className="block w-full p-2 border rounded"
+                                className="block  p-2 border rounded"
                             />
                         </div>
                         {/* Button Text color Color */}
@@ -659,7 +662,23 @@ export default function Settings() {
                                 style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
                                 value={settings.ar_try_on_ar_button_text_color}
                                 onChange={(e) => handleChange(e, 'ar_try_on_ar_button_text_color')}
-                                className="block w-full p-2 border rounded"
+                                className="block  p-2 border rounded"
+                            />
+                        </div>
+
+                        {/* Clear Cache */}
+                        <div className="space-y-2 mr-1">
+                            <label htmlFor="ar_try_on_clear_cache"
+                                   className="font-medium">
+                                Clear Cache
+                            </label>
+                            <input
+                                type="checkbox"
+                                id="ar_try_on_clear_cache"
+                                name="ar_try_on_clear_cache"
+                                value={settings.ar_try_on_clear_cache}
+                                onChange={(e) => handleChange(e, 'ar_try_on_clear_cache')}
+                                className="block p-5 border rounded"
                             />
                         </div>
                         {/* submit Button */}
@@ -667,7 +686,7 @@ export default function Settings() {
                             <button
                                 type="submit"
                                 value={'Save'}
-                                className="block w-full p-2 border rounded"
+                                className="block w-full  p-2 border rounded bg-blue-500 text-white "
                             >Save
                             </button>
                         </div>

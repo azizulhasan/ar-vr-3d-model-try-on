@@ -1,18 +1,4 @@
-import React, { useEffect, useMemo, useState, } from 'react';
-import { ToastContainer } from 'react-toastify';
-
-
-/**
- * Scripts
- */
-// import 'react-toastify/dist/ReactToastify.css';
-
-import { addScripts, getComponentName, isPro } from '../../../context/utilities';
-
-/**
- * Dashboard Components
- */
-
+import React from 'react';
 
 function Dashboard() {
 

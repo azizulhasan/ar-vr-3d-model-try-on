@@ -84,9 +84,15 @@ class AR_TRY_ON_Api_Routes {
 		$response['status'] = true;
 		// save data about recording.
 		if ( 'post' == $request['method'] ) {
-			$fields = json_decode( $request['fields'] );
+			$fields = json_decode( $request['fields'], true );
 			update_option( 'ar_try_on_settings', $fields );
 			AR_TRY_ON_Cache::delete( 'settings' );
+
+			if ( isset( $fields['ar_try_on_clear_cache'] ) && $fields['ar_try_on_clear_cache'] ) {
+				AR_TRY_ON_Cache::flush();
+				$fields['ar_try_on_clear_cache'] = false;
+			}
+
 			$response['data'] = $fields;
 			AR_TRY_ON_Cache::set( 'settings', $fields );
 
@@ -262,7 +268,6 @@ class AR_TRY_ON_Api_Routes {
 			'data'    => $data
 		] );
 	}
-
 
 
 	/*
