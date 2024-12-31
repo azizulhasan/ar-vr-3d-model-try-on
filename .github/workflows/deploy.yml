@@ -4,11 +4,9 @@ on:
     push:
         branches:
             - main
-            - develop
-            - staging
-          # Add more branches as needed
-            - feature/*
+            - develop  # Add more branches as needed
     workflow_dispatch: # Allows manual trigger
+
 
 jobs:
     deploy:
