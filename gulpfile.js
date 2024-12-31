@@ -44,19 +44,23 @@ const productionSrc = [
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
+	'!src/**',
 	'!.browserslistrc',
 	'!.eslintrc',
 	'!.gitignore',
 	'!gulpfile.js',
 	'!package.json',
 	'!composer.lock',
+	'!composer.json',
 	'!phpcs.xml',
 	'!.cpanel.yml',
+	'!README.md',
 	'!package-lock.json',
 	'!mix-manifest.json',
 	'!webpack.mix.js',
 	'!tailwind.config.js',
-	'!README.md',
+	'!public/js/ar-vr-3d-model-try-on-public.js',
+	'!admin/js/ar-try-on-media-library.js',
 ]
 
 
@@ -113,9 +117,17 @@ const config = {
 			//modifiedTime: undefined
 		}
 	},
-	release: {
+	test: {
 		src: productionSrc,
 		output: 'D://xampp/htdocs/azizulhasan/news/wp-content/plugins/ar-vr-3d-model-try-on/',
+		options: {
+			//compress: true,
+			//modifiedTime: undefined
+		}
+	},
+	release: {
+		src: productionSrc,
+		output: 'D:/xampp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined

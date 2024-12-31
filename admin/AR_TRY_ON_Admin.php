@@ -83,6 +83,7 @@ class AR_TRY_ON_Admin {
 			'VERSION'       => AR_TRY_ON_VERSION,
 			'plugin_url'    => AR_TRY_ON_PLUGIN_URL,
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
+			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
 		];
 	}
 
@@ -93,9 +94,12 @@ class AR_TRY_ON_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_ar_try_on_page() || AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
-			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
+		if ( AR_TRY_ON_Helper::is_ar_try_on_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
+
+		wp_enqueue_style( 'ar-vr-3d-model-try-on-admin', AR_TRY_ON_PLUGIN_URL . 'admin/css/ar-try-on-admin.css', array(), $this->version, 'all' );
+
 	}
 
 	/**
@@ -116,23 +120,23 @@ class AR_TRY_ON_Admin {
 		do_action( 'AR_TRY_ON_enqueue_pro_dashboard_scripts' );
 
 
-//		if ( AR_TRY_ON_Helper::is_ar_try_on_page() ) {
-		/* Load react js */
-		wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
-		wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
-//		}
+		if ( AR_TRY_ON_Helper::is_ar_try_on_page() ) {
+			/* Load react js */
+			wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
+			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
+		}
 
-		if ( AR_TRY_ON_Helper::ar_try_on_should_load_button() ) {
+		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script(
 				'ar-try-on-media-library',
-				AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
+				AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
 				[ 'wp-hooks' ], // Dependencies
 				$this->version,
 				true
 			);
 
-			wp_enqueue_script( 'ar-try-on-metabox-ui', AR_TRY_ON_PLUGIN_URL . '/admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-metabox-ui', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
 		}
 
@@ -166,39 +170,42 @@ class AR_TRY_ON_Admin {
 
 	/**
 	 * Sets the extension and mime type for Android - .gbl and IOS - .usdz files.
-	 * @param array  $wp_check_filetype_and_ext File data array containing 'ext', 'type', and 'proper_filename' keys.
-	 * @param string $file                      Full path to the file.
-	 * @param string $filename                  The name of the file (may differ from $file due to $file being in a tmp directory).
-	 * @param array  $mimes                     Key is the file extension with value as the mime type.
+	 *
+	 * @param array $wp_check_filetype_and_ext File data array containing 'ext', 'type', and 'proper_filename' keys.
+	 * @param string $file Full path to the file.
+	 * @param string $filename The name of the file (may differ from $file due to $file being in a tmp directory).
+	 * @param array $mimes Key is the file extension with value as the mime type.
 	 */
-	public function ar_try_on_for_woocommerce_file_and_ext($types, $file, $filename, $mimes)
-	{
-		if (false !== strpos($filename, '.glb')) {
-			$types['ext'] = 'glb';
+	public function ar_try_on_for_woocommerce_file_and_ext( $types, $file, $filename, $mimes ) {
+		if ( false !== strpos( $filename, '.glb' ) ) {
+			$types['ext']  = 'glb';
 			$types['type'] = 'model/gltf-binary';
 		}
-		if (false !== strpos($filename, '.gltf')) {
-			$types['ext'] = 'gltf';
+		if ( false !== strpos( $filename, '.gltf' ) ) {
+			$types['ext']  = 'gltf';
 			$types['type'] = 'model/gltf-binary';
 		}
-		if (false !== strpos($filename, '.usdz')) {
-			$types['ext'] = 'usdz';
+		if ( false !== strpos( $filename, '.usdz' ) ) {
+			$types['ext']  = 'usdz';
 			$types['type'] = 'model/vnd.usdz+zip';
 		}
+
 		return $types;
 	}
 
 	/**
 	 * Adds Android - .gbl and IOS - .usdz filetype to allowed mimes
 	 * @see https://codex.wordpress.org/Plugin_API/Filter_Reference/upload_mimes
+	 *
 	 * @param array $mimes Mime types keyed by the file extension regex corresponding tothose types. 'swf' and 'exe' removed from full list. 'htm|html' also removed depending on '$user' capabilities.
+	 *
 	 * @return array
 	 */
-	public function ar_try_on_for_woocommerce_mime_types($mimes)
-	{
-		$mimes['glb'] = 'model/gltf-binary'; //Adding gbl extension
+	public function ar_try_on_for_woocommerce_mime_types( $mimes ) {
+		$mimes['glb']  = 'model/gltf-binary'; //Adding gbl extension
 		$mimes['gltf'] = 'model/gltf-binary'; //Adding gbl extension
 		$mimes['usdz'] = 'model/vnd.usdz+zip'; //Adding usdz extension
+
 		return $mimes;
 	}
 

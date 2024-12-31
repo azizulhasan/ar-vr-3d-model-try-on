@@ -63,13 +63,17 @@ class AR_TRY_ON_Helper {
 		if ( $cache_value ) {
 			return $cache_value;
 		}
-		$post_types = get_post_types( array(
+		$post_types      = get_post_types( array(
 			'public' => 1, // Only get public post types
 		), 'array' );
+		$final_post_type = [];
+		foreach ( $post_types as $post_type ) {
+			$final_post_type[ $post_type->name ] = $post_type->name;
+		}
 
-		AR_TRY_ON_Cache::set( $cache_key, $post_types );
+		AR_TRY_ON_Cache::set( $cache_key, $final_post_type );
 
-		return apply_filters( 'ar_try_on_get_post_types', $post_types );
+		return apply_filters( 'ar_try_on_get_post_types', $final_post_type );
 	}
 
 	public static function ar_try_on_should_load_button( $post_status = '' ) {
@@ -144,8 +148,8 @@ class AR_TRY_ON_Helper {
 			return false;
 		}
 
-		if ( ! is_admin() && ! ( is_singular() && is_single() ) ) {
-			return false;
+		if ( ! is_admin() && ! ( is_singular() || is_single() ) ) {
+			return false; // The current page is singular or single on the frontend
 		}
 
 		$settings = (array) get_option( 'ar_try_on_settings' );
