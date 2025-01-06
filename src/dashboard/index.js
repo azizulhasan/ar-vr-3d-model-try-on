@@ -28,3 +28,7 @@ if (app) {
 
 
 
+{/*ADD PREFIX TO EVERY CLASS*/}
+{/*in your editor (i used phpstorm ctrl+shift+f for find and replace in all files of a specific folder):*/}
+{/*find  : (?<=class=["'][^"']*)([0-9a-zA-Z_-]+\s*)(?=[^"']*["'])*/}
+{/*replace : tw-$1*/}{" "}
