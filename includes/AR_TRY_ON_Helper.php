@@ -108,11 +108,6 @@ class AR_TRY_ON_Helper {
 			}
 		}
 
-//		if (  $should_load_button && ! is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-//			$should_load_button = false;
-//		}
-
-
 		return apply_filters( 'ar_try_on_should_load_button', $should_load_button, $post );
 	}
 

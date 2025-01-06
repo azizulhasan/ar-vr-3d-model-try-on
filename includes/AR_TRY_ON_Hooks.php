@@ -41,7 +41,14 @@ class AR_TRY_ON_Hooks {
 		add_filter( 'wp_kses_allowed_html', [ $this, 'allow_model_viewer_attributes' ], 10, 2 );
 	}
 
-	// Allow all attributes for the <model-viewer> tag
+	/**
+     * Allow all attributes for the <model-viewer> tag
+     *
+	 * @param $tags
+	 * @param $context
+	 *
+	 * @return mixed
+	 */
 	public function allow_model_viewer_attributes( $tags, $context ) {
 		// Check the context or directly apply changes
 		if ( ! isset( $tags['model-viewer'] ) ) {

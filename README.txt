@@ -4,11 +4,12 @@ Tags: AR, VR, 3D, Try on, Augmented Reality
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-Showcase your WordPress products in 3D and augmented reality! Elevate your eCommerce store with interactive 3D models, AR experiences, and AI-powered tools. Perfect for WooCommerce users.
+
+Showcase WordPress products in 3D & AR! Engage shoppers with 3D models, AR experiences, and AI tools—perfect for WooCommerce stores.
 
 == Description ==
 
@@ -94,6 +95,10 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
+= 1.0.1 ( 5 Jan 2025 )  =
+* Short description issue fixed.
+* Unnecessary code removed.
+
 = 1.0.0  =
 * Initial release
 
@@ -101,34 +106,3 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 = 0.1 =
 This version fixes a security related bug. Upgrade immediately.
-
-
-= JS Libraries Used =
-
-The non-compiled version of JavaScript source code for each package can be found at the following links:
-
-## JavaScript Dependencies
-
-This plugin utilizes several JavaScript libraries and tools to provide its functionality. Below is a list of the key dependencies used, along with a brief description and link to their source code:
-
-1. **@wordpress/i18n**: Internationalization utilities for client-side localization.
-   [Source Code](https://www.npmjs.com/package/@wordpress/i18n)
-
-2. **@wordpress/scripts**: A collection of reusable scripts and configurations to ease WordPress development.
-   [Source Code](https://www.npmjs.com/package/@wordpress/scripts)
-
-3. **react**: A JavaScript library for building user interfaces.
-   [Source Code](https://www.npmjs.com/package/react)
-
-4. **react-dom**: Serves as the entry point to the DOM and server renderers for React.
-   [Source Code](https://www.npmjs.com/package/react-dom)
-
-5. **react-router-dom**: DOM bindings for React Router, providing declarative routing for React applications.
-   [Source Code](https://www.npmjs.com/package/react-router-dom)
-
-6. **react-scripts**: Configuration and scripts for creating React applications.
-   [Source Code](https://www.npmjs.com/package/react-scripts)
-
-7. **react-toastify**: Enables adding customizable and flexible toast notifications to your app with ease.
-   [Source Code](https://www.npmjs.com/package/react-toastify)
-

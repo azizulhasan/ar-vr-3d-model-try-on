@@ -417,8 +417,8 @@ export default function Settings() {
                                         type="checkbox"
                                         name="ar_try_on_ar_modes[]"
                                         id="ar_try_on_ar_modes1"
-                                        value="1"
-                                        checked={settings.ar_try_on_ar_modes.includes('1')}
+                                        value="webxr"
+                                        checked={settings.ar_try_on_ar_modes.includes('webxr')}
                                         onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -429,8 +429,8 @@ export default function Settings() {
                                         type="checkbox"
                                         name="ar_try_on_ar_modes[]"
                                         id="ar_try_on_ar_modes2"
-                                        value="2"
-                                        checked={settings.ar_try_on_ar_modes.includes('2')}
+                                        value="scene-viewer"
+                                        checked={settings.ar_try_on_ar_modes.includes('scene-viewer')}
                                         onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
@@ -441,8 +441,8 @@ export default function Settings() {
                                         type="checkbox"
                                         name="ar_try_on_ar_modes[]"
                                         id="ar_try_on_ar_modes3"
-                                        value="3"
-                                        checked={settings.ar_try_on_ar_modes.includes('3')}
+                                        value="quick-look"
+                                        checked={settings.ar_try_on_ar_modes.includes('quick-look')}
                                         onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="text-blue-600 focus:ring-blue-500"
                                     />
