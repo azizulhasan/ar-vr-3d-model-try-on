@@ -13,7 +13,7 @@
  * @wordpress-plugin
  * Plugin Name:       AR VR 3D Model Try On
  * Description:       An augmented reality try-on plugin for wordpress products using ThreeJS,  WebXR.
- * Version:           1.0.0
+ * Version:           1.0.2
  * Author:            Azizul Hasan
  * License:           GPL-3.0+
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.txt
@@ -110,7 +110,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'AR_TRY_ON_VERSION' ) ) {
-			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.0.0' ) );
+			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.0.2' ) );
 		}
 
 		if ( ! defined( 'AR_TRY_ON_PLUGIN_NAME' ) ) {
