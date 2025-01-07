@@ -127,8 +127,9 @@ class AR_TRY_ON_Public {
 
 
 	public function ar_try_on_button( $content ) {
+		$current_filter = current_filter();
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			if ( current_filter() === 'the_content' ) {
+			if ( $current_filter === 'the_content' ) {
 				return $content;
 			}
 
@@ -145,7 +146,7 @@ class AR_TRY_ON_Public {
 		}
 		ob_start();
 		?>
-        <button product-id="<?php echo esc_attr( $post_id ) ?>" id="ar_vr_3d_model_try_on">View in 3D</button>
+        <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in 3D</button>
 		<?php
 		$ar_button_content = ob_get_clean();
 
@@ -154,6 +155,26 @@ class AR_TRY_ON_Public {
 		} else {
 			echo $ar_button_content;
 		}
+	}
+
+
+	/**
+	 * Adds a custom tab to the WooCommerce product page for viewing the product in 3D.
+	 *
+	 * @param array $tabs An associative array of the existing WooCommerce product tabs.
+	 *
+	 * @return array Modified array.
+	 * @since 1.0.3
+	 *
+	 */
+	public function ar_try_on_woocommerce_tab( $tabs ) {
+		$tabs['ar_try_on_3d_view'] = array(
+			'title'    => __( 'AR Try On Product View', 'woocommerce' ),
+			'priority' => 50,
+			'callback' => array( $this, 'ar_try_on_button' ),
+		);
+
+		return $tabs;
 	}
 
 

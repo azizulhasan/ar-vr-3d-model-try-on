@@ -60,7 +60,7 @@ export default function Settings() {
         if (Array.isArray(e)) {
             value = e;
 
-            if(targetName === 'ar_try_on_allowed_post_types' && value.length > 1) {
+            if (targetName === 'ar_try_on_allowed_post_types' && value.length > 1) {
                 toast('Multiple post type is only available in the pro version', 'error')
                 return;
             }
@@ -160,67 +160,67 @@ export default function Settings() {
 
                         {/* Dropdown Section */}
                         {
-                            ar_try_on.is_wc_active && <div className="art-space-y-4">
-                                <label
-                                    htmlFor="ar_try_on_wc_hook_position"
-                                    className="art-block art-font-medium"
-                                >
-                                    Show button in
-                                </label>
-                                <select
-                                    id="ar_try_on_wc_hook_position"
-                                    name="ar_try_on_wc_hook_position"
-                                    className="art-block art-w-full art-p-2 art-border art-rounded"
-                                    value={settings.ar_try_on_wc_hook_position}
-                                    onChange={handleChange}
-                                >
-                                    <option value="">None</option>
-                                    <option value="1">woocommerce_before_single_product_summary</option>
-                                    <option value="2">woocommerce_after_single_product_summary</option>
-                                    <option value="3">woocommerce_before_single_product</option>
-                                    <option value="4">woocommerce_after_single_product</option>
-                                    <option value="5">woocommerce_after_add_to_cart_form</option>
-                                    <option value="6">
-                                        woocommerce_before_add_to_cart_form
-                                    </option>
-                                </select>
-                            </div>
+                            ar_try_on.is_wc_active && <>
+                                <div className="art-space-y-4">
+                                    <label
+                                        htmlFor="ar_try_on_wc_hook_position"
+                                        className="art-block art-font-medium"
+                                    >
+                                        Show button in
+                                    </label>
+                                    <select
+                                        id="ar_try_on_wc_hook_position"
+                                        name="ar_try_on_wc_hook_position"
+                                        className="art-block art-w-full art-p-2 art-border art-rounded"
+                                        value={settings.ar_try_on_wc_hook_position}
+                                        onChange={handleChange}
+                                    >
+                                        <option value="">None</option>
+                                        <option value="1">woocommerce_before_single_product_summary</option>
+                                        <option value="2">woocommerce_after_single_product_summary</option>
+                                        <option value="3">woocommerce_before_single_product</option>
+                                        <option value="4">woocommerce_after_single_product</option>
+                                        <option value="5">woocommerce_after_add_to_cart_form</option>
+                                        <option value="6">
+                                            woocommerce_before_add_to_cart_form
+                                        </option>
+                                    </select>
+                                </div>
+                                {/* Radio Section */}
+                                <div className="art-space-y-4">
+                                    <label
+                                        htmlFor="ar_try_on_single_product_tabs"
+                                        className="art-block art-font-medium"
+                                    >
+                                        Show in Product Tabs
+                                    </label>
+                                    <div className="art-flex art-space-x-4">
+                                        <label className="art-flex art-items-center art-gap-2">
+                                            <input
+                                                type="radio"
+                                                id="ar_try_on_single_product_tabs1"
+                                                name="ar_try_on_single_product_tabs"
+                                                value="yes"
+                                                checked={settings.ar_try_on_single_product_tabs == 'yes'}
+                                                onChange={handleChange}
+                                            />
+                                            <span>Yes</span>
+                                        </label>
+                                        <label className="art-flex art-items-center art-gap-2">
+                                            <input
+                                                type="radio"
+                                                id="ar_try_on_single_product_tabs2"
+                                                name="ar_try_on_single_product_tabs"
+                                                value="no"
+                                                checked={settings.ar_try_on_single_product_tabs == 'no'}
+                                                onChange={handleChange}
+                                            />
+                                            <span>No</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </>
                         }
-                        {/*TODO:: add this feature in the next release.*/}
-                        {/* Radio Section */}
-                        {/*<div className="art-space-y-4">*/}
-                        {/*    <label*/}
-                        {/*        htmlFor="ar_try_on_single_product_tabs"*/}
-                        {/*        className="art-block art-font-medium"*/}
-                        {/*    >*/}
-                        {/*        Show in Product Tabs*/}
-                        {/*    </label>*/}
-                        {/*    <div className="art-flex art-space-x-4">*/}
-                        {/*        <label className="art-flex art-items-center art-gap-2">*/}
-                        {/*            <input*/}
-                        {/*                type="radio"*/}
-                        {/*                id="ar_try_on_single_product_tabs1"*/}
-                        {/*                name="ar_try_on_single_product_tabs"*/}
-                        {/*                value="yes"*/}
-                        {/*                checked={settings.ar_try_on_single_product_tabs == 'yes'}*/}
-                        {/*                onChange={handleChange}*/}
-                        {/*            />*/}
-                        {/*            <span>Yes</span>*/}
-                        {/*        </label>*/}
-                        {/*        <label className="art-flex art-items-center art-gap-2">*/}
-                        {/*            <input*/}
-                        {/*                type="radio"*/}
-                        {/*                id="ar_try_on_single_product_tabs2"*/}
-                        {/*                name="ar_try_on_single_product_tabs"*/}
-                        {/*                value="no"*/}
-                        {/*                checked={settings.ar_try_on_single_product_tabs == 'no'}*/}
-                        {/*                onChange={handleChange}*/}
-                        {/*            />*/}
-                        {/*            <span>No</span>*/}
-                        {/*        </label>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
-
 
                         {/* Loading Attributes */}
                         <div className="art-space-y-4">
@@ -535,7 +535,8 @@ export default function Settings() {
                             <p className="art-text-sm art-text-gray-500">
                                 Selects whether to place the object on the floor (horizontal surface) or a wall
                                 (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be placed
-                                against the wall and the shadow will be put on this surface as well. Note that the different AR
+                                against the wall and the shadow will be put on this surface as well. Note that the different
+                                AR
                                 modes handle the placement UX differently.
                             </p>
                         </div>

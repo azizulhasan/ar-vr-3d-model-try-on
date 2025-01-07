@@ -205,6 +205,13 @@ class AR_TRY_ON {
 
 		$this->loader->add_filter( 'the_content', $this->plugin_public, 'ar_try_on_button', 99999999 );
 
+
+		if ( isset( $settings['ar_try_on_single_product_tabs'] ) ) {
+			if ( $settings['ar_try_on_single_product_tabs'] == 'yes' ) {
+				$this->loader->add_filter( 'woocommerce_product_tabs', $this->plugin_public, 'ar_try_on_woocommerce_tab' );
+			}
+		}
+
 	}
 
 	/**
