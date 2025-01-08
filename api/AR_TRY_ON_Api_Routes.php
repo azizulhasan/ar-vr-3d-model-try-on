@@ -2,6 +2,7 @@
 
 namespace AR_TRY_ON_API;
 
+use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Cache;
 
 /**
@@ -67,6 +68,20 @@ class AR_TRY_ON_Api_Routes {
 				array(
 					'methods'             => \WP_REST_Server::ALLMETHODS,
 					'callback'            => array( $this, 'get_model_and_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register demo_preview route.
+		register_rest_route(
+			$this->namespace,
+			'/demo_preview',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'demo_preview' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
 					'args'                => array(),
 				),
@@ -267,6 +282,20 @@ class AR_TRY_ON_Api_Routes {
 			'success' => true,
 			'data'    => $data
 		] );
+	}
+
+	/*
+ * Manage product settings data
+ */
+	public function demo_preview( $request ) {
+		$response['status'] = true;
+		// save data about recording.
+		if ( 'post' == $request['method'] ) {
+			AR_TRY_ON_Activator::activate();;
+			$response['data'] = get_option( 'ar_try_on_settings' );
+
+			return rest_ensure_response( $response );
+		}
 	}
 
 

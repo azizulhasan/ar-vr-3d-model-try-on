@@ -139,6 +139,8 @@ class AR_TRY_ON_Helper {
 
 	public static function is_ar_supported_post_type() {
 		global $post;
+
+		return  true;
 		if ( ! $post ) {
 			return false;
 		}

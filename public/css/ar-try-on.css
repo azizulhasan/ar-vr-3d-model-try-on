@@ -30,12 +30,40 @@
   height: 1.5rem
 }
 
+.art-w-1\/2 {
+  width: 50%
+}
+
 .art-w-6 {
   width: 1.5rem
 }
 
 .art-w-full {
   width: 100%
+}
+
+.art-w-4 {
+  width: 1rem
+}
+
+.art-w-8 {
+  width: 2rem
+}
+
+.art-w-12 {
+  width: 3rem
+}
+
+.art-w-20 {
+  width: 5rem
+}
+
+.art-w-40 {
+  width: 10rem
+}
+
+.art-cursor-pointer {
+  cursor: pointer
 }
 
 .art-items-center {
@@ -92,15 +120,6 @@
 
 .art-border {
   border-width: 1px
-}
-
-.art-border-2 {
-  border-width: 2px
-}
-
-.art-border-red-900 {
-  --tw-border-opacity: 1;
-  border-color: rgb(127 29 29 / var(--tw-border-opacity, 1))
 }
 
 .art-border-sky-500 {
