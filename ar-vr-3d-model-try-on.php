@@ -24,7 +24,9 @@
  */
 
 // Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+} // Exit if accessed directly
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -78,13 +80,18 @@ if ( ! defined( 'AR_TRY_ON_DEBUG_MODE' ) ) {
 
 
 if ( ! defined( 'AR_TRY_ON_PLUGIN_URL' ) ) {
+	$url         = 'https://playground.wordpress.net';
+	$url_preview = 'http://playground.wordpress.net';
+
+	$site_url = plugin_dir_url( AR_TRY_ON_ROOT_FILE );
+	$site_url = str_replace( $url_preview, $url, $site_url );
 	/**
 	 * Plugin Directory URL
 	 *
 	 * @var string
 	 * @since 1.2.2
 	 */
-	define( 'AR_TRY_ON_PLUGIN_URL', trailingslashit( plugin_dir_url( AR_TRY_ON_ROOT_FILE ) ) );
+	define( 'AR_TRY_ON_PLUGIN_URL', trailingslashit( $site_url ) );
 }
 
 if ( ! defined( 'AR_TRY_ON_PLUGIN_PATH' ) ) {
@@ -124,7 +131,7 @@ class AR_TRY_ON_Init {
 		$plugin = new AR_TRY_ON();
 		$plugin->run();
 		//HPOS compatibility
-		if( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+		if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
 			add_action( 'before_woocommerce_init', function () {
 				if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 					\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
@@ -139,7 +146,6 @@ function ar_try_on_run() {
 	new AR_TRY_ON_Init();
 	new AR_TRY_ON_Api_Routes();
 }
-
 
 
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
