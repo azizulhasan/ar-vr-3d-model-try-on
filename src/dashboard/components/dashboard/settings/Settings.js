@@ -25,6 +25,7 @@ export default function Settings() {
         ar_try_on_ar_button_background_color: "#3a3a3a",
         ar_try_on_ar_button_text_color: "#ffffff",
         ar_try_on_clear_cache: false,
+        ar_try_on_ar_demo: {},
     });
     const [postTypes, setPostTypes] = useState(['post']);
     const [isDataLoaded, setIsDataLoaded] = useState(true)
@@ -128,6 +129,24 @@ export default function Settings() {
             });
     };
 
+    const ar_try_on_demo_id = (e) => {
+        document.getElementById('ar_try_on_demo_id').value = 'Setting Up Preview';
+        let formData = new FormData();
+        formData.append('method', 'post');
+        postWithoutImage(getURL('demo_preview'), formData)
+            .then((res) => {
+                if (res?.data?.ar_try_on_ar_demo?.url) {
+                    document.getElementById('ar_try_on_demo_id').value = 'Preview Demo';
+                    window.open(res?.data?.ar_try_on_ar_demo?.url, '_blank')
+                } else {
+                    document.getElementById('ar_try_on_demo_id').value = 'Try Again';
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
     return (
         isDataLoaded ? <React.Fragment>
                 <form onSubmit={handleSubmit}>
@@ -135,15 +154,24 @@ export default function Settings() {
                         id="ar_try_on_settings"
                         className="art-p-4 art-bg-gray-100 art-space-y-6"
                     >
-                        {/* Title Section */}
-                        <div className="art-space-y-4">
-                            <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
-                                <span className="art-dashicons art-dashicons-admin-generic"></span>
-                                View Settings
-                            </h3>
+
+                        <div className={'art-flex'}>
+                            {/* Title Section */}
+                            <div className="art-w-1/2">
+                                <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
+                                    <span className="art-dashicons art-dashicons-admin-generic"></span>
+                                    View Settings
+                                </h3>
+                            </div>
+                            <button
+                                type="button"
+                                id={'ar_try_on_demo_id'}
+                                onClick={ar_try_on_demo_id}
+                                className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
+                            >
+                                Preview Demo
+                            </button>
                         </div>
-
-
                         <div className="art-space-y-4">
                             <label
                                 htmlFor="ar_try_on_allowed_post_types"
@@ -160,7 +188,7 @@ export default function Settings() {
 
                         {/* Dropdown Section */}
                         {
-                            ar_try_on.is_wc_active && <>
+                        ar_try_on.is_wc_active && <>
                                 <div className="art-space-y-4">
                                     <label
                                         htmlFor="ar_try_on_wc_hook_position"
@@ -534,8 +562,10 @@ export default function Settings() {
                             </div>
                             <p className="art-text-sm art-text-gray-500">
                                 Selects whether to place the object on the floor (horizontal surface) or a wall
-                                (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be placed
-                                against the wall and the shadow will be put on this surface as well. Note that the different
+                                (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be
+                                placed
+                                against the wall and the shadow will be put on this surface as well. Note that the
+                                different
                                 AR
                                 modes handle the placement UX differently.
                             </p>
@@ -574,7 +604,8 @@ export default function Settings() {
                             </div>
                             <p className="art-text-sm art-text-gray-500">
                                 Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces
-                                the lighting selected with during an AR session. Known issues: sometimes too dark, sudden
+                                the lighting selected with during an AR session. Known issues: sometimes too dark,
+                                sudden
                                 updates, shiny materials look matte.environment-image
                             </p>
                         </div>
@@ -612,7 +643,8 @@ export default function Settings() {
                             </div>
                             <p className="art-text-sm art-text-gray-500">
                                 By placing a child element under with slot="ar-button", this element will replace the
-                                default "Enter AR" button, which is a icon in the lower right. This button will be visible
+                                default "Enter AR" button, which is a icon in the lower right. This button will be
+                                visible
                                 if AR is potentially available (we will have some false positives until the user tries).
                             </p>
                         </div>
@@ -687,7 +719,7 @@ export default function Settings() {
                             <button
                                 type="submit"
                                 value={'Save'}
-                                className="art-block art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
+                                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
                             >
                                 Save
                             </button>

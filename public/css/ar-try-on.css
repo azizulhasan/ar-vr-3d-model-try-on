@@ -26,8 +26,20 @@
   display: flex
 }
 
+.art-h-12 {
+  height: 3rem
+}
+
 .art-h-6 {
   height: 1.5rem
+}
+
+.art-w-1\/2 {
+  width: 50%
+}
+
+.art-w-40 {
+  width: 10rem
 }
 
 .art-w-6 {
@@ -36,6 +48,10 @@
 
 .art-w-full {
   width: 100%
+}
+
+.art-cursor-pointer {
+  cursor: pointer
 }
 
 .art-items-center {
