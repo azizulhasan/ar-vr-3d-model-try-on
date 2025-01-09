@@ -157,7 +157,7 @@ export default function Settings() {
 
                         <div className={'art-flex'}>
                             {/* Title Section */}
-                            <div className="art-space-y-2 art-w-1/2">
+                            <div className="art-w-1/2">
                                 <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
                                     <span className="art-dashicons art-dashicons-admin-generic"></span>
                                     View Settings
@@ -167,7 +167,7 @@ export default function Settings() {
                                 type="button"
                                 id={'ar_try_on_demo_id'}
                                 onClick={ar_try_on_demo_id}
-                                className="art-block art-cursor-pointer art-rounded art-w-40 art-bg-blue-500 art-text-white art-border art-border-sky-500 "
+                                className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
                             >
                                 Preview Demo
                             </button>
@@ -719,7 +719,7 @@ export default function Settings() {
                             <button
                                 type="submit"
                                 value={'Save'}
-                                className="art-block art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
+                                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
                             >
                                 Save
                             </button>
