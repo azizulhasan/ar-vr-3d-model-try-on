@@ -123,7 +123,7 @@ const ARProductModelSettings = () => {
                         className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
                     />
                     <button
-                        className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-try-on-open-media-library art-border art-border-sky-500 ">
+                        className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded ar-try-on-open-media-library art-border art-border-sky-500 ">
                         Add File
                     </button>
                     <p className="art-text-sm art-text-gray-600 art-mt-2">
@@ -153,7 +153,7 @@ const ARProductModelSettings = () => {
                         className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
                     />
                     <button
-                        className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-try-on-open-media-library art-border art-border-sky-500 ">
+                        className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded ar-try-on-open-media-library art-border art-border-sky-500 ">
                         Add File
                     </button>
                     <p className="art-text-sm art-text-gray-600 art-mt-2">
@@ -179,7 +179,7 @@ const ARProductModelSettings = () => {
                         className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
                     />
                     <button
-                        className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-try-on-open-media-library art-border art-border-sky-500 ">
+                        className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded ar-try-on-open-media-library art-border art-border-sky-500 ">
                         Add File
                     </button>
                     <p className="art-text-sm art-text-gray-600 art-mt-2">
@@ -215,7 +215,7 @@ const ARProductModelSettings = () => {
                 </div>
                 <div className="art-mb-6">
                     <button type={'submit'}
-                            className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500  art-w-full">
+                            className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500  art-w-full">
                         Save
                     </button>
                 </div>
