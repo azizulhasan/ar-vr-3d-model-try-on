@@ -119,7 +119,6 @@ class AR_TRY_ON_Activator {
 	private static function check_post_meta_keys( $post_id ) {
 		// Get the post meta value for 'ar_try_on_product_settings'
 		$meta_value = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
-		error_log( print_r( $meta_value, 1 ) );
 		// Check if the meta value exists and is an array
 		if ( ! is_array( $meta_value ) ) {
 			return false;
