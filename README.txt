@@ -4,7 +4,7 @@ Tags: AR, VR, 3D, Try on, Augmented Reality
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -94,6 +94,9 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 1. preview
 
 == Changelog ==
+
+= 1.0.6 ( 10 Jan 2025 )  =
+* Fixed: demo error fixed.
 
 = 1.0.5 ( 09 Jan 2025 )  =
 * Fixed: preview url issue fixed.
