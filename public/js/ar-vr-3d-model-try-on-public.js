@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Your custom HTML content
                 if (ar_try_on?.is_pro_active) {
                     const htmlContent = `
-                <div id="ar_try_on_model_viewer" style="display: flex; justify-content: center; align-items: center; width: 500px;height: 100%; z-index:-99">
+                <div id="ar_try_on_model_viewer" style="display: flex; justify-content: center; align-items: center; height: 100%;">
                 </div>`;
 
                     let loadingMessage;
@@ -47,14 +47,15 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Use the product name as the modal title
                                 const productName = data.product_name || '3D Product';
 
-                                // alertify
-                                //     .alert(productName, htmlContent)
-                                //     .set({
-                                //         transition: 'zoom',
-                                //         movable: true,
-                                //         maximizable: true
-                                //     }) // Customize options
-                                //     .setHeader(productName);
+                                alertify
+                                    .alert(productName, htmlContent)
+                                    .set({
+                                        transition: 'zoom',
+                                        movable: true,
+                                        maximizable: true,
+                                        resizable: true
+                                    }) // Customize options
+                                    .setHeader(productName);
 
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
