@@ -51,7 +51,7 @@ class AR_TRY_ON_Activator {
 			$post_url = get_permalink( $random_post_id );
 		}
 
-		$all_settings = get_option( 'ar_try_on_settings' );
+		$all_settings = (array) get_option( 'ar_try_on_settings' );
 		/**
 		 * Customization settings.
 		 */
