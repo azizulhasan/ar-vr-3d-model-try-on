@@ -22,7 +22,54 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 console.log(product_id)
                 // Your custom HTML content
-                const htmlContent = `
+                if (ar_try_on?.is_pro_active) {
+                    const htmlContent = `
+                <div id="ar_try_on_model_viewer" style="display: flex; justify-content: center; align-items: center; width: 500px;height: 100%; z-index:-99">
+                </div>`;
+
+                    let loadingMessage;
+                    // Show loading message before sending the request
+                    loadingMessage = alertify.success('Loading 3D model...', 2000);
+                    let formData = new FormData();
+                    formData.append('product_id', product_id);
+                    await postWithoutImage(getURL('get_model_and_settings'), formData)
+                        .then((response) => {
+                            console.log(response);
+
+                            // Hide loading message
+                            if (loadingMessage) {
+                                loadingMessage.dismiss();
+                            }
+
+                            if (response.success) {
+                                const data = response.data;
+
+                                // Use the product name as the modal title
+                                const productName = data.product_name || '3D Product';
+
+                                // alertify
+                                //     .alert(productName, htmlContent)
+                                //     .set({
+                                //         transition: 'zoom',
+                                //         movable: true,
+                                //         maximizable: true
+                                //     }) // Customize options
+                                //     .setHeader(productName);
+
+                                // Check if the data exists before assigning it to model-viewer
+                                if (data) {
+                                    wp.hooks.doAction('ar_try_on_pro_load_face_model', data);
+                                }
+
+                            } else {
+                                console.error(response.data);
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    const htmlContent = `
                 <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                     <model-viewer 
                         id="model-viewer" 
@@ -39,59 +86,60 @@ document.addEventListener('DOMContentLoaded', () => {
                     ></model-viewer>
                 </div>`;
 
-                let loadingMessage;
-                // Show loading message before sending the request
-                loadingMessage = alertify.success('Loading 3D model...', 2000);
-                let formData = new FormData();
-                formData.append('product_id', product_id);
-                await postWithoutImage(getURL('get_model_and_settings'), formData)
-                    .then((response) => {
-                        console.log(response);
+                    let loadingMessage;
+                    // Show loading message before sending the request
+                    loadingMessage = alertify.success('Loading 3D model...', 2000);
+                    let formData = new FormData();
+                    formData.append('product_id', product_id);
+                    await postWithoutImage(getURL('get_model_and_settings'), formData)
+                        .then((response) => {
+                            console.log(response);
 
-                        // Hide loading message
-                        if (loadingMessage) {
-                            loadingMessage.dismiss();
-                        }
-
-                        if (response.success) {
-                            const data = response.data;
-
-                            // Use the product name as the modal title
-                            const productName = data.product_name || '3D Product';
-
-                            alertify
-                                .alert(productName, htmlContent)
-                                .set({
-                                    transition: 'zoom',
-                                    movable: true,
-                                    maximizable: true
-                                }) // Customize options
-                                .setHeader(productName);
-
-                            // Check if the data exists before assigning it to model-viewer
-                            if (data) {
-                                const modelViewer = document.getElementById('model-viewer');
-                                if (modelViewer) {
-                                    modelViewer.setAttribute('src', data.model_3d_file || '');
-                                    modelViewer.setAttribute('alt', data.model_alt || '');
-                                    modelViewer.setAttribute('poster', data.model_poster || '');
-                                    modelViewer.setAttribute('reveal', data.reveal || 'auto');
-                                    modelViewer.setAttribute('loading', data.loading || 'auto');
-                                    modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
-                                    modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
-
-                                    const scale = data.scale || 'auto'; // Default value if not defined
-                                    modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-                                }
+                            // Hide loading message
+                            if (loadingMessage) {
+                                loadingMessage.dismiss();
                             }
 
-                        } else {
-                            console.error(response.data);
-                        }
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
+                            if (response.success) {
+                                const data = response.data;
+
+                                // Use the product name as the modal title
+                                const productName = data.product_name || '3D Product';
+
+                                alertify
+                                    .alert(productName, htmlContent)
+                                    .set({
+                                        transition: 'zoom',
+                                        movable: true,
+                                        maximizable: true
+                                    }) // Customize options
+                                    .setHeader(productName);
+
+                                // Check if the data exists before assigning it to model-viewer
+                                if (data) {
+                                    const modelViewer = document.getElementById('model-viewer');
+                                    if (modelViewer) {
+                                        modelViewer.setAttribute('src', data.model_3d_file || '');
+                                        modelViewer.setAttribute('alt', data.model_alt || '');
+                                        modelViewer.setAttribute('poster', data.model_poster || '');
+                                        modelViewer.setAttribute('reveal', data.reveal || 'auto');
+                                        modelViewer.setAttribute('loading', data.loading || 'auto');
+                                        modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
+                                        modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
+
+                                        const scale = data.scale || 'auto'; // Default value if not defined
+                                        modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
+                                    }
+                                }
+
+                            } else {
+                                console.error(response.data);
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                }
             });
         })
     }
