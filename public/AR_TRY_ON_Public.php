@@ -105,8 +105,9 @@ class AR_TRY_ON_Public {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . '/public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
-
+			wp_enqueue_style( 'alertify', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'alertify-default', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array('alertify'), $this->version, 'all' );
+			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
 		}
 
 	}
