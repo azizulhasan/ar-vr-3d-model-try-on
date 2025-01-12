@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
-                                    showModal()
+                                    // showModal()
                                     wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, data);
                                 }
 
