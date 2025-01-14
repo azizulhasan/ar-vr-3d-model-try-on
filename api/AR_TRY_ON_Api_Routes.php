@@ -169,7 +169,6 @@ class AR_TRY_ON_Api_Routes {
 		$model_3d_file                  = '';
 		$loading                        = '';
 		$reveal                         = '';
-		$with_credentials               = '';
 		$ar                             = '';
 		$scale                          = '';
 		$placement                      = '';
@@ -179,6 +178,7 @@ class AR_TRY_ON_Api_Routes {
 		$custom_button_text             = '';
 		$custom_button_text_color       = '';
 		$custom_button_background_color = '';
+		$poster_color                   = '';
 
 		$product_settings = (array) get_post_meta( $product_id, 'ar_try_on_product_settings', true );
 
@@ -220,10 +220,6 @@ class AR_TRY_ON_Api_Routes {
 
 		if ( isset( $settings['ar_try_on_reveal_type'] ) && $settings['ar_try_on_reveal_type'] ) {
 			$reveal = $settings['ar_try_on_reveal_type'];
-		}
-
-		if ( isset( $settings['ar_try_on_with_credentials'] ) && $settings['ar_try_on_with_credentials'] ) {
-			$with_credentials = $settings['ar_try_on_with_credentials'];
 		}
 
 
@@ -286,7 +282,6 @@ class AR_TRY_ON_Api_Routes {
 		$data = array(
 			'loading'                        => $loading,
 			'reveal'                         => $reveal,
-			'with_credentials'               => $with_credentials,
 			'poster_color'                   => $poster_color,
 			'ar'                             => $ar,
 			'scale'                          => $scale,
