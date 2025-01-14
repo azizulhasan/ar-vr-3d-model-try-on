@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 console.log(product_id)
                 // Your custom HTML content
-                if (ar_try_on?.is_pro_active) {
+                if (false) {
                     const htmlContent = `
                   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
