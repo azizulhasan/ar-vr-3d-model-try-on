@@ -18,7 +18,6 @@ export default function Settings() {
         ar_try_on_ar: "activate",
         ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
         ar_try_on_ar_scale: "auto",
-        ar_try_on_ar_placement: "floor",
         ar_try_on_xr_environment: "activate",
         ar_try_on_ar_button: "activate",
         ar_try_on_ar_button_text: "Activate AR",
@@ -527,50 +526,6 @@ export default function Settings() {
                                 resized by pinch.
                             </p>
                         </div>
-
-
-                        {/* AR Placement */}
-                        <div className="art-space-y-2">
-                            <label htmlFor="ar_try_on_ar_placement" className="art-font-medium">
-                                AR Placement
-                            </label>
-                            <div className="art-flex art-items-center art-space-x-4">
-                                <label className="art-flex art-items-center art-space-x-2">
-                                    <input
-                                        type="radio"
-                                        name="ar_try_on_ar_placement"
-                                        id="ar_try_on_ar_placement1"
-                                        value="floor"
-                                        checked={settings.ar_try_on_ar_placement == 'floor'}
-                                        onChange={handleChange}
-                                        className="art-text-blue-600 art-focus:ring-blue-500"
-                                    />
-                                    <span>Floor</span>
-                                </label>
-                                <label className="art-flex art-items-center art-space-x-2">
-                                    <input
-                                        type="radio"
-                                        name="ar_try_on_ar_placement"
-                                        id="ar_try_on_ar_placement2"
-                                        value="wall"
-                                        checked={settings.ar_try_on_ar_placement == 'wall'}
-                                        onChange={handleChange}
-                                        className="art-text-blue-600 art-focus:ring-blue-500"
-                                    />
-                                    <span>Wall</span>
-                                </label>
-                            </div>
-                            <p className="art-text-sm art-text-gray-500">
-                                Selects whether to place the object on the floor (horizontal surface) or a wall
-                                (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be
-                                placed
-                                against the wall and the shadow will be put on this surface as well. Note that the
-                                different
-                                AR
-                                modes handle the placement UX differently.
-                            </p>
-                        </div>
-
                         {/* XR Environment */}
                         <div className="art-space-y-2">
                             <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">

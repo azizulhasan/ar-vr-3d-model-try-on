@@ -203,6 +203,10 @@ class AR_TRY_ON_Api_Routes {
 			$model_poster = $product_settings['ar_try_on_file_poster'];
 		}
 
+		if ( isset( $product_settings['ar_try_on_ar_placement'] ) && $product_settings['ar_try_on_ar_placement'] ) {
+			$placement = $product_settings['ar_try_on_ar_placement'];
+		}
+
 		$settings = (array) get_option( 'ar_try_on_settings' );
 
 
@@ -232,7 +236,8 @@ class AR_TRY_ON_Api_Routes {
 			$scale = $settings['ar_try_on_ar_scale'];
 		}
 
-		if ( isset( $settings['ar_try_on_ar_placement'] ) && $settings['ar_try_on_ar_placement'] ) {
+		// TODO remove this one after 6 months. Because this settings will be based on model type.
+		if ( ! $placement && isset( $settings['ar_try_on_ar_placement'] ) && $settings['ar_try_on_ar_placement'] ) {
 			$placement = $settings['ar_try_on_ar_placement'];
 		}
 
