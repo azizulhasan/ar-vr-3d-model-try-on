@@ -18,7 +18,6 @@ export default function Settings() {
         ar_try_on_ar: "activate",
         ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
         ar_try_on_ar_scale: "auto",
-        ar_try_on_ar_placement: "floor",
         ar_try_on_xr_environment: "activate",
         ar_try_on_ar_button: "activate",
         ar_try_on_ar_button_text: "Activate AR",
@@ -188,7 +187,7 @@ export default function Settings() {
 
                         {/* Dropdown Section */}
                         {
-                        ar_try_on.is_wc_active && <>
+                            ar_try_on.is_wc_active && <>
                                 <div className="art-space-y-4">
                                     <label
                                         htmlFor="ar_try_on_wc_hook_position"
@@ -257,7 +256,7 @@ export default function Settings() {
                                 Loading : Attributes
                             </h3>
                             <label
-                                htmlFor="art_ar_try_on_loading_type"
+                                htmlFor="ar_try_on_loading_type"
                                 className="art-block art-font-medium"
                             >
                                 Loading
@@ -266,8 +265,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="art_ar_try_on_loading1"
-                                        name="art_ar_try_on_loading_type"
+                                        id="try_on_loading_type1"
+                                        name="ar_try_on_loading_type"
                                         value="auto"
                                         checked={settings.ar_try_on_loading_type == 'auto'}
                                         onChange={handleChange}
@@ -277,8 +276,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="art_ar_try_on_loading2"
-                                        name="art_ar_try_on_loading_type"
+                                        id="ar_try_on_loading2"
+                                        name="ar_try_on_loading_type"
                                         value="lazy"
                                         checked={settings.ar_try_on_loading_type == 'lazy'}
                                         onChange={handleChange}
@@ -288,8 +287,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="art_ar_try_on_loading3"
-                                        name="art_ar_try_on_loading_type"
+                                        id="ar_try_on_loading3"
+                                        name="ar_try_on_loading_type"
                                         value="eager"
                                         checked={settings.ar_try_on_loading_type == 'eager'}
                                         onChange={handleChange}
@@ -311,10 +310,10 @@ export default function Settings() {
                         <div className="art-space-y-4">
                             <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
                                 <span className="art-dashicons art-dashicons-admin-generic"></span>
-                                Loading : Attributes
+                                Reveal : Attributes
                             </h3>
                             <label
-                                htmlFor="art_ar_try_on_reveal_type"
+                                htmlFor="ar_try_on_reveal_type"
                                 className="art-block art-font-medium"
                             >
                                 Reveal
@@ -323,8 +322,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="art_ar_try_on_reveal1"
-                                        name="art_ar_try_on_reveal_type"
+                                        id="ar_try_on_reveal1"
+                                        name="ar_try_on_reveal_type"
                                         value="auto"
                                         checked={settings.ar_try_on_reveal_type == 'auto'}
                                         onChange={handleChange}
@@ -334,8 +333,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="art_ar_try_on_reveal2"
-                                        name="art_ar_try_on_reveal_type"
+                                        id="ar_try_on_reveal2"
+                                        name="ar_try_on_reveal_type"
                                         value="interaction"
                                         checked={settings.ar_try_on_reveal_type == 'interaction'}
                                         onChange={handleChange}
@@ -345,8 +344,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="art_ar_try_on_reveal3"
-                                        name="art_ar_try_on_reveal_type"
+                                        id="ar_try_on_reveal3"
+                                        name="ar_try_on_reveal_type"
                                         value="manual"
                                         checked={settings.ar_try_on_reveal_type == 'manual'}
                                         onChange={handleChange}
@@ -369,7 +368,7 @@ export default function Settings() {
                         {/* Poster Color */}
                         <div className="art-space-y-4">
                             <label
-                                htmlFor="art_ar_try_on_poster_color"
+                                htmlFor="ar_try_on_poster_color"
                                 className="art-block art-font-medium"
                             >
                                 --poster-color
@@ -377,8 +376,8 @@ export default function Settings() {
                             <div className="art-flex art-items-center art-gap-2">
                                 <input
                                     type="text"
-                                    id="art_ar_try_on_poster_color"
-                                    name="art_ar_try_on_poster_color"
+                                    id="ar_try_on_poster_color"
+                                    name="ar_try_on_poster_color"
                                     className="art-block  art-p-2 art-border art-rounded"
                                     value={settings.ar_try_on_poster_color}
                                     onChange={handleChange}
@@ -387,7 +386,7 @@ export default function Settings() {
                                     type="color"
                                     className="art-p-2 art-bg-gray-300 art-rounded"
                                     style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
-                                    onChange={(e) => handleChange(e, 'art_ar_try_on_poster_color')}
+                                    onChange={(e) => handleChange(e, 'ar_try_on_poster_color')}
                                 />
                             </div>
                             <p className="art-text-sm art-text-gray-500">
@@ -400,15 +399,15 @@ export default function Settings() {
 
                         {/* Enable AR */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar" className="art-font-medium">
+                            <label htmlFor="ar_try_on_ar" className="art-font-medium">
                                 Enable AR
                             </label>
                             <div className="art-flex art-items-center art-space-x-4">
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_ar"
-                                        id="art_ar_try_on_ar1"
+                                        name="ar_try_on_ar"
+                                        id="ar_try_on_ar1"
                                         value="activate"
                                         checked={settings.ar_try_on_ar == 'activate'}
                                         onChange={handleChange}
@@ -419,8 +418,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_ar"
-                                        id="art_ar_try_on_ar2"
+                                        name="ar_try_on_ar"
+                                        id="ar_try_on_ar2"
                                         value="deactivate"
                                         checked={settings.ar_try_on_ar == 'deactivate'}
                                         onChange={handleChange}
@@ -436,7 +435,7 @@ export default function Settings() {
 
                         {/* AR Modes */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_modes" className="art-font-medium">
+                            <label htmlFor="ar_try_on_ar_modes" className="art-font-medium">
                                 AR Modes
                             </label>
                             <p className="art-text-sm art-text-gray-500">Select / Deselect All</p>
@@ -444,11 +443,11 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="art_ar_try_on_ar_modes[]"
-                                        id="art_ar_try_on_ar_modes1"
+                                        name="ar_try_on_ar_modes[]"
+                                        id="ar_try_on_ar_modes1"
                                         value="webxr"
                                         checked={settings.ar_try_on_ar_modes.includes('webxr')}
-                                        onChange={(e) => handleChange(e, 'art_ar_try_on_ar_modes')}
+                                        onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
                                     <span>webxr</span>
@@ -456,11 +455,11 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="art_ar_try_on_ar_modes[]"
-                                        id="art_ar_try_on_ar_modes2"
+                                        name="ar_try_on_ar_modes[]"
+                                        id="ar_try_on_ar_modes2"
                                         value="scene-viewer"
                                         checked={settings.ar_try_on_ar_modes.includes('scene-viewer')}
-                                        onChange={(e) => handleChange(e, 'art_ar_try_on_ar_modes')}
+                                        onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
                                     <span>scene-viewer</span>
@@ -468,11 +467,11 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="checkbox"
-                                        name="art_ar_try_on_ar_modes[]"
-                                        id="art_ar_try_on_ar_modes3"
+                                        name="ar_try_on_ar_modes[]"
+                                        id="ar_try_on_ar_modes3"
                                         value="quick-look"
                                         checked={settings.ar_try_on_ar_modes.includes('quick-look')}
-                                        onChange={(e) => handleChange(e, 'art_ar_try_on_ar_modes')}
+                                        onChange={(e) => handleChange(e, 'ar_try_on_ar_modes')}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
                                     <span>quick-look</span>
@@ -490,15 +489,15 @@ export default function Settings() {
 
                         {/* AR Scale */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_scale" className="art-font-medium">
+                            <label htmlFor="ar_try_on_ar_scale" className="art-font-medium">
                                 AR Scale
                             </label>
                             <div className="art-flex art-items-center art-space-x-4">
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_ar_scale"
-                                        id="art_ar_try_on_ar_scale1"
+                                        name="ar_try_on_ar_scale"
+                                        id="ar_try_on_ar_scale1"
                                         value="auto"
                                         checked={settings.ar_try_on_ar_scale == 'auto'}
                                         onChange={handleChange}
@@ -509,8 +508,8 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_ar_scale"
-                                        id="art_ar_try_on_ar_scale2"
+                                        name="ar_try_on_ar_scale"
+                                        id="ar_try_on_ar_scale2"
                                         value="fixed"
                                         checked={settings.ar_try_on_ar_scale == 'fixed'}
                                         onChange={handleChange}
@@ -527,63 +526,19 @@ export default function Settings() {
                                 resized by pinch.
                             </p>
                         </div>
-
-
-                        {/* AR Placement */}
-                        <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_placement" className="art-font-medium">
-                                AR Placement
-                            </label>
-                            <div className="art-flex art-items-center art-space-x-4">
-                                <label className="art-flex art-items-center art-space-x-2">
-                                    <input
-                                        type="radio"
-                                        name="art_ar_try_on_ar_placement"
-                                        id="art_ar_try_on_ar_placement1"
-                                        value="floor"
-                                        checked={settings.art_ar_try_on_ar_placement == 'floor'}
-                                        onChange={handleChange}
-                                        className="art-text-blue-600 art-focus:ring-blue-500"
-                                    />
-                                    <span>Floor</span>
-                                </label>
-                                <label className="art-flex art-items-center art-space-x-2">
-                                    <input
-                                        type="radio"
-                                        name="art_ar_try_on_ar_placement"
-                                        id="art_ar_try_on_ar_placement2"
-                                        value="wall"
-                                        checked={settings.art_ar_try_on_ar_placement == 'wall'}
-                                        onChange={handleChange}
-                                        className="art-text-blue-600 art-focus:ring-blue-500"
-                                    />
-                                    <span>Wall</span>
-                                </label>
-                            </div>
-                            <p className="art-text-sm art-text-gray-500">
-                                Selects whether to place the object on the floor (horizontal surface) or a wall
-                                (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be
-                                placed
-                                against the wall and the shadow will be put on this surface as well. Note that the
-                                different
-                                AR
-                                modes handle the placement UX differently.
-                            </p>
-                        </div>
-
                         {/* XR Environment */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_xr_environment" className="art-font-medium">
+                            <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">
                                 XR-Environment
                             </label>
                             <div className="art-flex art-items-center art-space-x-4">
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_xr_environment"
-                                        id="art_ar_try_on_xr_environment1"
+                                        name="ar_try_on_xr_environment"
+                                        id="ar_try_on_xr_environment1"
                                         value="activate"
-                                        checked={settings.art_ar_try_on_xr_environment == 'activate'}
+                                        checked={settings.ar_try_on_xr_environment == 'activate'}
                                         onChange={handleChange}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
@@ -592,10 +547,10 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_xr_environment"
-                                        id="art_ar_try_on_xr_environment2"
+                                        name="ar_try_on_xr_environment"
+                                        id="ar_try_on_xr_environment2"
                                         value="deactivate"
-                                        checked={settings.art_ar_try_on_xr_environment == 'deactivate'}
+                                        checked={settings.ar_try_on_xr_environment == 'deactivate'}
                                         onChange={handleChange}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
@@ -612,17 +567,17 @@ export default function Settings() {
 
                         {/* Custom AR Button */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_button" className="art-font-medium">
+                            <label htmlFor="ar_try_on_ar_button" className="art-font-medium">
                                 Custom AR Button
                             </label>
                             <div className="art-flex art-items-center art-space-x-4">
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_ar_button"
-                                        id="art_ar_try_on_ar_button1"
+                                        name="ar_try_on_ar_button"
+                                        id="ar_try_on_ar_button1"
                                         value="activate"
-                                        checked={settings.art_ar_try_on_ar_button == 'activate'}
+                                        checked={settings.ar_try_on_ar_button == 'activate'}
                                         onChange={handleChange}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
@@ -631,10 +586,10 @@ export default function Settings() {
                                 <label className="art-flex art-items-center art-space-x-2">
                                     <input
                                         type="radio"
-                                        name="art_ar_try_on_ar_button"
-                                        id="art_ar_try_on_ar_button2"
+                                        name="ar_try_on_ar_button"
+                                        id="ar_try_on_ar_button2"
                                         value="deactivate"
-                                        checked={settings.art_ar_try_on_ar_button == 'deactivate'}
+                                        checked={settings.ar_try_on_ar_button == 'deactivate'}
                                         onChange={handleChange}
                                         className="art-text-blue-600 art-focus:ring-blue-500"
                                     />
@@ -651,14 +606,14 @@ export default function Settings() {
 
                         {/* Button Text */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_button_text" className="art-font-medium">
+                            <label htmlFor="ar_try_on_ar_button_text" className="art-font-medium">
                                 Button Text
                             </label>
                             <input
                                 type="text"
-                                id="art_ar_try_on_ar_button_text"
-                                name="art_ar_try_on_ar_button_text"
-                                value={settings.art_ar_try_on_ar_button_text}
+                                id="ar_try_on_ar_button_text"
+                                name="ar_try_on_ar_button_text"
+                                value={settings.ar_try_on_ar_button_text}
                                 onChange={handleChange}
                                 className="art-block art-p-2 art-border art-rounded"
                             />
@@ -666,50 +621,70 @@ export default function Settings() {
 
                         {/* Button Color */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_button_background_color"
+                            <label htmlFor="ar_try_on_ar_button_background_color"
                                    className="art-font-medium">
-                                Button Color
+                                Button Background Color
                             </label>
-                            <input
-                                type="color"
-                                id="art_ar_try_on_ar_button_background_color"
-                                name="art_ar_try_on_ar_button_background_color"
-                                style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
-                                value={settings.art_ar_try_on_ar_button_background_color}
-                                onChange={(e) => handleChange(e, 'art_ar_try_on_ar_button_background_color')}
-                                className="art-block art-p-2 art-border art-rounded"
-                            />
+                            <div className="art-flex art-items-center art-gap-2">
+                                <input
+                                    type="text"
+                                    id="ar_try_on_ar_button_background_color"
+                                    name="ar_try_on_ar_button_background_color"
+                                    className="art-block  art-p-2 art-border art-rounded"
+                                    value={settings.ar_try_on_ar_button_background_color}
+                                    onChange={handleChange}
+                                />
+                                <input
+                                    type="color"
+                                    id="ar_try_on_ar_button_background_color"
+                                    name="ar_try_on_ar_button_background_color"
+                                    style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
+                                    value={settings.ar_try_on_ar_button_background_color}
+                                    onChange={(e) => handleChange(e, 'ar_try_on_ar_button_background_color')}
+                                    className="art-block art-p-2 art-border art-rounded"
+                                />
+                            </div>
                         </div>
 
                         {/* Button Text color Color */}
                         <div className="art-space-y-2">
-                            <label htmlFor="art_ar_try_on_ar_button_text_color"
+                            <label htmlFor="ar_try_on_ar_button_text_color"
                                    className="art-font-medium">
-                                Button Color
+                                Button Text Color
                             </label>
-                            <input
-                                type="color"
-                                id="art_ar_try_on_ar_button_text_color"
-                                name="art_ar_try_on_ar_button_text_color"
-                                style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
-                                value={settings.art_ar_try_on_ar_button_text_color}
-                                onChange={(e) => handleChange(e, 'art_ar_try_on_ar_button_text_color')}
-                                className="art-block art-p-2 art-border art-rounded"
-                            />
+                            <div className="art-flex art-items-center art-gap-2">
+                                <input
+                                    type="text"
+                                    id="ar_try_on_ar_button_text_color"
+                                    name="ar_try_on_ar_button_text_color"
+                                    className="art-block  art-p-2 art-border art-rounded"
+                                    value={settings.ar_try_on_ar_button_text_color}
+                                    onChange={handleChange}
+                                />
+                                <input
+                                    type="color"
+                                    id="ar_try_on_ar_button_text_color"
+                                    name="ar_try_on_ar_button_text_color"
+                                    style={{backgroundColor: "rgba(78, 186, 79, 0)"}}
+                                    value={settings.ar_try_on_ar_button_text_color}
+                                    onChange={(e) => handleChange(e, 'ar_try_on_ar_button_text_color')}
+                                    className="art-block art-p-2 art-border art-rounded"
+                                />
+                            </div>
                         </div>
 
                         {/* Clear Cache */}
                         <div className="art-space-y-2 art-mr-1">
-                            <label htmlFor="art_ar_try_on_clear_cache"
+                            <label htmlFor="ar_try_on_clear_cache"
                                    className="art-font-medium">
                                 Clear Cache
                             </label>
                             <input
                                 type="checkbox"
-                                id="art_ar_try_on_clear_cache"
-                                name="art_ar_try_on_clear_cache"
-                                value={settings.art_ar_try_on_clear_cache}
-                                onChange={(e) => handleChange(e, 'art_ar_try_on_clear_cache')}
+                                id="ar_try_on_clear_cache"
+                                name="ar_try_on_clear_cache"
+                                value={settings.ar_try_on_clear_cache}
+                                onChange={(e) => handleChange(e, 'ar_try_on_clear_cache')}
                                 className="art-block art-p-5 art-border art-rounded"
                             />
                         </div>
