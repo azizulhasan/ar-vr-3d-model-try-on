@@ -44,7 +44,8 @@ class AR_TRY_ON_Activator {
 					"ar_try_on_file_android" => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.glb",
 					"ar_try_on_file_ios"     => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.glb",
 					"ar_try_on_file_poster"  => AR_TRY_ON_PLUGIN_URL . "admin/demo/demo_poster.png",
-					"ar_try_on_file_alt"     => "Demo title"
+					"ar_try_on_file_alt"     => "Demo title",
+					"ar_try_on_ar_placement" => "floor"
 				) );
 			}
 
@@ -66,7 +67,6 @@ class AR_TRY_ON_Activator {
 				'ar_try_on_ar'                         => "activate",
 				'ar_try_on_ar_modes'                   => [ "webxr", 'scene-viewer', "quick-look" ],
 				'ar_try_on_ar_scale'                   => "auto",
-				'ar_try_on_ar_placement'               => "floor",
 				'ar_try_on_xr_environment'             => "activate",
 				'ar_try_on_ar_button'                  => "activate",
 				'ar_try_on_ar_button_text'             => "Activate AR",
@@ -130,6 +130,7 @@ class AR_TRY_ON_Activator {
 			'ar_try_on_file_ios',
 			'ar_try_on_file_poster',
 			'ar_try_on_file_alt',
+			'ar_try_on_ar_placement',
 		);
 
 		// Loop through required keys and check if they exist and have a value

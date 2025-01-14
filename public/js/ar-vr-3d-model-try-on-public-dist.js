@@ -3878,10 +3878,8 @@ document.addEventListener('DOMContentLoaded', function () {
               console.error('Product ID is missing');
               return _context.abrupt("return");
             case 4:
-              console.log(product_id);
-              // Your custom HTML content
               if (true) {
-                _context.next = 14;
+                _context.next = 13;
                 break;
               }
               htmlContent = "\n                  <div class=\"modal-overlay\" id=\"modalOverlay\">\n    <div class=\"modal\">\n      <button class=\"close-btn\" id=\"closeModal\">&times;</button>\n      <h2>Modal Content</h2>\n      <p>This is a custom modal with blurred background and white content area.</p>\n    </div>\n  </div>";
@@ -3889,7 +3887,7 @@ document.addEventListener('DOMContentLoaded', function () {
               loadingMessage = alertifyjs__WEBPACK_IMPORTED_MODULE_0___default().success('Loading 3D model...', 2000);
               formData = new FormData();
               formData.append('product_id', product_id);
-              _context.next = 12;
+              _context.next = 11;
               return (0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)((0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_1__.getURL)('get_model_and_settings'), formData).then(function (response) {
                 console.log(response);
 
@@ -3950,19 +3948,18 @@ document.addEventListener('DOMContentLoaded', function () {
               })["catch"](function (err) {
                 console.log(err);
               });
-            case 12:
-              _context.next = 20;
+            case 11:
+              _context.next = 19;
               break;
-            case 14:
-              _htmlContent = "\n                <div style=\"display: flex; justify-content: center; align-items: center; height: 100%;\">\n                    <model-viewer \n                        id=\"model-viewer\" \n                        src=\"\" \n                        alt=\"\" \n                        poster=\"\" \n                        reveal=\"\" \n                        loading=\"\" \n                        ar \n                        ar-modes=\"\" \n                        camera-controls\n                        ar-scale=\"auto\"\n                        style=\"width: 100%; max-width: 600px; height: 400px;\"\n                    ></model-viewer>\n                </div>";
+            case 13:
+              _htmlContent = "\n                        <div style=\"display: flex; justify-content: center; align-items: center; height: 100%;\">\n                            <model-viewer \n                                id=\"model-viewer\" \n                                src=\"\" \n                                alt=\"\" \n                                poster=\"\" \n                                reveal=\"\" \n                                loading=\"\" \n                                ar \n                                ar-modes=\"\" \n                                camera-controls\n                                ar-scale=\"auto\"\n                                xr-environment\n                                style=\"width: 100%; max-width: 600px; height: 400px;\"\n                            ></model-viewer>\n                        </div>";
               // Show loading message before sending the request
               _loadingMessage = alertifyjs__WEBPACK_IMPORTED_MODULE_0___default().success('Loading 3D model...', 2000);
               _formData = new FormData();
               _formData.append('product_id', product_id);
-              _context.next = 20;
+              _context.next = 19;
               return (0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)((0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_1__.getURL)('get_model_and_settings'), _formData).then(function (response) {
                 console.log(response);
-
                 // Hide loading message
                 if (_loadingMessage) {
                   _loadingMessage.dismiss();
@@ -3984,23 +3981,34 @@ document.addEventListener('DOMContentLoaded', function () {
                     var modelViewer = document.getElementById('model-viewer');
                     if (modelViewer) {
                       modelViewer.setAttribute('src', data.model_3d_file || '');
+                      modelViewer.setAttribute('ios-src', data.model_ios_file || '');
                       modelViewer.setAttribute('alt', data.model_alt || '');
                       modelViewer.setAttribute('poster', data.model_poster || '');
                       modelViewer.setAttribute('reveal', data.reveal || 'auto');
                       modelViewer.setAttribute('loading', data.loading || 'auto');
                       modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
+                      modelViewer.setAttribute('ar-placement', data.ar_placement || 'floor');
                       modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
                       var scale = data.scale || 'auto'; // Default value if not defined
                       modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
+                      if (data.ar === "deactivate") {
+                        modelViewer.removeAttribute('ar');
+                      }
+                      if (data.xr_environment === "deactivate") {
+                        modelViewer.removeAttribute('xr-environment');
+                      }
+                      // TODO: add functionality for this.
+                      // if(data.custom_button === "activate") {
+                      //     modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
+                      // }
                     }
                   }
-                } else {
                   console.error(response.data);
                 }
               })["catch"](function (err) {
                 console.log(err);
               });
-            case 20:
+            case 19:
             case "end":
               return _context.stop();
           }

@@ -7,7 +7,8 @@ const ARProductModelSettings = () => {
         ar_try_on_file_android: '',
         ar_try_on_file_ios: '',
         ar_try_on_file_poster: '',
-        ar_try_on_file_alt: 'test',
+        ar_try_on_file_alt: 'Title',
+        ar_try_on_ar_placement: 'floor',
     });
     const [currentValue, setCurrentValue] = useState({});
 
@@ -83,9 +84,50 @@ const ARProductModelSettings = () => {
     };
     return (
         <form onSubmit={handleSubmit}>
-            <div className="art-p-4 art-bg-gray-100">
+            <div className="art-bg-gray-100">
+                {/* AR Placement */}
+                <div className="art-mb-3">
+                    <label htmlFor="ar_try_on_ar_placement" className="art-font-medium">
+                        AR Placement
+                    </label>
+                    <div className="art-flex art-items-center art-space-x-4">
+                        <label className="art-flex art-items-center art-space-x-2">
+                            <input
+                                type="radio"
+                                name="ar_try_on_ar_placement"
+                                id="ar_try_on_ar_placement1"
+                                value="floor"
+                                checked={productModel.ar_try_on_ar_placement == 'floor'}
+                                onChange={handleChange}
+                                className="art-text-blue-600 art-focus:ring-blue-500"
+                            />
+                            <span>Floor</span>
+                        </label>
+                        <label className="art-flex art-items-center art-space-x-2">
+                            <input
+                                type="radio"
+                                name="ar_try_on_ar_placement"
+                                id="ar_try_on_ar_placement2"
+                                value="wall"
+                                checked={productModel.ar_try_on_ar_placement == 'wall'}
+                                onChange={handleChange}
+                                className="art-text-blue-600 art-focus:ring-blue-500"
+                            />
+                            <span>Wall</span>
+                        </label>
+                    </div>
+                    <p className="art-text-sm art-text-gray-500">
+                        Selects whether to place the object on the floor (horizontal surface) or a wall
+                        (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be
+                        placed
+                        against the wall and the shadow will be put on this surface as well. Note that the
+                        different
+                        AR
+                        modes handle the placement UX differently.
+                    </p>
+                </div>
                 {/* 3D Model Section */}
-                <div className="art-mb-6">
+                <div className="art-mb-3">
                     <h5 className="art-text-lg art-font-bold art-flex art-items-center art-gap-2">
                         <img
                             src={ar_try_on.plugin_url + "admin/images/icons8-3d-object-18.png"}
@@ -102,7 +144,7 @@ const ARProductModelSettings = () => {
                 </div>
 
                 {/* File for Android */}
-                <div className="art-mb-6">
+                <div className="art-mb-3">
                     <label
                         htmlFor="ar_try_on_file_android"
                         className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
@@ -132,7 +174,7 @@ const ARProductModelSettings = () => {
                 </div>
 
                 {/* File for iOS */}
-                <div className="art-mb-6">
+                <div className="art-mb-3">
                     <label
                         htmlFor="ar_try_on_file_ios"
                         className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
@@ -163,7 +205,7 @@ const ARProductModelSettings = () => {
                 </div>
 
                 {/* Poster */}
-                <div className="art-mb-6">
+                <div className="art-mb-3">
                     <label
                         htmlFor="ar_try_on_file_poster"
                         className="art-block art-text-sm art-font-medium"
@@ -189,7 +231,7 @@ const ARProductModelSettings = () => {
                 </div>
 
                 {/* Alt Text */}
-                <div className="art-mb-6">
+                <div className="art-mb-3">
                     <label
                         htmlFor="ar_try_on_file_alt"
                         className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
@@ -213,7 +255,7 @@ const ARProductModelSettings = () => {
                         Insert a text. If the text field is left empty, the name of the product is taken.
                     </p>
                 </div>
-                <div className="art-mb-6">
+                <div className="art-mb-3">
                     <button type={'submit'}
                             className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500  art-w-full">
                         Save

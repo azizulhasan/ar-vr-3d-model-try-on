@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Product ID is missing');
                     return;
                 }
-                console.log(product_id)
                 // Your custom HTML content
                 if (false) {
                     const htmlContent = `
@@ -106,21 +105,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                 } else {
                     const htmlContent = `
-                <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                    <model-viewer 
-                        id="model-viewer" 
-                        src="" 
-                        alt="" 
-                        poster="" 
-                        reveal="" 
-                        loading="" 
-                        ar 
-                        ar-modes="" 
-                        camera-controls
-                        ar-scale="auto"
-                        style="width: 100%; max-width: 600px; height: 400px;"
-                    ></model-viewer>
-                </div>`;
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                            <model-viewer 
+                                id="model-viewer" 
+                                src="" 
+                                alt="" 
+                                poster="" 
+                                reveal="" 
+                                loading="" 
+                                ar 
+                                ar-modes="" 
+                                camera-controls
+                                ar-scale="auto"
+                                xr-environment
+                                style="width: 100%; max-width: 600px; height: 400px;"
+                            ></model-viewer>
+                        </div>`;
 
                     let loadingMessage;
                     // Show loading message before sending the request
@@ -130,7 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     await postWithoutImage(getURL('get_model_and_settings'), formData)
                         .then((response) => {
                             console.log(response);
-
                             // Hide loading message
                             if (loadingMessage) {
                                 loadingMessage.dismiss();
@@ -156,19 +155,29 @@ document.addEventListener('DOMContentLoaded', () => {
                                     const modelViewer = document.getElementById('model-viewer');
                                     if (modelViewer) {
                                         modelViewer.setAttribute('src', data.model_3d_file || '');
+                                        modelViewer.setAttribute('ios-src', data.model_ios_file || '');
                                         modelViewer.setAttribute('alt', data.model_alt || '');
                                         modelViewer.setAttribute('poster', data.model_poster || '');
                                         modelViewer.setAttribute('reveal', data.reveal || 'auto');
                                         modelViewer.setAttribute('loading', data.loading || 'auto');
                                         modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
+                                        modelViewer.setAttribute('ar-placement', (data.ar_placement || 'floor'));
                                         modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
-
                                         const scale = data.scale || 'auto'; // Default value if not defined
                                         modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
+                                        if (data.ar === "deactivate") {
+                                            modelViewer.removeAttribute('ar');
+                                        }
+                                        if (data.xr_environment === "deactivate") {
+                                            modelViewer.removeAttribute('xr-environment');
+                                        }
+                                        // TODO: add functionality for this.
+                                        // if(data.custom_button === "activate") {
+                                        //     modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
+                                        // }
                                     }
                                 }
 
-                            } else {
                                 console.error(response.data);
                             }
                         })
