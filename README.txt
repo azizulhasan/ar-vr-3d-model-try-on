@@ -1,10 +1,10 @@
 === AR VR 3D Model Try On  ===
-Contributors: hasanazizul
+Contributors: hasanazizul, atlasaidev
 Tags: AR, VR, 3D, Try on, Augmented Reality
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -94,6 +94,13 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 1. preview
 
 == Changelog ==
+
+
+= 1.0.8 ( 20 Jan 2025 )  =
+* Improved: UI improved.
+* Contact information added.
+* Feature added to dashboard
+
 
 = 1.0.7 ( 14 Jan 2025 )  =
 * Fixed: Settings save issue fixed.
