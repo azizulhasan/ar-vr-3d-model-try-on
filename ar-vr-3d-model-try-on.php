@@ -13,8 +13,9 @@
  * @wordpress-plugin
  * Plugin Name:       AR VR 3D Model Try On
  * Description:       Showcase WordPress products in 3D & AR! Engage shoppers with 3D models, AR experiences, and AI tools—perfect for WooCommerce stores.
- * Version:           1.0.7
+ * Version:           1.0.8
  * Author:            Azizul Hasan
+ * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.txt
  * Text Domain:       ar-vr-3d-model-try-on
@@ -117,7 +118,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'AR_TRY_ON_VERSION' ) ) {
-			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.0.7' ) );
+			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.0.8' ) );
 		}
 
 		if ( ! defined( 'AR_TRY_ON_PLUGIN_NAME' ) ) {
