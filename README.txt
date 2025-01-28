@@ -1,30 +1,39 @@
 === AR VR 3D Model Try On  ===
 Contributors: hasanazizul, atlasaidev
-Tags: AR, VR, 3D, Try on, Augmented Reality
+Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 
-Showcase WordPress products in 3D & AR! Engage shoppers with 3D models, AR experiences, and AI tools—perfect for WooCommerce stores.
+Best user friendly __augmented reality__ plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
 
 == Description ==
 
-**AR VR 3D Model Try On** is a cutting-edge WordPress plugin that transforms online shopping by enabling businesses to display their products using interactive 3D models and augmented reality (AR). With support for `.glb, .gltf` file formats, this plugin offers a dynamic and immersive shopping experience that enhances customer engagement and boosts conversion rates.
+Best user friendly __augmented reality__ plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
 
-If WooCommerce is active, the plugin seamlessly integrates to provide full support for showcasing your products in 3D and AR directly in your store. From furniture and gadgets to fashion, this tool is designed to help you stand out in the competitive eCommerce landscape.
 
-Take your store to the next level with **AI-powered tools** for 3D model generation. Easily create stunning 3D models from text descriptions or images (Pro version required).
+**No Registration, No Account, No API installation required. Simply install and let your visitors enjoy augmented reality of your woocommerce.**
+
+
+**AR VR 3D Model Try On** is a cutting-edge WordPress plugin that transforms online shopping by enabling businesses to display their products using interactive __3D models__ and __augmented reality__ (AR). With support for `.glb, .gltf` file formats, this plugin offers a dynamic and immersive shopping experience that enhances customer engagement and boosts conversion rates.
+
+If WooCommerce is active, the plugin seamlessly integrates to provide full support for showcasing your products in __3D__ and __AR__ directly in your __woocommerce__. From furniture and gadgets to fashion, this tool is designed to help you stand out in the competitive __eCommerce__ landscape.
+
+### SOME USEFUL LINKS:
+* [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
+* [Video Tutorial](https://www.youtube.com/@atlasaidev)
+* [Documentation](https://atlasaidev.com/docs/)
 
 ---
 
 ### 🌟 Key Features
 
 - **Augmented Reality (AR)**: Enable customers to explore products in their real-world environment using AR.
-- **3D Model Integration**: Showcase `.glb, .gltf`  files effortlessly.
+- **3D Model Integration**: display `.glb, .gltf`  files effortlessly.
 - **WordPress Compatibility**: Built to integrate seamlessly with WordPress.
 - **WooCommerce Support**: Fully compatible with WooCommerce for a complete eCommerce solution.
 - **External 3D File Support**: Import 3D models from services like Sketchfab and other sources.
@@ -36,7 +45,7 @@ Take your store to the next level with **AI-powered tools** for 3D model generat
 - **Boost Engagement**: Interactive 3D and AR features captivate customers and keep them engaged.
 - **Increase Conversion Rates**: Help shoppers visualize products more effectively to make confident buying decisions.
 - **User-Friendly Interface**: Intuitive setup with no technical expertise required.
-- **Advanced Technology**: Stay ahead with state-of-the-art AR and 3D model capabilities.
+- **Advanced Technology**: Stay ahead with state-of-the-art AR and __3D model__ capabilities.
 - **Scalable Solution**: Perfect for small businesses and large enterprises alike.
 
 ---
@@ -51,7 +60,7 @@ Take your store to the next level with **AI-powered tools** for 3D model generat
 
 Transform your WordPress and WooCommerce store with **AR VR 3D Model Try On**. Let your customers visualize and interact with products like never before, increasing satisfaction and driving sales.
 
-Start today and redefine the future of eCommerce with augmented reality and 3D technology! 🚀
+Start today and redefine the future of eCommerce with __augmented reality__ and 3D technology! 🚀
 
 
 
@@ -94,6 +103,11 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 1. preview
 
 == Changelog ==
+
+
+= 1.0.9 ( 28 Jan 2025 )  =
+* Improved: Minor changes.
+* Improved: Documentation improved.
 
 
 = 1.0.8 ( 20 Jan 2025 )  =
