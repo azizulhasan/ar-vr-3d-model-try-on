@@ -4,7 +4,7 @@ Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -104,6 +104,10 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
+
+= 1.0.10 ( 09 Feb 2025 )  =
+* Fixed: Unnecessary button load issue solved.
+* Fixed: Unnecessary tab adding in woocommerce solved.
 
 = 1.0.9 ( 28 Jan 2025 )  =
 * Improved: Minor changes.
