@@ -140,7 +140,6 @@ class AR_TRY_ON_Helper {
 	public static function is_ar_supported_post_type() {
 		global $post;
 
-		return  true;
 		if ( ! $post ) {
 			return false;
 		}
@@ -162,6 +161,16 @@ class AR_TRY_ON_Helper {
 		if ( $post->post_type == 'product' && $result && $current_hook === 'the_content' ) {
 			$result = false;
 		}
+
+		if ( ! is_admin() ) {
+			$product_settings = (array) get_post_meta( $post->ID, 'ar_try_on_product_settings', true );
+
+			//Get the file url for android
+			if ( ! isset( $product_settings['ar_try_on_file_android'] ) || ! $product_settings['ar_try_on_file_android'] ) {
+				$result = false;
+			}
+		}
+
 
 		return $result;
 	}
