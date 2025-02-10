@@ -1,10 +1,10 @@
-=== AR VR 3D Model Try On  ===
+=== Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On  ===
 Contributors: hasanazizul, atlasaidev
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -29,7 +29,7 @@ If WooCommerce is active, the plugin seamlessly integrates to provide full suppo
 * [Documentation](https://atlasaidev.com/docs/)
 
 ### CHECK OUT OUR OTHER ADDONS 👑:
-> * [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
+🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
 
 
 ---
@@ -108,6 +108,9 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
+
+= 1.0.12 ( 10 Feb 2025 )  =
+Title changed.
 
 = 1.0.11 ( 09 Feb 2025 )  =
 Fixed bug on helper file.
