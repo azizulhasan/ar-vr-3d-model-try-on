@@ -28,6 +28,10 @@ If WooCommerce is active, the plugin seamlessly integrates to provide full suppo
 * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 * [Documentation](https://atlasaidev.com/docs/)
 
+### CHECK OUT OUR OTHER ADDONS 👑:
+> * [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
+
+
 ---
 
 ### 🌟 Key Features
