@@ -2,9 +2,9 @@
 Contributors: hasanazizul, atlasaidev
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
-Tested up to: 6.7.1
+Tested up to: 6.7.2
 Requires PHP: 7.4
-Stable tag: 1.0.12
+Stable tag: 1.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -108,6 +108,9 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
+
+= 1.1.0 ( 09 Mar 2025 )  =
+Freemius integrated.
 
 = 1.0.12 ( 10 Feb 2025 )  =
 Title changed.
