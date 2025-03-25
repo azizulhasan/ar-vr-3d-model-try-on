@@ -4,7 +4,7 @@ Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.7.2
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -22,6 +22,15 @@ Best user friendly __augmented reality__ plugin. There is no limit just install 
 **AR VR 3D Model Try On** is a cutting-edge WordPress plugin that transforms online shopping by enabling businesses to display their products using interactive __3D models__ and __augmented reality__ (AR). With support for `.glb, .gltf` file formats, this plugin offers a dynamic and immersive shopping experience that enhances customer engagement and boosts conversion rates.
 
 If WooCommerce is active, the plugin seamlessly integrates to provide full support for showcasing your products in __3D__ and __AR__ directly in your __woocommerce__. From furniture and gadgets to fashion, this tool is designed to help you stand out in the competitive __eCommerce__ landscape.
+
+
+
+== How To Install Augmented Reality ( AR VR Try On ) Plugin By AtlasAidev  ==
+[youtube https://www.youtube.com/watch?v=1WgR-xUMHa0&ab_channel=AtlasAiDev]
+
+== Augmented Reality Plugin From Mobile Phone  ==
+[youtube https://www.youtube.com/watch?v=NlYaGeYeS1w&t=81s&ab_channel=AtlasAiDev]
+
 
 ### SOME USEFUL LINKS:
 * [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
@@ -107,6 +116,12 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 1. preview
 
 == Changelog ==
+
+
+
+= 1.1.1 ( 25 Mar 2025 )  =
+Added: Initial setup video added.
+
 
 
 = 1.1.0 ( 09 Mar 2025 )  =
