@@ -57,7 +57,7 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
             require_once AR_TRY_ON_PLUGIN_PATH . 'libs/AtlasAiDev/Client.php';
         }
         // Load Client
-        $this->client = new \AtlasAiDev\AppService\Client( 'dec06622-980f-4674-8b08-72e23cc9e70f', AR_TRY_ON_PLUGIN_NAME, AR_TRY_ON_ROOT_FILE );
+        $this->client = new \AtlasAiDev\AppService\Client( 'e0212edbb7ce82838c61d71951c5cb2c', AR_TRY_ON_PLUGIN_NAME, AR_TRY_ON_ROOT_FILE );
         // Load
         $this->insights  = $this->client->insights(); // Plugin Insights
         $this->promotion = $this->client->promotions(); // Promo offers
