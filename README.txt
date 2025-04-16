@@ -2,9 +2,9 @@
 Contributors: hasanazizul, atlasaidev
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
-Tested up to: 6.8.0
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -121,6 +121,9 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 == Changelog ==
 
+
+= 1.2.0 ( 16 April 2025 )  =
+Added: tracker added.
 
 = 1.1.2 ( 08 April 2025 )  =
 Added: Compatible with wordpress 6.8.0
