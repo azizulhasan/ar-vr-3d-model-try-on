@@ -2,7 +2,6 @@
 
 namespace AR_TRY_ON;
 
-use function GuzzleHttp\Promise\all;
 
 /**
  * Fired during plugin activation

@@ -14,7 +14,7 @@
  * Plugin Name:       Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Best user friendly augmented reality plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
- * Version:           1.1.2
+ * Version:           1.2.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -41,6 +41,8 @@ use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
+use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
+
 
 
 if ( ! function_exists( 'av3mto_fs' ) ) {
@@ -159,7 +161,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'AR_TRY_ON_VERSION' ) ) {
-			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.1.2' ) );
+			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.2.0' ) );
 		}
 
 		if ( ! defined( 'AR_TRY_ON_PLUGIN_NAME' ) ) {
@@ -186,6 +188,9 @@ class AR_TRY_ON_Init {
 
 function ar_try_on_run() {
 	new AR_TRY_ON_Init();
+//	if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
+		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
+//	}
 	new AR_TRY_ON_Api_Routes();
 }
 
