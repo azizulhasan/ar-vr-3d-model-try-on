@@ -2,9 +2,9 @@
 Contributors: hasanazizul, atlasaidev
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
-Tested up to: 6.7.2
+Tested up to: 6.8.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -113,11 +113,18 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 
 == Screenshots ==
-1. preview
+1. Settings For Wordpress
+2. Settings For WooCommerce
+3. Upload 3D Model By Metabox
+4. Demo Product In Frontend
+4. Plugin Features
 
 == Changelog ==
 
 
+= 1.1.2 ( 08 April 2025 )  =
+Added: Compatible with wordpress 6.8.0
+Added: Screenshots added of the plugin.
 
 = 1.1.1 ( 25 Mar 2025 )  =
 Added: Initial setup video added.
