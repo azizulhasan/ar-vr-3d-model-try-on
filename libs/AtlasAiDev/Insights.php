@@ -207,7 +207,7 @@ class Insights {
 	 */
 	private function init_plugin() {
 		// plugin deactivate popup.
-		if (  $this->__is_local_server() ) {
+		if ( ! $this->__is_local_server() ) {
 			add_action( 'plugin_action_links_' . $this->client->getBasename(), [ $this, 'plugin_action_links' ] );
 			add_action( 'admin_footer', [ $this, 'deactivate_scripts' ] );
 		}
@@ -448,18 +448,18 @@ class Insights {
 	 * @return void
 	 */
 	public function admin_notice() {
-//		if ( $this->__notice_dismissed() ) {
-//			return;
-//		}
-//
-//		if ( $this->is_tracking_allowed() ) {
-//			return;
-//		}
+		if ( $this->__notice_dismissed() ) {
+			return;
+		}
+
+		if ( $this->is_tracking_allowed() ) {
+			return;
+		}
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
 		// don't show tracking if a local server.
-		if (  $this->__is_local_server() && $this->should_show_notice_on_current_page() ) {
+		if ( ! $this->__is_local_server() && $this->should_show_notice_on_current_page() ) {
 			
 			if ( empty( $this->notice ) ) {
 				$notice = sprintf(
