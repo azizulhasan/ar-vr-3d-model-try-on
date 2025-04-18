@@ -174,6 +174,11 @@ class AR_TRY_ON_Public {
 	 *
 	 */
 	public function ar_try_on_woocommerce_tab( $tabs ) {
+
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			return $tabs;
+		}
+
 		$tabs['ar_try_on_3d_view'] = array(
 			'title'    => __( 'AR Try On Product View', 'woocommerce' ),
 			'priority' => 50,

@@ -2,7 +2,6 @@
 
 namespace AR_TRY_ON;
 
-use function GuzzleHttp\Promise\all;
 
 /**
  * Fired during plugin activation
@@ -56,7 +55,7 @@ class AR_TRY_ON_Activator {
 		/**
 		 * Customization settings.
 		 */
-		if ( $renew_all_settings || ! $all_settings ) {
+		if ( $renew_all_settings || empty( $all_settings ) ) {
 			$all_settings = [
 				'ar_try_on_allowed_post_types'         => [ 'post' ],
 				'ar_try_on_wc_hook_position'           => "3",

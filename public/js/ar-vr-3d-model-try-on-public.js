@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 // Your custom HTML content
-                if (false) {
+                if (1) {
                     const htmlContent = `
                   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
-                                    // showModal()
+                                    showModal()
                                     wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, data);
                                 }
 
@@ -175,17 +175,56 @@ document.addEventListener('DOMContentLoaded', () => {
                                         // if(data.custom_button === "activate") {
                                         //     modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
                                         // }
+
                                     }
                                 }
 
-                                console.error(response.data);
+                                if (response.success) {
+                                    const data = response.data;
+
+                                    // Use the product name as the modal title
+                                    const productName = data.product_name || '3D Product';
+
+                                    alertify
+                                        .alert(productName, htmlContent)
+                                        .set({
+                                            transition: 'zoom',
+                                            movable: true,
+                                            maximizable: true
+                                        }) // Customize options
+                                        .setHeader(productName);
+
+                                    // Check if the data exists before assigning it to model-viewer
+                                    if (data) {
+                                        const modelViewer = document.getElementById('model-viewer');
+                                        if (modelViewer) {
+                                            modelViewer.setAttribute('src', data.model_3d_file || '');
+                                            modelViewer.setAttribute('alt', data.model_alt || '');
+                                            modelViewer.setAttribute('poster', data.model_poster || '');
+                                            modelViewer.setAttribute('reveal', data.reveal || 'auto');
+                                            modelViewer.setAttribute('loading', data.loading || 'auto');
+                                            modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
+                                            modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
+
+                                            const scale = data.scale || 'auto'; // Default value if not defined
+                                            modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
+                                        }
+                                    }
+
+                                } else {
+                                    console.error(response.data);
+                                }
                             }
                         })
-                        .catch((err) => {
-                            console.log(err);
-                        });
                 }
-            });
-        })
+            })
+        });
     }
 });
+
+
+
+
+
+
+

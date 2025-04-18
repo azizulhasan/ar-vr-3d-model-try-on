@@ -140,7 +140,6 @@ class AR_TRY_ON_Helper {
 	public static function is_ar_supported_post_type() {
 		global $post;
 
-		return  true;
 		if ( ! $post ) {
 			return false;
 		}
@@ -149,9 +148,11 @@ class AR_TRY_ON_Helper {
 			return false; // The current page is singular or single on the frontend
 		}
 
-		$settings = (array) get_option( 'ar_try_on_settings' );
-
-		$post_types = $settings['ar_try_on_allowed_post_types'];
+		$settings   = (array) get_option( 'ar_try_on_settings' );
+		$post_types = [];
+		if ( isset( $settings['ar_try_on_allowed_post_types'] ) && ! empty( $settings['ar_try_on_allowed_post_types'] ) ) {
+			$post_types = $settings['ar_try_on_allowed_post_types'];
+		}
 
 		$result = in_array( $post->post_type, $post_types );
 
@@ -162,6 +163,20 @@ class AR_TRY_ON_Helper {
 		if ( $post->post_type == 'product' && $result && $current_hook === 'the_content' ) {
 			$result = false;
 		}
+
+		if ( ! is_admin() ) {
+			$product_settings = (array) get_post_meta( $post->ID, 'ar_try_on_product_settings', true );
+
+			//Get the file url for android
+			if ( ! isset( $product_settings['ar_try_on_file_android'] ) ) {
+				$result = false;
+			}
+
+			if ( isset( $product_settings['ar_try_on_file_android'] ) && ! $product_settings['ar_try_on_file_android'] ) {
+				$result = false;
+			}
+		}
+
 
 		return $result;
 	}
