@@ -2,9 +2,9 @@
 Contributors: hasanazizul, atlasaidev
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
-Tested up to: 6.7.1
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.12
+Stable tag: 1.2.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -23,13 +23,22 @@ Best user friendly __augmented reality__ plugin. There is no limit just install 
 
 If WooCommerce is active, the plugin seamlessly integrates to provide full support for showcasing your products in __3D__ and __AR__ directly in your __woocommerce__. From furniture and gadgets to fashion, this tool is designed to help you stand out in the competitive __eCommerce__ landscape.
 
+
+
+== How To Install Augmented Reality ( AR VR Try On ) Plugin By AtlasAidev  ==
+[youtube https://www.youtube.com/watch?v=1WgR-xUMHa0&ab_channel=AtlasAiDev]
+
+== Augmented Reality Plugin From Mobile Phone  ==
+[youtube https://www.youtube.com/watch?v=NlYaGeYeS1w&t=81s&ab_channel=AtlasAiDev]
+
+
 ### SOME USEFUL LINKS:
 * [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
 * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 * [Documentation](https://atlasaidev.com/docs/)
 
 ### CHECK OUT OUR OTHER ADDONS 👑:
-🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
+🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/AR_TRY_ON_TEXT_DOMAIN/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
 
 
 ---
@@ -104,10 +113,29 @@ No, the plugin is optimized for performance. It only loads the necessary scripts
 
 
 == Screenshots ==
-1. preview
+1. Settings For Wordpress
+2. Settings For WooCommerce
+3. Upload 3D Model By Metabox
+4. Demo Product In Frontend
+4. Plugin Features
 
 == Changelog ==
 
+
+= 1.2.0 ( 16 April 2025 )  =
+Added: tracker added.
+
+= 1.1.2 ( 08 April 2025 )  =
+Added: Compatible with wordpress 6.8.0
+Added: Screenshots added of the plugin.
+
+= 1.1.1 ( 25 Mar 2025 )  =
+Added: Initial setup video added.
+
+
+
+= 1.1.0 ( 09 Mar 2025 )  =
+Freemius integrated.
 
 = 1.0.12 ( 10 Feb 2025 )  =
 Title changed.

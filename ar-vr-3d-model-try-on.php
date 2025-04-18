@@ -14,7 +14,7 @@
  * Plugin Name:       Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Best user friendly augmented reality plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
- * Version:           1.0.12
+ * Version:           1.2.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -41,7 +41,49 @@ use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
+use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 
+
+
+if ( ! function_exists( 'av3mto_fs' ) ) {
+	// Create a helper function for easy SDK access.
+	function av3mto_fs() {
+		global $av3mto_fs;
+
+		if ( ! isset( $av3mto_fs ) ) {
+			// Activate multisite network integration.
+			if ( ! defined( 'WP_FS__PRODUCT_18159_MULTISITE' ) ) {
+				define( 'WP_FS__PRODUCT_18159_MULTISITE', true );
+			}
+
+			// Include Freemius SDK.
+			require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
+			$av3mto_fs = fs_dynamic_init( array(
+				'id'                  => '18159',
+				'slug'                => 'ar-vr-3d-model-try-on',
+				'type'                => 'plugin',
+				'public_key'          => 'pk_28cf95aad28914518f7065b97bbe4',
+				'is_premium'          => false,
+				'has_addons'          => false,
+				'has_paid_plans'      => false,
+				'menu'                => array(
+					'slug'           => 'ar-vr-3d-model-try-on',
+					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',
+					'support' => false,
+					'contact' => true,
+					'account' => true,
+				),
+			) );
+		}
+
+		return $av3mto_fs;
+	}
+
+	// Init Freemius.
+	av3mto_fs();
+	// Signal that SDK was initiated.
+	do_action( 'av3mto_fs_loaded' );
+}
 
 /**
  * Currently plugin version.
@@ -119,7 +161,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'AR_TRY_ON_VERSION' ) ) {
-			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.0.12' ) );
+			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.2.0' ) );
 		}
 
 		if ( ! defined( 'AR_TRY_ON_PLUGIN_NAME' ) ) {
@@ -146,6 +188,9 @@ class AR_TRY_ON_Init {
 
 function ar_try_on_run() {
 	new AR_TRY_ON_Init();
+//	if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
+		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
+//	}
 	new AR_TRY_ON_Api_Routes();
 }
 
