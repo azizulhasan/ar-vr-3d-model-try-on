@@ -80,7 +80,7 @@ class AR_TRY_ON_Public {
 			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => AR_TRY_ON_VERSION,
-			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-pro.php' ),
+			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
 		];
 
 

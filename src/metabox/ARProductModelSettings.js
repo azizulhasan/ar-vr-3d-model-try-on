@@ -20,6 +20,11 @@ const ARProductModelSettings = () => {
         let value = '';
         value = e.target.value
         if (!e.target.name) return;
+        // if (e.target.name === 'ar_try_on_ar_placement' && (value !== 'wall' || value !== 'floor') && !ar_try_on.is_pro_active) {
+        //     alert("This option is only available in the pro version");
+        //     return;
+        // }
+
         console.log({name: e.target.name, value})
 
         setProductModel({
@@ -88,34 +93,21 @@ const ARProductModelSettings = () => {
                 {/* AR Placement */}
                 <div className="art-mb-3">
                     <label htmlFor="ar_try_on_ar_placement" className="art-font-medium">
-                        AR Placement
+                        AR Placement / Product Type
                     </label>
-                    <div className="art-flex art-items-center art-space-x-4">
-                        <label className="art-flex art-items-center art-space-x-2">
-                            <input
-                                type="radio"
-                                name="ar_try_on_ar_placement"
-                                id="ar_try_on_ar_placement1"
-                                value="floor"
-                                checked={productModel.ar_try_on_ar_placement == 'floor'}
-                                onChange={handleChange}
-                                className="art-text-blue-600 art-focus:ring-blue-500"
-                            />
-                            <span>Floor</span>
-                        </label>
-                        <label className="art-flex art-items-center art-space-x-2">
-                            <input
-                                type="radio"
-                                name="ar_try_on_ar_placement"
-                                id="ar_try_on_ar_placement2"
-                                value="wall"
-                                checked={productModel.ar_try_on_ar_placement == 'wall'}
-                                onChange={handleChange}
-                                className="art-text-blue-600 art-focus:ring-blue-500"
-                            />
-                            <span>Wall</span>
-                        </label>
-                    </div>
+
+                    <select
+                        className="art-w-full art-border art-rounded art-p-2 art-text-sm art-mt-1"
+
+                        id="ar_try_on_ar_placement"
+                        name="ar_try_on_ar_placement"
+                        value={productModel.ar_try_on_ar_placement}
+                        onChange={handleChange}
+                    >
+                        <option value="floor">Floor</option>
+                        <option value="wall">Wall</option>
+                        <option value="168">Glass </option>
+                    </select>
                     <p className="art-text-sm art-text-gray-500">
                         Selects whether to place the object on the floor (horizontal surface) or a wall
                         (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be
