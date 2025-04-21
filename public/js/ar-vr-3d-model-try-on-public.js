@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 // Your custom HTML content
-                if (1) {
+                if (ar_try_on.is_pro_active) {
                     const htmlContent = `
                   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
