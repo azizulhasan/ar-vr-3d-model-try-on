@@ -113,7 +113,6 @@ if (false) {
                             ></model-viewer>
                         </div>`;
 
-    document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
 
 
     let formData = new FormData();
@@ -124,6 +123,8 @@ if (false) {
             if (response.success) {
                 model_settings = response.data;
                 console.log({model_settings})
+                document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+
             } else {
                 console.error(response.data);
             }

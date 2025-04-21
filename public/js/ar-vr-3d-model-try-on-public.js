@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 // Your custom HTML content
-                if (false) {
+                if (1) {
                     const htmlContent = `
                   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
