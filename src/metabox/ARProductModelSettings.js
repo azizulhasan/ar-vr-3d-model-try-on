@@ -21,7 +21,7 @@ const ARProductModelSettings = () => {
         let value = '';
         value = e.target.value
         if (!e.target.name) return;
-        console.log({ar_try_on})
+
         if (e.target.name === 'ar_try_on_ar_placement' && (value !== 'wall' && value !== 'floor') && !ar_try_on.is_pro_active) {
             alert("This option is only available in the pro version");
             return;
