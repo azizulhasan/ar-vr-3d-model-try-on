@@ -67,7 +67,8 @@ class AR_TRY_ON_Cache {
 	public static function get_key( $cache_key = 'all' ) {
 		// key will be method name and value will be cache key,
 		$cache_keys = [
-			'get_post_types'     => 'get_post_types',
+			'get_post_types' => 'get_post_types',
+			'all_plugins'    => 'all_plugins',
 		];
 
 		if ( $cache_key == 'all' ) {
@@ -94,6 +95,27 @@ class AR_TRY_ON_Cache {
 		$cache_key = self::get_key( 'all_plugins' );
 		self::delete( $cache_key );
 
+	}
+
+	/**
+	 * @return mixed|void
+	 */
+	public static function all_plugins() {
+		$all_plugins_cache_key = 'all_plugins';
+		$cached_all_plugins    = self::get( $all_plugins_cache_key );
+		if ( $cached_all_plugins ) {
+			return $cached_all_plugins;
+		}
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
+		$all_plugins = get_plugins();
+
+		self::set( $all_plugins_cache_key, $all_plugins );
+
+		return $all_plugins;
 	}
 
 }

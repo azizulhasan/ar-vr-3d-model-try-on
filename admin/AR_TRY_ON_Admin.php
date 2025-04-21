@@ -84,6 +84,8 @@ class AR_TRY_ON_Admin {
 			'plugin_url'    => AR_TRY_ON_PLUGIN_URL,
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
+			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
+
 		];
 	}
 
@@ -140,6 +142,22 @@ class AR_TRY_ON_Admin {
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
 		}
 
+	}
+
+	public function enqueue_preview() {
+
+		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+//
+//			wp_enqueue_style( 'alertify', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
+//			wp_enqueue_style( 'alertify-default', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
+//			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
+
+
+			// TODO:: enqueue base on model setup/settings
+			wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
+			wp_enqueue_script( $this->plugin_name . '-preview', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
+			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on', $this->localize_data );
+		}
 	}
 
 	/**
