@@ -140,10 +140,8 @@ if (false) {
         model_settings.model_poster = data.ar_try_on_file_poster;
         model_settings.ar_placement = data.ar_try_on_ar_placement;
 
-        console.log({model_settings})
-        console.log({data})
         // Check if the data exists before assigning it to model-viewer
-        if (model_settings) {
+        if (data.ar_try_on_ar_placement === 'floor' || data.ar_try_on_ar_placement === 'wall' ) {
             const modelViewer = document.getElementById('model-viewer');
             if (modelViewer) {
                 modelViewer.setAttribute('src', model_settings.model_3d_file || '');
@@ -169,6 +167,71 @@ if (false) {
                 // }
 
             }
+        }else{
+            const htmlContent = `
+                  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <h2>Modal Content</h2>
+      <p>This is a custom modal with blurred background and white content area.</p>
+    </div>
+  </div>`;
+
+            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+
+            // Use the product name as the modal title
+            const productName = data.product_name || '3D Product';
+
+            // alertify
+            //     .alert(productName, htmlContent)
+            //     .set({
+            //         transition: 'zoom',
+            //         movable: true,
+            //         maximizable: true,
+            //         // resizable: true,
+            //     }) // Customize options
+            //     .setHeader(productName);
+
+            // Function to append modal to DOM
+            function showModal() {
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+
+                // Create modal content
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+                modalContent.id = 'ar_try_on_model_viewer';
+
+                // Add close button
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'close-btn';
+                closeBtn.textContent = 'Close';
+                closeBtn.onclick = function () {
+                    document.body.removeChild(overlay);
+                };
+
+                // Add content to modal
+                modalContent.innerHTML = '<h2>Modal Title</h2><p>This is a custom modal.</p>';
+                modalContent.appendChild(closeBtn);
+
+                // Append modal content to overlay
+                overlay.appendChild(modalContent);
+
+                // Append overlay to body
+                document.getElementById('ar_try_on_preveiw').appendChild(overlay);
+
+
+            }
+
+            // Check if the data exists before assigning it to model-viewer
+            if (data) {
+                showModal()
+                console.log({data})
+                wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, model_settings);
+            }
+
+
         }
 
     });
