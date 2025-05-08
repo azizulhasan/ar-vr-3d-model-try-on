@@ -19,6 +19,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 #### **Key AR features at a Glance:**
 * **Inspect 3D models from every angle** (rotate/zoom).
 * **Place products in real spaces** using smartphone AR (floor/wall).
+* **Preview model** Preview model in the product editor page.
 * **Try before buying** with virtual eyewear/jewelry testing.
 
 *Glass placement & virtual try-ons require Pro version - coming soon.
