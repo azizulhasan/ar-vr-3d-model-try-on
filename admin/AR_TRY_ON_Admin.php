@@ -154,8 +154,8 @@ class AR_TRY_ON_Admin {
 
 
 			// TODO:: enqueue base on model setup/settings
-			wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
-			wp_enqueue_script( $this->plugin_name . '-preview', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
+			// wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
+			wp_enqueue_script( $this->plugin_name . '-preview', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array(), $this->version, true );
 			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on', $this->localize_data );
 		}
 	}

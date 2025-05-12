@@ -1,11 +1,11 @@
 import alertify from 'alertifyjs';
 
-import {getURL, postWithoutImage, getPostID} from "../../src/context/utilities";
+import { getURL, postWithoutImage, getPostID } from "../../src/context/utilities";
 
 
 const product_id = getPostID();
 
-console.log({product_id})
+console.log({ product_id })
 // Verify if product_id is defined
 if (!product_id) {
     console.error('Product ID is missing');
@@ -122,7 +122,7 @@ if (false) {
         .then((response) => {
             if (response.success) {
                 model_settings = response.data;
-                console.log({model_settings})
+                console.log({ model_settings })
                 document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
 
             } else {
@@ -141,7 +141,7 @@ if (false) {
         model_settings.ar_placement = data.ar_try_on_ar_placement;
 
         // Check if the data exists before assigning it to model-viewer
-        if (data.ar_try_on_ar_placement === 'floor' || data.ar_try_on_ar_placement === 'wall' ) {
+        if (data.ar_try_on_ar_placement === 'floor' || data.ar_try_on_ar_placement === 'wall') {
             const modelViewer = document.getElementById('model-viewer');
             if (modelViewer) {
                 modelViewer.setAttribute('src', model_settings.model_3d_file || '');
@@ -167,7 +167,7 @@ if (false) {
                 // }
 
             }
-        }else{
+        } else {
             const htmlContent = `
                   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
@@ -208,7 +208,7 @@ if (false) {
                 closeBtn.className = 'close-btn';
                 closeBtn.textContent = 'Close';
                 closeBtn.onclick = function () {
-                    document.body.removeChild(overlay);
+                    document.getElementById('ar_try_on_preveiw').removeChild(overlay);
                 };
 
                 // Add content to modal
@@ -227,7 +227,7 @@ if (false) {
             // Check if the data exists before assigning it to model-viewer
             if (data) {
                 showModal()
-                console.log({data})
+                console.log({ data })
                 wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, model_settings);
             }
 
