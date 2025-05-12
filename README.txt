@@ -4,7 +4,7 @@ Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -17,8 +17,8 @@ Augmented Reality & 3D Model Viewer for WooCommerce lets you upload and display 
 Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android—no apps needed.
 
 #### **Key AR features at a Glance:**
-* **Inspect 3D models from every angle** (rotate/zoom).
-* **Place products in real spaces** using smartphone AR (floor/wall).
+* **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/).
+* **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/).
 * **Preview model** Preview model in the product editor page.
 * **Try before buying** with virtual eyewear/jewelry testing.
 
@@ -27,9 +27,10 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 
 ### SOME USEFUL LINKS:
+* [Augmented Reality In Real World](https://wpaugmentedreality.com/shop/)
 * [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
-* [Video Tutorial](https://www.youtube.com/@atlasaidev)
-* [Documentation](https://atlasaidev.com/docs/)
+* [Video Tutorial](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
+* [Download Now](https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip)
 
 == How To Install Augmented Reality ( AR VR Try On ) Plugin By AtlasAidev  ==
 [youtube https://www.youtube.com/watch?v=1WgR-xUMHa0&ab_channel=AtlasAiDev]
@@ -54,8 +55,8 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 * Automatic fallback to interactive 3D model viewer on desktop.
 
 #### **2. Mobile Augmented Reality Magic (AR Placement Options)**
-* **Floor Augmented Reality (AR)**: Allow customers to visualize furniture, appliances, and other large items in their rooms.
-* **Wall Augmented Reality (AR)**: Let users preview wall art, mirrors, and décor directly on their walls.
+* **Floor Augmented Reality (AR)**: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
+* **Wall Augmented Reality (AR)**: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
 * **Glass Mode (Pro Version - Coming Soon)**: Enable virtual try-ons for glasses, sunglasses, and jewelry.
 
 #### **3. WooCommerce Optimization**
@@ -87,10 +88,10 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 == Real-World Augmented Reality Applications ==
 
-* 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."
-* 👓 **Eyewear Retailers (Pro Version for Try-On)**: "Virtual try-ons reduced returns by 33% for sunglasses."
+* 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."  [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
+* 👓 **Eyewear Retailers (Pro Version for Try-On)**: "Virtual try-ons reduced returns by 33% for sunglasses." 
 * 💎 **Jewelry Designers (Pro Version for Try-On)**: "See necklaces in AR at actual scale with real lighting."
-* 🖼️ **Home Decor**: "Preview wall art placement through phone camera."
+* 🖼️ **Home Decor**: "Preview wall art placement through phone camera." [Dining Armchair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
 
 *Eyewear placement & virtual try-ons require Pro version (coming soon)
 
@@ -99,7 +100,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 **Free Model Limits**
 - Our Plugin: Unlimited
-- Others: Often 5–10 models
+- Others: Often 1–10 models
 
 **iOS AR Support**
 - Our Plugin: Full native USDZ compatibility
@@ -192,6 +193,9 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 == Changelog ==
 
 
+= 1.3.2 ( 12 May 2025 )  =
+Added: Documentation, youtube video link added.
+Added: Real application of the plugin demo added
 
 = 1.3.1 ( 08 May 2025 )  =
 Added: Readme.txt updated.
