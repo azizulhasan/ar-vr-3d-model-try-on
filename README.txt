@@ -1,10 +1,10 @@
 === Augmented Reality & 3D Model Viewer for Wordpress & WooCommerce  ===
-Contributors: hasanazizul, atlasaidev
+Contributors: atlasaidev, hasanazizul
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -191,6 +191,12 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 4. Plugin Features
 
 == Changelog ==
+
+
+= 1.3.3 ( 15 June 2025 )  =
+Changed: Contact Us page link changed.
+Added: Link added to preview demo page.
+Updated: Feature list updated.
 
 
 = 1.3.2 ( 12 May 2025 )  =
