@@ -43,6 +43,9 @@ export default function Features() {
             <li className="art-text-sm art-text-gray-700">
                 ✅  <strong>Zero Coding:</strong> Automatic AR button placement on product pages – no coding required.
             </li>
+            <li className="art-text-sm art-text-gray-700">
+                ✅  <a href={'https://wordpress.org/plugins/ar-vr-3d-model-try-on/'} target={'_blank'}>Learn more</a>
+            </li>
         </ul>
 
 )
