@@ -129,21 +129,23 @@ export default function Settings() {
     };
 
     const ar_try_on_demo_id = (e) => {
-        document.getElementById('ar_try_on_demo_id').value = 'Setting Up Preview';
-        let formData = new FormData();
-        formData.append('method', 'post');
-        postWithoutImage(getURL('demo_preview'), formData)
-            .then((res) => {
-                if (res?.data?.ar_try_on_ar_demo?.url) {
-                    document.getElementById('ar_try_on_demo_id').value = 'Preview Demo';
-                    window.open(res?.data?.ar_try_on_ar_demo?.url, '_blank')
-                } else {
-                    document.getElementById('ar_try_on_demo_id').value = 'Try Again';
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        e.preventDefault();
+        window.open('https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/', '_blank');
+        // document.getElementById('ar_try_on_demo_id').value = 'Setting Up Preview';
+        // let formData = new FormData();
+        // formData.append('method', 'post');
+        // postWithoutImage(getURL('demo_preview'), formData)
+        //     .then((res) => {
+        //         if (res?.data?.ar_try_on_ar_demo?.url) {
+        //             document.getElementById('ar_try_on_demo_id').value = 'Preview Demo';
+        //             window.open(res?.data?.ar_try_on_ar_demo?.url, '_blank')
+        //         } else {
+        //             document.getElementById('ar_try_on_demo_id').value = 'Try Again';
+        //         }
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
     }
 
     return (
