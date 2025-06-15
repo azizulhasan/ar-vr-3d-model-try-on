@@ -12,7 +12,7 @@ export default function App() {
     const tabs = [
         { name: 'Settings', href: '#', current: true, component: 'Settings' },
         { name: 'Features', href: '#', current: false,  component: 'Features' },
-        { name: 'Contact Us', href: 'https://atlasaidev.com/contact-us/', current: false,  component: 'Contact' },
+        { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false,  component: 'Contact' },
     ]
 
     function classNames(...classes) {
