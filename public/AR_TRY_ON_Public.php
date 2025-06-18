@@ -149,11 +149,16 @@ class AR_TRY_ON_Public {
         } else {
             $post_id = $post->ID;
         }
-        ob_start();
-        ?>
-        <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in 3D</button>
-        <?php
-        $ar_button_content = ob_get_clean();
+        error_log(print_r($post->post_content, true));
+        $ar_button_content = '';
+        if( !has_shortcode($post->post_content, 'atlas_ar') ) {
+            ob_start();
+            ?>
+            <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in 3D</button>
+            <?php
+            $ar_button_content = ob_get_clean();
+        }
+
 
         if ( $post->post_type != 'product' ) {
             return $content . $ar_button_content;
@@ -181,8 +186,8 @@ class AR_TRY_ON_Public {
 		} else {
 			$post_id = $post->ID;
 		}
-		ob_start();
-		?>
+        ob_start();
+        ?>
         <div  id="atlas_ar_<?php echo esc_attr($post_id) ?>"></div>
         <script type="module">
 
@@ -220,22 +225,22 @@ class AR_TRY_ON_Public {
             document.addEventListener("DOMContentLoaded", async function  () {
                 let product_id = "<?php echo esc_attr($post_id) ?>";
                 const htmlContent = `
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <model-viewer
-                                id="model_viewer_${product_id}"
-                                src=""
-                                alt=""
-                                poster=""
-                                reveal=""
-                                loading=""
-                                ar
-                                ar-modes=""
-                                camera-controls
-                                ar-scale="auto"
-                                xr-environment
-                                style="width: 100%; max-width: 600px; height: 400px;"
-                            ></model-viewer>
-                        </div>`;
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <model-viewer
+                            id="model_viewer_${product_id}"
+                            src=""
+                            alt=""
+                            poster=""
+                            reveal=""
+                            loading=""
+                            ar
+                            ar-modes=""
+                            camera-controls
+                            ar-scale="auto"
+                            xr-environment
+                            style="width: 100%; max-width: 600px; height: 400px;"
+                        ></model-viewer>
+                    </div>`;
 
                 let current_product = document.getElementById('atlas_ar_' + product_id);
                 let tab = document.getElementById('tab-title-ar_try_on_3d_view');
@@ -292,8 +297,9 @@ class AR_TRY_ON_Public {
 
             });
         </script>
-		<?php
-		$ar_button_content = ob_get_clean();
+        <?php
+        $ar_button_content = ob_get_clean();
+
 
 		if ( $post->post_type != 'product' ) {
 			return $content . $ar_button_content;
