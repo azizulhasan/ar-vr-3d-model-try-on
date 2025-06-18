@@ -189,8 +189,6 @@ class AR_TRY_ON_Helper {
             'position' => 'after',
         ), $attr );
 
-
-
         $current_filter = current_filter();
 
         if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type('shortcode') ) {
@@ -220,57 +218,10 @@ class AR_TRY_ON_Helper {
         ?>
         <div style="height: <?php echo esc_attr($attributes['height']) ?>;width: <?php echo esc_attr($attributes['width']) ?>;" id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
         <script type="module">
-
-            /**
-             * Post data method.
-             * @param {url} url api url
-             * @param {method} method request type
-             * @returns
-             */
-            async function  postWithoutImage(url = "", data = {})  {
-                // Default options are marked with *
-                const response = await fetch(url, {
-                    // headers: {
-                    //   "Content-Type": "application/json",
-                    // },
-                    method: "POST", // *GET, POST, PUT, DELETE, etc.
-                    body: data, // body data type must match "Content-Type" header
-                    headers: {
-                        'X-WP-Nonce': ar_try_on.rest_nonce
-                    },
-                });
-                const responseData = await response.json(); // parses JSON response into native JavaScript objects
-
-                return responseData;
-            };
-
-            /**
-             *
-             * @param endpoint
-             * @returns {string}
-             */
-            function getURL(endpoint = '') {
-                return ar_try_on.api_url + ar_try_on.api_namespace + '/' + ar_try_on.api_version + '/' + endpoint;
-            }
             document.addEventListener("DOMContentLoaded", async function  () {
+                let atlasAR = new window.AtlasAR()
                 let product_id = "<?php echo esc_attr($post_id) ?>";
-                const htmlContent = `
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <model-viewer
-                                id="model_viewer_shortcode_${product_id}"
-                                src=""
-                                alt=""
-                                poster=""
-                                reveal=""
-                                loading=""
-                                ar
-                                ar-modes=""
-                                camera-controls
-                                ar-scale="auto"
-                                xr-environment
-                                style="width: 100%; max-width: 600px; height: 400px;"
-                            ></model-viewer>
-                        </div>`;
+                const htmlContent = atlasAR.getModelSkeleton(`model_viewer_shortcode_${product_id}`)
 
                 let current_product = document.getElementById('atlas_ar_shortcode_' + product_id);
                 let modelLoaded = false;
@@ -278,52 +229,12 @@ class AR_TRY_ON_Helper {
                     current_product.innerHTML = '<h1>3D File Is Loading</h1>'
                 }
                 current_product.innerHTML = htmlContent; // Insert model-viewer HTML
-                let formData = new FormData();
-                formData.append('product_id', product_id);
-                await postWithoutImage(getURL('get_model_and_settings'), formData)
-                    .then((response) => {
-                        if (response.success) {
-                            const data = response.data;
-                            // Check if the data exists before assigning it to model-viewer
-                            if (data) {
-                                const modelViewer = document.getElementById("model_viewer_shortcode_"+product_id);
-                                if (modelViewer) {
-                                    console.log({modelViewer})
-                                    modelViewer.setAttribute('src', data.model_3d_file || '');
-                                    modelViewer.setAttribute('ios-src', data.model_ios_file || '');
-                                    modelViewer.setAttribute('alt', data.model_alt || '');
-                                    modelViewer.setAttribute('poster', data.model_poster || '');
-                                    modelViewer.setAttribute('reveal', data.reveal || 'auto');
-                                    modelViewer.setAttribute('loading', data.loading || 'auto');
-                                    modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
-                                    modelViewer.setAttribute('ar-placement', (data.ar_placement || 'floor'));
-                                    modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
-                                    const scale = data.scale || 'auto'; // Default value if not defined
-                                    modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-                                    if (data.ar === "deactivate") {
-                                        modelViewer.removeAttribute('ar');
-                                    }
-                                    if (data.xr_environment === "deactivate") {
-                                        modelViewer.removeAttribute('xr-environment');
-                                    }
 
-                                    if(data.custom_button === "activate") {
-                                        modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
-                                    }
-
-                                    modelLoaded = true;
-                                }
-                            }
-                        }
-                    })
-
+                atlasAR.fetchModelData(product_id, "model_viewer_shortcode_"+product_id )
             });
         </script>
         <?php
         $ar_button_content = ob_get_clean();
-
-        error_log(print_r( [ $current_filter, $post->post_type], true));
-
 
         return $ar_button_content;
     }
