@@ -4,7 +4,7 @@ Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.3.4
+Stable tag: 1.4.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -192,6 +192,12 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 
 == Changelog ==
 
+
+= 1.4. ( 19 June 2025 )  =
+Added: ShortCode "[atlas_ar]" introduced.
+Added: Option for adding AR button automatically.
+Improved: Code structure improved.
+Fixed: Minor bug fixed.
 
 = 1.3.4 ( 17 June 2025 )  =
 Added: Model preview added to woocommerce tab in front end.
