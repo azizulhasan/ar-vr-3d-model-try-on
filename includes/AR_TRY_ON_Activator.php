@@ -68,7 +68,7 @@ class AR_TRY_ON_Activator {
 				'ar_try_on_ar_modes'                   => [ "webxr", 'scene-viewer', "quick-look" ],
 				'ar_try_on_ar_scale'                   => "auto",
 				'ar_try_on_xr_environment'             => "activate",
-				'ar_try_on_ar_button'                  => "activate",
+				'ar_try_on_ar_button'                  => "deactivate",
 				'ar_try_on_ar_button_text'             => "Activate AR",
 				'ar_try_on_ar_button_background_color' => "#3a3a3a",
 				'ar_try_on_ar_button_text_color'       => "#ffffff",
