@@ -2,8 +2,6 @@
 
 namespace AR_TRY_ON;
 
-use stdClass;
-use function Symfony\Component\Translation\t;
 
 /**
  * Fired during plugin activation
@@ -137,7 +135,7 @@ class AR_TRY_ON_Helper {
 		return false;
 	}
 
-	public static function is_ar_supported_post_type() {
+	public static function is_ar_supported_post_type($call_type = '') {
 		global $post;
 
 		if ( ! $post ) {
@@ -160,7 +158,10 @@ class AR_TRY_ON_Helper {
 			$result = false;
 		}
 		$current_hook = current_filter();
-		if ( $post->post_type == 'product' && $result && $current_hook === 'the_content' ) {
+		if ( $post->post_type == 'product'
+            && $result
+            && $current_hook === 'the_content'
+            && $call_type === '' ) {
 			$result = false;
 		}
 
@@ -180,5 +181,62 @@ class AR_TRY_ON_Helper {
 
 		return $result;
 	}
+
+    public static function create_shortcode( $attr, $content = '' ) {
+        $attributes = shortcode_atts( array(
+            'height' => '400px',
+            'width' => '500px',
+            'position' => 'after',
+        ), $attr );
+
+        $current_filter = current_filter();
+
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type('shortcode') ) {
+            if ( $current_filter === 'the_content' ) {
+                return $content;
+            }
+
+            return;
+        }
+
+        // Global product variable
+        global $product;
+        global $post;
+        if ( $product ) {
+            $post_id = $product->get_id();
+            if(!$content) {
+                $content = $post->post_content;
+            }
+        } else {
+            $post_id = $post->ID;
+            if(!$content) {
+                $content = $post->post_content;
+            }
+        }
+
+        ob_start();
+        ?>
+        <div style="height: <?php echo esc_attr($attributes['height']) ?>;width: <?php echo esc_attr($attributes['width']) ?>;" id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
+        <script type="module">
+            document.addEventListener("DOMContentLoaded", async function  () {
+                let atlasAR = new window.AtlasAR()
+                let product_id = "<?php echo esc_attr($post_id) ?>";
+                const htmlContent = atlasAR.getModelSkeleton(`model_viewer_shortcode_${product_id}`)
+
+                let current_product = document.getElementById('atlas_ar_shortcode_' + product_id);
+                let modelLoaded = false;
+                if(!modelLoaded) {
+                    current_product.innerHTML = '<h1>3D File Is Loading</h1>'
+                }
+                current_product.innerHTML = htmlContent; // Insert model-viewer HTML
+
+                atlasAR.fetchModelData(product_id, "model_viewer_shortcode_"+product_id )
+            });
+        </script>
+        <?php
+        $ar_button_content = ob_get_clean();
+
+        return $ar_button_content;
+    }
 
 }

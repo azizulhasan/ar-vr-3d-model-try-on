@@ -9,6 +9,7 @@ import MultiSelect from '../../../../context/MultiSelect';
 
 export default function Settings() {
     const [settings, setSettings] = useState({
+        ar_try_on_display_button_automatically: 'yes',
         ar_try_on_allowed_post_types: ['post'],
         ar_try_on_wc_hook_position: "3",
         ar_try_on_single_product_tabs: "yes",
@@ -172,6 +173,39 @@ export default function Settings() {
                             >
                                 Preview Demo
                             </button>
+                        </div>
+                        {/* Display AR Button Autometically */}
+                        <div className="art-space-y-4">
+                            <label
+                                htmlFor="ar_try_on_single_product_tabs"
+                                className="art-block art-font-medium"
+                            >
+                                Display AR Button Autometically
+                            </label>
+                            <div className="art-flex art-space-x-4">
+                                <label className="art-flex art-items-center art-gap-2">
+                                    <input
+                                        type="radio"
+                                        id="ar_try_on_display_button_automatically1"
+                                        name="ar_try_on_display_button_automatically"
+                                        value="yes"
+                                        checked={settings.ar_try_on_display_button_automatically == 'yes'}
+                                        onChange={handleChange}
+                                    />
+                                    <span>Yes</span>
+                                </label>
+                                <label className="art-flex art-items-center art-gap-2">
+                                    <input
+                                        type="radio"
+                                        id="ar_try_on_display_button_automatically2"
+                                        name="ar_try_on_display_button_automatically"
+                                        value="no"
+                                        checked={settings.ar_try_on_display_button_automatically == 'no'}
+                                        onChange={handleChange}
+                                    />
+                                    <span>No</span>
+                                </label>
+                            </div>
                         </div>
                         <div className="art-space-y-4">
                             <label

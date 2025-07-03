@@ -14,7 +14,7 @@
  * Plugin Name:       Augmented Reality & 3D Model Viewer for Wordpress & WooCommerce
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Augmented Reality & 3D Model Viewer for WooCommerce lets you upload and display 3D models with built‑in AR on iOS and Android, no extra apps required.
- * Version:           1.3.4
+ * Version:           1.4.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -42,6 +42,7 @@ use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
+use AR_TRY_ON\AR_TRY_ON_Helper;
 
 
 
@@ -161,7 +162,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'AR_TRY_ON_VERSION' ) ) {
-			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.3.4' ) );
+			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.4.0' ) );
 		}
 
 		if ( ! defined( 'AR_TRY_ON_PLUGIN_NAME' ) ) {
@@ -214,3 +215,39 @@ register_activation_hook( __FILE__, function () {
 register_deactivation_hook( __FILE__, function () {
 	AR_TRY_ON_Deactivate::deactivate();
 } );
+
+
+/**
+ *
+ * Create short code for qr code.
+ * Example [atlasvoice]
+ *
+ * @param $atts
+ *
+ * @return string
+ */
+function atlas_ar_create_shortcode( $atts ) {
+
+    return AR_TRY_ON_Helper::create_shortcode( $atts );
+
+}
+
+add_shortcode( 'atlas_ar', 'atlas_ar_create_shortcode' );
+
+
+// Filter to allow shortcodes in HTML tags
+add_filter( 'do_shortcode_tag', 'atlas_ar_allow_shortcode_in_html_tag', 10, 4 );
+function atlas_ar_allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
+    if ( $tag == 'atlas_ar' && ! empty( $attr ) ) {
+        if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
+            $content = AR_TRY_ON_Helper::create_shortcode( $attr,  $m[5] ) . $m[5];
+        } else {
+            $content = $m[5] . AR_TRY_ON_Helper::create_shortcode( $attr, $m[5] );
+        }
+
+        //Get the content wrapped by the shortcode.
+        return $content;
+    }
+
+    return $output;
+}

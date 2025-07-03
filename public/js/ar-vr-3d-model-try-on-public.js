@@ -1,13 +1,9 @@
-import alertify from 'alertifyjs';
-
-import {getURL, postWithoutImage} from "../../src/context/utilities";
-
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
     // Add event listener to the button
     const buttons = [...document.getElementsByClassName('ar_vr_3d_model_try_on')];
 
-
+    const atlasAR = new window.AtlasAR()
     if (buttons) {
         buttons.map(button => {
             button.addEventListener('click', async () => {
@@ -32,10 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     let loadingMessage;
                     // Show loading message before sending the request
-                    loadingMessage = alertify.success('Loading 3D model...', 2000);
+                    loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
                     let formData = new FormData();
                     formData.append('product_id', product_id);
-                    await postWithoutImage(getURL('get_model_and_settings'), formData)
+                    await atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), formData)
                         .then((response) => {
                             console.log(response);
 
@@ -50,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Use the product name as the modal title
                                 const productName = data.product_name || '3D Product';
 
-                                // alertify
+                                // atlasAR.alertify
                                 //     .alert(productName, htmlContent)
                                 //     .set({
                                 //         transition: 'zoom',
@@ -104,30 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             console.log(err);
                         });
                 } else {
-                    const htmlContent = `
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
-                            <model-viewer 
-                                id="model-viewer" 
-                                src="" 
-                                alt="" 
-                                poster="" 
-                                reveal="" 
-                                loading="" 
-                                ar 
-                                ar-modes="" 
-                                camera-controls
-                                ar-scale="auto"
-                                xr-environment
-                                style="width: 100%; max-width: 600px; height: 400px;"
-                            ></model-viewer>
-                        </div>`;
+                    const htmlContent = atlasAR.getModelSkeleton('atlas_ar_model_viewer')
 
                     let loadingMessage;
                     // Show loading message before sending the request
-                    loadingMessage = alertify.success('Loading 3D model...', 2000);
+                    loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
                     let formData = new FormData();
                     formData.append('product_id', product_id);
-                    await postWithoutImage(getURL('get_model_and_settings'), formData)
+                    await atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), formData)
                         .then((response) => {
                             // Hide loading message
                             if (loadingMessage) {
@@ -136,11 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             if (response.success) {
                                 const data = response.data;
-                                console.log(data)
                                 // Use the product name as the modal title
                                 const productName = data.product_name || '3D Product';
 
-                                alertify
+                                atlasAR.alertify
                                     .alert(productName, htmlContent)
                                     .set({
                                         transition: 'zoom',
@@ -151,31 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
-                                    const modelViewer = document.getElementById('model-viewer');
-                                    if (modelViewer) {
-                                        modelViewer.setAttribute('src', data.model_3d_file || '');
-                                        modelViewer.setAttribute('ios-src', data.model_ios_file || '');
-                                        modelViewer.setAttribute('alt', data.model_alt || '');
-                                        modelViewer.setAttribute('poster', data.model_poster || '');
-                                        modelViewer.setAttribute('reveal', data.reveal || 'auto');
-                                        modelViewer.setAttribute('loading', data.loading || 'auto');
-                                        modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
-                                        modelViewer.setAttribute('ar-placement', (data.ar_placement || 'floor'));
-                                        modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
-                                        const scale = data.scale || 'auto'; // Default value if not defined
-                                        modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-                                        if (data.ar === "deactivate") {
-                                            modelViewer.removeAttribute('ar');
-                                        }
-                                        if (data.xr_environment === "deactivate") {
-                                            modelViewer.removeAttribute('xr-environment');
-                                        }
-                                        // TODO: add functionality for this.
-                                        // if(data.custom_button === "activate") {
-                                        //     modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
-                                        // }
-
-                                    }
+                                    atlasAR.setModelData(data, 'atlas_ar_model_viewer')
                                 }
                             }
                         })

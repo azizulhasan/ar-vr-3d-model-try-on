@@ -57,6 +57,7 @@ class AR_TRY_ON_Activator {
 		 */
 		if ( $renew_all_settings || empty( $all_settings ) ) {
 			$all_settings = [
+				'ar_try_on_display_button_automatically'         => 'yes',
 				'ar_try_on_allowed_post_types'         => [ 'post' ],
 				'ar_try_on_wc_hook_position'           => "3",
 				'ar_try_on_single_product_tabs'        => "yes",

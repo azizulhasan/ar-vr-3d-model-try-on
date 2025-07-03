@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {getPostID, getURL, postWithoutImage} from "../context/utilities";
+import {getPostID, getURL, postWithoutImage, copyshortcode} from "../context/utilities";
 
 
 const ARProductModelSettings = () => {
@@ -279,6 +279,29 @@ const ARProductModelSettings = () => {
                 </form>
             </div>
             <div className="art-w-1/2">
+                <div className="art-bg-white art-rounded art-shadow-sm art-space-y-2 art-flex ">
+
+                    <input
+                        type="text"
+                        name="atlas_ar_shortcode_button"
+                        id="atlas_ar_shortcode_button"
+                        defaultValue="[atlas_ar]"
+                        title="Short code"
+                        className="art-w-1/2 art-border art-border-gray-300 art-rounded  art-text-sm art-outline-none art-focus:ring art-focus:ring-blue-500"
+                    />
+
+                    <button
+                        type="button"
+                        id="atlas_ar_shortcode_button"
+                        style={{"cursor": "copy"}}
+                        onClick={copyshortcode}
+                        className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 "
+                    >
+                        <span className="dashicons dashicons-admin-page"></span>
+                        Copy ShortCode
+                    </button>
+                </div>
+
                 <div id='ar_try_on_preveiw'></div>
             </div>
         </div>

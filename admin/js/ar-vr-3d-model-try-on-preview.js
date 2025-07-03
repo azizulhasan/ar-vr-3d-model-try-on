@@ -96,7 +96,7 @@ if (false) {
         });
 } else {
     const htmlContent = `
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
+                        <div style="display: flex; justify-content: center; height: 100%;">
                             <model-viewer 
                                 id="model-viewer" 
                                 src="" 
@@ -113,24 +113,33 @@ if (false) {
                             ></model-viewer>
                         </div>`;
 
-    document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
 
 
-    let formData = new FormData();
-    formData.append('product_id', product_id);
-    let model_settings = {}
-    await postWithoutImage(getURL('get_model_and_settings'), formData)
-        .then((response) => {
-            if (response.success) {
-                model_settings = response.data;
-                console.log({model_settings})
-            } else {
-                console.error(response.data);
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+
+        let formData = new FormData();
+        formData.append('product_id', product_id);
+        let model_settings = {}
+        await postWithoutImage(getURL('get_model_and_settings'), formData)
+            .then((response) => {
+                if (response.success) {
+                    model_settings = response.data;
+                    console.log({model_settings})
+                    let InterVal =  setInterval(()=>{
+                        console.log(document.getElementById('ar_try_on_preveiw'))
+                        if(document.getElementById('ar_try_on_preveiw')) {
+                            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+                            clearInterval(InterVal)
+                        }
+                    },200)
+                } else {
+                    console.error(response.data);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+
     wp.hooks.addAction('ar_try_on_preview_data', 'ar_try_on', function (data) {
 
         model_settings.model_3d_file = data.ar_try_on_file_android;
@@ -139,8 +148,6 @@ if (false) {
         model_settings.model_poster = data.ar_try_on_file_poster;
         model_settings.ar_placement = data.ar_try_on_ar_placement;
 
-        console.log({model_settings})
-        console.log({data})
         // Check if the data exists before assigning it to model-viewer
         if (model_settings) {
             const modelViewer = document.getElementById('model-viewer');
@@ -163,14 +170,14 @@ if (false) {
                     modelViewer.removeAttribute('xr-environment');
                 }
                 // TODO: add functionality for this.
-                // if(data.custom_button === "activate") {
-                //     modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
-                // }
+                if(data.custom_button === "activate") {
+                    modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
+                }
 
             }
         }
-
     });
+
 
 }
 
