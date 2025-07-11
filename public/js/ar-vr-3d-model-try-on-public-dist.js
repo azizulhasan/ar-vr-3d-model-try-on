@@ -3940,7 +3940,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   var productName = data.product_name || '3D Product';
                   if (data) {
                     showModal();
-                    wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, data);
+                    wp.hooks.doAction('atlas_ar_pro_load_premium_functionality', htmlContent, data);
                   }
                 } else {
                   console.error(response.data);

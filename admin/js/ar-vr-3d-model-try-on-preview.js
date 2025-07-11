@@ -122,7 +122,6 @@ if (false) {
         .then((response) => {
             if (response.success) {
                 model_settings = response.data;
-                console.log({ model_settings })
                 document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
 
             } else {
@@ -143,6 +142,8 @@ if (false) {
         // Check if the data exists before assigning it to model-viewer
         if (data.ar_try_on_ar_placement === 'floor' || data.ar_try_on_ar_placement === 'wall') {
             const modelViewer = document.getElementById('model-viewer');
+            console.log({ modelViewer })
+
             if (modelViewer) {
                 modelViewer.setAttribute('src', model_settings.model_3d_file || '');
                 modelViewer.setAttribute('ios-src', model_settings.model_ios_file || '');
@@ -161,6 +162,8 @@ if (false) {
                 if (model_settings.xr_environment === "deactivate") {
                     modelViewer.removeAttribute('xr-environment');
                 }
+
+
                 // TODO: add functionality for this.
                 // if(data.custom_button === "activate") {
                 //     modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;

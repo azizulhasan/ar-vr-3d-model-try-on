@@ -83,16 +83,6 @@ class AR_TRY_ON_Public {
 			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
 		];
 
-
-		// Add "type=module" attribute
-		add_filter( 'script_loader_tag', function ( $tag, $handle, $src ) {
-			if ( 'ar-try-on-google-model-viewer' === $handle ) {
-				$tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
-			}
-
-			return $tag;
-		}, 10, 3 );
-
 	}
 
 	/**
@@ -119,6 +109,15 @@ class AR_TRY_ON_Public {
 	 */
 	public function enqueue_scripts() {
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+
+				// Add "type=module" attribute
+				add_filter( 'script_loader_tag', function ( $tag, $handle, $src ) {
+					if ( 'ar-try-on-google-model-viewer' === $handle ) {
+						$tag = '<script type="module" id="ar-try-on-google-model-viewer" src="' . esc_url( $src ) . '"></script>';
+					}
+
+					return $tag;
+				}, 10, 3 );
 //			if ( ! $this->localize_data['is_pro_active'] ) {
 //				wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array(), $this->version, true );
 //			}

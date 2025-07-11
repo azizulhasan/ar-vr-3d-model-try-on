@@ -1,6 +1,6 @@
 import alertify from 'alertifyjs';
 
-import {getURL, postWithoutImage} from "../../src/context/utilities";
+import { getURL, postWithoutImage } from "../../src/context/utilities";
 
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
                                     showModal()
-                                    wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, data);
+                                    wp.hooks.doAction('atlas_ar_pro_load_premium_functionality', htmlContent, data);
                                 }
 
                             } else {
