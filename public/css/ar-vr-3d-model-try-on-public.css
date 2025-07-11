@@ -49,7 +49,14 @@
 }
 
 #ar_try_on_qr_code {
-	position: absolute;
+	position: fixed;
+	/* right: 90%;
+	left: 0; */
 	right: 0;
 	left: 90%;
+	position: fixed;
+	bottom: 3%;
+	z-index: 9999;
+	border-radius: 2px white;
+	overflow: visible !important;
 }
