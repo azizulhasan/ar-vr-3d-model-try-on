@@ -120,7 +120,7 @@ const config = {
 	},
 	test: {
 		src: productionSrc,
-		output: 'D://xampp/htdocs/azizulhasan/news/wp-content/plugins/ar-vr-3d-model-try-on/',
+		output: 'D://xampp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -267,6 +267,12 @@ gulp.task('copyProButton', function () {
 gulp.task('release', function () {
 	return gulp.src(config.release.src)
 		.pipe(gulpCopy(config.release.output, config.release.options))
+		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
+})
+
+gulp.task('test', function () {
+	return gulp.src(config.test.src)
+		.pipe(gulpCopy(config.test.output, config.test.options))
 		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
 })
 

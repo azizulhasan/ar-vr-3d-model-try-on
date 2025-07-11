@@ -4,7 +4,7 @@ Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -12,7 +12,7 @@ Augmented Reality & 3D Model Viewer for WooCommerce lets you upload and display 
 
 == Description ==
 
-### **Experience the Future of Shopping with Augmented Reality & 3D Model Viewer for WooCommerce!**
+### **Experience the Future of Shopping with AR Try On & 3D Model Viewer for WooCommerce!**
 
 Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android—no apps needed.
 
@@ -146,8 +146,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 
 ### CHECK OUT OUR OTHER ADDONS 👑:
-🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/AR_TRY_ON_TEXT_DOMAIN/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
-
+🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
 
 
 
@@ -156,7 +155,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 1.  Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
 2.  Install directly through the WordPress plugins screen: Go to 'Plugins' > 'Add New', search for "Augmented Reality & 3D Model Viewer for WordPress & WooCommerce" (or the name you use, like "AR VR Try-On"), and click 'Install Now'.
 3.  Activate the plugin through the 'Plugins' menu in WordPress.
-4.  Navigate to a WooCommerce product, go to the product data section, and find the "AR Try-On" (or your specific tab name) tab to upload your 3D models.
+4.  Navigate to a WooCommerce product, go to the product data section, and find the "AR Try On" (or your specific tab name) tab to upload your 3D models.
 5.  The "View in 3D / AR" button will automatically appear on product pages. You can also use the shortcode `[view_in_3d product_id="YOUR_PRODUCT_ID"]` for manual placement.
 
 == Frequently Asked Questions ==
@@ -191,6 +190,10 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 4. Plugin Features
 
 == Changelog ==
+
+
+= 1.4.2 ( 11 July 2025 )  =
+Fixed: Activation issue fixed.
 
 
 = 1.4.1 ( 03 July 2025 )  =
