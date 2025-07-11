@@ -24,6 +24,7 @@ export default function Settings() {
         ar_try_on_ar_button_text: "Activate AR",
         ar_try_on_ar_button_background_color: "#3a3a3a",
         ar_try_on_ar_button_text_color: "#ffffff",
+        ar_try_on_enable_qr_code: 'yes',
         ar_try_on_clear_cache: false,
         ar_try_on_ar_demo: {},
     });
@@ -723,6 +724,39 @@ export default function Settings() {
                             onChange={(e) => handleChange(e, 'ar_try_on_clear_cache')}
                             className="art-block art-p-5 art-border art-rounded"
                         />
+                    </div>
+                    {/* Enable QR Code */}
+                    <div className="art-space-y-4">
+                        <label
+                            htmlFor="ar_try_on_enable_qr_code"
+                            className="art-block art-font-medium"
+                        >
+                            Enable QR Code
+                        </label>
+                        <div className="art-flex art-space-x-4">
+                            <label className="art-flex art-items-center art-gap-2">
+                                <input
+                                    type="radio"
+                                    id="ar_try_on_enable_qr_code"
+                                    name="ar_try_on_enable_qr_code"
+                                    value="yes"
+                                    checked={settings.ar_try_on_enable_qr_code == 'yes'}
+                                    onChange={handleChange}
+                                />
+                                <span>Yes</span>
+                            </label>
+                            <label className="art-flex art-items-center art-gap-2">
+                                <input
+                                    type="radio"
+                                    id="ar_try_on_enable_qr_code"
+                                    name="ar_try_on_enable_qr_code"
+                                    value="no"
+                                    checked={settings.ar_try_on_enable_qr_code == 'no'}
+                                    onChange={handleChange}
+                                />
+                                <span>No</span>
+                            </label>
+                        </div>
                     </div>
 
                     {/* Submit Button */}

@@ -3,6 +3,7 @@
 namespace AR_TRY_ON_Public;
 
 use AR_TRY_ON\AR_TRY_ON_Helper;
+use AR_TRY_ON\AR_TRY_ON_Cache;
 
 /**
  * The public-facing functionality of the plugin.
@@ -127,6 +128,10 @@ class AR_TRY_ON_Public {
             wp_enqueue_script( 'AtlasAR', AR_TRY_ON_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
             wp_enqueue_script( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
 			wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
+
+			if(AR_TRY_ON_Helper::is_qr_code_enabled()){
+				wp_enqueue_script( 'ar-try-on-qr-generator', AR_TRY_ON_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+			}
 		}
 
 
@@ -150,10 +155,12 @@ class AR_TRY_ON_Public {
         } else {
             $post_id = $post->ID;
         }
-
+		
         $ar_button_content = '';
+		$settings = AR_TRY_ON_Cache::get( 'settings' );
+		$ar_button_content = AR_TRY_ON_Helper::get_qr_code($settings);
+		
 
-        $settings   = (array) get_option( 'ar_try_on_settings' );
         $should_add_ar_button = false;
         if ( isset( $settings['ar_try_on_display_button_automatically'] ) && $settings['ar_try_on_display_button_automatically'] == 'yes' ) {
             $should_add_ar_button = true;
@@ -164,7 +171,7 @@ class AR_TRY_ON_Public {
             ?>
             <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in 3D</button>
             <?php
-            $ar_button_content = ob_get_clean();
+            $ar_button_content .= ob_get_clean();
         }
 
         if ( $post->post_type != 'product' ) {

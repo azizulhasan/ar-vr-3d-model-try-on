@@ -72,6 +72,7 @@ class AR_TRY_ON_Activator {
 				'ar_try_on_ar_button_text'             => "Activate AR",
 				'ar_try_on_ar_button_background_color' => "#3a3a3a",
 				'ar_try_on_ar_button_text_color'       => "#ffffff",
+				'ar_try_on_enable_qr_code'             => 'yes',
 				'ar_try_on_ar_demo'                    => [
 					'id'  => $random_post_id,
 					'url' => $post_url
@@ -79,7 +80,7 @@ class AR_TRY_ON_Activator {
 			];
 
 			update_option( 'ar_try_on_settings', $all_settings );
-
+			AR_TRY_ON_Cache::set( 'settings', $all_settings );
 		}
 
 		if ( ! isset( $all_settings['ar_try_on_ar_demo'] )
@@ -92,6 +93,7 @@ class AR_TRY_ON_Activator {
 			$all_settings['ar_try_on_ar_demo']['url'] = $post_url;
 			$all_settings['ar_try_on_ar_demo']['id']  = $random_post_id;
 			update_option( 'ar_try_on_settings', $all_settings );
+			AR_TRY_ON_Cache::set( 'settings', $all_settings );
 		}
 
 	}

@@ -239,4 +239,39 @@ class AR_TRY_ON_Helper {
         return $ar_button_content;
     }
 
+	public static function is_qr_code_enabled($settings = []) {
+		if(empty($settings)) {
+			$settings = AR_TRY_ON_Cache::get( 'settings' );
+		}
+		if ( isset( $settings['ar_try_on_enable_qr_code'] )&&  $settings['ar_try_on_enable_qr_code'] == 'yes' ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public static function get_qr_code($settings = []) {
+		$ar_button_content = '';
+		if( !self::is_qr_code_enabled($settings) ) {
+			return $ar_button_content;
+		}
+		
+		$url = \get_permalink();
+		ob_start();
+		?>
+		<div id="ar_try_on_qr_code"></div>
+		<script>
+			var typeNumber = 4;
+			var errorCorrectionLevel = 'L';
+			var qr = qrcode(typeNumber, errorCorrectionLevel);
+			qr.addData("<?php echo esc_url( $url ) ?>");
+			qr.make();
+			document.getElementById("ar_try_on_qr_code").innerHTML = qr.createImgTag();
+		</script>
+		<?php
+		$ar_button_content = ob_get_clean();
+
+		return $ar_button_content;
+	}
+
 }
