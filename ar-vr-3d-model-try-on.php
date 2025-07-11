@@ -206,7 +206,7 @@ add_action( 'init', function () {
  * This action is documented in includes/AR_TRY_ON_Activator.php
  */
 register_activation_hook( __FILE__, function () {
-	AR_TRY_ON_Activator::activate();
+	AR_TRY_ON_Activator::activate(1);
 } );
 /**
  * The code that runs during plugin deactivation.

@@ -313,7 +313,7 @@ class AR_TRY_ON_Api_Routes {
 		$response['status'] = true;
 		// save data about recording.
 		if ( 'post' == $request['method'] ) {
-			AR_TRY_ON_Activator::activate();;
+			AR_TRY_ON_Activator::activate(1);
 			$response['data'] = get_option( 'ar_try_on_settings' );
 
 			return rest_ensure_response( $response );
