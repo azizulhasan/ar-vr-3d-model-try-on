@@ -50,13 +50,18 @@
 
 #ar_try_on_qr_code {
 	position: fixed;
-	/* right: 90%;
-	left: 0; */
 	right: 0;
 	left: 90%;
 	position: fixed;
 	bottom: 3%;
 	z-index: 9999;
-	border-radius: 2px white;
 	overflow: visible !important;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+	#ar_try_on_qr_code {
+		right: 0;
+		left: 70%;
+	}
 }
