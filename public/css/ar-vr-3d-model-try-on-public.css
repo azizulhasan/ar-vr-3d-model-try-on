@@ -52,10 +52,31 @@
 	position: fixed;
 	right: 0;
 	left: 90%;
-	position: fixed;
 	bottom: 3%;
 	z-index: 9999;
 	overflow: visible !important;
+
+	padding: 2px;
+	background-color: #f0f0f0;
+	border: 1px solid #ccc;
+	width: fit-content;
+	border-radius: 8px;
+}
+
+#ar_close_btn {
+	position: absolute;
+	top: -20px;
+	right: -8px;
+	background: none;
+	border: none;
+	font-size: 18px;
+	font-weight: normal;
+	cursor: pointer;
+	color: #888;
+}
+
+#ar_close_btn:hover {
+	color: #000;
 }
 
 /* Extra small devices (phones, 600px and down) */

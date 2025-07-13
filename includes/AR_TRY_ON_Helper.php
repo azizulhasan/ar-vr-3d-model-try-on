@@ -259,14 +259,19 @@ class AR_TRY_ON_Helper {
 		$url = \get_permalink();
 		ob_start();
 		?>
-		<div id="ar_try_on_qr_code"></div>
+		<div id="ar_try_on_qr_code">
+			
+		</div>
 		<script>
 			var typeNumber = 4;
 			var errorCorrectionLevel = 'L';
 			var qr = qrcode(typeNumber, errorCorrectionLevel);
 			qr.addData("<?php echo esc_url( $url ) ?>");
 			qr.make();
-			document.getElementById("ar_try_on_qr_code").innerHTML = qr.createImgTag();
+			document.getElementById("ar_try_on_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>'+qr.createImgTag() ;
+			document.getElementById("ar_close_btn").addEventListener("click", function () {
+				document.getElementById("ar_try_on_qr_code").style.display = "none";
+			});
 		</script>
 		<?php
 		$ar_button_content = ob_get_clean();
