@@ -3,47 +3,86 @@
  * included in this file.
  */
 
-
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
-    model-viewer {
-        width: 320px;
-        height: 320px;
-    }
+	model-viewer {
+		width: 320px;
+		height: 320px;
+	}
 }
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
-    model-viewer {
-        width: 600px;
-        height: 400px;
-    }
+	model-viewer {
+		width: 600px;
+		height: 400px;
+	}
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
-    model-viewer {
-        width: 450px;
-        height: 450px;
-    }
+	model-viewer {
+		width: 450px;
+		height: 450px;
+	}
 }
 
 /* Large devices (laptops/desktops, 992px and up) */
 @media only screen and (min-width: 992px) {
-    model-viewer {
-        width: 450px;
-        height: 450px;
-    }
+	model-viewer {
+		width: 450px;
+		height: 450px;
+	}
 }
 
 /* Extra large devices (large laptops and desktops, 1200px and up) */
 @media only screen and (min-width: 1200px) {
-    model-viewer {
-        width: 450px;
-        height: 450px;
-    }
+	model-viewer {
+		width: 450px;
+		height: 450px;
+	}
 }
 
 /* jQuery UI Dialog*/
-.ui-dialog { z-index: 1000 !important ;}
+.ui-dialog {
+	z-index: 1000 !important ;
+}
 
+#ar_try_on_qr_code {
+	position: fixed;
+	right: 0;
+	left: 90%;
+	bottom: 3%;
+	z-index: 9999;
+	overflow: visible !important;
+
+	padding: 2px;
+	background-color: #f0f0f0;
+	border: 1px solid #ccc;
+	width: fit-content;
+	border-radius: 8px;
+}
+
+#ar_close_btn {
+	position: absolute;
+	top: -20px;
+	right: -8px;
+	background: none;
+	border: none;
+	font-size: 18px;
+	font-weight: normal;
+	cursor: pointer;
+	color: #888;
+}
+
+#ar_close_btn:hover {
+	color: #000;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+	#ar_try_on_qr_code {
+		right: 0;
+		left: 70%;
+	}
+}
