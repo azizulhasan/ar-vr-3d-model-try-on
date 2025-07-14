@@ -4,7 +4,7 @@ class AtlasAR {
 
     alertify = null
 
-    constructor( ) {
+    constructor() {
         this.alertify = alertify
     }
 
@@ -46,10 +46,11 @@ class AtlasAR {
         const params = new URLSearchParams(window.location.search);
 
         // Get the 'post' parameter
-        return  params.get('post');
+        return params.get('post');
     }
 
     getModelSkeleton(model_id = 'atlas_ar_model_viewer') {
+
         return `
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <model-viewer
@@ -95,11 +96,11 @@ class AtlasAR {
                 modelViewer.removeAttribute('xr-environment');
             }
             // TODO: add functionality for this.
-            if(data.custom_button === "activate") {
-                modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
+            if (data.custom_button === "activate") {
+                modelViewer.innerHTML = `<button> ${data.custom_button_text || 'Activate Ar'} </button>`;
             }
 
-            console.log({modelViewer})
+            console.log({ modelViewer })
 
         }
     }
@@ -119,6 +120,35 @@ class AtlasAR {
                 }
             })
     }
+
+    supportsModelViewerTag() {
+        const el = document.createElement('model-viewer');
+        return el instanceof HTMLElement; // works even if <model-viewer> isn't fully registered yet
+    }
+    supportsModelViewer() {
+        const supportsCustomElements = 'customElements' in window;
+        const supportsWebGL = (() => {
+            try {
+                const canvas = document.createElement('canvas');
+                return !!(window.WebGLRenderingContext && canvas.getContext('webgl'));
+            } catch (e) {
+                return false;
+            }
+        })();
+
+        const supportsWebXR = 'xr' in navigator;
+
+        return supportsCustomElements && supportsWebGL; // Optional: && supportsWebXR
+    }
+
+    isModelViewerSupported() {
+        return (
+            'customElements' in window &&
+            typeof customElements.get('model-viewer') !== 'undefined'
+        );
+    }
+
+
 
 }
 
