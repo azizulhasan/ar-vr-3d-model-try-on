@@ -41,7 +41,7 @@ class AR_TRY_ON_Activator {
 			if ( ! self::check_post_meta_keys( $random_post_id ) ) {
 				update_post_meta( $random_post_id, 'ar_try_on_product_settings', array(
 					"ar_try_on_file_android" => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.glb",
-					"ar_try_on_file_ios"     => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.glb",
+					"ar_try_on_file_ios"     => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.usdz",
 					"ar_try_on_file_poster"  => AR_TRY_ON_PLUGIN_URL . "admin/demo/demo_poster.png",
 					"ar_try_on_file_alt"     => "Demo title",
 					"ar_try_on_ar_placement" => "floor"
@@ -57,7 +57,7 @@ class AR_TRY_ON_Activator {
 		 */
 		if ( $renew_all_settings || empty( $all_settings ) ) {
 			$all_settings = [
-				'ar_try_on_display_button_automatically'         => 'yes',
+				'ar_try_on_display_button_automatically' => 'yes',
 				'ar_try_on_allowed_post_types'         => [ 'post' ],
 				'ar_try_on_wc_hook_position'           => "3",
 				'ar_try_on_single_product_tabs'        => "yes",
