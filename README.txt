@@ -2,7 +2,7 @@
 Contributors: atlasaidev, hasanazizul
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
-Tested up to: 6.8
+Tested up to: 6.8.2
 Requires PHP: 7.4
 Stable tag: 1.43
 License: GPLv3 or later
