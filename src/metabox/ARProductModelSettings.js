@@ -38,7 +38,6 @@ const ARProductModelSettings = () => {
     };
 
     useEffect(() => {
-        // let cloneProductModel = structuredClone(productModel)
         let cloneProductModel = JSON.parse(JSON.stringify(productModel));
         wp.hooks.addAction('ar_try_on_on_select_model_file', 'ar_try_on', function (val) {
             setCurrentValue(val);

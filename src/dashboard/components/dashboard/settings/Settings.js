@@ -82,7 +82,6 @@ export default function Settings() {
 
         if (e.target.name == 'ar_try_on_ar_modes') {
             let status = e.target.checked
-            // let clonedVal = structuredClone(settings)
             let clonedVal = JSON.parse(JSON.stringify(settings));
             let tempVal = clonedVal.ar_try_on_ar_modes
             if (status) {
