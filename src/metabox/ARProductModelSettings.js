@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from "react";
-import {getPostID, getURL, postWithoutImage, copyshortcode} from "../context/utilities";
+import React, { useState, useEffect } from "react";
+import { getPostID, getURL, postWithoutImage, copyshortcode } from "../context/utilities";
 
 
 const ARProductModelSettings = () => {
@@ -29,7 +29,7 @@ const ARProductModelSettings = () => {
 
         const productModelData = {
             ...productModel,
-            ...{[e.target.name]: value},
+            ...{ [e.target.name]: value },
         };
         setProductModel(productModelData);
 
@@ -38,7 +38,7 @@ const ARProductModelSettings = () => {
     };
 
     useEffect(() => {
-        let cloneProductModel = structuredClone(productModel)
+        let cloneProductModel = JSON.parse(JSON.stringify(productModel));
         wp.hooks.addAction('ar_try_on_on_select_model_file', 'ar_try_on', function (val) {
             setCurrentValue(val);
         });
@@ -48,7 +48,7 @@ const ARProductModelSettings = () => {
 
             const productModelData = {
                 ...productModel,
-                ...{[currentValue.name]: currentValue.url}
+                ...{ [currentValue.name]: currentValue.url }
             };
             setProductModel(productModelData);
             wp.hooks.doAction('ar_try_on_preview_data', productModelData);
@@ -58,7 +58,7 @@ const ARProductModelSettings = () => {
 
     useEffect(() => {
 
-        if(wp.hooks) {
+        if (wp.hooks) {
             const postId = getPostID()
             /**
              * Get data from and display to table.
@@ -68,7 +68,7 @@ const ARProductModelSettings = () => {
             formData.append('post_id', postId);
             postWithoutImage(getURL('product_settings'), formData).then(
                 (res) => {
-                    const productModelData = {...productModel, ...res.data};
+                    const productModelData = { ...productModel, ...res.data };
                     setProductModel(productModelData);
                     setIsProductModelLoad(true)
                 });
@@ -88,7 +88,7 @@ const ARProductModelSettings = () => {
         formData.append('method', 'post');
         postWithoutImage(getURL('product_settings'), formData)
             .then((res) => {
-                setProductModel({...productModel, ...res.data});
+                setProductModel({ ...productModel, ...res.data });
 
                 alert('Successfully Saved Data.')
                 // setIsDataLoaded(true)
@@ -100,8 +100,8 @@ const ARProductModelSettings = () => {
 
 
     useEffect(() => {
-        if(isProductModelLoaded) {
-            console.log({productModel})
+        if (isProductModelLoaded) {
+            console.log({ productModel })
             wp.hooks.doAction('ar_try_on_preview_data', productModel);
         }
     }, [isProductModelLoaded]);
@@ -213,7 +213,7 @@ const ARProductModelSettings = () => {
                                 Add File
                             </button>
                             <p className="art-text-sm art-text-gray-600 art-mt-2">
-                                Upload or enter a URL to 3D object (with .usdz extension).<br/>
+                                Upload or enter a URL to 3D object (with .usdz extension).<br />
                                 The presence of this attribute will automatically enable the quick-look ar-mode.
                             </p>
                         </div>
@@ -271,7 +271,7 @@ const ARProductModelSettings = () => {
                         </div>
                         <div className="art-mb-1">
                             <button type={'submit'}
-                                    className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500  art-w-full">
+                                className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500  art-w-full">
                                 Save
                             </button>
                         </div>
@@ -293,7 +293,7 @@ const ARProductModelSettings = () => {
                     <button
                         type="button"
                         id="atlas_ar_shortcode_button"
-                        style={{"cursor": "copy"}}
+                        style={{ "cursor": "copy" }}
                         onClick={copyshortcode}
                         className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 "
                     >
