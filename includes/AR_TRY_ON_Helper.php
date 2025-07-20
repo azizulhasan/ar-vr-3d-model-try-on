@@ -263,7 +263,7 @@ class AR_TRY_ON_Helper {
 			
 		</div>
 		<script>
-			var typeNumber = 4;
+			var typeNumber = 0;
 			var errorCorrectionLevel = 'L';
 			var qr = qrcode(typeNumber, errorCorrectionLevel);
 			qr.addData("<?php echo esc_url( $url ) ?>");
