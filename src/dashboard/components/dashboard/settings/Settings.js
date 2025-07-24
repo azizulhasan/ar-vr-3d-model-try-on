@@ -34,8 +34,8 @@ export default function Settings() {
 
     useEffect(() => {
         if (window.hasOwnProperty('ar_try_on') && ar_try_on?.post_types) {
-            console.log(ar_try_on.post_types)
-            let tempPostTypes = wp.hooks.applyFilters('ar_try_on_allowed_post_types', structuredClone(Object.keys(ar_try_on.post_types)))
+            console.log(JSON.parse(JSON.stringify(Object.keys(ar_try_on.post_types))))
+            let tempPostTypes = wp.hooks.applyFilters('ar_try_on_allowed_post_types', JSON.parse(JSON.stringify(Object.keys(ar_try_on.post_types))))
             setPostTypes(tempPostTypes)
         }
     }, [window?.ar_try_on])
