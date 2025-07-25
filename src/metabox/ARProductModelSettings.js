@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { getPostID, getURL, postWithoutImage, copyshortcode } from "../context/utilities";
 
 
+
+
+
+
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
         ar_try_on_file_android: '',
@@ -115,7 +119,7 @@ const ARProductModelSettings = () => {
                         {/* AR Placement */}
                         <div className="art-mb-3">
                             <label htmlFor="ar_try_on_ar_placement" className="art-font-medium">
-                                AR Placement / Product Type
+                                AR Placements / Product Type
                             </label>
 
                             <select
