@@ -135,6 +135,7 @@ class AR_TRY_ON {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_preview', 99999 );
+        $this->loader->add_action('init', $plugin_admin, 'engueue_block_scripts', 99999);
 
 		/**
 		 * Enqueues the admin scripts for the WordPress admin dashboard.

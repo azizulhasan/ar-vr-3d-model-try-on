@@ -1,0 +1,30 @@
+.ar-try-on-blocks-responsive {
+	margin-top: 24px;
+	position: relative;
+	width: 100%;
+}
+.ar-try-on-blocks-responsive:nth(1) {
+	margin-top: 0;
+}
+.ar-try-on-blocks-responsive svg {
+	font-size: 20px;
+	height: 1em;
+	width: 1em;
+}
+.ar-try-on-blocks-responsive .components-dropdown {
+	background: #fafafa;
+	border-radius: 50%;
+	position: absolute;
+	right: 0;
+	top: -15px;
+	z-index: 9;
+}
+.ar-try-on-tooggle-group svg {
+	font-size: 20px;
+	height: 1em;
+	width: 1em;
+}
+.ar-try-on-tooggle-group.ar-try-on-choose {
+	display: inline-flex;
+	width: auto;
+}

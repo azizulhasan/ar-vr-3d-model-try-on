@@ -251,3 +251,42 @@ function atlas_ar_allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 
     return $output;
 }
+
+/**
+ * Register Blocks
+ */
+
+add_action( 'init', function () {
+
+// error_log(print_r(AR_TRY_ON_PLUGIN_PATH . 'admin/js/ar-blocks/ar-try-on',1));
+	// register_block_type_from_metadata( AR_TRY_ON_PLUGIN_PATH . 'blocks/atlas-ar' );
+	register_block_type_from_metadata( AR_TRY_ON_PLUGIN_PATH . 'admin/js/ar-blocks/ar-try-on' );
+} );
+
+function atlas_ar_blocks_render( $block_content, $block ) {
+	// if ( isset( $block['blockName'] ) && str_contains( $block['blockName'], 'atlas-ar/' ) ) {
+	// 	$tags = new WP_HTML_Tag_Processor( $block_content );
+	// 	$tags->next_tag( 'div' );
+	// 	$tags->add_class( 'atlas-ar' );
+	// 	$tags->get_updated_html();
+	// 	$module_style = ! empty( $block['attrs']['moduleStyle'] ) ? $block['attrs']['moduleStyle'] : '';
+	// 	return sprintf( "<style>%1s</style> %2s", $module_style, $tags );
+	// }
+
+	if ( isset( $block['blockName'] ) && str_contains( $block['blockName'], 'atlas-ar/' ) ) {
+		error_log(print_r([
+			'block' => $block,
+			'block_content' => $block_content,
+		],1));
+		$tags = new WP_HTML_Tag_Processor( $block_content );
+		$tags->next_tag( 'div' );
+		$tags->add_class( 'ar-try-on' );
+		$tags->get_updated_html();
+		$module_style = ! empty( $block['attrs']['moduleStyle'] ) ? $block['attrs']['moduleStyle'] : '';
+		return sprintf( "<style>%1s</style> %2s", $module_style, $tags );
+	}
+
+
+	return $block_content;
+}
+add_filter( 'render_block', 'atlas_ar_blocks_render', 10, 2 );

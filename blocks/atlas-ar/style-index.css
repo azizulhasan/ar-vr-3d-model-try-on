@@ -1,0 +1,30 @@
+.bdt-atlas-ar {
+	display: flex;
+	justify-content: var(--atlas-ar-align-desktop, center);
+}
+@media (max-width: 64em) {
+	.bdt-atlas-ar {
+		justify-content: var(--atlas-ar-align-tablet, center);
+	}
+}
+@media (max-width: 37.5em) {
+	.bdt-atlas-ar {
+		justify-content: var(--atlas-ar-align-mobile, center);
+	}
+}
+.bdt-atlas-ar model-viewer {
+	height: var(--atlas-ar-height-desktop, 400px);
+	width: var(--atlas-ar-width-desktop, 400px);
+}
+@media (max-width: 64em) {
+	.bdt-atlas-ar model-viewer {
+		height: var(--atlas-ar-height-tablet, 400px);
+		width: var(--atlas-ar-width-tablet, 400px);
+	}
+}
+@media (max-width: 37.5em) {
+	.bdt-atlas-ar model-viewer {
+		height: var(--atlas-ar-height-mobile, 300px);
+		width: var(--atlas-ar-width-mobile, 300px);
+	}
+}

@@ -1,0 +1,30 @@
+.atlas-ar-blocks-responsive {
+	margin-top: 24px;
+	position: relative;
+	width: 100%;
+}
+.atlas-ar-blocks-responsive:nth(1) {
+	margin-top: 0;
+}
+.atlas-ar-blocks-responsive svg {
+	font-size: 20px;
+	height: 1em;
+	width: 1em;
+}
+.atlas-ar-blocks-responsive .components-dropdown {
+	background: #fafafa;
+	border-radius: 50%;
+	position: absolute;
+	right: 0;
+	top: -15px;
+	z-index: 9;
+}
+.atlas-ar-tooggle-group svg {
+	font-size: 20px;
+	height: 1em;
+	width: 1em;
+}
+.atlas-ar-tooggle-group.atlas-ar-choose {
+	display: inline-flex;
+	width: auto;
+}

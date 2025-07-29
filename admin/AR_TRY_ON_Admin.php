@@ -3,6 +3,7 @@
 namespace AR_TRY_ON_Admin;
 
 use AR_TRY_ON\AR_TRY_ON_Helper;
+use AR_TRY_ON_Pro;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -226,5 +227,58 @@ class AR_TRY_ON_Admin {
 
 		return $mimes;
 	}
+
+	public function engueue_block_scripts() {
+		// if ( AR_TRY_ON_Helper::is_edit_page() ) {
+			wp_enqueue_script( 'ar-blocks', plugin_dir_url( dirname( __FILE__ ) ) . 'admin/js/ar-blocks/blocks.js', array(
+				'wp-blocks',
+				'wp-i18n',
+				'wp-element',
+				'wp-editor'
+			), true, true );
+			wp_localize_script( 'ar-blocks', 'arBlocks', $this->localize_data );
+		// }
+
+		register_block_type( 'tts/atlasvoice', [
+			'render_callback' => [ $this, 'render_button' ],
+		] );
+
+		// register_block_type( 'ar-try-on/ar-try-on', [
+		// 	'render_callback' => [ $this, 'render_ar_try_on' ],
+		// ] );
+
+	}
+
+		/**
+	 * @param $customize button.
+	 *
+	 * @return string
+	 */
+	public function render_button( $customize ) {
+		return 'atlas-voice';
+	}
+
+	/**
+	 * @param $customize button.
+	 *
+	 * @return string
+	 */
+	public function render_ar_try_on( $block_content, $block ) {
+
+		// if ( isset( $block['blockName'] ) && str_contains( $block['blockName'], 'ar-try-on/' ) ) {
+			// error_log(print_r([
+			// 	'block' => $block,
+			// 	'block_content' => $block_content,
+			// ],1));
+		// 	$tags = new WP_HTML_Tag_Processor( $block_content );
+		// 	$tags->next_tag( 'div' );
+		// 	$tags->add_class( 'ar-try-on' );
+		// 	$tags->get_updated_html();
+		// 	$module_style = ! empty( $block['attrs']['moduleStyle'] ) ? $block['attrs']['moduleStyle'] : '';
+		// 	return sprintf( "<style>%1s</style> %2s", $module_style, $tags );
+		// }
+		return 'ar-try-on';
+	}
+	
 
 }

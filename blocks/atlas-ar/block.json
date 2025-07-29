@@ -1,0 +1,113 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "atlas-ar/atlas-ar",
+  "version": "0.1.0",
+  "title": "Atlas AR",
+  "category": "widgets",
+  "description": "Example block scaffolded with Create Block tool.",
+  "attributes": {
+    "blockClass": {
+      "type": "string"
+    },
+    "blockStyle": {
+      "type": "string"
+    },
+    "posterType": {
+      "type": "string",
+      "default": "remote"
+    },
+    "poster": {
+      "type": "string",
+      "default": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp"
+    },
+    "hdrType": {
+      "type": "string",
+      "default": "remote"
+    },
+    "hdr": {
+      "type": "string",
+      "default": "https://modelviewer.dev/shared-assets/environments/moon_1k.hdr"
+    },
+    "glbType": {
+      "type": "string",
+      "default": "remote"
+    },
+    "glb": {
+      "type": "string",
+      "default": "https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb"
+    },
+    "skyBoxType": {
+      "type": "string",
+      "default": "remote"
+    },
+    "skyBox": {
+      "type": "string",
+      "default": "https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg"
+    },
+    "autoRotate": {
+      "type": "boolean",
+      "default": false
+    },
+    "shadowIntensity": {
+      "type": "number",
+      "default": 1
+    },
+    "cameraOrbit": {
+      "type": "string",
+      "default": "45deg 55deg 4m"
+    },
+    "zoom": {
+      "type": "boolean",
+      "default": false
+    },
+    "tap": {
+      "type": "boolean",
+      "default": false
+    },
+    "alignmentDesktop": {
+      "type": "string"
+    },
+    "alignmentTablet": {
+      "type": "string"
+    },
+    "alignmentMobile": {
+      "type": "string"
+    },
+    "widthDesktop": {
+      "type": "number",
+      "default": 300
+    },
+    "widthTablet": {
+      "type": "number",
+      "default": 300
+    },
+    "widthMobile": {
+      "type": "number",
+      "default": 300
+    },
+    "heightDesktop": {
+      "type": "number",
+      "default": 300
+    },
+    "heightTablet": {
+      "type": "number",
+      "default": 300
+    },
+    "heightMobile": {
+      "type": "number",
+      "default": 300
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "textdomain": "atlas-ar",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "viewScript": "file:./view.js",
+  "script": [
+    "model-viewer"
+  ]
+}
