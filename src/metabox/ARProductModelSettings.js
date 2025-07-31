@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { getPostID, getURL, postWithoutImage, copyshortcode } from "../context/utilities";
 
 
+
+
+
+
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
         ar_try_on_file_android: '',
@@ -113,23 +117,46 @@ const ARProductModelSettings = () => {
                 <form onSubmit={handleSubmit}>
                     <div className="art-bg-gray-100">
                         {/* AR Placement */}
-                        <div className="art-mb-3">
-                            <label htmlFor="ar_try_on_ar_placement" className="art-font-medium">
-                                AR Placement / Product Type
-                            </label>
 
-                            <select
-                                className="art-w-full art-border art-rounded art-p-2 art-text-sm art-mt-1"
+{/* AR Placement */}
+<div className="art-mb-3">
+  <label className="art-font-medium block mb-2">
+    AR Placements / Product Type
+  </label>
+  <div className="art-relative">
+    <select
+      name="ar_try_on_ar_placement"
+      value={productModel.ar_try_on_ar_placement}
+      onChange={handleChange}
+      className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded art-bg-white art-appearance-none art-pr-8"
+    >
+      <option value="floor">Floor</option>
+      <option value="wall">Wall</option>
+      <option value="168">Glass Pro</option>
+    </select>
+    <div className="art-absolute art-inset-y-0 art-right-0 art-flex art-items-center art-px-2 art-pointer-events-none">
+      <svg className="art-fill-current art-h-4 art-w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+      </svg>
+    </div>
+  </div>
+  
+  {/* Display selected option with icon */}
+  <div className="art-mt-2 art-flex art-items-center art-gap-2">
+    <img
+      src={ar_try_on.plugin_url + 'admin/images/' + 
+        (productModel.ar_try_on_ar_placement === 'floor' ? 'floor.png' : 
+         productModel.ar_try_on_ar_placement === 'wall' ? 'wall.png' : 'glass.png')}
+      alt="Selected placement"
+      className="art-w-6 art-h-6"
+    />
+    <span className="art-text-sm art-text-gray-600">
+      Selected: {productModel.ar_try_on_ar_placement === 'floor' ? 'Floor' : 
+                 productModel.ar_try_on_ar_placement === 'wall' ? 'Wall' : 'Glass Pro'}
+    </span>
+  </div>
+</div>
 
-                                id="ar_try_on_ar_placement"
-                                name="ar_try_on_ar_placement"
-                                value={productModel.ar_try_on_ar_placement}
-                                onChange={handleChange}
-                            >
-                                <option value="floor">Floor</option>
-                                <option value="wall">Wall</option>
-                                <option value="168">Glass {ar_try_on.is_pro_active ? ' ' : ' Pro'} </option>
-                            </select>
                             {/*<p className="art-text-sm art-text-gray-500">*/}
                             {/*    Selects whether to place the object on the floor (horizontal surface) or a wall*/}
                             {/*    (vertical surface) in AR. The back (negative Z) of the object´s bounding box will be*/}
@@ -139,7 +166,7 @@ const ARProductModelSettings = () => {
                             {/*    AR*/}
                             {/*    modes handle the placement UX differently.*/}
                             {/*</p>*/}
-                        </div>
+                       
                         {/* 3D Model Section */}
                         <div className="art-mb-1">
                             <h5 className="art-text-lg art-font-bold art-flex art-items-center art-gap-2">
@@ -191,7 +218,7 @@ const ARProductModelSettings = () => {
                         <div className="art-mb-1">
                             <label
                                 htmlFor="ar_try_on_file_ios"
-                                className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
+                                className="art-block art-text-sm art-font-medium art-items-center art-gap-2"
                             >
                                 <img
                                     src={ar_try_on.plugin_url + "admin/images/icons8-mac-client-18.png"}
@@ -248,7 +275,7 @@ const ARProductModelSettings = () => {
                         <div className="art-mb-1">
                             <label
                                 htmlFor="ar_try_on_file_alt"
-                                className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
+                                className="art-block art-text-sm art-font-medium  art-items-center art-gap-2"
                             >
                                 <img
                                     src={ar_try_on.plugin_url + "admin/images/icons8-web-accessibility-18.png"}
@@ -270,6 +297,29 @@ const ARProductModelSettings = () => {
                             </p>
                         </div>
                         <div className="art-mb-1">
+  <label
+    htmlFor="ar_try_on_test_field"
+    className="art-block art-text-sm art-font-medium"
+  >
+    Test Field (for saving)
+  </label>
+  <input
+    type="text"
+    id="ar_try_on_test_field"
+    name="ar_try_on_test_field"
+    onChange={handleChange}
+    value={productModel.ar_try_on_test_field || ''}
+    className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
+  />
+  <p className="art-text-sm art-text-gray-600 art-mt-1">
+    Random field for testing saving functionality.
+  </p>
+</div>
+
+
+
+
+                        <div className="art-mb-1">
                             <button type={'submit'}
                                 className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500  art-w-full">
                                 Save
@@ -278,29 +328,44 @@ const ARProductModelSettings = () => {
                     </div>
                 </form>
             </div>
-            <div className="art-w-1/2">
-                <div className="art-bg-white art-rounded art-shadow-sm art-space-y-2 art-flex ">
 
-                    <input
-                        type="text"
-                        name="atlas_ar_shortcode_button"
-                        id="atlas_ar_shortcode_button"
-                        defaultValue="[atlas_ar]"
-                        title="Short code"
-                        className="art-w-1/2 art-border art-border-gray-300 art-rounded  art-text-sm art-outline-none art-focus:ring art-focus:ring-blue-500"
-                    />
 
-                    <button
-                        type="button"
-                        id="atlas_ar_shortcode_button"
-                        style={{ "cursor": "copy" }}
-                        onClick={copyshortcode}
-                        className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 "
-                    >
-                        <span className="dashicons dashicons-admin-page"></span>
-                        Copy ShortCode
-                    </button>
-                </div>
+{/*             
+<div class="flex items-center space-x-4">
+  <input type="text" class="h-10 w-48 border border-gray-300 px-4 rounded" placeholder="Enter text">
+  <button class="h-10 w-48 bg-blue-500 text-white px-4 rounded">Submit</button>
+</div> */}
+
+
+
+
+
+
+
+<div className="art-w-1/2">
+  <div className="art-bg-white art-rounded art-shadow-sm art-flex art-items-center art-gap-2 art-p-4 ">
+    <input
+      type="text"
+      name="atlas_ar_shortcode_button"
+      id="atlas_ar_shortcode_button"
+      defaultValue="[atlas_ar]"
+      title="Short code"
+      className="art-border art-w-1/2 art-mt-2 art-p-2 art-rounded art-text-xl"
+    />
+
+    <div
+      type="button"
+      id="atlas_ar_shortcode_button"
+      style={{ cursor: "copy" }}
+      onClick={copyshortcode}
+      className="art-w-1/5 art-h-1/5   art-cursor-pointer art-p-2 art-mt-1  art-bg-blue-500 art-text-white art-text-xl art-rounded art-border art-border-sky-500 "
+    >
+      <span className="dashicons dashicons-admin-page"></span>
+      Copy ShortCode
+    </div>
+  </div>
+
+
 
                 <div id='ar_try_on_preveiw'></div>
             </div>
@@ -310,3 +375,6 @@ const ARProductModelSettings = () => {
 };
 
 export default ARProductModelSettings;
+
+
+
