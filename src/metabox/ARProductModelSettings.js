@@ -8,7 +8,13 @@ const ARProductModelSettings = () => {
         ar_try_on_file_poster: '',
         ar_try_on_file_alt: 'Title',
         ar_try_on_ar_placement: 'floor',
-        ar_try_on_test_field: ''
+        ar_try_on_test_field: '',
+        // Camera settings
+        auto_rotate: false,
+        shadow_intensity: '1',
+        camera_orbit: '45deg 55deg 4m',
+        disable_zoom: false,
+        disable_tap: false
     });
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
@@ -21,18 +27,16 @@ const ARProductModelSettings = () => {
         advance: false
     });
     const [styleAccordion, setStyleAccordion] = useState({
-    canvas: true,
-    advance: false,
-});
-const toggleStyleAccordion = (section) => {
-    setStyleAccordion((prev) => ({
-        ...prev,
-        [section]: !prev[section],
-    }));
-};
+        canvas: true,
+        advance: false,
+    });
 
-
-    
+    const toggleStyleAccordion = (section) => {
+        setStyleAccordion((prev) => ({
+            ...prev,
+            [section]: !prev[section],
+        }));
+    };
 
     // Toggle accordion
     const toggleAccordion = (section) => {
@@ -53,7 +57,13 @@ const toggleStyleAccordion = (section) => {
      */
     const handleChange = (e) => {
         let value = '';
-        value = e.target.value
+        
+        if (e.target.type === 'checkbox') {
+            value = e.target.checked;
+        } else {
+            value = e.target.value;
+        }
+        
         if (!e.target.name) return;
 
         if (e.target.name === 'ar_try_on_ar_placement' && (value !== 'wall' && value !== 'floor') && !ar_try_on.is_pro_active) {
@@ -383,14 +393,13 @@ const toggleStyleAccordion = (section) => {
                                                 Random field for testing saving functionality.
                                             </p>
 
-
-                                                                            <button 
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
-                                >
-                                    Save
-                                </button>
+                                            <button 
+                                                type="button"
+                                                onClick={handleSubmit}
+                                                className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
+                                            >
+                                                Save
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -401,7 +410,7 @@ const toggleStyleAccordion = (section) => {
                                 <button
                                     type="button"
                                     onClick={() => toggleAccordion('camera')}
-                                    className=" art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                                    className="art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
                                 >
                                     <span>Camera</span>
                                     <svg
@@ -416,8 +425,100 @@ const toggleStyleAccordion = (section) => {
                                     </svg>
                                 </button>
                                 {activeAccordion.camera && (
-                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t">
-                                        <p className="art-text-gray-600">Camera settings content will be added here later...</p>
+                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-4">
+                                        {/* Auto Rotate Toggle */}
+                                        <div className="art-flex art-items-center art-gap-3">
+                                            <label className="art-relative art-inline-flex art-items-center art-cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    name="auto_rotate"
+                                                    checked={productModel.auto_rotate}
+                                                    onChange={handleChange}
+                                                    className="art-sr-only art-peer"
+                                                />
+                                                <div className="art-relative art-w-11 art-h-6 art-bg-gray-200 art-peer-focus:outline-none art-peer-focus:ring-4 art-peer-focus:ring-blue-300 art-rounded-full art-peer art-peer-checked:after:translate-x-full art-peer-checked:after:border-white art-after:content-[''] art-after:absolute art-after:top-[2px] art-after:left-[2px] art-after:bg-white art-after:border-gray-300 art-after:border art-after:rounded-full art-after:h-5 art-after:w-5 art-after:transition-all art-peer-checked:bg-blue-600"></div>
+                                            </label>
+                                            <span className="art-text-sm art-font-medium">Auto Rotate</span>
+                                        </div>
+
+                                        {/* Shadow Intensity */}
+                                        <div>
+                                            <label className="art-block art-text-sm art-font-medium art-mb-2 art-uppercase art-tracking-wide">
+                                                Shadow Intensity
+                                            </label>
+                                            <input
+                                                type="number"
+                                                name="shadow_intensity"
+                                                value={productModel.shadow_intensity}
+                                                onChange={handleChange}
+                                                min="0"
+                                                max="1"
+                                                step="0.1"
+                                                placeholder="1"
+                                                className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
+                                            />
+                                            <p className="art-text-xs art-text-gray-500 art-mt-1">
+                                                Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely. Any value between 0 and 1
+                                            </p>
+                                        </div>
+
+                                        {/* Camera Orbit */}
+                                        <div>
+                                            <label className="art-block art-text-sm art-font-medium art-mb-2 art-uppercase art-tracking-wide">
+                                                Camera Orbit
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="camera_orbit"
+                                                value={productModel.camera_orbit}
+                                                onChange={handleChange}
+                                                placeholder="45deg 55deg 4m"
+                                                className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
+                                            />
+                                            <p className="art-text-xs art-text-gray-500 art-mt-1">
+                                                The camera orbit.
+                                            </p>
+                                        </div>
+
+                                        {/* Disable Zoom Toggle */}
+                                        <div className="art-flex art-items-start art-gap-3">
+                                            <label className="art-relative art-inline-flex art-items-center art-cursor-pointer art-mt-1">
+                                                <input
+                                                    type="checkbox"
+                                                    name="disable_zoom"
+                                                    checked={productModel.disable_zoom}
+                                                    onChange={handleChange}
+                                                    className="art-sr-only art-peer"
+                                                />
+                                                <div className="art-relative art-w-11 art-h-6 art-bg-gray-200 art-peer-focus:outline-none art-peer-focus:ring-4 art-peer-focus:ring-blue-300 art-rounded-full art-peer art-peer-checked:after:translate-x-full art-peer-checked:after:border-white art-after:content-[''] art-after:absolute art-after:top-[2px] art-after:left-[2px] art-after:bg-white art-after:border-gray-300 art-after:border art-after:rounded-full art-after:h-5 art-after:w-5 art-after:transition-all art-peer-checked:bg-blue-600"></div>
+                                            </label>
+                                            <div>
+                                                <span className="art-text-sm art-font-medium art-block">Disable Zoom</span>
+                                                <p className="art-text-xs art-text-gray-500 art-mt-1">
+                                                    Disable zooming in and out of the model.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Disable Tap Toggle */}
+                                        <div className="art-flex art-items-start art-gap-3">
+                                            <label className="art-relative art-inline-flex art-items-center art-cursor-pointer art-mt-1">
+                                                <input
+                                                    type="checkbox"
+                                                    name="disable_tap"
+                                                    checked={productModel.disable_tap}
+                                                    onChange={handleChange}
+                                                    className="art-sr-only art-peer"
+                                                />
+                                                <div className="art-relative art-w-11 art-h-6 art-bg-gray-200 art-peer-focus:outline-none art-peer-focus:ring-4 art-peer-focus:ring-blue-300 art-rounded-full art-peer art-peer-checked:after:translate-x-full art-peer-checked:after:border-white art-after:content-[''] art-after:absolute art-after:top-[2px] art-after:left-[2px] art-after:bg-white art-after:border-gray-300 art-after:border art-after:rounded-full art-after:h-5 art-after:w-5 art-after:transition-all art-peer-checked:bg-blue-600"></div>
+                                            </label>
+                                            <div>
+                                                <span className="art-text-sm art-font-medium art-block">Disable Tap</span>
+                                                <p className="art-text-xs art-text-gray-500 art-mt-1">
+                                                    Disable tap to rotate the model.
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -447,17 +548,6 @@ const toggleStyleAccordion = (section) => {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Save Button */}
-                            {/* <div className="art-mb-1">
-                                <button 
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
-                                >
-                                    Save
-                                </button>
-                            </div> */}
                         </div>
                     )}
 
@@ -484,6 +574,13 @@ const toggleStyleAccordion = (section) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
+            
+
+
+
+
+
+
 
             {/* Only show when canvas is open */}
             {styleAccordion.canvas && (
@@ -559,7 +656,6 @@ const toggleStyleAccordion = (section) => {
         </div>
     </div>
 )}
-
 
                 </div>
             </div>
