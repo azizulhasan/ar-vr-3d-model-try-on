@@ -146,7 +146,7 @@ const ARProductModelSettings = () => {
     }, [isProductModelLoaded]);
 
     return (
-        <div className="art-flex">
+        <div className="art-flex art-gap-4">
             {/* Left Side - Settings/Style Sections */}
             <div className="art-w-1/2">
                 {/* Section Tabs */}
@@ -180,23 +180,28 @@ const ARProductModelSettings = () => {
                         <div className="art-bg-gray-100 art-rounded">
                             {/* Content Accordion */}
                             <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
-<button
-  type="button"
-  onClick={() => toggleAccordion('content')}
-  className="art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
->
-  <span>Content</span>
-  <svg
-    className={`art-w-2 art-h-2 transform transition-transform duration-300 ease-in-out ${
-      activeAccordion.content ? 'rotate-180' : ''
-    }`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-  </svg>
-</button>
+                                    <button
+                                    type="button"
+                                    onClick={() => toggleAccordion('content')}
+                                    className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                                    >
+                                    <span>Content</span>
+
+                                    {/* <svg
+                                        className={` ${
+                                        activeAccordion.content ? 'rotate-180' : ''
+                                        }`}
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg> */}
+
+
+                                
+                                 
+                                </button>
 
                                 {activeAccordion.content && (
                                     <div className="art-px-3 art-py-2 art-bg-white art-border-t">
@@ -238,6 +243,19 @@ const ARProductModelSettings = () => {
                                                 </span>
                                             </div>
                                         </div>
+                                        
+
+
+
+
+
+
+
+
+
+
+
+
 
                                         {/* 3D Model Section */}
                                         <div className="art-mb-1">
@@ -393,13 +411,7 @@ const ARProductModelSettings = () => {
                                                 Random field for testing saving functionality.
                                             </p>
 
-                                            <button 
-                                                type="button"
-                                                onClick={handleSubmit}
-                                                className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
-                                            >
-                                                Save
-                                            </button>
+
                                         </div>
                                     </div>
                                 )}
@@ -410,10 +422,10 @@ const ARProductModelSettings = () => {
                                 <button
                                     type="button"
                                     onClick={() => toggleAccordion('camera')}
-                                    className="art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                                    className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
                                 >
                                     <span>Camera</span>
-                                    <svg
+                                    {/* <svg
                                         className={`art-w-3 art-h-3 art-transform art-transition-transform ${
                                             activeAccordion.camera ? 'art-rotate-180' : ''
                                         }`}
@@ -422,7 +434,7 @@ const ARProductModelSettings = () => {
                                         stroke="currentColor"
                                     >
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                    </svg> */}
                                 </button>
                                 {activeAccordion.camera && (
                                     <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-4">
@@ -528,10 +540,10 @@ const ARProductModelSettings = () => {
                                 <button
                                     type="button"
                                     onClick={() => toggleAccordion('advance')}
-                                    className=" art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                                    className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
                                 >
                                     <span>Advance</span>
-                                    <svg
+                                    {/* <svg
                                         className={`art-w-3 art-h-3 art-transform art-transition-transform ${
                                             activeAccordion.advance ? 'art-rotate-180' : ''
                                         }`}
@@ -540,30 +552,38 @@ const ARProductModelSettings = () => {
                                         stroke="currentColor"
                                     >
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                    </svg> */}
                                 </button>
                                 {activeAccordion.advance && (
                                     <div className="art-px-3 art-py-2 art-bg-white art-border-t">
                                         <p className="art-text-gray-600">Advanced settings content will be added here later...</p>
                                     </div>
                                 )}
+
+                                <button 
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
+                                     >
+                                     Save
+                                </button>
                             </div>
                         </div>
                     )}
 
                     {/* Style Section */}
-{activeSection === 'style' && (
-    <div className="art-bg-gray-100 art-p-4 art-rounded">
+            {activeSection === 'style' && (
+                <div className="art-bg-gray-100 art-p-4 art-rounded">
 
-        {/* Canvas Accordion */}
-        <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
+                    {/* Canvas Accordion */}
+                    <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
             <button
                 type="button"
                 onClick={() => toggleStyleAccordion('canvas')}
-                className="art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
             >
                 <span>Canvas</span>
-                <svg
+                {/* <svg
                     className={`art-w-3 art-h-3 transform transition-transform duration-300 ${
                         styleAccordion.canvas ? 'rotate-180' : ''
                     }`}
@@ -572,7 +592,7 @@ const ARProductModelSettings = () => {
                     stroke="currentColor"
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                </svg> */}
             </button>
             
 
@@ -634,10 +654,10 @@ const ARProductModelSettings = () => {
             <button
                 type="button"
                 onClick={() => toggleStyleAccordion('advance')}
-                className="art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
             >
                 <span>Advance</span>
-                <svg
+                {/* <svg
                     className={`art-w-3 art-h-3 transform transition-transform duration-300 ${
                         styleAccordion.advance ? 'rotate-180' : ''
                     }`}
@@ -646,13 +666,22 @@ const ARProductModelSettings = () => {
                     stroke="currentColor"
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                </svg> */}
             </button>
             {styleAccordion.advance && (
                 <div className="art-px-3 art-py-2 art-bg-white art-border-t">
                     <p className="art-text-gray-600">Advanced style settings will be added later...</p>
                 </div>
             )}
+
+
+            <button 
+                type="button"
+                onClick={handleSubmit}
+                className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
+                >
+                Save
+            </button>
         </div>
     </div>
 )}
@@ -662,14 +691,14 @@ const ARProductModelSettings = () => {
 
             {/* Right Side - Shortcode and Preview */}
             <div className="art-w-1/2">
-                <div className="art-bg-white art-rounded art-shadow-sm art-flex art-items-center art-gap-2 art-p-4">
+                <div className="art-bg-white art-rounded art-shadow-sm art-flex art-items-end art-gap-2">
                     <input
                         type="text"
                         name="atlas_ar_shortcode_button"
                         id="atlas_ar_shortcode_button"
                         defaultValue="[atlas_ar]"
                         title="Short code"
-                        className="art-border art-w-1/2 art-mt-2 art-p-2 art-rounded art-text-xl"
+                        className="art-border art-w-1/2 art-rounded art-ml-4 "
                     />
 
                     <div
@@ -677,7 +706,7 @@ const ARProductModelSettings = () => {
                         id="atlas_ar_shortcode_button"
                         style={{ cursor: "copy" }}
                         onClick={copyshortcode}
-                        className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-mt-1 art-bg-blue-500 art-text-white art-text-xl art-rounded art-border art-border-sky-500"
+                        className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500"
                     >
                         <span className="dashicons dashicons-admin-page"></span>
                         Copy ShortCode
