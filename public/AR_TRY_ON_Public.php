@@ -169,7 +169,7 @@ class AR_TRY_ON_Public {
         if( !has_shortcode($post->post_content, 'atlas_ar') && $should_add_ar_button ) {
             ob_start();
             ?>
-            <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in 3D</button>
+            <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in AR</button>
             <?php
             $ar_button_content .= ob_get_clean();
         }

@@ -11,9 +11,9 @@
  * @package           AR_TRY_ON
  *
  * @wordpress-plugin
- * Plugin Name:       Augmented Reality & 3D Model Viewer for Wordpress & WooCommerce
+ * Plugin Name:       3D Model Viewer & WordPress Augmented Reality
  * Plugin URI:        https://atlasaidev.com/
- * Description:       Augmented Reality & 3D Model Viewer for WooCommerce lets you upload and display 3D models with built‑in AR on iOS and Android, no extra apps required.
+ * Description:       3D Model Viewer & WordPress Augmented Reality plugin lets you upload and display 3D models with built‑in AR on iOS and Android, no extra apps required.
  * Version:           1.4.6
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
