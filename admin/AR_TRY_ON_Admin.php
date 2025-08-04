@@ -98,6 +98,7 @@ class AR_TRY_ON_Admin {
 	public function enqueue_styles() {
 		if ( AR_TRY_ON_Helper::is_ar_try_on_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
+
 		}
 
 		wp_enqueue_style( 'ar-vr-3d-model-try-on-admin', AR_TRY_ON_PLUGIN_URL . 'admin/css/ar-try-on-admin.css', array(), $this->version, 'all' );
