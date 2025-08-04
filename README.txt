@@ -8,8 +8,7 @@ Stable tag: 1.4.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-3D Model Viewer & WordPress Augmented Reality Plugin lets you upload and display 3D models with built‑in AR on iOS and Android, no extra apps required.
-
+3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
 == Description ==
 
 Showcase your 3D Models with immersive AR experiences directly in the browser using advanced Augmented Reality WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
