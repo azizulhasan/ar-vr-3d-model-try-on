@@ -15,7 +15,13 @@ const ARProductModelSettings = () => {
         shadow_intensity: '1',
         camera_orbit: '45deg 55deg 4m',
         disable_zoom: false,
-        disable_tap: false
+        disable_tap: false,
+        poster_source_type: 'upload',
+        environment_source_type: 'upload', 
+        model_source_type: 'upload',
+        skybox_source_type: 'upload',
+        android_model_source_type: 'upload',
+        ios_model_source_type: 'upload'
     });
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
@@ -191,180 +197,331 @@ const ARProductModelSettings = () => {
                                     </span>
                                 </button>
 
-                                {activeAccordion.content && (
-                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t">
-                                        {/* AR Placement */}
-                                        <div className="art-mb-3">
-                                            <label className="art-font-medium block mb-2">
-                                                AR Placements / Product Type
-                                            </label>
-                                            <div className="art-relative">
-                                                <select
-                                                    name="ar_try_on_ar_placement"
-                                                    value={productModel.ar_try_on_ar_placement}
+
+
+
+                            {activeAccordion.content && (
+                                <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-6">
+                                    {/* === Android MODEL URL === */}
+                                    <div>
+                                             <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
+                                                    MODEL URL FOR ANDROID
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17.523 15.3414c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm-11.046 0c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm11.405-6.02L19.76 6.394c.095-.152.043-.348-.109-.442-.15-.095-.348-.043-.442.109l-1.906 3.038C16.04 8.73 14.06 8.366 12 8.366c-2.06 0-4.04.364-5.303.733L4.791 6.061c-.095-.152-.292-.204-.442-.109-.152.095-.204.291-.109.442L6.118 9.32C3.264 10.558 1.5 12.833 1.5 15.441v1.2h21v-1.2c0-2.608-1.764-4.883-4.618-6.121z" fill="#3DDC84"/>
+                                                    </svg>
+                                                </label>
+                                        <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductModel(prev => ({ ...prev, android_model_source_type: 'upload' }))}
+                                                className={`art-p-2 art-transition-all art-duration-200 ${
+                                                    productModel.android_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                }`}
+                                            >
+                                                <span className="dashicons dashicons-cloud-upload"></span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductModel(prev => ({ ...prev, android_model_source_type: 'url' }))}
+                                                className={`art-p-2 art-transition-all art-duration-200 ${
+                                                    productModel.android_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                }`}
+                                            >
+                                                <span className="dashicons dashicons-format-image"></span>
+                                            </button>
+                                        </div>
+
+                                        {/* Show input field when upload (cloud-upload) is selected */}
+                                        {productModel.android_model_source_type === 'upload' && (
+                                            <>
+                                                <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
+                                                <input
+                                                    type="text"
+                                                    name="ar_try_on_android_model"
+                                                    value={productModel.ar_try_on_android_model}
                                                     onChange={handleChange}
-                                                    className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded art-bg-white art-appearance-none art-pr-8"
+                                                    className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                    placeholder="Enter Android model URL"
+                                                />
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
+                                            </>
+                                        )}
+
+                                        {/* Show Select Android Model button when url (format-image) is selected */}
+                                        {productModel.android_model_source_type === 'url' && (
+                                            <>
+                                                <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMediaButtonClick('ar_try_on_android_model')}
+                                                    className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
                                                 >
-                                                    <option value="floor">Floor</option>
-                                                    <option value="wall">Wall</option>
-                                                    <option value="168">Glass Pro</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <div className="art-mt-2 art-flex art-items-center art-gap-2">
-                                                {/* <img
-                                                    src={ar_try_on.plugin_url + 'admin/images/' + 
-                                                        (productModel.ar_try_on_ar_placement === 'floor' ? 'floor.png' : 
-                                                         productModel.ar_try_on_ar_placement === 'wall' ? 'wall.png' : 'glass.png')}
-                                                    alt="Selected placement"
-                                                    className="art-w-6 art-h-6"
-                                                /> */}
-                                                <span className="art-text-sm art-text-gray-600">
-                                                    Selected: {productModel.ar_try_on_ar_placement === 'floor' ? 'Floor' : 
-                                                               productModel.ar_try_on_ar_placement === 'wall' ? 'Wall' : 'Glass Pro'}
-                                                </span>
-                                            </div>
-                                        </div>
+                                                    Select .glb model url
+                                                </button>
+                                                {productModel.ar_try_on_android_model && (
+                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                        Selected: {productModel.ar_try_on_android_model.split('/').pop()}
+                                                    </p>
+                                                )}
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select Android model from media library.</p>
+                                            </>
+                                        )}
+                                    </div>
 
-                                        {/* 3D Model Section */}
-                                        <div className="art-mb-1">
-                                            <h5 className="art-text-lg art-font-bold art-flex art-items-center art-gap-2">
-                                                <img
-                                                    src={ar_try_on.plugin_url + "admin/images/icons8-3d-object-18.png"}
-                                                    alt="3D Model Icon"
-                                                    className="art-w-6 art-h-6"
-                                                />
-                                                3D Model
-                                            </h5>
-                                            <p className="art-text-sm art-text-gray-600">
-                                                Add the files of 3D model to this product. Only glTF/GLB models are supported.
-                                            </p>
-                                        </div>
-
-                                        {/* File for Android */}
-                                        <div className="art-mb-1">
-                                            <label
-                                                htmlFor="ar_try_on_file_android"
-                                                className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
-                                            >
-                                                <img
-                                                    src={ar_try_on.plugin_url + "admin/images/icons8-android-os-18.png"}
-                                                    alt="Android Icon"
-                                                    className="art-w-6 art-h-6"
-                                                />
-                                                File for Android
-                                            </label>
-                                            <input
-                                                type="text"
-                                                onChange={handleChange}
-                                                id="ar_try_on_file_android"
-                                                name="ar_try_on_file_android"
-                                                value={productModel.ar_try_on_file_android}
-                                                className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
-                                            />
+                                    {/* === IOS MODEL URL === */}
+                                    <div>
+                                           <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
+                                                        MODEL URL FOR IOS
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="#000000"/>
+                                                        </svg>
+                                                    </label>
+                                        
+                                        <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
                                                 type="button"
-                                                onClick={() => handleMediaButtonClick('ar_try_on_file_android')}
-                                                className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded ar-try-on-open-media-library art-border art-border-sky-500"
+                                                onClick={() => setProductModel(prev => ({ ...prev, ios_model_source_type: 'upload' }))}
+                                                className={`art-p-2 art-transition-all art-duration-200 ${
+                                                    productModel.ios_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                }`}
                                             >
-                                                Add File
+                                                <span className="dashicons dashicons-cloud-upload"></span>
                                             </button>
-                                            <p className="art-text-sm art-text-gray-600 art-mt-2">
-                                                Upload or enter a URL to 3D object (with .glb extension).
-                                            </p>
-                                        </div>
-
-                                        {/* File for iOS */}
-                                        <div className="art-mb-1">
-                                            <label
-                                                htmlFor="ar_try_on_file_ios"
-                                                className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
-                                            >
-                                                <img
-                                                    src={ar_try_on.plugin_url + "admin/images/icons8-mac-client-18.png"}
-                                                    alt="iOS Icon"
-                                                    className="art-w-6 art-h-6"
-                                                />
-                                                File for iOS
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="ar_try_on_file_ios"
-                                                name="ar_try_on_file_ios"
-                                                onChange={handleChange}
-                                                value={productModel.ar_try_on_file_ios}
-                                                className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
-                                            />
                                             <button
                                                 type="button"
-                                                onClick={() => handleMediaButtonClick('ar_try_on_file_ios')}
-                                                className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded ar-try-on-open-media-library art-border art-border-sky-500"
+                                                onClick={() => setProductModel(prev => ({ ...prev, ios_model_source_type: 'url' }))}
+                                                className={`art-p-2 art-transition-all art-duration-200 ${
+                                                    productModel.ios_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                }`}
                                             >
-                                                Add File
+                                                <span className="dashicons dashicons-format-image"></span>
                                             </button>
-                                            <p className="art-text-sm art-text-gray-600 art-mt-2">
-                                                Upload or enter a URL to 3D object (with .usdz extension).<br />
-                                                The presence of this attribute will automatically enable the quick-look ar-mode.
-                                            </p>
                                         </div>
 
-                                        {/* Poster */}
-                                        <div className="art-mb-1">
-                                            <label
-                                                htmlFor="ar_try_on_file_poster"
-                                                className="art-block art-text-sm art-font-medium"
-                                            >
-                                                Poster
-                                            </label>
+                                        {/* Show input field when upload (cloud-upload) is selected */}
+                                        {productModel.ios_model_source_type === 'upload' && (
+                                            <>
+                                                <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
+                                                <input
+                                                    type="text"
+                                                    name="ar_try_on_ios_model"
+                                                    value={productModel.ar_try_on_ios_model}
+                                                    onChange={handleChange}
+                                                    className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                    placeholder="Enter iOS model URL"
+                                                />
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the iOS model file.</p>
+                                            </>
+                                        )}
+
+                                        {/* Show Select iOS Model button when url (format-image) is selected */}
+                                        {productModel.ios_model_source_type === 'url' && (
+                                            <>
+                                                <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMediaButtonClick('ar_try_on_ios_model')}
+                                                    className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
+                                                >
+                                                    Select .usdz model url
+                                                </button>
+                                                {productModel.ar_try_on_ios_model && (
+                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                        Selected: {productModel.ar_try_on_ios_model.split('/').pop()}
+                                                    </p>
+                                                )}
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select iOS model from media library.</p>
+                                            </>
+                                        )}
+                                    </div>
+
+                                {/* === POSTER SOURCE === */}
+
+                                <div>
+                                    <label className="art-text-xs art-font-semibold art-uppercase">Poster Source</label>
+                                    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, poster_source_type: 'upload' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.poster_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-cloud-upload"></span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, poster_source_type: 'url' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.poster_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-format-image"></span>
+                                        </button>
+                                    </div>
+
+                                    {/* Show input field when upload (cloud-upload) is selected */}
+                                    {productModel.poster_source_type === 'upload' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">POSTER</label>
                                             <input
                                                 type="text"
-                                                id="ar_try_on_file_poster"
                                                 name="ar_try_on_file_poster"
-                                                onChange={handleChange}
                                                 value={productModel.ar_try_on_file_poster}
-                                                className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
+                                                onChange={handleChange}
+                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                placeholder="Enter poster image URL"
                                             />
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the poster image.</p>
+                                        </>
+                                    )}
+
+                                    {/* Show Select Poster button when url (format-image) is selected */}
+                                    {productModel.poster_source_type === 'url' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">POSTER</label>
                                             <button
                                                 type="button"
                                                 onClick={() => handleMediaButtonClick('ar_try_on_file_poster')}
-                                                className="art-mt-2 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded ar-try-on-open-media-library art-border art-border-sky-500"
+                                                className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
                                             >
-                                                Add File
+                                                Select Poster
                                             </button>
-                                            <p className="art-text-sm art-text-gray-600 art-mt-2">
-                                                Upload an image or enter a URL. If the image field (alt) is left empty, the photo
-                                                of the product is taken.
-                                            </p>
-                                        </div>
+                                            {productModel.ar_try_on_file_poster && (
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                    Selected: {productModel.ar_try_on_file_poster.split('/').pop()}
+                                                </p>
+                                            )}
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select poster image from media library.</p>
+                                        </>
+                                    )}
+                                </div>
 
-                                        {/* Alt Text */}
-                                        <div className="art-mb-1">
-                                            <label
-                                                htmlFor="ar_try_on_file_alt"
-                                                className="art-block art-text-sm art-font-medium art-flex art-items-center art-gap-2"
-                                            >
-                                                <img
-                                                    src={ar_try_on.plugin_url + "admin/images/icons8-web-accessibility-18.png"}
-                                                    alt="Accessibility Icon"
-                                                    className="art-w-6 art-h-6"
-                                                />
-                                                Alt
-                                            </label>
+                                {/* === ENVIRONMENT IMAGE SOURCE === */}
+                                <div>
+                                    <label className="art-text-xs art-font-semibold art-uppercase">Environment Image Source</label>
+                                    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'upload' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.environment_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-cloud-upload"></span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'url' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.environment_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-format-image"></span>
+                                        </button>
+                                    </div>
+                                    {/* Show input field when upload (cloud-upload) is selected */}
+                                    {productModel.environment_source_type === 'upload' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
                                             <input
                                                 type="text"
-                                                id="ar_try_on_file_alt"
-                                                name="ar_try_on_file_alt"
+                                                name="ar_try_on_file_environment"
+                                                value={productModel.ar_try_on_file_environment}
                                                 onChange={handleChange}
-                                                value={productModel.ar_try_on_file_alt}
-                                                className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
+                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                placeholder="Enter environment image URL"
                                             />
-                                            <p className="art-text-sm art-text-gray-600 art-mt-2">
-                                                Insert a text. If the text field is left empty, the name of the product is taken.
-                                            </p>
-                                        </div>
-                                    </div>
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">HDR image to use as the environment map.</p>
+                                        </>
+                                    )}
+                                    {/* Show Select Environment Image button when url (format-image) is selected */}
+                                    {productModel.environment_source_type === 'url' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleMediaButtonClick('ar_try_on_file_environment')}
+                                                className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
+                                            >
+                                                Select Image (HDR)
+                                            </button>
+                                            {productModel.ar_try_on_file_environment && (
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                    Selected: {productModel.ar_try_on_file_environment.split('/').pop()}
+                                                </p>
+                                            )}
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select environment image from media library.</p>
+                                        </>
+                                    )}
+                                </div>  
+                                </div>
+
                                 )}
-                            </div>
+                                </div>                                
+                                                                    
+
+                                {/* === MODEL SOURCE === */}
+                                {/* <div>
+                                    <label className="art-text-xs art-font-semibold art-uppercase">Model Source</label>
+                                    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, model_source_type: 'upload' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-cloud-upload"></span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, model_source_type: 'url' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-format-image"></span>
+                                        </button>
+                                    </div>
+                                    {/* Show input field when upload (cloud-upload) is selected */}
+                                    {/* {productModel.model_source_type === 'upload' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL</label>
+                                            <input
+                                                type="text"
+                                                name="ar_model_url"
+                                                value={productModel.ar_model_url || ''}
+                                                onChange={handleChange}
+                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                placeholder="Enter .glTF or .GLB model URL"
+                                            />
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the glTF or GLB model to be displayed.</p>
+                                        </>
+                                    )} */}
+                                    {/* Show Select Model button when url (format-image) is selected */}
+                                    {/* {productModel.model_source_type === 'url' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleMediaButtonClick('ar_model_url')}
+                                                className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
+                                            >
+                                                Select Model
+                                            </button>
+                                            {productModel.ar_model_url && (
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                    Selected: {productModel.ar_model_url.split('/').pop()}
+                                                </p>
+                                            )}
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select glTF or GLB model from media library.</p>
+                                        </>
+                                    )}
+                                //  */} 
+
+
+
 
                             {/* Camera Settings Accordion */}
                             <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
@@ -472,21 +629,79 @@ const ARProductModelSettings = () => {
                                 )}
                             </div>
 
-                            {/* Advance Accordion */}
+                            {/* Light & Environment Accordion */}
                             <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
                                 <button
                                     type="button"
-                                    onClick={() => toggleAccordion('advance')}
+                                    onClick={() => toggleAccordion('light')}
                                     className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
                                 >
                                     <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-                                        Advance
-                                        <AccordionIcon status={activeAccordion.advance}/>
+                                        Light & Environment
+                                        <AccordionIcon status={activeAccordion.light}/>
                                     </span>
                                 </button>
-                                {activeAccordion.advance && (
+                                {activeAccordion.light && (
                                     <div className="art-px-3 art-py-2 art-bg-white art-border-t">
-                                        <p className="art-text-gray-600">Advanced settings content will be added here later...</p>
+                                        
+                                    {/* === SKYBOX SOURCE === */}
+                                    <div>
+                                        <label className="art-text-xs art-font-semibold art-uppercase">Skybox Source</label>
+                                        <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductModel(prev => ({ ...prev, skybox_source_type: 'upload' }))}
+                                                className={`art-p-2 art-transition-all art-duration-200 ${
+                                                    productModel.skybox_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                }`}
+                                            >
+                                                <span className="dashicons dashicons-cloud-upload"></span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setProductModel(prev => ({ ...prev, skybox_source_type: 'url' }))}
+                                                className={`art-p-2 art-transition-all art-duration-200 ${
+                                                    productModel.skybox_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                }`}
+                                            >
+                                                <span className="dashicons dashicons-format-image"></span>
+                                            </button>
+                                        </div>
+                                        {/* Show input field when upload (cloud-upload) is selected */}
+                                        {productModel.skybox_source_type === 'upload' && (
+                                            <>
+                                                <label className="art-mt-2 art-block art-text-sm art-font-medium">SKYBOX IMAGE</label>
+                                                <input
+                                                    type="text"
+                                                    name="ar_skybox_image"
+                                                    value={productModel.ar_skybox_image}
+                                                    onChange={handleChange}
+                                                    className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                    placeholder="Enter skybox image URL"
+                                                />
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the skybox image for the AR environment.</p>
+                                            </>
+                                        )}
+                                        {/* Show Select Skybox button when url (format-image) is selected */}
+                                        {productModel.skybox_source_type === 'url' && (
+                                            <>
+                                                <label className="art-mt-2 art-block art-text-sm art-font-medium">SKYBOX IMAGE</label>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMediaButtonClick('ar_skybox_image')}
+                                                    className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
+                                                >
+                                                    Select Skybox Image
+                                                </button>
+                                                {productModel.ar_skybox_image && (
+                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                        Selected: {productModel.ar_skybox_image.split('/').pop()}
+                                                    </p>
+                                                )}
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select skybox image from media library.</p>
+                                            </>
+                                        )}
+                                    </div>
                                     </div>
                                 )}
 
@@ -564,7 +779,7 @@ const ARProductModelSettings = () => {
                             </div>
 
                             {/* Advance Accordion */}
-                            <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
+                            {/* <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
                                 <button
                                     type="button"
                                     onClick={() => toggleStyleAccordion('advance')}
@@ -579,7 +794,7 @@ const ARProductModelSettings = () => {
                                     <div className="art-px-3 art-py-2 art-bg-white art-border-t">
                                         <p className="art-text-gray-600">Advanced style settings will be added later...</p>
                                     </div>
-                                )}
+                                )} */}
 
                                 <button 
                                     type="button"
@@ -589,7 +804,7 @@ const ARProductModelSettings = () => {
                                     Save
                                 </button>
                             </div>
-                        </div>
+                        // </div>
                     )}
                 </div>
             </div>
