@@ -93,6 +93,10 @@
   margin: 2rem
 }
 
+.art-m-2 {
+  margin: 0.5rem
+}
+
 .art-mx-auto {
   margin-left: auto;
   margin-right: auto
@@ -158,6 +162,10 @@
   margin-top: 0.75rem
 }
 
+.art-mt-6 {
+  margin-top: 1.5rem
+}
+
 .art-block {
   display: block
 }
@@ -214,6 +222,10 @@
   max-height: 0px
 }
 
+.art-min-h-\[150px\] {
+  min-height: 150px
+}
+
 .art-w-1\/2 {
   width: 50%
 }
@@ -260,6 +272,10 @@
 
 .art-w-1\/4 {
   width: 25%
+}
+
+.art-w-px {
+  width: 1px
 }
 
 .art-max-w-2xl {
@@ -333,6 +349,10 @@
   gap: 0.25rem
 }
 
+.art-gap-6 {
+  gap: 1.5rem
+}
+
 .art-space-x-2 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.5rem * var(--tw-space-x-reverse));
@@ -375,6 +395,23 @@
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
 }
 
+.art-divide-x > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-x-reverse: 0;
+  border-right-width: calc(1px * var(--tw-divide-x-reverse));
+  border-left-width: calc(1px * calc(1 - var(--tw-divide-x-reverse)))
+}
+
+.art-divide-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-x-reverse: 0;
+  border-right-width: calc(2px * var(--tw-divide-x-reverse));
+  border-left-width: calc(2px * calc(1 - var(--tw-divide-x-reverse)))
+}
+
+.art-divide-black > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(0 0 0 / var(--tw-divide-opacity, 1))
+}
+
 .art-overflow-hidden {
   overflow: hidden
 }
@@ -408,6 +445,10 @@
   border-width: 1px
 }
 
+.art-border-2 {
+  border-width: 2px
+}
+
 .art-border-b {
   border-bottom-width: 1px
 }
@@ -422,6 +463,14 @@
 
 .art-border-t-0 {
   border-top-width: 0px
+}
+
+.art-border-r {
+  border-right-width: 1px
+}
+
+.art-border-solid {
+  border-style: solid
 }
 
 .art-border-blue-500 {
@@ -465,6 +514,11 @@
 .art-border-blue-400 {
   --tw-border-opacity: 1;
   border-color: rgb(96 165 250 / var(--tw-border-opacity, 1))
+}
+
+.art-border-black {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 0 0 / var(--tw-border-opacity, 1))
 }
 
 .art-bg-blue-500 {
@@ -606,6 +660,10 @@
   padding-right: 2.5rem
 }
 
+.art-pr-4 {
+  padding-right: 1rem
+}
+
 .art-text-left {
   text-align: left
 }
@@ -616,6 +674,10 @@
 
 .art-text-justify {
   text-align: justify
+}
+
+.art-font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
 }
 
 .art-text-base {

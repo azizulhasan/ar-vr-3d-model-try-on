@@ -4,12 +4,14 @@ import AccordionIcon from "../icons/AccordionIcon";
 
 const ARProductModelSettings = () => {
     const [productModel, setProductModel] = useState({
-        ar_try_on_file_android: '',
-        ar_try_on_file_ios: '',
+        // ar_try_on_file_android: '',
+        // ar_try_on_file_ios: '',
         ar_try_on_file_poster: '',
         ar_try_on_file_alt: 'Title',
         ar_try_on_ar_placement: 'floor',
         ar_try_on_test_field: '',
+        ar_try_on_android_model: '',
+        ar_try_on_ios_model: '',
         // Camera settings
         auto_rotate: false,
         shadow_intensity: '1',
@@ -121,7 +123,16 @@ const ARProductModelSettings = () => {
             formData.append('post_id', postId);
             postWithoutImage(getURL('product_settings'), formData).then(
                 (res) => {
-                    const productModelData = { ...productModel, ...res.data };
+                    const productModelData = { 
+                        ...productModel, 
+                        ...res.data,
+                        // Always force these to 'upload' on page load
+                        android_model_source_type: 'upload',
+                        ios_model_source_type: 'upload',
+                        poster_source_type: 'upload',
+                        environment_source_type: 'upload',
+                        skybox_source_type: 'upload',
+                    };
                     setProductModel(productModelData);
                     setIsProductModelLoad(true)
                 });
@@ -151,10 +162,26 @@ const ARProductModelSettings = () => {
             });
     };
 
+    const SaveButton = () => (
+    <button 
+        type="button"
+        onClick={handleSubmit}
+        className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
+    >
+        Save
+    </button>
+    );
+
+
+
+
+
+
+
     return (
-        <div className="art-flex art-gap-4">
+        <div className="art-flex art-gap-6" style={{ display: 'flex', gap: '0.25rem' }}>
             {/* Left Side - Settings/Style Sections */}
-            <div className="art-w-1/2">
+            <div className="art-w-1/2" style={{ width: '50%', borderRight: '1px solid black', paddingRight: '1rem' }}>
                 {/* Section Tabs */}
                 <div className="art-flex art-mb-4 art-border-b">
                     <button
@@ -198,12 +225,54 @@ const ARProductModelSettings = () => {
                                 </button>
 
 
+                                    {activeAccordion.content && (
+                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t">
+                                        {/* AR Placement */}
+                                        <div className="art-mb-3">
+                                            <label className="art-font-medium block mb-2">
+                                                AR Placements / Product Type
+                                            </label>
+                                            <div className="art-relative">
+                                                <select
+                                                    name="ar_try_on_ar_placement"
+                                                    value={productModel.ar_try_on_ar_placement}
+                                                    onChange={handleChange}
+                                                    className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded art-bg-white art-appearance-none art-pr-8"
+                                                >
+                                                    <option value="floor">Floor</option>
+                                                    <option value="wall">Wall</option>
+                                                    <option value="168">Glass Pro</option>
+                                                </select>
+                                                <div className="art-absolute art-inset-y-0 art-right-0 art-flex art-items-center art-px-2 art-pointer-events-none">
+                                                    <svg className="art-fill-current art-h-4 art-w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                        {/* <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/> */}
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Display selected option with icon */}
+                                            <div className="art-mt-2 art-flex art-items-center art-gap-2">
+                                                {/* <img
+                                                    src={ar_try_on.plugin_url + 'admin/images/' + 
+                                                        (productModel.ar_try_on_ar_placement === 'floor' ? 'floor.png' : 
+                                                         productModel.ar_try_on_ar_placement === 'wall' ? 'wall.png' : 'glass.png')}
+                                                    alt="Selected placement"
+                                                    className="art-w-6 art-h-6"
+                                                /> */}
+                                                <span className="art-text-sm art-text-gray-600">
+                                                    Selected: {productModel.ar_try_on_ar_placement === 'floor' ? 'Floor' : 
+                                                               productModel.ar_try_on_ar_placement === 'wall' ? 'Wall' : 'Glass Pro'}
+                                                </span>
+                                            </div>
+                                        </div>
 
 
+
+{/* 
                             {activeAccordion.content && (
-                                <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-6">
+                                <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-6"> */}
                                     {/* === Android MODEL URL === */}
-                                    <div>
+                                    <div className="art-border art-border-solid art-border-black art-p-4">
                                              <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
                                                     MODEL URL FOR ANDROID
                                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -235,14 +304,14 @@ const ARProductModelSettings = () => {
                                         {productModel.android_model_source_type === 'upload' && (
                                             <>
                                                 <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
-                                                <input
-                                                    type="text"
-                                                    name="ar_try_on_android_model"
-                                                    value={productModel.ar_try_on_android_model}
-                                                    onChange={handleChange}
-                                                    className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                                    placeholder="Enter Android model URL"
-                                                />
+                                              <input
+                                                type="text"
+                                                name="ar_try_on_android_model"  // This should match the field name in handleMediaButtonClick
+                                                value={productModel.ar_try_on_android_model || ''} // Add || '' to prevent undefined errors
+                                                onChange={handleChange}
+                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                placeholder="Enter Android model URL"
+                                            />
                                                 <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
                                             </>
                                         )}
@@ -267,9 +336,10 @@ const ARProductModelSettings = () => {
                                             </>
                                         )}
                                     </div>
+                                    <br/>
 
                                     {/* === IOS MODEL URL === */}
-                                    <div>
+                                    <div className="art-border art-border-solid art-border-black art-p-4">
                                            <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
                                                         MODEL URL FOR IOS
                                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -302,14 +372,15 @@ const ARProductModelSettings = () => {
                                         {productModel.ios_model_source_type === 'upload' && (
                                             <>
                                                 <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
-                                                <input
-                                                    type="text"
-                                                    name="ar_try_on_ios_model"
-                                                    value={productModel.ar_try_on_ios_model}
-                                                    onChange={handleChange}
-                                                    className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                                    placeholder="Enter iOS model URL"
-                                                />
+
+                                                    <input
+                                                        type="text"
+                                                        name="ar_try_on_ios_model"  // This should match the field name in handleMediaButtonClick
+                                                        value={productModel.ar_try_on_ios_model || ''} // Add || '' to prevent undefined errors
+                                                        onChange={handleChange}
+                                                        className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                        placeholder="Enter iOS model URL"
+                                                    />
                                                 <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the iOS model file.</p>
                                             </>
                                         )}
@@ -334,10 +405,11 @@ const ARProductModelSettings = () => {
                                             </>
                                         )}
                                     </div>
+                                      <br/>
 
                                 {/* === POSTER SOURCE === */}
 
-                                <div>
+                                <div className="art-border art-border-solid art-border-black art-p-4">
                                     <label className="art-text-xs art-font-semibold art-uppercase">Poster Source</label>
                                     <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                         <button
@@ -396,69 +468,39 @@ const ARProductModelSettings = () => {
                                         </>
                                     )}
                                 </div>
+                                
 
-                                {/* === ENVIRONMENT IMAGE SOURCE === */}
-                                <div>
-                                    <label className="art-text-xs art-font-semibold art-uppercase">Environment Image Source</label>
-                                    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
-                                        <button
-                                            type="button"
-                                            onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'upload' }))}
-                                            className={`art-p-2 art-transition-all art-duration-200 ${
-                                                productModel.environment_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
-                                            }`}
-                                        >
-                                            <span className="dashicons dashicons-cloud-upload"></span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'url' }))}
-                                            className={`art-p-2 art-transition-all art-duration-200 ${
-                                                productModel.environment_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
-                                            }`}
-                                        >
-                                            <span className="dashicons dashicons-format-image"></span>
-                                        </button>
-                                    </div>
-                                    {/* Show input field when upload (cloud-upload) is selected */}
-                                    {productModel.environment_source_type === 'upload' && (
-                                        <>
-                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
+                                    {/* Alt Text */}
+                                        <div className="art-mb-1">
+                                            <label
+                                                htmlFor="ar_try_on_file_alt"
+                                                className="art-block art-text-sm art-font-medium art-items-center art-gap-2"
+                                            >
+                                                <img
+                                                    src={ar_try_on.plugin_url + "admin/images/icons8-web-accessibility-18.png"}
+                                                    alt="Accessibility Icon"
+                                                    className="art-w-6 art-h-6 art-mt-4"
+                                                />
+                                                Alt
+                                            </label>
                                             <input
                                                 type="text"
-                                                name="ar_try_on_file_environment"
-                                                value={productModel.ar_try_on_file_environment}
+                                                id="ar_try_on_file_alt"
+                                                name="ar_try_on_file_alt"
                                                 onChange={handleChange}
-                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                                placeholder="Enter environment image URL"
+                                                value={productModel.ar_try_on_file_alt}
+                                                className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
                                             />
-                                            <p className="art-text-sm art-text-gray-600 art-mt-1">HDR image to use as the environment map.</p>
-                                        </>
-                                    )}
-                                    {/* Show Select Environment Image button when url (format-image) is selected */}
-                                    {productModel.environment_source_type === 'url' && (
-                                        <>
-                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleMediaButtonClick('ar_try_on_file_environment')}
-                                                className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
-                                            >
-                                                Select Image (HDR)
-                                            </button>
-                                            {productModel.ar_try_on_file_environment && (
-                                                <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                                    Selected: {productModel.ar_try_on_file_environment.split('/').pop()}
-                                                </p>
-                                            )}
-                                            <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select environment image from media library.</p>
-                                        </>
-                                    )}
-                                </div>  
-                                </div>
+                                            <p className="art-text-sm art-text-gray-600 art-mt-2">
+                                                Insert a text. If the text field is left empty, the name of the product is taken.
+                                            </p>
+                                        </div>
+                                        </div>
 
                                 )}
-                                </div>                                
+                                </div>
+                                
+                              
                                                                     
 
                                 {/* === MODEL SOURCE === */}
@@ -520,6 +562,9 @@ const ARProductModelSettings = () => {
                                     )}
                                 //  */} 
 
+           
+
+
 
 
 
@@ -571,6 +616,7 @@ const ARProductModelSettings = () => {
                                                 Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely. Any value between 0 and 1
                                             </p>
                                         </div>
+
 
                                         {/* Camera Orbit */}
                                         <div>
@@ -642,10 +688,10 @@ const ARProductModelSettings = () => {
                                     </span>
                                 </button>
                                 {activeAccordion.light && (
-                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t">
+                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t ">
                                         
                                     {/* === SKYBOX SOURCE === */}
-                                    <div>
+                                    <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label className="art-text-xs art-font-semibold art-uppercase">Skybox Source</label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -701,17 +747,77 @@ const ARProductModelSettings = () => {
                                                 <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select skybox image from media library.</p>
                                             </>
                                         )}
+                                        </div>
+                                          <br/>
+                                                                        {/* === ENVIRONMENT IMAGE SOURCE === */}
+                                <div className="art-border art-border-solid art-border-black art-p-4">
+                                    <label className="art-text-xs art-font-semibold art-uppercase">Environment Image Source</label>
+                                    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'upload' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.environment_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-cloud-upload"></span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'url' }))}
+                                            className={`art-p-2 art-transition-all art-duration-200 ${
+                                                productModel.environment_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                            }`}
+                                        >
+                                            <span className="dashicons dashicons-format-image"></span>
+                                        </button>
                                     </div>
-                                    </div>
+                                    {/* Show input field when upload (cloud-upload) is selected */}
+                                    {productModel.environment_source_type === 'upload' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
+                                            <input
+                                                type="text"
+                                                name="ar_try_on_file_environment"
+                                                value={productModel.ar_try_on_file_environment}
+                                                onChange={handleChange}
+                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                placeholder="Enter environment image URL"
+                                            />
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">HDR image to use as the environment map.</p>
+                                        </>
+                                    )}
+                                    {/* Show Select Environment Image button when url (format-image) is selected */}
+                                    {productModel.environment_source_type === 'url' && (
+                                        <>
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleMediaButtonClick('ar_try_on_file_environment')}
+                                                className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
+                                            >
+                                                Select Image (HDR)
+                                            </button>
+                                            {productModel.ar_try_on_file_environment && (
+                                                <p className="art-text-sm art-text-gray-600 art-mt-1">
+                                                    Selected: {productModel.ar_try_on_file_environment.split('/').pop()}
+                                                </p>
+                                            )}
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select environment image from media library.</p>
+                                        </>
+                                    )}
+                                </div>  
+                                </div>
+
+                               
+
+
+                                        
+
+                                   
                                 )}
 
-                                <button 
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
-                                >
-                                    Save
-                                </button>
+                              <SaveButton />
                             </div>
                         </div>
                     )}
@@ -728,89 +834,118 @@ const ARProductModelSettings = () => {
                                 >
                                     <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
                                         Canvas
-                                        <AccordionIcon status={styleAccordion.canvas}/>
+                                        <AccordionIcon status={styleAccordion.canvas} />
                                     </span>
                                 </button>
 
-                                {styleAccordion.canvas && (
-                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-4">
-                                        {/* Alignment Settings */}
-                                        <div>
-                                            <label className="art-block art-font-medium mb-2">Alignment</label>
-                                            <select
-                                                name="canvas_alignment"
-                                                onChange={handleChange}
-                                                className="art-w-full art-p-2 art-border art-rounded"
-                                                value={productModel.canvas_alignment || 'center'}
-                                            >
-                                                <option value="left">Left</option>
-                                                <option value="center">Center</option>
-                                                <option value="right">Right</option>
-                                            </select>
-                                        </div>
-
-                                        {/* Width */}
-                                        <div>
-                                            <label className="art-block art-font-medium mb-2">Width (px)</label>
-                                            <input
-                                                type="number"
-                                                name="canvas_width"
-                                                onChange={handleChange}
-                                                value={productModel.canvas_width || ''}
-                                                className="art-w-full art-p-2 art-border art-rounded"
-                                                placeholder="e.g., 600"
-                                            />
-                                        </div>
-
-                                        {/* Height */}
-                                        <div>
-                                            <label className="art-block art-font-medium mb-2">Height (px)</label>
-                                            <input
-                                                type="number"
-                                                name="canvas_height"
-                                                onChange={handleChange}
-                                                value={productModel.canvas_height || ''}
-                                                className="art-w-full art-p-2 art-border art-rounded"
-                                                placeholder="e.g., 400"
-                                            />
-                                        </div>
+                               {styleAccordion.canvas && (
+                                <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-4">
+                                    {/* Alignment */}
+                                    <div>
+                                        <label className="art-block art-font-medium mb-2">Alignment</label>
+                                        <select
+                                            name="canvas_alignment"
+                                            onChange={handleChange}
+                                            className="art-w-full art-p-2 art-border art-rounded"
+                                            value={productModel.canvas_alignment || 'center'}
+                                        >
+                                            <option value="left">Left</option>
+                                            <option value="center">Center</option>
+                                            <option value="right">Right</option>
+                                        </select>
                                     </div>
-                                )}
-                            </div>
 
-                            {/* Advance Accordion */}
-                            {/* <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
-                                <button
-                                    type="button"
-                                    onClick={() => toggleStyleAccordion('advance')}
-                                    className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
-                                >
-                                    <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-                                        Advance
-                                        <AccordionIcon status={styleAccordion.advance}/>
-                                    </span>
-                                </button>
-                                {styleAccordion.advance && (
-                                    <div className="art-px-3 art-py-2 art-bg-white art-border-t">
-                                        <p className="art-text-gray-600">Advanced style settings will be added later...</p>
+                                    {/* Width */}
+                                    <div>
+                                        <label className="art-block art-font-medium mb-2">Width</label>
+                                        <input
+                                            type="text"
+                                            name="canvas_width"
+                                            onChange={handleChange}
+                                            value={productModel.canvas_width || ''}
+                                            className="art-w-full art-p-2 art-border art-rounded"
+                                            placeholder="e.g., 600px, 50%, 10rem"
+                                        />
                                     </div>
-                                )} */}
 
-                                <button 
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-full"
-                                >
-                                    Save
-                                </button>
+                                    {/* Height */}
+                                    <div>
+                                        <label className="art-block art-font-medium mb-2">Height</label>
+                                        <input
+                                            type="text"
+                                            name="canvas_height"
+                                            onChange={handleChange}
+                                            value={productModel.canvas_height || ''}
+                                            className="art-w-full art-p-2 art-border art-rounded"
+                                            placeholder="e.g., 400px, auto, 30vh"
+                                        />
+                                    </div>
+
+                                    {/* Margin */}
+                                    <div>
+                                        <label className="art-block art-font-medium mb-2">Margin</label>
+                                        <input
+                                            type="text"
+                                            name="canvas_margin"
+                                            onChange={handleChange}
+                                            value={productModel.canvas_margin || ''}
+                                            className="art-w-full art-p-2 art-border art-rounded"
+                                            placeholder="e.g., 10px 20px"
+                                        />
+                                    </div>
+
+                                    {/* Padding */}
+                                    <div>
+                                        <label className="art-block art-font-medium mb-2">Padding</label>
+                                        <input
+                                            type="text"
+                                            name="canvas_padding"
+                                            onChange={handleChange}
+                                            value={productModel.canvas_padding || ''}
+                                            className="art-w-full art-p-2 art-border art-rounded"
+                                            placeholder="e.g., 1rem 2rem"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                        {/* Custom CSS Accordion */}
+                        <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
+                            <button
+                                type="button"
+                                onClick={() => toggleStyleAccordion('advance')}
+                                className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                            >
+                                <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
+                                    Custom CSS
+                                    <AccordionIcon status={styleAccordion.advance} />
+                                </span>
+                            </button>
+
+                            {styleAccordion.advance && (
+                                <div className="art-px-3 art-py-2 art-bg-white art-border-t art-space-y-4">
+                                    <label className="art-block art-font-medium mb-2">Write Custom CSS</label>
+                                    <textarea
+                                        name="custom_css"
+                                        onChange={handleChange}
+                                        value={productModel.custom_css || ''}
+                                        className="art-w-full art-min-h-[150px] art-p-2 art-border art-rounded art-font-mono art-text-sm"
+                                        placeholder={`e.g.\n.selector {\n    color: red;\n    font-size: 16px;\n}`}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+
+                                   <SaveButton />
                             </div>
-                        // </div>
+                         </div>
                     )}
                 </div>
             </div>
 
             {/* Right Side - Shortcode and Preview */}
-            <div className="art-w-1/2">
+            <div className="art-w-1/2" style={{ width: '50%', paddingLeft: '1rem' }}>
                 <div className="art-bg-white art-rounded art-shadow-sm art-flex art-gap-2">
                     <input
                         type="text"
