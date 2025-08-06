@@ -5,6 +5,11 @@ import AccordionIcon from "../icons/AccordionIcon";
 const ARProductModelSettings = () => {
     const [basicSettings, setBasicSettings] = useState({
         android_model_source_type: 'upload',
+        poster_source_type: 'upload',
+        environment_source_type: 'upload',
+        model_source_type: 'upload',
+        skybox_source_type: 'upload',
+        ios_model_source_type: 'upload',
     })
     const [productModel, setProductModel] = useState({
         ar_try_on_file_android: '',
@@ -15,17 +20,14 @@ const ARProductModelSettings = () => {
         ar_try_on_test_field: '',
         ar_try_on_android_model: '',
         ar_try_on_ios_model: '',
+        ar_try_on_file_skybox: '',
         // Camera settings
         auto_rotate: false,
         shadow_intensity: '1',
         camera_orbit: '45deg 55deg 4m',
         disable_zoom: false,
         disable_tap: false,
-        poster_source_type: 'upload',
-        environment_source_type: 'upload',
-        model_source_type: 'upload',
-        skybox_source_type: 'upload',
-        ios_model_source_type: 'upload'
+
     });
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
@@ -80,23 +82,13 @@ const ARProductModelSettings = () => {
         wp.hooks.doAction('ar_try_on_preview_data', productModelData);
     };
 
-    const handleMediaButtonClick = (fieldName) => {
-        // const media = wp.media({
-        //     title: "Upload File",
-        //     multiple: false
-        // });
-
-        // media.on("select", function () {
-        //     const attachment = media.state().get("selection").first().toJSON();
-        //     const updatedModel = {
-        //         ...productModel,
-        //         [fieldName]: attachment.url
-        //     };
-        //     setProductModel(updatedModel);
-        //     wp.hooks.doAction('ar_try_on_preview_data', updatedModel);
-        // });
-
-        // media.open();
+    const handleMediaButtonClick = (fieldName, value) => {
+        setBasicSettings(prev => ({ ...prev, fieldName: value }))
+        let inputField= document.getElementById(fieldName) 
+        wp.hooks.doAction('ar_try_on_select_light_and_envirement_files', {
+            name: fieldName,
+            field: inputField,
+        });
     };
 
     useEffect(() => {
@@ -314,7 +306,7 @@ const ARProductModelSettings = () => {
                                         {/* === IOS MODEL URL === */}
                                         <div className="art-border art-border-solid art-border-black art-p-4">
                                             <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                                                MODEL URL FOR IOS
+                                                MODEL {basicSettings.ios_model_source_type == 'upload' ? "File" : 'URL'} FOR IOS
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="#000000" />
                                                 </svg>
@@ -323,40 +315,41 @@ const ARProductModelSettings = () => {
                                             <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, ios_model_source_type: 'upload' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.ios_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, ios_model_source_type: 'upload' }))}
+                                                    data-name="ar_try_on_file_ios"
+                                                    className={` art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
-                                                    <span className="dashicons dashicons-cloud-upload"></span>
+                                                    <span data-name="ar_try_on_file_ios" className="dashicons dashicons-cloud-upload"></span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, ios_model_source_type: 'url' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.ios_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, ios_model_source_type: 'url' }))}
+                                                    className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
                                                     <span className="dashicons dashicons-format-image"></span>
                                                 </button>
                                             </div>
 
-                                            {/* Show input field when upload (cloud-upload) is selected */}
-                                            {productModel.ios_model_source_type === 'upload' && (
-                                                <>
+        
                                                     <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
 
                                                     <input
                                                         type="text"
-                                                        name="ar_try_on_ios_model"  // This should match the field name in handleMediaButtonClick
-                                                        value={productModel.ar_try_on_ios_model || ''} // Add || '' to prevent undefined errors
+                                                        id="ar_try_on_file_ios"
+                                                        name="ar_try_on_file_ios"  // This should match the field name in handleMediaButtonClick
+                                                        value={productModel.ar_try_on_file_ios || ''} // Add || '' to prevent undefined errors
                                                         onChange={handleChange}
                                                         className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
                                                         placeholder="Enter iOS model URL"
                                                     />
                                                     <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the iOS model file.</p>
-                                                </>
-                                            )}
+                                                
+                                            
 
-                                            {/* Show Select iOS Model button when url (format-image) is selected */}
+
+                                            {/* Show Select iOS Model button when url (format-image) is selected
                                             {productModel.ios_model_source_type === 'url' && (
                                                 <>
                                                     <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
@@ -374,39 +367,38 @@ const ARProductModelSettings = () => {
                                                     )}
                                                     <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select iOS model from media library.</p>
                                                 </>
-                                            )}
+                                            )} */}
                                         </div>
                                         <br />
 
                                         {/* === POSTER SOURCE === */}
 
                                         <div className="art-border art-border-solid art-border-black art-p-4">
-                                            <label className="art-text-xs art-font-semibold art-uppercase">Poster Source</label>
+                                            <label className="art-text-xs art-font-semibold art-uppercase"> POSTER SOURCE {basicSettings.poster_source_type == 'upload' ? "File" : 'URL'}</label>
                                             <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, poster_source_type: 'upload' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.poster_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, poster_source_type: 'upload' }))}
+                                                    data-name="ar_try_on_file_poster"
+                                                    className={`art-p-2  ar-try-on-open-media-library art-transition-all art-duration-200 ${basicSettings.poster_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
-                                                    <span className="dashicons dashicons-cloud-upload"></span>
+                                                    <span data-name="ar_try_on_file_poster" className="dashicons dashicons-cloud-upload"></span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, poster_source_type: 'url' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.poster_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, poster_source_type: 'url' }))}
+                                                    className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.poster_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
                                                     <span className="dashicons dashicons-format-image"></span>
                                                 </button>
                                             </div>
 
-                                            {/* Show input field when upload (cloud-upload) is selected */}
-                                            {productModel.poster_source_type === 'upload' && (
-                                                <>
                                                     <label className="art-mt-2 art-block art-text-sm art-font-medium">POSTER</label>
                                                     <input
                                                         type="text"
+                                                        id="ar_try_on_file_poster"
                                                         name="ar_try_on_file_poster"
                                                         value={productModel.ar_try_on_file_poster}
                                                         onChange={handleChange}
@@ -414,11 +406,11 @@ const ARProductModelSettings = () => {
                                                         placeholder="Enter poster image URL"
                                                     />
                                                     <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the poster image.</p>
-                                                </>
-                                            )}
+                                                
+                                            
 
                                             {/* Show Select Poster button when url (format-image) is selected */}
-                                            {productModel.poster_source_type === 'url' && (
+                                            {/* {productModel.poster_source_type === 'url' && (
                                                 <>
                                                     <label className="art-mt-2 art-block art-text-sm art-font-medium">POSTER</label>
                                                     <button
@@ -435,7 +427,7 @@ const ARProductModelSettings = () => {
                                                     )}
                                                     <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select poster image from media library.</p>
                                                 </>
-                                            )}
+                                            )} */}
                                         </div>
 
 
@@ -661,60 +653,43 @@ const ARProductModelSettings = () => {
 
                                         {/* === SKYBOX SOURCE === */}
                                         <div className="art-border art-border-solid art-border-black art-p-4">
-                                            <label className="art-text-xs art-font-semibold art-uppercase">Skybox Source</label>
-                                            <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
+                                         <label className="art-text-xs art-font-semibold art-uppercase"> SKYBOX SOURCE {basicSettings.skybox_source_type == 'upload' ? "File" : 'URL'}</label>
+                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, skybox_source_type: 'upload' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.skybox_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={(e) => handleMediaButtonClick('ar_try_on_file_skybox', 'upload')}
+                                                    data-name="ar_try_on_file_skybox"
+                                                    className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${basicSettings.skybox_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
-                                                    <span className="dashicons dashicons-cloud-upload"></span>
+                                                    <span data-name="ar_try_on_file_skybox" className="dashicons dashicons-cloud-upload"></span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, skybox_source_type: 'url' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.skybox_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, skybox_source_type: 'url' }))}
+                                                    className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.skybox_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
                                                     <span className="dashicons dashicons-format-image"></span>
                                                 </button>
-                                            </div>
-                                            {/* Show input field when upload (cloud-upload) is selected */}
-                                            {productModel.skybox_source_type === 'upload' && (
-                                                <>
+                                                </div>
+            
                                                     <label className="art-mt-2 art-block art-text-sm art-font-medium">SKYBOX IMAGE</label>
                                                     <input
                                                         type="text"
-                                                        name="ar_skybox_image"
-                                                        value={productModel.ar_skybox_image}
+                                                        id="ar_try_on_file_skybox"
+                                                        name="ar_try_on_file_skybox"
+                                                        value={productModel.ar_try_on_file_skybox}
                                                         onChange={handleChange}
                                                         className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
                                                         placeholder="Enter skybox image URL"
                                                     />
                                                     <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the skybox image for the AR environment.</p>
-                                                </>
-                                            )}
-                                            {/* Show Select Skybox button when url (format-image) is selected */}
-                                            {productModel.skybox_source_type === 'url' && (
-                                                <>
-                                                    <label className="art-mt-2 art-block art-text-sm art-font-medium">SKYBOX IMAGE</label>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleMediaButtonClick('ar_skybox_image')}
-                                                        className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
-                                                    >
-                                                        Select Skybox Image
-                                                    </button>
-                                                    {productModel.ar_skybox_image && (
-                                                        <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                                            Selected: {productModel.ar_skybox_image.split('/').pop()}
-                                                        </p>
-                                                    )}
-                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select skybox image from media library.</p>
-                                                </>
-                                            )}
+                                  
                                         </div>
+                                        
+                                        
+                                        
                                         <br />
                                         {/* === ENVIRONMENT IMAGE SOURCE === */}
                                         <div className="art-border art-border-solid art-border-black art-p-4">
@@ -781,6 +756,7 @@ const ARProductModelSettings = () => {
 
 
                                 )}
+
 
                                 <SaveButton />
                             </div>
