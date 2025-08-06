@@ -21,6 +21,7 @@ const ARProductModelSettings = () => {
         ar_try_on_android_model: '',
         ar_try_on_ios_model: '',
         ar_try_on_file_skybox: '',
+        ar_try_on_file_environment: '',
         // Camera settings
         auto_rotate: false,
         shadow_intensity: '1',
@@ -693,31 +694,31 @@ const ARProductModelSettings = () => {
                                         <br />
                                         {/* === ENVIRONMENT IMAGE SOURCE === */}
                                         <div className="art-border art-border-solid art-border-black art-p-4">
-                                            <label className="art-text-xs art-font-semibold art-uppercase">Environment Image Source</label>
+                                                                                     <label className="art-text-xs art-font-semibold art-uppercase"> ENVIRONMENT IMAGE SOURCE {basicSettings.environment_source_type == 'upload' ? "File" : 'URL'}</label>
                                             <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'upload' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.environment_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={(e) => handleMediaButtonClick('ar_try_on_file_environment', 'upload' )}
+                                                    data-name="ar_try_on_file_environment"
+                                                    className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${basicSettings.environment_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
-                                                    <span className="dashicons dashicons-cloud-upload"></span>
+                                                    <span data-name="ar_try_on_file_environment" className="dashicons dashicons-cloud-upload"></span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, environment_source_type: 'url' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.environment_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, environment_source_type: 'url' }))}
+                                                    className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.environment_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
                                                     <span className="dashicons dashicons-format-image"></span>
                                                 </button>
                                             </div>
-                                            {/* Show input field when upload (cloud-upload) is selected */}
-                                            {productModel.environment_source_type === 'upload' && (
-                                                <>
+                            
                                                     <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
                                                     <input
                                                         type="text"
+                                                        id="ar_try_on_file_environment"
                                                         name="ar_try_on_file_environment"
                                                         value={productModel.ar_try_on_file_environment}
                                                         onChange={handleChange}
@@ -725,29 +726,13 @@ const ARProductModelSettings = () => {
                                                         placeholder="Enter environment image URL"
                                                     />
                                                     <p className="art-text-sm art-text-gray-600 art-mt-1">HDR image to use as the environment map.</p>
-                                                </>
-                                            )}
-                                            {/* Show Select Environment Image button when url (format-image) is selected */}
-                                            {productModel.environment_source_type === 'url' && (
-                                                <>
-                                                    <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleMediaButtonClick('ar_try_on_file_environment')}
-                                                        className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-text-white hover:art-bg-blue-600 art-transition-colors"
-                                                    >
-                                                        Select Image (HDR)
-                                                    </button>
-                                                    {productModel.ar_try_on_file_environment && (
-                                                        <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                                            Selected: {productModel.ar_try_on_file_environment.split('/').pop()}
-                                                        </p>
-                                                    )}
-                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select environment image from media library.</p>
-                                                </>
-                                            )}
+                                                    </div>
+                                                
+                                        
+                            
+                                        
                                         </div>
-                                    </div>
+        
 
 
 
