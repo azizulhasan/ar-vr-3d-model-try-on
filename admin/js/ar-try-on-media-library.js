@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     let mediaUploader;
-
     // Attach click event listener to elements with the class 'ar-try-on-open-media-library'
     document.querySelectorAll('.ar-try-on-open-media-library').forEach(function (button) {
+        console.log(button)
         button.addEventListener('click', function (e) {
             e.preventDefault();
 
