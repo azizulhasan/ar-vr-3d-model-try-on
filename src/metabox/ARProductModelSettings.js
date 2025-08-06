@@ -3,6 +3,9 @@ import { getPostID, getURL, postWithoutImage, copyshortcode } from "../context/u
 import AccordionIcon from "../icons/AccordionIcon";
 
 const ARProductModelSettings = () => {
+    const [basicSettings, setBasicSettings] = useState({
+        android_model_source_type: 'upload',
+    })
     const [productModel, setProductModel] = useState({
         ar_try_on_file_android: '',
         ar_try_on_file_ios: '',
@@ -22,7 +25,6 @@ const ARProductModelSettings = () => {
         environment_source_type: 'upload',
         model_source_type: 'upload',
         skybox_source_type: 'upload',
-        android_model_source_type: 'upload',
         ios_model_source_type: 'upload'
     });
     const [currentValue, setCurrentValue] = useState({});
@@ -105,6 +107,7 @@ const ARProductModelSettings = () => {
     }, []);
 
     useEffect(() => {
+        console.log(currentValue)
         if (Object.keys(currentValue).length) {
             const productModelData = {
                 ...productModel,
@@ -127,7 +130,6 @@ const ARProductModelSettings = () => {
                         ...productModel,
                         ...res.data,
                         // Always force these to 'upload' on page load
-                        android_model_source_type: 'upload',
                         ios_model_source_type: 'upload',
                         poster_source_type: 'upload',
                         environment_source_type: 'upload',
@@ -269,7 +271,8 @@ const ARProductModelSettings = () => {
                                         {/* === Android MODEL URL === */}
                                         <div className="art-border art-border-solid art-border-black art-p-4">
                                             <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                                                MODEL URL FOR ANDROID
+                                                MODEL {basicSettings.android_model_source_type == 'upload' ? "File" : 'URL'} FOR ANDROID
+
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                     <path d="M17.523 15.3414c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm-11.046 0c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm11.405-6.02L19.76 6.394c.095-.152.043-.348-.109-.442-.15-.095-.348-.043-.442.109l-1.906 3.038C16.04 8.73 14.06 8.366 12 8.366c-2.06 0-4.04.364-5.303.733L4.791 6.061c-.095-.152-.292-.204-.442-.109-.152.095-.204.291-.109.442L6.118 9.32C3.264 10.558 1.5 12.833 1.5 15.441v1.2h21v-1.2c0-2.608-1.764-4.883-4.618-6.121z" fill="#3DDC84" />
                                                 </svg>
@@ -277,57 +280,34 @@ const ARProductModelSettings = () => {
                                             <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, android_model_source_type: 'upload' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.android_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, android_model_source_type: 'upload' }))}
+                                                    data-name="ar_try_on_file_android"
+                                                    className={` art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.android_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
-                                                    <span className="dashicons dashicons-cloud-upload"></span>
+                                                    <span data-name="ar_try_on_file_android" className="dashicons dashicons-cloud-upload"></span>
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setProductModel(prev => ({ ...prev, android_model_source_type: 'url' }))}
-                                                    className={`art-p-2 art-transition-all art-duration-200 ${productModel.android_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
+                                                    onClick={() => setBasicSettings(prev => ({ ...prev, android_model_source_type: 'url' }))}
+                                                    className={`art-p-2 art-transition-all art-cursor-pointer  art-duration-200 ${basicSettings.android_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'
                                                         }`}
                                                 >
                                                     <span className="dashicons dashicons-format-image"></span>
                                                 </button>
                                             </div>
 
-                                            {/* Show input field when upload (cloud-upload) is selected */}
-                                            {productModel.android_model_source_type === 'upload' && (
-                                                <>
-                                                    <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
-                                                    <input
-                                                        type="text"
-                                                        id="ar_try_on_file_android"
-                                                        name="ar_try_on_file_android"  // This should match the field name in handleMediaButtonClick
-                                                        value={productModel.ar_try_on_file_android || ''} // Add || '' to prevent undefined errors
-                                                        onChange={handleChange}
-                                                        className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                                        placeholder="Enter Android model URL"
-                                                    />
-                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
-                                                </>
-                                            )}
-
-                                            {/* Show Select Android Model button when url (format-image) is selected */}
-                                            {productModel.android_model_source_type === 'url' && (
-                                                <>
-                                                    <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
-                                                    <button
-                                                        type="button"
-                                                        className="art-w-1/4 art-mt-1 art-p-2 art-border art-rounded art-bg-blue-500 art-cursor-pointer art-text-white hover:art-bg-blue-600 art-transition-colors ar-try-on-open-media-library"
-                                                    >
-                                                        Select .glb model url
-                                                    </button>
-                                                    {productModel.ar_try_on_file_android && (
-                                                        <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                                            Selected: {productModel.ar_try_on_file_android.split('/').pop()}
-                                                        </p>
-                                                    )}
-                                                    <p className="art-text-sm art-text-gray-600 art-mt-1">Click to select Android model from media library.</p>
-                                                </>
-                                            )}
+                                            <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
+                                            <input
+                                                type="text"
+                                                id="ar_try_on_file_android"
+                                                name="ar_try_on_file_android"  // This should match the field name in handleMediaButtonClick
+                                                value={productModel.ar_try_on_file_android || ''} // Add || '' to prevent undefined errors
+                                                onChange={handleChange}
+                                                className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
+                                                placeholder="Enter Android model URL"
+                                            />
+                                            <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
                                         </div>
                                         <br />
 

@@ -130,13 +130,14 @@ class AR_TRY_ON_Admin {
 		}
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script( 'ar-try-on-metabox-ui', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
-			wp_enqueue_media(); // Enqueue the WordPress media uploader
+			
 			wp_enqueue_script(
 				'ar-try-on-media-library',
 				AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
-				['ar-try-on-metabox-ui' ], // Dependencies
+				['ar-try-on-metabox-ui'], // Dependencies
 				$this->version,
 				true
 			);
