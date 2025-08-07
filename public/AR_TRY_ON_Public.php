@@ -157,6 +157,9 @@ class AR_TRY_ON_Public {
         }
 		
         $ar_button_content = '';
+		/**
+		 * AR-27: Cache system is  giving empty value.
+		 */
 		$settings   = (array) get_option( 'ar_try_on_settings' );
 		$ar_button_content = AR_TRY_ON_Helper::get_qr_code($settings);
 		
