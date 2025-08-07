@@ -157,7 +157,7 @@ class AR_TRY_ON_Public {
         }
 		
         $ar_button_content = '';
-		$settings = AR_TRY_ON_Cache::get( 'settings' );
+		$settings   = (array) get_option( 'ar_try_on_settings' );
 		$ar_button_content = AR_TRY_ON_Helper::get_qr_code($settings);
 		
 
