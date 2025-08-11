@@ -92,9 +92,6 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     modelViewer.setAttribute('ios-src', model_settings.ios_src || '');
     modelViewer.setAttribute('alt', model_settings.alt || '');
     modelViewer.setAttribute('poster', model_settings.poster || '');
-    modelViewer.setAttribute('reveal', model_settings.reveal || 'auto');
-    modelViewer.setAttribute('loading', model_settings.loading || 'auto');
-    modelViewer.setAttribute('ar-modes', (model_settings.ar_modes || []).join(' '));
     modelViewer.setAttribute('ar-placement', (model_settings.ar_placement || 'floor'));
     modelViewer.setAttribute('skybox-image', (model_settings.skybox_image || ''));
     modelViewer.setAttribute('environment-image', (model_settings.environment_image || ''));
@@ -147,6 +144,15 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     if (model_settings.canvas_padding) {
         modelViewer.style.padding = model_settings.canvas_padding;
     }
+
+
+
+
+    modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
+    modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
+    modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
+
+
 
     const modelViewerStyle = document.getElementById('model-viewer-style');
     if (modelViewerStyle) {
