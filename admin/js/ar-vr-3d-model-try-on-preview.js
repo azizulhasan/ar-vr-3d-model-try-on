@@ -96,6 +96,7 @@ if (false) {
         });
 } else {
     const htmlContent = `
+                <style id="model-viewer-style"></style>
                         <div style="display: flex; justify-content: center; height: 100%;">
                             <model-viewer 
                                 id="model-viewer" 
@@ -205,6 +206,34 @@ if (false) {
                 }
 
 
+
+            //    Here goes the Canvas Section:
+            if (model_settings.canvas_alignment) {
+                    if (model_settings.canvas_alignment === 'center') {
+                        modelViewer.style.display = 'block';
+                        modelViewer.style.margin = '0 auto';
+                    } else if (model_settings.canvas_alignment === 'left') {
+                        modelViewer.style.margin = '0 auto 0 0';
+                    } else if (model_settings.canvas_alignment === 'right') {
+                        modelViewer.style.margin = '0 0 0 auto';
+                    }
+                }
+
+                if (model_settings.canvas_width) {
+                    modelViewer.style.width = model_settings.canvas_width;
+                }
+                if (model_settings.canvas_height) {
+                    modelViewer.style.height = model_settings.canvas_height;
+                }
+                if (model_settings.canvas_margin) {
+                    modelViewer.style.margin = model_settings.canvas_margin;
+                }
+                if (model_settings.canvas_padding) {
+                    modelViewer.style.padding = model_settings.canvas_padding;
+                }
+
+
+
                 modelViewer.style.backgroundColor = model_settings.poster_color || 'rgba(255,255,255,0)';
                 const scale = model_settings.scale || 'auto'; // Default value if not defined
                 modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
@@ -219,7 +248,14 @@ if (false) {
                     modelViewer.innerHTML = `<button> ${data.custom_button_text || 'Activate Ar'} </button>`;
                 }
 
+                const modelViewerStyle = document.getElementById('model-viewer-style');
+                if(modelViewerStyle) {
+                    modelViewerStyle.innerHTML = model_settings.custom_css
+                }
+
             }
+            
+            
         }
     });
 

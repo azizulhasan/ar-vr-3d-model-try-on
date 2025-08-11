@@ -113,7 +113,38 @@ class AtlasAR {
                     modelViewer.setAttribute('disable-tap', '');
                 } else {
                     modelViewer.removeAttribute('disable-tap');
+
+
+                
+                if (data.canvas_alignment) {
+                    if (data.canvas_alignment === 'center') {
+                        modelViewer.style.display = 'block';
+                        modelViewer.style.margin = '0 auto';
+                    } else if (data.canvas_alignment === 'left') {
+                        modelViewer.style.margin = '0 auto 0 0';
+                    } else if (data.canvas_alignment === 'right') {
+                        modelViewer.style.margin = '0 0 0 auto';
+                    }
+                }
+
+                if (data.canvas_width) {
+                    modelViewer.style.width = data.canvas_width;
+                }
+                if (data.canvas_height) {
+                    modelViewer.style.height = data.canvas_height;
+                }
+                if (data.canvas_margin) {
+                    modelViewer.style.margin = data.canvas_margin;
+                }
+                if (data.canvas_padding) {
+                    modelViewer.style.padding = data.canvas_padding;
+                }
+
+                    
 }
+
+
+
 
 
             modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';

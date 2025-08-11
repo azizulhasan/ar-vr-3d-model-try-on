@@ -21,6 +21,7 @@ const ARProductModelSettings = () => {
         ar_try_on_file_poster: '',
         ar_try_on_file_alt: 'Title',
         ar_try_on_ar_placement: 'floor',
+        // light & environment settings
         skybox_image: '',
         environment_image: '',
         // Camera settings
@@ -29,6 +30,14 @@ const ARProductModelSettings = () => {
         camera_orbit: '45deg 55deg 4m',
         disable_zoom: false,
         disable_tap: false,
+        // Canvas settings
+        canvas_alignment: '',
+        canvas_width: '',
+        canvas_height: '',
+        canvas_margin: '',
+        canvas_padding: '',
+
+        
 
     });
     const [currentValue, setCurrentValue] = useState({});
