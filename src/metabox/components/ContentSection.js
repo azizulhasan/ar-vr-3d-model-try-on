@@ -32,8 +32,8 @@ const ContentSection = ({
           </label>
           <div className="art-relative">
             <select
-              name="ar_try_on_ar_placement"
-              value={productModel.ar_try_on_ar_placement}
+              name="ar_placement"
+              value={productModel.ar_placement}
               onChange={handleChange}
               className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded art-bg-white art-appearance-none art-pr-8"
             >
@@ -48,8 +48,8 @@ const ContentSection = ({
 
           <div className="art-mt-2 art-flex art-items-center art-gap-2">
             <span className="art-text-sm art-text-gray-600">
-              Selected: {productModel.ar_try_on_ar_placement === 'floor' ? 'Floor' :
-                productModel.ar_try_on_ar_placement === 'wall' ? 'Wall' : 'Glass Pro'}
+              Selected: {productModel.ar_placement === 'floor' ? 'Floor' :
+                productModel.ar_placement === 'wall' ? 'Wall' : 'Glass Pro'}
             </span>
           </div>
         </div>
@@ -66,10 +66,10 @@ const ContentSection = ({
             <button
               type="button"
               onClick={() => setBasicSettings(prev => ({ ...prev, android_model_source_type: 'upload' }))}
-              data-name="ar_try_on_file_android"
+              data-name="src"
               className={`art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.android_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
-              <span data-name="ar_try_on_file_android" className="dashicons dashicons-cloud-upload"></span>
+              <span data-name="src" className="dashicons dashicons-cloud-upload"></span>
             </button>
             <button
               type="button"
@@ -83,9 +83,9 @@ const ContentSection = ({
           <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
           <input
             type="text"
-            id="ar_try_on_file_android"
-            name="ar_try_on_file_android"
-            value={productModel.ar_try_on_file_android || ''}
+            id="src"
+            name="src"
+            value={productModel.src || ''}
             onChange={handleChange}
             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
             placeholder="Enter Android model URL"
@@ -107,10 +107,10 @@ const ContentSection = ({
             <button
               type="button"
               onClick={() => setBasicSettings(prev => ({ ...prev, ios_model_source_type: 'upload' }))}
-              data-name="ar_try_on_file_ios"
+              data-name="ios_src"
               className={`art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
-              <span data-name="ar_try_on_file_ios" className="dashicons dashicons-cloud-upload"></span>
+              <span data-name="ios_src" className="dashicons dashicons-cloud-upload"></span>
             </button>
             <button
               type="button"
@@ -124,9 +124,9 @@ const ContentSection = ({
           <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
           <input
             type="text"
-            id="ar_try_on_file_ios"
-            name="ar_try_on_file_ios"
-            value={productModel.ar_try_on_file_ios || ''}
+            id="ios_src"
+            name="ios_src"
+            value={productModel.ios_src || ''}
             onChange={handleChange}
             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
             placeholder="Enter iOS model URL"
@@ -142,10 +142,10 @@ const ContentSection = ({
             <button
               type="button"
               onClick={() => setBasicSettings(prev => ({ ...prev, poster_source_type: 'upload' }))}
-              data-name="ar_try_on_file_poster"
+              data-name="poster"
               className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${basicSettings.poster_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
-              <span data-name="ar_try_on_file_poster" className="dashicons dashicons-cloud-upload"></span>
+              <span data-name="poster" className="dashicons dashicons-cloud-upload"></span>
             </button>
             <button
               type="button"
@@ -159,9 +159,9 @@ const ContentSection = ({
           <label className="art-mt-2 art-block art-text-sm art-font-medium">POSTER</label>
           <input
             type="text"
-            id="ar_try_on_file_poster"
-            name="ar_try_on_file_poster"
-            value={productModel.ar_try_on_file_poster}
+            id="poster"
+            name="poster"
+            value={productModel.poster}
             onChange={handleChange}
             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
             placeholder="Enter poster image URL"
@@ -172,7 +172,7 @@ const ContentSection = ({
         {/* Alt Text */}
         <div className="art-mb-1">
           <label
-            htmlFor="ar_try_on_file_alt"
+            htmlFor="alt"
             className="art-block art-text-sm art-font-medium art-items-center art-gap-2"
           >
             <img
@@ -184,10 +184,10 @@ const ContentSection = ({
           </label>
           <input
             type="text"
-            id="ar_try_on_file_alt"
-            name="ar_try_on_file_alt"
+            id="alt"
+            name="alt"
             onChange={handleChange}
-            value={productModel.ar_try_on_file_alt}
+            value={productModel.alt}
             className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
           />
           <p className="art-text-sm art-text-gray-600 art-mt-2">

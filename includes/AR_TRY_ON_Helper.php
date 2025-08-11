@@ -169,11 +169,11 @@ class AR_TRY_ON_Helper {
 			$product_settings = (array) get_post_meta( $post->ID, 'ar_try_on_product_settings', true );
 
 			//Get the file url for android
-			if ( ! isset( $product_settings['ar_try_on_file_android'] ) ) {
+			if ( ! isset( $product_settings['src'] ) ) {
 				$result = false;
 			}
 
-			if ( isset( $product_settings['ar_try_on_file_android'] ) && ! $product_settings['ar_try_on_file_android'] ) {
+			if ( isset( $product_settings['src'] ) && ! $product_settings['src'] ) {
 				$result = false;
 			}
 		}
@@ -302,11 +302,11 @@ class AR_TRY_ON_Helper {
 
 	public static function default_model_settings() {
 		return  [
-			'ar_try_on_file_android'=> 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb',
-			'ar_try_on_file_ios'=> '',
-			'ar_try_on_file_poster'=> 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp',
-			'ar_try_on_file_alt'=> 'NeilArmstrong',
-			'ar_try_on_ar_placement'=> 'floor',
+			'src'=> 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb',
+			'ios_src'=> '',
+			'poster'=> 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp',
+			'alt'=> 'NeilArmstrong',
+			'ar_placement'=> 'floor',
 			// light & environment settings
 			'skybox_image'=> 'https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg',
 			'environment_image'=> 'https://modelviewer.dev/shared-assets/environments/moon_1k.hdr',

@@ -1,4 +1,5 @@
 import alertify from 'alertifyjs';
+import { setModelAttributes } from '../../src/context/utilities';
 
 class AtlasAR {
 
@@ -78,94 +79,9 @@ class AtlasAR {
     }
 
     setModelData(data, model_id = 'atlas_ar_model_viewer') {
-        const modelViewer = document.getElementById(model_id);
-        const modelViewer2 = document.querySelectorAll('.atlas_ar_model_viewer')[0]
-        console.log(modelViewer2)
+        const modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0]
         if (modelViewer && this.isObject(data)) {
-            modelViewer.setAttribute('src', data.model_3d_file || '');
-            modelViewer.setAttribute('ios-src', data.model_ios_file || '');
-            modelViewer.setAttribute('alt', data.model_alt || '');
-            modelViewer.setAttribute('poster', data.model_poster || '');
-            modelViewer.setAttribute('reveal', data.reveal || 'auto');
-            modelViewer.setAttribute('loading', data.loading || 'auto');
-            modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
-            modelViewer.setAttribute('ar-placement', (data.ar_placement || 'floor'));
-            modelViewer.setAttribute('skybox-image', (data.skybox_image || ''));
-            modelViewer.setAttribute('environment-image', (data.environment_image || ''));
-
-            if (data.auto_rotate) {
-                modelViewer.setAttribute('auto-rotate', '');
-            } else {
-                modelViewer.removeAttribute('auto-rotate');
-            }
-
-            modelViewer.setAttribute('shadow-intensity', data.shadow_intensity ?? '1');
-
-            if (data.camera_orbit) {
-                modelViewer.setAttribute('camera-orbit', data.camera_orbit);
-            } else {
-                modelViewer.removeAttribute('camera-orbit');
-            }
-
-            if (data.disable_zoom) {
-                modelViewer.setAttribute('disable-zoom', '');
-            } else {
-                modelViewer.removeAttribute('disable-zoom');
-            }
-
-            if (data.disable_tap) {
-                modelViewer.setAttribute('disable-tap', '');
-            } else {
-                modelViewer.removeAttribute('disable-tap');
-            }
-
-
-            if (data.canvas_alignment) {
-                if (data.canvas_alignment === 'center') {
-                    modelViewer.style.display = 'block';
-                    modelViewer.style.margin = '0 auto';
-                } else if (data.canvas_alignment === 'left') {
-                    modelViewer.style.margin = '0 auto 0 0';
-                } else if (data.canvas_alignment === 'right') {
-                    modelViewer.style.margin = '0 0 0 auto';
-                }
-            }
-
-            console.log({ data })
-            if (data.canvas_width) {
-                modelViewer.style.width = data.canvas_width;
-            }
-            if (data.canvas_height) {
-                modelViewer.style.height = data.canvas_height;
-            }
-            if (data.canvas_margin) {
-                modelViewer.style.margin = data.canvas_margin;
-            }
-            if (data.canvas_padding) {
-                modelViewer.style.padding = data.canvas_padding;
-            }
-            const modelViewerStyle = document.getElementById('model-viewer-style');
-            if (modelViewerStyle) {
-                modelViewerStyle.innerHTML = data.custom_css
-            }
-
-
-            modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
-            const scale = data.scale || 'auto'; // Default value if not defined
-            modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-            if (data.ar === "deactivate") {
-                modelViewer.removeAttribute('ar');
-            }
-            if (data.xr_environment === "deactivate") {
-                modelViewer.removeAttribute('xr-environment');
-            }
-            // TODO: add functionality for this.
-            if (data.custom_button === "activate") {
-                modelViewer.innerHTML = `<button> ${data.custom_button_text || 'Activate Ar'} </button>`;
-            }
-
-            console.log({ modelViewer })
-
+            setModelAttributes(modelViewer, data)
         }
     }
 

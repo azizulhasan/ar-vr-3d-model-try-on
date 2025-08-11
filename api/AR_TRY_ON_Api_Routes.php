@@ -46,21 +46,6 @@ class AR_TRY_ON_Api_Routes {
 				),
 			)
 		);
-
-		// register settings route.
-		register_rest_route(
-			$this->namespace,
-			'/product_settings',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::ALLMETHODS,
-					'callback'            => array( $this, 'product_settings' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
-
 		// register get_model_and_settings route.
 		register_rest_route(
 			$this->namespace,
@@ -128,194 +113,54 @@ class AR_TRY_ON_Api_Routes {
 		}
 	}
 
-
-	/*
-	 * Manage product settings data
-	 */
-	public function product_settings( $request ) {
-		$response['status'] = true;
-		// save data about recording.
-		if ( 'post' == $request['method'] ) {
-			$fields  = json_decode( $request['fields'] );
-			$post_id = json_decode( $request['post_id'] );
-			update_post_meta( $post_id, 'ar_try_on_product_settings', $fields );
-			$response['data'] = $fields;
-
-			return rest_ensure_response( $response );
-		}
-
-		// get data about recording.
-		if ( 'get' == $request['method'] ) {
-			$post_id = json_decode( $request['post_id'] );
-
-			$response['data'] = get_post_meta( $post_id, 'ar_try_on_product_settings', true );
-
-			return rest_ensure_response( $response );
-		}
-	}
-
 	public function get_model_and_settings( $request ) {
 
 		$decoded_body = $request->get_params();
 		$post_id = isset($decoded_body['post_id']) ? $decoded_body['post_id'] : null;
 		$post_id = intval( $post_id );
 		$call_from = isset($decoded_body['call_from']) ? $decoded_body['call_from'] : '';
-
-		// Global product variable
-		$model_poster                   = '';
-		$model_alt                      = '';
-		$get_ios_file                   = '';
-		$model_3d_file                  = '';
-		$loading                        = '';
-		$reveal                         = '';
-		$ar                             = '';
-		$scale                          = '';
-		$placement                      = '';
-		$xr_environment                 = '';
-		$ar_modes                       = [ 'webxr', 'scene-viewer', 'quick-look' ];
-		$custom_button                  = '';
-		$custom_button_text             = '';
-		$custom_button_text_color       = '';
-		$custom_button_background_color = '';
-		$poster_color                   = '';
-		$settings = (array) get_option( 'ar_try_on_settings' );
-		$product_settings = [];
-		if ( empty( $post_id ) && $call_from == 'admin' ) {
-			if(empty($settings)) {
-				$settings = AR_TRY_ON_Helper::default_settings();
+		$method = isset($decoded_body['method']) ? $decoded_body['method'] : 'GET';
+		$filtered_data = [];
+		$data = [];
+		if($method == 'GET') {
+			$settings = (array) get_option( 'ar_try_on_settings' );
+			$product_settings = [];
+			if ( empty( $post_id ) && $call_from == 'admin' ) {
+				if(empty($settings)) {
+					$settings = AR_TRY_ON_Helper::default_settings();
+				}
+				$product_settings = AR_TRY_ON_Helper::default_model_settings();
 			}
-			$product_settings = AR_TRY_ON_Helper::default_model_settings();
-			// return rest_ensure_response( [
-			// 	'success' => true,
-			// 	'data'    => []
-			// ] );
+
+			if($post_id) {
+				$product_settings = get_post_meta( $post_id, 'ar_try_on_product_settings', true );
+			}
+			
+			// Get Default value.
+			if(empty($product_settings)) {
+				$product_settings = AR_TRY_ON_Helper::default_model_settings();
+			}
+
+
+			$data = $settings;
+			$data += $product_settings;
+			$data['product_name'] = $post_id ?  get_the_title( $post_id ) : '';
+		}else{
+			$fields = json_decode($decoded_body['fields']);
+			$data = $fields;
+			foreach( $fields  as $key =>  $value ) {
+				if (strpos($key, 'ar_try_on') === false) {
+					$filtered_data[$key] = $value;
+				}
+			}
+
+			update_post_meta($post_id, 'ar_try_on_product_settings', $filtered_data);
 		}
-
-		if($post_id && empty($product_settings)) {
-			$product_settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
-		}
-
-
-
-		//Get the file url for android
-		if ( isset( $product_settings['ar_try_on_file_android'] ) && $product_settings['ar_try_on_file_android'] ) {
-			$model_3d_file = $product_settings['ar_try_on_file_android'];
-		}
-
-		//Get the fiel url for IOS
-		if ( isset( $product_settings['ar_try_on_file_ios'] ) && $product_settings['ar_try_on_file_ios'] ) {
-			$get_ios_file = $product_settings['ar_try_on_file_ios'];
-		}
-
-
-		//Get the alt for web accessibility
-		if ( isset( $product_settings['ar_try_on_file_alt'] ) && $product_settings['ar_try_on_file_alt'] ) {
-			$model_alt = $product_settings['ar_try_on_file_alt'];
-		}
-
-		//Get the Poster
-		if ( isset( $product_settings['ar_try_on_file_poster'] ) && $product_settings['ar_try_on_file_poster'] ) {
-			$model_poster = $product_settings['ar_try_on_file_poster'];
-		}
-
-		if ( isset( $product_settings['ar_try_on_ar_placement'] ) && $product_settings['ar_try_on_ar_placement'] ) {
-			$placement = $product_settings['ar_try_on_ar_placement'];
-		}
-
-		if ( isset( $settings['ar_try_on_poster_color'] ) && $settings['ar_try_on_poster_color'] ) {
-			$poster_color = $settings['ar_try_on_poster_color'];
-		}
-
-		if ( isset( $settings['ar_try_on_loading_type'] ) && $settings['ar_try_on_loading_type'] ) {
-			$loading = $settings['ar_try_on_loading_type'];
-		}
-
-		if ( isset( $settings['ar_try_on_reveal_type'] ) && $settings['ar_try_on_reveal_type'] ) {
-			$reveal = $settings['ar_try_on_reveal_type'];
-		}
-
-
-		if ( isset( $settings['ar_try_on_ar'] ) && $settings['ar_try_on_ar'] ) {
-			$ar = $settings['ar_try_on_ar'];
-		}
-
-
-		if ( isset( $settings['ar_try_on_ar_scale'] ) && $settings['ar_try_on_ar_scale'] ) {
-			$scale = $settings['ar_try_on_ar_scale'];
-		}
-
-		// TODO remove this one after 6 months. Because this settings will be based on model type.
-		if ( ! $placement && isset( $settings['ar_try_on_ar_placement'] ) && $settings['ar_try_on_ar_placement'] ) {
-			$placement = $settings['ar_try_on_ar_placement'];
-		}
-
-		if ( isset( $settings['ar_try_on_xr_environment'] ) && $settings['ar_try_on_xr_environment'] ) {
-			$xr_environment = $settings['ar_try_on_xr_environment'];
-		}
-
-		if ( isset( $settings['ar_try_on_ar_modes'] ) && $settings['ar_try_on_ar_modes'] ) {
-			$ar_modes = $settings['ar_try_on_ar_modes'];
-		}
-
-		if ( isset( $settings['ar_try_on_ar_button'] ) && $settings['ar_try_on_ar_button'] ) {
-			$custom_button = $settings['ar_try_on_ar_button'];
-		}
-
-		if ( isset( $settings['ar_try_on_ar_button_text'] ) && $settings['ar_try_on_ar_button_text'] ) {
-			$custom_button_text = $settings['ar_try_on_ar_button_text'];
-		}
-
-		if ( isset( $settings['ar_try_on_ar_button_text_color'] ) && $settings['ar_try_on_ar_button_text_color'] ) {
-			$custom_button_text_color = $settings['ar_try_on_ar_button_text_color'];
-		}
-
-		if ( isset( $settings['ar_try_on_ar_button_background_color'] ) && $settings['ar_try_on_ar_button_background_color'] ) {
-			$custom_button_background_color = $settings['ar_try_on_ar_button_background_color'];
-		}
-
-		// Check if the customs fields has a value.
-		if ( ! empty( $get_android_file ) ) {
-			$android_file_url = $get_android_file;
-		}
-
-
-		// Obtener el nombre del producto
-		$product_name = get_the_title( $post_id );
-
-		// Comprobar que el archivo 3D existe
-		if ( ! $model_3d_file ) {
-			return rest_ensure_response( [
-				'success' => false,
-				'data'    => '3D model file is missing.'
-			] );
-		}
-
-		// Preparar los datos para el retorno
-		$data = array(
-			'loading'                        => $loading,
-			'reveal'                         => $reveal,
-			'poster_color'                   => $poster_color,
-			'ar'                             => $ar,
-			'scale'                          => $scale,
-			'ar_placement'                   => $placement,
-			'xr_environment'                 => $xr_environment,
-			'ar_modes'                       => $ar_modes,
-			'product_name'                   => $product_name,
-			'model_3d_file'                  => $model_3d_file,
-			'model_ios_file'                 => $get_ios_file,
-			'model_alt'                      => $model_alt,
-			'model_poster'                   => $model_poster,
-			'custom_button'                  => $custom_button,
-			'custom_button_text'             => $custom_button_text,
-			'custom_button_text_color'       => $custom_button_text_color,
-			'custom_button_background_color' => $custom_button_background_color,
-		);
-		$data += $product_settings;
 
 		// Enviar la respuesta en formato JSON
 		return rest_ensure_response( [
 			'success' => true,
-			'data'    => $data
+			'data'    => $data,
 		] );
 	}
 

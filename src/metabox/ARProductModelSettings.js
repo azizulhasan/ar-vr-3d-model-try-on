@@ -16,11 +16,11 @@ const ARProductModelSettings = () => {
         ios_model_source_type: 'upload',
     })
     const [productModel, setProductModel] = useState({
-        ar_try_on_file_android: '',
-        ar_try_on_file_ios: '',
-        ar_try_on_file_poster: '',
-        ar_try_on_file_alt: 'Title',
-        ar_try_on_ar_placement: 'floor',
+        src: '',
+        ios_src: '',
+        poster: '',
+        alt: 'Title',
+        ar_placement: 'floor',
         // light & environment settings
         skybox_image: '',
         environment_image: '',
@@ -126,7 +126,6 @@ const ARProductModelSettings = () => {
                 clearInterval(InterVal)
                 const postId = getPostID()
                 let formData = new FormData();
-                formData.append('method', 'get');
                 formData.append('post_id', postId);
                 formData.append('call_from', 'admin');
                 postWithoutImage(getURL('get_model_and_settings'), formData).then(
@@ -134,11 +133,6 @@ const ARProductModelSettings = () => {
                         const productModelData = {
                             ...productModel,
                             ...res.data,
-                            // Always force these to 'upload' on page load
-                            ios_model_source_type: 'upload',
-                            poster_source_type: 'upload',
-                            environment_source_type: 'upload',
-                            skybox_source_type: 'upload',
                         };
                         setProductModel(productModelData);
                         setIsProductModelLoad(true)
@@ -157,12 +151,18 @@ const ARProductModelSettings = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const postId = getPostID()
+        if (!postId) {
+            alert('Please publish the post first. Then reload the page and save.')
+            return;
+        }
+
         let formData = new FormData();
         formData.append('fields', JSON.stringify(productModel));
         formData.append('post_id', postId);
-        formData.append('method', 'post');
-        postWithoutImage(getURL('product_settings'), formData)
+        formData.append('method', 'POST');
+        postWithoutImage(getURL('get_model_and_settings'), formData)
             .then((res) => {
+                console.log(res)
                 setProductModel({ ...productModel, ...res.data });
                 alert('Successfully Saved Data.')
             })
