@@ -180,6 +180,31 @@ if (false) {
                 modelViewer.setAttribute('skybox-image', (model_settings.skybox_image || ''));
                 modelViewer.setAttribute('environment-image', (model_settings.environment_image || ''));
 
+                if (model_settings.auto_rotate) {
+                    modelViewer.setAttribute('auto-rotate', '');
+                } else {
+                    modelViewer.removeAttribute('auto-rotate');
+                }
+                modelViewer.setAttribute('shadow-intensity', (model_settings.shadow_intensity ?? '1'));
+                if (model_settings.camera_orbit) {
+                    modelViewer.setAttribute('camera-orbit', data.camera_orbit);
+                } else {
+                    modelViewer.removeAttribute('camera-orbit');
+                }
+             
+                if (model_settings.disable_zoom) {
+                        modelViewer.setAttribute('disable-zoom', '');
+                } else {
+                        modelViewer.removeAttribute('disable-zoom');
+                    }
+
+                if (model_settings.disable_tap) {
+                        modelViewer.setAttribute('disable-tap', '');
+                } else {
+                        modelViewer.removeAttribute('disable-tap');
+                }
+
+
                 modelViewer.style.backgroundColor = model_settings.poster_color || 'rgba(255,255,255,0)';
                 const scale = model_settings.scale || 'auto'; // Default value if not defined
                 modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed

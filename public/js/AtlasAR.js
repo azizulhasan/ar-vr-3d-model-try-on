@@ -89,6 +89,33 @@ class AtlasAR {
             modelViewer.setAttribute('skybox-image', (data.skybox_image || ''));
             modelViewer.setAttribute('environment-image', (data.environment_image || ''));
 
+                if (data.auto_rotate) {
+                    modelViewer.setAttribute('auto-rotate', '');
+                } else {
+                    modelViewer.removeAttribute('auto-rotate');
+                }
+
+                modelViewer.setAttribute('shadow-intensity', data.shadow_intensity ?? '1');
+
+                if (data.camera_orbit) {
+                    modelViewer.setAttribute('camera-orbit', data.camera_orbit);
+                } else {
+                    modelViewer.removeAttribute('camera-orbit');
+                }
+
+                if (data.disable_zoom) {
+                    modelViewer.setAttribute('disable-zoom', '');
+                } else {
+                    modelViewer.removeAttribute('disable-zoom');
+                }
+
+                if (data.disable_tap) {
+                    modelViewer.setAttribute('disable-tap', '');
+                } else {
+                    modelViewer.removeAttribute('disable-tap');
+}
+
+
             modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
             const scale = data.scale || 'auto'; // Default value if not defined
             modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
