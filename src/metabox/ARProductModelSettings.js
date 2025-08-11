@@ -21,11 +21,8 @@ const ARProductModelSettings = () => {
         ar_try_on_file_poster: '',
         ar_try_on_file_alt: 'Title',
         ar_try_on_ar_placement: 'floor',
-        ar_try_on_test_field: '',
-        ar_try_on_android_model: '',
-        ar_try_on_ios_model: '',
-        ar_try_on_file_skybox: '',
-        ar_try_on_file_environment: '',
+        skybox_image: '',
+        environment_image: '',
         // Camera settings
         auto_rotate: false,
         shadow_intensity: '1',
@@ -89,7 +86,7 @@ const ARProductModelSettings = () => {
 
     const handleMediaButtonClick = (fieldName, value) => {
         setBasicSettings(prev => ({ ...prev, fieldName: value }))
-        let inputField= document.getElementById(fieldName) 
+        let inputField = document.getElementById(fieldName)
         wp.hooks.doAction('ar_try_on_select_light_and_envirement_files', {
             name: fieldName,
             field: inputField,
@@ -170,7 +167,7 @@ const ARProductModelSettings = () => {
             Save
         </button>
     );
-    
+
     return (
         <div className="art-flex art-gap-6" style={{ display: 'flex', gap: '0.25rem' }}>
             {/* Left Side - Settings/Style Sections */}
@@ -228,7 +225,7 @@ const ARProductModelSettings = () => {
                                 setBasicSettings={setBasicSettings}
                             />
 
-                           
+
                         </div>
                     )}
 
@@ -239,16 +236,16 @@ const ARProductModelSettings = () => {
                             handleChange={handleChange}
                             styleAccordion={styleAccordion}
                             toggleStyleAccordion={toggleStyleAccordion}
-                            
+
                         />
 
-                    
-                        
+
+
                     )}
 
-                     <SaveButton />
-                    
-                    
+                    <SaveButton />
+
+
                 </div>
             </div>
 
@@ -278,6 +275,7 @@ const ARProductModelSettings = () => {
 
                 <div id='ar_try_on_preveiw'></div>
             </div>
+            <div className="art-hidden"></div>
         </div>
     );
 };

@@ -1,11 +1,11 @@
 import alertify from 'alertifyjs';
 
-import {getURL, postWithoutImage, getPostID} from "../../src/context/utilities";
+import { getURL, postWithoutImage, getPostID } from "../../src/context/utilities";
 
 
 const product_id = getPostID();
 
-console.log({product_id})
+console.log({ product_id })
 // Verify if product_id is defined
 if (!product_id) {
     console.error('Product ID is missing');
@@ -116,28 +116,28 @@ if (false) {
 
 
 
-        let formData = new FormData();
-        formData.append('product_id', product_id);
-        let model_settings = {}
-        await postWithoutImage(getURL('get_model_and_settings'), formData)
-            .then((response) => {
-                if (response.success) {
-                    model_settings = response.data;
-                    console.log({model_settings})
-                    let InterVal =  setInterval(()=>{
-                        console.log(document.getElementById('ar_try_on_preveiw'))
-                        if(document.getElementById('ar_try_on_preveiw')) {
-                            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
-                            clearInterval(InterVal)
-                        }
-                    },200)
-                } else {
-                    console.error(response.data);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+    let formData = new FormData();
+    formData.append('product_id', product_id);
+    let model_settings = {}
+    await postWithoutImage(getURL('get_model_and_settings'), formData)
+        .then((response) => {
+            if (response.success) {
+                model_settings = response.data;
+                console.log({ model_settings })
+                let InterVal = setInterval(() => {
+                    console.log(document.getElementById('ar_try_on_preveiw'))
+                    if (document.getElementById('ar_try_on_preveiw')) {
+                        document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+                        clearInterval(InterVal)
+                    }
+                }, 200)
+            } else {
+                console.error(response.data);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 
 
     wp.hooks.addAction('ar_try_on_preview_data', 'ar_try_on', function (data) {
@@ -147,6 +147,23 @@ if (false) {
         model_settings.model_alt = data.ar_try_on_file_alt;
         model_settings.model_poster = data.ar_try_on_file_poster;
         model_settings.ar_placement = data.ar_try_on_ar_placement;
+        model_settings = { ...model_settings, ...data }
+        // <model-viewer 
+        //     ar="true" 
+        //     src="https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb" 
+        //     environment-image="https://modelviewer.dev/shared-assets/environments/moon_1k.hdr" 
+        //     poster="https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp" 
+        //     shadow-intensity="1" 
+        //     camera-controls="" 
+        //     touch-action="pan-y" 
+        //     tone-mapping="neutral" 
+        //     auto-rotate="false" 
+        //     camera-orbit="45deg 55deg 4m" 
+        //     skybox-image="https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg" 
+        //     ar-status="not-presenting">
+        // </model-viewer>
+
+        console.log(model_settings)
 
         // Check if the data exists before assigning it to model-viewer
         if (model_settings) {
@@ -160,6 +177,9 @@ if (false) {
                 modelViewer.setAttribute('loading', model_settings.loading || 'auto');
                 modelViewer.setAttribute('ar-modes', (model_settings.ar_modes || []).join(' '));
                 modelViewer.setAttribute('ar-placement', (model_settings.ar_placement || 'floor'));
+                modelViewer.setAttribute('skybox-image', (model_settings.skybox_image || ''));
+                modelViewer.setAttribute('environment-image', (model_settings.environment_image || ''));
+
                 modelViewer.style.backgroundColor = model_settings.poster_color || 'rgba(255,255,255,0)';
                 const scale = model_settings.scale || 'auto'; // Default value if not defined
                 modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
@@ -170,8 +190,8 @@ if (false) {
                     modelViewer.removeAttribute('xr-environment');
                 }
                 // TODO: add functionality for this.
-                if(data.custom_button === "activate") {
-                    modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
+                if (data.custom_button === "activate") {
+                    modelViewer.innerHTML = `<button> ${data.custom_button_text || 'Activate Ar'} </button>`;
                 }
 
             }

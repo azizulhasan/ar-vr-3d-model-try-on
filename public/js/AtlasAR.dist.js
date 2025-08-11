@@ -3860,6 +3860,8 @@ var AtlasAR = /*#__PURE__*/function () {
         modelViewer.setAttribute('loading', data.loading || 'auto');
         modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
         modelViewer.setAttribute('ar-placement', data.ar_placement || 'floor');
+        modelViewer.setAttribute('skybox-image', data.skybox_image || '');
+        modelViewer.setAttribute('environment-image', data.environment_image || '');
         modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
         var scale = data.scale || 'auto'; // Default value if not defined
         modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed

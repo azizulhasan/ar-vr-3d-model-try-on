@@ -298,6 +298,7 @@ class AR_TRY_ON_Api_Routes {
 			'custom_button_text_color'       => $custom_button_text_color,
 			'custom_button_background_color' => $custom_button_background_color,
 		);
+		$data += $product_settings;
 
 		// Enviar la respuesta en formato JSON
 		return rest_ensure_response( [
