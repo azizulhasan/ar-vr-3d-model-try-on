@@ -1,17 +1,17 @@
-=== 3D Model Viewer & WordPress Augmented Reality  ===
-Contributors: atlasaidev, hasanazizul
-Tags: AR, 3d model, model viewer, Augmented Reality, 3d
+=== 3D Viewer – 3D Model Viewer – WordPress Augmented Reality  ===
+Contributors: atlasaidev, hasanazizul, freemius
+Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.4.8
+Stable tag: 1.5.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
+3D Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
 == Description ==
 
-Showcase your 3D Models with immersive AR experiences directly in the browser using advanced Augmented Reality WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
+Showcase your 3D Models with immersive AR experiences directly in the browser using advanced 3D Viewer WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
 
 #### **Key AR features at a Glance:**
 * **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/).
@@ -32,9 +32,9 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 [youtube https://www.youtube.com/watch?v=NlYaGeYeS1w&t=81s&ab_channel=AtlasAiDev]
 
 
-### **Why Choose Our Augmented Reality WordPress Solution?**
+### **Why Choose Our 3d viewer WordPress Solution?**
 
-* ✅ **Unlimited 3D Uploads**: Free version supports unlimited .glb/.gltf files.
+* ✅ **Unlimited 3D Uploads**: Free version supports unlimited .glb/.gltf/.usdz files.
 * ✅ **True Mobile AR**: Android (GLB) + iOS (USDZ) compatibility.
 * ✅ **WooCommerce Native**: Automatic integration with product pages.
 * ✅ **Zero Coding**: Automatic AR button placement on product pages – no coding required.
@@ -51,8 +51,8 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 * Automatic fallback to interactive 3D model viewer on desktop/mobile.
 
 #### **2. Mobile Augmented Reality Magic (AR Placement Options)**
-* **Floor Augmented Reality (AR)**: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
-* **Wall Augmented Reality (AR)**: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
+* **Floor 3d viewer **: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
+* **Wall 3d viewer **: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
 * **Glass Mode (Pro Version - Coming Soon)**: Enable virtual try-ons for glasses, sunglasses, and jewelry.
 
 #### **3. WooCommerce Optimization**
@@ -87,7 +87,7 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
     * The "View in AR " button is automatically placed on your WordPress Posts/WooCommerce product pages.
     * For manual placement in other locations, you can use the shortcode: `[atlas_ar]`.
 
-== Real-World Augmented Reality Applications ==
+== Real-World 3D Viewer Applications ==
 
 * 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."  [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
 * 👓 **Eyewear Retailers (Pro Version for Try-On)**: "Virtual try-ons reduced returns by 33% for sunglasses." 
@@ -197,6 +197,21 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 4. Plugin Features
 
 == Changelog ==
+
+
+
+= 1.5.0 ( 13 August 2025 )  =
+Added: auto retate option added.
+Added: skybox image option added.
+Added: environment image option added.
+Added: disable tap option added.
+Added: disable zoom option added.
+Added: shadow intesity option added.
+Added: alignment, margin, padding, width, height option added.
+Improved: Metabox UI improved.
+Added: Default model value added.
+Improved: performance of model loading improved.
+Added: Custom css option added.
 
 
 
