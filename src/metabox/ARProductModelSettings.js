@@ -43,12 +43,12 @@ const ARProductModelSettings = () => {
     // Accordion state
     const [activeSection, setActiveSection] = useState('settings');
     const [activeAccordion, setActiveAccordion] = useState({
-        content: true,
+        content: false,
         camera: false,
         advance: false
     });
     const [styleAccordion, setStyleAccordion] = useState({
-        canvas: true,
+        canvas: false,
         advance: false,
     });
 
@@ -69,7 +69,8 @@ const ARProductModelSettings = () => {
         }));
     };
 
-    const toggleSection = (section) => {
+    const toggleSection = (e, section) => {
+        e.preventDefault()
         setActiveSection(section);
     };
 
@@ -187,7 +188,7 @@ const ARProductModelSettings = () => {
                 {/* Section Tabs */}
                 <div className="art-flex art-mb-4 art-border-b">
                     <button
-                        onClick={() => toggleSection('settings')}
+                        onClick={(e) => toggleSection(e, 'settings')}
                         className={`art-px-4 art-py-2 art-cursor-pointer art-font-medium art-border-b-2 ${activeSection === 'settings'
                             ? 'art-border-blue-500 art-text-blue-600'
                             : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
@@ -196,7 +197,7 @@ const ARProductModelSettings = () => {
                         Settings
                     </button>
                     <button
-                        onClick={() => toggleSection('style')}
+                        onClick={(e) => toggleSection(e, 'style')}
                         className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'style'
                             ? 'art-border-blue-500 art-text-blue-600'
                             : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
