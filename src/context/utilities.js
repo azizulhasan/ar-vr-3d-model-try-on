@@ -122,13 +122,14 @@ export const setModelAttributes = (modelViewer, model_settings) => {
 
     //    Here goes the Canvas Section:
     if (model_settings.canvas_alignment) {
-        if (model_settings.canvas_alignment === 'center') {
+        if (model_settings.canvas_alignment == 'center') {
             modelViewer.style.display = 'block';
-            modelViewer.style.margin = '15px auto';
-        } else if (model_settings.canvas_alignment === 'left') {
+            modelViewer.style.margin = '0px auto';
+        } else if (model_settings.canvas_alignment ==   'left') {
             modelViewer.style.margin = '0 auto 0 0';
-        } else if (model_settings.canvas_alignment === 'right') {
+        } else if (model_settings.canvas_alignment == 'right') {
             modelViewer.style.margin = '0 0 0 auto';
+            console.log(model_settings)
         }
     }
 
@@ -159,17 +160,17 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         modelViewerStyle.innerHTML = model_settings.custom_css
     }
 
-    modelViewer.style.backgroundColor = model_settings.poster_color || 'rgba(255,255,255,0)';
-    const scale = model_settings.scale || 'auto'; // Default value if not defined
+    modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || 'rgba(255,255,255,0)';
+    const scale = model_settings.ar_try_on_ar_scale || 'auto'; // Default value if not defined
     modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-    if (model_settings.ar === "deactivate") {
+    if (model_settings.ar_try_on_ar === "deactivate") {
         modelViewer.removeAttribute('ar');
     }
-    if (model_settings.xr_environment === "deactivate") {
+    if (model_settings.ar_try_on_xr_environment === "deactivate") {
         modelViewer.removeAttribute('xr-environment');
     }
     // TODO: add functionality for this.
-    if (model_settings.custom_button === "activate") {
-        modelViewer.innerHTML = `<button> ${model_settings.custom_button_text || 'Activate Ar'} </button>`;
+    if (model_settings.ar_try_on_ar_button === "activate") {
+        modelViewer.innerHTML = `<button> ${model_settings.ar_try_on_ar_button_text || 'Activate Ar'} </button>`;
     }
 }

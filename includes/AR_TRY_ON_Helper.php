@@ -322,7 +322,7 @@ class AR_TRY_ON_Helper {
 			'canvas_width'=> '100%',
 			'canvas_height'=> '400px',
 			'canvas_margin'=> '0',
-			'canvas_padding'=> '0',
+			'canvas_padding'=> '20px 0',
 			'custom_css'=> '',
 		];
 	}
