@@ -157,7 +157,10 @@ class AR_TRY_ON_Public {
         }
 		
         $ar_button_content = '';
-		$settings = AR_TRY_ON_Cache::get( 'settings' );
+		/**
+		 * AR-27: Cache system is  giving empty value.
+		 */
+		$settings   = (array) get_option( 'ar_try_on_settings' );
 		$ar_button_content = AR_TRY_ON_Helper::get_qr_code($settings);
 		
 
@@ -169,7 +172,7 @@ class AR_TRY_ON_Public {
         if( !has_shortcode($post->post_content, 'atlas_ar') && $should_add_ar_button ) {
             ob_start();
             ?>
-            <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in 3D</button>
+            <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on">View in AR</button>
             <?php
             $ar_button_content .= ob_get_clean();
         }

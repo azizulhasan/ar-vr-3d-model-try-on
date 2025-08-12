@@ -1,29 +1,22 @@
-=== Augmented Reality & 3D Model Viewer for Wordpress & WooCommerce  ===
+=== 3D Model Viewer & WordPress Augmented Reality  ===
 Contributors: atlasaidev, hasanazizul
 Tags: AR, 3d model, model viewer, Augmented Reality, 3d
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.4.6
+Stable tag: 1.4.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-Augmented Reality & 3D Model Viewer for WooCommerce lets you upload and display 3D models with built‑in AR on iOS and Android, no extra apps required.
-
+3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
 == Description ==
 
-### **Experience the Future of Shopping with AR Try On & 3D Model Viewer for WooCommerce!**
-
-Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android—no apps needed.
+Showcase your 3D Models with immersive AR experiences directly in the browser using advanced Augmented Reality WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
 
 #### **Key AR features at a Glance:**
 * **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/).
 * **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/).
 * **Preview model** Preview model in the product editor page.
-* **Try before buying** with virtual eyewear/jewelry testing.
-
-*Glass placement & virtual try-ons require Pro version - coming soon.
-
 
 
 ### SOME USEFUL LINKS:
@@ -45,12 +38,15 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 * ✅ **True Mobile AR**: Android (GLB) + iOS (USDZ) compatibility.
 * ✅ **WooCommerce Native**: Automatic integration with product pages.
 * ✅ **Zero Coding**: Automatic AR button placement on product pages – no coding required.
+* ✅ **ShortCode**: Easy shortcode setup `[atlas_ar]` .
+* ✅ **QR Code**: Display a QR code in desktop view .
+
 
 ### **Core Features:**
 
 #### **1. Complete 3D Model Control**
-* Upload GLB/GLTF files for Android AR and desktop 3D viewing.
-* Add USDZ files for iOS AR Quick Look.
+* Upload .GLB/.GLTF files for Android AR and 3D view in desktop.
+* Add .USDZ files for iOS AR Quick Look.
 * Set custom posters/thumbnails for each 3D model viewer.
 * Automatic fallback to interactive 3D model viewer on desktop/mobile.
 
@@ -61,7 +57,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 #### **3. WooCommerce Optimization**
 * Dedicated "AR Try On" tab and settings within the WooCommerce product editor.
-* Automatic "View in 3D / AR" button placement on product pages.
+* Automatic "View in AR " button placement on product pages.
 * Full support for simple and variable/configurable products.
 * Designed to work seamlessly with all standard WooCommerce themes.
 
@@ -70,20 +66,25 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 * Optimized for fast and smooth mobile Augmented Reality experiences.
 * Asynchronous loading of models to ensure fast page speeds.
 
+#### **5. QR Code**
+Display a QR code in desktop view, allowing users to scan and switch to an AR capable device.
+
 == How It Works - 3 Simple Steps ==
 
 1.  **Install & Activate**:
     * In your WordPress admin panel, go to Plugins → Add New.
-    * Search for "AR VR Try On" (or your plugin's exact name in the repository).
+    * Search for "AR VR 3D Model Try On".
     * Click "Install Now" and then "Activate."
 2.  **Upload Models**:
-    * Navigate to a WooCommerce product editing screen.
-    * Find the "AR Try On" (or similarly named) tab.
+    * Navigate to a WordPress post eiditing screen
+    * Find the "AR Try On" Metabox.
+    * Select the place where you want to display the 3D Model like Floor/Wall etc.
     * Upload your Android Model: `.glb/.gltf` file.
     * Upload your iOS Model: `.usdz` file.
     * Optionally, add a Poster Image (thumbnail) for the 3D model viewer.
+    * If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
 3.  **Display 3D Model Viewer**:
-    * The "View in 3D / AR" button is automatically placed on your WooCommerce product pages.
+    * The "View in AR " button is automatically placed on your WordPress Posts/WooCommerce product pages.
     * For manual placement in other locations, you can use the shortcode: `[atlas_ar]`.
 
 == Real-World Augmented Reality Applications ==
@@ -103,7 +104,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 - Others: Often 1–10 models
 
 **iOS AR Support**
-- Our Plugin: Full native USDZ compatibility
+- Our Plugin: Full native .USDZ compatibility
 - Others: Android-only or limited iOS support
 
 **WooCommerce Integration**
@@ -140,7 +141,7 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 1.  **Install the Free Version**: Get started with unlimited 3D model uploads, no credit card needed.
 2.  **Upload Your First Model**: Add a `.glb/.gltf` file for Android/Web and a `.usdz` file for iOS to a product.
-3.  **Watch Engagement Soar**: Provide interactive AR experiences and see the impact typically within 24 hours of setup.
+3.  **Watch Engagement Soar**: Provide interactive AR experiences.
 
 
 
@@ -152,22 +153,28 @@ Turn your WooCommerce store into an immersive 3D experience. Let customers explo
 
 == Installation ==
 
-1.  Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
-2.  Install directly through the WordPress plugins screen: Go to 'Plugins' > 'Add New', search for "Augmented Reality & 3D Model Viewer for WordPress & WooCommerce" (or the name you use, like "AR VR Try-On"), and click 'Install Now'.
-3.  Activate the plugin through the 'Plugins' menu in WordPress.
-4.  Navigate to a WooCommerce product, go to the product data section, and find the "AR Try On" (or your specific tab name) tab to upload your 3D models.
-5.  The "View in 3D / AR" button will automatically appear on product pages. You can also use the shortcode `[atlas_ar]` for manual placement.
+1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
+2. Install directly through the WordPress plugins screen: Go to 'Plugins' > 'Add New', search for "3D Model Viewer & AR for Wordpress & WooCommerce" by `Azizul Hasan` , and click 'Install Now'.
+3. Activate the plugin through the 'Plugins' menu in WordPress.
+4. Navigate to a WordPress Post, post metabox section, and find the "AR Try On" metabox to upload your 3D models.
+5. Navigate to a WooCommerce product, go to the product metabox section, and find the "AR Try On" metabox to upload your 3D models.
+6. The "View in AR " button will automatically appear on product pages. You can also use the shortcode `[atlas_ar]` for manual placement.
+7. If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
 
 == Frequently Asked Questions ==
+
+= Q: Can I display 3D Models with custom post types? =
+A: Yes, By default it enabled with post type post. If you want to enabled for any other post then go to settings page of the plugin. And Look "Enable AR For Post Types". Change it to `you_custom_post_type' and save.
+
 
 = Q: Which 3D file formats are supported? =
 A: You can upload `.glb` and `.gltf` files for Android and desktop viewers, and `.usdz` files to enable native iOS AR Quick Look functionality.
 
 = Q: Do my customers need to install an app to use AR? =
-A: No—AR experiences launch directly in mobile browsers on both Android (via Scene Viewer) and iOS (via Quick Look), with no extra app downloads required.
+A: No— AtlasAR launch directly in mobile browsers on both Android (via Scene Viewer) and iOS (via Quick Look), with no extra app downloads required.
 
 = Q: How do I display the 3D/AR viewer on my product pages? =
-A: Once the plugin is active, “View in 3D / AR” buttons are automatically added to all WooCommerce product pages where models are assigned.
+A: Once the plugin is active, “View in AR ” buttons are automatically added to all WooCommerce product pages where models are assigned.
 
 = Q: Is there a limit on how many models I can upload with the free version? =
 A: No. The free version supports unlimited `.glb`/`.gltf` model uploads—no size or quantity caps.
@@ -190,6 +197,17 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 4. Plugin Features
 
 == Changelog ==
+
+
+
+= 1.4.8 ( 07 August 2025 )  =
+Fixed: 3D view button not showing up is fixed.
+
+= 1.4.7 ( 04 August 2025 )  =
+Improved: QR code will only load for Desktop.
+Changed: AR button Name changed.
+Updated: Documentation updated.
+
 
 = 1.4.6 ( 24 July 2025 )  =
 Fixed: UI related bug fixed.

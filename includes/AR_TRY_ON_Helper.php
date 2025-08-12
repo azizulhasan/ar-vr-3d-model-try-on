@@ -242,9 +242,9 @@ class AR_TRY_ON_Helper {
 
 	public static function is_qr_code_enabled($settings = []) {
 		if(empty($settings)) {
-			$settings = AR_TRY_ON_Cache::get( 'settings' );
+			$settings   = (array) get_option( 'ar_try_on_settings' );
 		}
-		if ( isset( $settings['ar_try_on_enable_qr_code'] )&&  $settings['ar_try_on_enable_qr_code'] == 'yes' ) {
+		if ( !wp_is_mobile() && isset( $settings['ar_try_on_enable_qr_code'] )&&  $settings['ar_try_on_enable_qr_code'] == 'yes' ) {
 			return true;
 		}
 
