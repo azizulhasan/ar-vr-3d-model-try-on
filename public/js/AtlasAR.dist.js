@@ -3839,7 +3839,8 @@ var AtlasAR = /*#__PURE__*/function () {
     key: "getModelSkeleton",
     value: function getModelSkeleton() {
       var model_id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'atlas_ar_model_viewer';
-      return "\n                    <div style=\"display: flex; justify-content: center; align-items: center; height: 100%;\">\n                        <model-viewer\n                            id=\"".concat(model_id, "\"\n                            src=\"\"\n                            alt=\"\"\n                            poster=\"\"\n                            reveal=\"\"\n                            loading=\"\"\n                            ar\n                            ar-modes=\"\"\n                            camera-controls\n                            ar-scale=\"auto\"\n                            xr-environment\n                            style=\"width: 100%; max-width: 600px; height: 400px;\"\n                        ></model-viewer>\n                    </div>");
+      // TODO: user should add custom class for there own sake.
+      return "\n                <style id=\"model-viewer-style\"></style>\n                    <div style=\"display: flex; justify-content: center; align-items: center; height: 100%;\">\n                        <model-viewer\n                            id=\"".concat(model_id, "\"\n                            class=\"atlas_ar_model_viewer\" \n                            src=\"\"\n                            alt=\"\"\n                            poster=\"\"\n                            reveal=\"\"\n                            loading=\"\"\n                            ar\n                            ar-modes=\"\"\n                            camera-controls\n                            ar-scale=\"auto\"\n                            xr-environment\n                            style=\"width: 100%; height: 400px;\"\n                        ></model-viewer>\n                    </div>");
     }
   }, {
     key: "isObject",
@@ -3851,6 +3852,8 @@ var AtlasAR = /*#__PURE__*/function () {
     value: function setModelData(data) {
       var model_id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'atlas_ar_model_viewer';
       var modelViewer = document.getElementById(model_id);
+      var modelViewer2 = document.querySelectorAll('.atlas_ar_model_viewer')[0];
+      console.log(modelViewer2);
       if (modelViewer && this.isObject(data)) {
         var _data$shadow_intensit;
         modelViewer.setAttribute('src', data.model_3d_file || '');
@@ -3883,28 +3886,35 @@ var AtlasAR = /*#__PURE__*/function () {
           modelViewer.setAttribute('disable-tap', '');
         } else {
           modelViewer.removeAttribute('disable-tap');
-          if (data.canvas_alignment) {
-            if (data.canvas_alignment === 'center') {
-              modelViewer.style.display = 'block';
-              modelViewer.style.margin = '0 auto';
-            } else if (data.canvas_alignment === 'left') {
-              modelViewer.style.margin = '0 auto 0 0';
-            } else if (data.canvas_alignment === 'right') {
-              modelViewer.style.margin = '0 0 0 auto';
-            }
+        }
+        if (data.canvas_alignment) {
+          if (data.canvas_alignment === 'center') {
+            modelViewer.style.display = 'block';
+            modelViewer.style.margin = '0 auto';
+          } else if (data.canvas_alignment === 'left') {
+            modelViewer.style.margin = '0 auto 0 0';
+          } else if (data.canvas_alignment === 'right') {
+            modelViewer.style.margin = '0 0 0 auto';
           }
-          if (data.canvas_width) {
-            modelViewer.style.width = data.canvas_width;
-          }
-          if (data.canvas_height) {
-            modelViewer.style.height = data.canvas_height;
-          }
-          if (data.canvas_margin) {
-            modelViewer.style.margin = data.canvas_margin;
-          }
-          if (data.canvas_padding) {
-            modelViewer.style.padding = data.canvas_padding;
-          }
+        }
+        console.log({
+          data: data
+        });
+        if (data.canvas_width) {
+          modelViewer.style.width = data.canvas_width;
+        }
+        if (data.canvas_height) {
+          modelViewer.style.height = data.canvas_height;
+        }
+        if (data.canvas_margin) {
+          modelViewer.style.margin = data.canvas_margin;
+        }
+        if (data.canvas_padding) {
+          modelViewer.style.padding = data.canvas_padding;
+        }
+        var modelViewerStyle = document.getElementById('model-viewer-style');
+        if (modelViewerStyle) {
+          modelViewerStyle.innerHTML = data.custom_css;
         }
         modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
         var scale = data.scale || 'auto'; // Default value if not defined
@@ -3938,7 +3948,7 @@ var AtlasAR = /*#__PURE__*/function () {
               model_id = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : 'atlas_ar_model_viewer';
               self = this;
               formData = new FormData();
-              formData.append('product_id', product_id);
+              formData.append('post_id', product_id);
               _context2.next = 6;
               return this.postWithoutImage(this.getURL('get_model_and_settings'), formData).then(function (response) {
                 if (response.success) {

@@ -36,9 +36,7 @@ const ARProductModelSettings = () => {
         canvas_height: '',
         canvas_margin: '',
         canvas_padding: '',
-
-        
-
+        custom_css: '',
     });
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
@@ -103,11 +101,12 @@ const ARProductModelSettings = () => {
     };
 
     useEffect(() => {
-        let cloneProductModel = JSON.parse(JSON.stringify(productModel));
-        wp.hooks.addAction('ar_try_on_on_select_model_file', 'ar_try_on', function (val) {
-            setCurrentValue(val);
-        });
-    }, []);
+        if (wp?.hooks) {
+            wp.hooks.addAction('ar_try_on_on_select_model_file', 'ar_try_on', function (val) {
+                setCurrentValue(val);
+            });
+        }
+    }, [wp.hooks]);
 
     useEffect(() => {
         console.log(currentValue)
@@ -122,27 +121,32 @@ const ARProductModelSettings = () => {
     }, [currentValue]);
 
     useEffect(() => {
-        if (wp.hooks) {
-            const postId = getPostID()
-            let formData = new FormData();
-            formData.append('method', 'get');
-            formData.append('post_id', postId);
-            postWithoutImage(getURL('product_settings'), formData).then(
-                (res) => {
-                    const productModelData = {
-                        ...productModel,
-                        ...res.data,
-                        // Always force these to 'upload' on page load
-                        ios_model_source_type: 'upload',
-                        poster_source_type: 'upload',
-                        environment_source_type: 'upload',
-                        skybox_source_type: 'upload',
-                    };
-                    setProductModel(productModelData);
-                    setIsProductModelLoad(true)
-                });
-        }
-    }, [wp.hooks]);
+        let InterVal = setInterval(() => {
+            if (document.getElementById('ar_try_on_preveiw')) {
+                clearInterval(InterVal)
+                const postId = getPostID()
+                let formData = new FormData();
+                formData.append('method', 'get');
+                formData.append('post_id', postId);
+                formData.append('call_from', 'admin');
+                postWithoutImage(getURL('get_model_and_settings'), formData).then(
+                    (res) => {
+                        const productModelData = {
+                            ...productModel,
+                            ...res.data,
+                            // Always force these to 'upload' on page load
+                            ios_model_source_type: 'upload',
+                            poster_source_type: 'upload',
+                            environment_source_type: 'upload',
+                            skybox_source_type: 'upload',
+                        };
+                        setProductModel(productModelData);
+                        setIsProductModelLoad(true)
+                    });
+            }
+        }, 1000)
+
+    }, []);
 
     useEffect(() => {
         if (isProductModelLoaded) {

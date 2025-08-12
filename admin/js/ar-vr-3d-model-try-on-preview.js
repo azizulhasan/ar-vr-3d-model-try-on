@@ -95,11 +95,13 @@ if (false) {
             console.log(err);
         });
 } else {
+    // TODO: user should add custom class for there own sake.
     const htmlContent = `
                 <style id="model-viewer-style"></style>
                         <div style="display: flex; justify-content: center; height: 100%;">
                             <model-viewer 
-                                id="model-viewer" 
+                                id="model-viewer"
+                                class="atlas_ar_model_viewer"
                                 src="" 
                                 alt="" 
                                 poster="" 
@@ -110,35 +112,34 @@ if (false) {
                                 camera-controls
                                 ar-scale="auto"
                                 xr-environment
-                                style="width: 100%; max-width: 600px; height: 400px;"
+                                style="width: 100%;max-width:600px; height: 400px;"
                             ></model-viewer>
                         </div>`;
 
 
 
 
-    let formData = new FormData();
-    formData.append('product_id', product_id);
     let model_settings = {}
-    await postWithoutImage(getURL('get_model_and_settings'), formData)
-        .then((response) => {
-            if (response.success) {
-                model_settings = response.data;
-                console.log({ model_settings })
-                let InterVal = setInterval(() => {
-                    console.log(document.getElementById('ar_try_on_preveiw'))
-                    if (document.getElementById('ar_try_on_preveiw')) {
-                        document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
-                        clearInterval(InterVal)
-                    }
-                }, 200)
-            } else {
-                console.error(response.data);
-            }
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+    let InterVal = setInterval(async () => {
+        if (document.getElementById('ar_try_on_preveiw')) {
+            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+            clearInterval(InterVal)
+            // let formData = new FormData();
+            // formData.append('product_id', product_id);
+            // await postWithoutImage(getURL('get_model_and_settings'), formData)
+            //     .then((response) => {
+            //         if (response.success) {
+            //             model_settings = response.data;
+            //         } else {
+            //             console.error(response.data);
+            //         }
+            //     })
+            //     .catch((err) => {
+            //         console.log(err);
+            //     });
+        }
+    }, 10)
+
 
 
     wp.hooks.addAction('ar_try_on_preview_data', 'ar_try_on', function (data) {
@@ -164,7 +165,7 @@ if (false) {
         //     ar-status="not-presenting">
         // </model-viewer>
 
-        console.log(model_settings)
+        console.log({ model_settings })
 
         // Check if the data exists before assigning it to model-viewer
         if (model_settings) {
@@ -192,26 +193,26 @@ if (false) {
                 } else {
                     modelViewer.removeAttribute('camera-orbit');
                 }
-             
+
                 if (model_settings.disable_zoom) {
-                        modelViewer.setAttribute('disable-zoom', '');
+                    modelViewer.setAttribute('disable-zoom', '');
                 } else {
-                        modelViewer.removeAttribute('disable-zoom');
-                    }
+                    modelViewer.removeAttribute('disable-zoom');
+                }
 
                 if (model_settings.disable_tap) {
-                        modelViewer.setAttribute('disable-tap', '');
+                    modelViewer.setAttribute('disable-tap', '');
                 } else {
-                        modelViewer.removeAttribute('disable-tap');
+                    modelViewer.removeAttribute('disable-tap');
                 }
 
 
 
-            //    Here goes the Canvas Section:
-            if (model_settings.canvas_alignment) {
+                //    Here goes the Canvas Section:
+                if (model_settings.canvas_alignment) {
                     if (model_settings.canvas_alignment === 'center') {
                         modelViewer.style.display = 'block';
-                        modelViewer.style.margin = '0 auto';
+                        modelViewer.style.margin = '15px auto';
                     } else if (model_settings.canvas_alignment === 'left') {
                         modelViewer.style.margin = '0 auto 0 0';
                     } else if (model_settings.canvas_alignment === 'right') {
@@ -232,6 +233,11 @@ if (false) {
                     modelViewer.style.padding = model_settings.canvas_padding;
                 }
 
+                const modelViewerStyle = document.getElementById('model-viewer-style');
+                if (modelViewerStyle) {
+                    modelViewerStyle.innerHTML = model_settings.custom_css
+                }
+
 
 
                 modelViewer.style.backgroundColor = model_settings.poster_color || 'rgba(255,255,255,0)';
@@ -248,14 +254,13 @@ if (false) {
                     modelViewer.innerHTML = `<button> ${data.custom_button_text || 'Activate Ar'} </button>`;
                 }
 
-                const modelViewerStyle = document.getElementById('model-viewer-style');
-                if(modelViewerStyle) {
-                    modelViewerStyle.innerHTML = model_settings.custom_css
-                }
-
             }
-            
-            
+
+
+            const modelViewer2 = document.querySelectorAll('.atlas_ar_model_viewer')[0]
+            console.log(modelViewer2)
+
+
         }
     });
 

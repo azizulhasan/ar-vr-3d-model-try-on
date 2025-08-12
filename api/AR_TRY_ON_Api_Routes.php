@@ -4,6 +4,7 @@ namespace AR_TRY_ON_API;
 
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Cache;
+use AR_TRY_ON\AR_TRY_ON_Helper;
 
 /**
  * This class is for getting all plugin's data  through api.
@@ -116,8 +117,12 @@ class AR_TRY_ON_Api_Routes {
 
 		// get data about recording.
 		if ( 'get' == $request['method'] ) {
-
-			$response['data'] = get_option( 'ar_try_on_settings' );
+			$settings = get_option( 'ar_try_on_settings' );
+			if(empty($settings)) {
+				$settings = AR_TRY_ON_Activator::activate(1);
+			}
+			
+			$response['data'] = $settings;
 
 			return rest_ensure_response( $response );
 		}
@@ -151,18 +156,12 @@ class AR_TRY_ON_Api_Routes {
 
 	public function get_model_and_settings( $request ) {
 
-		$product_id = json_decode( $request['product_id'] );
-		$product_id = intval( $product_id );
-
-		if ( empty( $product_id ) ) {
-			return rest_ensure_response( [
-				'success' => false,
-				'data'    => 'Invalid Product ID.'
-			] );
-		}
+		$decoded_body = $request->get_params();
+		$post_id = isset($decoded_body['post_id']) ? $decoded_body['post_id'] : null;
+		$post_id = intval( $post_id );
+		$call_from = isset($decoded_body['call_from']) ? $decoded_body['call_from'] : '';
 
 		// Global product variable
-		global $product;
 		$model_poster                   = '';
 		$model_alt                      = '';
 		$get_ios_file                   = '';
@@ -179,8 +178,24 @@ class AR_TRY_ON_Api_Routes {
 		$custom_button_text_color       = '';
 		$custom_button_background_color = '';
 		$poster_color                   = '';
+		$settings = (array) get_option( 'ar_try_on_settings' );
+		$product_settings = [];
+		if ( empty( $post_id ) && $call_from == 'admin' ) {
+			if(empty($settings)) {
+				$settings = AR_TRY_ON_Helper::default_settings();
+			}
+			$product_settings = AR_TRY_ON_Helper::default_model_settings();
+			// return rest_ensure_response( [
+			// 	'success' => true,
+			// 	'data'    => []
+			// ] );
+		}
 
-		$product_settings = (array) get_post_meta( $product_id, 'ar_try_on_product_settings', true );
+		if($post_id && empty($product_settings)) {
+			$product_settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
+		}
+
+
 
 		//Get the file url for android
 		if ( isset( $product_settings['ar_try_on_file_android'] ) && $product_settings['ar_try_on_file_android'] ) {
@@ -206,9 +221,6 @@ class AR_TRY_ON_Api_Routes {
 		if ( isset( $product_settings['ar_try_on_ar_placement'] ) && $product_settings['ar_try_on_ar_placement'] ) {
 			$placement = $product_settings['ar_try_on_ar_placement'];
 		}
-
-		$settings = (array) get_option( 'ar_try_on_settings' );
-
 
 		if ( isset( $settings['ar_try_on_poster_color'] ) && $settings['ar_try_on_poster_color'] ) {
 			$poster_color = $settings['ar_try_on_poster_color'];
@@ -268,7 +280,7 @@ class AR_TRY_ON_Api_Routes {
 
 
 		// Obtener el nombre del producto
-		$product_name = get_the_title( $product_id );
+		$product_name = get_the_title( $post_id );
 
 		// Comprobar que el archivo 3D existe
 		if ( ! $model_3d_file ) {
@@ -314,7 +326,6 @@ class AR_TRY_ON_Api_Routes {
 		$response['status'] = true;
 		// save data about recording.
 		if ( 'post' == $request['method'] ) {
-			AR_TRY_ON_Activator::activate();
 			$response['data'] = get_option( 'ar_try_on_settings' );
 
 			return rest_ensure_response( $response );

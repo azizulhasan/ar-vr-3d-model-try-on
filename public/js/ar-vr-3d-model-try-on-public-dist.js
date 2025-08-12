@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
               // Show loading message before sending the request
               _loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
               _formData = new FormData();
-              _formData.append('product_id', product_id);
+              _formData.append('post_id', product_id);
               _context.next = 19;
               return atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), _formData).then(function (response) {
                 // Hide loading message

@@ -39,13 +39,7 @@ class AR_TRY_ON_Activator {
 		if ( $random_post_id ) {
 			// 'The post is missing required keys or some values are empty.';
 			if ( ! self::check_post_meta_keys( $random_post_id ) ) {
-				update_post_meta( $random_post_id, 'ar_try_on_product_settings', array(
-					"ar_try_on_file_android" => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.glb",
-					"ar_try_on_file_ios"     => AR_TRY_ON_PLUGIN_URL . "admin/demo/1.usdz",
-					"ar_try_on_file_poster"  => AR_TRY_ON_PLUGIN_URL . "admin/demo/demo_poster.png",
-					"ar_try_on_file_alt"     => "Demo title",
-					"ar_try_on_ar_placement" => "floor"
-				) );
+				update_post_meta( $random_post_id, 'ar_try_on_product_settings', AR_TRY_ON_Helper::default_model_settings() );
 			}
 
 			$post_url = get_permalink( $random_post_id );
@@ -56,27 +50,10 @@ class AR_TRY_ON_Activator {
 		 * Customization settings.
 		 */
 		if ( $renew_all_settings || empty( $all_settings ) ) {
-			$all_settings = [
-				'ar_try_on_display_button_automatically' => 'yes',
-				'ar_try_on_allowed_post_types'         => [ 'post' ],
-				'ar_try_on_wc_hook_position'           => "3",
-				'ar_try_on_single_product_tabs'        => "yes",
-				'ar_try_on_loading_type'               => "auto",
-				'ar_try_on_reveal_type'                => "auto",
-				'ar_try_on_poster_color'               => "rgba(78,186,79,0)",
-				'ar_try_on_ar'                         => "activate",
-				'ar_try_on_ar_modes'                   => [ "webxr", 'scene-viewer', "quick-look" ],
-				'ar_try_on_ar_scale'                   => "auto",
-				'ar_try_on_xr_environment'             => "activate",
-				'ar_try_on_ar_button'                  => "deactivate",
-				'ar_try_on_ar_button_text'             => "Activate AR",
-				'ar_try_on_ar_button_background_color' => "#3a3a3a",
-				'ar_try_on_ar_button_text_color'       => "#ffffff",
-				'ar_try_on_enable_qr_code'             => 'yes',
-				'ar_try_on_ar_demo'                    => [
+			$all_settings = AR_TRY_ON_Helper::default_settings();
+			$all_settings['ar_try_on_ar_demo'] = [
 					'id'  => $random_post_id,
 					'url' => $post_url
-				],
 			];
 
 			update_option( 'ar_try_on_settings', $all_settings );
@@ -95,7 +72,8 @@ class AR_TRY_ON_Activator {
 			update_option( 'ar_try_on_settings', $all_settings );
 			AR_TRY_ON_Cache::set( 'settings', $all_settings );
 		}
-
+		
+		return $all_settings;
 	}
 
 	private static function get_random_post_id( $post_type = 'post' ) {
