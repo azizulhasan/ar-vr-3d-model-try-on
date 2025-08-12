@@ -8,12 +8,11 @@ import StyleSection from "./components/StyleSection.js";
 const ARProductModelSettings = () => {
 
     const [basicSettings, setBasicSettings] = useState({
-        android_model_source_type: 'upload',
-        poster_source_type: 'upload',
+        src: 'upload',
+        poster: 'upload',
         environment_source_type: 'upload',
-        model_source_type: 'upload',
         skybox_source_type: 'upload',
-        ios_model_source_type: 'upload',
+        ios_src: 'upload',
     })
     const [productModel, setProductModel] = useState({
         src: '',
@@ -92,7 +91,7 @@ const ARProductModelSettings = () => {
     };
 
     const handleMediaButtonClick = (fieldName, value) => {
-        setBasicSettings(prev => ({ ...prev, fieldName: value }))
+        setBasicSettings(prev => ({ ...prev, ...{ [fieldName]: value } }))
         let inputField = document.getElementById(fieldName)
         wp.hooks.doAction('ar_try_on_select_light_and_envirement_files', {
             name: fieldName,
@@ -219,6 +218,7 @@ const ARProductModelSettings = () => {
                                 setBasicSettings={setBasicSettings}
                                 activeAccordion={activeAccordion}
                                 toggleAccordion={toggleAccordion}
+                                handleMediaButtonClick={handleMediaButtonClick}
                             />
 
                             <CameraSection

@@ -8,7 +8,8 @@ const ContentSection = ({
   handleChange,
   setBasicSettings,
   activeAccordion,
-  toggleAccordion
+  toggleAccordion,
+  handleMediaButtonClick
 }) => {
   return (
     <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
@@ -57,7 +58,7 @@ const ContentSection = ({
         {/* Android Model */}
         <div className="art-border art-border-solid art-border-black art-p-4">
           <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-            MODEL {basicSettings.android_model_source_type == 'upload' ? "File" : 'URL'} FOR ANDROID
+            MODEL {basicSettings.src == 'upload' ? "File" : 'URL'} FOR ANDROID
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M17.523 15.3414c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm-11.046 0c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm11.405-6.02L19.76 6.394c.095-.152.043-.348-.109-.442-.15-.095-.348-.043-.442.109l-1.906 3.038C16.04 8.73 14.06 8.366 12 8.366c-2.06 0-4.04.364-5.303.733L4.791 6.061c-.095-.152-.292-.204-.442-.109-.152.095-.204.291-.109.442L6.118 9.32C3.264 10.558 1.5 12.833 1.5 15.441v1.2h21v-1.2c0-2.608-1.764-4.883-4.618-6.121z" fill="#3DDC84" />
             </svg>
@@ -65,16 +66,17 @@ const ContentSection = ({
           <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
             <button
               type="button"
-              onClick={() => setBasicSettings(prev => ({ ...prev, android_model_source_type: 'upload' }))}
+              // onClick={() => setBasicSettings(prev => ({ ...prev, src: 'upload' }))}
+              onClick={(e) => handleMediaButtonClick('src', 'upload')}
               data-name="src"
-              className={`art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.android_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
+              className={`art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.src === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
               <span data-name="src" className="dashicons dashicons-cloud-upload"></span>
             </button>
             <button
               type="button"
-              onClick={() => setBasicSettings(prev => ({ ...prev, android_model_source_type: 'url' }))}
-              className={`art-p-2 art-transition-all art-cursor-pointer art-duration-200 ${basicSettings.android_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
+              onClick={() => setBasicSettings(prev => ({ ...prev, src: 'url' }))}
+              className={`art-p-2 art-transition-all art-cursor-pointer art-duration-200 ${basicSettings.src === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
               <span className="dashicons dashicons-format-image"></span>
             </button>
@@ -97,7 +99,7 @@ const ContentSection = ({
         {/* iOS Model */}
         <div className="art-border art-border-solid art-border-black art-p-4">
           <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-            MODEL {basicSettings.ios_model_source_type == 'upload' ? "File" : 'URL'} FOR IOS
+            MODEL {basicSettings.ios_src == 'upload' ? "File" : 'URL'} FOR IOS
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="#000000" />
             </svg>
@@ -106,16 +108,17 @@ const ContentSection = ({
           <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
             <button
               type="button"
-              onClick={() => setBasicSettings(prev => ({ ...prev, ios_model_source_type: 'upload' }))}
+              // onClick={() => setBasicSettings(prev => ({ ...prev, ios_src: 'upload' }))}
+              onClick={(e) => handleMediaButtonClick('ios_src', 'upload')}
               data-name="ios_src"
-              className={`art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_model_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
+              className={`art-cursor-pointer ar-try-on-open-media-library art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_src === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
               <span data-name="ios_src" className="dashicons dashicons-cloud-upload"></span>
             </button>
             <button
               type="button"
-              onClick={() => setBasicSettings(prev => ({ ...prev, ios_model_source_type: 'url' }))}
-              className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_model_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
+              onClick={() => setBasicSettings(prev => ({ ...prev, ios_src: 'url' }))}
+              className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.ios_src === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
               <span className="dashicons dashicons-format-image"></span>
             </button>
@@ -137,20 +140,21 @@ const ContentSection = ({
 
         {/* Poster Source */}
         <div className="art-border art-border-solid art-border-black art-p-4">
-          <label className="art-text-xs art-font-semibold art-uppercase"> POSTER SOURCE {basicSettings.poster_source_type == 'upload' ? "File" : 'URL'}</label>
+          <label className="art-text-xs art-font-semibold art-uppercase"> POSTER SOURCE {basicSettings.poster == 'upload' ? "File" : 'URL'}</label>
           <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
             <button
               type="button"
-              onClick={() => setBasicSettings(prev => ({ ...prev, poster_source_type: 'upload' }))}
+              // onClick={() => setBasicSettings(prev => ({ ...prev, poster: 'upload' }))}
+              onClick={(e) => handleMediaButtonClick('poster', 'upload')}
               data-name="poster"
-              className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${basicSettings.poster_source_type === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
+              className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${basicSettings.poster === 'upload' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
               <span data-name="poster" className="dashicons dashicons-cloud-upload"></span>
             </button>
             <button
               type="button"
-              onClick={() => setBasicSettings(prev => ({ ...prev, poster_source_type: 'url' }))}
-              className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.poster_source_type === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
+              onClick={() => setBasicSettings(prev => ({ ...prev, poster: 'url' }))}
+              className={`art-p-2 art-transition-all art-duration-200 ${basicSettings.poster === 'url' ? 'art-bg-black art-text-white' : 'art-bg-white art-text-black'}`}
             >
               <span className="dashicons dashicons-format-image"></span>
             </button>

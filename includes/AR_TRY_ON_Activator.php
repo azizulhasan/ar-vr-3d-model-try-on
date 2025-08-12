@@ -106,11 +106,11 @@ class AR_TRY_ON_Activator {
 
 		// Define the required keys
 		$required_keys = array(
-			'ar_try_on_file_android',
-			'ar_try_on_file_ios',
-			'ar_try_on_file_poster',
-			'ar_try_on_file_alt',
-			'ar_try_on_ar_placement',
+			'src',
+			'ios_src',
+			'poster',
+			'alt',
+			'ar_placement',
 		);
 
 		// Loop through required keys and check if they exist and have a value
