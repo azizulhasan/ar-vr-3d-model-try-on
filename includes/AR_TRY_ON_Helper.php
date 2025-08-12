@@ -167,6 +167,7 @@ class AR_TRY_ON_Helper {
 
 		if ( ! is_admin() ) {
 			$product_settings = (array) get_post_meta( $post->ID, 'ar_try_on_product_settings', true );
+			$product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
 
 			//Get the file url for android
 			if ( ! isset( $product_settings['src'] ) ) {
@@ -326,4 +327,25 @@ class AR_TRY_ON_Helper {
 		];
 	}
 
+	public static function rename_old_keys_of_product_metadata( $product_settings ) {
+		//TODO: remove this code after 6 months later. 
+		/**
+		 * AR-24: date: 12-08-225
+		 */
+		$old_settings_keys = [
+			'ar_try_on_file_android' => 'src',
+			'ar_try_on_file_ios' 	 => 'ios_src',
+			'ar_try_on_file_poster'  => 'poster',
+			'ar_try_on_file_alt' 	 => 'alt',
+			'ar_try_on_ar_placement' => 'ar_placement',
+		];
+		
+		foreach( $product_settings as $key => $value ) {
+			if( in_array( $key, array_keys($old_settings_keys) ) ) {
+				$product_settings[$old_settings_keys[$key]] = $value;
+			}
+		}
+
+		return $product_settings;
+	} 
 }

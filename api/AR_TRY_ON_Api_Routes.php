@@ -2,6 +2,7 @@
 
 namespace AR_TRY_ON_API;
 
+use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Cache;
 use AR_TRY_ON\AR_TRY_ON_Helper;
@@ -133,7 +134,8 @@ class AR_TRY_ON_Api_Routes {
 			}
 
 			if($post_id) {
-				$product_settings = get_post_meta( $post_id, 'ar_try_on_product_settings', true );
+				$product_settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
+				$product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
 			}
 			
 			// Get Default value.
