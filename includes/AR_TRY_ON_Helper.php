@@ -167,13 +167,14 @@ class AR_TRY_ON_Helper {
 
 		if ( ! is_admin() ) {
 			$product_settings = (array) get_post_meta( $post->ID, 'ar_try_on_product_settings', true );
+			$product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
 
 			//Get the file url for android
-			if ( ! isset( $product_settings['ar_try_on_file_android'] ) ) {
+			if ( ! isset( $product_settings['src'] ) ) {
 				$result = false;
 			}
 
-			if ( isset( $product_settings['ar_try_on_file_android'] ) && ! $product_settings['ar_try_on_file_android'] ) {
+			if ( isset( $product_settings['src'] ) && ! $product_settings['src'] ) {
 				$result = false;
 			}
 		}
@@ -279,4 +280,72 @@ class AR_TRY_ON_Helper {
 		return $ar_button_content;
 	}
 
+	public static function default_settings() {
+		return  [
+			'ar_try_on_display_button_automatically' => 'yes',
+			'ar_try_on_allowed_post_types'         => [ 'post' ],
+			'ar_try_on_wc_hook_position'           => "3",
+			'ar_try_on_single_product_tabs'        => "yes",
+			'ar_try_on_loading_type'               => "auto",
+			'ar_try_on_reveal_type'                => "auto",
+			'ar_try_on_poster_color'               => "rgba(78,186,79,0)",
+			'ar_try_on_ar'                         => "activate",
+			'ar_try_on_ar_modes'                   => [ "webxr", 'scene-viewer', "quick-look" ],
+			'ar_try_on_ar_scale'                   => "auto",
+			'ar_try_on_xr_environment'             => "activate",
+			'ar_try_on_ar_button'                  => "deactivate",
+			'ar_try_on_ar_button_text'             => "Activate AR",
+			'ar_try_on_ar_button_background_color' => "#3a3a3a",
+			'ar_try_on_ar_button_text_color'       => "#ffffff",
+			'ar_try_on_enable_qr_code'             => 'yes',
+		];
+	}
+
+	public static function default_model_settings() {
+		return  [
+			'src'=> 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb',
+			'ios_src'=> '',
+			'poster'=> 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp',
+			'alt'=> 'NeilArmstrong',
+			'ar_placement'=> 'floor',
+			// light & environment settings
+			'skybox_image'=> 'https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg',
+			'environment_image'=> 'https://modelviewer.dev/shared-assets/environments/moon_1k.hdr',
+			// Camera settings
+			'auto_rotate'=> false,
+			'shadow_intensity'=> '1',
+			'camera_orbit'=> '45deg 55deg 4m',
+			'disable_zoom'=> false,
+			'disable_tap'=> false,
+			// Canvas settings
+			'canvas_alignment'=> 'left',
+			'canvas_width'=> '100%',
+			'canvas_height'=> '400px',
+			'canvas_margin'=> '0',
+			'canvas_padding'=> '20px 0',
+			'custom_css'=> '',
+		];
+	}
+
+	public static function rename_old_keys_of_product_metadata( $product_settings ) {
+		//TODO: remove this code after 6 months later. 
+		/**
+		 * AR-24: date: 12-08-225
+		 */
+		$old_settings_keys = [
+			'ar_try_on_file_android' => 'src',
+			'ar_try_on_file_ios' 	 => 'ios_src',
+			'ar_try_on_file_poster'  => 'poster',
+			'ar_try_on_file_alt' 	 => 'alt',
+			'ar_try_on_ar_placement' => 'ar_placement',
+		];
+		
+		foreach( $product_settings as $key => $value ) {
+			if( in_array( $key, array_keys($old_settings_keys) ) ) {
+				$product_settings[$old_settings_keys[$key]] = $value;
+			}
+		}
+
+		return $product_settings;
+	} 
 }

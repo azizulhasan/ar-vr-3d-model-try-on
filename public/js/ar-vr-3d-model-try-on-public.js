@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Show loading message before sending the request
                     loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
                     let formData = new FormData();
-                    formData.append('product_id', product_id);
+                    formData.append('post_id', product_id);
                     await atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), formData)
                         .then((response) => {
                             console.log(response);
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Show loading message before sending the request
                     loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
                     let formData = new FormData();
-                    formData.append('product_id', product_id);
+                    formData.append('post_id', product_id);
                     await atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), formData)
                         .then((response) => {
                             // Hide loading message

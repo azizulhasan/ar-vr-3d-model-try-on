@@ -1,4 +1,5 @@
 import alertify from 'alertifyjs';
+import { setModelAttributes } from '../../src/context/utilities';
 
 class AtlasAR {
 
@@ -50,11 +51,13 @@ class AtlasAR {
     }
 
     getModelSkeleton(model_id = 'atlas_ar_model_viewer') {
-
+        // TODO: user should add custom class for there own sake.
         return `
+                <style id="model-viewer-style"></style>
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <model-viewer
                             id="${model_id}"
+                            class="atlas_ar_model_viewer" 
                             src=""
                             alt=""
                             poster=""
@@ -65,7 +68,7 @@ class AtlasAR {
                             camera-controls
                             ar-scale="auto"
                             xr-environment
-                            style="width: 100%; max-width: 600px; height: 400px;"
+                            style="width: 100%; height: 400px;"
                         ></model-viewer>
                     </div>`;
     }
@@ -76,39 +79,16 @@ class AtlasAR {
     }
 
     setModelData(data, model_id = 'atlas_ar_model_viewer') {
-        const modelViewer = document.getElementById(model_id);
+        const modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0]
         if (modelViewer && this.isObject(data)) {
-            modelViewer.setAttribute('src', data.model_3d_file || '');
-            modelViewer.setAttribute('ios-src', data.model_ios_file || '');
-            modelViewer.setAttribute('alt', data.model_alt || '');
-            modelViewer.setAttribute('poster', data.model_poster || '');
-            modelViewer.setAttribute('reveal', data.reveal || 'auto');
-            modelViewer.setAttribute('loading', data.loading || 'auto');
-            modelViewer.setAttribute('ar-modes', (data.ar_modes || []).join(' '));
-            modelViewer.setAttribute('ar-placement', (data.ar_placement || 'floor'));
-            modelViewer.style.backgroundColor = data.poster_color || 'rgba(255,255,255,0)';
-            const scale = data.scale || 'auto'; // Default value if not defined
-            modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-            if (data.ar === "deactivate") {
-                modelViewer.removeAttribute('ar');
-            }
-            if (data.xr_environment === "deactivate") {
-                modelViewer.removeAttribute('xr-environment');
-            }
-            // TODO: add functionality for this.
-            if (data.custom_button === "activate") {
-                modelViewer.innerHTML = `<button> ${data.custom_button_text || 'Activate Ar'} </button>`;
-            }
-
-            console.log({ modelViewer })
-
+            setModelAttributes(modelViewer, data)
         }
     }
 
     async fetchModelData(product_id, model_id = 'atlas_ar_model_viewer') {
         let self = this
         let formData = new FormData();
-        formData.append('product_id', product_id);
+        formData.append('post_id', product_id);
         await this.postWithoutImage(this.getURL('get_model_and_settings'), formData)
             .then((response) => {
                 if (response.success) {
