@@ -1,11 +1,11 @@
 import alertify from 'alertifyjs';
 
-import {getURL, postWithoutImage, getPostID} from "../../src/context/utilities";
+import { getURL, postWithoutImage, getPostID, setModelAttributes } from "../../src/context/utilities";
 
 
 const product_id = getPostID();
 
-console.log({product_id})
+console.log({ product_id })
 // Verify if product_id is defined
 if (!product_id) {
     console.error('Product ID is missing');
@@ -95,10 +95,13 @@ if (false) {
             console.log(err);
         });
 } else {
+    // TODO: user should add custom class for there own sake.
     const htmlContent = `
+                <style id="model-viewer-style"></style>
                         <div style="display: flex; justify-content: center; height: 100%;">
                             <model-viewer 
-                                id="model-viewer" 
+                                id="model-viewer"
+                                class="atlas_ar_model_viewer"
                                 src="" 
                                 alt="" 
                                 poster="" 
@@ -109,72 +112,37 @@ if (false) {
                                 camera-controls
                                 ar-scale="auto"
                                 xr-environment
-                                style="width: 100%; max-width: 600px; height: 400px;"
+                                style="width: 100%;max-width:600px; height: 400px;"
                             ></model-viewer>
                         </div>`;
 
 
 
 
-        let formData = new FormData();
-        formData.append('product_id', product_id);
-        let model_settings = {}
-        await postWithoutImage(getURL('get_model_and_settings'), formData)
-            .then((response) => {
-                if (response.success) {
-                    model_settings = response.data;
-                    console.log({model_settings})
-                    let InterVal =  setInterval(()=>{
-                        console.log(document.getElementById('ar_try_on_preveiw'))
-                        if(document.getElementById('ar_try_on_preveiw')) {
-                            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
-                            clearInterval(InterVal)
-                        }
-                    },200)
-                } else {
-                    console.error(response.data);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+    let model_settings = {}
+    let InterVal = setInterval(async () => {
+        if (document.getElementById('ar_try_on_preveiw')) {
+            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+            clearInterval(InterVal)
+        }
+    }, 10)
+
 
 
     wp.hooks.addAction('ar_try_on_preview_data', 'ar_try_on', function (data) {
 
-        model_settings.model_3d_file = data.ar_try_on_file_android;
-        model_settings.model_ios_file = data.ar_try_on_file_ios;
-        model_settings.model_alt = data.ar_try_on_file_alt;
-        model_settings.model_poster = data.ar_try_on_file_poster;
-        model_settings.ar_placement = data.ar_try_on_ar_placement;
+        model_settings = { ...model_settings, ...data }
+        console.log(model_settings)
 
         // Check if the data exists before assigning it to model-viewer
         if (model_settings) {
-            const modelViewer = document.getElementById('model-viewer');
+            const modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0]
             if (modelViewer) {
-                modelViewer.setAttribute('src', model_settings.model_3d_file || '');
-                modelViewer.setAttribute('ios-src', model_settings.model_ios_file || '');
-                modelViewer.setAttribute('alt', model_settings.model_alt || '');
-                modelViewer.setAttribute('poster', model_settings.model_poster || '');
-                modelViewer.setAttribute('reveal', model_settings.reveal || 'auto');
-                modelViewer.setAttribute('loading', model_settings.loading || 'auto');
-                modelViewer.setAttribute('ar-modes', (model_settings.ar_modes || []).join(' '));
-                modelViewer.setAttribute('ar-placement', (model_settings.ar_placement || 'floor'));
-                modelViewer.style.backgroundColor = model_settings.poster_color || 'rgba(255,255,255,0)';
-                const scale = model_settings.scale || 'auto'; // Default value if not defined
-                modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-                if (model_settings.ar === "deactivate") {
-                    modelViewer.removeAttribute('ar');
-                }
-                if (model_settings.xr_environment === "deactivate") {
-                    modelViewer.removeAttribute('xr-environment');
-                }
-                // TODO: add functionality for this.
-                if(data.custom_button === "activate") {
-                    modelViewer.innerHTML =  `<button> ${data.custom_button_text || 'Activate Ar'} </button>` ;
-                }
+                setModelAttributes(modelViewer, model_settings)
 
             }
+
+
         }
     });
 

@@ -38,12 +38,12 @@ export const getPostID = () => {
     const params = new URLSearchParams(window.location.search);
 
     // Get the 'post' parameter
-    return  params.get('post');
+    return params.get('post');
 }
 
 
 
-function unsecuredCopyToClipboard()  {
+function unsecuredCopyToClipboard() {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     document.body.appendChild(textArea);
@@ -62,7 +62,7 @@ function unsecuredCopyToClipboard()  {
 /**
  * Copy short Code
  */
-export const copyshortcode =  (e)  =>{
+export const copyshortcode = (e) => {
     e.preventDefault();
     /* Get the text field */
     var copyText = document.getElementById("atlas_ar_shortcode_button");
@@ -85,3 +85,92 @@ export const copyshortcode =  (e)  =>{
         unsecuredCopyToClipboard(copyText.value);
     }
 };
+
+
+export const setModelAttributes = (modelViewer, model_settings) => {
+    modelViewer.setAttribute('src', model_settings.src || '');
+    modelViewer.setAttribute('ios-src', model_settings.ios_src || '');
+    modelViewer.setAttribute('alt', model_settings.alt || '');
+    modelViewer.setAttribute('poster', model_settings.poster || '');
+    modelViewer.setAttribute('ar-placement', (model_settings.ar_placement || 'floor'));
+    modelViewer.setAttribute('skybox-image', (model_settings.skybox_image || ''));
+    modelViewer.setAttribute('environment-image', (model_settings.environment_image || ''));
+
+    if (model_settings.auto_rotate) {
+        modelViewer.setAttribute('auto-rotate', '');
+    } else {
+        modelViewer.removeAttribute('auto-rotate');
+    }
+    modelViewer.setAttribute('shadow-intensity', (model_settings.shadow_intensity ?? '1'));
+    if (model_settings.camera_orbit) {
+        modelViewer.setAttribute('camera-orbit', model_settings.camera_orbit);
+    } else {
+        modelViewer.removeAttribute('camera-orbit');
+    }
+
+    if (model_settings.disable_zoom) {
+        modelViewer.setAttribute('disable-zoom', '');
+    } else {
+        modelViewer.removeAttribute('disable-zoom');
+    }
+
+    if (model_settings.disable_tap) {
+        modelViewer.setAttribute('disable-tap', '');
+    } else {
+        modelViewer.removeAttribute('disable-tap');
+    }
+
+    //    Here goes the Canvas Section:
+    if (model_settings.canvas_alignment) {
+        if (model_settings.canvas_alignment == 'center') {
+            modelViewer.style.display = 'block';
+            modelViewer.style.margin = '0px auto';
+        } else if (model_settings.canvas_alignment ==   'left') {
+            modelViewer.style.margin = '0 auto 0 0';
+        } else if (model_settings.canvas_alignment == 'right') {
+            modelViewer.style.margin = '0 0 0 auto';
+            console.log(model_settings)
+        }
+    }
+
+    if (model_settings.canvas_width) {
+        modelViewer.style.width = model_settings.canvas_width;
+    }
+    if (model_settings.canvas_height) {
+        modelViewer.style.height = model_settings.canvas_height;
+    }
+    if (model_settings.canvas_margin) {
+        modelViewer.style.margin = model_settings.canvas_margin;
+    }
+    if (model_settings.canvas_padding) {
+        modelViewer.style.padding = model_settings.canvas_padding;
+    }
+
+
+
+
+    modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
+    modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
+    modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
+
+
+
+    const modelViewerStyle = document.getElementById('model-viewer-style');
+    if (modelViewerStyle) {
+        modelViewerStyle.innerHTML = model_settings.custom_css
+    }
+
+    modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || 'rgba(255,255,255,0)';
+    const scale = model_settings.ar_try_on_ar_scale || 'auto'; // Default value if not defined
+    modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
+    if (model_settings.ar_try_on_ar === "deactivate") {
+        modelViewer.removeAttribute('ar');
+    }
+    if (model_settings.ar_try_on_xr_environment === "deactivate") {
+        modelViewer.removeAttribute('xr-environment');
+    }
+    // TODO: add functionality for this.
+    if (model_settings.ar_try_on_ar_button === "activate") {
+        modelViewer.innerHTML = `<button> ${model_settings.ar_try_on_ar_button_text || 'Activate Ar'} </button>`;
+    }
+}
