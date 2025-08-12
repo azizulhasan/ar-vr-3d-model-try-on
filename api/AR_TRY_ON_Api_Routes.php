@@ -118,6 +118,9 @@ class AR_TRY_ON_Api_Routes {
 
 		$decoded_body = $request->get_params();
 		$post_id = isset($decoded_body['post_id']) ? $decoded_body['post_id'] : null;
+		if(!$post_id) {
+			$post_id = isset($decoded_body['product_id']) ? $decoded_body['product_id'] : null;
+		}
 		$post_id = intval( $post_id );
 		$call_from = isset($decoded_body['call_from']) ? $decoded_body['call_from'] : '';
 		$method = isset($decoded_body['method']) ? $decoded_body['method'] : 'GET';
