@@ -142,7 +142,7 @@ class AR_TRY_ON_Api_Routes {
 			}
 			
 			// Get Default value.
-			if(empty($product_settings)) {
+			if(empty($product_settings) || !array_key_exists('src', $product_settings) ) {
 				$product_settings = AR_TRY_ON_Helper::default_model_settings();
 			}
 
