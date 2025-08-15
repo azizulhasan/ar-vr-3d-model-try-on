@@ -17,6 +17,13 @@ export default function IntegrationSection() {
         setFields(updated);
     };
 
+    const handleSubmit = ()=> {
+            console.log("Saved Data:", fields);
+            alert("Data saved successfully!"); 
+    
+    }
+
+    
     return (
         <div className=" art-rounded art-p-4">
             <button
@@ -35,14 +42,14 @@ export default function IntegrationSection() {
                         placeholder="Key"
                         value={field.key}
                         onChange={(e) => handleChange(index, "key", e.target.value)}
-                        className="art-border art-rounded art-p-2 art-w-1/3"
+                        className="art-border art-rounded art-p-2 art-w-1/5"
                     />
 
                     {/* Type Selector */}
                     <select
                         value={field.type}
                         onChange={(e) => handleChange(index, "type", e.target.value)}
-                        className="art-border art-rounded art-p-2 art-w-1/4"
+                        className="art-border art-rounded art-p-2 art-w-1/5"
                     >
                         <option value="text">Text</option>
                         <option value="number">Number</option>
@@ -55,7 +62,7 @@ export default function IntegrationSection() {
                             placeholder="Value"
                             value={field.value}
                             onChange={(e) => handleChange(index, "value", e.target.value)}
-                            className="art-border art-rounded art-p-2 art-w-1/3"
+                            className="art-border art-rounded art-p-2 art-w-1/2"
                         />
                     ) : (
                         <input
@@ -63,7 +70,7 @@ export default function IntegrationSection() {
                             placeholder="Value"
                             value={field.value}
                             onChange={(e) => handleChange(index, "value", e.target.value)}
-                            className="art-border art-rounded art-p-2 art-w-1/3"
+                            className="art-border art-rounded art-p-2 art-w-1/2"
                         />
                     )}
 
@@ -79,7 +86,10 @@ export default function IntegrationSection() {
                 
             ))}
 
-            <button>Save</button>
+            <button type="button"
+            onClick={handleSubmit}
+            className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 "
+            >Generate Model</button>
         </div>
     );
 }

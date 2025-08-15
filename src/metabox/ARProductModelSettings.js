@@ -276,7 +276,7 @@ const ARProductModelSettings = () => {
 
                     )}
 
-                    {/* {(activeSection === 'settings' || activeSection === 'style') && <SaveButton />} */}
+                    {(activeSection === 'settings' || activeSection === 'style') && <SaveButton />}
 
               
 
@@ -306,7 +306,7 @@ const ARProductModelSettings = () => {
                         id="atlas_ar_shortcode_button"
                         defaultValue="[atlas_ar]"
                         title="Short code"
-                        className="art-border art-w-1/2 art-rounded art-ml-4 "
+                        className="art-border art-w-1/2 art-rounded art-ml-4 art-mb-4 "
                     />
 
                     <div
@@ -315,12 +315,12 @@ const ARProductModelSettings = () => {
                         style={{ cursor: "copy" }}
                         onClick={copyshortcode}
                         // className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500"
-                        className="art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
+                        className="art-mt-2 art-mb-4 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
                     >
                         <span className="dashicons dashicons-admin-page"></span>
                         Copy ShortCode
                     </div>
-                    <SaveButton classes="art-w-96" />
+                    <SaveButton classes="art-w-96 art-mb-4" />
                 </div>
 
                 <div id='ar_try_on_preveiw'></div>
