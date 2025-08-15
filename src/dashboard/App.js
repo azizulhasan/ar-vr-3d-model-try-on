@@ -1,39 +1,188 @@
 
-import {useState} from "react";
+import { useEffect, useState } from "react";
 
 import 'react-toastify/dist/ReactToastify.css';
 
 import Settings from "./components/dashboard/settings/Settings";
-import {ToastContainer} from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
 
 
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Integration')
+    const [activeTab, setActiveTab] = useState('Integration');
+    const [authType, setAuthType] = useState("Bearer");
+    const [settings, setSettings] = useState({
+        ar_try_on_display_button_automatically: 'yes',
+        ar_try_on_allowed_post_types: ['post'],
+        ar_try_on_wc_hook_position: "3",
+        ar_try_on_single_product_tabs: "yes",
+        ar_try_on_loading_type: "auto",
+        ar_try_on_reveal_type: "auto",
+        ar_try_on_poster_color: "rgba(78,186,79,0)",
+        ar_try_on_ar: "activate",
+        ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
+        ar_try_on_ar_scale: "auto",
+        ar_try_on_xr_environment: "activate",
+        ar_try_on_ar_button: "deactivate",
+        ar_try_on_ar_button_text: "Activate AR",
+        ar_try_on_ar_button_background_color: "#3a3a3a",
+        ar_try_on_ar_button_text_color: "#ffffff",
+        ar_try_on_enable_qr_code: 'yes',
+        ar_try_on_clear_cache: false,
+        ar_try_on_ar_demo: {},
+        ar_try_on_model_api_url: '',
+        ar_try_on_model_api_headers: [
+            {
+                key: "Authorization",
+                value:
+                    authType === "Basic"
+                        ? `Basic `
+                        : authType === "Bearer"
+                            ? `Bearer `
+                            : "",
+                fixed: false,
+            },
+        ],
+    });
     const tabs = [
         { name: 'Settings', href: '#', current: false, component: 'Settings' },
-        { name: 'Integration', href: '#', current: true ,  component: 'Integration' },
-        { name: 'Features', href: '#', current: false,  component: 'Features' },
-      
-        { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false,  component: 'Contact' },
-      
+        { name: 'Integration', href: '#', current: true, component: 'Integration' },
+        { name: 'Features', href: '#', current: false, component: 'Features' },
+
+        { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
+
     ]
+    const [headers, setHeaders] = useState([]);
+
+    // useEffect(() => {
+    //     let tempHead
+    //     setHeaders({
+    //         key: "Authorization",
+    //         value:
+    //             authType === "Basic"
+    //                 ? `Basic `
+    //                 : authType === "Bearer"
+    //                     ? `Bearer `
+    //                     : "",
+    //         fixed: false,
+    //     },)
+    // }, [authType])
 
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ')
     }
 
-    const handChange = (e, tab) => {
+    const handleTabChange = (e, tab) => {
         e.preventDefault();
-        if(tab.href !== '#') {
+        if (tab.href !== '#') {
             window.open(tab.href, '_blank')
-        }else{
+        } else {
             setActiveTab(tab.component)
         }
-
     }
+
+    /**
+ * handle change
+ * @param {*} e
+ */
+    const handleChange = (e, targetName = '') => {
+        if (e.target.name == 'authType') {
+            setAuthType(e.target.value)
+
+            let tempSettings = structuredClone(settings)
+            let headers = tempSettings.ar_try_on_model_api_headers;
+            headers[0] = {
+                key: "Authorization",
+                value: e.target.value + ' '
+            }
+
+            setSettings({
+                ...tempSettings, ...{ ar_try_on_model_api_headers: headers }
+            });
+
+            return;
+        }
+        let value = '';
+        if (Array.isArray(e)) {
+            value = e;
+
+            if (targetName === 'ar_try_on_allowed_post_types' && value.length > 1) {
+                toast('Multiple post type is only available in the pro version', 'error')
+                return;
+            }
+            setSettings({
+                ...settings,
+                ...{ [targetName]: value },
+            });
+            return;
+        } else {
+            value = e.target.value
+        }
+
+
+        if (targetName) {
+            e.target.name = targetName;
+        }
+
+        if (e.target.name == 'ar_try_on_ar_modes') {
+            let status = e.target.checked
+            let clonedVal = JSON.parse(JSON.stringify(settings));
+            let tempVal = clonedVal.ar_try_on_ar_modes
+            if (status) {
+                tempVal.push(value)
+                value = tempVal
+            } else {
+                if (tempVal.includes(value)) {
+                    tempVal = tempVal.filter(item => item != value);
+                }
+                value = tempVal
+            }
+
+            console.log(value)
+        }
+
+        if (!e.target.name) return;
+
+        console.log({ name: e.target.name, value: e.target.value })
+
+        setSettings({
+            ...settings,
+            ...{ [e.target.name]: value },
+        });
+    };
+
+    const handleHeaderChange = (index, field, value) => {
+        const updated = [...settings.ar_try_on_model_api_headers];
+        updated[index][field] = value;
+        setHeaders(updated);
+        setSettings({ ...settings, ...{ [ar_try_on_model_api_headers]: updated } })
+    };
+
+
+    /**
+     * Handle form Submit
+     */
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log(settings)
+        return;
+        let formData = new FormData();
+        formData.append('fields', JSON.stringify(settings));
+        formData.append('method', 'post');
+        postWithoutImage(getURL('settings'), formData)
+            .then((res) => {
+                // setSettings(res.data);
+                // toast('Successfully Saved.', 'info', {
+                //     autoClose: 15000
+                // });
+                // setIsDataLoaded(true)
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
     return <>
         <ToastContainer
@@ -69,7 +218,7 @@ export default function App() {
                         <a
                             key={tab.name}
                             href={tab.href}
-                            onClick={(e)=>handChange(e,tab)}
+                            onClick={(e) => handleTabChange(e, tab)}
                             aria-current={tab.current ? 'page' : undefined}
                             className={classNames(
                                 tab.current
@@ -87,15 +236,24 @@ export default function App() {
             {/*<div className="art-absolute art-inset-y-0 art-right-0 art-flex art-items-center art-pr-2 art-sm:static art-sm:inset-auto art-sm:ml-6 art-sm:pr-0">1.0.8</div>*/}
         </div>
 
-            {
-                activeTab === 'Settings' && <Settings/>
-            }
-            {
-                activeTab === 'Features' && <Features/>
-            }
-            {
-                activeTab === 'Integration' && <Integration/>
-            }
+        {
+            activeTab === 'Settings' && <Settings setHeaders={setHeaders} settings={settings} handleChange={handleChange} />
+        }
+        {
+            activeTab === 'Features' && <Features />
+        }
+        {
+            activeTab === 'Integration' && <Integration setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType} handleChange={handleChange} handleHeaderChange={handleHeaderChange} />
+        }
+        {/* Submit Button */}
+        <div className="art-space-y-2">
+            <button
+                onClick={handleSubmit}
+                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
+            >
+                Save
+            </button>
+        </div>
     </>;
 }
 

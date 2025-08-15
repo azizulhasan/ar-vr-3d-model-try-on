@@ -1,48 +1,41 @@
 import { useState, useEffect } from "react";
+import Settings from "../settings/Settings";
 
-export default function Integration() {
-    const [url, setUrl] = useState("");
-    const [authType, setAuthType] = useState("Bearer");
-    const [headers, setHeaders] = useState([]);
+export default function Integration({ handleHeaderChange, handleChange, settings, setHeaders, authType, setAuthType, setSettings }) {
 
     // Always keep default Authorization header
     useEffect(() => {
-        setHeaders([
-            {
-                key: "Authorization",
-                value:
-                    authType === "Basic"
-                        ? `Basic `
-                        : authType === "Bearer"
-                        ? `Bearer `
-                        : "",
-                fixed: false,
-            },
-        ]);
-    }, [authType]);
+        // setHeaders([
+        //     {
+        //         key: "Authorization",
+        //         value:
+        //             authType === "Basic"
+        //                 ? `Basic `
+        //                 : authType === "Bearer"
+        //                     ? `Bearer `
+        //                     : "",
+        //         fixed: false,
+        //     },
+        // ]);
+    }, []);
 
     const addHeader = () => {
-        setHeaders([...headers, { key: "", value: "", fixed: false }]);
+        let tempSettings = structuredClone(settings)
+        let headers = tempSettings.ar_try_on_model_api_headers;
+        headers.push({ key: "", value: "", })
+        console.log(tempSettings, headers)
+        setSettings({
+            ...tempSettings, ...{ ar_try_on_model_api_headers: headers }
+        });
     };
 
     const removeHeader = (index) => {
-        setHeaders(headers.filter((_, i) => i !== index));
-    };
-
-    const handleHeaderChange = (index, field, value) => {
-        const updated = [...headers];
-        updated[index][field] = value;
-        setHeaders(updated);
-    };
-
-    const handleSave = () => {
-        const data = {
-            url,
-            authType,
-            headers,
-        };
-        console.log("Saved Data:", data);
-        alert("Data saved! Check console for details.");
+        let tempSettings = structuredClone(settings)
+        let headers = tempSettings.ar_try_on_model_api_headers;
+        headers = headers.filter((_, i) => i !== index)
+        setSettings({
+            ...tempSettings, ...{ ar_try_on_model_api_headers: headers }
+        });
     };
 
     return (
@@ -54,8 +47,10 @@ export default function Integration() {
                 <label>URL:</label>
                 <input
                     type="text"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
+                    name="ar_try_on_model_api_url"
+                    id="ar_try_on_model_api_url"
+                    value={settings.ar_try_on_model_api_url}
+                    onChange={(e) => handleChange(e)}
                     placeholder="Enter API URL"
                     style={{ width: "100%", padding: "8px", marginTop: "5px" }}
                 />
@@ -66,12 +61,14 @@ export default function Integration() {
                 <label>Auth Type:</label>
                 <select
                     value={authType}
-                    onChange={(e) => setAuthType(e.target.value)}
+                    name="authType"
+                    id="authType"
+                    onChange={(e) => handleChange(e)}
                     style={{ width: "100%", padding: "8px", marginTop: "5px" }}
                 >
-                   <option value="Bearer">Bearer Token</option>
+                    <option value="Bearer">Bearer Token</option>
                     <option value="Basic">Basic</option>
-                   
+
                 </select>
             </div>
 
@@ -93,61 +90,42 @@ export default function Integration() {
                     Add Header
                 </button>
 
-                {headers.map((header, index) => (
+                {settings.ar_try_on_model_api_headers.map((header, index) => (
                     <div key={index} style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
                         <input
                             type="text"
                             value={header.key}
                             id={header.key}
                             name={header.key}
-                            readOnly={header.fixed}
-                            placeholder={header.fixed ? header.key : "Key"}
+                            placeholder={"Key"}
                             onChange={(e) => handleHeaderChange(index, "key", e.target.value)}
                             style={{ flex: 1, padding: "8px" }}
                         />
                         <input
                             type="text"
-                            value={header.fixed ? "" : header.value}
-                            placeholder={header.fixed ? header.value : "Value"}
-                            readOnly={header.fixed}
+                            value={header.value}
+                            placeholder={"Value"}
                             onChange={(e) => handleHeaderChange(index, "value", e.target.value)}
                             style={{ flex: 1, padding: "8px" }}
                         />
                         <button
-                                type="button"
-                                onClick={() => removeHeader(index)}
-                                style={{
-                                    padding: "8px 12px",
-                                    background: "#f44336",
-                                    color: "white",
-                                    border: "none",
-                                    borderRadius: "4px",
-                                    cursor: "pointer",
-                                    visibility: index != 0 ? 'visible' : 'hidden'
-                                }}
-                            >
-                                Delete
+                            type="button"
+                            onClick={() => removeHeader(index)}
+                            style={{
+                                padding: "8px 12px",
+                                background: "#f44336",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                visibility: index != 0 ? 'visible' : 'hidden'
+                            }}
+                        >
+                            Delete
                         </button>
                     </div>
                 ))}
             </div>
-
-            {/* Save Button */}
-            <button
-                type="button"
-                onClick={handleSave}
-                style={{
-                    marginTop: "20px",
-                    padding: "10px 15px",
-                    background: "#2196F3",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                }}
-            >
-                Save
-            </button>
         </div>
     );
 }
