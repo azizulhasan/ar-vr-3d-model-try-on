@@ -46,7 +46,7 @@ export default function Integration() {
     };
 
     return (
-        <div style={{ maxWidth: "80%", margin: "20px auto", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
+        <div style={{ maxWidth: "80%", margin: "20px", padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
             <h2>Integration Settings</h2>
 
             {/* URL Field */}
@@ -98,8 +98,10 @@ export default function Integration() {
                         <input
                             type="text"
                             value={header.key}
+                            id={header.key}
+                            name={header.key}
                             readOnly={header.fixed}
-                            placeholder={header.fixed ? undefined : "Key"}
+                            placeholder={header.fixed ? header.key : "Key"}
                             onChange={(e) => handleHeaderChange(index, "key", e.target.value)}
                             style={{ flex: 1, padding: "8px" }}
                         />
@@ -121,7 +123,7 @@ export default function Integration() {
                                     border: "none",
                                     borderRadius: "4px",
                                     cursor: "pointer",
-                                    display: index != 0 ? 'block' : 'none'
+                                    visibility: index != 0 ? 'visible' : 'hidden'
                                 }}
                             >
                                 Delete
