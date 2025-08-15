@@ -4,6 +4,7 @@ import ContentSection from "./components/ContentSection.js";
 import CameraSection from "./components/CameraSection.js";
 import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
 import StyleSection from "./components/StyleSection.js";
+import IntegrationSection from "./components/IntegrationSection.js";
 
 const ARProductModelSettings = () => {
 
@@ -37,11 +38,12 @@ const ARProductModelSettings = () => {
         canvas_padding: '',
         custom_css: '',
     });
+    
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
 
     // Accordion state
-    const [activeSection, setActiveSection] = useState('settings');
+    const [activeSection, setActiveSection] = useState('integration');
     const [activeAccordion, setActiveAccordion] = useState({
         content: false,
         camera: false,
@@ -205,7 +207,23 @@ const ARProductModelSettings = () => {
                     >
                         Style
                     </button>
+
+                        <button
+                            onClick={(e) => toggleSection(e, 'integration')}
+                            className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
+                                ? 'art-border-blue-500 art-text-blue-600'
+                                : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
+                                }`}
+                        >
+                            Integration
+                        </button>
                 </div>
+
+
+                
+                
+                
+
 
                 <div>
                     <br />
@@ -253,11 +271,27 @@ const ARProductModelSettings = () => {
 
                         />
 
+                        
 
 
                     )}
 
-                    <SaveButton />
+                    {/* {(activeSection === 'settings' || activeSection === 'style') && <SaveButton />} */}
+
+              
+
+                    
+                    {activeSection === 'integration' && (
+                            <IntegrationSection />
+                        )}
+
+                  
+
+                    
+                    
+
+
+                    
 
 
                 </div>
