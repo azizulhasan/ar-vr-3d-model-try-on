@@ -6,13 +6,19 @@ import 'react-toastify/dist/ReactToastify.css';
 import Settings from "./components/dashboard/settings/Settings";
 import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
+import Integration from "./components/dashboard/Integration/Integration";
+
+
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Settings')
+    const [activeTab, setActiveTab] = useState('Integration')
     const tabs = [
-        { name: 'Settings', href: '#', current: true, component: 'Settings' },
+        { name: 'Settings', href: '#', current: false, component: 'Settings' },
+        { name: 'Integration', href: '#', current: true ,  component: 'Integration' },
         { name: 'Features', href: '#', current: false,  component: 'Features' },
+      
         { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false,  component: 'Contact' },
+      
     ]
 
     function classNames(...classes) {
@@ -81,9 +87,15 @@ export default function App() {
             {/*<div className="art-absolute art-inset-y-0 art-right-0 art-flex art-items-center art-pr-2 art-sm:static art-sm:inset-auto art-sm:ml-6 art-sm:pr-0">1.0.8</div>*/}
         </div>
 
-        {
-            activeTab === 'Settings' ? <Settings/> : <Features/>
-        }
+            {
+                activeTab === 'Settings' && <Settings/>
+            }
+            {
+                activeTab === 'Features' && <Features/>
+            }
+            {
+                activeTab === 'Integration' && <Integration/>
+            }
     </>;
 }
 
