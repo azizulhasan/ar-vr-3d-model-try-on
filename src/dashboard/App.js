@@ -32,17 +32,11 @@ export default function App() {
         ar_try_on_enable_qr_code: 'yes',
         ar_try_on_clear_cache: false,
         ar_try_on_ar_demo: {},
-        ar_try_on_model_api_url: '',
+        ar_try_on_exclude_model_api_url: '',
         ar_try_on_model_api_headers: [
             {
                 key: "Authorization",
-                value:
-                    authType === "Basic"
-                        ? `Basic `
-                        : authType === "Bearer"
-                            ? `Bearer `
-                            : "",
-                fixed: false,
+                value: "Bearer "
             },
         ],
     });

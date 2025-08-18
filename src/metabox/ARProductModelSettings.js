@@ -37,6 +37,9 @@ const ARProductModelSettings = () => {
         canvas_margin: '',
         canvas_padding: '',
         custom_css: '',
+        // Integration settings
+        integration_fields: [{ key: "", value: "", type: "text" }],
+
     });
     
     const [currentValue, setCurrentValue] = useState({});
@@ -54,6 +57,36 @@ const ARProductModelSettings = () => {
         advance: false,
     });
 
+
+    // integration settings:
+    const addIntegrationField = () => {
+        setProductModel((prev) => ({
+            ...prev,
+            integration_fields: [...prev.integration_fields, { key: "", value: "", type: "text" }],
+        }));
+        };
+
+        const removeIntegrationField = (index) => {
+        setProductModel((prev) => ({
+            ...prev,
+            integration_fields: prev.integration_fields.filter((_, i) => i !== index),
+        }));
+        };
+
+        const handleIntegrationChange = (index, name, value) => {
+        setProductModel((prev) => {
+            const updated = [...prev.integration_fields];
+            updated[index][name] = value;
+            return { ...prev, integration_fields: updated };
+        });
+        };
+
+    // integration accordion
+//     const [integrationAccordion, setIntegrationAccordion] = useState({
+//         body: false,
+//         headers: false, // if you want multiple accordion parts later
+// });
+
     const toggleStyleAccordion = (section) => {
         setStyleAccordion(prev => ({
             canvas: false,
@@ -61,6 +94,15 @@ const ARProductModelSettings = () => {
             [section]: !prev[section],
         }));
     };
+
+    // toggle integration accordion
+//     const toggleIntegrationAccordion = (section) => {
+//     setIntegrationAccordion(prev => ({
+//         ...prev,
+//         [section]: !prev[section],
+//     }));
+// };
+
 
     const toggleAccordion = (section) => {
         setActiveAccordion(prev => ({
@@ -136,6 +178,7 @@ const ARProductModelSettings = () => {
                             ...productModel,
                             ...res.data,
                         };
+                       
                         setProductModel(productModelData);
                         setIsProductModelLoad(true)
                     });
@@ -282,8 +325,17 @@ const ARProductModelSettings = () => {
 
                     
                     {activeSection === 'integration' && (
-                            <IntegrationSection />
+                            <IntegrationSection 
+                                // productModel={productModel}
+                                fields={productModel.integration_fields}
+                                addField={addIntegrationField}
+                                removeField={removeIntegrationField}
+                                handleChange={handleIntegrationChange}
+                            />
                         )}
+
+
+                      
 
                   
 

@@ -47,9 +47,9 @@ export default function Integration({ handleHeaderChange, handleChange, settings
                 <label>URL:</label>
                 <input
                     type="text"
-                    name="ar_try_on_model_api_url"
-                    id="ar_try_on_model_api_url"
-                    value={settings.ar_try_on_model_api_url}
+                    name="ar_try_on_exclude_model_api_url"
+                    id="ar_try_on_exclude_model_api_url"
+                    value={settings.ar_try_on_exclude_model_api_url}
                     onChange={(e) => handleChange(e)}
                     placeholder="Enter API URL"
                     style={{ width: "100%", padding: "8px", marginTop: "5px" }}
@@ -57,7 +57,7 @@ export default function Integration({ handleHeaderChange, handleChange, settings
             </div>
 
             {/* Auth Type */}
-            <div style={{ marginBottom: "15px" }}>
+            {/* <div style={{ marginBottom: "15px" }}>
                 <label>Auth Type:</label>
                 <select
                     value={authType}
@@ -70,7 +70,7 @@ export default function Integration({ handleHeaderChange, handleChange, settings
                     <option value="Basic">Basic</option>
 
                 </select>
-            </div>
+            </div> */}
 
             {/* Headers Section */}
             <div>
