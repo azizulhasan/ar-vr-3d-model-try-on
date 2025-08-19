@@ -38,10 +38,10 @@ const ARProductModelSettings = () => {
         canvas_padding: '',
         custom_css: '',
         // Integration settings
-        integration_fields: [{ key: "", value: "", type: "text" }],
+        exclude_integration_api_body: [{ key: "", value: "", type: "text" }],
 
     });
-    
+
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
 
@@ -57,35 +57,31 @@ const ARProductModelSettings = () => {
         advance: false,
     });
 
+    const [settings, setSettings] = useState({})
 
     // integration settings:
     const addIntegrationField = () => {
         setProductModel((prev) => ({
             ...prev,
-            integration_fields: [...prev.integration_fields, { key: "", value: "", type: "text" }],
+            exclude_integration_api_body: [...prev.exclude_integration_api_body, { key: "", value: "", type: "text" }],
         }));
-        };
+    };
 
-        const removeIntegrationField = (index) => {
+    const removeIntegrationField = (index) => {
         setProductModel((prev) => ({
             ...prev,
-            integration_fields: prev.integration_fields.filter((_, i) => i !== index),
+            exclude_integration_api_body: prev.exclude_integration_api_body.filter((_, i) => i !== index),
         }));
-        };
+    };
 
-        const handleIntegrationChange = (index, name, value) => {
+    const handleIntegrationChange = (index, name, value) => {
         setProductModel((prev) => {
-            const updated = [...prev.integration_fields];
+            const updated = [...prev.exclude_integration_api_body];
             updated[index][name] = value;
-            return { ...prev, integration_fields: updated };
+            return { ...prev, exclude_integration_api_body: updated };
         });
-        };
+    };
 
-    // integration accordion
-//     const [integrationAccordion, setIntegrationAccordion] = useState({
-//         body: false,
-//         headers: false, // if you want multiple accordion parts later
-// });
 
     const toggleStyleAccordion = (section) => {
         setStyleAccordion(prev => ({
@@ -94,14 +90,6 @@ const ARProductModelSettings = () => {
             [section]: !prev[section],
         }));
     };
-
-    // toggle integration accordion
-//     const toggleIntegrationAccordion = (section) => {
-//     setIntegrationAccordion(prev => ({
-//         ...prev,
-//         [section]: !prev[section],
-//     }));
-// };
 
 
     const toggleAccordion = (section) => {
@@ -178,13 +166,25 @@ const ARProductModelSettings = () => {
                             ...productModel,
                             ...res.data,
                         };
-                       
+
                         setProductModel(productModelData);
                         setIsProductModelLoad(true)
                     });
             }
         }, 1000)
 
+    }, []);
+
+    useEffect(() => {
+        /**
+         * Get data from and display to table.
+         */
+        let formData = new FormData();
+        formData.append('method', 'get');
+        postWithoutImage(getURL('settings'), formData).then(
+            (res) => {
+                setSettings({ ...settings, ...res.data });
+            });
     }, []);
 
     useEffect(() => {
@@ -251,21 +251,21 @@ const ARProductModelSettings = () => {
                         Style
                     </button>
 
-                        <button
-                            onClick={(e) => toggleSection(e, 'integration')}
-                            className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
-                                ? 'art-border-blue-500 art-text-blue-600'
-                                : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                                }`}
-                        >
-                            Integration
-                        </button>
+                    <button
+                        onClick={(e) => toggleSection(e, 'integration')}
+                        className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
+                            ? 'art-border-blue-500 art-text-blue-600'
+                            : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
+                            }`}
+                    >
+                        Integration
+                    </button>
                 </div>
 
 
-                
-                
-                
+
+
+
 
 
                 <div>
@@ -314,36 +314,36 @@ const ARProductModelSettings = () => {
 
                         />
 
-                        
+
 
 
                     )}
 
                     {(activeSection === 'settings' || activeSection === 'style') && <SaveButton />}
 
-              
 
-                    
+
+
                     {activeSection === 'integration' && (
-                            <IntegrationSection 
-                                // productModel={productModel}
-                                fields={productModel.integration_fields}
-                                addField={addIntegrationField}
-                                removeField={removeIntegrationField}
-                                handleChange={handleIntegrationChange}
-                            />
-                        )}
+                        <IntegrationSection
+                            productModel={productModel}
+                            addField={addIntegrationField}
+                            removeField={removeIntegrationField}
+                            handleChange={handleIntegrationChange}
+                            settings={settings}
+                        />
+                    )}
 
 
-                      
-
-                  
-
-                    
-                    
 
 
-                    
+
+
+
+
+
+
+
 
 
                 </div>

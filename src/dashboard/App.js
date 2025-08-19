@@ -7,11 +7,12 @@ import Settings from "./components/dashboard/settings/Settings";
 import { ToastContainer } from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
+import { getURL, postWithoutImage } from "../context/utilities";
 
 
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Integration');
+    const [activeTab, setActiveTab] = useState('Settings');
     const [authType, setAuthType] = useState("Bearer");
     const [settings, setSettings] = useState({
         ar_try_on_display_button_automatically: 'yes',
@@ -32,17 +33,17 @@ export default function App() {
         ar_try_on_enable_qr_code: 'yes',
         ar_try_on_clear_cache: false,
         ar_try_on_ar_demo: {},
-        ar_try_on_exclude_model_api_url: '',
-        ar_try_on_model_api_headers: [
+        ar_try_on_exclude_integration_api_url: '',
+        ar_try_on_exclude_integration_api_headers: [
             {
                 key: "Authorization",
-                value: "Bearer "
+                value: ""
             },
         ],
     });
     const tabs = [
-        { name: 'Settings', href: '#', current: false, component: 'Settings' },
-        { name: 'Integration', href: '#', current: true, component: 'Integration' },
+        { name: 'Settings', href: '#', current: true, component: 'Settings' },
+        { name: 'Integration', href: '#', current: false, component: 'Integration' },
         { name: 'Features', href: '#', current: false, component: 'Features' },
 
         { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
@@ -50,19 +51,18 @@ export default function App() {
     ]
     const [headers, setHeaders] = useState([]);
 
-    // useEffect(() => {
-    //     let tempHead
-    //     setHeaders({
-    //         key: "Authorization",
-    //         value:
-    //             authType === "Basic"
-    //                 ? `Basic `
-    //                 : authType === "Bearer"
-    //                     ? `Bearer `
-    //                     : "",
-    //         fixed: false,
-    //     },)
-    // }, [authType])
+    useEffect(() => {
+        /**
+         * Get data from and display to table.
+         */
+        let formData = new FormData();
+        formData.append('method', 'get');
+        postWithoutImage(getURL('settings'), formData).then(
+            (res) => {
+                setSettings({ ...settings, ...res.data });
+                // setIsDataLoaded(true)
+            });
+    }, []);
 
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ')
@@ -86,14 +86,14 @@ export default function App() {
             setAuthType(e.target.value)
 
             let tempSettings = structuredClone(settings)
-            let headers = tempSettings.ar_try_on_model_api_headers;
+            let headers = tempSettings.ar_try_on_exclude_integration_api_headers;
             headers[0] = {
                 key: "Authorization",
                 value: e.target.value + ' '
             }
 
             setSettings({
-                ...tempSettings, ...{ ar_try_on_model_api_headers: headers }
+                ...tempSettings, ...{ ar_try_on_exclude_integration_api_headers: headers }
             });
 
             return;
@@ -148,10 +148,10 @@ export default function App() {
     };
 
     const handleHeaderChange = (index, field, value) => {
-        const updated = [...settings.ar_try_on_model_api_headers];
+        const updated = [...settings.ar_try_on_exclude_integration_api_headers];
         updated[index][field] = value;
         setHeaders(updated);
-        setSettings({ ...settings, ...{ [ar_try_on_model_api_headers]: updated } })
+        setSettings({ ...settings, ...{ [ar_try_on_exclude_integration_api_headers]: updated } })
     };
 
 
@@ -161,16 +161,15 @@ export default function App() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(settings)
-        return;
+        // return;
         let formData = new FormData();
         formData.append('fields', JSON.stringify(settings));
         formData.append('method', 'post');
         postWithoutImage(getURL('settings'), formData)
             .then((res) => {
-                // setSettings(res.data);
-                // toast('Successfully Saved.', 'info', {
-                //     autoClose: 15000
-                // });
+                setSettings(res.data);
+                toast('Successfully Saved.', 'info')
+
                 // setIsDataLoaded(true)
             })
             .catch((err) => {

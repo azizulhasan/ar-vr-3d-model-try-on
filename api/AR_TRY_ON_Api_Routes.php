@@ -76,6 +76,21 @@ class AR_TRY_ON_Api_Routes {
 		);
 
 
+		// register generate_3d_model route.
+		register_rest_route(
+			$this->namespace,
+			'/generate_3d_model',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'generate_3d_model' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+
 	}
 
 
@@ -180,6 +195,62 @@ class AR_TRY_ON_Api_Routes {
 
 			return rest_ensure_response( $response );
 		}
+	}
+
+
+	public function generate_3d_model($request) {
+		$body = $request->get_params();
+		$result['status'] = false;
+		$decoded_data = json_decode($body['data'], 1);
+		$api_url = $decoded_data['url']; // Replace with your API Key
+		$headers = $decoded_data['headers'];
+		$headers['Authorization'] = 'Bearer '.$headers['Authorization'];
+		$api_body = $decoded_data['body'];
+
+		$response = wp_remote_post( $api_url, array(
+			'headers' => $headers,
+			'body' => json_encode( $api_body ),
+			'timeout' => 60, // optional, prevent timeout on large requests
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			$result['data'] = $response->get_error_message();
+			return rest_ensure_response($result);
+		}
+
+		$status_code = wp_remote_retrieve_response_code( $response );
+		$response_body        = wp_remote_retrieve_body( $response );
+
+		if ( $status_code !== 200 ) {
+			$result['data'] = json_decode($response_body,1);
+			$result['extra'] = [
+				'headers' => $headers,
+				'api_body' => $api_body, 
+				'response_body'=> $response_body,
+				'$decoded_data' => $decoded_data,
+			];
+			
+			return rest_ensure_response($result);
+		}
+
+		// 7a879bbb-e3da-4b06-87a9-6bb79b48e4c8
+
+		$result['data'] = $response_body;
+
+		$result['status'] = true;
+		$result['extra'] = [
+			'decoded_data' => $decoded_data,
+			'body' => $body, 
+			'response_body'=> $response_body,
+		];
+
+
+
+		
+
+
+
+		// return rest_ensure_response( $response );
 	}
 
 

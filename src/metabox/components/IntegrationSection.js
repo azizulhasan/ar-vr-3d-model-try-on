@@ -1,71 +1,39 @@
 import React from "react";
+import { getURL, postWithoutImage } from "../../context/utilities";
 
 export default function IntegrationSection({
-  fields,
+  productModel,
   addField,
   removeField,
   handleChange,
+  settings,
 }) {
   const handleSubmit = async () => {
-    console.log(fields);
+    // console.log(productModel);
+    // console.log(settings)
     // 'tsk_IrIonIBYMdxL8KY5sNvPJ7XLYQY4OpDuCnjh-2gj9sA'
-    let prompt_val = fields[0].value;
-
-    const APIKEY = 'tsk_IrIonIBYMdxL8KY5sNvPJ7XLYQY4OpDuCnjh-2gj9sA'; // put your real key here
-
-    const response = await fetch("https://api.tripo3d.ai/v2/openapi/task", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${APIKEY}`
-      },
-      body: JSON.stringify({
-        type: "text_to_model",
-        prompt: prompt_val
-      })
+    const APIKEY = 'tsk_IrIonIBYMdxL8KY5sNvPJ7XLYQY4OpDuCnjh-2gj9sA';
+    let headers = {}
+    settings.ar_try_on_exclude_integration_api_headers.map(header => {
+      headers[header.key] = header.value;
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status},info : ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log("Response:", result);
-    // if (result?.data?.task_id) {
-    //   const response = await fetch(`https://api.tripo3d.ai/v2/openapi/task/${result?.data?.task_id}`, {
-    //     headers: {
-    //       "Authorization": `Bearer ${APIKEY}`
-    //     },
-    //     body: JSON.stringify({
-    //       type: "text_to_model",
-    //       prompt: prompt
-    //     })
-    //   });
-
-    //   if (!response.ok) {
-    //     throw new Error(`HTTP error! status: ${response.status},info : ${response.statusText}`);
-    //   }
-
-    //   const data = await response.json();
-    //   console.log({ data });
-    // }
-
-
-    // Example usage
-
-
-
-    // const response = await fetch("https://hysts-shap-e.hf.space/gradio_api/queue/join", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     data: [prompt],
-    //     event_data: null,
-    //     fn_index: 2,
-    //     trigger_id: 7,
-    //     session_hash: "qyyifkz574s",
-    //   })
-    // });
+    let body = {}
+    productModel.exclude_integration_api_body.map(item => {
+      body[item.key] = item.value;
+    });
+    let data_arr = {};
+    data_arr['url'] = settings.ar_try_on_exclude_integration_api_url
+    data_arr['headers'] = headers;
+    data_arr['body'] = body
+    console.log(data_arr)
+    let formData = new FormData();
+    formData.append('data', JSON.stringify(data_arr));
+    formData.append('method', 'POST');
+    postWithoutImage(getURL('generate_3d_model'), formData).then(
+      (res) => {
+        console.log(res)
+      });
 
 
   };
@@ -84,7 +52,7 @@ export default function IntegrationSection({
       </button>
 
       {/* Dynamic rows */}
-      {fields.map((field, index) => (
+      {productModel.exclude_integration_api_body.map((field, index) => (
         <div key={index} className="art-flex art-gap-2 art-mb-4 art-flex-nowrap">
           <input
             type="text"

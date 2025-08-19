@@ -40,19 +40,6 @@ export default function Settings({ settings, handleChange }) {
         }
     }, [window?.ar_try_on])
 
-    useEffect(() => {
-        /**
-         * Get data from and display to table.
-         */
-        let formData = new FormData();
-        formData.append('method', 'get');
-        postWithoutImage(getURL('settings'), formData).then(
-            (res) => {
-                setSettings({ ...settings, ...res.data });
-                setIsDataLoaded(true)
-            });
-    }, []);
-
     const handleSettingsChange = (e, targetName = '') => {
         handleChange(e, targetName)
     }

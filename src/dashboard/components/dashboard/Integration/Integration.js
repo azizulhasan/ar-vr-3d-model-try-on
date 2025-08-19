@@ -21,20 +21,20 @@ export default function Integration({ handleHeaderChange, handleChange, settings
 
     const addHeader = () => {
         let tempSettings = structuredClone(settings)
-        let headers = tempSettings.ar_try_on_model_api_headers;
+        let headers = tempSettings.ar_try_on_exclude_integration_api_headers;
         headers.push({ key: "", value: "", })
         console.log(tempSettings, headers)
         setSettings({
-            ...tempSettings, ...{ ar_try_on_model_api_headers: headers }
+            ...tempSettings, ...{ ar_try_on_exclude_integration_api_headers: headers }
         });
     };
 
     const removeHeader = (index) => {
         let tempSettings = structuredClone(settings)
-        let headers = tempSettings.ar_try_on_model_api_headers;
+        let headers = tempSettings.ar_try_on_exclude_integration_api_headers;
         headers = headers.filter((_, i) => i !== index)
         setSettings({
-            ...tempSettings, ...{ ar_try_on_model_api_headers: headers }
+            ...tempSettings, ...{ ar_try_on_exclude_integration_api_headers: headers }
         });
     };
 
@@ -47,9 +47,9 @@ export default function Integration({ handleHeaderChange, handleChange, settings
                 <label>URL:</label>
                 <input
                     type="text"
-                    name="ar_try_on_exclude_model_api_url"
-                    id="ar_try_on_exclude_model_api_url"
-                    value={settings.ar_try_on_exclude_model_api_url}
+                    name="ar_try_on_exclude_integration_api_url"
+                    id="ar_try_on_exclude_integration_api_url"
+                    value={settings.ar_try_on_exclude_integration_api_url}
                     onChange={(e) => handleChange(e)}
                     placeholder="Enter API URL"
                     style={{ width: "100%", padding: "8px", marginTop: "5px" }}
@@ -90,7 +90,7 @@ export default function Integration({ handleHeaderChange, handleChange, settings
                     Add Header
                 </button>
 
-                {settings.ar_try_on_model_api_headers.map((header, index) => (
+                {settings.ar_try_on_exclude_integration_api_headers.map((header, index) => (
                     <div key={index} style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
                         <input
                             type="text"
