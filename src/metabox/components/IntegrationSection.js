@@ -1,75 +1,74 @@
 import React from "react";
 
-export default function IntegrationSection({ 
-    fields, 
-    addField, 
-    removeField, 
-    handleChange,
- }) {
-        const handleSubmit = async () => {
-            console.log( fields);
-            
-            
+export default function IntegrationSection({
+  fields,
+  addField,
+  removeField,
+  handleChange,
+}) {
+  const handleSubmit = async () => {
+    console.log(fields);
+    // 'tsk_IrIonIBYMdxL8KY5sNvPJ7XLYQY4OpDuCnjh-2gj9sA'
+    let prompt_val = fields[0].value;
 
-        async function generate3DModelFromHF(prompt) {
-                        console.log( prompt);
+    const APIKEY = 'tsk_IrIonIBYMdxL8KY5sNvPJ7XLYQY4OpDuCnjh-2gj9sA'; // put your real key here
 
-            const response = await fetch("https://hysts-shap-e.hf.space/gradio_api/queue/join", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({data: [prompt],
-                        event_data: null,
-                        fn_index: 2,
-                        trigger_id: 7,
-                        session_hash: "qyyifkz574s",
-                    })
-            });
-           const result = await response.json();
-            console.log({result});
+    const response = await fetch("https://api.tripo3d.ai/v2/openapi/task", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${APIKEY}`
+      },
+      body: JSON.stringify({
+        type: "text_to_model",
+        prompt: prompt_val
+      })
+    });
 
-            // The output usually looks like result.data[0].url OR a base64 file
-            // const modelUrl = result?.data[0]?.url || result?.data[0]; 
-            // console.log(modelUrl)
-            const response2 = await fetch("https://hysts-shap-e.hf.space/gradio_api/queue/data?session_hash=qyyifkz574s", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" }
-            } );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status},info : ${response.statusText}`);
+    }
 
-            // const result2 = await response2.json();
-            console.log({response2});
+    const result = await response.json();
+    console.log("Response:", result);
+    // if (result?.data?.task_id) {
+    //   const response = await fetch(`https://api.tripo3d.ai/v2/openapi/task/${result?.data?.task_id}`, {
+    //     headers: {
+    //       "Authorization": `Bearer ${APIKEY}`
+    //     },
+    //     body: JSON.stringify({
+    //       type: "text_to_model",
+    //       prompt: prompt
+    //     })
+    //   });
 
-             const response3 = await fetch("https://hysts-shap-e.hf.space/gradio_api/queue/join", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({data: [prompt],
-                        event_data: null,
-                        fn_index: 3,
-                        trigger_id: 7,
-                        session_hash: "qyyifkz574s",
-                    })
-            });
-           const result3 = await response3.json();
-            console.log({result3});
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status},info : ${response.statusText}`);
+    //   }
 
-            // The output usually looks like result.data[0].url OR a base64 file
-            // const modelUrl = result?.data[0]?.url || result?.data[0]; 
-            // console.log(modelUrl)
-            const response4 = await fetch("https://hysts-shap-e.hf.space/gradio_api/queue/data?session_hash=qyyifkz574s", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" }
-            } );
+    //   const data = await response.json();
+    //   console.log({ data });
+    // }
 
-            // const result4 = await response4.json();
-            console.log({response4});
 
-      
-            // return modelUrl; // .glb file
-        }
+    // Example usage
 
-        let model = await generate3DModelFromHF('a dog')
-        console.log({model})
 
-     };
+
+    // const response = await fetch("https://hysts-shap-e.hf.space/gradio_api/queue/join", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     data: [prompt],
+    //     event_data: null,
+    //     fn_index: 2,
+    //     trigger_id: 7,
+    //     session_hash: "qyyifkz574s",
+    //   })
+    // });
+
+
+  };
 
   return (
     <div className="art-bg-gray-100 art-p-4 art-rounded">
@@ -132,13 +131,13 @@ export default function IntegrationSection({
           </button>
 
         </div>
-        
+
       ))}
-        <button type="button" 
-         onClick={handleSubmit} 
-         className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
-            Generate Model
-         </button>
+      <button type="button"
+        onClick={handleSubmit}
+        className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
+        Generate Model
+      </button>
     </div>
   );
 }
