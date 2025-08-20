@@ -29,10 +29,36 @@ export default function IntegrationSection({
     console.log(data_arr)
     let formData = new FormData();
     formData.append('data', JSON.stringify(data_arr));
-    formData.append('method', 'POST');
     postWithoutImage(getURL('generate_3d_model'), formData).then(
       (res) => {
         console.log(res)
+        if(!res?.data?.data?.output?.generated_image && res?.data?.data?.task_id) {
+          let responseData = {};
+          let taskInterval = setInterval(async () =>{
+            console.log(taskInterval)
+            if(responseData?.data?.data?.output?.generated_image){
+              clearInterval(taskInterval)
+              taskInterval = null;
+              return;
+            }
+
+            let formData2 = new FormData();
+            data_arr.body.task_id = res?.data?.data?.task_id;
+            console.log(data_arr)
+            formData2.append('data', JSON.stringify(data_arr));
+            // Default options are marked with *
+            const response = await fetch(getURL('generate_3d_model'), {
+              method: "POST", // *GET, POST, PUT, DELETE, etc.
+              body: formData2, // body data type must match "Content-Type" header
+              headers: {
+                'X-WP-Nonce': ar_try_on.rest_nonce
+              },
+            });
+            responseData = await response.json();
+            console.log(responseData)
+          },10000)
+        }
+
       });
 
 
