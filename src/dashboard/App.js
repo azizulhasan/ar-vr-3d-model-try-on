@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import 'react-toastify/dist/ReactToastify.css';
 
 import Settings from "./components/dashboard/settings/Settings";
-import { ToastContainer } from "react-toastify";
+import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
 import { getURL, postWithoutImage } from "../context/utilities";
+import toast from '../context/Notify';
 
 
 
@@ -144,7 +145,16 @@ export default function App() {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(settings)
-        // return;
+
+        if( settings?.ar_try_on_exclude_integration_api_name  && settings?.ar_try_on_exclude_integration_api_url  ) {
+            settings.ar_try_on_exclude_integration_api_headers.map(header=>{
+                if(header.key == '' || header.value == '') {
+                    alert('Please fill all of the API headers with proper value')
+                    return;
+                }
+            })
+        }
+        // tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
         let formData = new FormData();
         formData.append('fields', JSON.stringify(settings));
         formData.append('method', 'post');
@@ -152,7 +162,6 @@ export default function App() {
             .then((res) => {
                 setSettings(res.data);
                 toast('Successfully Saved.', 'info')
-
                 // setIsDataLoaded(true)
             })
             .catch((err) => {

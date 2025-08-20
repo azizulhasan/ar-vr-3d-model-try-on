@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { getPostID, getURL, postWithoutImage, copyshortcode } from "../context/utilities";
+import React, {useState, useEffect} from "react";
+import {getPostID, getURL, postWithoutImage, copyshortcode, getAPITypes} from "../context/utilities";
 import ContentSection from "./components/ContentSection.js";
 import CameraSection from "./components/CameraSection.js";
 import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
@@ -39,12 +39,13 @@ const ARProductModelSettings = () => {
         custom_css: '',
         // Integration settings
         exclude_integration_api_body: [
-            { key: 'mode', type: 'text', value: 'preview' },
-            { key: 'prompt', type: 'textarea', value: '' },
-            { key: 'negative_prompt', type: 'textarea', value: '' },
-            { key: 'art_style', type: 'text', value: 'realistic' },
-            { key: 'should_remesh', type: 'boolean', value: true }
+            {key: 'mode', type: 'text', value: 'preview'},
+            {key: 'prompt', type: 'textarea', value: ''},
+            {key: 'negative_prompt', type: 'textarea', value: ''},
+            {key: 'art_style', type: 'text', value: 'realistic'},
+            {key: 'should_remesh', type: 'boolean', value: true}
         ],
+        exclude_integration_api_model_type: 'text_to_model'
     });
 
     const [currentValue, setCurrentValue] = useState({});
@@ -64,11 +65,14 @@ const ARProductModelSettings = () => {
 
     const [settings, setSettings] = useState({})
 
+    const allApi = getAPITypes('all');
+    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+
     // integration settings:
     const addIntegrationField = () => {
         setProductModel((prev) => ({
             ...prev,
-            exclude_integration_api_body: [...prev.exclude_integration_api_body, { key: "", value: "", type: "text" }],
+            exclude_integration_api_body: [...prev.exclude_integration_api_body, {key: "", value: "", type: "text"}],
         }));
     };
 
@@ -83,7 +87,7 @@ const ARProductModelSettings = () => {
         setProductModel((prev) => {
             const updated = [...prev.exclude_integration_api_body];
             updated[index][name] = value;
-            return { ...prev, exclude_integration_api_body: updated };
+            return {...prev, exclude_integration_api_body: updated};
         });
     };
 
@@ -129,7 +133,7 @@ const ARProductModelSettings = () => {
     };
 
     const handleMediaButtonClick = (fieldName, value) => {
-        setBasicSettings(prev => ({ ...prev, ...{ [fieldName]: value } }))
+        setBasicSettings(prev => ({...prev, ...{[fieldName]: value}}))
         let inputField = document.getElementById(fieldName)
         wp.hooks.doAction('ar_try_on_select_light_and_envirement_files', {
             name: fieldName,
@@ -146,7 +150,6 @@ const ARProductModelSettings = () => {
     }, [wp.hooks]);
 
     useEffect(() => {
-        console.log(currentValue)
         if (Object.keys(currentValue).length) {
             const productModelData = {
                 ...productModel,
@@ -188,13 +191,16 @@ const ARProductModelSettings = () => {
         formData.append('method', 'get');
         postWithoutImage(getURL('settings'), formData).then(
             (res) => {
-                setSettings({ ...settings, ...res.data });
+                setSettings({...settings, ...res.data});
             });
     }, []);
 
     useEffect(() => {
         if (isProductModelLoaded) {
             wp.hooks.doAction('ar_try_on_preview_data', productModel);
+            if(settings?.ar_try_on_exclude_integration_api_name != currentApi?.id) {
+                console.log({name: settings?.ar_try_on_exclude_integration_api_name, currentApi  })
+            }
         }
     }, [isProductModelLoaded]);
 
@@ -213,7 +219,7 @@ const ARProductModelSettings = () => {
         postWithoutImage(getURL('get_model_and_settings'), formData)
             .then((res) => {
                 console.log(res)
-                setProductModel({ ...productModel, ...res.data });
+                setProductModel({...productModel, ...res.data});
                 alert('Successfully Saved Data.')
             })
             .catch((err) => {
@@ -221,7 +227,7 @@ const ARProductModelSettings = () => {
             });
     };
 
-    const SaveButton = ({ classes = 'art-w-full' }) => (
+    const SaveButton = ({classes = 'art-w-full'}) => (
         <button
             type="button"
             onClick={handleSubmit}
@@ -232,9 +238,9 @@ const ARProductModelSettings = () => {
     );
 
     return (
-        <div className="art-flex art-gap-6" style={{ display: 'flex', gap: '0.25rem' }}>
+        <div className="art-flex art-gap-6" style={{display: 'flex', gap: '0.25rem'}}>
             {/* Left Side - Settings/Style Sections */}
-            <div className="art-w-1/2" style={{ width: '50%', borderRight: '1px solid black', paddingRight: '1rem' }}>
+            <div className="art-w-1/2" style={{width: '50%', borderRight: '1px solid black', paddingRight: '1rem'}}>
                 {/* Section Tabs */}
                 <div className="art-flex art-mb-4 art-border-b">
                     <button
@@ -242,7 +248,7 @@ const ARProductModelSettings = () => {
                         className={`art-px-4 art-py-2 art-cursor-pointer art-font-medium art-border-b-2 ${activeSection === 'settings'
                             ? 'art-border-blue-500 art-text-blue-600'
                             : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                            }`}
+                        }`}
                     >
                         Settings
                     </button>
@@ -251,7 +257,7 @@ const ARProductModelSettings = () => {
                         className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'style'
                             ? 'art-border-blue-500 art-text-blue-600'
                             : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                            }`}
+                        }`}
                     >
                         Style
                     </button>
@@ -261,20 +267,13 @@ const ARProductModelSettings = () => {
                         className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
                             ? 'art-border-blue-500 art-text-blue-600'
                             : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                            }`}
+                        }`}
                     >
                         Integration
                     </button>
                 </div>
-
-
-
-
-
-
-
                 <div>
-                    <br />
+                    <br/>
                     {/* Settings Section */}
                     {activeSection === 'settings' && (
                         <div className="art-bg-gray-100 art-rounded">
@@ -318,44 +317,27 @@ const ARProductModelSettings = () => {
                             toggleStyleAccordion={toggleStyleAccordion}
 
                         />
-
-
-
-
                     )}
 
-                    {(activeSection === 'settings' || activeSection === 'style') && <SaveButton />}
-
-
-
+                    {(activeSection === 'settings' || activeSection === 'style') && <SaveButton/>}
 
                     {activeSection === 'integration' && (
                         <IntegrationSection
                             productModel={productModel}
                             addField={addIntegrationField}
                             removeField={removeIntegrationField}
-                            handleChange={handleIntegrationChange}
+                            handleIntegrationChange={handleIntegrationChange}
                             settings={settings}
+                            currentApi={currentApi}
+                            handleChange={handleChange}
+                            setProductModel={setProductModel}
                         />
                     )}
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </div>
             </div>
 
             {/* Right Side - Shortcode and Preview */}
-            <div className="art-w-1/2" style={{ width: '50%', paddingLeft: '1rem' }}>
+            <div className="art-w-1/2" style={{width: '50%', paddingLeft: '1rem'}}>
                 <div className="art-bg-white art-rounded art-shadow-sm art-flex art-gap-2">
                     <input
                         type="text"
@@ -369,7 +351,7 @@ const ARProductModelSettings = () => {
                     <div
                         type="button"
                         id="atlas_ar_shortcode_button"
-                        style={{ cursor: "copy" }}
+                        style={{cursor: "copy"}}
                         onClick={copyshortcode}
                         // className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500"
                         className="art-mt-2 art-mb-4 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
@@ -377,7 +359,7 @@ const ARProductModelSettings = () => {
                         <span className="dashicons dashicons-admin-page"></span>
                         Copy ShortCode
                     </div>
-                    <SaveButton classes="art-w-96 art-mb-4" />
+                    <SaveButton classes="art-w-96 art-mb-4"/>
                 </div>
 
                 <div id='ar_try_on_preveiw'></div>

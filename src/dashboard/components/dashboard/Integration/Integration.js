@@ -35,17 +35,13 @@ export default function Integration({
 
 
     useEffect(() => {
-
         if(!previousHeaders && settings?.ar_try_on_exclude_integration_api_url !== '') {
             setPreviousHeaders({
                 api_name:settings?.ar_try_on_exclude_integration_api_name || currentApi.id,
                 headers: settings?.ar_try_on_exclude_integration_api_headers
             })
-
         }
-
         if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
-
 
             let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name);
             setCurentAPI(data);
@@ -81,7 +77,7 @@ export default function Integration({
 
             {/* API Name */}
             {
-                currentApi?.name && <>
+                currentApi?.id && <>
                     <div style={{marginBottom: "15px"}}>
                         <label>API Name:</label>
                         <select

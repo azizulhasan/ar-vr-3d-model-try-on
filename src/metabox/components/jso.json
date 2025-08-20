@@ -36,24 +36,5 @@
         }
       }
     }
-  },
-  "extra": {
-    "headers": {
-      "Authorization": "Bearer tsk_Gzxoe1K-zmKEwaAe613vCdbMSukzYCVU0ZrreYAVtJy"
-    },
-    "api_body": {
-      "task_id": "32772dfa-14cd-4bac-ba8a-44c389d8ed44"
-    },
-    "response_body": "",
-    "$decoded_data": {
-      "url": "https:\/\/api.tripo3d.ai\/v2\/openapi\/task",
-      "headers": {
-        "Authorization": "tsk_Gzxoe1K-zmKEwaAe613vCdbMSukzYCVU0ZrreYAVtJy",
-        "Content-Type": "application\/json"
-      },
-      "body": {
-        "task_id": "32772dfa-14cd-4bac-ba8a-44c389d8ed44"
-      }
-    }
   }
 }
