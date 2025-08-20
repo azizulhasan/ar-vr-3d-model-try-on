@@ -1,3 +1,4 @@
+import {useState} from "react";
 
 
 /**
@@ -173,4 +174,77 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     if (model_settings.ar_try_on_ar_button === "activate") {
         modelViewer.innerHTML = `<button> ${model_settings.ar_try_on_ar_button_text || 'Activate Ar'} </button>`;
     }
+}
+
+
+
+export const getAPITypes = (api_type = 'tripo3d') => {
+    let api_types = {
+        tripo3d: {
+            id: 'tripo3d',
+            name: 'Tripo 3D',
+            url: 'https://api.tripo3d.ai/v2/openapi/task',
+            headers: [
+                {key: 'Authorization', value: '' },
+                {key: 'Content-Type', value: 'application/json' },
+            ],
+            body: {
+                supported_types: {
+                    text_to_model: {
+                        input: [
+                            {key: 'type', type: 'text', value: 'text_to_model'},
+                            {key: 'prompt', type: 'textarea', value: ''},
+                            {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
+                            {key: 'texture', type: 'boolean', value: true},
+                            {key: 'pbr', type: 'boolean', value: true},
+                            {key: 'texture_alignment', type: 'text', value: 'geometry'},
+                            {key: 'geometry_quality', type: 'text', value: 'original'},
+                        ],
+                        doc: 'https://platform.tripo3d.ai/docs/generation#text-to-model'
+                    },
+                    image_to_model: {
+                        input: [
+                            { key: 'type', type: 'text', value: 'image_to_model' },
+                            { key: 'file.type', type: 'text', value: 'png' },
+                            { key: 'file.file_token', type: 'file', value: '' },
+                            { key: 'file.object', type: 'text', value: '' },
+                            { key: 'file.url', type: 'url', value: '' },
+                            { key: 'model_version', type: 'text', value: 'v2.5-20250123' },
+                            { key: 'texture', type: 'boolean', value: true },
+                            { key: 'pbr', type: 'boolean', value: true },
+                            { key: 'texture_alignment', type: 'text', value: 'original_image' }
+                        ],
+                        doc: 'https://platform.tripo3d.ai/docs/generation#image-to-model'
+                    }
+                }
+            }
+        },
+        meshy_ai: {
+            id: 'meshy_ai',
+            name: 'Meshy AI 3D',
+            url: 'https://api.meshy.ai/openapi/v2/text-to-3d',
+            headers: [
+                {key: 'Authorization', value: '' },
+                {key: 'Content-Type', value: 'application/json' },
+            ],
+            body: {
+                supported_types: {
+                    text_to_model: {
+                        input: [
+                            { key: 'mode', type: 'text', value: 'preview' },
+                            { key: 'prompt', type: 'textarea', value: '' },
+                            { key: 'negative_prompt', type: 'textarea', value: '' },
+                            { key: 'art_style', type: 'text', value: 'realistic' },
+                            { key: 'should_remesh', type: 'boolean', value: true }
+                        ],
+                        doc: 'https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request'
+                    },
+                }
+            }
+        }
+    }
+    if(api_type === 'all'){
+        return api_types;
+    }
+    return api_types[api_type];
 }

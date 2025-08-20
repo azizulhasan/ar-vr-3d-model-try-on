@@ -1,5 +1,5 @@
-import React from "react";
-import { getURL, postWithoutImage } from "../../context/utilities";
+import React, {useState, useEffect} from "react";
+import { getURL, postWithoutImage, getAPITypes } from "../../context/utilities";
 
 export default function IntegrationSection({
   productModel,
@@ -8,6 +8,14 @@ export default function IntegrationSection({
   handleChange,
   settings,
 }) {
+
+  const allApi = getAPITypes('all');
+  const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+  const [previousHeaders, setPreviousHeaders] = useState(null)
+
+  useEffect(() => {
+    console.log(currentApi)
+  }, []);
   const handleSubmit = async () => {
     // console.log(productModel);
     // console.log(settings)

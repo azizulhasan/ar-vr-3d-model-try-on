@@ -12,7 +12,7 @@ import { getURL, postWithoutImage } from "../context/utilities";
 
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Settings');
+    const [activeTab, setActiveTab] = useState('Integration');
     const [authType, setAuthType] = useState("Bearer");
     const [settings, setSettings] = useState({
         ar_try_on_display_button_automatically: 'yes',
@@ -42,8 +42,8 @@ export default function App() {
         ],
     });
     const tabs = [
-        { name: 'Settings', href: '#', current: true, component: 'Settings' },
-        { name: 'Integration', href: '#', current: false, component: 'Integration' },
+        { name: 'Settings', href: '#', current: false, component: 'Settings' },
+        { name: 'Integration', href: '#', current: true, component: 'Integration' },
         { name: 'Features', href: '#', current: false, component: 'Features' },
 
         { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
@@ -82,22 +82,7 @@ export default function App() {
  * @param {*} e
  */
     const handleChange = (e, targetName = '') => {
-        if (e.target.name == 'authType') {
-            setAuthType(e.target.value)
 
-            let tempSettings = structuredClone(settings)
-            let headers = tempSettings.ar_try_on_exclude_integration_api_headers;
-            headers[0] = {
-                key: "Authorization",
-                value: e.target.value + ' '
-            }
-
-            setSettings({
-                ...tempSettings, ...{ ar_try_on_exclude_integration_api_headers: headers }
-            });
-
-            return;
-        }
         let value = '';
         if (Array.isArray(e)) {
             value = e;
@@ -134,13 +119,11 @@ export default function App() {
                 value = tempVal
             }
 
-            console.log(value)
         }
 
         if (!e.target.name) return;
 
-        console.log({ name: e.target.name, value: e.target.value })
-
+        console.log({name: e.target.name, value})
         setSettings({
             ...settings,
             ...{ [e.target.name]: value },
