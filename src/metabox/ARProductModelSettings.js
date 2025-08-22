@@ -39,8 +39,8 @@ const ARProductModelSettings = () => {
         custom_css: '',
         // Integration settings
         exclude_integration_api_body: [
-            {key: 'mode', type: 'text', value: 'preview'},
             {key: 'prompt', type: 'textarea', value: ''},
+            {key: 'mode', type: 'text', value: 'preview'},
             {key: 'negative_prompt', type: 'textarea', value: ''},
             {key: 'art_style', type: 'text', value: 'realistic'},
             {key: 'should_remesh', type: 'boolean', value: true}

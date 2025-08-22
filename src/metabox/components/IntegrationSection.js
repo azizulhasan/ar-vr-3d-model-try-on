@@ -103,7 +103,7 @@ export default function IntegrationSection({
 
 
     return (
-        <div className="art-bg-gray-100 art-p-4 art-rounded">
+        <div className="art-bg-gray-100 ">
             <h3 className="art-font-medium art-mb-4">Integration</h3>
 
 
@@ -129,17 +129,50 @@ export default function IntegrationSection({
             }
 
             {/* Add new field button */}
-            <button
-                type="button"
-                onClick={addField}
-                className="art-mb-4 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border-none"
-            >
-                Add Body
-            </button>
+                <div className="art-flex art-items-center art-justify-between">
+                {/* Add Body Button */}
+                <button
+                    type="button"
+                    onClick={addField}
+                    className="art-mb-4 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border-none art-hover:bg-blue-600"
+                >
+                    Add Body
+                </button>
+
+                {/* Tooltip Button */}
+                <div className="art-relative art-group">
+                    <button
+                    type="button"
+                    className="art-bg-gray-200  art-p-2  art-cursor-pointer"
+                    >
+                    ℹ️
+                    </button>
+
+                    {/* Tooltip Text */}
+                        <div className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
+                        Model Documentation:
+                        <br/>
+                        {productModel.exclude_integration_api_model_type === 'text_to_model' ? (
+                            <p>Meshy Ai: <a href="https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Text to 3D API Guide</a></p>
+                        ) : productModel.exclude_integration_api_model_type === 'image_to_model' ? (
+                            <p>Tripo Ai: <a href="https://platform.tripo3d.ai/docs/generation#image-to-model" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Image to Model Guide</a></p>
+                        ) : (
+                            <>
+                            <p>Tripo Ai: <a href="https://platform.tripo3d.ai/docs/generation#image-to-model" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Image to Model Guide</a></p>
+                            <br/>
+                            <p>Meshy Ai: <a href="https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Text to 3D API Guide</a></p>
+                            </>
+                        )}
+                        </div>
+                </div>
+                </div>
+
+
+
 
             {/* Dynamic rows */}
             {productModel.exclude_integration_api_body.map((field, index) => (
-                <div key={index} className="art-flex art-gap-2 art-mb-4 art-flex-nowrap">
+                <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
                     <input
                         type="text"
                         placeholder="Key"
