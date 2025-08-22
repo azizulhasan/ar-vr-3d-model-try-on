@@ -215,7 +215,8 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                             { key: 'texture_alignment', type: 'text', value: 'original_image' }
                         ],
                         doc: 'https://platform.tripo3d.ai/docs/generation#image-to-model'
-                    }
+                    },                  
+                    
                 }
             }
         },
@@ -241,8 +242,10 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                     },
                 }
             }
-        }
+        },
+
     }
+
     if(api_type === 'all'){
         return api_types;
     }

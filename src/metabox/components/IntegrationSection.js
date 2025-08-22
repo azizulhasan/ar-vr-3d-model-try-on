@@ -150,19 +150,23 @@ export default function IntegrationSection({
 
                     {/* Tooltip Text */}
                         <div className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
-                        Model Documentation:
-                        <br/>
-                        {productModel.exclude_integration_api_model_type === 'text_to_model' ? (
-                            <p>Meshy Ai: <a href="https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Text to 3D API Guide</a></p>
-                        ) : productModel.exclude_integration_api_model_type === 'image_to_model' ? (
-                            <p>Tripo Ai: <a href="https://platform.tripo3d.ai/docs/generation#image-to-model" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Image to Model Guide</a></p>
-                        ) : (
-                            <>
-                            <p>Tripo Ai: <a href="https://platform.tripo3d.ai/docs/generation#image-to-model" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Image to Model Guide</a></p>
+                            Model Documentation:
                             <br/>
-                            <p>Meshy Ai: <a href="https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request" target="_blank" rel="noopener noreferrer" className="art-text-blue-400 hover:art-text-blue-300 art-underline">Text to 3D API Guide</a></p>
-                            </>
-                        )}
+                            {currentApi?.body?.supported_types?.[productModel.exclude_integration_api_model_type]?.doc ? (
+                                <p>
+                                    {currentApi.name}: 
+                                    <a 
+                                        href={currentApi.body.supported_types[productModel.exclude_integration_api_model_type].doc} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="art-text-blue-400 hover:art-text-blue-300 art-underline art-ml-1"
+                                    >
+                                        {productModel.exclude_integration_api_model_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} Guide
+                                    </a>
+                                </p>
+                            ) : (
+                                <p>No documentation available for this model type.</p>
+                            )}
                         </div>
                 </div>
                 </div>
@@ -209,15 +213,32 @@ export default function IntegrationSection({
                         />
                     )}
 
-                    <button
+                    {/* <button
                         type="button"
                         onClick={() => removeField(index)}
                         className="art-bg-blue-500 art-text-white art-px-2 art-rounded art-border-none"
                     >
                         ✕
-                    </button>
 
-                </div>
+                    </button> */}
+
+
+                     {!field.required ? (
+                        <button
+                            type="button"
+                            onClick={() => removeField(index)}
+                            className="art-bg-blue-500 art-text-white art-px-2 art-rounded art-border-none"
+                            title="Remove field"
+                        >
+                            ✕
+                        </button>
+                            ) : (
+                                <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center" title="Required field">
+                                
+                                </div>
+                            )}
+
+                        </div>
 
             ))}
             <button type="button"

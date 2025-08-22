@@ -39,11 +39,13 @@ const ARProductModelSettings = () => {
         custom_css: '',
         // Integration settings
         exclude_integration_api_body: [
-            {key: 'prompt', type: 'textarea', value: ''},
-            {key: 'mode', type: 'text', value: 'preview'},
-            {key: 'negative_prompt', type: 'textarea', value: ''},
-            {key: 'art_style', type: 'text', value: 'realistic'},
-            {key: 'should_remesh', type: 'boolean', value: true}
+            {key: 'prompt', type: 'textarea', value: '',required:true},
+            {key: 'type', type: 'text', value: 'text_to_model'},
+            {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
+            {key: 'texture', type: 'boolean', value: true},
+            {key: 'pbr', type: 'boolean', value: true},
+            {key: 'texture_alignment', type: 'text', value: 'geometry'},
+            {key: 'geometry_quality', type: 'text', value: 'original'},
         ],
         exclude_integration_api_model_type: 'text_to_model'
     });
@@ -203,6 +205,9 @@ const ARProductModelSettings = () => {
             }
         }
     }, [isProductModelLoaded]);
+
+
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
