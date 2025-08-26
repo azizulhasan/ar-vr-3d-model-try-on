@@ -167,8 +167,8 @@ class AR_TRY_ON_Admin {
 
 	public function ar_try_on_menu() {
 		add_menu_page(
-			'AR Try-On',
-			'AR Try-On',
+			'AtlasAR',
+			'AtlasAR',
 			'manage_options',
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
