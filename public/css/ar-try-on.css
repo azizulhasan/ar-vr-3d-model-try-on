@@ -39,6 +39,11 @@
   grid-row-start: 1
 }
 
+.art-mx-auto {
+  margin-left: auto;
+  margin-right: auto
+}
+
 .art--mb-px {
   margin-bottom: -1px
 }
@@ -61,6 +66,14 @@
 
 .art-mb-6 {
   margin-bottom: 1.5rem
+}
+
+.art-mb-8 {
+  margin-bottom: 2rem
+}
+
+.art-ml-1 {
+  margin-left: 0.25rem
 }
 
 .art-ml-4 {
@@ -163,6 +176,10 @@
   width: 100%
 }
 
+.art-max-w-4xl {
+  max-width: 56rem
+}
+
 .art-cursor-pointer {
   cursor: pointer
 }
@@ -191,10 +208,6 @@
 
 .art-items-start {
   align-items: flex-start
-}
-
-.art-items-end {
-  align-items: flex-end
 }
 
 .art-items-center {
@@ -251,6 +264,12 @@
   margin-bottom: calc(0.5rem * var(--tw-space-y-reverse))
 }
 
+.art-space-y-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(0.75rem * var(--tw-space-y-reverse))
+}
+
 .art-space-y-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
@@ -273,6 +292,14 @@
 
 .art-rounded {
   border-radius: 0.25rem
+}
+
+.art-rounded-2xl {
+  border-radius: 1rem
+}
+
+.art-rounded-lg {
+  border-radius: 0.5rem
 }
 
 .art-rounded-md {
@@ -362,6 +389,11 @@
   background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1))
 }
 
+.art-bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}
+
 .art-bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
@@ -383,6 +415,10 @@
   padding: 1.25rem
 }
 
+.art-p-8 {
+  padding: 2rem
+}
+
 .art-px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem
@@ -401,6 +437,11 @@
 .art-px-4 {
   padding-left: 1rem;
   padding-right: 1rem
+}
+
+.art-py-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem
 }
 
 .art-py-2 {
@@ -431,6 +472,11 @@
 
 .art-font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace
+}
+
+.art-text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem
 }
 
 .art-text-base {
@@ -474,6 +520,10 @@
   text-transform: uppercase
 }
 
+.art-leading-relaxed {
+  line-height: 1.625
+}
+
 .art-tracking-wide {
   letter-spacing: 0.025em
 }
@@ -493,6 +543,11 @@
   color: rgb(37 99 235 / var(--tw-text-opacity, 1))
 }
 
+.art-text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-text-opacity, 1))
+}
+
 .art-text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1))
@@ -506,6 +561,11 @@
 .art-text-gray-700 {
   --tw-text-opacity: 1;
   color: rgb(55 65 81 / var(--tw-text-opacity, 1))
+}
+
+.art-text-gray-800 {
+  --tw-text-opacity: 1;
+  color: rgb(31 41 55 / var(--tw-text-opacity, 1))
 }
 
 .art-text-gray-900 {
@@ -545,6 +605,12 @@
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
 }
 
+.art-shadow-md {
+  --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}
+
 .art-shadow-sm {
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
@@ -567,6 +633,14 @@
   outline-color: #d1d5db
 }
 
+.art-transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms
+}
+
 .art-transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -579,6 +653,11 @@
 
 .art-duration-300 {
   transition-duration: 300ms
+}
+
+.hover\:art-bg-gray-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1))
 }
 
 .hover\:art-bg-gray-50:hover {
@@ -594,6 +673,10 @@
 .hover\:art-text-gray-800:hover {
   --tw-text-opacity: 1;
   color: rgb(31 41 55 / var(--tw-text-opacity, 1))
+}
+
+.hover\:art-underline:hover {
+  text-decoration-line: underline
 }
 
 .art-group:hover .group-hover\:art-visible {

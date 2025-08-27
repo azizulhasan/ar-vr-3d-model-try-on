@@ -7,6 +7,7 @@ import Settings from "./components/dashboard/settings/Settings";
 import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
+import Documentation from "./components/dashboard/Documentation/Documentation";
 import { getURL, postWithoutImage } from "../context/utilities";
 import toast from '../context/Notify';
 
@@ -46,7 +47,7 @@ export default function App() {
         { name: 'Settings', href: '#', current: false, component: 'Settings' },
         { name: 'Integration', href: '#', current: true, component: 'Integration' },
         { name: 'Features', href: '#', current: false, component: 'Features' },
-
+        { name: 'Documentation', href: '#', current: false, component: 'Documentation' },
         { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
 
     ]
@@ -230,15 +231,19 @@ export default function App() {
         {
             activeTab === 'Integration' && <Integration setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType} handleChange={handleChange} handleHeaderChange={handleHeaderChange} />
         }
+        { activeTab === 'Documentation' && <Documentation /> }
+
         {/* Submit Button */}
-        <div className="art-space-y-2">
-            <button
+            {activeTab !== 'Documentation' && (
+            <div className="art-space-y-2">
+                <button
                 onClick={handleSubmit}
-                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
-            >
+                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500"
+                >
                 Save
-            </button>
-        </div>
+                </button>
+            </div>
+)}
     </>;
 }
 
