@@ -2,7 +2,6 @@
 
 namespace AR_TRY_ON_API;
 
-use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Cache;
 use AR_TRY_ON\AR_TRY_ON_Helper;
@@ -214,12 +213,17 @@ class AR_TRY_ON_Api_Routes
         $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
         $api_body = $decoded_data['body'];
 
+        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data);
+        $result['extra'] = [];
+
+        return rest_ensure_response($result);
+
         $response_body = '';
         if (!isset($api_body['task_id']) || !$api_body['task_id']) {
             $response = wp_remote_post($api_url, array(
                 'headers' => $headers,
                 'body' => json_encode($api_body),
-                'timeout' => 60, // optional, prevent timeout on large requests
+                'timeout' => 90, // optional, prevent timeout on large requests
             ));
 
             if (is_wp_error($response)) {
@@ -230,6 +234,9 @@ class AR_TRY_ON_Api_Routes
             $status_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
             $response_body = json_decode($response_body, true);
+            /**
+             * Model generated properly .
+             */
             if ($status_code !== 200) {
                 $result['data'] = $response_body;
                 $result['extra'] = [

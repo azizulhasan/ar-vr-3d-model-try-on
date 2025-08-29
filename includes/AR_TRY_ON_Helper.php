@@ -347,5 +347,46 @@ class AR_TRY_ON_Helper {
 		}
 
 		return $product_settings;
-	} 
+	}
+
+    public static function get_structured_model_response( $decoded_data ) {
+        // D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json;
+        $response_body = [];
+
+        if(isset($decoded_data['api_name'], $decoded_data['body']['type'])
+            && $decoded_data['api_name'] == "tripo3d"
+            && $decoded_data['body']['type'] == "text_to_model"
+        ) {
+            if(empty($response_body)) {
+                $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
+                $response_data = json_decode( $response_data, true );
+
+                if(isset($response_data['data']['task_id'])) {
+                    $response_body['task_id'] = $response_data['data']['task_id'];
+                }
+
+                if(isset($response_data['data']['type'])) {
+                    $response_body['type'] = $response_data['data']['type'];
+                }
+
+                if(isset($response_data['data']['input'])) {
+                    $response_body['input'] = $response_data['data']['input'];
+                }
+
+                if(isset($response_data['data']['output'])) {
+                    $response_body['output'] = $response_data['data']['output'];
+                }
+
+                if(isset($response_data['data']['result'])) {
+                    $response_body['result'] = $response_data['data']['result'];
+                }
+
+
+            }
+        }
+
+
+        return  $response_body;
+
+    }
 }

@@ -206,7 +206,13 @@ const ARProductModelSettings = () => {
         }
     }, [isProductModelLoaded]);
 
-
+    useEffect(() => {
+        if(productModel.exclude_integration_api_model_type) {
+            let tempProductModel = structuredClone(productModel)
+            tempProductModel.exclude_integration_api_body = currentApi.body.supported_types[productModel.exclude_integration_api_model_type].input;
+            setProductModel(tempProductModel)
+        }
+    }, [productModel.exclude_integration_api_model_type]);
 
 
     const handleSubmit = (e) => {

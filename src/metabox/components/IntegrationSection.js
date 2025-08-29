@@ -30,9 +30,6 @@ export default function IntegrationSection({
         data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
         data_arr['headers'] = headers;
         data_arr['body'] = body
-        console.log(data_arr)
-        console.log({apinam: data_arr?.api_name, prompt: data_arr?.body?.prompt, leng: data_arr?.body?.prompt.leng})
-
         if (data_arr?.url == '' || data_arr?.api_name == '') {
             alert('Please integrate first from Integration Tab of the plugin')
             return;
@@ -44,38 +41,41 @@ export default function IntegrationSection({
             return;
         }
 
-        return;
         let formData = new FormData();
         formData.append('data', JSON.stringify(data_arr));
         postWithoutImage(getURL('generate_3d_model'), formData).then(
             (res) => {
                 console.log(res)
-                if (!res?.data?.data?.output?.generated_image && res?.data?.data?.task_id) {
-                    let responseData = {};
-                    let taskInterval = setInterval(async () => {
-                        console.log(taskInterval)
-                        if (responseData?.data?.data?.output?.generated_image) {
-                            clearInterval(taskInterval)
-                            taskInterval = null;
-                            return;
-                        }
 
-                        let formData2 = new FormData();
-                        data_arr.body.task_id = res?.data?.data?.task_id;
-                        console.log(data_arr)
-                        formData2.append('data', JSON.stringify(data_arr));
-                        // Default options are marked with *
-                        const response = await fetch(getURL('generate_3d_model'), {
-                            method: "POST", // *GET, POST, PUT, DELETE, etc.
-                            body: formData2, // body data type must match "Content-Type" header
-                            headers: {
-                                'X-WP-Nonce': ar_try_on.rest_nonce
-                            },
-                        });
-                        responseData = await response.json();
-                        console.log(responseData)
-                    }, 10000)
-                }
+                /**
+                 * TODO:: meke this a method.
+                 */
+                // if (!res?.data?.data?.output?.generated_image && res?.data?.data?.task_id) {
+                //     let responseData = {};
+                //     let taskInterval = setInterval(async () => {
+                //         console.log(taskInterval)
+                //         if (responseData?.data?.data?.output?.generated_image) {
+                //             clearInterval(taskInterval)
+                //             taskInterval = null;
+                //             return;
+                //         }
+                //
+                //         let formData2 = new FormData();
+                //         data_arr.body.task_id = res?.data?.data?.task_id;
+                //         console.log(data_arr)
+                //         formData2.append('data', JSON.stringify(data_arr));
+                //         // Default options are marked with *
+                //         const response = await fetch(getURL('generate_3d_model'), {
+                //             method: "POST", // *GET, POST, PUT, DELETE, etc.
+                //             body: formData2, // body data type must match "Content-Type" header
+                //             headers: {
+                //                 'X-WP-Nonce': ar_try_on.rest_nonce
+                //             },
+                //         });
+                //         responseData = await response.json();
+                //         console.log(responseData)
+                //     }, 10000)
+                // }
 
             });
     };
