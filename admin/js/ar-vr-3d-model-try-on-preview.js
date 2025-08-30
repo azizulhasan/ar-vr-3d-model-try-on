@@ -121,15 +121,15 @@ if (false) {
 
     let model_settings = {}
     let InterVal = setInterval(async () => {
-        if (document.getElementById('atlas_ar_preveiw')) {
-            document.getElementById('ATLAS_AR_preveiw').innerHTML = htmlContent
+        if (document.getElementById('atlas_ar_preview')) {
+            document.getElementById('atlas_ar_preview').innerHTML = htmlContent
             clearInterval(InterVal)
         }
     }, 10)
 
 
 
-    wp.hooks.addAction('ATLAS_AR_preview_data', 'ar_try_on', function (data) {
+    wp.hooks.addAction('atlas_ar_preview_data', 'ar_try_on', function (data) {
 
         model_settings = { ...model_settings, ...data }
         console.log(model_settings)

@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Create modal content
                     var modalContent = document.createElement('div');
                     modalContent.className = 'modal-content';
-                    modalContent.id = 'ATLAS_AR_model_viewer';
+                    modalContent.id = 'atlas_ar_model_viewer';
 
                     // Add close button
                     var closeBtn = document.createElement('button');
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   var productName = data.product_name || '3D Product';
                   if (data) {
                     showModal();
-                    wp.hooks.doAction('ATLAS_AR_pro_load_face_model', htmlContent, data);
+                    wp.hooks.doAction('atlas_ar_pro_load_face_model', htmlContent, data);
                   }
                 } else {
                   console.error(response.data);

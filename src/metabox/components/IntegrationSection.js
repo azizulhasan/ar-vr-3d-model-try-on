@@ -46,13 +46,13 @@ export default function IntegrationSection({
         postWithoutImage(getURL('generate_3d_model'), formData).then(
             (res) => {
                 console.log(res)
-                if(res?.status && res?.data?.src) {
+                if(res?.status && res?.data?.temp?.src?.url) {
                     // console.log(res)
                     let tempProductModel = structuredClone(productModel)
-                    tempProductModel.src = res.data.src
+                    tempProductModel.src = res?.data?.temp?.src?.url
                     setProductModel(tempProductModel)
                     console.log({tempProductModel})
-                    wp.hooks.doAction('ar_try_on_preview_data', tempProductModel);
+                    wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                 }
 
                 /**
@@ -69,7 +69,7 @@ export default function IntegrationSection({
                 //             tempProductModel.src = responseData.data.src
                 //             setProductModel(tempProductModel)
                 //             console.log({tempProductModel})
-                //             wp.hooks.doAction('ar_try_on_preview_data', tempProductModel);
+                //             wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                 //             return;
                 //         }
                 //

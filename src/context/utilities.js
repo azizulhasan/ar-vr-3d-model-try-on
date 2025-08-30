@@ -89,6 +89,7 @@ export const copyshortcode = (e) => {
 
 
 export const setModelAttributes = (modelViewer, model_settings) => {
+    console.log({model_settings})
     modelViewer.setAttribute('src', model_settings.src || '');
     modelViewer.setAttribute('ios-src', model_settings.ios_src || '');
     modelViewer.setAttribute('alt', model_settings.alt || '');

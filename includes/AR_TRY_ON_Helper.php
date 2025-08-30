@@ -436,30 +436,23 @@ class AR_TRY_ON_Helper
         $file_path = isset($settings['path']) ? $settings['path'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
         $file_url = isset($settings['url']) ? $settings['url'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL;
 
-//        $files = [
-//            'pbr_model' => "https://tripo-data.rg1.data.tripo3d.com/.../tripo_pbr_model_xxx.glb?...",
-//            'generated_image' => "https://tripo-data.rg1.data.tripo3d.com/.../im.webp?...",
-//            'rendered_image' => "https://tripo-data.rg1.data.tripo3d.com/.../legacy_mesh.webp?..."
-//        ];
-
-
         // Make sure the directory exists
         if (!file_exists($file_path)) {
             wp_mkdir_p($file_path);
         }
         $uploaded_files = [];
-        foreach ($files as $key => $url) {
+        foreach ($files as $file_key => $url) {
             $response = wp_remote_get($url, ['timeout' => 90]);
 
             if (is_wp_error($response)) {
-                error_log(print_r("Failed to download $key: " . $response->get_error_message(), true));
+                error_log(print_r("Failed to download $file_key: " . $response->get_error_message(), true));
                 continue;
             }
 
             $body = wp_remote_retrieve_body($response);
 
             if (empty($body)) {
-                error_log(print_r("Empty body for $key", true));
+                error_log(print_r("Empty body for $file_key", true));
                 continue;
             }
 
@@ -467,19 +460,19 @@ class AR_TRY_ON_Helper
             $filename = basename(parse_url($url, PHP_URL_PATH));
             error_log(print_r([
                 'filename' => $filename,
-                '$key' => $key,
+                '$key' => $file_key,
                 'url' => $url,
                 '$response' => $response,
             ], true));
 
             // Save file
-            $file_full_path = trailingslashit($file_path) . $filename;
-            $file_full_url = trailingslashit($file_url) . $filename;
+            $file_full_path = trailingslashit($file_path) . $file_key .'__'. $filename;
+            $file_full_url = trailingslashit($file_url) . $file_key .'__'. $filename;
             $saved = file_put_contents($file_full_path, $body);
 
 
-            $uploaded_files[$key]['url'] = $file_full_url;
-            $uploaded_files[$key]['path'] = $file_full_path;
+            $uploaded_files[$file_key]['url'] = $file_full_url;
+            $uploaded_files[$file_key]['path'] = $file_full_path;
         }
 
         error_log(print_r($uploaded_files, true));

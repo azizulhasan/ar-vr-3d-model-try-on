@@ -124,7 +124,7 @@ const ARProductModelSettings = () => {
             [e.target.name]: value,
         };
         setProductModel(productModelData);
-        wp.hooks.doAction('ar_try_on_preview_data', productModelData);
+        wp.hooks.doAction('atlas_ar_preview_data', productModelData);
     };
 
     const handleMediaButtonClick = (fieldName, value) => {
@@ -151,7 +151,7 @@ const ARProductModelSettings = () => {
                 [currentValue.name]: currentValue.url
             };
             setProductModel(productModelData);
-            wp.hooks.doAction('ar_try_on_preview_data', productModelData);
+            wp.hooks.doAction('atlas_ar_preview_data', productModelData);
         }
     }, [currentValue]);
 
@@ -178,7 +178,7 @@ const ARProductModelSettings = () => {
 
     useEffect(() => {
         let InterVal = setInterval(() => {
-            if (document.getElementById('ar_try_on_preveiw') && isSettingsLoaded) {
+            if (document.getElementById('atlas_ar_preview') && isSettingsLoaded) {
                 clearInterval(InterVal)
                 const postId = getPostID()
                 let formData = new FormData();
@@ -212,8 +212,8 @@ const ARProductModelSettings = () => {
 
     useEffect(() => {
         if (isProductModelLoaded) {
-            wp.hooks.doAction('ar_try_on_preview_data', productModel);
-            console.log({name: settings.ar_try_on_exclude_integration_api_name, currentApi })
+            wp.hooks.doAction('atlas_ar_preview_data', productModel);
+            console.log({name: settings.ar_try_on_exclude_integration_api_name, isProductModelLoaded })
         }
     }, [isProductModelLoaded]);
 
@@ -385,7 +385,7 @@ const ARProductModelSettings = () => {
                     <SaveButton classes="art-w-96 art-mb-4"/>
                 </div>
 
-                <div id='ar_try_on_preveiw'></div>
+                <div id='atlas_ar_preview'></div>
             </div>
             <div className="art-hidden art-w-96 art-w-1/3"></div>
         </div>
