@@ -44,14 +44,14 @@ class AR_TRY_ON_Constants {
 
 		if ( ! defined( 'ATLAS_AR_MODEL_DIR' ) ) {
 			/**
-			 * Custom Font Directory.
+			 * ATLAS_AR_MODEL_DIR
 			 *
 			 * @var string.
 			 * @since 1.0.0
 			 */
 			$upload_dir = wp_upload_dir();
 			$base_dir   = $upload_dir['basedir'];
-			$tta_dir    = $base_dir . "/AtlasAR";
+			$tta_dir    = $base_dir . "/atlas_ar";
 
 			define( 'ATLAS_AR_MODEL_DIR', apply_filters( 'atlas_ar_model_dir', $tta_dir . '/' ) );
 			if ( self::is_model_folder_writable() ) {
@@ -68,14 +68,14 @@ class AR_TRY_ON_Constants {
 
 		if ( ! defined( 'ATLAS_AR_MODEL_DIR_URL' ) ) {
 			/**
-			 * Custom Font Directory.
+			 * ATLAS_AR_MODEL_DIR_URL
 			 *
 			 * @var string.
 			 * @since 1.0.0
 			 */
 			$upload_dir = wp_upload_dir();
 			$base_dir   = $upload_dir['baseurl'];
-			$tta_dir    = $base_dir . "/ATLASAR";
+			$tta_dir    = $base_dir . "/atlas_ar";
 			$should_ssl = \explode( ':', $tta_dir )[0] === 'http';
 			if ( ! empty( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ) {
 				if ( $should_ssl ) {
@@ -90,7 +90,7 @@ class AR_TRY_ON_Constants {
 
 		if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_DIR' ) ) {
 			/**
-			 * Custom Font Directory.
+			 * ATLAS_AR_CURRENT_MODEL_DIR
 			 *
 			 * @var string.
 			 * @since 1.0.0
@@ -102,7 +102,7 @@ class AR_TRY_ON_Constants {
 
 		if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_DIR_URL' ) ) {
 			/**
-			 * Custom Font Directory.
+			 * ATLAS_AR_CURRENT_MODEL_DIR_URL
 			 *
 			 * @var string.
 			 * @since 1.0.0
@@ -110,6 +110,29 @@ class AR_TRY_ON_Constants {
 			define( 'ATLAS_AR_CURRENT_MODEL_DIR_URL', apply_filters( 'atlas_ar_current_model_dir_url', ATLAS_AR_MODEL_DIR_URL . $api_name . '/' ) );
 
 		}
+
+
+        if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_TEMP_DIR' ) ) {
+            /**
+             * ATLAS_AR_CURRENT_MODEL_TEMP_DIR
+             *
+             * @var string.
+             * @since 1.0.0
+             */
+
+            define( 'ATLAS_AR_CURRENT_MODEL_TEMP_DIR', apply_filters( 'atlas_ar_current_model_temp_dir', ATLAS_AR_CURRENT_MODEL_DIR . 'temp/' ) );
+        }
+
+        if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL' ) ) {
+            /**
+             * ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL
+             *
+             * @var string.
+             * @since 1.0.0
+             */
+            define( 'ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL', apply_filters( 'atlas_ar_current_model_temp_dir_url', ATLAS_AR_CURRENT_MODEL_DIR_URL . 'temp/' ) );
+
+        }
 
 	}
 }

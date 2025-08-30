@@ -58,37 +58,37 @@ export default function IntegrationSection({
                 /**
                  * TODO:: meke this a method.
                  */
-                if (!res?.data?.src && res?.data?.task_id) {
-                    let responseData = {};
-                    let taskInterval = setInterval(async () => {
-                        console.log(taskInterval)
-                        if (responseData?.data?.src) {
-                            clearInterval(taskInterval)
-                            taskInterval = null;
-                            let tempProductModel = structuredClone(productModel)
-                            tempProductModel.src = responseData.data.src
-                            setProductModel(tempProductModel)
-                            console.log({tempProductModel})
-                            wp.hooks.doAction('ar_try_on_preview_data', tempProductModel);
-                            return;
-                        }
-
-                        let formData2 = new FormData();
-                        data_arr.body.task_id = res?.data?.task_id;
-                        console.log(data_arr)
-                        formData2.append('data', JSON.stringify(data_arr));
-                        // Default options are marked with *
-                        const response = await fetch(getURL('generate_3d_model'), {
-                            method: "POST", // *GET, POST, PUT, DELETE, etc.
-                            body: formData2, // body data type must match "Content-Type" header
-                            headers: {
-                                'X-WP-Nonce': ar_try_on.rest_nonce
-                            },
-                        });
-                        responseData = await response.json();
-                        console.log(responseData)
-                    }, 20000)
-                }
+                // if (!res?.data?.src && res?.data?.task_id) {
+                //     let responseData = {};
+                //     let taskInterval = setInterval(async () => {
+                //         console.log(taskInterval)
+                //         if (responseData?.data?.src) {
+                //             clearInterval(taskInterval)
+                //             taskInterval = null;
+                //             let tempProductModel = structuredClone(productModel)
+                //             tempProductModel.src = responseData.data.src
+                //             setProductModel(tempProductModel)
+                //             console.log({tempProductModel})
+                //             wp.hooks.doAction('ar_try_on_preview_data', tempProductModel);
+                //             return;
+                //         }
+                //
+                //         let formData2 = new FormData();
+                //         data_arr.body.task_id = res?.data?.task_id;
+                //         console.log(data_arr)
+                //         formData2.append('data', JSON.stringify(data_arr));
+                //         // Default options are marked with *
+                //         const response = await fetch(getURL('generate_3d_model'), {
+                //             method: "POST", // *GET, POST, PUT, DELETE, etc.
+                //             body: formData2, // body data type must match "Content-Type" header
+                //             headers: {
+                //                 'X-WP-Nonce': ar_try_on.rest_nonce
+                //             },
+                //         });
+                //         responseData = await response.json();
+                //         console.log(responseData)
+                //     }, 20000)
+                // }
 
             });
     };

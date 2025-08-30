@@ -213,12 +213,17 @@ class AR_TRY_ON_Api_Routes
         $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
         $api_body = $decoded_data['body'];
 
-        $result['data'] = [];
-        $result['extra'] = [
-            'data' => ATLAS_AR_CURRENT_MODEL_DIR,
-        ];
-
-        return rest_ensure_response($result);
+//        $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
+//        $response_data = json_decode( $response_data, true );
+//
+//        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
+//        $result['result'] = AR_TRY_ON_Helper::download_model_files_files_and_store($result['data']['output'], []);
+//        $result['extra'] = [
+//            'data' => ATLAS_AR_CURRENT_MODEL_TEMP_DIR,
+//            'data1' => ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL
+//        ];
+//
+//        return rest_ensure_response($result);
 
         $response_body = '';
         if (!isset($api_body['task_id']) || !$api_body['task_id']) {
@@ -315,11 +320,15 @@ class AR_TRY_ON_Api_Routes
         }
 
         $task_result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $task_response_body);
-        $task_result['extra'] = [];
+        error_log(print_r(['data' => $task_result['data'], '$decoded_data' => $decoded_data], 1));
+        $task_result['result'] = AR_TRY_ON_Helper::download_model_files_files_and_store($task_result['data']['output'], []);
+        $task_result['extra'] = [
+            '$task_response_body' => $task_response_body
+        ];
 
 //        meshy ai :: msy_iJeiy22Sjva5vKtiX44YJQACPqWZttgSHVLi
 //        trio ai :: tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
-        // task_id: 33e653ca-783d-47a3-a70d-c6d66d418f5a
+        // task_id: a650bc25-e67b-4248-9c38-1d109c9274da
 
         return rest_ensure_response($task_result);
     }
