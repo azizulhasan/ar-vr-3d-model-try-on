@@ -150,9 +150,9 @@ export const setModelAttributes = (modelViewer, model_settings) => {
 
 
 
-    modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
-    modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
-    modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
+    modelViewer.setAttribute('reveal', model_settings.ATLAS_AR_reveal_type || 'auto');
+    modelViewer.setAttribute('loading', model_settings.ATLAS_AR_loading_type || 'auto');
+    modelViewer.setAttribute('ar-modes', (model_settings.ATLAS_AR_ar_modes || []).join(' '));
 
 
 
@@ -161,18 +161,18 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         modelViewerStyle.innerHTML = model_settings.custom_css
     }
 
-    modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || 'rgba(255,255,255,0)';
-    const scale = model_settings.ar_try_on_ar_scale || 'auto'; // Default value if not defined
+    modelViewer.style.backgroundColor = model_settings.ATLAS_AR_poster_color || 'rgba(255,255,255,0)';
+    const scale = model_settings.ATLAS_AR_ar_scale || 'auto'; // Default value if not defined
     modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-    if (model_settings.ar_try_on_ar === "deactivate") {
+    if (model_settings.ATLAS_AR_ar === "deactivate") {
         modelViewer.removeAttribute('ar');
     }
-    if (model_settings.ar_try_on_xr_environment === "deactivate") {
+    if (model_settings.ATLAS_AR_xr_environment === "deactivate") {
         modelViewer.removeAttribute('xr-environment');
     }
     // TODO: add functionality for this.
-    if (model_settings.ar_try_on_ar_button === "activate") {
-        modelViewer.innerHTML = `<button> ${model_settings.ar_try_on_ar_button_text || 'Activate Ar'} </button>`;
+    if (model_settings.ATLAS_AR_ar_button === "activate") {
+        modelViewer.innerHTML = `<button> ${model_settings.ATLAS_AR_ar_button_text || 'Activate Ar'} </button>`;
     }
 }
 
@@ -192,7 +192,7 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            {key: 'prompt', type: 'textarea', value: ''},
+                            {key: 'prompt', type: 'textarea', value: 'a cat'},
                             {key: 'type', type: 'text', value: 'text_to_model'},
                             {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
                             {key: 'texture', type: 'boolean', value: true},

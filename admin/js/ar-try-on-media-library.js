@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 document.getElementById(fieldName).value = attachment.url;
             }
-            wp.hooks.doAction('ar_try_on_on_select_model_file', {
+            wp.hooks.doAction('ATLAS_AR_on_select_model_file', {
                 name: fieldName,
                 url: attachment.url
             });
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    wp.hooks.addAction('ar_try_on_select_light_and_envirement_files', 'ar_try_on', function ({ name, field }) {
+    wp.hooks.addAction('ATLAS_AR_select_light_and_envirement_files', 'ar_try_on', function ({ name, field }) {
         uploadModelFile(name, field)
     });
 });

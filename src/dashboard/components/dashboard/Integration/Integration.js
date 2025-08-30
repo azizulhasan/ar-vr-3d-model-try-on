@@ -12,45 +12,45 @@ export default function Integration({
                                         setSettings
                                     }) {
     const allApi = getAPITypes('all');
-    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ATLAS_AR_exclude_integration_api_name || 'tripo3d'))
     const [previousHeaders, setPreviousHeaders] = useState(null)
     const addHeader = () => {
         let tempSettings = structuredClone(settings)
-        let headers = tempSettings.ar_try_on_exclude_integration_api_headers;
+        let headers = tempSettings.ATLAS_AR_exclude_integration_api_headers;
         headers.push({key: "", value: "",})
         setSettings({
-            ...tempSettings, ...{ar_try_on_exclude_integration_api_headers: headers}
+            ...tempSettings, ...{ATLAS_AR_exclude_integration_api_headers: headers}
         });
     };
 
     const removeHeader = (index) => {
         let tempSettings = structuredClone(settings)
-        let headers = tempSettings.ar_try_on_exclude_integration_api_headers;
+        let headers = tempSettings.ATLAS_AR_exclude_integration_api_headers;
         headers = headers.filter((_, i) => i !== index)
         setSettings({
-            ...tempSettings, ...{ar_try_on_exclude_integration_api_headers: headers}
+            ...tempSettings, ...{ATLAS_AR_exclude_integration_api_headers: headers}
         });
     };
 
 
 
     useEffect(() => {
-        if(!previousHeaders && settings?.ar_try_on_exclude_integration_api_url !== '') {
+        if(!previousHeaders && settings?.ATLAS_AR_exclude_integration_api_url !== '') {
             setPreviousHeaders({
-                api_name:settings?.ar_try_on_exclude_integration_api_name || currentApi.id,
-                headers: settings?.ar_try_on_exclude_integration_api_headers
+                api_name:settings?.ATLAS_AR_exclude_integration_api_name || currentApi.id,
+                headers: settings?.ATLAS_AR_exclude_integration_api_headers
             })
         }
-        if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
+        if (settings?.ATLAS_AR_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ATLAS_AR_exclude_integration_api_name ) {
 
-            let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name);
+            let data = getAPITypes(settings.ATLAS_AR_exclude_integration_api_name);
             setCurentAPI(data);
-            if(previousHeaders?.api_name == settings?.ar_try_on_exclude_integration_api_name) {
+            if(previousHeaders?.api_name == settings?.ATLAS_AR_exclude_integration_api_name) {
                 data.headers = previousHeaders.headers;
             }
 
             let headerData = [
-                ...settings.ar_try_on_exclude_integration_api_headers,
+                ...settings.ATLAS_AR_exclude_integration_api_headers,
                 ...data.headers,
             ];
 
@@ -64,8 +64,8 @@ export default function Integration({
 
             let settingsData = {
                 ...settings,
-                ar_try_on_exclude_integration_api_url: data.url,
-                ar_try_on_exclude_integration_api_headers: uniqueHeaders
+                ATLAS_AR_exclude_integration_api_url: data.url,
+                ATLAS_AR_exclude_integration_api_headers: uniqueHeaders
             }
             setSettings(settingsData)
         }
@@ -81,9 +81,9 @@ export default function Integration({
                     <div style={{marginBottom: "15px"}}>
                         <label>API Name:</label>
                         <select
-                            value={settings.ar_try_on_exclude_integration_api_name}
-                            name="ar_try_on_exclude_integration_api_name"
-                            id="ar_try_on_exclude_integration_api_name"
+                            value={settings.ATLAS_AR_exclude_integration_api_name}
+                            name="ATLAS_AR_exclude_integration_api_name"
+                            id="ATLAS_AR_exclude_integration_api_name"
                             onChange={(e) => handleChange(e)}
                             style={{width: "100%", padding: "8px", marginTop: "5px"}}
                         >
@@ -102,9 +102,9 @@ export default function Integration({
                         <label>URL:</label>
                         <input
                             type="text"
-                            name="ar_try_on_exclude_integration_api_url"
-                            id="ar_try_on_exclude_integration_api_url"
-                            value={settings.ar_try_on_exclude_integration_api_url || currentApi.url}
+                            name="ATLAS_AR_exclude_integration_api_url"
+                            id="ATLAS_AR_exclude_integration_api_url"
+                            value={settings.ATLAS_AR_exclude_integration_api_url || currentApi.url}
                             onChange={(e) => handleChange(e)}
                             placeholder="Enter API URL"
                             style={{width: "100%", padding: "8px", marginTop: "5px"}}
@@ -128,7 +128,7 @@ export default function Integration({
                             Add Header
                         </button>
 
-                        {settings?.ar_try_on_exclude_integration_api_headers && Object.keys(settings.ar_try_on_exclude_integration_api_headers).length && settings.ar_try_on_exclude_integration_api_headers.map((header, index) => {
+                        {settings?.ATLAS_AR_exclude_integration_api_headers && Object.keys(settings.ATLAS_AR_exclude_integration_api_headers).length && settings.ATLAS_AR_exclude_integration_api_headers.map((header, index) => {
                             return <div key={index} style={{display: "flex", gap: "10px", marginBottom: "8px"}}>
                                 <input
                                     type="text"

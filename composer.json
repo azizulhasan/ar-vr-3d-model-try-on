@@ -12,7 +12,7 @@
             "AR_TRY_ON\\": "includes",
             "AR_TRY_ON_Admin\\": "admin",
             "AR_TRY_ON_Public\\": "public",
-            "AR_TRY_ON_API\\": "api"
+            "ATLAS_AR_API\\": "api"
         }
     },
     "require": {}

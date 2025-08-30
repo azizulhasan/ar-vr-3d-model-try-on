@@ -17,7 +17,7 @@ export default function IntegrationSection({
     const handleSubmit = async () => {
 
         let headers = {}
-        settings.ar_try_on_exclude_integration_api_headers.map(header => {
+        settings.ATLAS_AR_exclude_integration_api_headers.map(header => {
             headers[header.key] = header.value;
         });
 
@@ -26,8 +26,8 @@ export default function IntegrationSection({
             body[item.key] = item.value;
         });
         let data_arr = {};
-        data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
-        data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
+        data_arr['url'] = settings?.ATLAS_AR_exclude_integration_api_url || ''
+        data_arr['api_name'] = settings?.ATLAS_AR_exclude_integration_api_name || ''
         data_arr['headers'] = headers;
         data_arr['body'] = body
         if (data_arr?.url == '' || data_arr?.api_name == '') {
@@ -46,36 +46,49 @@ export default function IntegrationSection({
         postWithoutImage(getURL('generate_3d_model'), formData).then(
             (res) => {
                 console.log(res)
+                if(res?.status && res?.data?.src) {
+                    // console.log(res)
+                    let tempProductModel = structuredClone(productModel)
+                    tempProductModel.src = res.data.src
+                    setProductModel(tempProductModel)
+                    console.log({tempProductModel})
+                    wp.hooks.doAction('ATLAS_AR_preview_data', tempProductModel);
+                }
 
                 /**
                  * TODO:: meke this a method.
                  */
-                // if (!res?.data?.data?.output?.generated_image && res?.data?.data?.task_id) {
-                //     let responseData = {};
-                //     let taskInterval = setInterval(async () => {
-                //         console.log(taskInterval)
-                //         if (responseData?.data?.data?.output?.generated_image) {
-                //             clearInterval(taskInterval)
-                //             taskInterval = null;
-                //             return;
-                //         }
-                //
-                //         let formData2 = new FormData();
-                //         data_arr.body.task_id = res?.data?.data?.task_id;
-                //         console.log(data_arr)
-                //         formData2.append('data', JSON.stringify(data_arr));
-                //         // Default options are marked with *
-                //         const response = await fetch(getURL('generate_3d_model'), {
-                //             method: "POST", // *GET, POST, PUT, DELETE, etc.
-                //             body: formData2, // body data type must match "Content-Type" header
-                //             headers: {
-                //                 'X-WP-Nonce': ar_try_on.rest_nonce
-                //             },
-                //         });
-                //         responseData = await response.json();
-                //         console.log(responseData)
-                //     }, 10000)
-                // }
+                if (!res?.data?.src && res?.data?.task_id) {
+                    let responseData = {};
+                    let taskInterval = setInterval(async () => {
+                        console.log(taskInterval)
+                        if (responseData?.data?.src) {
+                            clearInterval(taskInterval)
+                            taskInterval = null;
+                            let tempProductModel = structuredClone(productModel)
+                            tempProductModel.src = responseData.data.src
+                            setProductModel(tempProductModel)
+                            console.log({tempProductModel})
+                            wp.hooks.doAction('ATLAS_AR_preview_data', tempProductModel);
+                            return;
+                        }
+
+                        let formData2 = new FormData();
+                        data_arr.body.task_id = res?.data?.task_id;
+                        console.log(data_arr)
+                        formData2.append('data', JSON.stringify(data_arr));
+                        // Default options are marked with *
+                        const response = await fetch(getURL('generate_3d_model'), {
+                            method: "POST", // *GET, POST, PUT, DELETE, etc.
+                            body: formData2, // body data type must match "Content-Type" header
+                            headers: {
+                                'X-WP-Nonce': ar_try_on.rest_nonce
+                            },
+                        });
+                        responseData = await response.json();
+                        console.log(responseData)
+                    }, 20000)
+                }
 
             });
     };
@@ -99,6 +112,8 @@ export default function IntegrationSection({
             //TODO:: un endign loop
             // setProductModel(productModelData);
         }
+
+        console.log({productModel})
     }, [productModel])
 
 

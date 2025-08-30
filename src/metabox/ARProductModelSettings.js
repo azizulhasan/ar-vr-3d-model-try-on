@@ -39,7 +39,7 @@ const ARProductModelSettings = () => {
         custom_css: '',
         // Integration settings
         exclude_integration_api_body: [
-            {key: 'prompt', type: 'textarea', value: '',required:true},
+            {key: 'prompt', type: 'textarea', value: 'a cat',required:true},
             {key: 'type', type: 'text', value: 'text_to_model'},
             {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
             {key: 'texture', type: 'boolean', value: true},
@@ -68,7 +68,7 @@ const ARProductModelSettings = () => {
     const [settings, setSettings] = useState({})
 
     const allApi = getAPITypes('all');
-    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ATLAS_AR_exclude_integration_api_name || 'tripo3d'))
 
     // integration settings:
     const addIntegrationField = () => {
@@ -121,7 +121,7 @@ const ARProductModelSettings = () => {
         let value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
         if (!e.target.name) return;
 
-        if (e.target.name === 'ar_try_on_ar_placement' && (value !== 'wall' && value !== 'floor') && !ar_try_on.is_pro_active) {
+        if (e.target.name === 'ATLAS_AR_ar_placement' && (value !== 'wall' && value !== 'floor') && !ar_try_on.is_pro_active) {
             alert("This option is only available in the pro version");
             return;
         }
@@ -131,13 +131,13 @@ const ARProductModelSettings = () => {
             [e.target.name]: value,
         };
         setProductModel(productModelData);
-        wp.hooks.doAction('ar_try_on_preview_data', productModelData);
+        wp.hooks.doAction('ATLAS_AR_preview_data', productModelData);
     };
 
     const handleMediaButtonClick = (fieldName, value) => {
         setBasicSettings(prev => ({...prev, ...{[fieldName]: value}}))
         let inputField = document.getElementById(fieldName)
-        wp.hooks.doAction('ar_try_on_select_light_and_envirement_files', {
+        wp.hooks.doAction('ATLAS_AR_select_light_and_envirement_files', {
             name: fieldName,
             field: inputField,
         });
@@ -145,7 +145,7 @@ const ARProductModelSettings = () => {
 
     useEffect(() => {
         if (wp?.hooks) {
-            wp.hooks.addAction('ar_try_on_on_select_model_file', 'ar_try_on', function (val) {
+            wp.hooks.addAction('ATLAS_AR_on_select_model_file', 'ar_try_on', function (val) {
                 setCurrentValue(val);
             });
         }
@@ -158,13 +158,13 @@ const ARProductModelSettings = () => {
                 [currentValue.name]: currentValue.url
             };
             setProductModel(productModelData);
-            wp.hooks.doAction('ar_try_on_preview_data', productModelData);
+            wp.hooks.doAction('ATLAS_AR_preview_data', productModelData);
         }
     }, [currentValue]);
 
     useEffect(() => {
         let InterVal = setInterval(() => {
-            if (document.getElementById('ar_try_on_preveiw')) {
+            if (document.getElementById('ATLAS_AR_preveiw')) {
                 clearInterval(InterVal)
                 const postId = getPostID()
                 let formData = new FormData();
@@ -199,9 +199,9 @@ const ARProductModelSettings = () => {
 
     useEffect(() => {
         if (isProductModelLoaded) {
-            wp.hooks.doAction('ar_try_on_preview_data', productModel);
-            if(settings?.ar_try_on_exclude_integration_api_name != currentApi?.id) {
-                console.log({name: settings?.ar_try_on_exclude_integration_api_name, currentApi  })
+            wp.hooks.doAction('ATLAS_AR_preview_data', productModel);
+            if(settings?.ATLAS_AR_exclude_integration_api_name != currentApi?.id) {
+                console.log({name: settings?.ATLAS_AR_exclude_integration_api_name, currentApi  })
             }
         }
     }, [isProductModelLoaded]);
@@ -373,7 +373,7 @@ const ARProductModelSettings = () => {
                     <SaveButton classes="art-w-96 art-mb-4"/>
                 </div>
 
-                <div id='ar_try_on_preveiw'></div>
+                <div id='ATLAS_AR_preveiw'></div>
             </div>
             <div className="art-hidden art-w-96 art-w-1/3"></div>
         </div>

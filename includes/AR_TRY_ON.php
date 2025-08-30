@@ -89,13 +89,13 @@ class AR_TRY_ON {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'AR_TRY_ON_VERSION' ) ) {
-			$this->version = AR_TRY_ON_VERSION;
+		if ( defined( 'ATLAS_AR_VERSION' ) ) {
+			$this->version = ATLAS_AR_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
 		$this->plugin_name   = 'ar-vr-3d-model-try-on';
-		$this->plugin_prefix = 'ar_try_on_';
+		$this->plugin_prefix = 'ATLAS_AR_';
 
 
 		$this->load_dependencies();
@@ -114,7 +114,9 @@ class AR_TRY_ON {
 	 */
 	private function load_dependencies() {
 
-		require_once AR_TRY_ON_PLUGIN_PATH . '/includes/AR_TRY_ON_Hooks.php';
+		require_once ATLAS_AR_PLUGIN_PATH . '/includes/AR_TRY_ON_Constants.php';
+        $constants = new AR_TRY_ON_Constants();
+        require_once ATLAS_AR_PLUGIN_PATH . '/includes/AR_TRY_ON_Hooks.php';
 
 		$this->loader = new AR_TRY_ON_Loader();
 
@@ -144,7 +146,7 @@ class AR_TRY_ON {
 		$this->loader->add_filter(
 			'wp_check_filetype_and_ext',
 			$plugin_admin,
-			'ar_try_on_for_woocommerce_file_and_ext',
+			'ATLAS_AR_for_woocommerce_file_and_ext',
 			10,
 			4
 		);
@@ -155,10 +157,10 @@ class AR_TRY_ON {
 		 * It hooks into the `wp_check_filetype_and_ext` filter, with a priority of 10 and passes 4 arguments.
 		 */
 		// Allow Android (.glb) and iOS (.usdz) files to be uploaded by adding them to the allowed MIME types.
-		$this->loader->add_filter( 'upload_mimes', $plugin_admin, 'ar_try_on_for_woocommerce_mime_types' );
+		$this->loader->add_filter( 'upload_mimes', $plugin_admin, 'ATLAS_AR_for_woocommerce_mime_types' );
 
 
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'ar_try_on_menu' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'ATLAS_AR_menu' );
 	}
 
 	/**
@@ -185,31 +187,31 @@ class AR_TRY_ON {
 		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : false;
 		switch ( $wc_hook_id ) {
 			case 1:
-				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 				break;
 			case 2:
-				$this->loader->add_action( 'woocommerce_after_single_product_summary', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_after_single_product_summary', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 				break;
 			case 3:
-				$this->loader->add_action( 'woocommerce_before_single_product', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_before_single_product', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 				break;
 			case 4:
-				$this->loader->add_action( 'woocommerce_after_single_product', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_after_single_product', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 				break;
 			case 5:
-				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 				break;
 			case 6:
-				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'ar_try_on_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 				break;
 		}
 
-		$this->loader->add_filter( 'the_content', $this->plugin_public, 'ar_try_on_button', 99999999 );
+		$this->loader->add_filter( 'the_content', $this->plugin_public, 'ATLAS_AR_button', 99999999 );
 
 
 		if ( isset( $settings['ar_try_on_single_product_tabs'] ) ) {
 			if ( $settings['ar_try_on_single_product_tabs'] == 'yes' ) {
-				$this->loader->add_filter( 'woocommerce_product_tabs', $this->plugin_public, 'ar_try_on_woocommerce_tab' );
+				$this->loader->add_filter( 'woocommerce_product_tabs', $this->plugin_public, 'ATLAS_AR_woocommerce_tab' );
 			}
 		}
 

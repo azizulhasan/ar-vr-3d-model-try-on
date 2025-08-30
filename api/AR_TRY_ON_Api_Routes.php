@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON_API;
+namespace ATLAS_AR_API;
 
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Cache;
@@ -27,13 +27,13 @@ class AR_TRY_ON_Api_Routes
     {
         $this->version = 'v1';
         $this->namespace = 'ar_try_on/' . $this->version;
-        add_action('rest_api_init', [$this, 'ar_try_on_register_routes']);
+        add_action('rest_api_init', [$this, 'ATLAS_AR_register_routes']);
     }
 
     /**
      * Register Routes
      */
-    public function ar_try_on_register_routes()
+    public function ATLAS_AR_register_routes()
     {
 
         // register settings route.
@@ -213,10 +213,10 @@ class AR_TRY_ON_Api_Routes
         $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
         $api_body = $decoded_data['body'];
 
-        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data);
-        $result['extra'] = [];
-
-        return rest_ensure_response($result);
+//        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data);
+//        $result['extra'] = [];
+//
+//        return rest_ensure_response($result);
 
         $response_body = '';
         if (!isset($api_body['task_id']) || !$api_body['task_id']) {
@@ -234,6 +234,11 @@ class AR_TRY_ON_Api_Routes
             $status_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
             $response_body = json_decode($response_body, true);
+
+            error_log(print_r([
+                '$status_code' => $status_code,
+                '$response_body' => $response_body,
+            ],1));
             /**
              * Model generated properly .
              */
@@ -269,7 +274,7 @@ class AR_TRY_ON_Api_Routes
 
             $task_response = wp_remote_get($api_url, array(
                 'headers' => $headers,
-                'timeout' => 60, // optional, prevent timeout on large requests
+                'timeout' => 90, // optional, prevent timeout on large requests
             ));
 
             if (is_wp_error($task_response)) {
@@ -286,6 +291,10 @@ class AR_TRY_ON_Api_Routes
             $task_status_code = wp_remote_retrieve_response_code($task_response);
             $task_response_body = wp_remote_retrieve_body($task_response);
             $task_response_body = json_decode($task_response_body, true);
+            error_log(print_r([
+                '$task_status_code' => $task_status_code,
+                '$task_response_body' => $task_response_body,
+            ],1));
             if ($task_status_code !== 200) {
                 $task_result['data'] = $task_response_body;
                 $task_result['extra'] = [
@@ -303,11 +312,12 @@ class AR_TRY_ON_Api_Routes
 
         }
 
-        $task_result['data'] = $task_response_body;
+        $task_result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $task_response_body);
         $task_result['extra'] = [];
 
 //        meshy ai :: msy_iJeiy22Sjva5vKtiX44YJQACPqWZttgSHVLi
 //        trio ai :: tsk_Gzxoe1K-zmKEwaAe613vCdbMSukzYCVU0ZrreYAVtJy
+        // task_id: 33e653ca-783d-47a3-a70d-c6d66d418f5a
 
         return rest_ensure_response($task_result);
     }
@@ -321,11 +331,11 @@ class AR_TRY_ON_Api_Routes
         if (!isset($_SERVER['HTTP_X_WP_NONCE'])) {
             $nonce = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WP_NONCE']));
             if (!wp_verify_nonce($nonce, 'wp_rest')) {
-                return apply_filters('ar_try_on_rest_route_access', false);
+                return apply_filters('ATLAS_AR_rest_route_access', false);
             }
         }
 
 
-        return apply_filters('ar_try_on_rest_route_access', true);
+        return apply_filters('ATLAS_AR_rest_route_access', true);
     }
 }

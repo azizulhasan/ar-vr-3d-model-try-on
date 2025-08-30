@@ -11,7 +11,7 @@ class AR_TRY_ON_Cache {
 	 * @return mixed|false  false if cache not found.
 	 * @since 3.3.10
 	 */
-	public static function get( $key, $prefix = '__ar_try_on_cache_' ) {
+	public static function get( $key, $prefix = '__atlas_ar_cache_' ) {
 		if ( empty( $key ) ) {
 			return false;
 		}
@@ -30,7 +30,7 @@ class AR_TRY_ON_Cache {
 	 *
 	 * @return bool
 	 */
-	public static function set( $key, $data, $expiration = false, $prefix = '__ar_try_on_cache_' ) {
+	public static function set( $key, $data, $expiration = false, $prefix = '__atlas_ar_cache_' ) {
 		if ( empty( $key ) ) {
 			return false;
 		}
@@ -44,7 +44,7 @@ class AR_TRY_ON_Cache {
 		return set_transient( $prefix . $key, $data, $expiration );
 	}
 
-	public static function delete( $key, $prefix = '__ar_try_on_cache_' ) {
+	public static function delete( $key, $prefix = '__atlas_ar_cache_' ) {
 		if ( empty( $key ) ) {
 			return false;
 		}
@@ -61,7 +61,7 @@ class AR_TRY_ON_Cache {
 	public static function flush() {
 		global $wpdb;
 
-		return $wpdb->query( "DELETE FROM $wpdb->options WHERE ({$wpdb->options}.option_name LIKE '_transient_timeout___ar_try_on_cache_%') OR ({$wpdb->options}.option_name LIKE '_transient___ar_try_on_cache_%')" ); // phpcs:ignore
+		return $wpdb->query( "DELETE FROM $wpdb->options WHERE ({$wpdb->options}.option_name LIKE '_transient_timeout___atlas_ar_cache_%') OR ({$wpdb->options}.option_name LIKE '_transient___atlas_ar_cache_%')" ); // phpcs:ignore
 	}
 
 	public static function get_key( $cache_key = 'all' ) {

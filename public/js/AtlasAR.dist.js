@@ -3864,25 +3864,25 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
   if (model_settings.canvas_padding) {
     modelViewer.style.padding = model_settings.canvas_padding;
   }
-  modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
-  modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
-  modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
+  modelViewer.setAttribute('reveal', model_settings.ATLAS_AR_reveal_type || 'auto');
+  modelViewer.setAttribute('loading', model_settings.ATLAS_AR_loading_type || 'auto');
+  modelViewer.setAttribute('ar-modes', (model_settings.ATLAS_AR_ar_modes || []).join(' '));
   var modelViewerStyle = document.getElementById('model-viewer-style');
   if (modelViewerStyle) {
     modelViewerStyle.innerHTML = model_settings.custom_css;
   }
-  modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || 'rgba(255,255,255,0)';
-  var scale = model_settings.ar_try_on_ar_scale || 'auto'; // Default value if not defined
+  modelViewer.style.backgroundColor = model_settings.ATLAS_AR_poster_color || 'rgba(255,255,255,0)';
+  var scale = model_settings.ATLAS_AR_ar_scale || 'auto'; // Default value if not defined
   modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
-  if (model_settings.ar_try_on_ar === "deactivate") {
+  if (model_settings.ATLAS_AR_ar === "deactivate") {
     modelViewer.removeAttribute('ar');
   }
-  if (model_settings.ar_try_on_xr_environment === "deactivate") {
+  if (model_settings.ATLAS_AR_xr_environment === "deactivate") {
     modelViewer.removeAttribute('xr-environment');
   }
   // TODO: add functionality for this.
-  if (model_settings.ar_try_on_ar_button === "activate") {
-    modelViewer.innerHTML = "<button> ".concat(model_settings.ar_try_on_ar_button_text || 'Activate Ar', " </button>");
+  if (model_settings.ATLAS_AR_ar_button === "activate") {
+    modelViewer.innerHTML = "<button> ".concat(model_settings.ATLAS_AR_ar_button_text || 'Activate Ar', " </button>");
   }
 };
 var getAPITypes = function getAPITypes() {

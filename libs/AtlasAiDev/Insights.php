@@ -1414,7 +1414,7 @@ class Insights {
 		$allowed_pages  = [
 			admin_url() . 'index.php',
 			admin_url() . 'plugins.php',
-			admin_url().'admin.php?page=' . AR_TRY_ON_TEXT_DOMAIN
+			admin_url().'admin.php?page=' . ATLAS_AR_TEXT_DOMAIN
 		];
 		
 

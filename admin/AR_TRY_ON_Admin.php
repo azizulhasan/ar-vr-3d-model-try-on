@@ -78,10 +78,10 @@ class AR_TRY_ON_Admin {
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
 			'api_version'   => 'v1',
-			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
+			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
-			'VERSION'       => AR_TRY_ON_VERSION,
-			'plugin_url'    => AR_TRY_ON_PLUGIN_URL,
+			'VERSION'       => ATLAS_AR_VERSION,
+			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
 			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
@@ -96,12 +96,12 @@ class AR_TRY_ON_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_ar_try_on_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
+		if ( AR_TRY_ON_Helper::is_atlas_ar_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', ATLAS_AR_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
 
 		}
 
-		wp_enqueue_style( 'ar-vr-3d-model-try-on-admin', AR_TRY_ON_PLUGIN_URL . 'admin/css/ar-try-on-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( 'ar-vr-3d-model-try-on-admin', ATLAS_AR_PLUGIN_URL . 'admin/css/ar-try-on-admin.css', array(), $this->version, 'all' );
 
 	}
 
@@ -120,23 +120,23 @@ class AR_TRY_ON_Admin {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		do_action( 'AR_TRY_ON_enqueue_pro_dashboard_scripts' );
+		do_action( 'atlas_ar_enqueue_pro_dashboard_scripts' );
 
 
-		if ( AR_TRY_ON_Helper::is_ar_try_on_page() ) {
+		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
 			/* Load react js */
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
 			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
 		}
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
-			wp_enqueue_script( 'ar-try-on-metabox-ui', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
 			
 			wp_enqueue_script(
 				'ar-try-on-media-library',
-				AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
+				ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
 				['ar-try-on-metabox-ui'], // Dependencies
 				$this->version,
 				true
@@ -149,14 +149,14 @@ class AR_TRY_ON_Admin {
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 //
-//			wp_enqueue_style( 'alertify', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
-//			wp_enqueue_style( 'alertify-default', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
-//			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
+//			wp_enqueue_style( 'alertify', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
+//			wp_enqueue_style( 'alertify-default', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
+//			wp_enqueue_style( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
 
 
 			// TODO:: enqueue base on model setup/settings
-			wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
-			wp_enqueue_script( $this->plugin_name . '-preview', AR_TRY_ON_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
+			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
 			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on', $this->localize_data );
 		}
 	}
@@ -165,20 +165,20 @@ class AR_TRY_ON_Admin {
 	 * Add Menu and Submenu page
 	 */
 
-	public function ar_try_on_menu() {
+	public function ATLAS_AR_menu() {
 		add_menu_page(
 			'AtlasAR',
 			'AtlasAR',
 			'manage_options',
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
-			AR_TRY_ON_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
+			ATLAS_AR_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
 			20
 		);
 	}
 
 	public function ar_try_on_settings() {
-		echo wp_kses( "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>", array(
+		echo wp_kses( "<div class='wpwrap'><div id='ATLAS_AR_dashboard_ui'></div></div>", array(
 			'div' => array(
 				'id'    => array(),
 				'class' => array(),
@@ -195,7 +195,7 @@ class AR_TRY_ON_Admin {
 	 * @param string $filename The name of the file (may differ from $file due to $file being in a tmp directory).
 	 * @param array $mimes Key is the file extension with value as the mime type.
 	 */
-	public function ar_try_on_for_woocommerce_file_and_ext( $types, $file, $filename, $mimes ) {
+	public function ATLAS_AR_for_woocommerce_file_and_ext( $types, $file, $filename, $mimes ) {
 		if ( false !== strpos( $filename, '.glb' ) ) {
 			$types['ext']  = 'glb';
 			$types['type'] = 'model/gltf-binary';
@@ -220,7 +220,7 @@ class AR_TRY_ON_Admin {
 	 *
 	 * @return array
 	 */
-	public function ar_try_on_for_woocommerce_mime_types( $mimes ) {
+	public function ATLAS_AR_for_woocommerce_mime_types( $mimes ) {
 		$mimes['glb']  = 'model/gltf-binary'; //Adding gbl extension
 		$mimes['gltf'] = 'model/gltf-binary'; //Adding gbl extension
 		$mimes['usdz'] = 'model/vnd.usdz+zip'; //Adding usdz extension

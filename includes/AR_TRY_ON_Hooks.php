@@ -74,7 +74,7 @@ class AR_TRY_ON_Hooks {
 				$plugin_name,
 				array(
 					$this,
-					'ar_try_on_meta_box',
+					'ATLAS_AR_meta_box',
 				),
 				get_current_screen()->post_type,
 				'advanced',
@@ -89,17 +89,17 @@ class AR_TRY_ON_Hooks {
 	/**
 	 * Add meta box for record, re-record, listen content with loud.
 	 */
-	public function ar_try_on_meta_box() {
+	public function ATLAS_AR_meta_box() {
 
-		\do_action( 'ar_try_on_before_metabox_content' );
+		\do_action( 'ATLAS_AR_before_metabox_content' );
 		?>
         <div class="tta_metabox">
-            <div id="ar_try_on_product_model_settings"></div>
-			<?php \do_action( 'ar_try_on_after_free_metabox_settings' ); ?>
-            <div id="ar_try_on_analytics"></div>
+            <div id="ATLAS_AR_product_model_settings"></div>
+			<?php \do_action( 'ATLAS_AR_after_free_metabox_settings' ); ?>
+            <div id="ATLAS_AR_analytics"></div>
         </div>
 		<?php
-		\do_action( 'ar_try_on_after_metabox_content' );
+		\do_action( 'ATLAS_AR_after_metabox_content' );
 	}
 }
 

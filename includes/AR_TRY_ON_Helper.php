@@ -24,7 +24,7 @@ namespace AR_TRY_ON;
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 class AR_TRY_ON_Helper {
-	public static function is_ar_try_on_page() {
+	public static function is_atlas_ar_page() {
 		// Ensure we are in the admin area
 		if ( is_admin() ) {
 			if ( ! function_exists( 'get_current_screen' ) ) {
@@ -71,10 +71,10 @@ class AR_TRY_ON_Helper {
 
 		AR_TRY_ON_Cache::set( $cache_key, $final_post_type );
 
-		return apply_filters( 'ar_try_on_get_post_types', $final_post_type );
+		return apply_filters( 'atlas_ar_get_post_types', $final_post_type );
 	}
 
-	public static function ar_try_on_should_load_button( $post_status = '' ) {
+	public static function atlas_ar_should_load_button( $post_status = '' ) {
 		$should_load_button = false;
 		global $post;
 		// is_home() || is_archive() || is_front_page() || is_category()
@@ -88,7 +88,7 @@ class AR_TRY_ON_Helper {
 			! isset( $settings['ar_try_on_allowed_post_types'] )
 			|| count( $settings['ar_try_on_allowed_post_types'] ) === 0
 			|| ! is_array( $settings['ar_try_on_allowed_post_types'] )
-			|| ! in_array( self::ar_try_on_post_type(), $settings['ar_try_on_allowed_post_types'] )
+			|| ! in_array( self::post_type(), $settings['ar_try_on_allowed_post_types'] )
 
 		) {
 			$should_load_button = false;
@@ -100,13 +100,13 @@ class AR_TRY_ON_Helper {
 				! isset( $settings['ar_try_on_allowed_post_types'] )
 				|| count( $settings['ar_try_on_allowed_post_types'] ) === 0
 				|| ! is_array( $settings['ar_try_on_allowed_post_types'] )
-				|| ! in_array( self::ar_try_on_post_type(), $settings['ar_try_on_allowed_post_types'] )
+				|| ! in_array( self::post_type(), $settings['ar_try_on_allowed_post_types'] )
 			) {
 				$should_load_button = false;
 			}
 		}
 
-		return apply_filters( 'ar_try_on_should_load_button', $should_load_button, $post );
+		return apply_filters( 'atlas_ar_should_load_button', $should_load_button, $post );
 	}
 
 	/**
@@ -115,7 +115,7 @@ class AR_TRY_ON_Helper {
 	 * @see
 	 */
 
-	public static function ar_try_on_post_type() {
+	public static function post_type() {
 		global $post;
 
 		return isset( $post->post_type ) ? $post->post_type : '';
@@ -260,7 +260,7 @@ class AR_TRY_ON_Helper {
 		$url = \get_permalink();
 		ob_start();
 		?>
-		<div id="ar_try_on_qr_code">
+		<div id="atlas_ar_qr_code">
 			
 		</div>
 		<script>
@@ -269,9 +269,9 @@ class AR_TRY_ON_Helper {
 			var qr = qrcode(typeNumber, errorCorrectionLevel);
 			qr.addData("<?php echo esc_url( $url ) ?>");
 			qr.make();
-			document.getElementById("ar_try_on_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>'+qr.createImgTag() ;
+			document.getElementById("atlas_ar_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>'+qr.createImgTag() ;
 			document.getElementById("ar_close_btn").addEventListener("click", function () {
-				document.getElementById("ar_try_on_qr_code").style.display = "none";
+				document.getElementById("atlas_ar_qr_code").style.display = "none";
 			});
 		</script>
 		<?php
@@ -282,9 +282,9 @@ class AR_TRY_ON_Helper {
 
 	public static function default_settings() {
 		return  [
-			'ar_try_on_display_button_automatically' => 'yes',
-			'ar_try_on_allowed_post_types'         => [ 'post' ],
-			'ar_try_on_wc_hook_position'           => "3",
+            'ar_try_on_display_button_automatically' => 'yes',
+            'ar_try_on_allowed_post_types'         => [ 'post' ],
+            'ar_try_on_wc_hook_position'           => "3",
 			'ar_try_on_single_product_tabs'        => "yes",
 			'ar_try_on_loading_type'               => "auto",
 			'ar_try_on_reveal_type'                => "auto",
@@ -349,38 +349,45 @@ class AR_TRY_ON_Helper {
 		return $product_settings;
 	}
 
-    public static function get_structured_model_response( $decoded_data ) {
+    public static function get_structured_model_response( $request_decoded_data, $api_response_data=[] ) {
         // D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json;
         $response_body = [];
 
-        if(isset($decoded_data['api_name'], $decoded_data['body']['type'])
-            && $decoded_data['api_name'] == "tripo3d"
-            && $decoded_data['body']['type'] == "text_to_model"
+        if(isset($request_decoded_data['api_name'], $request_decoded_data['body']['type'])
+            && $request_decoded_data['api_name'] == "tripo3d"
+            && $request_decoded_data['body']['type'] == "text_to_model"
         ) {
-            if(empty($response_body)) {
-                $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
-                $response_data = json_decode( $response_data, true );
+            if(!empty($api_response_data)) {
+//                $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
+//                $response_data = json_decode( $response_data, true );
 
-                if(isset($response_data['data']['task_id'])) {
-                    $response_body['task_id'] = $response_data['data']['task_id'];
+                if(isset($api_response_data['data']['task_id'])) {
+                    $response_body['task_id'] = $api_response_data['data']['task_id'];
                 }
 
-                if(isset($response_data['data']['type'])) {
-                    $response_body['type'] = $response_data['data']['type'];
+                if(isset($api_response_data['data']['type'])) {
+                    $response_body['type'] = $api_response_data['data']['type'];
                 }
 
-                if(isset($response_data['data']['input'])) {
-                    $response_body['input'] = $response_data['data']['input'];
+                if(isset($api_response_data['data']['input'])) {
+                    $response_body['input'] = $api_response_data['data']['input'];
                 }
 
-                if(isset($response_data['data']['output'])) {
-                    $response_body['output'] = $response_data['data']['output'];
+                if(isset($api_response_data['data']['output'])) {
+                    if(isset($api_response_data['data']['output']['pbr_model'])) {
+                        $response_body['src'] = $api_response_data['data']['output']['pbr_model'];
+                    }
+                    if(isset($api_response_data['data']['output']['generated_image'])) {
+                        $response_body['generated_image'] = $api_response_data['data']['output']['generated_image'];
+                    }
+                    if(isset($api_response_data['data']['output']['rendered_image'])) {
+                        $response_body['rendered_image'] = $api_response_data['data']['output']['rendered_image'];
+                    }
                 }
 
-                if(isset($response_data['data']['result'])) {
-                    $response_body['result'] = $response_data['data']['result'];
+                if(isset($api_response_data['data']['thumbnail'])) {
+                    $response_body['thumbnail'] = $api_response_data['data']['thumbnail'];
                 }
-
 
             }
         }
@@ -388,5 +395,10 @@ class AR_TRY_ON_Helper {
 
         return  $response_body;
 
+    }
+
+    public static function get_integrated_api_name()
+    {
+        
     }
 }
