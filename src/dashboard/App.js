@@ -17,26 +17,26 @@ export default function App() {
     const [activeTab, setActiveTab] = useState('Integration');
     const [authType, setAuthType] = useState("Bearer");
     const [settings, setSettings] = useState({
-        ATLAS_AR_display_button_automatically: 'yes',
+        ar_try_on_display_button_automatically: 'yes',
         atlas_ar_allowed_post_types: ['post'],
-        ATLAS_AR_wc_hook_position: "3",
-        ATLAS_AR_single_product_tabs: "yes",
-        ATLAS_AR_loading_type: "auto",
-        ATLAS_AR_reveal_type: "auto",
-        ATLAS_AR_poster_color: "rgba(78,186,79,0)",
-        ATLAS_AR_ar: "activate",
-        ATLAS_AR_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
-        ATLAS_AR_ar_scale: "auto",
-        ATLAS_AR_xr_environment: "activate",
-        ATLAS_AR_ar_button: "deactivate",
-        ATLAS_AR_ar_button_text: "Activate AR",
-        ATLAS_AR_ar_button_background_color: "#3a3a3a",
-        ATLAS_AR_ar_button_text_color: "#ffffff",
+        ar_try_on_wc_hook_position: "3",
+        ar_try_on_single_product_tabs: "yes",
+        ar_try_on_loading_type: "auto",
+        ar_try_on_reveal_type: "auto",
+        ar_try_on_poster_color: "rgba(78,186,79,0)",
+        ar_try_on_ar: "activate",
+        ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
+        ar_try_on_ar_scale: "auto",
+        ar_try_on_xr_environment: "activate",
+        ar_try_on_ar_button: "deactivate",
+        ar_try_on_ar_button_text: "Activate AR",
+        ar_try_on_ar_button_background_color: "#3a3a3a",
+        ar_try_on_ar_button_text_color: "#ffffff",
         atlas_ar_enable_qr_code: 'yes',
-        ATLAS_AR_clear_cache: false,
-        ATLAS_AR_ar_demo: {},
-        ATLAS_AR_exclude_integration_api_url: '',
-        ATLAS_AR_exclude_integration_api_headers: [
+        ar_try_on_clear_cache: false,
+        ar_try_on_ar_demo: {},
+        ar_try_on_exclude_integration_api_url: '',
+        ar_try_on_exclude_integration_api_headers: [
             {
                 key: "Authorization",
                 value: ""
@@ -107,10 +107,10 @@ export default function App() {
             e.target.name = targetName;
         }
 
-        if (e.target.name == 'ATLAS_AR_ar_modes') {
+        if (e.target.name == 'ar_try_on_ar_modes') {
             let status = e.target.checked
             let clonedVal = JSON.parse(JSON.stringify(settings));
-            let tempVal = clonedVal.ATLAS_AR_ar_modes
+            let tempVal = clonedVal.ar_try_on_ar_modes
             if (status) {
                 tempVal.push(value)
                 value = tempVal
@@ -133,7 +133,7 @@ export default function App() {
     };
 
     const handleHeaderChange = (index, field, value) => {
-        const updated = [...settings.ATLAS_AR_exclude_integration_api_headers];
+        const updated = [...settings.ar_try_on_exclude_integration_api_headers];
         updated[index][field] = value;
         setHeaders(updated);
         setSettings({ ...settings, ...{ [ar_try_on_exclude_integration_api_headers]: updated } })
@@ -147,8 +147,8 @@ export default function App() {
         e.preventDefault();
         console.log(settings)
 
-        if( settings?.ATLAS_AR_exclude_integration_api_name  && settings?.ATLAS_AR_exclude_integration_api_url  ) {
-            settings.ATLAS_AR_exclude_integration_api_headers.map(header=>{
+        if( settings?.ar_try_on_exclude_integration_api_name  && settings?.ar_try_on_exclude_integration_api_url  ) {
+            settings.ar_try_on_exclude_integration_api_headers.map(header=>{
                 if(header.key == '' || header.value == '') {
                     alert('Please fill all of the API headers with proper value')
                     return;

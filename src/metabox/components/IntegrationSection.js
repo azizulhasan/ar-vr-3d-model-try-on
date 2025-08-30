@@ -17,7 +17,7 @@ export default function IntegrationSection({
     const handleSubmit = async () => {
 
         let headers = {}
-        settings.ATLAS_AR_exclude_integration_api_headers.map(header => {
+        settings.ar_try_on_exclude_integration_api_headers.map(header => {
             headers[header.key] = header.value;
         });
 
@@ -26,8 +26,8 @@ export default function IntegrationSection({
             body[item.key] = item.value;
         });
         let data_arr = {};
-        data_arr['url'] = settings?.ATLAS_AR_exclude_integration_api_url || ''
-        data_arr['api_name'] = settings?.ATLAS_AR_exclude_integration_api_name || ''
+        data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
+        data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
         data_arr['headers'] = headers;
         data_arr['body'] = body
         if (data_arr?.url == '' || data_arr?.api_name == '') {
@@ -52,7 +52,7 @@ export default function IntegrationSection({
                     tempProductModel.src = res.data.src
                     setProductModel(tempProductModel)
                     console.log({tempProductModel})
-                    wp.hooks.doAction('ATLAS_AR_preview_data', tempProductModel);
+                    wp.hooks.doAction('ar_try_on_preview_data', tempProductModel);
                 }
 
                 /**
@@ -69,7 +69,7 @@ export default function IntegrationSection({
                             tempProductModel.src = responseData.data.src
                             setProductModel(tempProductModel)
                             console.log({tempProductModel})
-                            wp.hooks.doAction('ATLAS_AR_preview_data', tempProductModel);
+                            wp.hooks.doAction('ar_try_on_preview_data', tempProductModel);
                             return;
                         }
 
@@ -93,6 +93,9 @@ export default function IntegrationSection({
             });
     };
 
+    useEffect(() => {
+        console.log({currentApi})
+    }, [currentApi]);
 
     useEffect(() => {
         if (!previousBody && productModel?.exclude_integration_api_body) {
@@ -190,7 +193,7 @@ export default function IntegrationSection({
 
 
             {/* Dynamic rows */}
-            {productModel.exclude_integration_api_body.map((field, index) => (
+            { currentApi.body.supported_types[productModel.exclude_integration_api_model_type].input.map((field, index) => (
                 <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
                     <input
                         type="text"

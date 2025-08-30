@@ -213,10 +213,12 @@ class AR_TRY_ON_Api_Routes
         $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
         $api_body = $decoded_data['body'];
 
-//        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data);
-//        $result['extra'] = [];
-//
-//        return rest_ensure_response($result);
+        $result['data'] = [];
+        $result['extra'] = [
+            'data' => ATLAS_AR_CURRENT_MODEL_DIR,
+        ];
+
+        return rest_ensure_response($result);
 
         $response_body = '';
         if (!isset($api_body['task_id']) || !$api_body['task_id']) {
@@ -316,7 +318,7 @@ class AR_TRY_ON_Api_Routes
         $task_result['extra'] = [];
 
 //        meshy ai :: msy_iJeiy22Sjva5vKtiX44YJQACPqWZttgSHVLi
-//        trio ai :: tsk_Gzxoe1K-zmKEwaAe613vCdbMSukzYCVU0ZrreYAVtJy
+//        trio ai :: tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
         // task_id: 33e653ca-783d-47a3-a70d-c6d66d418f5a
 
         return rest_ensure_response($task_result);

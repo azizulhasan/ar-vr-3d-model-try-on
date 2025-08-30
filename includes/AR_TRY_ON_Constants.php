@@ -95,7 +95,9 @@ class AR_TRY_ON_Constants {
 			 * @var string.
 			 * @since 1.0.0
 			 */
-			define( 'ATLAS_AR_CURRENT_MODEL_DIR', apply_filters( 'atlas_ar_current_model_dir', ATLAS_AR_MODEL_DIR . 'gtts/' ) );
+            $api_name = AR_TRY_ON_Helper::get_integrated_api_name();
+
+			define( 'ATLAS_AR_CURRENT_MODEL_DIR', apply_filters( 'atlas_ar_current_model_dir', ATLAS_AR_MODEL_DIR . $api_name . '/' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_DIR_URL' ) ) {
@@ -105,10 +107,10 @@ class AR_TRY_ON_Constants {
 			 * @var string.
 			 * @since 1.0.0
 			 */
-			define( 'ATLAS_AR_CURRENT_MODEL_DIR_URL', apply_filters( 'atlas_ar_current_model_dir_url', ATLAS_AR_MODEL_DIR_URL . 'gtts/' ) );
+			define( 'ATLAS_AR_CURRENT_MODEL_DIR_URL', apply_filters( 'atlas_ar_current_model_dir_url', ATLAS_AR_MODEL_DIR_URL . $api_name . '/' ) );
 
 		}
 
 	}
 }
-$constants = new AR_TRY_ON_Constants();
+(new AR_TRY_ON_Constants())->init();

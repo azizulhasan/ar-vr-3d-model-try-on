@@ -9,24 +9,24 @@ import MultiSelect from '../../../../context/MultiSelect';
 
 export default function Settings({ settings, handleChange }) {
     // const [settings, setSettings] = useState({
-    //     ATLAS_AR_display_button_automatically: 'yes',
+    //     ar_try_on_display_button_automatically: 'yes',
     //     atlas_ar_allowed_post_types: ['post'],
-    //     ATLAS_AR_wc_hook_position: "3",
-    //     ATLAS_AR_single_product_tabs: "yes",
-    //     ATLAS_AR_loading_type: "auto",
-    //     ATLAS_AR_reveal_type: "auto",
-    //     ATLAS_AR_poster_color: "rgba(78,186,79,0)",
-    //     ATLAS_AR_ar: "activate",
-    //     ATLAS_AR_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
-    //     ATLAS_AR_ar_scale: "auto",
-    //     ATLAS_AR_xr_environment: "activate",
-    //     ATLAS_AR_ar_button: "deactivate",
-    //     ATLAS_AR_ar_button_text: "Activate AR",
-    //     ATLAS_AR_ar_button_background_color: "#3a3a3a",
-    //     ATLAS_AR_ar_button_text_color: "#ffffff",
+    //     ar_try_on_wc_hook_position: "3",
+    //     ar_try_on_single_product_tabs: "yes",
+    //     ar_try_on_loading_type: "auto",
+    //     ar_try_on_reveal_type: "auto",
+    //     ar_try_on_poster_color: "rgba(78,186,79,0)",
+    //     ar_try_on_ar: "activate",
+    //     ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
+    //     ar_try_on_ar_scale: "auto",
+    //     ar_try_on_xr_environment: "activate",
+    //     ar_try_on_ar_button: "deactivate",
+    //     ar_try_on_ar_button_text: "Activate AR",
+    //     ar_try_on_ar_button_background_color: "#3a3a3a",
+    //     ar_try_on_ar_button_text_color: "#ffffff",
     //     atlas_ar_enable_qr_code: 'yes',
-    //     ATLAS_AR_clear_cache: false,
-    //     ATLAS_AR_ar_demo: {},
+    //     ar_try_on_clear_cache: false,
+    //     ar_try_on_ar_demo: {},
     // });
     const [postTypes, setPostTypes] = useState(['post']);
     const [isDataLoaded, setIsDataLoaded] = useState(true)
@@ -67,19 +67,19 @@ export default function Settings({ settings, handleChange }) {
             });
     };
 
-    const ATLAS_AR_demo_id = (e) => {
+    const ar_try_on_demo_id = (e) => {
         e.preventDefault();
         // window.open('https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/', '_blank');
-        document.getElementById('ATLAS_AR_demo_id').value = 'Setting Up Preview';
+        document.getElementById('ar_try_on_demo_id').value = 'Setting Up Preview';
         let formData = new FormData();
         formData.append('method', 'post');
         postWithoutImage(getURL('demo_preview'), formData)
             .then((res) => {
-                if (res?.data?.ATLAS_AR_ar_demo?.url) {
-                    document.getElementById('ATLAS_AR_demo_id').value = 'Preview Demo';
-                    window.open(res?.data?.ATLAS_AR_ar_demo?.url, '_blank')
+                if (res?.data?.ar_try_on_ar_demo?.url) {
+                    document.getElementById('ar_try_on_demo_id').value = 'Preview Demo';
+                    window.open(res?.data?.ar_try_on_ar_demo?.url, '_blank')
                 } else {
-                    document.getElementById('ATLAS_AR_demo_id').value = 'Try Again';
+                    document.getElementById('ar_try_on_demo_id').value = 'Try Again';
                 }
             })
             .catch((err) => {
@@ -104,8 +104,8 @@ export default function Settings({ settings, handleChange }) {
                     </div>
                     <button
                         type="button"
-                        id={'ATLAS_AR_demo_id'}
-                        onClick={ATLAS_AR_demo_id}
+                        id={'ar_try_on_demo_id'}
+                        onClick={ar_try_on_demo_id}
                         className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
                     >
                         Preview Demo
@@ -114,7 +114,7 @@ export default function Settings({ settings, handleChange }) {
                 {/* Display AR Button Autometically */}
                 <div className="art-space-y-4">
                     <label
-                        htmlFor="ATLAS_AR_single_product_tabs"
+                        htmlFor="ar_try_on_single_product_tabs"
                         className="art-block art-font-medium"
                     >
                         Display AR Button Autometically
@@ -123,10 +123,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_display_button_automatically1"
-                                name="ATLAS_AR_display_button_automatically"
+                                id="ar_try_on_display_button_automatically1"
+                                name="ar_try_on_display_button_automatically"
                                 value="yes"
-                                checked={settings.ATLAS_AR_display_button_automatically == 'yes'}
+                                checked={settings.ar_try_on_display_button_automatically == 'yes'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Yes</span>
@@ -134,10 +134,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_display_button_automatically2"
-                                name="ATLAS_AR_display_button_automatically"
+                                id="ar_try_on_display_button_automatically2"
+                                name="ar_try_on_display_button_automatically"
                                 value="no"
-                                checked={settings.ATLAS_AR_display_button_automatically == 'no'}
+                                checked={settings.ar_try_on_display_button_automatically == 'no'}
                                 onChange={handleSettingsChange}
                             />
                             <span>No</span>
@@ -163,16 +163,16 @@ export default function Settings({ settings, handleChange }) {
                     ar_try_on.is_wc_active && <>
                         <div className="art-space-y-4">
                             <label
-                                htmlFor="ATLAS_AR_wc_hook_position"
+                                htmlFor="ar_try_on_wc_hook_position"
                                 className="art-block art-font-medium"
                             >
                                 Show button in
                             </label>
                             <select
-                                id="ATLAS_AR_wc_hook_position"
-                                name="ATLAS_AR_wc_hook_position"
+                                id="ar_try_on_wc_hook_position"
+                                name="ar_try_on_wc_hook_position"
                                 className="art-block art-w-full art-p-2 art-border art-rounded"
-                                value={settings.ATLAS_AR_wc_hook_position}
+                                value={settings.ar_try_on_wc_hook_position}
                                 onChange={handleSettingsChange}
                             >
                                 <option value="">None</option>
@@ -189,7 +189,7 @@ export default function Settings({ settings, handleChange }) {
                         {/* Radio Section */}
                         <div className="art-space-y-4">
                             <label
-                                htmlFor="ATLAS_AR_single_product_tabs"
+                                htmlFor="ar_try_on_single_product_tabs"
                                 className="art-block art-font-medium"
                             >
                                 Show in Product Tabs
@@ -198,10 +198,10 @@ export default function Settings({ settings, handleChange }) {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="ATLAS_AR_single_product_tabs1"
-                                        name="ATLAS_AR_single_product_tabs"
+                                        id="ar_try_on_single_product_tabs1"
+                                        name="ar_try_on_single_product_tabs"
                                         value="yes"
-                                        checked={settings.ATLAS_AR_single_product_tabs == 'yes'}
+                                        checked={settings.ar_try_on_single_product_tabs == 'yes'}
                                         onChange={handleSettingsChange}
                                     />
                                     <span>Yes</span>
@@ -209,10 +209,10 @@ export default function Settings({ settings, handleChange }) {
                                 <label className="art-flex art-items-center art-gap-2">
                                     <input
                                         type="radio"
-                                        id="ATLAS_AR_single_product_tabs2"
-                                        name="ATLAS_AR_single_product_tabs"
+                                        id="ar_try_on_single_product_tabs2"
+                                        name="ar_try_on_single_product_tabs"
                                         value="no"
-                                        checked={settings.ATLAS_AR_single_product_tabs == 'no'}
+                                        checked={settings.ar_try_on_single_product_tabs == 'no'}
                                         onChange={handleSettingsChange}
                                     />
                                     <span>No</span>
@@ -229,7 +229,7 @@ export default function Settings({ settings, handleChange }) {
                         Loading : Attributes
                     </h3>
                     <label
-                        htmlFor="ATLAS_AR_loading_type"
+                        htmlFor="ar_try_on_loading_type"
                         className="art-block art-font-medium"
                     >
                         Loading
@@ -239,9 +239,9 @@ export default function Settings({ settings, handleChange }) {
                             <input
                                 type="radio"
                                 id="try_on_loading_type1"
-                                name="ATLAS_AR_loading_type"
+                                name="ar_try_on_loading_type"
                                 value="auto"
-                                checked={settings.ATLAS_AR_loading_type == 'auto'}
+                                checked={settings.ar_try_on_loading_type == 'auto'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Auto</span>
@@ -249,10 +249,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_loading2"
-                                name="ATLAS_AR_loading_type"
+                                id="ar_try_on_loading2"
+                                name="ar_try_on_loading_type"
                                 value="lazy"
-                                checked={settings.ATLAS_AR_loading_type == 'lazy'}
+                                checked={settings.ar_try_on_loading_type == 'lazy'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Lazy</span>
@@ -260,10 +260,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_loading3"
-                                name="ATLAS_AR_loading_type"
+                                id="ar_try_on_loading3"
+                                name="ar_try_on_loading_type"
                                 value="eager"
-                                checked={settings.ATLAS_AR_loading_type == 'eager'}
+                                checked={settings.ar_try_on_loading_type == 'eager'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Eager</span>
@@ -286,7 +286,7 @@ export default function Settings({ settings, handleChange }) {
                         Reveal : Attributes
                     </h3>
                     <label
-                        htmlFor="ATLAS_AR_reveal_type"
+                        htmlFor="ar_try_on_reveal_type"
                         className="art-block art-font-medium"
                     >
                         Reveal
@@ -295,10 +295,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_reveal1"
-                                name="ATLAS_AR_reveal_type"
+                                id="ar_try_on_reveal1"
+                                name="ar_try_on_reveal_type"
                                 value="auto"
-                                checked={settings.ATLAS_AR_reveal_type == 'auto'}
+                                checked={settings.ar_try_on_reveal_type == 'auto'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Auto</span>
@@ -306,10 +306,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_reveal2"
-                                name="ATLAS_AR_reveal_type"
+                                id="ar_try_on_reveal2"
+                                name="ar_try_on_reveal_type"
                                 value="interaction"
-                                checked={settings.ATLAS_AR_reveal_type == 'interaction'}
+                                checked={settings.ar_try_on_reveal_type == 'interaction'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Interaction</span>
@@ -317,10 +317,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="ATLAS_AR_reveal3"
-                                name="ATLAS_AR_reveal_type"
+                                id="ar_try_on_reveal3"
+                                name="ar_try_on_reveal_type"
                                 value="manual"
-                                checked={settings.ATLAS_AR_reveal_type == 'manual'}
+                                checked={settings.ar_try_on_reveal_type == 'manual'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Manual</span>
@@ -341,7 +341,7 @@ export default function Settings({ settings, handleChange }) {
                 {/* Poster Color */}
                 <div className="art-space-y-4">
                     <label
-                        htmlFor="ATLAS_AR_poster_color"
+                        htmlFor="ar_try_on_poster_color"
                         className="art-block art-font-medium"
                     >
                         --poster-color
@@ -349,17 +349,17 @@ export default function Settings({ settings, handleChange }) {
                     <div className="art-flex art-items-center art-gap-2">
                         <input
                             type="text"
-                            id="ATLAS_AR_poster_color"
-                            name="ATLAS_AR_poster_color"
+                            id="ar_try_on_poster_color"
+                            name="ar_try_on_poster_color"
                             className="art-block  art-p-2 art-border art-rounded"
-                            value={settings.ATLAS_AR_poster_color}
+                            value={settings.ar_try_on_poster_color}
                             onChange={handleSettingsChange}
                         />
                         <input
                             type="color"
                             className="art-p-2 art-bg-gray-300 art-rounded"
                             style={{ backgroundColor: "rgba(78, 186, 79, 0)" }}
-                            onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_poster_color')}
+                            onChange={(e) => handleSettingsChange(e, 'ar_try_on_poster_color')}
                         />
                     </div>
                     <p className="art-text-sm art-text-gray-500">
@@ -372,17 +372,17 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Enable AR */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar" className="art-font-medium">
+                    <label htmlFor="ar_try_on_ar" className="art-font-medium">
                         Enable AR
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_ar"
-                                id="ATLAS_AR_ar1"
+                                name="ar_try_on_ar"
+                                id="ar_try_on_ar1"
                                 value="activate"
-                                checked={settings.ATLAS_AR_ar == 'activate'}
+                                checked={settings.ar_try_on_ar == 'activate'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -391,10 +391,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_ar"
-                                id="ATLAS_AR_ar2"
+                                name="ar_try_on_ar"
+                                id="ar_try_on_ar2"
                                 value="deactivate"
-                                checked={settings.ATLAS_AR_ar == 'deactivate'}
+                                checked={settings.ar_try_on_ar == 'deactivate'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -408,7 +408,7 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* AR Modes */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar_modes" className="art-font-medium">
+                    <label htmlFor="ar_try_on_ar_modes" className="art-font-medium">
                         AR Modes
                     </label>
                     <p className="art-text-sm art-text-gray-500">Select / Deselect All</p>
@@ -416,11 +416,11 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="checkbox"
-                                name="ATLAS_AR_ar_modes[]"
-                                id="ATLAS_AR_ar_modes1"
+                                name="ar_try_on_ar_modes[]"
+                                id="ar_try_on_ar_modes1"
                                 value="webxr"
-                                checked={settings.ATLAS_AR_ar_modes.includes('webxr')}
-                                onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_ar_modes')}
+                                checked={settings.ar_try_on_ar_modes.includes('webxr')}
+                                onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_modes')}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
                             <span>webxr</span>
@@ -428,11 +428,11 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="checkbox"
-                                name="ATLAS_AR_ar_modes[]"
-                                id="ATLAS_AR_ar_modes2"
+                                name="ar_try_on_ar_modes[]"
+                                id="ar_try_on_ar_modes2"
                                 value="scene-viewer"
-                                checked={settings.ATLAS_AR_ar_modes.includes('scene-viewer')}
-                                onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_ar_modes')}
+                                checked={settings.ar_try_on_ar_modes.includes('scene-viewer')}
+                                onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_modes')}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
                             <span>scene-viewer</span>
@@ -440,11 +440,11 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="checkbox"
-                                name="ATLAS_AR_ar_modes[]"
-                                id="ATLAS_AR_ar_modes3"
+                                name="ar_try_on_ar_modes[]"
+                                id="ar_try_on_ar_modes3"
                                 value="quick-look"
-                                checked={settings.ATLAS_AR_ar_modes.includes('quick-look')}
-                                onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_ar_modes')}
+                                checked={settings.ar_try_on_ar_modes.includes('quick-look')}
+                                onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_modes')}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
                             <span>quick-look</span>
@@ -462,17 +462,17 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* AR Scale */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar_scale" className="art-font-medium">
+                    <label htmlFor="ar_try_on_ar_scale" className="art-font-medium">
                         AR Scale
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_ar_scale"
-                                id="ATLAS_AR_ar_scale1"
+                                name="ar_try_on_ar_scale"
+                                id="ar_try_on_ar_scale1"
                                 value="auto"
-                                checked={settings.ATLAS_AR_ar_scale == 'auto'}
+                                checked={settings.ar_try_on_ar_scale == 'auto'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -481,10 +481,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_ar_scale"
-                                id="ATLAS_AR_ar_scale2"
+                                name="ar_try_on_ar_scale"
+                                id="ar_try_on_ar_scale2"
                                 value="fixed"
-                                checked={settings.ATLAS_AR_ar_scale == 'fixed'}
+                                checked={settings.ar_try_on_ar_scale == 'fixed'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -501,17 +501,17 @@ export default function Settings({ settings, handleChange }) {
                 </div>
                 {/* XR Environment */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_xr_environment" className="art-font-medium">
+                    <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">
                         XR-Environment
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_xr_environment"
-                                id="ATLAS_AR_xr_environment1"
+                                name="ar_try_on_xr_environment"
+                                id="ar_try_on_xr_environment1"
                                 value="activate"
-                                checked={settings.ATLAS_AR_xr_environment == 'activate'}
+                                checked={settings.ar_try_on_xr_environment == 'activate'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -520,10 +520,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_xr_environment"
-                                id="ATLAS_AR_xr_environment2"
+                                name="ar_try_on_xr_environment"
+                                id="ar_try_on_xr_environment2"
                                 value="deactivate"
-                                checked={settings.ATLAS_AR_xr_environment == 'deactivate'}
+                                checked={settings.ar_try_on_xr_environment == 'deactivate'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -540,17 +540,17 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Custom AR Button */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar_button" className="art-font-medium">
+                    <label htmlFor="ar_try_on_ar_button" className="art-font-medium">
                         Custom AR Button
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_ar_button"
-                                id="ATLAS_AR_ar_button1"
+                                name="ar_try_on_ar_button"
+                                id="ar_try_on_ar_button1"
                                 value="activate"
-                                checked={settings.ATLAS_AR_ar_button == 'activate'}
+                                checked={settings.ar_try_on_ar_button == 'activate'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -559,10 +559,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-space-x-2">
                             <input
                                 type="radio"
-                                name="ATLAS_AR_ar_button"
-                                id="ATLAS_AR_ar_button2"
+                                name="ar_try_on_ar_button"
+                                id="ar_try_on_ar_button2"
                                 value="deactivate"
-                                checked={settings.ATLAS_AR_ar_button == 'deactivate'}
+                                checked={settings.ar_try_on_ar_button == 'deactivate'}
                                 onChange={handleSettingsChange}
                                 className="art-text-blue-600 art-focus:ring-blue-500"
                             />
@@ -579,14 +579,14 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Button Text */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar_button_text" className="art-font-medium">
+                    <label htmlFor="ar_try_on_ar_button_text" className="art-font-medium">
                         Button Text
                     </label>
                     <input
                         type="text"
-                        id="ATLAS_AR_ar_button_text"
-                        name="ATLAS_AR_ar_button_text"
-                        value={settings.ATLAS_AR_ar_button_text}
+                        id="ar_try_on_ar_button_text"
+                        name="ar_try_on_ar_button_text"
+                        value={settings.ar_try_on_ar_button_text}
                         onChange={handleSettingsChange}
                         className="art-block art-p-2 art-border art-rounded"
                     />
@@ -594,26 +594,26 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Button Color */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar_button_background_color"
+                    <label htmlFor="ar_try_on_ar_button_background_color"
                         className="art-font-medium">
                         Button Background Color
                     </label>
                     <div className="art-flex art-items-center art-gap-2">
                         <input
                             type="text"
-                            id="ATLAS_AR_ar_button_background_color"
-                            name="ATLAS_AR_ar_button_background_color"
+                            id="ar_try_on_ar_button_background_color"
+                            name="ar_try_on_ar_button_background_color"
                             className="art-block  art-p-2 art-border art-rounded"
-                            value={settings.ATLAS_AR_ar_button_background_color}
+                            value={settings.ar_try_on_ar_button_background_color}
                             onChange={handleSettingsChange}
                         />
                         <input
                             type="color"
-                            id="ATLAS_AR_ar_button_background_color"
-                            name="ATLAS_AR_ar_button_background_color"
+                            id="ar_try_on_ar_button_background_color"
+                            name="ar_try_on_ar_button_background_color"
                             style={{ backgroundColor: "rgba(78, 186, 79, 0)" }}
-                            value={settings.ATLAS_AR_ar_button_background_color}
-                            onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_ar_button_background_color')}
+                            value={settings.ar_try_on_ar_button_background_color}
+                            onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_button_background_color')}
                             className="art-block art-p-2 art-border art-rounded"
                         />
                     </div>
@@ -621,26 +621,26 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Button Text color Color */}
                 <div className="art-space-y-2">
-                    <label htmlFor="ATLAS_AR_ar_button_text_color"
+                    <label htmlFor="ar_try_on_ar_button_text_color"
                         className="art-font-medium">
                         Button Text Color
                     </label>
                     <div className="art-flex art-items-center art-gap-2">
                         <input
                             type="text"
-                            id="ATLAS_AR_ar_button_text_color"
-                            name="ATLAS_AR_ar_button_text_color"
+                            id="ar_try_on_ar_button_text_color"
+                            name="ar_try_on_ar_button_text_color"
                             className="art-block  art-p-2 art-border art-rounded"
-                            value={settings.ATLAS_AR_ar_button_text_color}
+                            value={settings.ar_try_on_ar_button_text_color}
                             onChange={handleSettingsChange}
                         />
                         <input
                             type="color"
-                            id="ATLAS_AR_ar_button_text_color"
-                            name="ATLAS_AR_ar_button_text_color"
+                            id="ar_try_on_ar_button_text_color"
+                            name="ar_try_on_ar_button_text_color"
                             style={{ backgroundColor: "rgba(78, 186, 79, 0)" }}
-                            value={settings.ATLAS_AR_ar_button_text_color}
-                            onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_ar_button_text_color')}
+                            value={settings.ar_try_on_ar_button_text_color}
+                            onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_button_text_color')}
                             className="art-block art-p-2 art-border art-rounded"
                         />
                     </div>
@@ -648,16 +648,16 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Clear Cache */}
                 <div className="art-space-y-2 art-mr-1">
-                    <label htmlFor="ATLAS_AR_clear_cache"
+                    <label htmlFor="ar_try_on_clear_cache"
                         className="art-font-medium">
                         Clear Cache
                     </label>
                     <input
                         type="checkbox"
-                        id="ATLAS_AR_clear_cache"
-                        name="ATLAS_AR_clear_cache"
-                        value={settings.ATLAS_AR_clear_cache}
-                        onChange={(e) => handleSettingsChange(e, 'ATLAS_AR_clear_cache')}
+                        id="ar_try_on_clear_cache"
+                        name="ar_try_on_clear_cache"
+                        value={settings.ar_try_on_clear_cache}
+                        onChange={(e) => handleSettingsChange(e, 'ar_try_on_clear_cache')}
                         className="art-block art-p-5 art-border art-rounded"
                     />
                 </div>

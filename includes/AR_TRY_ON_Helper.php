@@ -399,6 +399,16 @@ class AR_TRY_ON_Helper {
 
     public static function get_integrated_api_name()
     {
-        
+        $settings = (array) get_option( 'ar_try_on_settings' );
+        $api_name =  '';
+        if (
+            isset( $settings['ar_try_on_exclude_integration_api_name'], $settings['ar_try_on_exclude_integration_api_headers']  )
+            && count($settings['ar_try_on_exclude_integration_api_headers'])
+            && $settings['ar_try_on_exclude_integration_api_name']
+        ) {
+            $api_name = $settings['ar_try_on_exclude_integration_api_name'];
+        }
+
+        return $api_name;
     }
 }
