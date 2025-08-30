@@ -65,7 +65,7 @@ class AR_TRY_ON_Hooks {
 	 * Register MetaBox to add PDF Download Button
 	 */
 	public function add_custom_meta_box() {
-		$plugin_name = 'AR Try-On';
+		$plugin_name = 'AtlasAR';
 
 		global $post;
 		if ( $post && AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
@@ -74,7 +74,7 @@ class AR_TRY_ON_Hooks {
 				$plugin_name,
 				array(
 					$this,
-					'ATLAS_AR_meta_box',
+					'atlas_ar_meta_box',
 				),
 				get_current_screen()->post_type,
 				'advanced',
@@ -89,17 +89,17 @@ class AR_TRY_ON_Hooks {
 	/**
 	 * Add meta box for record, re-record, listen content with loud.
 	 */
-	public function ATLAS_AR_meta_box() {
+	public function atlas_ar_meta_box() {
 
-		\do_action( 'ATLAS_AR_before_metabox_content' );
+		\do_action( 'atlas_ar_before_metabox_content' );
 		?>
         <div class="tta_metabox">
-            <div id="ATLAS_AR_product_model_settings"></div>
+            <div id="atlas_ar_product_model_settings"></div>
 			<?php \do_action( 'ATLAS_AR_after_free_metabox_settings' ); ?>
-            <div id="ATLAS_AR_analytics"></div>
+            <div id="atlas_ar_analytics"></div>
         </div>
 		<?php
-		\do_action( 'ATLAS_AR_after_metabox_content' );
+		\do_action( 'atlas_ar_after_metabox_content' );
 	}
 }
 

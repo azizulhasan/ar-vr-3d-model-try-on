@@ -111,3 +111,4 @@ class AR_TRY_ON_Constants {
 
 	}
 }
+$constants = new AR_TRY_ON_Constants();

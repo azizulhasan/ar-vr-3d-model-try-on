@@ -115,7 +115,6 @@ class AR_TRY_ON {
 	private function load_dependencies() {
 
 		require_once ATLAS_AR_PLUGIN_PATH . '/includes/AR_TRY_ON_Constants.php';
-        $constants = new AR_TRY_ON_Constants();
         require_once ATLAS_AR_PLUGIN_PATH . '/includes/AR_TRY_ON_Hooks.php';
 
 		$this->loader = new AR_TRY_ON_Loader();
