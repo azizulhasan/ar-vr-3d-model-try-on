@@ -38,20 +38,14 @@ const ARProductModelSettings = () => {
         canvas_padding: '',
         custom_css: '',
         // Integration settings
-        exclude_integration_api_body: [
-            {key: 'prompt', type: 'textarea', value: 'a cat',required:true},
-            {key: 'type', type: 'text', value: 'text_to_model'},
-            {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
-            {key: 'texture', type: 'boolean', value: true},
-            {key: 'pbr', type: 'boolean', value: true},
-            {key: 'texture_alignment', type: 'text', value: 'geometry'},
-            {key: 'geometry_quality', type: 'text', value: 'original'},
-        ],
+        exclude_integration_api_body: [],
         exclude_integration_api_model_type: 'text_to_model'
     });
 
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
+    const [isSettingsLoaded, setIsSettingsLoaded] = useState(false)
+
 
     // Accordion state
     const [activeSection, setActiveSection] = useState('integration');
@@ -67,8 +61,7 @@ const ARProductModelSettings = () => {
 
     const [settings, setSettings] = useState({})
 
-    const [currentApi, setCurrentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
-    const [isCurrentApiSet, setIsCurrentApiSet] = useState(false)
+    const [currentApi, setCurrentAPI] = useState(getAPITypes( 'tripo3d'))
 
     // integration settings:
     const addIntegrationField = () => {
@@ -162,9 +155,30 @@ const ARProductModelSettings = () => {
         }
     }, [currentValue]);
 
+
+    useEffect(() => {
+        /**
+         * Get data from and display to table.
+         */
+        let formData = new FormData();
+        formData.append('method', 'get');
+        postWithoutImage(getURL('settings'), formData).then(
+            (res) => {
+                let tempCurrentAPI = getAPITypes(res.data.ar_try_on_exclude_integration_api_name);
+
+                console.log({name: res.data.ar_try_on_exclude_integration_api_name, tempCurrentAPI})
+                setCurrentAPI(tempCurrentAPI)
+
+                setSettings({...settings, ...res.data});
+                setIsSettingsLoaded(true)
+
+            });
+    }, []);
+
+
     useEffect(() => {
         let InterVal = setInterval(() => {
-            if (document.getElementById('ar_try_on_preveiw')) {
+            if (document.getElementById('ar_try_on_preveiw') && isSettingsLoaded) {
                 clearInterval(InterVal)
                 const postId = getPostID()
                 let formData = new FormData();
@@ -177,41 +191,32 @@ const ARProductModelSettings = () => {
                             ...res.data,
                         };
 
+                        if(!productModelData?.exclude_integration_api_model_type) {
+                            productModelData.exclude_integration_api_model_type = 'text_to_model'
+                        }
+
+                        console.log({before: productModelData.exclude_integration_api_body})
+
+                        if(!res.data?.exclude_integration_api_body || res.data?.exclude_integration_api_body.length < 1) {
+                            productModelData.exclude_integration_api_body = currentApi.body.supported_types[productModelData.exclude_integration_api_model_type].input
+                        }
+                        console.log({after: productModelData.exclude_integration_api_body})
+
                         setProductModel(productModelData);
                         setIsProductModelLoad(true)
                     });
             }
         }, 1000)
 
-    }, []);
-
-    useEffect(() => {
-        /**
-         * Get data from and display to table.
-         */
-        let formData = new FormData();
-        formData.append('method', 'get');
-        postWithoutImage(getURL('settings'), formData).then(
-            (res) => {
-                setSettings({...settings, ...res.data});
-            });
-    }, []);
+    }, [isSettingsLoaded]);
 
     useEffect(() => {
         if (isProductModelLoaded) {
             wp.hooks.doAction('ar_try_on_preview_data', productModel);
-            if(settings?.ar_try_on_exclude_integration_api_name != currentApi?.id) {
-                let tempCurrentAPI = getAPITypes(settings.ar_try_on_exclude_integration_api_name);
-                setCurrentAPI(tempCurrentAPI)
-                
-            }
+            console.log({name: settings.ar_try_on_exclude_integration_api_name, currentApi })
         }
     }, [isProductModelLoaded]);
-    useEffect(()=>{
-        if(!isCurrentApiSet && settings?.ar_try_on_exclude_integration_api_name == currentApi?.id){
-            setIsCurrentApiSet(true)
-        }
-    },[currentApi])
+
 
     useEffect(() => {
         if(productModel.exclude_integration_api_model_type) {
@@ -339,7 +344,7 @@ const ARProductModelSettings = () => {
 
                     {(activeSection === 'settings' || activeSection === 'style') && <SaveButton/>}
 
-                    {activeSection === 'integration' && isCurrentApiSet && (
+                    {activeSection === 'integration' && isProductModelLoaded && (
                         <IntegrationSection
                             productModel={productModel}
                             addField={addIntegrationField}

@@ -193,7 +193,7 @@ export default function IntegrationSection({
 
 
             {/* Dynamic rows */}
-            { currentApi.body.supported_types[productModel.exclude_integration_api_model_type].input.map((field, index) => (
+            {productModel.exclude_integration_api_body.map((field, index) => (
                 <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
                     <input
                         type="text"
