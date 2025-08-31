@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     // Create modal content
                                     const modalContent = document.createElement('div');
                                     modalContent.className = 'modal-content';
-                                    modalContent.id = 'ar_try_on_model_viewer';
+                                    modalContent.id = 'atlas_ar_model_viewer';
 
                                     // Add close button
                                     const closeBtn = document.createElement('button');
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
                                     showModal()
-                                    wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, data);
+                                    wp.hooks.doAction('atlas_ar_pro_load_face_model', htmlContent, data);
                                 }
 
                             } else {

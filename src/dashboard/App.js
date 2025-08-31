@@ -1,33 +1,174 @@
 
-import {useState} from "react";
+import { useEffect, useState } from "react";
 
 import 'react-toastify/dist/ReactToastify.css';
 
 import Settings from "./components/dashboard/settings/Settings";
 import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
+import Integration from "./components/dashboard/Integration/Integration";
+import Documentation from "./components/dashboard/Documentation/Documentation";
+import { getURL, postWithoutImage } from "../context/utilities";
+import toast from '../context/Notify';
+
+
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState('Settings')
+    const [activeTab, setActiveTab] = useState('Settings');
+    const [authType, setAuthType] = useState("Bearer");
+    const [settings, setSettings] = useState({
+        ar_try_on_display_button_automatically: 'yes',
+        atlas_ar_allowed_post_types: ['post'],
+        ar_try_on_wc_hook_position: "3",
+        ar_try_on_single_product_tabs: "yes",
+        ar_try_on_loading_type: "auto",
+        ar_try_on_reveal_type: "auto",
+        ar_try_on_poster_color: "rgba(78,186,79,0)",
+        ar_try_on_ar: "activate",
+        ar_try_on_ar_modes: ["webxr", 'scene-viewer', "quick-look"],
+        ar_try_on_ar_scale: "auto",
+        ar_try_on_xr_environment: "activate",
+        ar_try_on_ar_button: "deactivate",
+        ar_try_on_ar_button_text: "Activate AR",
+        ar_try_on_ar_button_background_color: "#3a3a3a",
+        ar_try_on_ar_button_text_color: "#ffffff",
+        atlas_ar_enable_qr_code: 'yes',
+        ar_try_on_clear_cache: false,
+        ar_try_on_ar_demo: {},
+        ar_try_on_exclude_integration_api_url: '',
+        ar_try_on_exclude_integration_api_headers: [
+            {
+                key: "Authorization",
+                value: ""
+            },
+        ],
+    });
     const tabs = [
-        { name: 'Settings', href: '#', current: true, component: 'Settings' },
-        { name: 'Features', href: '#', current: false,  component: 'Features' },
-        { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false,  component: 'Contact' },
+        { name: 'Settings', href: '#', current: false, component: 'Settings' },
+        // { name: 'Integration', href: '#', current: true, component: 'Integration' },
+        { name: 'Features', href: '#', current: false, component: 'Features' },
+        { name: 'Documentation', href: '#', current: false, component: 'Documentation' },
+        { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
+
     ]
+    const [headers, setHeaders] = useState([]);
+
+    useEffect(() => {
+        /**
+         * Get data from and display to table.
+         */
+        let formData = new FormData();
+        formData.append('method', 'get');
+        postWithoutImage(getURL('settings'), formData).then(
+            (res) => {
+                setSettings({ ...settings, ...res.data });
+                // setIsDataLoaded(true)
+            });
+    }, []);
 
     function classNames(...classes) {
         return classes.filter(Boolean).join(' ')
     }
 
-    const handChange = (e, tab) => {
+    const handleTabChange = (e, tab) => {
         e.preventDefault();
-        if(tab.href !== '#') {
+        if (tab.href !== '#') {
             window.open(tab.href, '_blank')
-        }else{
+        } else {
             setActiveTab(tab.component)
         }
-
     }
+
+    /**
+ * handle change
+ * @param {*} e
+ */
+    const handleChange = (e, targetName = '') => {
+
+        let value = '';
+        if (Array.isArray(e)) {
+            value = e;
+
+            if (targetName === 'atlas_ar_allowed_post_types' && value.length > 1) {
+                toast('Multiple post type is only available in the pro version', 'error')
+                return;
+            }
+            setSettings({
+                ...settings,
+                ...{ [targetName]: value },
+            });
+            return;
+        } else {
+            value = e.target.value
+        }
+
+
+        if (targetName) {
+            e.target.name = targetName;
+        }
+
+        if (e.target.name == 'ar_try_on_ar_modes') {
+            let status = e.target.checked
+            let clonedVal = JSON.parse(JSON.stringify(settings));
+            let tempVal = clonedVal.ar_try_on_ar_modes
+            if (status) {
+                tempVal.push(value)
+                value = tempVal
+            } else {
+                if (tempVal.includes(value)) {
+                    tempVal = tempVal.filter(item => item != value);
+                }
+                value = tempVal
+            }
+
+        }
+
+        if (!e.target.name) return;
+
+        console.log({name: e.target.name, value})
+        setSettings({
+            ...settings,
+            ...{ [e.target.name]: value },
+        });
+    };
+
+    const handleHeaderChange = (index, field, value) => {
+        const updated = [...settings.ar_try_on_exclude_integration_api_headers];
+        updated[index][field] = value;
+        setHeaders(updated);
+        setSettings({ ...settings, ...{ [ar_try_on_exclude_integration_api_headers]: updated } })
+    };
+
+
+    /**
+     * Handle form Submit
+     */
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log(settings)
+
+        if( settings?.ar_try_on_exclude_integration_api_name  && settings?.ar_try_on_exclude_integration_api_url  ) {
+            settings.ar_try_on_exclude_integration_api_headers.map(header=>{
+                if(header.key == '' || header.value == '') {
+                    alert('Please fill all of the API headers with proper value')
+                    return;
+                }
+            })
+        }
+        // tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
+        let formData = new FormData();
+        formData.append('fields', JSON.stringify(settings));
+        formData.append('method', 'post');
+        postWithoutImage(getURL('settings'), formData)
+            .then((res) => {
+                setSettings(res.data);
+                toast('Successfully Saved.', 'info')
+                // setIsDataLoaded(true)
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
     return <>
         <ToastContainer
@@ -63,7 +204,7 @@ export default function App() {
                         <a
                             key={tab.name}
                             href={tab.href}
-                            onClick={(e)=>handChange(e,tab)}
+                            onClick={(e) => handleTabChange(e, tab)}
                             aria-current={tab.current ? 'page' : undefined}
                             className={classNames(
                                 tab.current
@@ -82,8 +223,27 @@ export default function App() {
         </div>
 
         {
-            activeTab === 'Settings' ? <Settings/> : <Features/>
+            activeTab === 'Settings' && <Settings setHeaders={setHeaders} settings={settings} handleChange={handleChange} />
         }
+        {
+            activeTab === 'Features' && <Features />
+        }
+        {
+            activeTab === 'Integration' && <Integration setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType} handleChange={handleChange} handleHeaderChange={handleHeaderChange} />
+        }
+        { activeTab === 'Documentation' && <Documentation /> }
+
+        {/* Submit Button */}
+            {activeTab !== 'Documentation' && (
+            <div className="art-space-y-2">
+                <button
+                onClick={handleSubmit}
+                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500"
+                >
+                Save
+                </button>
+            </div>
+)}
     </>;
 }
 

@@ -4,7 +4,7 @@ namespace AR_TRY_ON;
 
 
 /**
- * Class AR_TRY_ON_Lib_AtlasAiDev
+ * class AR_TRY_ON_Lib_AtlasAiDev
  */
 final class AR_TRY_ON_Lib_AtlasAiDev {
 
@@ -54,10 +54,10 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
     public function init() {
         if ( ! class_exists( '\AtlasAiDev\AppService\Client' ) ) {
             /** @noinspection PhpIncludeInspection */
-            require_once AR_TRY_ON_PLUGIN_PATH . 'libs/AtlasAiDev/Client.php';
+            require_once ATLAS_AR_PLUGIN_PATH . 'libs/AtlasAiDev/Client.php';
         }
         // Load Client
-        $this->client = new \AtlasAiDev\AppService\Client( 'e0212edbb7ce82838c61d71951c5cb2c', AR_TRY_ON_PLUGIN_NAME, AR_TRY_ON_ROOT_FILE );
+        $this->client = new \AtlasAiDev\AppService\Client( 'e0212edbb7ce82838c61d71951c5cb2c', ATLAS_AR_PLUGIN_NAME, ATLAS_AR_ROOT_FILE );
         // Load
         $this->insights  = $this->client->insights(); // Plugin Insights
         $this->promotion = $this->client->promotions(); // Promo offers
@@ -100,7 +100,7 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
      * @since 1.0.2
      */
     public function __clone() {
-        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', AR_TRY_ON_TEXT_DOMAIN ), '1.0.2' );
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', ATLAS_AR_TEXT_DOMAIN ), '1.0.2' );
     }
 
     /**
@@ -180,21 +180,21 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
      */
     public function supportResponse() {
         $response        = '';
-        $response       .= sprintf( '<h3>%s</h3>', esc_html__( 'Thank you -- Support Ticket Submitted.', AR_TRY_ON_TEXT_DOMAIN ) );
-        $ticketSubmitted = esc_html__( 'Your ticket has been successfully submitted.', AR_TRY_ON_TEXT_DOMAIN );
-        $twenty4Hours    = sprintf( '<strong>%s</strong>', esc_html__( '24 hours', AR_TRY_ON_TEXT_DOMAIN ) );
+        $response       .= sprintf( '<h3>%s</h3>', esc_html__( 'Thank you -- Support Ticket Submitted.', ATLAS_AR_TEXT_DOMAIN ) );
+        $ticketSubmitted = esc_html__( 'Your ticket has been successfully submitted.', ATLAS_AR_TEXT_DOMAIN );
+        $twenty4Hours    = sprintf( '<strong>%s</strong>', esc_html__( '24 hours', ATLAS_AR_TEXT_DOMAIN ) );
         /* translators: %s: Approx. time to response after ticket submission. */
-        $notification = sprintf( esc_html__( 'You will receive an email notification from "contact.atlasaidev@gmail.com" in your inbox within %s.', AR_TRY_ON_TEXT_DOMAIN ), $twenty4Hours );
-        $followUp     = esc_html__( 'Please Follow the email and AtlasAiDev Support Team will get back with you shortly.', AR_TRY_ON_TEXT_DOMAIN );
+        $notification = sprintf( esc_html__( 'You will receive an email notification from "contact.atlasaidev@gmail.com" in your inbox within %s.', ATLAS_AR_TEXT_DOMAIN ), $twenty4Hours );
+        $followUp     = esc_html__( 'Please Follow the email and AtlasAiDev Support Team will get back with you shortly.', ATLAS_AR_TEXT_DOMAIN );
         $response    .= sprintf( '<p>%s %s %s</p>', $ticketSubmitted, $notification, $followUp );
-        $docLink      = sprintf( '<a class="button button-primary" href="https://atlasaidev.helpscoutdocs.com/" target="_blank"><span class="dashicons dashicons-media-document" aria-hidden="true"></span> %s</a>', esc_html__( 'Documentation', AR_TRY_ON_TEXT_DOMAIN ) );
-        $vidLink      = sprintf( '<a class="button button-primary" href="https://www.youtube.com/@atlasaidev" target="_blank"><span class="dashicons dashicons-video-alt3" aria-hidden="true"></span> %s</a>', esc_html__( 'Video Tutorials', AR_TRY_ON_TEXT_DOMAIN ) );
+        $docLink      = sprintf( '<a class="button button-primary" href="https://atlasaidev.helpscoutdocs.com/" target="_blank"><span class="dashicons dashicons-media-document" aria-hidden="true"></span> %s</a>', esc_html__( 'Documentation', ATLAS_AR_TEXT_DOMAIN ) );
+        $vidLink      = sprintf( '<a class="button button-primary" href="https://www.youtube.com/@atlasaidev" target="_blank"><span class="dashicons dashicons-video-alt3" aria-hidden="true"></span> %s</a>', esc_html__( 'Video Tutorials', ATLAS_AR_TEXT_DOMAIN ) );
         $response    .= sprintf( '<p>%s %s</p>', $docLink, $vidLink );
         $response    .= '<br><br><br>';
-        $toc          = sprintf( '<a href="https://atlasaidev.com/terms-and-conditions/" target="_blank">%s</a>', esc_html__( 'Terms & Conditions', AR_TRY_ON_TEXT_DOMAIN ) );
-        $pp           = sprintf( '<a href="https://atlasaidev.com/privacy-policy/" target="_blank">%s</a>', esc_html__( 'Privacy Policy', AR_TRY_ON_TEXT_DOMAIN ) );
+        $toc          = sprintf( '<a href="https://atlasaidev.com/terms-and-conditions/" target="_blank">%s</a>', esc_html__( 'Terms & Conditions', ATLAS_AR_TEXT_DOMAIN ) );
+        $pp           = sprintf( '<a href="https://atlasaidev.com/privacy-policy/" target="_blank">%s</a>', esc_html__( 'Privacy Policy', ATLAS_AR_TEXT_DOMAIN ) );
         /* translators: 1: Link to the Trams And Condition Page, 2: Link to the Privacy Policy Page */
-        $policy    = sprintf( esc_html__( 'Please read our %1$s and %2$s', AR_TRY_ON_TEXT_DOMAIN ), $toc, $pp );
+        $policy    = sprintf( esc_html__( 'Please read our %1$s and %2$s', ATLAS_AR_TEXT_DOMAIN ), $toc, $pp );
         $response .= sprintf( '<p style="font-size: 12px;">%s</p>', $policy );
 
         return $response;
@@ -208,9 +208,9 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
     public function supportErrorResponse() {
         return sprintf(
             '<div class="mui-error"><p>%s</p><p>%s</p><br><br><p style="font-size: 12px;">%s</p></div>',
-            esc_html__( 'Something Went Wrong. Please Try The Support Ticket Form On Our Website.', AR_TRY_ON_TEXT_DOMAIN ),
-            sprintf( '<a class="button button-primary" href="https://atlasaidev.com/contact-us/" target="_blank">%s</a>', esc_html__( 'Get Support', AR_TRY_ON_TEXT_DOMAIN ) ),
-            esc_html__( 'Support Ticket form will open in new tab in 5 seconds.', AR_TRY_ON_TEXT_DOMAIN )
+            esc_html__( 'Something Went Wrong. Please Try The Support Ticket Form On Our Website.', ATLAS_AR_TEXT_DOMAIN ),
+            sprintf( '<a class="button button-primary" href="https://atlasaidev.com/contact-us/" target="_blank">%s</a>', esc_html__( 'Get Support', ATLAS_AR_TEXT_DOMAIN ) ),
+            esc_html__( 'Support Ticket form will open in new tab in 5 seconds.', ATLAS_AR_TEXT_DOMAIN )
         );
     }
 
@@ -225,9 +225,9 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         $data = array_merge(
             $data,
             array(
-                esc_html__( 'Site name, language and url.', AR_TRY_ON_TEXT_DOMAIN ),
-                esc_html__( 'Number of active and inactive plugins.', AR_TRY_ON_TEXT_DOMAIN ),
-                esc_html__( 'Your name and email address.', AR_TRY_ON_TEXT_DOMAIN ),
+                esc_html__( 'Site name, language and url.', ATLAS_AR_TEXT_DOMAIN ),
+                esc_html__( 'Number of active and inactive plugins.', ATLAS_AR_TEXT_DOMAIN ),
+                esc_html__( 'Your name and email address.', ATLAS_AR_TEXT_DOMAIN ),
             )
         );
 
