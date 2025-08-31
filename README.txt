@@ -56,7 +56,7 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 * **Glass Mode (Pro Version - Coming Soon)**: Enable virtual try-ons for glasses, sunglasses, and jewelry.
 
 #### **3. WooCommerce Optimization**
-* Dedicated "AR Try On" tab and settings within the WooCommerce product editor.
+* Dedicated "AtlasAR" tab and settings within the WooCommerce product editor.
 * Automatic "View in AR " button placement on product pages.
 * Full support for simple and variable/configurable products.
 * Designed to work seamlessly with all standard WooCommerce themes.
@@ -75,9 +75,11 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
     * In your WordPress admin panel, go to Plugins → Add New.
     * Search for "AR VR 3D Model Try On".
     * Click "Install Now" and then "Activate."
+    * Find the "AtlasAR" menu.
+    * Setup you basic settings.
 2.  **Upload Models**:
     * Navigate to a WordPress post eiditing screen
-    * Find the "AR Try On" Metabox.
+    * Find the "AtlasAR" Metabox.
     * Select the place where you want to display the 3D Model like Floor/Wall etc.
     * Upload your Android Model: `.glb/.gltf` file.
     * Upload your iOS Model: `.usdz` file.
@@ -156,8 +158,8 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
 2. Install directly through the WordPress plugins screen: Go to 'Plugins' > 'Add New', search for "3D Model Viewer & AR for Wordpress & WooCommerce" by `Azizul Hasan` , and click 'Install Now'.
 3. Activate the plugin through the 'Plugins' menu in WordPress.
-4. Navigate to a WordPress Post, post metabox section, and find the "AR Try On" metabox to upload your 3D models.
-5. Navigate to a WooCommerce product, go to the product metabox section, and find the "AR Try On" metabox to upload your 3D models.
+4. Navigate to a WordPress Post, post metabox section, and find the "AtlasAR" metabox to upload your 3D models.
+5. Navigate to a WooCommerce product, go to the product metabox section, and find the "AtlasAR" metabox to upload your 3D models.
 6. The "View in AR " button will automatically appear on product pages. You can also use the shortcode `[atlas_ar]` for manual placement.
 7. If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
 

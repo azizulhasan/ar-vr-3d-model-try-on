@@ -165,7 +165,7 @@ class AR_TRY_ON_Admin {
 	 * Add Menu and Submenu page
 	 */
 
-	public function ATLAS_AR_menu() {
+	public function atlas_ar_menu() {
 		add_menu_page(
 			'AtlasAR',
 			'AtlasAR',
@@ -220,7 +220,7 @@ class AR_TRY_ON_Admin {
 	 *
 	 * @return array
 	 */
-	public function ATLAS_AR_for_woocommerce_mime_types( $mimes ) {
+	public function atlas_ar_for_woocommerce_mime_types( $mimes ) {
 		$mimes['glb']  = 'model/gltf-binary'; //Adding gbl extension
 		$mimes['gltf'] = 'model/gltf-binary'; //Adding gbl extension
 		$mimes['usdz'] = 'model/vnd.usdz+zip'; //Adding usdz extension

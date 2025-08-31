@@ -243,10 +243,6 @@ class AR_TRY_ON_Api_Routes
             $response_body = wp_remote_retrieve_body($response);
             $response_body = json_decode($response_body, true);
 
-            error_log(print_r([
-                '$status_code' => $status_code,
-                '$response_body' => $response_body,
-            ],1));
             /**
              * Model generated properly .
              */
@@ -299,10 +295,7 @@ class AR_TRY_ON_Api_Routes
             $task_status_code = wp_remote_retrieve_response_code($task_response);
             $task_response_body = wp_remote_retrieve_body($task_response);
             $task_response_body = json_decode($task_response_body, true);
-            error_log(print_r([
-                '$task_status_code' => $task_status_code,
-                '$task_response_body' => $task_response_body,
-            ],1));
+
             if ($task_status_code !== 200) {
                 $task_result['data'] = $task_response_body;
                 $task_result['extra'] = [
@@ -326,9 +319,6 @@ class AR_TRY_ON_Api_Routes
             '$task_response_body' => $task_response_body
         ];
 
-//        meshy ai :: msy_iJeiy22Sjva5vKtiX44YJQACPqWZttgSHVLi
-//        trio ai :: tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
-        // task_id: a650bc25-e67b-4248-9c38-1d109c9274da
 
         return rest_ensure_response($task_result);
     }

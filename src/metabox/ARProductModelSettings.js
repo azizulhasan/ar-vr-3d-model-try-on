@@ -48,7 +48,7 @@ const ARProductModelSettings = () => {
 
 
     // Accordion state
-    const [activeSection, setActiveSection] = useState('integration');
+    const [activeSection, setActiveSection] = useState('settings');
     const [activeAccordion, setActiveAccordion] = useState({
         content: false,
         camera: false,
@@ -284,16 +284,16 @@ const ARProductModelSettings = () => {
                     >
                         Style
                     </button>
-
-                    <button
-                        onClick={(e) => toggleSection(e, 'integration')}
-                        className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
-                            ? 'art-border-blue-500 art-text-blue-600'
-                            : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                        }`}
-                    >
-                        Integration
-                    </button>
+                    {/*//TODO:: release integration with next release.*/}
+                    {/*<button*/}
+                    {/*    onClick={(e) => toggleSection(e, 'integration')}*/}
+                    {/*    className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'*/}
+                    {/*        ? 'art-border-blue-500 art-text-blue-600'*/}
+                    {/*        : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'*/}
+                    {/*    }`}*/}
+                    {/*>*/}
+                    {/*    Integration*/}
+                    {/*</button>*/}
                 </div>
                 <div>
                     <br/>

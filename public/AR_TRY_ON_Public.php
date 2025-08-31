@@ -137,7 +137,7 @@ class AR_TRY_ON_Public {
 
 	}
 
-    public function ATLAS_AR_button( $content ) {
+    public function atlas_ar_button( $content ) {
         $current_filter = current_filter();
         if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             if ( $current_filter === 'the_content' ) {
@@ -185,7 +185,7 @@ class AR_TRY_ON_Public {
     }
 
 
-	public function ATLAS_AR_button_tab( $content ) {
+	public function atlas_ar_button_tab( $content ) {
 		$current_filter = current_filter();
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			if ( $current_filter === 'the_content' ) {
@@ -213,7 +213,7 @@ class AR_TRY_ON_Public {
                 const htmlContent = atlasAR.getModelSkeleton(`model_viewer_${product_id}`);
 
                 let current_product = document.getElementById('atlas_ar_' + product_id);
-                let tab = document.getElementById('tab-title-ATLAS_AR_3d_view');
+                let tab = document.getElementById('tab-title-atlas_ar_3d_view');
                 let modelLoaded = false;
                 tab.addEventListener('click', async function() {
                     if(!modelLoaded) {
@@ -250,16 +250,16 @@ class AR_TRY_ON_Public {
 	 * @since 1.0.3
 	 *
 	 */
-	public function ATLAS_AR_woocommerce_tab( $tabs ) {
+	public function atlas_ar_woocommerce_tab( $tabs ) {
 
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return $tabs;
 		}
 
-		$tabs['ar_try_on_3d_view'] = array(
-			'title'    => __( 'AR Try On Product View', 'woocommerce' ),
+		$tabs['atlas_ar_3d_view'] = array(
+			'title'    => __( 'AtlasAR Product View', 'woocommerce' ),
 			'priority' => 50,
-			'callback' => array( $this, 'ATLAS_AR_button_tab' ),
+			'callback' => array( $this, 'atlas_ar_button_tab' ),
 		);
 
 		return $tabs;

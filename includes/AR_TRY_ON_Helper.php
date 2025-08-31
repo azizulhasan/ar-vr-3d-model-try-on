@@ -366,7 +366,6 @@ class AR_TRY_ON_Helper
 
     public static function get_structured_model_response($request_decoded_data, $api_response_data = [])
     {
-        // D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json;
         $response_body = [];
 
         if (isset($request_decoded_data['api_name'], $request_decoded_data['body']['type'])
@@ -374,8 +373,6 @@ class AR_TRY_ON_Helper
             && $request_decoded_data['body']['type'] == "text_to_model"
         ) {
             if (!empty($api_response_data)) {
-//                $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
-//                $response_data = json_decode( $response_data, true );
 
                 if (isset($api_response_data['data']['task_id'])) {
                     $response_body['task_id'] = $api_response_data['data']['task_id'];
@@ -458,12 +455,6 @@ class AR_TRY_ON_Helper
 
             // Extract filename from URL
             $filename = basename(parse_url($url, PHP_URL_PATH));
-            error_log(print_r([
-                'filename' => $filename,
-                '$key' => $file_key,
-                'url' => $url,
-                '$response' => $response,
-            ], true));
 
             // Save file
             $file_full_path = trailingslashit($file_path) . $file_key .'__'. $filename;
@@ -475,7 +466,6 @@ class AR_TRY_ON_Helper
             $uploaded_files[$file_key]['path'] = $file_full_path;
         }
 
-        error_log(print_r($uploaded_files, true));
 
         return $uploaded_files;
     }
