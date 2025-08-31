@@ -206,25 +206,25 @@ class AR_TRY_ON_Api_Routes
     public function generate_3d_model($request)
     {
         $body = $request->get_params();
-        $result['status'] = true;
+        $result['status'] = false;
         $decoded_data = json_decode($body['data'], 1);
         $api_url = $decoded_data['url'];
         $headers = $decoded_data['headers'];
         $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
         $api_body = $decoded_data['body'];
 
-        $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
-        $response_data = json_decode( $response_data, true );
-
-        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
-        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($result['data']['output'], []);
-
-        $result['extra'] = [
-            'data' => ATLAS_AR_CURRENT_MODEL_TEMP_DIR,
-            'data1' => ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL
-        ];
-
-        return rest_ensure_response($result);
+//        $response_data = file_get_contents('D:\xampp\htdocs\azizulhasan\ar\wp-content\plugins\ar-vr-3d-model-try-on\src\metabox\components\jso.json');
+//        $response_data = json_decode( $response_data, true );
+//
+//        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
+//        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($result['data']['output'], []);
+//
+//        $result['extra'] = [
+//            'data' => ATLAS_AR_CURRENT_MODEL_TEMP_DIR,
+//            'data1' => ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL
+//        ];
+//
+//        return rest_ensure_response($result);
 
         $response_body = '';
         if (!isset($api_body['task_id']) || !$api_body['task_id']) {
