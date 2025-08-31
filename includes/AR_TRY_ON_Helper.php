@@ -159,7 +159,6 @@ class AR_TRY_ON_Helper
         if (isset($settings['ar_try_on_allowed_post_types']) && !empty($settings['ar_try_on_allowed_post_types'])) {
             $post_types = $settings['ar_try_on_allowed_post_types'];
         }
-        error_log(print_r($post_types, true));
 
         $result = in_array($post->post_type, $post_types);
 
