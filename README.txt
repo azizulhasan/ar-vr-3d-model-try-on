@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -199,6 +199,13 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 4. Plugin Features
 
 == Changelog ==
+
+
+= 1.5.4 ( 31 August 2025 )  =
+Fixed: model upload issue fixed.
+Fixed: multiple model load issue fixed.
+Fixed: Cache issue not working issue fixed.
+Fixed: QR code , post types settings not working issue fixed.
 
 
 = 1.5.3 ( 31 August 2025 )  =

@@ -130,7 +130,7 @@ const ARProductModelSettings = () => {
     const handleMediaButtonClick = (fieldName, value) => {
         setBasicSettings(prev => ({...prev, ...{[fieldName]: value}}))
         let inputField = document.getElementById(fieldName)
-        wp.hooks.doAction('ar_try_on_select_light_and_envirement_files', {
+        wp.hooks.doAction('atlas_ar_select_light_and_envirement_files', {
             name: fieldName,
             field: inputField,
         });
@@ -138,7 +138,7 @@ const ARProductModelSettings = () => {
 
     useEffect(() => {
         if (wp?.hooks) {
-            wp.hooks.addAction('ar_try_on_on_select_model_file', 'ar_try_on', function (val) {
+            wp.hooks.addAction('atlas_ar_on_select_model_file', 'ar_try_on', function (val) {
                 setCurrentValue(val);
             });
         }

@@ -222,7 +222,7 @@ class AR_TRY_ON_Public {
                     setTimeout(async  function(){
                         if (tab.classList.contains('active') && current_product && !modelLoaded) {
                             current_product.innerHTML = htmlContent; // Insert model-viewer HTML
-                            atlasAR.fetchModelData(product_id, "model_viewer_"+product_id )
+                            atlasAR.fetchModelData(product_id, "#model_viewer_"+product_id )
                         }
                     }, 500)
                 })

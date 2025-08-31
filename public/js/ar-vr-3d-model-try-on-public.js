@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 // Check if the data exists before assigning it to model-viewer
                                 if (data) {
-                                    atlasAR.setModelData(data, 'atlas_ar_model_viewer')
+                                    atlasAR.setModelData(data, '#atlas_ar_model_viewer')
                                 }
                             }
                         })

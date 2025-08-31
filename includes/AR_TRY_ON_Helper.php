@@ -241,7 +241,7 @@ class AR_TRY_ON_Helper
                 }
                 current_product.innerHTML = htmlContent; // Insert model-viewer HTML
 
-                atlasAR.fetchModelData(product_id, "model_viewer_shortcode_" + product_id)
+                atlasAR.fetchModelData(product_id, "#model_viewer_shortcode_" + product_id)
             });
         </script>
         <?php

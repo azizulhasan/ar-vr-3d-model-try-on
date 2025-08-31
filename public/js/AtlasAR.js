@@ -78,14 +78,14 @@ class AtlasAR {
         return value !== null && typeof value === 'object' && !Array.isArray(value);
     }
 
-    setModelData(data, model_id = 'atlas_ar_model_viewer') {
-        const modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0]
+    setModelData(data, model_id = '.atlas_ar_model_viewer') {
+        const modelViewer = document.querySelectorAll(model_id)[0]
         if (modelViewer && this.isObject(data)) {
             setModelAttributes(modelViewer, data)
         }
     }
 
-    async fetchModelData(product_id, model_id = 'atlas_ar_model_viewer') {
+    async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer') {
         let self = this
         let formData = new FormData();
         formData.append('post_id', product_id);
