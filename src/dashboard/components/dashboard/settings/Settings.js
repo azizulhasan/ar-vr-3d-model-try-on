@@ -10,7 +10,7 @@ import MultiSelect from '../../../../context/MultiSelect';
 export default function Settings({ settings, handleChange }) {
     // const [settings, setSettings] = useState({
     //     ar_try_on_display_button_automatically: 'yes',
-    //     atlas_ar_allowed_post_types: ['post'],
+    //     ar_try_on_allowed_post_types: ['post'],
     //     ar_try_on_wc_hook_position: "3",
     //     ar_try_on_single_product_tabs: "yes",
     //     ar_try_on_loading_type: "auto",
@@ -24,7 +24,7 @@ export default function Settings({ settings, handleChange }) {
     //     ar_try_on_ar_button_text: "Activate AR",
     //     ar_try_on_ar_button_background_color: "#3a3a3a",
     //     ar_try_on_ar_button_text_color: "#ffffff",
-    //     atlas_ar_enable_qr_code: 'yes',
+    //     ar_try_on_enable_qr_code: 'yes',
     //     ar_try_on_clear_cache: false,
     //     ar_try_on_ar_demo: {},
     // });
@@ -35,7 +35,7 @@ export default function Settings({ settings, handleChange }) {
     useEffect(() => {
         if (window.hasOwnProperty('ar_try_on') && ar_try_on?.post_types) {
             console.log(JSON.parse(JSON.stringify(Object.keys(ar_try_on.post_types))))
-            let tempPostTypes = wp.hooks.applyFilters('atlas_ar_allowed_post_types', JSON.parse(JSON.stringify(Object.keys(ar_try_on.post_types))))
+            let tempPostTypes = wp.hooks.applyFilters('ar_try_on_allowed_post_types', JSON.parse(JSON.stringify(Object.keys(ar_try_on.post_types))))
             setPostTypes(tempPostTypes)
         }
     }, [window?.ar_try_on])
@@ -146,16 +146,16 @@ export default function Settings({ settings, handleChange }) {
                 </div>
                 <div className="art-space-y-4">
                     <label
-                        htmlFor="atlas_ar_allowed_post_types"
+                        htmlFor="ar_try_on_allowed_post_types"
                         className="art-block art-font-medium"
                     >
                         Enable AR For Post Types
                     </label>
                     <MultiSelect
-                        id="atlas_ar_allowed_post_types"
-                        selectedItems={settings.atlas_ar_allowed_post_types}
+                        id="ar_try_on_allowed_post_types"
+                        selectedItems={settings.ar_try_on_allowed_post_types}
                         options={postTypes}
-                        onChange={(e) => handleSettingsChange(e, 'atlas_ar_allowed_post_types')} />
+                        onChange={(e) => handleSettingsChange(e, 'ar_try_on_allowed_post_types')} />
                 </div>
 
                 {/* Dropdown Section */}
@@ -664,7 +664,7 @@ export default function Settings({ settings, handleChange }) {
                 {/* Enable QR Code */}
                 <div className="art-space-y-4">
                     <label
-                        htmlFor="atlas_ar_enable_qr_code"
+                        htmlFor="ar_try_on_enable_qr_code"
                         className="art-block art-font-medium"
                     >
                         Enable QR Code
@@ -673,10 +673,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="atlas_ar_enable_qr_code"
-                                name="atlas_ar_enable_qr_code"
+                                id="ar_try_on_enable_qr_code"
+                                name="ar_try_on_enable_qr_code"
                                 value="yes"
-                                checked={settings.atlas_ar_enable_qr_code == 'yes'}
+                                checked={settings.ar_try_on_enable_qr_code == 'yes'}
                                 onChange={handleSettingsChange}
                             />
                             <span>Yes</span>
@@ -684,10 +684,10 @@ export default function Settings({ settings, handleChange }) {
                         <label className="art-flex art-items-center art-gap-2">
                             <input
                                 type="radio"
-                                id="atlas_ar_enable_qr_code"
-                                name="atlas_ar_enable_qr_code"
+                                id="ar_try_on_enable_qr_code"
+                                name="ar_try_on_enable_qr_code"
                                 value="no"
-                                checked={settings.atlas_ar_enable_qr_code == 'no'}
+                                checked={settings.ar_try_on_enable_qr_code == 'no'}
                                 onChange={handleSettingsChange}
                             />
                             <span>No</span>

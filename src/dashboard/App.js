@@ -18,7 +18,7 @@ export default function App() {
     const [authType, setAuthType] = useState("Bearer");
     const [settings, setSettings] = useState({
         ar_try_on_display_button_automatically: 'yes',
-        atlas_ar_allowed_post_types: ['post'],
+        ar_try_on_allowed_post_types: ['post'],
         ar_try_on_wc_hook_position: "3",
         ar_try_on_single_product_tabs: "yes",
         ar_try_on_loading_type: "auto",
@@ -32,7 +32,7 @@ export default function App() {
         ar_try_on_ar_button_text: "Activate AR",
         ar_try_on_ar_button_background_color: "#3a3a3a",
         ar_try_on_ar_button_text_color: "#ffffff",
-        atlas_ar_enable_qr_code: 'yes',
+        ar_try_on_enable_qr_code: 'yes',
         ar_try_on_clear_cache: false,
         ar_try_on_ar_demo: {},
         ar_try_on_exclude_integration_api_url: '',
@@ -89,7 +89,7 @@ export default function App() {
         if (Array.isArray(e)) {
             value = e;
 
-            if (targetName === 'atlas_ar_allowed_post_types' && value.length > 1) {
+            if (targetName === 'ar_try_on_allowed_post_types' && value.length > 1) {
                 toast('Multiple post type is only available in the pro version', 'error')
                 return;
             }
