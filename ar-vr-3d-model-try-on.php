@@ -40,7 +40,7 @@ require_once 'vendor/autoload.php';
 use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
-use AR_TRY_ON_API\AR_TRY_ON_Api_Routes;
+use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 
@@ -92,43 +92,43 @@ if ( ! function_exists( 'av3mto_fs' ) ) {
  * Rename this for your plugin and update it as you release new versions.
  */
 
-if ( ! defined( 'AR_TRY_ON_NONCE' ) ) {
+if ( ! defined( 'ATLAS_AR_NONCE' ) ) {
 
-	define( 'AR_TRY_ON_NONCE', 'AR_TRY_ON_NONCE' );
+	define( 'ATLAS_AR_NONCE', 'ATLAS_AR_NONCE' );
 }
 
-if ( ! defined( 'AR_TRY_ON_TEXT_DOMAIN' ) ) {
+if ( ! defined( 'ATLAS_AR_TEXT_DOMAIN' ) ) {
 
-	define( 'AR_TRY_ON_TEXT_DOMAIN', 'ar-vr-3d-model-try-on' );
+	define( 'ATLAS_AR_TEXT_DOMAIN', 'ar-vr-3d-model-try-on' );
 }
 
-if ( ! defined( 'AR_TRY_ON_ROOT_FILE' ) ) {
+if ( ! defined( 'ATLAS_AR_ROOT_FILE' ) ) {
 
-	define( 'AR_TRY_ON_ROOT_FILE', __FILE__ );
+	define( 'ATLAS_AR_ROOT_FILE', __FILE__ );
 }
 
-if ( ! defined( 'AR_TRY_ON_ROOT_FILE_NAME' ) ) {
-	$path = explode( DIRECTORY_SEPARATOR, AR_TRY_ON_ROOT_FILE );
+if ( ! defined( 'ATLAS_AR_ROOT_FILE_NAME' ) ) {
+	$path = explode( DIRECTORY_SEPARATOR, ATLAS_AR_ROOT_FILE );
 	$file = end( $path );
-	define( 'AR_TRY_ON_ROOT_FILE_NAME', $file );
+	define( 'ATLAS_AR_ROOT_FILE_NAME', $file );
 }
 
-if ( ! defined( 'AR_TRY_ON_ADMIN_PATH' ) ) {
+if ( ! defined( 'ATLAS_AR_ADMIN_PATH' ) ) {
 
-	define( 'AR_TRY_ON_ADMIN_PATH', plugin_dir_url( __FILE__ ) . 'admin/' );
+	define( 'ATLAS_AR_ADMIN_PATH', plugin_dir_url( __FILE__ ) . 'admin/' );
 }
 
-if ( ! defined( 'AR_TRY_ON_DEBUG_MODE' ) ) {
+if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 
-	define( 'AR_TRY_ON_DEBUG_MODE', 0 );
+	define( 'ATLAS_AR_DEBUG_MODE', 0 );
 }
 
 
-if ( ! defined( 'AR_TRY_ON_PLUGIN_URL' ) ) {
+if ( ! defined( 'ATLAS_AR_PLUGIN_URL' ) ) {
 	$url         = 'https://playground.wordpress.net';
 	$url_preview = 'http://playground.wordpress.net';
 
-	$site_url = plugin_dir_url( AR_TRY_ON_ROOT_FILE );
+	$site_url = plugin_dir_url( ATLAS_AR_ROOT_FILE );
 	$site_url = str_replace( $url_preview, $url, $site_url );
 	/**
 	 * Plugin Directory URL
@@ -136,17 +136,17 @@ if ( ! defined( 'AR_TRY_ON_PLUGIN_URL' ) ) {
 	 * @var string
 	 * @since 1.2.2
 	 */
-	define( 'AR_TRY_ON_PLUGIN_URL', trailingslashit( $site_url ) );
+	define( 'ATLAS_AR_PLUGIN_URL', trailingslashit( $site_url ) );
 }
 
-if ( ! defined( 'AR_TRY_ON_PLUGIN_PATH' ) ) {
+if ( ! defined( 'ATLAS_AR_PLUGIN_PATH' ) ) {
 	/**
 	 * Plugin Directory PATH
 	 *
 	 * @var string
 	 * @since 1.2.2
 	 */
-	define( 'AR_TRY_ON_PLUGIN_PATH', trailingslashit( plugin_dir_path( AR_TRY_ON_ROOT_FILE ) ) );
+	define( 'ATLAS_AR_PLUGIN_PATH', trailingslashit( plugin_dir_path( ATLAS_AR_ROOT_FILE ) ) );
 }
 
 /**
@@ -161,12 +161,12 @@ if ( ! defined( 'AR_TRY_ON_PLUGIN_PATH' ) ) {
 class AR_TRY_ON_Init {
 
 	public function __construct() {
-		if ( ! defined( 'AR_TRY_ON_VERSION' ) ) {
-			define( 'AR_TRY_ON_VERSION', apply_filters( 'ar_try_on_version', '1.5.2' ) );
+		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '1.5.2' ) );
 		}
 
-		if ( ! defined( 'AR_TRY_ON_PLUGIN_NAME' ) ) {
-			define( 'AR_TRY_ON_PLUGIN_NAME', apply_filters( 'ar_try_on_plugin_name', 'AR Try-On' ) );
+		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
+			define( 'ATLAS_AR_PLUGIN_NAME', apply_filters( 'ATLAS_AR_plugin_name', 'AtlasAR' ) );
 		}
 
 		$this->run();
@@ -187,7 +187,7 @@ class AR_TRY_ON_Init {
 }
 
 
-function ar_try_on_run() {
+function atlas_ar_run() {
 	new AR_TRY_ON_Init();
 //	if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
 		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
@@ -199,7 +199,7 @@ function ar_try_on_run() {
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
 
 add_action( 'init', function () {
-	ar_try_on_run();
+    atlas_ar_run();
 } );
 /**
  * The code that runs during plugin activation.

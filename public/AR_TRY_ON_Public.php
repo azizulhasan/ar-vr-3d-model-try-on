@@ -77,10 +77,10 @@ class AR_TRY_ON_Public {
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
 			'api_version'   => 'v1',
-			'nonce'         => wp_create_nonce( AR_TRY_ON_NONCE ),
-			'plugin_name'   => AR_TRY_ON_PLUGIN_NAME,
+			'nonce'         => wp_create_nonce( ATLAS_AR_NONCE ),
+			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
-			'VERSION'       => AR_TRY_ON_VERSION,
+			'VERSION'       => ATLAS_AR_VERSION,
 			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
 		];
 
@@ -103,12 +103,12 @@ class AR_TRY_ON_Public {
 	 */
 	public function enqueue_styles() {
 		if ( is_admin() && AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			wp_enqueue_style( 'ar-vr-3d-model-try-on', AR_TRY_ON_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'ar-vr-3d-model-try-on', ATLAS_AR_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 		}
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			wp_enqueue_style( 'alertify', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
-			wp_enqueue_style( 'alertify-default', AR_TRY_ON_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
-			wp_enqueue_style( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'alertify', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
+			wp_enqueue_style( 'alertify-default', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
+			wp_enqueue_style( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
 		}
 
 	}
@@ -121,23 +121,23 @@ class AR_TRY_ON_Public {
 	public function enqueue_scripts() {
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 //			if ( ! $this->localize_data['is_pro_active'] ) {
-//				wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array(), $this->version, true );
+//				wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array(), $this->version, true );
 //			}
             // TODO:: enqueue base on model setup/settings
-			wp_enqueue_script( 'ar-try-on-google-model-viewer', AR_TRY_ON_PLUGIN_URL . 'public/js/google-model-viewer.js', array(), $this->version, true );
-            wp_enqueue_script( 'AtlasAR', AR_TRY_ON_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
-            wp_enqueue_script( $this->plugin_name, AR_TRY_ON_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
+			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array(), $this->version, true );
+            wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
+            wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
 			wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
 
 			if(AR_TRY_ON_Helper::is_qr_code_enabled()){
-				wp_enqueue_script( 'ar-try-on-qr-generator', AR_TRY_ON_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+				wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
 			}
 		}
 
 
 	}
 
-    public function ar_try_on_button( $content ) {
+    public function atlas_ar_button( $content ) {
         $current_filter = current_filter();
         if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             if ( $current_filter === 'the_content' ) {
@@ -185,7 +185,7 @@ class AR_TRY_ON_Public {
     }
 
 
-	public function ar_try_on_button_tab( $content ) {
+	public function atlas_ar_button_tab( $content ) {
 		$current_filter = current_filter();
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			if ( $current_filter === 'the_content' ) {
@@ -213,7 +213,7 @@ class AR_TRY_ON_Public {
                 const htmlContent = atlasAR.getModelSkeleton(`model_viewer_${product_id}`);
 
                 let current_product = document.getElementById('atlas_ar_' + product_id);
-                let tab = document.getElementById('tab-title-ar_try_on_3d_view');
+                let tab = document.getElementById('tab-title-atlas_ar_3d_view');
                 let modelLoaded = false;
                 tab.addEventListener('click', async function() {
                     if(!modelLoaded) {
@@ -250,16 +250,16 @@ class AR_TRY_ON_Public {
 	 * @since 1.0.3
 	 *
 	 */
-	public function ar_try_on_woocommerce_tab( $tabs ) {
+	public function atlas_ar_woocommerce_tab( $tabs ) {
 
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return $tabs;
 		}
 
-		$tabs['ar_try_on_3d_view'] = array(
-			'title'    => __( 'AR Try On Product View', 'woocommerce' ),
+		$tabs['atlas_ar_3d_view'] = array(
+			'title'    => __( 'AtlasAR Product View', 'woocommerce' ),
 			'priority' => 50,
-			'callback' => array( $this, 'ar_try_on_button_tab' ),
+			'callback' => array( $this, 'atlas_ar_button_tab' ),
 		);
 
 		return $tabs;

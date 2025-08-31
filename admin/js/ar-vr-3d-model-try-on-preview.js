@@ -60,7 +60,7 @@ if (false) {
                     // Create modal content
                     const modalContent = document.createElement('div');
                     modalContent.className = 'modal-content';
-                    modalContent.id = 'ar_try_on_model_viewer';
+                    modalContent.id = 'atlas_ar_model_viewer';
 
                     // Add close button
                     const closeBtn = document.createElement('button');
@@ -84,7 +84,7 @@ if (false) {
                 // Check if the data exists before assigning it to model-viewer
                 if (data) {
                     showModal()
-                    wp.hooks.doAction('ar_try_on_pro_load_face_model', htmlContent, data);
+                    wp.hooks.doAction('atlas_ar_pro_load_face_model', htmlContent, data);
                 }
 
             } else {
@@ -121,15 +121,15 @@ if (false) {
 
     let model_settings = {}
     let InterVal = setInterval(async () => {
-        if (document.getElementById('ar_try_on_preveiw')) {
-            document.getElementById('ar_try_on_preveiw').innerHTML = htmlContent
+        if (document.getElementById('atlas_ar_preview')) {
+            document.getElementById('atlas_ar_preview').innerHTML = htmlContent
             clearInterval(InterVal)
         }
     }, 10)
 
 
 
-    wp.hooks.addAction('ar_try_on_preview_data', 'ar_try_on', function (data) {
+    wp.hooks.addAction('atlas_ar_preview_data', 'ar_try_on', function (data) {
 
         model_settings = { ...model_settings, ...data }
         console.log(model_settings)

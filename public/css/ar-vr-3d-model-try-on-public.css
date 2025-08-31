@@ -48,7 +48,7 @@
 	z-index: 1000 !important ;
 }
 
-#ar_try_on_qr_code {
+#atlas_ar_qr_code {
 	position: fixed;
 	right: 0;
 	left: 90%;
@@ -81,7 +81,7 @@
 
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
-	#ar_try_on_qr_code {
+	#atlas_ar_qr_code {
 		right: 0;
 		left: 70%;
 	}
