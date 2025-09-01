@@ -45,7 +45,7 @@ export default function App() {
     });
     const tabs = [
         { name: 'Settings', href: '#', current: false, component: 'Settings' },
-        // { name: 'Integration', href: '#', current: true, component: 'Integration' },
+        { name: 'Integration', href: '#', current: true, component: 'Integration' },
         { name: 'Features', href: '#', current: false, component: 'Features' },
         { name: 'Documentation', href: '#', current: false, component: 'Documentation' },
         { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
