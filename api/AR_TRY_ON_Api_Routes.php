@@ -148,6 +148,7 @@ class AR_TRY_ON_Api_Routes
         if ($method == 'GET') {
             $settings = (array)get_option('ar_try_on_settings');
             $product_settings = [];
+            error_log(print_r($call_from, 1));
             if (empty($post_id) && $call_from == 'admin') {
                 if (empty($settings)) {
                     $settings = AR_TRY_ON_Helper::default_settings();
@@ -158,6 +159,7 @@ class AR_TRY_ON_Api_Routes
             if ($post_id) {
                 $product_settings = (array)get_post_meta($post_id, 'ar_try_on_product_settings', true);
                 $product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
+
             }
 
             // Get Default value.
@@ -169,6 +171,13 @@ class AR_TRY_ON_Api_Routes
             $data = $settings;
             $data += $product_settings;
             $data['product_name'] = $post_id ? get_the_title($post_id) : '';
+
+            /**
+             * If call is form frontend then exclude api related values.
+             */
+            if($call_from !== 'admin') {
+                $data = AR_TRY_ON_Helper::exclude_sensitive_properties($data);
+            }
         } else {
             $fields = json_decode($decoded_body['fields']);
             $data = $fields;

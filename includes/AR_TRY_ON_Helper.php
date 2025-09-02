@@ -367,7 +367,7 @@ class AR_TRY_ON_Helper
     public static function get_structured_model_response($request_decoded_data, $api_response_data = [])
     {
         $response_body = [];
-
+        error_log(print_r(['$api_response_data' => $api_response_data], 1));
         if (isset($request_decoded_data['api_name'], $request_decoded_data['body']['type'])
             && $request_decoded_data['api_name'] == "tripo3d"
             && $request_decoded_data['body']['type'] == "text_to_model"
@@ -388,19 +388,44 @@ class AR_TRY_ON_Helper
 
                 $response_body['output'] = [];
                 if (isset($api_response_data['data']['output'])) {
+                    /**
+                     * pbr_model will give work as glb
+                     */
                     if (isset($api_response_data['data']['output']['pbr_model'])) {
                         $response_body['output']['src'] = $api_response_data['data']['output']['pbr_model'];
                     }
+                    /**
+                     * generated_image image will work as post image.
+                     */
                     if (isset($api_response_data['data']['output']['generated_image'])) {
-                        $response_body['output']['generated_image'] = $api_response_data['data']['output']['generated_image'];
+                        $response_body['output']['poster'] = $api_response_data['data']['output']['generated_image'];
                     }
+                    /**
+                     * rendered_image and thumbnail both image are same. that is why one of
+                     * both will be stored.
+                     */
                     if (isset($api_response_data['data']['output']['rendered_image'])) {
-                        $response_body['output']['rendered_image'] = $api_response_data['data']['output']['rendered_image'];
+                        $response_body['output']['thumbnail'] = $api_response_data['data']['output']['rendered_image'];
                     }
                 }
 
-                if (isset($api_response_data['data']['thumbnail'])) {
+                /**
+                 * If thumbnail is not set yet, then look into result.
+                 */
+                if (!isset($response_body['output']['thumbnail']) && isset($api_response_data['data']['thumbnail'])) {
                     $response_body['output']['thumbnail'] = $api_response_data['data']['thumbnail'];
+                }
+                /**
+                 * If src is not set yet, then look into result.
+                 */
+                if (!isset($response_body['output']['src']) && isset($api_response_data['data']['result']['pbr_model']['url'])) {
+                    $response_body['output']['src'] = $api_response_data['data']['result']['pbr_model']['url'];
+                }
+                /**
+                 * If thumbnail is not set yet, then look into result.
+                 */
+                if (!isset($response_body['output']['thumbnail']) && isset($api_response_data['data']['result']['rendered_image']['url'])) {
+                    $response_body['output']['thumbnail'] = $api_response_data['data']['result']['rendered_image']['url'];
                 }
 
             }
@@ -438,36 +463,53 @@ class AR_TRY_ON_Helper
             wp_mkdir_p($file_path);
         }
         $uploaded_files = [];
-        foreach ($files as $file_key => $url) {
-            $response = wp_remote_get($url, ['timeout' => 90]);
+        error_log(print_r($files, true));
+        if (isset($files['src']) && !empty($files['src'])) {
+            foreach ($files as $file_key => $url) {
+                $response = wp_remote_get($url, ['timeout' => 90]);
 
-            if (is_wp_error($response)) {
-                error_log(print_r("Failed to download $file_key: " . $response->get_error_message(), true));
-                continue;
+                if (is_wp_error($response)) {
+                    error_log(print_r("Failed to download $file_key: " . $response->get_error_message(), true));
+                    continue;
+                }
+
+                $body = wp_remote_retrieve_body($response);
+
+                if (empty($body)) {
+                    error_log(print_r("Empty body for $file_key", true));
+                    continue;
+                }
+
+                // Extract filename from URL
+                $filename = basename(parse_url($url, PHP_URL_PATH));
+
+                // Save file
+                $file_full_path = trailingslashit($file_path) . $file_key . '__' . $filename;
+                $file_full_url = trailingslashit($file_url) . $file_key . '__' . $filename;
+                $saved = file_put_contents($file_full_path, $body);
+
+
+                $uploaded_files[$file_key]['url'] = $file_full_url;
+                $uploaded_files[$file_key]['path'] = $file_full_path;
             }
-
-            $body = wp_remote_retrieve_body($response);
-
-            if (empty($body)) {
-                error_log(print_r("Empty body for $file_key", true));
-                continue;
-            }
-
-            // Extract filename from URL
-            $filename = basename(parse_url($url, PHP_URL_PATH));
-
-            // Save file
-            $file_full_path = trailingslashit($file_path) . $file_key .'__'. $filename;
-            $file_full_url = trailingslashit($file_url) . $file_key .'__'. $filename;
-            $saved = file_put_contents($file_full_path, $body);
-
-
-            $uploaded_files[$file_key]['url'] = $file_full_url;
-            $uploaded_files[$file_key]['path'] = $file_full_path;
         }
 
 
         return $uploaded_files;
+    }
+
+    public static function exclude_sensitive_properties($product_settings)
+    {
+
+        // word to match inside the key
+        $word = "exclude";
+
+        // filter array
+        $product_settings = array_filter($product_settings, function ($value, $key) use ($word) {
+            return stripos($key, $word) === false; // keep only if $word not in key
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return $product_settings;
     }
 
 }
