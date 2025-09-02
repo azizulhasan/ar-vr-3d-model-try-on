@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -8,9 +7,8 @@ import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
 import Documentation from "./components/dashboard/Documentation/Documentation";
-import { getURL, postWithoutImage } from "../context/utilities";
+import {getAPITypes, getURL, postWithoutImage} from "../context/utilities";
 import toast from '../context/Notify';
-
 
 
 export default function App() {
@@ -35,23 +33,27 @@ export default function App() {
         ar_try_on_enable_qr_code: 'yes',
         ar_try_on_clear_cache: false,
         ar_try_on_ar_demo: {},
+        ar_try_on_exclude_integration_api_name: '',
         ar_try_on_exclude_integration_api_url: '',
         ar_try_on_exclude_integration_api_headers: [
             {
                 key: "Authorization",
                 value: ""
             },
+            {key: 'Content-Type', value: 'application/json'},
         ],
     });
     const tabs = [
-        { name: 'Settings', href: '#', current: false, component: 'Settings' },
-        { name: 'Integration', href: '#', current: true, component: 'Integration' },
-        { name: 'Features', href: '#', current: false, component: 'Features' },
-        { name: 'Documentation', href: '#', current: false, component: 'Documentation' },
-        { name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact' },
+        {name: 'Settings', href: '#', current: true, component: 'Settings'},
+        {name: 'Integration', href: '#', current: false, component: 'Integration'},
+        {name: 'Features', href: '#', current: false, component: 'Features'},
+        {name: 'Documentation', href: '#', current: false, component: 'Documentation'},
+        {name: 'Contact Us', href: 'https://wpaugmentedreality.com/contact-us/', current: false, component: 'Contact'},
 
     ]
     const [headers, setHeaders] = useState([]);
+    const allApi = getAPITypes('all');
+    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
 
     useEffect(() => {
         /**
@@ -61,8 +63,14 @@ export default function App() {
         formData.append('method', 'get');
         postWithoutImage(getURL('settings'), formData).then(
             (res) => {
-                setSettings({ ...settings, ...res.data });
-                // setIsDataLoaded(true)
+
+                let finalSettings = {...settings, ...res.data};
+                if(!finalSettings?.ar_try_on_exclude_integration_api_name) {
+                    console.log(finalSettings?.ar_try_on_exclude_integration_api_name)
+                    console.log(currentApi)
+
+                }
+                setSettings(finalSettings);
             });
     }, []);
 
@@ -80,9 +88,9 @@ export default function App() {
     }
 
     /**
- * handle change
- * @param {*} e
- */
+     * handle change
+     * @param {*} e
+     */
     const handleChange = (e, targetName = '') => {
 
         let value = '';
@@ -95,7 +103,7 @@ export default function App() {
             }
             setSettings({
                 ...settings,
-                ...{ [targetName]: value },
+                ...{[targetName]: value},
             });
             return;
         } else {
@@ -125,18 +133,27 @@ export default function App() {
 
         if (!e.target.name) return;
 
+        if(e.target.name === 'ar_try_on_exclude_integration_api_name') {
+            // setSettings({
+            //     ...settings,
+            // {ar_try_on_exclude_integration_api_name: allA}
+            //     ...{[e.target.name]: value},
+            // });
+            //
+            // return;
+        }
+
         console.log({name: e.target.name, value})
         setSettings({
             ...settings,
-            ...{ [e.target.name]: value },
+            ...{[e.target.name]: value},
         });
     };
 
     const handleHeaderChange = (index, field, value) => {
         const updated = [...settings.ar_try_on_exclude_integration_api_headers];
         updated[index][field] = value;
-        setHeaders(updated);
-        setSettings({ ...settings, ...{ [ar_try_on_exclude_integration_api_headers]: updated } })
+        setSettings({...settings, ...{ar_try_on_exclude_integration_api_headers: updated}})
     };
 
 
@@ -147,14 +164,15 @@ export default function App() {
         e.preventDefault();
         console.log(settings)
 
-        if( settings?.ar_try_on_exclude_integration_api_name  && settings?.ar_try_on_exclude_integration_api_url  ) {
-            settings.ar_try_on_exclude_integration_api_headers.map(header=>{
-                if(header.key == '' || header.value == '') {
+        if (settings?.ar_try_on_exclude_integration_api_name && settings?.ar_try_on_exclude_integration_api_url) {
+            settings.ar_try_on_exclude_integration_api_headers.map(header => {
+                if (header.key == '' || header.value == '') {
                     alert('Please fill all of the API headers with proper value')
                     return;
                 }
             })
         }
+        return;
         // tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
         let formData = new FormData();
         formData.append('fields', JSON.stringify(settings));
@@ -223,27 +241,30 @@ export default function App() {
         </div>
 
         {
-            activeTab === 'Settings' && <Settings setHeaders={setHeaders} settings={settings} handleChange={handleChange} />
+            activeTab === 'Settings' &&
+            <Settings setHeaders={setHeaders} settings={settings} handleChange={handleChange}/>
         }
         {
-            activeTab === 'Features' && <Features />
+            activeTab === 'Features' && <Features/>
         }
         {
-            activeTab === 'Integration' && <Integration setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType} handleChange={handleChange} handleHeaderChange={handleHeaderChange} />
+            activeTab === 'Integration' &&
+            <Integration currentApi={currentApi} allApi={allApi} setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType}
+                         handleChange={handleChange} handleHeaderChange={handleHeaderChange}/>
         }
-        { activeTab === 'Documentation' && <Documentation /> }
+        {activeTab === 'Documentation' && <Documentation/>}
 
         {/* Submit Button */}
-            {activeTab !== 'Documentation' && (
+        {activeTab !== 'Documentation' && (
             <div className="art-space-y-2">
                 <button
-                onClick={handleSubmit}
-                className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500"
+                    onClick={handleSubmit}
+                    className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500"
                 >
-                Save
+                    Save
                 </button>
             </div>
-)}
+        )}
     </>;
 }
 

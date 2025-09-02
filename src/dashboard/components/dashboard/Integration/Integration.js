@@ -9,10 +9,11 @@ export default function Integration({
                                         setHeaders,
                                         authType,
                                         setAuthType,
-                                        setSettings
+                                        setSettings,
+                                        currentApi,
+                                        allApi,
                                     }) {
-    const allApi = getAPITypes('all');
-    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+
     const [previousHeaders, setPreviousHeaders] = useState(null)
     const addHeader = () => {
         let tempSettings = structuredClone(settings)
@@ -41,34 +42,35 @@ export default function Integration({
                 headers: settings?.ar_try_on_exclude_integration_api_headers
             })
         }
-        if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
-
-            let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name);
-            setCurentAPI(data);
-            if(previousHeaders?.api_name == settings?.ar_try_on_exclude_integration_api_name) {
-                data.headers = previousHeaders.headers;
-            }
-
-            let headerData = [
-                ...settings.ar_try_on_exclude_integration_api_headers,
-                ...data.headers,
-            ];
-
-            // Keep only the last occurrence of each key
-            const uniqueHeaders = Object.values(
-                headerData.reduce((acc, item) => {
-                    acc[item.key] = item; // overwrite if duplicate
-                    return acc;
-                }, {})
-            );
-
-            let settingsData = {
-                ...settings,
-                ar_try_on_exclude_integration_api_url: data.url,
-                ar_try_on_exclude_integration_api_headers: uniqueHeaders
-            }
-            setSettings(settingsData)
-        }
+        // if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
+        //
+        //     let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name || 'tripo3d');
+        //     setCurentAPI(data);
+        //     console.log({data})
+        //     if(previousHeaders?.api_name == settings?.ar_try_on_exclude_integration_api_name) {
+        //         data.headers = previousHeaders.headers;
+        //     }
+        //
+        //     let headerData = [
+        //         ...settings.ar_try_on_exclude_integration_api_headers,
+        //         ...data.headers,
+        //     ];
+        //
+        //     // Keep only the last occurrence of each key
+        //     const uniqueHeaders = Object.values(
+        //         headerData.reduce((acc, item) => {
+        //             acc[item.key] = item; // overwrite if duplicate
+        //             return acc;
+        //         }, {})
+        //     );
+        //
+        //     let settingsData = {
+        //         ...settings,
+        //         ar_try_on_exclude_integration_api_url: data.url,
+        //         ar_try_on_exclude_integration_api_headers: uniqueHeaders
+        //     }
+        //     setSettings(settingsData)
+        // }
     }, [settings])
 
     return (
