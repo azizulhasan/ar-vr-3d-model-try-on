@@ -53,6 +53,7 @@ export default function IntegrationSection({
                     setProductModel(tempProductModel)
                     console.log({tempProductModel})
                     wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
+                    return;
                 }
 
                 /**

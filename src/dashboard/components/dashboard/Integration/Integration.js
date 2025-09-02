@@ -12,6 +12,7 @@ export default function Integration({
                                         setSettings,
                                         currentApi,
                                         allApi,
+                                        setCurrentAPI
                                     }) {
 
     const [previousHeaders, setPreviousHeaders] = useState(null)
@@ -42,35 +43,41 @@ export default function Integration({
                 headers: settings?.ar_try_on_exclude_integration_api_headers
             })
         }
-        // if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
-        //
-        //     let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name || 'tripo3d');
-        //     setCurentAPI(data);
-        //     console.log({data})
-        //     if(previousHeaders?.api_name == settings?.ar_try_on_exclude_integration_api_name) {
-        //         data.headers = previousHeaders.headers;
-        //     }
-        //
-        //     let headerData = [
-        //         ...settings.ar_try_on_exclude_integration_api_headers,
-        //         ...data.headers,
-        //     ];
-        //
-        //     // Keep only the last occurrence of each key
-        //     const uniqueHeaders = Object.values(
-        //         headerData.reduce((acc, item) => {
-        //             acc[item.key] = item; // overwrite if duplicate
-        //             return acc;
-        //         }, {})
-        //     );
-        //
-        //     let settingsData = {
-        //         ...settings,
-        //         ar_try_on_exclude_integration_api_url: data.url,
-        //         ar_try_on_exclude_integration_api_headers: uniqueHeaders
-        //     }
-        //     setSettings(settingsData)
-        // }
+        /**
+         * When a user change the API name like from "trip3d' to "meshy" at that point,
+         * the header will be changed. but without saving if he, select again the tripo3d
+         * then its previous value which is saved in database with "Authorization" key
+         *
+         * This code will restore it.
+         */
+        if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
+
+            let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name || 'tripo3d');
+            setCurrentAPI(data);
+            if(previousHeaders?.api_name === settings?.ar_try_on_exclude_integration_api_name) {
+                data.headers = previousHeaders.headers;
+            }
+
+            let headerData = [
+                ...settings.ar_try_on_exclude_integration_api_headers,
+                ...data.headers,
+            ];
+
+            // Keep only the last occurrence of each key
+            const uniqueHeaders = Object.values(
+                headerData.reduce((acc, item) => {
+                    acc[item.key] = item; // overwrite if duplicate
+                    return acc;
+                }, {})
+            );
+
+            let settingsData = {
+                ...settings,
+                ar_try_on_exclude_integration_api_url: data.url,
+                ar_try_on_exclude_integration_api_headers: uniqueHeaders
+            }
+            setSettings(settingsData)
+        }
     }, [settings])
 
     return (

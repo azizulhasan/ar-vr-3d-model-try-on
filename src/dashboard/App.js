@@ -53,7 +53,7 @@ export default function App() {
     ]
     const [headers, setHeaders] = useState([]);
     const allApi = getAPITypes('all');
-    const [currentApi, setCurentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+    const [currentApi, setCurrentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
 
     useEffect(() => {
         /**
@@ -66,9 +66,10 @@ export default function App() {
 
                 let finalSettings = {...settings, ...res.data};
                 if(!finalSettings?.ar_try_on_exclude_integration_api_name) {
-                    console.log(finalSettings?.ar_try_on_exclude_integration_api_name)
+                    finalSettings.ar_try_on_exclude_integration_api_name = currentApi.id
+                    finalSettings.ar_try_on_exclude_integration_api_url = currentApi.url
                     console.log(currentApi)
-
+                    console.log(finalSettings)
                 }
                 setSettings(finalSettings);
             });
@@ -172,7 +173,7 @@ export default function App() {
                 }
             })
         }
-        return;
+        // return;
         // tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
         let formData = new FormData();
         formData.append('fields', JSON.stringify(settings));
@@ -249,7 +250,7 @@ export default function App() {
         }
         {
             activeTab === 'Integration' &&
-            <Integration currentApi={currentApi} allApi={allApi} setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType}
+            <Integration setCurrentAPI={setCurrentAPI} currentApi={currentApi} allApi={allApi} setSettings={setSettings} settings={settings} authType={authType} setAuthType={setAuthType}
                          handleChange={handleChange} handleHeaderChange={handleHeaderChange}/>
         }
         {activeTab === 'Documentation' && <Documentation/>}
