@@ -30,6 +30,15 @@ export default function IntegrationSection({
     }
     const handleSubmit = async (e) => {
         let submitButton = e.target;
+        e.preventDefault();
+        const postId = getPostID()
+        if (!postId) {
+            notify('Please publish the post first. Then reload the page and save.', 'warn',{
+                autoClose: 5000,
+            })
+            return;
+        }
+
         if(submitButton.getAttribute('data-id') === 'complete') {
             if(!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
                 return;
@@ -37,32 +46,42 @@ export default function IntegrationSection({
             generateModelButtonStateChange('generate', 'Generating Model......', submitButton)
         }
 
+        /**
+         * Build data to generate model or save model.
+         * @type {{}}
+         */
+        let headers = {}
+        settings.ar_try_on_exclude_integration_api_headers.map(header => {
+            headers[header.key] = header.value;
+        });
+
+        let body = {}
+        productModel.exclude_integration_api_body.map(item => {
+            body[item.key] = item.value;
+        });
+        let data_arr = {};
+        data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
+        data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
+        data_arr['headers'] = headers;
+        data_arr['body'] = body
+        data_arr['post_id'] = postId
+        if (data_arr?.url == '' || data_arr?.api_name == '') {
+            notify('Please integrate first from Integration Tab of the plugin', 'error');
+            return;
+        }
+
+        if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
+            && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
+            notify('Please write a proper prompt', 'error');
+            return;
+        }
+
+        /**
+         * Generate model and save it to temporary folder. also get the temporary model url
+         * and temporary poster url and preview it. at that time button state will be "save"
+         * If user is satisfied then click button again. To save it on permanent folder
+         */
         if(submitButton.getAttribute('data-id') === 'generate') {
-            let headers = {}
-            settings.ar_try_on_exclude_integration_api_headers.map(header => {
-                headers[header.key] = header.value;
-            });
-
-            let body = {}
-            productModel.exclude_integration_api_body.map(item => {
-                body[item.key] = item.value;
-            });
-            let data_arr = {};
-            data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
-            data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
-            data_arr['headers'] = headers;
-            data_arr['body'] = body
-            data_arr['post_id'] = getPostID()
-            if (data_arr?.url == '' || data_arr?.api_name == '') {
-                notify('Please integrate first from Integration Tab of the plugin', 'error');
-                return;
-            }
-
-            if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
-                && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
-                notify('Please write a proper prompt', 'error');
-                return;
-            }
 
             if(data_arr?.body?.task_id) {
                 generateModelButtonStateChange('progress', 'Generating Model......', submitButton)
@@ -83,7 +102,7 @@ export default function IntegrationSection({
                             tempProductModel.poster = res.data.temp.poster.url
                         }
                         setProductModel(tempProductModel)
-                        setTempModelData({...res.data.temp, ...{post_id: data_arr.post_id}})
+                        setTempModelData({...{temp:res.data.temp}, ...{post_id: data_arr.post_id}})
                         console.log(tempProductModel)
                         generateModelButtonStateChange('save', 'Save This Model', submitButton)
                         wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
@@ -108,7 +127,7 @@ export default function IntegrationSection({
                                 if(res?.data?.temp?.poster?.url) {
                                     tempProductModel.poster = res.data.temp.poster.url
                                 }
-                                setTempModelData({...res.data.temp, ...{post_id: data_arr.post_id}})
+                                setTempModelData({...{temp:res.data.temp}, ...{post_id: data_arr.post_id}})
                                 setProductModel(tempProductModel)
                                 generateModelButtonStateChange('save', 'Save This Model', submitButton)
                                 console.log({tempProductModel})
@@ -137,10 +156,68 @@ export default function IntegrationSection({
                         }, 30000)
                     }
                 });
+            /**
+             * When button state is "save" then it will move the temporay
+             * files to permanent folder.
+             */
         }else if(submitButton.getAttribute('data-id') === 'save'){
             console.log(e.target.getAttribute('data-id'))
-            console.log(false)
-            generateModelButtonStateChange('complete', 'Model is saved successfully.', submitButton)
+            /**
+             * Save model files from temporary folder to final folder.
+             */
+            generateModelButtonStateChange('save_progress', 'Model files saving .......', submitButton)
+            let formData2 = new FormData();
+            data_arr['temporary_model_data'] = tempModelData
+            formData2.append('data', JSON.stringify(data_arr));
+            console.log(tempModelData)
+            let response = await fetch(getURL('generate_3d_model'), {
+                method: "POST", // *GET, POST, PUT, DELETE, etc.
+                body: formData2, // body data type must match "Content-Type" header
+                headers: {
+                    'X-WP-Nonce': ar_try_on.rest_nonce
+                },
+            });
+            response = await response.json();
+            let tempProductModel = structuredClone(productModel)
+            if(!response?.data?.src?.url) {
+                generateModelButtonStateChange('error', 'Something went wrong! Try again.', submitButton)
+                return;
+            }
+            tempProductModel.src = response.data.src.url
+            if(response?.data?.poster?.url) {
+                tempProductModel.poster = response.data.poster.url
+            }
+            setTempModelData({})
+            setProductModel(tempProductModel)
+            generateModelButtonStateChange('file_saved', 'Model files saved successfully.', submitButton)
+
+            /**
+             * Save product model data with updated poster ans src url to database.
+             */
+            console.log(tempProductModel)
+            let formData = new FormData();
+            formData.append('fields', JSON.stringify(tempProductModel));
+            formData.append('post_id', postId);
+            formData.append('method', 'POST');
+
+            setTimeout(()=>{
+                generateModelButtonStateChange('data_save', 'Model data is saving.......', submitButton)
+            },1000)
+            postWithoutImage(getURL('get_model_and_settings'), formData)
+                .then((res) => {
+                    console.log(res)
+                    let tempProductModel = {...productModel, ...res.data};
+                    setProductModel(tempProductModel);
+                    notify('Successfully Saved All Data.', 'success',{
+                        autoClose: 5000,
+                    })
+                    generateModelButtonStateChange('complete', 'Successfully Saved All Data.', submitButton)
+                    wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+
         }else {
             generateModelButtonStateChange('double_click', 'Do not click multiple time!', submitButton)
         }
@@ -313,7 +390,7 @@ export default function IntegrationSection({
             ))}
             <button type="button"
                     onClick={handleSubmit}
-                    data-id={'save'}
+                    data-id={'generate'}
                     id={"atlas_ar_model_generate"}
                     className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
                 Generate Model

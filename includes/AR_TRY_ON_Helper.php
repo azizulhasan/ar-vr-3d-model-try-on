@@ -521,6 +521,39 @@ class AR_TRY_ON_Helper
         return $product_settings;
     }
 
+    public static function move_model_files_to_permanent_folder($temporary_model_data) {
+        $files = $temporary_model_data['temp'];
+        if (empty($files)) {
+            return $temporary_model_data['temp']; // nothing to move
+        }
+        $final_files = [];
+        foreach ($files as $file_key => $file_data) {
+            $file_path = $file_data['path'];
+            $file_url = $file_data['url'];
+            if (!file_exists($file_path)) {
+                continue; // skip if file not found
+            }
+
+            // remove "temp" from the path
+            $target_path = str_replace('/temp/', '/', $file_path);
+            $target_url = str_replace('/temp/', '/', $file_url);
+
+            // make sure destination folder exists
+            $target_dir = dirname($target_path);
+            if (!is_dir($target_dir)) {
+                wp_mkdir_p($target_dir);
+            }
+
+            // move file
+            rename($file_path, $target_path);
+
+            $final_files[$file_key]['path'] = $target_path;
+            $final_files[$file_key]['url'] = $target_url;
+        }
+
+        return $final_files;
+    }
+
     public static function get_post_date($post_id)
     {
         $post_date = get_post_field('post_date', $post_id);

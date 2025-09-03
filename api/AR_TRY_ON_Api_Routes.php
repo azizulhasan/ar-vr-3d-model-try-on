@@ -215,15 +215,28 @@ class AR_TRY_ON_Api_Routes
     public function generate_3d_model($request)
     {
         $body = $request->get_params();
-        $result['status'] = false;
+        $result['status'] = true;
         $decoded_data = json_decode($body['data'], 1);
         $api_url = $decoded_data['url'];
         $headers = $decoded_data['headers'];
         $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
         $api_body = $decoded_data['body'];
 
+        /**
+         * Move temporary files to permanent folder.
+         */
+        if(isset($decoded_data['temporary_model_data'])){
+            $files_data = AR_TRY_ON_Helper::move_model_files_to_permanent_folder($decoded_data['temporary_model_data']);
+            $result['data'] = $files_data;
+            $result['extra'] = [
+                '$decoded_data' => $decoded_data,
+            ];
+
+            return rest_ensure_response($result);
+        }
+
 //        $response_data = file_get_contents('D:\mamp\htdocs\azizulhasan\tts\wp-content\plugins\ar-vr-3d-model-try-on\src\context\tripo3d_final.json');
-//        $response_data = json_decode( $response_data, true );
+//        $response_data = json_decode($response_data, true);
 //
 //        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
 //        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($result['data']['output'], $decoded_data);
