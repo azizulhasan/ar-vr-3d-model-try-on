@@ -367,7 +367,6 @@ class AR_TRY_ON_Helper
     public static function get_structured_model_response($request_decoded_data, $api_response_data = [])
     {
         $response_body = [];
-        error_log(print_r(['$api_response_data' => $api_response_data], 1));
         if (isset($request_decoded_data['api_name'], $request_decoded_data['body']['type'])
             && $request_decoded_data['api_name'] == "tripo3d"
             && $request_decoded_data['body']['type'] == "text_to_model"
@@ -455,15 +454,25 @@ class AR_TRY_ON_Helper
     public static function download_model_files_files_and_store($files, $settings = [])
     {
 
-        $file_path = isset($settings['path']) ? $settings['path'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
-        $file_url = isset($settings['url']) ? $settings['url'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL;
+        $file_path = isset($settings['temp_path']) ? $settings['temp_path'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
+        $file_url = isset($settings['temp_url']) ? $settings['temp_url'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL;
+
+        if (isset($settings['post_id']) && !empty($settings['post_id'])) {
+            $date = self::get_post_date($settings['post_id']);
+            $file_path .= $date . '/';
+            $file_url .= $date . '/';
+        }
+
+        error_log(print_r([
+            'file_path' => $file_path,
+            'file_url' => $file_url,
+        ], 1));
 
         // Make sure the directory exists
         if (!file_exists($file_path)) {
             wp_mkdir_p($file_path);
         }
         $uploaded_files = [];
-        error_log(print_r($files, true));
         if (isset($files['src']) && !empty($files['src'])) {
             foreach ($files as $file_key => $url) {
                 $response = wp_remote_get($url, ['timeout' => 90]);
@@ -510,6 +519,14 @@ class AR_TRY_ON_Helper
         }, ARRAY_FILTER_USE_BOTH);
 
         return $product_settings;
+    }
+
+    public static function get_post_date($post_id)
+    {
+        $post_date = get_post_field('post_date', $post_id);
+        $date = date('Y/m/d', strtotime($post_date));
+
+        return $date;
     }
 
 }

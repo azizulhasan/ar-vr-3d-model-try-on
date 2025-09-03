@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
 
-import 'react-toastify/dist/ReactToastify.css';
 
 import Settings from "./components/dashboard/settings/Settings";
 import {ToastContainer} from "react-toastify";

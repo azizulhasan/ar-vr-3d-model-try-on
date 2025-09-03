@@ -5,6 +5,10 @@ import CameraSection from "./components/CameraSection.js";
 import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
 import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
+import notify from "../context/Notify";
+import {ToastContainer} from "react-toastify";
+
+
 
 const ARProductModelSettings = () => {
 
@@ -61,7 +65,7 @@ const ARProductModelSettings = () => {
 
     const [settings, setSettings] = useState({})
 
-    const [currentApi, setCurrentAPI] = useState(getAPITypes( 'tripo3d'))
+    const [currentApi, setCurrentAPI] = useState(getAPITypes('tripo3d'))
 
     // integration settings:
     const addIntegrationField = () => {
@@ -115,7 +119,16 @@ const ARProductModelSettings = () => {
         if (!e.target.name) return;
 
         if (e.target.name === 'ar_try_on_ar_placement' && (value !== 'wall' && value !== 'floor') && !ar_try_on.is_pro_active) {
-            alert("This option is only available in the pro version");
+            notify('This option is only available in the pro version', 'warn',{
+                autoClose: 5000,
+            })
+            return;
+        }
+
+        if (e.target.name === 'exclude_integration_api_model_type' && e.target.value === 'image_to_model') {
+            notify('Image to model generation is only available in pro version!', 'warn',{
+                autoClose: 5000,
+            });
             return;
         }
 
@@ -191,13 +204,13 @@ const ARProductModelSettings = () => {
                             ...res.data,
                         };
 
-                        if(!productModelData?.exclude_integration_api_model_type) {
+                        if (!productModelData?.exclude_integration_api_model_type) {
                             productModelData.exclude_integration_api_model_type = 'text_to_model'
                         }
 
                         console.log({before: productModelData.exclude_integration_api_body})
 
-                        if(!res.data?.exclude_integration_api_body || res.data?.exclude_integration_api_body.length < 1) {
+                        if (!res.data?.exclude_integration_api_body || res.data?.exclude_integration_api_body.length < 1) {
                             productModelData.exclude_integration_api_body = currentApi.body.supported_types[productModelData.exclude_integration_api_model_type].input
                         }
                         console.log({after: productModelData.exclude_integration_api_body})
@@ -213,13 +226,13 @@ const ARProductModelSettings = () => {
     useEffect(() => {
         if (isProductModelLoaded) {
             wp.hooks.doAction('atlas_ar_preview_data', productModel);
-            console.log({name: settings.ar_try_on_exclude_integration_api_name, isProductModelLoaded })
+            console.log({name: settings.ar_try_on_exclude_integration_api_name, isProductModelLoaded})
         }
     }, [isProductModelLoaded]);
 
 
     useEffect(() => {
-        if(productModel.exclude_integration_api_model_type) {
+        if (productModel.exclude_integration_api_model_type) {
             let tempProductModel = structuredClone(productModel)
             tempProductModel.exclude_integration_api_body = currentApi.body.supported_types[productModel.exclude_integration_api_model_type].input;
             setProductModel(tempProductModel)
@@ -231,7 +244,9 @@ const ARProductModelSettings = () => {
         e.preventDefault();
         const postId = getPostID()
         if (!postId) {
-            alert('Please publish the post first. Then reload the page and save.')
+            notify('Please publish the post first. Then reload the page and save.', 'warn',{
+                autoClose: 5000,
+            })
             return;
         }
 
@@ -243,7 +258,9 @@ const ARProductModelSettings = () => {
             .then((res) => {
                 console.log(res)
                 setProductModel({...productModel, ...res.data});
-                alert('Successfully Saved Data.')
+                notify('Successfully Saved Data.', 'success',{
+                    autoClose: 5000,
+                })
             })
             .catch((err) => {
                 console.log(err);
@@ -261,134 +278,147 @@ const ARProductModelSettings = () => {
     );
 
     return (
-        <div className="art-flex art-gap-6" style={{display: 'flex', gap: '0.25rem'}}>
-            {/* Left Side - Settings/Style Sections */}
-            <div className="art-w-1/2" style={{width: '50%', borderRight: '1px solid black', paddingRight: '1rem'}}>
-                {/* Section Tabs */}
-                <div className="art-flex art-mb-4 art-border-b">
-                    <button
-                        onClick={(e) => toggleSection(e, 'settings')}
-                        className={`art-px-4 art-py-2 art-cursor-pointer art-font-medium art-border-b-2 ${activeSection === 'settings'
-                            ? 'art-border-blue-500 art-text-blue-600'
-                            : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                        }`}
-                    >
-                        Settings
-                    </button>
-                    <button
-                        onClick={(e) => toggleSection(e, 'style')}
-                        className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'style'
-                            ? 'art-border-blue-500 art-text-blue-600'
-                            : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                        }`}
-                    >
-                        Style
-                    </button>
-                    {/*//TODO:: release integration with next release.*/}
-                    <button
-                        onClick={(e) => toggleSection(e, 'integration')}
-                        className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
-                            ? 'art-border-blue-500 art-text-blue-600'
-                            : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
-                        }`}
-                    >
-                        Integration
-                    </button>
-                </div>
-                <div>
-                    <br/>
-                    {/* Settings Section */}
-                    {activeSection === 'settings' && (
-                        <div className="art-bg-gray-100 art-rounded">
-                            <ContentSection
-                                basicSettings={basicSettings}
-                                productModel={productModel}
-                                handleChange={handleChange}
-                                setBasicSettings={setBasicSettings}
-                                activeAccordion={activeAccordion}
-                                toggleAccordion={toggleAccordion}
-                                handleMediaButtonClick={handleMediaButtonClick}
-                            />
-
-                            <CameraSection
-                                productModel={productModel}
-                                handleChange={handleChange}
-                                activeAccordion={activeAccordion}
-                                toggleAccordion={toggleAccordion}
-                            />
-
-                            <LightEnvironmentSection
-                                basicSettings={basicSettings}
-                                productModel={productModel}
-                                handleChange={handleChange}
-                                handleMediaButtonClick={handleMediaButtonClick}
-                                activeAccordion={activeAccordion}
-                                toggleAccordion={toggleAccordion}
-                                setBasicSettings={setBasicSettings}
-                            />
-
-
-                        </div>
-                    )}
-
-                    {/* Style Section */}
-                    {activeSection === 'style' && (
-                        <StyleSection
-                            productModel={productModel}
-                            handleChange={handleChange}
-                            styleAccordion={styleAccordion}
-                            toggleStyleAccordion={toggleStyleAccordion}
-
-                        />
-                    )}
-
-                    {(activeSection === 'settings' || activeSection === 'style') && <SaveButton/>}
-
-                    {activeSection === 'integration' && isProductModelLoaded && (
-                        <IntegrationSection
-                            productModel={productModel}
-                            addField={addIntegrationField}
-                            removeField={removeIntegrationField}
-                            handleIntegrationChange={handleIntegrationChange}
-                            settings={settings}
-                            currentApi={currentApi}
-                            handleChange={handleChange}
-                            setProductModel={setProductModel}
-                        />
-                    )}
-                </div>
-            </div>
-
-            {/* Right Side - Shortcode and Preview */}
-            <div className="art-w-1/2" style={{width: '50%', paddingLeft: '1rem'}}>
-                <div className="art-bg-white art-rounded art-shadow-sm art-flex art-gap-2">
-                    <input
-                        type="text"
-                        name="atlas_ar_shortcode_button"
-                        id="atlas_ar_shortcode_button"
-                        defaultValue="[atlas_ar]"
-                        title="Short code"
-                        className="art-border art-w-1/2 art-rounded art-ml-4 art-mb-4 "
-                    />
-
-                    <div
-                        type="button"
-                        id="atlas_ar_shortcode_button"
-                        style={{cursor: "copy"}}
-                        onClick={copyshortcode}
-                        // className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500"
-                        className="art-mt-2 art-mb-4 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
-                    >
-                        <span className="dashicons dashicons-admin-page"></span>
-                        Copy ShortCode
+        <>
+            <ToastContainer
+                position='top-right'
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
+            <div className="art-flex art-gap-6" style={{display: 'flex', gap: '0.25rem'}}>
+                {/* Left Side - Settings/Style Sections */}
+                <div className="art-w-1/2" style={{width: '50%', borderRight: '1px solid black', paddingRight: '1rem'}}>
+                    {/* Section Tabs */}
+                    <div className="art-flex art-mb-4 art-border-b">
+                        <button
+                            onClick={(e) => toggleSection(e, 'settings')}
+                            className={`art-px-4 art-py-2 art-cursor-pointer art-font-medium art-border-b-2 ${activeSection === 'settings'
+                                ? 'art-border-blue-500 art-text-blue-600'
+                                : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
+                            }`}
+                        >
+                            Settings
+                        </button>
+                        <button
+                            onClick={(e) => toggleSection(e, 'style')}
+                            className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'style'
+                                ? 'art-border-blue-500 art-text-blue-600'
+                                : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
+                            }`}
+                        >
+                            Style
+                        </button>
+                        {/*//TODO:: release integration with next release.*/}
+                        <button
+                            onClick={(e) => toggleSection(e, 'integration')}
+                            className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${activeSection === 'integration'
+                                ? 'art-border-blue-500 art-text-blue-600'
+                                : 'art-border-transparent art-text-gray-600 hover:art-text-gray-800'
+                            }`}
+                        >
+                            Integration
+                        </button>
                     </div>
-                    <SaveButton classes="art-w-96 art-mb-4"/>
+                    <div>
+                        <br/>
+                        {/* Settings Section */}
+                        {activeSection === 'settings' && (
+                            <div className="art-bg-gray-100 art-rounded">
+                                <ContentSection
+                                    basicSettings={basicSettings}
+                                    productModel={productModel}
+                                    handleChange={handleChange}
+                                    setBasicSettings={setBasicSettings}
+                                    activeAccordion={activeAccordion}
+                                    toggleAccordion={toggleAccordion}
+                                    handleMediaButtonClick={handleMediaButtonClick}
+                                />
+
+                                <CameraSection
+                                    productModel={productModel}
+                                    handleChange={handleChange}
+                                    activeAccordion={activeAccordion}
+                                    toggleAccordion={toggleAccordion}
+                                />
+
+                                <LightEnvironmentSection
+                                    basicSettings={basicSettings}
+                                    productModel={productModel}
+                                    handleChange={handleChange}
+                                    handleMediaButtonClick={handleMediaButtonClick}
+                                    activeAccordion={activeAccordion}
+                                    toggleAccordion={toggleAccordion}
+                                    setBasicSettings={setBasicSettings}
+                                />
+
+
+                            </div>
+                        )}
+
+                        {/* Style Section */}
+                        {activeSection === 'style' && (
+                            <StyleSection
+                                productModel={productModel}
+                                handleChange={handleChange}
+                                styleAccordion={styleAccordion}
+                                toggleStyleAccordion={toggleStyleAccordion}
+
+                            />
+                        )}
+
+                        {(activeSection === 'settings' || activeSection === 'style') && <SaveButton/>}
+
+                        {activeSection === 'integration' && isProductModelLoaded && (
+                            <IntegrationSection
+                                productModel={productModel}
+                                addField={addIntegrationField}
+                                removeField={removeIntegrationField}
+                                handleIntegrationChange={handleIntegrationChange}
+                                settings={settings}
+                                currentApi={currentApi}
+                                handleChange={handleChange}
+                                setProductModel={setProductModel}
+                            />
+                        )}
+                    </div>
                 </div>
 
-                <div id='atlas_ar_preview'></div>
+                {/* Right Side - Shortcode and Preview */}
+                <div className="art-w-1/2" style={{width: '50%', paddingLeft: '1rem'}}>
+                    <div className="art-bg-white art-rounded art-shadow-sm art-flex art-gap-2">
+                        <input
+                            type="text"
+                            name="atlas_ar_shortcode_button"
+                            id="atlas_ar_shortcode_button"
+                            defaultValue="[atlas_ar]"
+                            title="Short code"
+                            className="art-border art-w-1/2 art-rounded art-ml-4 art-mb-4 "
+                        />
+
+                        <div
+                            type="button"
+                            id="atlas_ar_shortcode_button"
+                            style={{cursor: "copy"}}
+                            onClick={copyshortcode}
+                            // className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500"
+                            className="art-mt-2 art-mb-4 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
+                        >
+                            <span className="dashicons dashicons-admin-page"></span>
+                            Copy ShortCode
+                        </div>
+                        <SaveButton classes="art-w-96 art-mb-4"/>
+                    </div>
+
+                    <div id='atlas_ar_preview'></div>
+                </div>
+                <div className="art-hidden art-w-96 art-w-1/3"></div>
             </div>
-            <div className="art-hidden art-w-96 art-w-1/3"></div>
-        </div>
+        </>
     );
 };
 

@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
-import {getURL, postWithoutImage, getAPITypes} from "../../context/utilities";
+import {getURL, postWithoutImage, getAPITypes, getPostID} from "../../context/utilities";
+import notify from "../../context/Notify";
 
 export default function IntegrationSection({
                                                productModel,
@@ -14,84 +15,135 @@ export default function IntegrationSection({
 
     const [previousBody, setPreviousBody] = useState(null)
     const [previousModelType, setPreviousModelType] = useState(null)
-    const handleSubmit = async () => {
-
-        let headers = {}
-        settings.ar_try_on_exclude_integration_api_headers.map(header => {
-            headers[header.key] = header.value;
-        });
-
-        let body = {}
-        productModel.exclude_integration_api_body.map(item => {
-            body[item.key] = item.value;
-        });
-        let data_arr = {};
-        data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
-        data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
-        data_arr['headers'] = headers;
-        data_arr['body'] = body
-        if (data_arr?.url == '' || data_arr?.api_name == '') {
-            alert('Please integrate first from Integration Tab of the plugin')
-            return;
+    const [tempModelData, setTempModelData] = useState({})
+    const generateModelButtonStateChange = (state, innerText, submitButton = '') => {
+        if(!submitButton) {
+            submitButton = document.getElementById('atlas_ar_model_generate');
+        }
+        if(state) {
+            submitButton.setAttribute('data-id', state)
         }
 
-        if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
-            && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
-            alert('Please write a proper prompt')
-            return;
+        if(innerText) {
+            submitButton.innerHTML = innerText;
+        }
+    }
+    const handleSubmit = async (e) => {
+        let submitButton = e.target;
+        if(submitButton.getAttribute('data-id') === 'complete') {
+            if(!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
+                return;
+            }
+            generateModelButtonStateChange('generate', 'Generating Model......', submitButton)
         }
 
-        let formData = new FormData();
-        formData.append('data', JSON.stringify(data_arr));
-        postWithoutImage(getURL('generate_3d_model'), formData).then(
-            (res) => {
-                console.log(res)
-                if(res?.status && res?.data?.temp?.src?.url) {
-                    // console.log(res)
-                    let tempProductModel = structuredClone(productModel)
-                    tempProductModel.src = res?.data?.temp?.src?.url
-                    setProductModel(tempProductModel)
-                    console.log({tempProductModel})
-                    wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
-                    return;
-                }
-
-                /**
-                 * TODO:: meke this a method.
-                 */
-                if (!res?.data?.temp?.src?.url && res?.data?.task_id) {
-                    let responseData = {};
-                    let taskInterval = setInterval(async () => {
-                        console.log(taskInterval)
-                        if (responseData?.data?.temp?.src?.url) {
-                            clearInterval(taskInterval)
-                            taskInterval = null;
-                            let tempProductModel = structuredClone(productModel)
-                            tempProductModel.src = responseData.data.temp.src.url
-                            setProductModel(tempProductModel)
-                            console.log({tempProductModel})
-                            wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
-                            return;
-                        }
-
-                        let formData2 = new FormData();
-                        data_arr.body.task_id = res?.data?.task_id;
-                        console.log(data_arr)
-                        formData2.append('data', JSON.stringify(data_arr));
-                        // Default options are marked with *
-                        const response = await fetch(getURL('generate_3d_model'), {
-                            method: "POST", // *GET, POST, PUT, DELETE, etc.
-                            body: formData2, // body data type must match "Content-Type" header
-                            headers: {
-                                'X-WP-Nonce': ar_try_on.rest_nonce
-                            },
-                        });
-                        responseData = await response.json();
-                        console.log(responseData)
-                    }, 30000)
-                }
-
+        if(submitButton.getAttribute('data-id') === 'generate') {
+            let headers = {}
+            settings.ar_try_on_exclude_integration_api_headers.map(header => {
+                headers[header.key] = header.value;
             });
+
+            let body = {}
+            productModel.exclude_integration_api_body.map(item => {
+                body[item.key] = item.value;
+            });
+            let data_arr = {};
+            data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
+            data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
+            data_arr['headers'] = headers;
+            data_arr['body'] = body
+            data_arr['post_id'] = getPostID()
+            if (data_arr?.url == '' || data_arr?.api_name == '') {
+                notify('Please integrate first from Integration Tab of the plugin', 'error');
+                return;
+            }
+
+            if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
+                && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
+                notify('Please write a proper prompt', 'error');
+                return;
+            }
+
+            if(data_arr?.body?.task_id) {
+                generateModelButtonStateChange('progress', 'Generating Model......', submitButton)
+            }else{
+                generateModelButtonStateChange('progress', 'Generating Task......', submitButton)
+            }
+            console.log(data_arr)
+            // return;
+            let formData = new FormData();
+            formData.append('data', JSON.stringify(data_arr));
+            postWithoutImage(getURL('generate_3d_model'), formData).then(
+                (res) => {
+                    console.log(res)
+                    if(res?.status && res?.data?.temp?.src?.url) {
+                        let tempProductModel = structuredClone(productModel)
+                        tempProductModel.src = res.data.temp.src.url
+                        if(res?.data?.temp?.poster?.url) {
+                            tempProductModel.poster = res.data.temp.poster.url
+                        }
+                        setProductModel(tempProductModel)
+                        setTempModelData({...res.data.temp, ...{post_id: data_arr.post_id}})
+                        console.log(tempProductModel)
+                        generateModelButtonStateChange('save', 'Save This Model', submitButton)
+                        wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
+                        return;
+                    }
+
+                    if(res?.data?.task_id) {
+                        generateModelButtonStateChange('task', 'Task Created! Please Wait!', submitButton)
+                    }
+                    /**
+                     * TODO:: meke this a method.
+                     */
+                    if (!res?.data?.temp?.src?.url && res?.data?.task_id) {
+                        let responseData = {};
+                        let taskInterval = setInterval(async () => {
+                            console.log(taskInterval)
+                            if (responseData?.data?.temp?.src?.url) {
+                                clearInterval(taskInterval)
+                                taskInterval = null;
+                                let tempProductModel = structuredClone(productModel)
+                                tempProductModel.src = responseData.data.temp.src.url
+                                if(res?.data?.temp?.poster?.url) {
+                                    tempProductModel.poster = res.data.temp.poster.url
+                                }
+                                setTempModelData({...res.data.temp, ...{post_id: data_arr.post_id}})
+                                setProductModel(tempProductModel)
+                                generateModelButtonStateChange('save', 'Save This Model', submitButton)
+                                console.log({tempProductModel})
+                                wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
+                                return;
+                            }
+
+                            if (responseData?.data?.temp?.poster?.url) {
+                                generateModelButtonStateChange('poster', 'Poster Created! Now Generating Model', submitButton)
+                            }
+
+                            let formData2 = new FormData();
+                            data_arr.body.task_id = res?.data?.task_id;
+                            console.log(data_arr)
+                            formData2.append('data', JSON.stringify(data_arr));
+                            // Default options are marked with *
+                            const response = await fetch(getURL('generate_3d_model'), {
+                                method: "POST", // *GET, POST, PUT, DELETE, etc.
+                                body: formData2, // body data type must match "Content-Type" header
+                                headers: {
+                                    'X-WP-Nonce': ar_try_on.rest_nonce
+                                },
+                            });
+                            responseData = await response.json();
+                            console.log(responseData)
+                        }, 30000)
+                    }
+                });
+        }else if(submitButton.getAttribute('data-id') === 'save'){
+            console.log(e.target.getAttribute('data-id'))
+            console.log(false)
+            generateModelButtonStateChange('complete', 'Model is saved successfully.', submitButton)
+        }else {
+            generateModelButtonStateChange('double_click', 'Do not click multiple time!', submitButton)
+        }
     };
 
     useEffect(() => {
@@ -117,7 +169,6 @@ export default function IntegrationSection({
             // setProductModel(productModelData);
         }
 
-        console.log({productModel})
     }, [productModel])
 
 
@@ -262,6 +313,8 @@ export default function IntegrationSection({
             ))}
             <button type="button"
                     onClick={handleSubmit}
+                    data-id={'save'}
+                    id={"atlas_ar_model_generate"}
                     className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
                 Generate Model
             </button>
