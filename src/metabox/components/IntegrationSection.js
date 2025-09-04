@@ -16,6 +16,22 @@ export default function IntegrationSection({
     const [previousBody, setPreviousBody] = useState(null)
     const [previousModelType, setPreviousModelType] = useState(null)
     const [tempModelData, setTempModelData] = useState(null)
+
+    function insertUnique(array, newItem, shouldReplace = false) {
+        const index = array.findIndex(item => item.key === newItem.key);
+
+        if (index === -1) {
+            // if key not found → insert new
+            array.push(newItem);
+        }
+
+        if (shouldReplace) {
+            // if key exists and shouldReplace is true → replace
+            array[index] = newItem;
+        }
+
+        return array;
+    }
     const generateModelButtonStateChange = (state, innerText, submitButton = '') => {
         if (!submitButton) {
             submitButton = document.getElementById('atlas_ar_model_generate');
@@ -109,10 +125,8 @@ export default function IntegrationSection({
 
                         // set product body with task_id
                         if (res?.data?.input?.prompt) {
-                            tempProductModel.exclude_integration_api_body = {
-                                ...res.data.input,
-                                ...{task_id: res.data.task_id}
-                            }
+                            tempProductModel.exclude_integration_api_body  = insertUnique(tempProductModel.exclude_integration_api_body,{key: 'prompt', type: 'textarea', value: res.data.input.prompt}, true)
+                            tempProductModel.exclude_integration_api_body  = insertUnique(tempProductModel.exclude_integration_api_body,{key: 'task_id', type: 'textarea', value: res.data.task_id})
                         }
 
                         setProductModel(tempProductModel)
@@ -145,11 +159,11 @@ export default function IntegrationSection({
                                 }
 
                                 // set product body with task_id
-                                if (res?.data?.input?.prompt) {
-                                    tempProductModel.exclude_integration_api_body = {
-                                        ...tempProductModel.exclude_integration_api_body,
-                                        ...{task_id: res.data.task_id}
-                                    }
+                                if (responseData?.data?.task_id) {
+                                    tempProductModel.exclude_integration_api_body.push({key: 'task_id', type: 'text', value: responseData.data.task_id})
+                                }
+                                if (responseData?.data?.task_id) {
+                                    tempProductModel.exclude_integration_api_body  = insertUnique(tempProductModel.exclude_integration_api_body,{key: 'task_id', type: 'textarea', value: responseData.data.task_id})
                                 }
 
                                 setTempModelData({...{temp: responseData.data.temp}, ...{post_id: data_arr.post_id}})
