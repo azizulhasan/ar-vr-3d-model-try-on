@@ -148,7 +148,6 @@ class AR_TRY_ON_Api_Routes
         if ($method == 'GET') {
             $settings = (array)get_option('ar_try_on_settings');
             $product_settings = [];
-            error_log(print_r($call_from, 1));
             if (empty($post_id) && $call_from == 'admin') {
                 if (empty($settings)) {
                     $settings = AR_TRY_ON_Helper::default_settings();
