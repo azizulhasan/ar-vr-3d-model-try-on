@@ -174,7 +174,7 @@ export default function IntegrationSection({
                                 return;
                             }
 
-                            if (responseData?.data?.temp?.poster?.url || responseData?.data?.output?.poster?.url) {
+                            if (responseData?.data?.temp?.poster?.url || responseData?.data?.output?.poster) {
                                 generateModelButtonStateChange('poster', 'Poster Created! Now Generating Model', submitButton)
                                 setTimeout(() => {
                                     generateModelButtonStateChange('poster', 'Model .glb file is generating!', submitButton)
