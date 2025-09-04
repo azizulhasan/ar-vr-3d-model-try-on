@@ -26,7 +26,7 @@ jobs:
                     port: ${{ secrets.FTP_PORT }}
                     protocol: ftp
                     local-dir: ./ # Path to your plugin folder
-                    server-dir: /home/azizyzjn/cors2.atlasaidev.com/wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
+                    server-dir: ./wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
                     log-level: verbose
                     exclude: |
                         .github/**
