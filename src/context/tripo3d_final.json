@@ -1,0 +1,37 @@
+{
+  "code": 0,
+  "data": {
+    "task_id": "c056a910-adc0-4d17-92f0-f727a58f2631",
+    "type": "text_to_model",
+    "status": "success",
+    "input": {
+      "prompt": "a sneaker with multiple variants like red, green, blue , white, gray, black, for a 18 year old boy.",
+      "model_version": "v2.5-20250123",
+      "texture": true,
+      "pbr": true,
+      "texture_alignment": "geometry",
+      "geometry_quality": "original"
+    },
+    "output": {
+      "pbr_model": "https:\/\/tripo-data.rg1.data.tripo3d.com\/tcli_2493dc5efb0d4af7bb5e047fa472b99a\/20250902\/c056a910-adc0-4d17-92f0-f727a58f2631\/tripo_pbr_model_c056a910-adc0-4d17-92f0-f727a58f2631.glb?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly90cmlwby1kYXRhLnJnMS5kYXRhLnRyaXBvM2QuY29tL3RjbGlfMjQ5M2RjNWVmYjBkNGFmN2JiNWUwNDdmYTQ3MmI5OWEvMjAyNTA5MDIvYzA1NmE5MTAtYWRjMC00ZDE3LTkyZjAtZjcyN2E1OGYyNjMxL3RyaXBvX3Bicl9tb2RlbF9jMDU2YTkxMC1hZGMwLTRkMTctOTJmMC1mNzI3YTU4ZjI2MzEuZ2xiIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzU2OTQ0MDAwfX19XX0_&Signature=e2btOCXevMzReJC5oe0G3MjUbKTOR6u7up-kQ6BHrE0XOfnrO3hMi~JruhFRYrbmrIth-zURYbjEsz32SIC4ShfJHZ9oNE0QhQWIOgzqI7Cwl3sqFgRDZxuMlObcY8v81WONSIvdDTUVhm7zlnNxdfRRJDDVOg0XaKURL~5yRzECKQ0U8b0S4m2VLBkZM6FUF1IgDx7og0zBXDrAaLNauyNYrvIy~J1M3qJWHR8TNnVaZvoPxE0woG9tDibwtDGSv8tc9LDLwy4he1In2PiGN0QflooNQnuy7gwuwXTLE4CKa1JiNPMmwjdvKAxRsAmXAAo-Ka2plCEhLu0PxNNmog__&Key-Pair-Id=K1676C64NMVM2J",
+      "generated_image": "https:\/\/tripo-data.rg1.data.tripo3d.com\/tcli_2493dc5efb0d4af7bb5e047fa472b99a\/20250902\/c056a910-adc0-4d17-92f0-f727a58f2631\/im.webp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly90cmlwby1kYXRhLnJnMS5kYXRhLnRyaXBvM2QuY29tL3RjbGlfMjQ5M2RjNWVmYjBkNGFmN2JiNWUwNDdmYTQ3MmI5OWEvMjAyNTA5MDIvYzA1NmE5MTAtYWRjMC00ZDE3LTkyZjAtZjcyN2E1OGYyNjMxL2ltLndlYnAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3NTY5NDQwMDB9fX1dfQ__&Signature=IkrDtPqENwEO2IVQ4H7C0wDpaznL9bs119DBF89NkOarj8FzstVGfRRSY3ovsOtF1yUQOu~Niu0cXAPRrJVu7T1bkltRgCqihsvPdrCeJUyx6M~Kt-7qE9RPtiM7z-5td28kLdf2Tskh3Pjue6thNL8yDYC~BXp-CxTbzBC4pOk~AI6gscJLk4-bj90WMiOU5Ncos~XJNDEXWa8gs9QpeNeiu03wqfAq7fyodgeKDL01BNJRgnvKyFGoZt370OmJVlp3gk7w83~nf9F5wd8NU2uZ6IgvhwBaIpXFaJof~OWv6tiw0-STwII8JGDozoXioXvvngz7xCsCLXE00-Z7HA__&Key-Pair-Id=K1676C64NMVM2J",
+      "rendered_image": "https:\/\/tripo-data.rg1.data.tripo3d.com\/tcli_2493dc5efb0d4af7bb5e047fa472b99a\/20250902\/c056a910-adc0-4d17-92f0-f727a58f2631\/legacy_mesh.webp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly90cmlwby1kYXRhLnJnMS5kYXRhLnRyaXBvM2QuY29tL3RjbGlfMjQ5M2RjNWVmYjBkNGFmN2JiNWUwNDdmYTQ3MmI5OWEvMjAyNTA5MDIvYzA1NmE5MTAtYWRjMC00ZDE3LTkyZjAtZjcyN2E1OGYyNjMxL2xlZ2FjeV9tZXNoLndlYnAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3NTY5NDQwMDB9fX1dfQ__&Signature=EtfP8AN-F7EUvxtJ~7KAO8kso9WWRJ86z6tgXAaFvd5-EYXxh48b9Ix-~4okUSe0ueiE5Z6WrHSzZRe0QmKaA98K7h9nO2~4d7zQWFACMHdGMs~q2aEkuEqSHPfDX6cJjoJbHT57mSDYJ4pYrW6ojDGNR7X24~7ATmriS2J9CKuP8aXrDXv3R9kGVowabg9tcy5FYk5JlgcVf3hcXL~f4P1LXxyd3SQT-L1-cNlXvBzFXOtDHxNd171OcbIlIu0IJImDkYI7-kPnfmvQHSTFtUMp13TGGonqYEP7clPD4z4kSCwVR-A6XaYpFxLl44HqgdqKttqxyvgxJGFX9hb38w__&Key-Pair-Id=K1676C64NMVM2J"
+    },
+    "progress": 100,
+    "create_time": 1756806239,
+    "prompt": "a sneaker with multiple variants like red, green, blue , white, gray, black, for a 18 year old boy.",
+    "thumbnail": "https:\/\/tripo-data.rg1.data.tripo3d.com\/tcli_2493dc5efb0d4af7bb5e047fa472b99a\/20250902\/c056a910-adc0-4d17-92f0-f727a58f2631\/legacy_mesh.webp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly90cmlwby1kYXRhLnJnMS5kYXRhLnRyaXBvM2QuY29tL3RjbGlfMjQ5M2RjNWVmYjBkNGFmN2JiNWUwNDdmYTQ3MmI5OWEvMjAyNTA5MDIvYzA1NmE5MTAtYWRjMC00ZDE3LTkyZjAtZjcyN2E1OGYyNjMxL2xlZ2FjeV9tZXNoLndlYnAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3NTY5NDQwMDB9fX1dfQ__&Signature=EtfP8AN-F7EUvxtJ~7KAO8kso9WWRJ86z6tgXAaFvd5-EYXxh48b9Ix-~4okUSe0ueiE5Z6WrHSzZRe0QmKaA98K7h9nO2~4d7zQWFACMHdGMs~q2aEkuEqSHPfDX6cJjoJbHT57mSDYJ4pYrW6ojDGNR7X24~7ATmriS2J9CKuP8aXrDXv3R9kGVowabg9tcy5FYk5JlgcVf3hcXL~f4P1LXxyd3SQT-L1-cNlXvBzFXOtDHxNd171OcbIlIu0IJImDkYI7-kPnfmvQHSTFtUMp13TGGonqYEP7clPD4z4kSCwVR-A6XaYpFxLl44HqgdqKttqxyvgxJGFX9hb38w__&Key-Pair-Id=K1676C64NMVM2J",
+    "queuing_num": -1,
+    "running_left_time": -1,
+    "result": {
+      "pbr_model": {
+        "type": "glb",
+        "url": "https:\/\/tripo-data.rg1.data.tripo3d.com\/tcli_2493dc5efb0d4af7bb5e047fa472b99a\/20250902\/c056a910-adc0-4d17-92f0-f727a58f2631\/tripo_pbr_model_c056a910-adc0-4d17-92f0-f727a58f2631.glb?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly90cmlwby1kYXRhLnJnMS5kYXRhLnRyaXBvM2QuY29tL3RjbGlfMjQ5M2RjNWVmYjBkNGFmN2JiNWUwNDdmYTQ3MmI5OWEvMjAyNTA5MDIvYzA1NmE5MTAtYWRjMC00ZDE3LTkyZjAtZjcyN2E1OGYyNjMxL3RyaXBvX3Bicl9tb2RlbF9jMDU2YTkxMC1hZGMwLTRkMTctOTJmMC1mNzI3YTU4ZjI2MzEuZ2xiIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzU2OTQ0MDAwfX19XX0_&Signature=e2btOCXevMzReJC5oe0G3MjUbKTOR6u7up-kQ6BHrE0XOfnrO3hMi~JruhFRYrbmrIth-zURYbjEsz32SIC4ShfJHZ9oNE0QhQWIOgzqI7Cwl3sqFgRDZxuMlObcY8v81WONSIvdDTUVhm7zlnNxdfRRJDDVOg0XaKURL~5yRzECKQ0U8b0S4m2VLBkZM6FUF1IgDx7og0zBXDrAaLNauyNYrvIy~J1M3qJWHR8TNnVaZvoPxE0woG9tDibwtDGSv8tc9LDLwy4he1In2PiGN0QflooNQnuy7gwuwXTLE4CKa1JiNPMmwjdvKAxRsAmXAAo-Ka2plCEhLu0PxNNmog__&Key-Pair-Id=K1676C64NMVM2J"
+      },
+      "rendered_image": {
+        "type": "webp",
+        "url": "https:\/\/tripo-data.rg1.data.tripo3d.com\/tcli_2493dc5efb0d4af7bb5e047fa472b99a\/20250902\/c056a910-adc0-4d17-92f0-f727a58f2631\/legacy_mesh.webp?Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly90cmlwby1kYXRhLnJnMS5kYXRhLnRyaXBvM2QuY29tL3RjbGlfMjQ5M2RjNWVmYjBkNGFmN2JiNWUwNDdmYTQ3MmI5OWEvMjAyNTA5MDIvYzA1NmE5MTAtYWRjMC00ZDE3LTkyZjAtZjcyN2E1OGYyNjMxL2xlZ2FjeV9tZXNoLndlYnAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3NTY5NDQwMDB9fX1dfQ__&Signature=EtfP8AN-F7EUvxtJ~7KAO8kso9WWRJ86z6tgXAaFvd5-EYXxh48b9Ix-~4okUSe0ueiE5Z6WrHSzZRe0QmKaA98K7h9nO2~4d7zQWFACMHdGMs~q2aEkuEqSHPfDX6cJjoJbHT57mSDYJ4pYrW6ojDGNR7X24~7ATmriS2J9CKuP8aXrDXv3R9kGVowabg9tcy5FYk5JlgcVf3hcXL~f4P1LXxyd3SQT-L1-cNlXvBzFXOtDHxNd171OcbIlIu0IJImDkYI7-kPnfmvQHSTFtUMp13TGGonqYEP7clPD4z4kSCwVR-A6XaYpFxLl44HqgdqKttqxyvgxJGFX9hb38w__&Key-Pair-Id=K1676C64NMVM2J"
+      }
+    }
+  }
+}

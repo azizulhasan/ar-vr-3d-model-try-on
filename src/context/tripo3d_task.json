@@ -1,0 +1,14 @@
+{
+  "task_id": "c056a910-adc0-4d17-92f0-f727a58f2631",
+  "type": "text_to_model",
+  "input": {
+    "prompt": "a sneaker with multiple variants like red, green, blue , white, gray, black, for a 18 year old boy.",
+    "model_version": "v2.5-20250123",
+    "texture": true,
+    "pbr": true,
+    "texture_alignment": "geometry",
+    "geometry_quality": "original"
+  },
+  "output": [],
+  "temp": []
+}

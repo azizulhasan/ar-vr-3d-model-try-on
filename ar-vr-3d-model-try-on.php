@@ -44,6 +44,7 @@ use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 
+remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
 
 if ( ! function_exists( 'av3mto_fs' ) ) {

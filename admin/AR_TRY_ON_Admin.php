@@ -98,8 +98,8 @@ class AR_TRY_ON_Admin {
 	public function enqueue_styles() {
 		if ( AR_TRY_ON_Helper::is_atlas_ar_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', ATLAS_AR_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
-
-		}
+        }
+        wp_enqueue_style( 'atlas_ar_toastify', ATLAS_AR_PLUGIN_URL . 'admin/css/atlas_ar_toastify.css', array(), $this->version, 'all' );
 
 		wp_enqueue_style( 'ar-vr-3d-model-try-on-admin', ATLAS_AR_PLUGIN_URL . 'admin/css/ar-try-on-admin.css', array(), $this->version, 'all' );
 

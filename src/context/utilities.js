@@ -185,6 +185,7 @@ export const getAPITypes = (api_type = 'tripo3d') => {
             id: 'tripo3d',
             name: 'Tripo 3D',
             url: 'https://api.tripo3d.ai/v2/openapi/task',
+            api_key_url: 'https://platform.tripo3d.ai/api-keys',
             headers: [
                 {key: 'Authorization', value: '' },
                 {key: 'Content-Type', value: 'application/json' },
@@ -193,7 +194,7 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            {key: 'prompt', type: 'textarea', value: 'a cat'},
+                            {key: 'prompt', type: 'textarea', value: ''},
                             {key: 'type', type: 'text', value: 'text_to_model'},
                             {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
                             {key: 'texture', type: 'boolean', value: true},
@@ -225,6 +226,7 @@ export const getAPITypes = (api_type = 'tripo3d') => {
             id: 'meshy_ai',
             name: 'Meshy AI 3D',
             url: 'https://api.meshy.ai/openapi/v2/text-to-3d',
+            api_key_url: 'https://www.meshy.ai/settings/api',
             headers: [
                 {key: 'Authorization', value: '' },
                 {key: 'Content-Type', value: 'application/json' },

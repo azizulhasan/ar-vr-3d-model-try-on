@@ -17,13 +17,13 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Deploy via FTP to https://stage2.atlasaidev.com/ testing server.
-                uses: SamKirkland/FTP-Deploy-Action@4.3.2
+            -   name: Deploy via FTP to https://cors2.atlasaidev.com/ testing server.
+                uses: SamKirkland/FTP-Deploy-Action@v4.3.2
                 with:
-                    server: ${{ secrets.FTP_HOST }}
+                    server: ${{ secrets.FTP_SERVER }}
                     username: ${{ secrets.FTP_USERNAME }}
                     password: ${{ secrets.FTP_PASSWORD }}
-                    port: ${{ secrets.FTP_PORT || 21 }}
+                    port: ${{ secrets.FTP_PORT }}
                     protocol: ftp
                     local-dir: ./ # Path to your plugin folder
                     server-dir: /wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
@@ -53,6 +53,7 @@ jobs:
                         webpack.mix.js
                         tailwind.config.js
                         README.md
+                        .DS_Store
                         
 
 
