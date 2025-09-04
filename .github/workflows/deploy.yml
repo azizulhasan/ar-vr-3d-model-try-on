@@ -17,7 +17,7 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Deploy via FTP to https://stage2.atlasaidev.com/ testing server.
+            -   name: Deploy via FTP to https://cors2.atlasaidev.com/ testing server.
                 uses: SamKirkland/FTP-Deploy-Action@v4.3.5
                 with:
                     server: ${{ secrets.FTP_SERVER }}
@@ -26,7 +26,7 @@ jobs:
                     port: ${{ secrets.FTP_PORT }}
                     protocol: ftp
                     local-dir: ./ # Path to your plugin folder
-                    server-dir: /wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
+                    server-dir: /home/azizyzjn/cors2.atlasaidev.com/wp-content/plugins/ar-vr-3d-model-try-on/ # Remote server directory
                     log-level: verbose
                     exclude: |
                         .github/**
