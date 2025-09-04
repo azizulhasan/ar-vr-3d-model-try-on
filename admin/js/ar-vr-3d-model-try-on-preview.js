@@ -8,7 +8,7 @@ const product_id = getPostID();
 console.log({ product_id })
 // Verify if product_id is defined
 if (!product_id) {
-    console.error('Product ID is missing');
+    console.log('Product ID is missing');
 }
 // Your custom HTML content
 if (false) {
@@ -94,7 +94,7 @@ if (false) {
         .catch((err) => {
             console.log(err);
         });
-} else {
+} else if(product_id) {
     // TODO: user should add custom class for there own sake.
     const htmlContent = `
                 <style id="model-viewer-style"></style>
