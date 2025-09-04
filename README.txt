@@ -1,10 +1,10 @@
-=== 3D Viewer – 3D Model Viewer – WordPress Augmented Reality  ===
+=== 3D Viewer – 3D Model Viewer – Augmented Reality  ===
 Contributors: atlasaidev, hasanazizul, freemius
 Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.5.4
+Stable tag: 1.6.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -17,6 +17,7 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 * **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/).
 * **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/).
 * **Preview model** Preview model in the product editor page.
+* **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
 
 
 ### SOME USEFUL LINKS:
@@ -40,6 +41,7 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 * ✅ **Zero Coding**: Automatic AR button placement on product pages – no coding required.
 * ✅ **ShortCode**: Easy shortcode setup `[atlas_ar]` .
 * ✅ **QR Code**: Display a QR code in desktop view .
+* ✅ **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
 
 
 ### **Core Features:**
@@ -68,6 +70,26 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 
 #### **5. QR Code**
 Display a QR code in desktop view, allowing users to scan and switch to an AR capable device.
+
+
+== 3D Model Generation ==
+
+= How to Generate 3D Models with Tripo3D API =
+
+1. Generate your API key from the [Tripo3D API](https://www.tripo3d.ai/api).
+2. Copy the API key.
+3. Go to the **AtlasAR metabox** in the post edit screen.
+4. Click on the **Integration** tab.
+5. Paste your API key in the Integration settings and save.
+6. Now, go back to the **Edit Post** page.
+7. In the AtlasAR metabox, enter your prompt for the 3D model.
+8. Click on the **Generate Model** button.
+   - A `task_id` will be generated.
+   - Wait a few seconds while the model is being processed.
+9. Once the model is generated, a 3D preview will appear on the right side.
+10. Click on the **Save This Model** button to save the generated model and update the post data.
+11. After saving, you can view the generated 3D model on the front end of your site.
+
 
 == How It Works - 3 Simple Steps ==
 
@@ -199,6 +221,12 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 4. Plugin Features
 
 == Changelog ==
+
+
+= 1.6.0 ( 04 September 2025 )  =
+Introduced: model generation UI.
+Introduced: User can generate model from post edit page.
+integrated with [Tripo3D API ](https://www.tripo3d.ai/)
 
 
 = 1.5.4 ( 31 August 2025 )  =
