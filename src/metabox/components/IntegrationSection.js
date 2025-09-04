@@ -15,16 +15,16 @@ export default function IntegrationSection({
 
     const [previousBody, setPreviousBody] = useState(null)
     const [previousModelType, setPreviousModelType] = useState(null)
-    const [tempModelData, setTempModelData] = useState({})
+    const [tempModelData, setTempModelData] = useState(null)
     const generateModelButtonStateChange = (state, innerText, submitButton = '') => {
-        if(!submitButton) {
+        if (!submitButton) {
             submitButton = document.getElementById('atlas_ar_model_generate');
         }
-        if(state) {
+        if (state) {
             submitButton.setAttribute('data-id', state)
         }
 
-        if(innerText) {
+        if (innerText) {
             submitButton.innerHTML = innerText;
         }
     }
@@ -33,14 +33,14 @@ export default function IntegrationSection({
         e.preventDefault();
         const postId = getPostID()
         if (!postId) {
-            notify('Please publish the post first. Then reload the page and save.', 'warn',{
+            notify('Please publish the post first. Then reload the page and save.', 'warn', {
                 autoClose: 5000,
             })
             return;
         }
 
-        if(submitButton.getAttribute('data-id') === 'complete') {
-            if(!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
+        if (submitButton.getAttribute('data-id') === 'complete') {
+            if (!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
                 return;
             }
             generateModelButtonStateChange('generate', 'Generating Model......', submitButton)
@@ -81,11 +81,11 @@ export default function IntegrationSection({
          * and temporary poster url and preview it. at that time button state will be "save"
          * If user is satisfied then click button again. To save it on permanent folder
          */
-        if(submitButton.getAttribute('data-id') === 'generate') {
+        if (submitButton.getAttribute('data-id') === 'generate') {
 
-            if(data_arr?.body?.task_id) {
+            if (data_arr?.body?.task_id) {
                 generateModelButtonStateChange('progress', 'Generating Model......', submitButton)
-            }else{
+            } else {
                 generateModelButtonStateChange('progress', 'Generating Task......', submitButton)
             }
             console.log(data_arr)
@@ -95,39 +95,64 @@ export default function IntegrationSection({
             postWithoutImage(getURL('generate_3d_model'), formData).then(
                 (res) => {
                     console.log(res)
-                    if(res?.status && res?.data?.temp?.src?.url) {
+                    /**
+                     * This code  will be true why request is being sent with task_id
+                     */
+                    if (res?.status && res?.data?.temp?.src?.url) {
                         let tempProductModel = structuredClone(productModel)
+                        // set product model file
                         tempProductModel.src = res.data.temp.src.url
-                        if(res?.data?.temp?.poster?.url) {
+                        // set product poster image
+                        if (res?.data?.temp?.poster?.url) {
                             tempProductModel.poster = res.data.temp.poster.url
                         }
+
+                        // set product body with task_id
+                        if (res?.data?.input?.prompt) {
+                            tempProductModel.exclude_integration_api_body = {
+                                ...res.data.input,
+                                ...{task_id: res.data.task_id}
+                            }
+                        }
+
                         setProductModel(tempProductModel)
-                        setTempModelData({...{temp:res.data.temp}, ...{post_id: data_arr.post_id}})
-                        console.log(tempProductModel)
+                        setTempModelData({...{temp: res.data.temp}, ...{post_id: data_arr.post_id}})
+                        console.log({tempProductModel})
                         generateModelButtonStateChange('save', 'Save This Model', submitButton)
                         wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                         return;
                     }
 
-                    if(res?.data?.task_id) {
+                    if (res?.data?.task_id) {
                         generateModelButtonStateChange('task', 'Task Created! Please Wait!', submitButton)
                     }
                     /**
-                     * TODO:: meke this a method.
+                     * TODO:: meke this a method. This code will be true when
+                     * request is being created without any task_id
                      */
                     if (!res?.data?.temp?.src?.url && res?.data?.task_id) {
                         let responseData = {};
                         let taskInterval = setInterval(async () => {
-                            console.log(taskInterval)
                             if (responseData?.data?.temp?.src?.url) {
                                 clearInterval(taskInterval)
                                 taskInterval = null;
                                 let tempProductModel = structuredClone(productModel)
+                                // set product model file
                                 tempProductModel.src = responseData.data.temp.src.url
-                                if(res?.data?.temp?.poster?.url) {
-                                    tempProductModel.poster = res.data.temp.poster.url
+                                // set product poster image
+                                if (responseData?.data?.temp?.poster?.url) {
+                                    tempProductModel.poster = responseData.data.temp.poster.url
                                 }
-                                setTempModelData({...{temp:res.data.temp}, ...{post_id: data_arr.post_id}})
+
+                                // set product body with task_id
+                                if (res?.data?.input?.prompt) {
+                                    tempProductModel.exclude_integration_api_body = {
+                                        ...tempProductModel.exclude_integration_api_body,
+                                        ...{task_id: res.data.task_id}
+                                    }
+                                }
+
+                                setTempModelData({...{temp: responseData.data.temp}, ...{post_id: data_arr.post_id}})
                                 setProductModel(tempProductModel)
                                 generateModelButtonStateChange('save', 'Save This Model', submitButton)
                                 console.log({tempProductModel})
@@ -135,13 +160,16 @@ export default function IntegrationSection({
                                 return;
                             }
 
-                            if (responseData?.data?.temp?.poster?.url) {
+                            if (responseData?.data?.temp?.poster?.url || responseData?.data?.output?.poster?.url) {
                                 generateModelButtonStateChange('poster', 'Poster Created! Now Generating Model', submitButton)
+                                setTimeout(() => {
+                                    generateModelButtonStateChange('poster', 'Model .glb file is generating!', submitButton)
+                                }, 5000)
                             }
 
                             let formData2 = new FormData();
                             data_arr.body.task_id = res?.data?.task_id;
-                            console.log(data_arr)
+
                             formData2.append('data', JSON.stringify(data_arr));
                             // Default options are marked with *
                             const response = await fetch(getURL('generate_3d_model'), {
@@ -160,8 +188,13 @@ export default function IntegrationSection({
              * When button state is "save" then it will move the temporay
              * files to permanent folder.
              */
-        }else if(submitButton.getAttribute('data-id') === 'save'){
-            console.log(e.target.getAttribute('data-id'))
+        } else if (submitButton.getAttribute('data-id') === 'save') {
+            console.log(tempModelData)
+            if (!tempModelData?.temp) {
+                generateModelButtonStateChange('error', 'Model data is not set!', submitButton)
+                console.error('Model data is not set!')
+                return;
+            }
             /**
              * Save model files from temporary folder to final folder.
              */
@@ -169,7 +202,6 @@ export default function IntegrationSection({
             let formData2 = new FormData();
             data_arr['temporary_model_data'] = tempModelData
             formData2.append('data', JSON.stringify(data_arr));
-            console.log(tempModelData)
             let response = await fetch(getURL('generate_3d_model'), {
                 method: "POST", // *GET, POST, PUT, DELETE, etc.
                 body: formData2, // body data type must match "Content-Type" header
@@ -179,14 +211,17 @@ export default function IntegrationSection({
             });
             response = await response.json();
             let tempProductModel = structuredClone(productModel)
-            if(!response?.data?.src?.url) {
+            if (!response?.data?.src?.url) {
                 generateModelButtonStateChange('error', 'Something went wrong! Try again.', submitButton)
                 return;
             }
+            // set model src
             tempProductModel.src = response.data.src.url
-            if(response?.data?.poster?.url) {
+            // set model poster.
+            if (response?.data?.poster?.url) {
                 tempProductModel.poster = response.data.poster.url
             }
+
             setTempModelData({})
             setProductModel(tempProductModel)
             generateModelButtonStateChange('file_saved', 'Model files saved successfully.', submitButton)
@@ -200,15 +235,15 @@ export default function IntegrationSection({
             formData.append('post_id', postId);
             formData.append('method', 'POST');
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 generateModelButtonStateChange('data_save', 'Model data is saving.......', submitButton)
-            },1000)
+            }, 800)
             postWithoutImage(getURL('get_model_and_settings'), formData)
                 .then((res) => {
                     console.log(res)
                     let tempProductModel = {...productModel, ...res.data};
                     setProductModel(tempProductModel);
-                    notify('Successfully Saved All Data.', 'success',{
+                    notify('Successfully Saved All Data.', 'success', {
                         autoClose: 5000,
                     })
                     generateModelButtonStateChange('complete', 'Successfully Saved All Data.', submitButton)
@@ -218,7 +253,7 @@ export default function IntegrationSection({
                     console.log(err);
                 });
 
-        }else {
+        } else {
             generateModelButtonStateChange('double_click', 'Do not click multiple time!', submitButton)
         }
     };
@@ -241,7 +276,7 @@ export default function IntegrationSection({
 
             let productModelData = structuredClone(productModel);
             productModelData.exclude_integration_api_body = currentApi.body.supported_types[productModel?.exclude_integration_api_model_type].input
-            console.log({ productModelData, previousBody })
+            console.log({productModelData, previousBody})
             //TODO:: un endign loop
             // setProductModel(productModelData);
         }
@@ -276,7 +311,7 @@ export default function IntegrationSection({
             }
 
             {/* Add new field button */}
-                <div className="art-flex art-items-center art-justify-between">
+            <div className="art-flex art-items-center art-justify-between">
                 {/* Add Body Button */}
                 <button
                     type="button"
@@ -289,36 +324,35 @@ export default function IntegrationSection({
                 {/* Tooltip Button */}
                 <div className="art-relative art-group">
                     <button
-                    type="button"
-                    className="art-bg-gray-200  art-p-2  art-cursor-pointer"
+                        type="button"
+                        className="art-bg-gray-200  art-p-2  art-cursor-pointer"
                     >
-                    ℹ️
+                        ℹ️
                     </button>
 
                     {/* Tooltip Text */}
-                        <div className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
-                            Model Documentation:
-                            <br/>
-                            {currentApi?.body?.supported_types?.[productModel.exclude_integration_api_model_type]?.doc ? (
-                                <p>
-                                    {currentApi.name}: 
-                                    <a 
-                                        href={currentApi.body.supported_types[productModel.exclude_integration_api_model_type].doc} 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
-                                        className="art-text-blue-400 hover:art-text-blue-300 art-underline art-ml-1"
-                                    >
-                                        {productModel.exclude_integration_api_model_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} Guide
-                                    </a>
-                                </p>
-                            ) : (
-                                <p>No documentation available for this model type.</p>
-                            )}
-                        </div>
+                    <div
+                        className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
+                        Model Documentation:
+                        <br/>
+                        {currentApi?.body?.supported_types?.[productModel.exclude_integration_api_model_type]?.doc ? (
+                            <p>
+                                {currentApi.name}:
+                                <a
+                                    href={currentApi.body.supported_types[productModel.exclude_integration_api_model_type].doc}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="art-text-blue-400 hover:art-text-blue-300 art-underline art-ml-1"
+                                >
+                                    {productModel.exclude_integration_api_model_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} Guide
+                                </a>
+                            </p>
+                        ) : (
+                            <p>No documentation available for this model type.</p>
+                        )}
+                    </div>
                 </div>
-                </div>
-
-
+            </div>
 
 
             {/* Dynamic rows */}
@@ -370,7 +404,7 @@ export default function IntegrationSection({
                     </button> */}
 
 
-                     {!field.required ? (
+                    {!field.required ? (
                         <button
                             type="button"
                             onClick={() => removeField(index)}
@@ -379,13 +413,14 @@ export default function IntegrationSection({
                         >
                             ✕
                         </button>
-                            ) : (
-                                <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center" title="Required field">
-                                
-                                </div>
-                            )}
+                    ) : (
+                        <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center"
+                             title="Required field">
 
                         </div>
+                    )}
+
+                </div>
 
             ))}
             <button type="button"

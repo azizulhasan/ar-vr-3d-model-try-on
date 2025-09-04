@@ -215,7 +215,7 @@ class AR_TRY_ON_Api_Routes
     public function generate_3d_model($request)
     {
         $body = $request->get_params();
-        $result['status'] = true;
+        $result['status'] = false;
         $decoded_data = json_decode($body['data'], 1);
         $api_url = $decoded_data['url'];
         $headers = $decoded_data['headers'];

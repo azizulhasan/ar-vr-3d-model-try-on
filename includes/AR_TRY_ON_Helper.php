@@ -403,17 +403,19 @@ class AR_TRY_ON_Helper
                      * rendered_image and thumbnail both image are same. that is why one of
                      * both will be stored.
                      */
-                    if (isset($api_response_data['data']['output']['rendered_image'])) {
-                        $response_body['output']['thumbnail'] = $api_response_data['data']['output']['rendered_image'];
-                    }
+                    // TODO:: this file will only need for slider/3d gallery
+//                    if (isset($api_response_data['data']['output']['rendered_image'])) {
+//                        $response_body['output']['thumbnail'] = $api_response_data['data']['output']['rendered_image'];
+//                    }
                 }
 
                 /**
                  * If thumbnail is not set yet, then look into result.
                  */
-                if (!isset($response_body['output']['thumbnail']) && isset($api_response_data['data']['thumbnail'])) {
-                    $response_body['output']['thumbnail'] = $api_response_data['data']['thumbnail'];
-                }
+                // TODO:: this file will only need for slider/3d gallery
+//                if (!isset($response_body['output']['thumbnail']) && isset($api_response_data['data']['thumbnail'])) {
+//                    $response_body['output']['thumbnail'] = $api_response_data['data']['thumbnail'];
+//                }
                 /**
                  * If src is not set yet, then look into result.
                  */
@@ -423,9 +425,10 @@ class AR_TRY_ON_Helper
                 /**
                  * If thumbnail is not set yet, then look into result.
                  */
-                if (!isset($response_body['output']['thumbnail']) && isset($api_response_data['data']['result']['rendered_image']['url'])) {
-                    $response_body['output']['thumbnail'] = $api_response_data['data']['result']['rendered_image']['url'];
-                }
+                // TODO:: this file will only need for slider/3d gallery
+//                if (!isset($response_body['output']['thumbnail']) && isset($api_response_data['data']['result']['rendered_image']['url'])) {
+//                    $response_body['output']['thumbnail'] = $api_response_data['data']['result']['rendered_image']['url'];
+//                }
 
             }
         }
@@ -463,10 +466,6 @@ class AR_TRY_ON_Helper
             $file_url .= $date . '/';
         }
 
-        error_log(print_r([
-            'file_path' => $file_path,
-            'file_url' => $file_url,
-        ], 1));
 
         // Make sure the directory exists
         if (!file_exists($file_path)) {
