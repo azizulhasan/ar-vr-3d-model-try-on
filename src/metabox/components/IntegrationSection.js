@@ -304,8 +304,6 @@ export default function IntegrationSection({
     return (
         <div className="art-bg-gray-100 ">
             <h3 className="art-font-medium art-mb-4">Integration</h3>
-
-
             {currentApi?.id && <div style={{marginBottom: "15px"}}>
                 <label>Supported Model Types:</label>
                 <select
