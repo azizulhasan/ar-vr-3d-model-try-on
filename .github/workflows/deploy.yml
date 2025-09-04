@@ -53,6 +53,7 @@ jobs:
                         webpack.mix.js
                         tailwind.config.js
                         README.md
+                        .DS_Store
                         
 
 
