@@ -194,7 +194,7 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            {key: 'prompt', type: 'textarea', value: 'a cat'},
+                            {key: 'prompt', type: 'textarea', value: ''},
                             {key: 'type', type: 'text', value: 'text_to_model'},
                             {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
                             {key: 'texture', type: 'boolean', value: true},

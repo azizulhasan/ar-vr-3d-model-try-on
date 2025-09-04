@@ -177,7 +177,7 @@ const ARProductModelSettings = () => {
         formData.append('method', 'get');
         postWithoutImage(getURL('settings'), formData).then(
             (res) => {
-                let tempCurrentAPI = getAPITypes(res.data.ar_try_on_exclude_integration_api_name);
+                let tempCurrentAPI = getAPITypes(res.data.ar_try_on_exclude_integration_api_name || 'tripo3d');
 
                 console.log({name: res.data.ar_try_on_exclude_integration_api_name, tempCurrentAPI})
                 setCurrentAPI(tempCurrentAPI)
@@ -208,12 +208,9 @@ const ARProductModelSettings = () => {
                             productModelData.exclude_integration_api_model_type = 'text_to_model'
                         }
 
-                        console.log({before: productModelData.exclude_integration_api_body})
-
-                        if (!res.data?.exclude_integration_api_body || res.data?.exclude_integration_api_body.length < 1) {
+                        if ((!res.data?.exclude_integration_api_body || res.data?.exclude_integration_api_body.length < 1) && currentApi?.body) {
                             productModelData.exclude_integration_api_body = currentApi.body.supported_types[productModelData.exclude_integration_api_model_type].input
                         }
-                        console.log({after: productModelData.exclude_integration_api_body})
 
                         setProductModel(productModelData);
                         setIsProductModelLoad(true)
@@ -226,13 +223,12 @@ const ARProductModelSettings = () => {
     useEffect(() => {
         if (isProductModelLoaded) {
             wp.hooks.doAction('atlas_ar_preview_data', productModel);
-            console.log({name: settings.ar_try_on_exclude_integration_api_name, isProductModelLoaded})
         }
     }, [isProductModelLoaded]);
 
 
     useEffect(() => {
-        if (productModel.exclude_integration_api_model_type) {
+        if (productModel.exclude_integration_api_model_type && currentApi?.body) {
             let tempProductModel = structuredClone(productModel)
             tempProductModel.exclude_integration_api_body = currentApi.body.supported_types[productModel.exclude_integration_api_model_type].input;
             setProductModel(tempProductModel)
