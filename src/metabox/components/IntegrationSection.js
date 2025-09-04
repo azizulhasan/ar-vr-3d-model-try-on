@@ -251,7 +251,7 @@ export default function IntegrationSection({
 
             setTimeout(() => {
                 generateModelButtonStateChange('data_save', 'Model data is saving.......', submitButton)
-            }, 800)
+            }, 10)
             postWithoutImage(getURL('get_model_and_settings'), formData)
                 .then((res) => {
                     console.log(res)
@@ -261,6 +261,9 @@ export default function IntegrationSection({
                         autoClose: 5000,
                     })
                     generateModelButtonStateChange('complete', 'Successfully Saved All Data.', submitButton)
+                    setTimeout(() => {
+                        generateModelButtonStateChange('complete', 'See model from frontend.', submitButton)
+                    }, 2000)
                     wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                 })
                 .catch((err) => {
