@@ -67,6 +67,10 @@ export default function IntegrationSection({
          * @type {{}}
          */
         let headers = {}
+        if(!settings?.ar_try_on_exclude_integration_api_headers) {
+            notify('Please integrate first from Integration Tab of the plugin', 'error');
+            return;
+        }
         settings.ar_try_on_exclude_integration_api_headers.map(header => {
             headers[header.key] = header.value;
         });

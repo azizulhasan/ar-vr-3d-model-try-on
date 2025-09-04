@@ -120,7 +120,7 @@ const config = {
 	},
 	test: {
 		src: productionSrc,
-		output: 'D://xampp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/',
+		output: 'D://mamp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -128,7 +128,7 @@ const config = {
 	},
 	release: {
 		src: productionSrc,
-		output: 'D:/xampp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/',
+		output: 'D:/mamp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -136,7 +136,7 @@ const config = {
 	},
 	copyProButton: {
 		src: [],
-		output: 'D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/ar-try-on-pro/Assets/js/build/',
+		output: 'D:/mamp/htdocs/azizulhasan/tts/wp-content/plugins/ar-try-on-pro/Assets/js/build/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
