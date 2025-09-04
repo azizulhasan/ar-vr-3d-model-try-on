@@ -20,7 +20,7 @@ jobs:
             -   name: Deploy via FTP to https://cors2.atlasaidev.com/ testing server.
                 uses: SamKirkland/FTP-Deploy-Action@4.3.2
                 with:
-                    server: ${{ secrets.FTP_HOST }}
+                    server: ${{ secrets.FTP_SERVER }}
                     username: ${{ secrets.FTP_USERNAME }}
                     password: ${{ secrets.FTP_PASSWORD }}
                     port: ${{ secrets.FTP_PORT || 21 }}
