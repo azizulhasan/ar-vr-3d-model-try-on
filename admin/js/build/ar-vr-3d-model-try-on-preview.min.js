@@ -3895,6 +3895,7 @@ var getAPITypes = function getAPITypes() {
       id: 'tripo3d',
       name: 'Tripo 3D',
       url: 'https://api.tripo3d.ai/v2/openapi/task',
+      api_key_url: 'https://platform.tripo3d.ai/api-keys',
       headers: [{
         key: 'Authorization',
         value: ''
@@ -3983,6 +3984,7 @@ var getAPITypes = function getAPITypes() {
       id: 'meshy_ai',
       name: 'Meshy AI 3D',
       url: 'https://api.meshy.ai/openapi/v2/text-to-3d',
+      api_key_url: 'https://www.meshy.ai/settings/api',
       headers: [{
         key: 'Authorization',
         value: ''

@@ -342,7 +342,7 @@ export default function IntegrationSection({
                         type="button"
                         className="art-bg-gray-200  art-p-2  art-cursor-pointer"
                     >
-                        ℹ️
+                        <span className="dashicons dashicons-info-outline"></span>
                     </button>
 
                     {/* Tooltip Text */}

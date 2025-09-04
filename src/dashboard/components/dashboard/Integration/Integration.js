@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import React, {useState, useEffect} from "react";
 import Settings from "../settings/Settings";
 import {getAPITypes} from "../../../../context/utilities";
 
@@ -50,7 +50,7 @@ export default function Integration({
          *
          * This code will restore it.
          */
-        if (settings?.ar_try_on_exclude_integration_api_name !== undefined && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
+        if (settings?.ar_try_on_exclude_integration_api_name && currentApi.id !== settings?.ar_try_on_exclude_integration_api_name ) {
 
             let data = getAPITypes(settings.ar_try_on_exclude_integration_api_name || 'tripo3d');
             setCurrentAPI(data);
@@ -87,7 +87,7 @@ export default function Integration({
             {/* API Name */}
             {
                 currentApi?.id && <>
-                    <div style={{marginBottom: "15px"}}>
+                    <div>
                         <label>API Name:</label>
                         <select
                             value={settings.ar_try_on_exclude_integration_api_name}
@@ -107,7 +107,7 @@ export default function Integration({
                         </select>
                     </div>
                     {/* URL Field */}
-                    <div style={{marginBottom: "15px"}}>
+                    <div className="art-w-full art-flex art-items-center art-py-4  art-gap-4 art-flex-nowrap ">
                         <label>URL:</label>
                         <input
                             type="text"
@@ -118,7 +118,39 @@ export default function Integration({
                             placeholder="Enter API URL"
                             style={{width: "100%", padding: "8px", marginTop: "5px"}}
                         />
+                        {/* Tooltip Button */}
+                        <div className="art-relative art-group">
+                            <button
+                                type="button"
+                                className="art-bg-gray-200 art-p-2 art-cursor-pointer"
+                            >
+                                <span className="dashicons dashicons-info-outline"></span>
+                            </button>
+
+                            {/* Tooltip Text */}
+                            <div className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
+                                Model Documentation:
+                                <br/>
+                                {currentApi?.api_key_url ? (
+                                    <p>
+                                        {currentApi.name}:
+                                        <a
+                                            href={currentApi.api_key_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="art-text-blue-400 hover:art-text-blue-300 art-underline art-ml-1"
+                                        >
+                                            {currentApi.name} API Key Guide
+                                        </a>
+                                    </p>
+                                ) : (
+                                    <p>No documentation available for this model type.</p>
+                                )}
+                            </div>
+                        </div>
                     </div>
+
+
                     {/* Headers Section */}
                     <div>
                         <button

@@ -8,6 +8,7 @@ import Integration from "./components/dashboard/Integration/Integration";
 import Documentation from "./components/dashboard/Documentation/Documentation";
 import {getAPITypes, getURL, postWithoutImage} from "../context/utilities";
 import toast from '../context/Notify';
+import notify from "../context/Notify";
 
 
 export default function App() {
@@ -133,14 +134,9 @@ export default function App() {
 
         if (!e.target.name) return;
 
-        if(e.target.name === 'ar_try_on_exclude_integration_api_name') {
-            // setSettings({
-            //     ...settings,
-            // {ar_try_on_exclude_integration_api_name: allA}
-            //     ...{[e.target.name]: value},
-            // });
-            //
-            // return;
+        if(e.target.name === 'ar_try_on_exclude_integration_api_name' && e.target.value !== 'tripo3d') {
+            notify('API switch is available in pro version', 'warn')
+            return;
         }
 
         console.log({name: e.target.name, value})
@@ -153,7 +149,14 @@ export default function App() {
     const handleHeaderChange = (index, field, value) => {
         const updated = [...settings.ar_try_on_exclude_integration_api_headers];
         updated[index][field] = value;
-        setSettings({...settings, ...{ar_try_on_exclude_integration_api_headers: updated}})
+        if(field === 'value' && updated[index]?.key === 'Authorization') {
+            setSettings({...settings, ...{
+                ar_try_on_exclude_integration_api_name: currentApi.id,
+                ar_try_on_exclude_integration_api_url: currentApi.url
+            }})
+        }else{
+            setSettings({...settings, ...{ar_try_on_exclude_integration_api_headers: updated}})
+        }
     };
 
 
@@ -162,26 +165,34 @@ export default function App() {
      */
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(settings)
+        let tempSettings = structuredClone(settings);
 
-        if (settings?.ar_try_on_exclude_integration_api_name && settings?.ar_try_on_exclude_integration_api_url) {
-            settings.ar_try_on_exclude_integration_api_headers.map(header => {
-                if (header.key == '' || header.value == '') {
-                    alert('Please fill all of the API headers with proper value')
+        if (tempSettings?.ar_try_on_exclude_integration_api_name && tempSettings?.ar_try_on_exclude_integration_api_url) {
+            tempSettings.ar_try_on_exclude_integration_api_headers.forEach((header, index) => {
+                if (header.key === '' && header.value === '') {
+                    alert('Please fill all of the API headers with proper value');
                     return;
                 }
-            })
+
+                if (header.key === 'Authorization' && header.value === '') {
+                    tempSettings.ar_try_on_exclude_integration_api_name = '';
+                    tempSettings.ar_try_on_exclude_integration_api_url = '';
+                } else if (header.value === '') {
+                    tempSettings.ar_try_on_exclude_integration_api_headers.splice(index, 1);
+                }
+            });
         }
+        console.log({tempSettings})
+
         // return;
-        // tsk_cfShGDWK1lSYbHdHapvQQ9k6IgBlQ6yB4Pi6fkeIYOh
+
         let formData = new FormData();
-        formData.append('fields', JSON.stringify(settings));
+        formData.append('fields', JSON.stringify(tempSettings));
         formData.append('method', 'post');
         postWithoutImage(getURL('settings'), formData)
             .then((res) => {
                 setSettings(res.data);
                 toast('Successfully Saved.', 'info')
-                // setIsDataLoaded(true)
             })
             .catch((err) => {
                 console.log(err);
@@ -200,21 +211,6 @@ export default function App() {
             draggable
             pauseOnHover
         />
-
-
-        {/*<div className="art-grid art-grid-cols-1 art-hidden art-sm:block ">*/}
-        {/*    /!* Use an "onChange" listener to redirect the user to the selected tab URL. *!/*/}
-        {/*    <select*/}
-        {/*        defaultValue={tabs.find((tab) => tab.current).name}*/}
-        {/*        aria-label="Select a tab"*/}
-        {/*        className="art-col-start-1 art-row-start-1 art-w-full art-appearance-none art-rounded-md art-bg-white art-py-2 art-pl-3 art-pr-8 art-text-base art-text-gray-900 art-outline art-outline-1 art--outline-offset-1 art-outline-gray-300 art-focus:outline art-focus:outline-2 art-focus:-outline-offset-2 art-focus:outline-indigo-600"*/}
-        {/*    >*/}
-        {/*        {tabs.map((tab) => (*/}
-        {/*            <option key={tab.name}>{tab.name}</option>*/}
-        {/*        ))}*/}
-        {/*    </select>*/}
-        {/*    icon*/}
-        {/*</div>*/}
         <div className="art-md:block ">
             <div className="art-border-b art-border-gray-200">
                 <nav aria-label="Tabs" className="art--mb-px art-flex art-space-x-8 art-no-underline">
