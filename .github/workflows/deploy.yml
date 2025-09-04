@@ -18,7 +18,7 @@ jobs:
                 uses: actions/checkout@v3
 
             -   name: Deploy via FTP to https://cors2.atlasaidev.com/ testing server.
-                uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+                uses: SamKirkland/FTP-Deploy-Action@v4.3.2
                 with:
                     server: ${{ secrets.FTP_SERVER }}
                     username: ${{ secrets.FTP_USERNAME }}
