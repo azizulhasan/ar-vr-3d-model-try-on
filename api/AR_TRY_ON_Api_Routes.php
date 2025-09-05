@@ -173,9 +173,11 @@ class AR_TRY_ON_Api_Routes
 
             /**
              * If call is form frontend then exclude api related values.
+             * and update cached ids
              */
             if($call_from !== 'admin') {
                 $data = AR_TRY_ON_Helper::exclude_sensitive_properties($data);
+                AR_TRY_ON_Helper::update_cache_data(true, $post_id, 'remove');
             }
         } else {
             $fields = json_decode($decoded_body['fields']);
@@ -187,6 +189,8 @@ class AR_TRY_ON_Api_Routes
             }
 
             update_post_meta($post_id, 'ar_try_on_product_settings', $filtered_data);
+
+            AR_TRY_ON_Helper::update_cache_data($decoded_body, $post_id);
         }
 
         // Enviar la respuesta en formato JSON

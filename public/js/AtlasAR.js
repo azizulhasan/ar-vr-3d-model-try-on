@@ -1,5 +1,5 @@
 import alertify from 'alertifyjs';
-import { setModelAttributes } from '../../src/context/utilities';
+import {setModelAttributes} from '../../src/context/utilities';
 
 class AtlasAR {
 
@@ -80,21 +80,31 @@ class AtlasAR {
 
     setModelData(data, model_id = '.atlas_ar_model_viewer') {
         const modelViewer = document.querySelectorAll(model_id)[0]
+        console.log({model_id, modelViewer})
         if (modelViewer && this.isObject(data)) {
             setModelAttributes(modelViewer, data)
         }
     }
 
     async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer') {
+        let modelSessionData = this.getModelSessionData(product_id);
+        product_id = parseInt(product_id)
+        if(modelSessionData && ar_try_on?.cached_ids?.includes('all')) {
+            this.setModelData(modelSessionData, model_id)
+            console.log({inc: ar_try_on?.cached_ids?.includes(product_id), product_id})
+            return;
+        }
         let self = this
         let formData = new FormData();
         formData.append('post_id', product_id);
+        formData.append('has_value_changed', true);
         await this.postWithoutImage(this.getURL('get_model_and_settings'), formData)
             .then((response) => {
                 if (response.success) {
                     const data = response.data;
                     // Check if the data exists before assigning it to model-viewer
                     if (data) {
+                        this.setModelSessionData(data, product_id)
                         self.setModelData(data, model_id)
                     }
                 }
@@ -105,6 +115,7 @@ class AtlasAR {
         const el = document.createElement('model-viewer');
         return el instanceof HTMLElement; // works even if <model-viewer> isn't fully registered yet
     }
+
     supportsModelViewer() {
         const supportsCustomElements = 'customElements' in window;
         const supportsWebGL = (() => {
@@ -128,6 +139,36 @@ class AtlasAR {
         );
     }
 
+    getModelSessionData(postId = '') {
+
+        this.storedModelData = this.getStoredModelDataObj();
+
+        return this.storedModelData?.models?.[postId] ?? false;
+    }
+
+    setModelSessionData(modelData, postId) {
+        // TODO: update this method based on postId.
+        let storedModelDataObj = this.getStoredModelDataObj();
+        let storedModelData = {}
+        if (modelData && postId) {
+            storedModelData = {
+                url: window.location.href,
+                models: {
+                    [postId]: modelData,
+                    ...storedModelDataObj?.models
+                }
+            }
+            window.sessionStorage.setItem('atlas_ar_model_data', JSON.stringify(storedModelData))
+        }
+
+        this.storedModelData = storedModelData;
+
+        return this.storedModelData;
+    }
+
+    getStoredModelDataObj() {
+        return JSON.parse(window.sessionStorage.getItem('atlas_ar_model_data'));
+    }
 
 
 }

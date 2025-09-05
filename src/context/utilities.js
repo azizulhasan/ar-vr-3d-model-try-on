@@ -43,7 +43,6 @@ export const getPostID = () => {
 }
 
 
-
 function unsecuredCopyToClipboard() {
     const textArea = document.createElement("textarea");
     textArea.value = text;
@@ -127,7 +126,7 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         if (model_settings.canvas_alignment == 'center') {
             modelViewer.style.display = 'block';
             modelViewer.style.margin = '0px auto';
-        } else if (model_settings.canvas_alignment ==   'left') {
+        } else if (model_settings.canvas_alignment == 'left') {
             modelViewer.style.margin = '0 auto 0 0';
         } else if (model_settings.canvas_alignment == 'right') {
             modelViewer.style.margin = '0 0 0 auto';
@@ -149,12 +148,9 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     }
 
 
-
-
     modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
     modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
     modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
-
 
 
     const modelViewerStyle = document.getElementById('model-viewer-style');
@@ -178,7 +174,6 @@ export const setModelAttributes = (modelViewer, model_settings) => {
 }
 
 
-
 export const getAPITypes = (api_type = 'tripo3d') => {
     let api_types = {
         tripo3d: {
@@ -187,8 +182,8 @@ export const getAPITypes = (api_type = 'tripo3d') => {
             url: 'https://api.tripo3d.ai/v2/openapi/task',
             api_key_url: 'https://platform.tripo3d.ai/api-keys',
             headers: [
-                {key: 'Authorization', value: '' },
-                {key: 'Content-Type', value: 'application/json' },
+                {key: 'Authorization', value: ''},
+                {key: 'Content-Type', value: 'application/json'},
             ],
             body: {
                 supported_types: {
@@ -206,19 +201,19 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                     },
                     image_to_model: {
                         input: [
-                            { key: 'type', type: 'text', value: 'image_to_model' },
-                            { key: 'file.type', type: 'text', value: 'png' },
-                            { key: 'file.file_token', type: 'file', value: '' },
-                            { key: 'file.object', type: 'text', value: '' },
-                            { key: 'file.url', type: 'url', value: '' },
-                            { key: 'model_version', type: 'text', value: 'v2.5-20250123' },
-                            { key: 'texture', type: 'boolean', value: true },
-                            { key: 'pbr', type: 'boolean', value: true },
-                            { key: 'texture_alignment', type: 'text', value: 'original_image' }
+                            {key: 'type', type: 'text', value: 'image_to_model'},
+                            {key: 'file.type', type: 'text', value: 'png'},
+                            {key: 'file.file_token', type: 'file', value: ''},
+                            {key: 'file.object', type: 'text', value: ''},
+                            {key: 'file.url', type: 'url', value: ''},
+                            {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
+                            {key: 'texture', type: 'boolean', value: true},
+                            {key: 'pbr', type: 'boolean', value: true},
+                            {key: 'texture_alignment', type: 'text', value: 'original_image'}
                         ],
                         doc: 'https://platform.tripo3d.ai/docs/generation#image-to-model'
-                    },                  
-                    
+                    },
+
                 }
             }
         },
@@ -228,18 +223,18 @@ export const getAPITypes = (api_type = 'tripo3d') => {
             url: 'https://api.meshy.ai/openapi/v2/text-to-3d',
             api_key_url: 'https://www.meshy.ai/settings/api',
             headers: [
-                {key: 'Authorization', value: '' },
-                {key: 'Content-Type', value: 'application/json' },
+                {key: 'Authorization', value: ''},
+                {key: 'Content-Type', value: 'application/json'},
             ],
             body: {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            { key: 'prompt', type: 'textarea', value: '' },
-                            { key: 'mode', type: 'text', value: 'preview' },
-                            { key: 'negative_prompt', type: 'textarea', value: '' },
-                            { key: 'art_style', type: 'text', value: 'realistic' },
-                            { key: 'should_remesh', type: 'boolean', value: true }
+                            {key: 'prompt', type: 'textarea', value: ''},
+                            {key: 'mode', type: 'text', value: 'preview'},
+                            {key: 'negative_prompt', type: 'textarea', value: ''},
+                            {key: 'art_style', type: 'text', value: 'realistic'},
+                            {key: 'should_remesh', type: 'boolean', value: true}
                         ],
                         doc: 'https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request'
                     },
@@ -249,8 +244,52 @@ export const getAPITypes = (api_type = 'tripo3d') => {
 
     }
 
-    if(api_type === 'all'){
+    if (api_type === 'all') {
         return api_types;
     }
     return api_types[api_type];
+}
+
+/**
+ * compare 2 objects
+ * @param obj1
+ * @param obj2
+ * @returns {boolean}
+ */
+export const isDifferent = (obj1, obj2) => {
+    // If both are strictly equal
+    if (obj1 === obj2) return false;
+
+    // If either is null/undefined or types don't match
+    if (typeof obj1 !== typeof obj2 || obj1 === null || obj2 === null) {
+        return true;
+    }
+
+    // Handle arrays
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+        if (obj1.length !== obj2.length) return true;
+        for (let i = 0; i < obj1.length; i++) {
+            if (isDifferent(obj1[i], obj2[i])) return true;
+        }
+        return false;
+    }
+
+    // Handle objects
+    if (typeof obj1 === "object" && typeof obj2 === "object") {
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        // Check if keys length differs
+        if (keys1.length !== keys2.length) return true;
+
+        // Check if any key is missing or values differ
+        for (let key of keys1) {
+            if (!(key in obj2)) return true;
+            if (isDifferent(obj1[key], obj2[key])) return true;
+        }
+        return false;
+    }
+
+    // Primitive values (string, number, boolean, etc.)
+    return obj1 !== obj2;
 }

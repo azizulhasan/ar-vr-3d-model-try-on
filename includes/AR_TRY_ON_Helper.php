@@ -561,4 +561,35 @@ class AR_TRY_ON_Helper
         return $date;
     }
 
+    public static function update_cache_data($data, $post_id = '', $state = 'add') {
+        $has_value_changed = isset($data['has_value_changed']) ? $data['has_value_changed'] : $data;
+        $post_cache_data =  get_option('get_cache_data');
+        $post_cache_data =  AR_TRY_ON_Cache::get('get_cache_data');
+        if ($has_value_changed && $post_id) {
+            if($state === 'add') {
+                $post_cache_data = is_array($post_cache_data) ? $post_cache_data : [];
+                $post_cache_data[] = $post_id;
+                update_option('get_cache_data',$post_cache_data);
+                AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
+            }elseif($state === 'remove') {
+                // Search for the item
+                $index = array_search($post_id, $post_cache_data);
+
+                if ($index !== false) {
+                    unset($post_cache_data[$index]);
+                    // Reindex the array if needed
+                    $post_cache_data = array_values($post_cache_data);
+                }
+
+                update_option('get_cache_data',$post_cache_data);
+                AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
+            }
+        }elseif($has_value_changed) {
+            update_option('get_cache_data',['all']);
+            AR_TRY_ON_Cache::set('get_cache_data', ['all']);
+        }
+
+        return $post_cache_data;
+    }
+
 }

@@ -82,6 +82,7 @@ class AR_TRY_ON_Public {
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
 			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
+            'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
 		];
 
 
