@@ -78,7 +78,20 @@ class AtlasAR {
         return value !== null && typeof value === 'object' && !Array.isArray(value);
     }
 
-    setModelData(data, model_id = '.atlas_ar_model_viewer') {
+    setModelData(data, model_id = '.atlas_ar_model_viewer', type = 'normal') {
+        if(type === 'modal') {
+            const productName = data.product_name || '3D Product';
+            let model_id_name = model_id.replace('#', '');
+            const htmlContent = this.getModelSkeleton(model_id_name)
+            this.alertify
+                .alert(productName, htmlContent)
+                .set({
+                    transition: 'zoom',
+                    movable: true,
+                    maximizable: true
+                }) // Customize options
+                .setHeader(productName);
+        }
         const modelViewer = document.querySelectorAll(model_id)[0]
         console.log({model_id, modelViewer})
         if (modelViewer && this.isObject(data)) {
@@ -86,14 +99,40 @@ class AtlasAR {
         }
     }
 
-    async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer') {
-        let modelSessionData = this.getModelSessionData(product_id);
-        product_id = parseInt(product_id)
-        if(modelSessionData && ar_try_on?.cached_ids?.includes('all')) {
-            this.setModelData(modelSessionData, model_id)
-            console.log({inc: ar_try_on?.cached_ids?.includes(product_id), product_id})
-            return;
+
+    whichExists  (arr = []) {
+        if(arr.length < 1) {
+            arr = ar_try_on?.cached_ids || []
         }
+        if (!Array.isArray(arr)) return false;
+        if (arr.includes("all")) return "all";
+        if (arr.includes("all_remove")) return "all_remove";
+        return false;
+    }
+
+
+    async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer', type='normal') {
+        let modelSessionData = this.getModelSessionData('models', product_id);
+        product_id = parseInt(product_id)
+        let isSettingsChanged = this.getModelSessionData('isSettingsChanged')
+        const whichExists = this.whichExists(ar_try_on.cached_ids)
+
+        if (whichExists){
+            if(isSettingsChanged === whichExists) {
+                this.setModelData(modelSessionData, model_id, type)
+                return;
+            }
+        }else{
+            if (modelSessionData && !ar_try_on?.cached_ids?.includes(product_id)) {
+                this.setModelData(modelSessionData, model_id, type)
+                return;
+            }
+        }
+
+
+        let loadingMessage;
+        // Show loading message before sending the request
+        loadingMessage = this.alertify.success('Loading 3D model...', 2000);
         let self = this
         let formData = new FormData();
         formData.append('post_id', product_id);
@@ -103,9 +142,26 @@ class AtlasAR {
                 if (response.success) {
                     const data = response.data;
                     // Check if the data exists before assigning it to model-viewer
+                    if(type === 'modal') {
+                        // Hide loading message
+                        if (loadingMessage) {
+                            loadingMessage.dismiss();
+                        }
+                        // Use the product name as the modal title
+                        const productName = data.product_name || '3D Product';
+                        const htmlContent = self.getModelSkeleton('atlas_ar_model_viewer__'+product_id)
+                        self.alertify
+                            .alert(productName, htmlContent)
+                            .set({
+                                transition: 'zoom',
+                                movable: true,
+                                maximizable: true
+                            }) // Customize options
+                            .setHeader(productName);
+                    }
                     if (data) {
                         this.setModelSessionData(data, product_id)
-                        self.setModelData(data, model_id)
+                        self.setModelData(data, model_id, type)
                     }
                 }
             })
@@ -139,22 +195,27 @@ class AtlasAR {
         );
     }
 
-    getModelSessionData(postId = '') {
+    getModelSessionData(propertyName = 'models', postId = '') {
 
         this.storedModelData = this.getStoredModelDataObj();
+        if (propertyName === 'models') {
+            return this.storedModelData?.models?.[postId] ?? false;
+        }
 
-        return this.storedModelData?.models?.[postId] ?? false;
+        return this.storedModelData?.[propertyName] ?? false;
+
     }
 
-    setModelSessionData(modelData, postId) {
+    setModelSessionData(data, postId = '', propertyName = '') {
         // TODO: update this method based on postId.
         let storedModelDataObj = this.getStoredModelDataObj();
         let storedModelData = {}
-        if (modelData && postId) {
+        if (data && postId) {
             storedModelData = {
                 url: window.location.href,
+                isSettingsChanged: this.whichExists(),
                 models: {
-                    [postId]: modelData,
+                    [postId]: data,
                     ...storedModelDataObj?.models
                 }
             }

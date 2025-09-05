@@ -115,6 +115,7 @@ class AR_TRY_ON_Api_Routes
 
             $response['data'] = $fields;
             AR_TRY_ON_Cache::set('settings', $fields);
+            AR_TRY_ON_Helper::update_cache_data($request['has_value_changed']);
 
             return rest_ensure_response($response);
         }
