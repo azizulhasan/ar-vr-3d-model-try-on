@@ -248,7 +248,7 @@ export default function App() {
           className="art-flex art-items-center art-justify-between art-p-4 art-cursor-pointer"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          <button className="art-font-bold art-bg-[#005e63] art-text-white art-border-blue-200">☰</button>
+          <button className="art-font-bold art-bg-[#005e63] art-text-white art-border-blue-400">☰</button>
         </div>
 
         {/* Tabs */}
