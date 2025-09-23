@@ -1,4 +1,3 @@
-import alertify from 'alertifyjs';
 
 import { getURL, postWithoutImage, getPostID, setModelAttributes } from "../../src/context/utilities";
 
@@ -23,7 +22,7 @@ if (false) {
 
     let loadingMessage;
     // Show loading message before sending the request
-    loadingMessage = alertify.success('Loading 3D model...', 2000);
+    // loadingMessage = alertify.success('Loading 3D model...', 2000);
     let formData = new FormData();
     formData.append('product_id', product_id);
     await postWithoutImage(getURL('get_model_and_settings'), formData)

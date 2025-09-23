@@ -1,12 +1,10 @@
-import alertify from 'alertifyjs';
-import {setModelAttributes} from '../../src/context/utilities';
+import {setModelAttributes, createModal} from '../../src/context/utilities';
 
 class AtlasAR {
 
     alertify = null
 
     constructor() {
-        this.alertify = alertify
     }
 
     /**
@@ -83,14 +81,7 @@ class AtlasAR {
             const productName = data.product_name || '3D Product';
             let model_id_name = model_id.replace('#', '');
             const htmlContent = this.getModelSkeleton(model_id_name)
-            this.alertify
-                .alert(productName, htmlContent)
-                .set({
-                    transition: 'zoom',
-                    movable: true,
-                    maximizable: true
-                }) // Customize options
-                .setHeader(productName);
+            createModal(productName, htmlContent)
         }
         const modelViewer = document.querySelectorAll(model_id)[0]
         console.log({model_id, modelViewer})
@@ -129,10 +120,9 @@ class AtlasAR {
             }
         }
 
-
+        // return;
         let loadingMessage;
         // Show loading message before sending the request
-        loadingMessage = this.alertify.success('Loading 3D model...', 2000);
         let self = this
         let formData = new FormData();
         formData.append('post_id', product_id);
@@ -141,27 +131,9 @@ class AtlasAR {
             .then((response) => {
                 if (response.success) {
                     const data = response.data;
-                    // Check if the data exists before assigning it to model-viewer
-                    if(type === 'modal') {
-                        // Hide loading message
-                        if (loadingMessage) {
-                            loadingMessage.dismiss();
-                        }
-                        // Use the product name as the modal title
-                        const productName = data.product_name || '3D Product';
-                        const htmlContent = self.getModelSkeleton('atlas_ar_model_viewer__'+product_id)
-                        self.alertify
-                            .alert(productName, htmlContent)
-                            .set({
-                                transition: 'zoom',
-                                movable: true,
-                                maximizable: true
-                            }) // Customize options
-                            .setHeader(productName);
-                    }
+                    self.setModelData(data, model_id, type)
                     if (data) {
                         this.setModelSessionData(data, product_id)
-                        self.setModelData(data, model_id, type)
                     }
                 }
             })
