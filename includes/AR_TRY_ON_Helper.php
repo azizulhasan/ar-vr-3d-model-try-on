@@ -573,7 +573,7 @@ class AR_TRY_ON_Helper
                 $post_cache_data[] = $post_id;
                 update_option('get_cache_data', $post_cache_data);
                 AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
-            } elseif ($state === 'remove') {
+            } elseif ($state === 'remove' && is_array($post_cache_data)) {
                 // Search for the item
                 $index = array_search($post_id, $post_cache_data);
 
