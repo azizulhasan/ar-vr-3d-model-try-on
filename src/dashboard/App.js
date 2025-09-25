@@ -14,6 +14,7 @@ import notify from "../context/Notify";
 export default function App() {
     const [activeTab, setActiveTab] = useState('Settings');
     const [authType, setAuthType] = useState("Bearer");
+    // const [isSideBarOpen, setIsSideBarOpen] = useState(false);
     const [settings, setSettings] = useState({
         ar_try_on_display_button_automatically: 'yes',
         ar_try_on_allowed_post_types: ['post'],
@@ -54,6 +55,23 @@ export default function App() {
     const [headers, setHeaders] = useState([]);
     const allApi = getAPITypes('all');
     const [currentApi, setCurrentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+
+    // const sideBarItems = [
+    //     {name:'Settings', component: 'Settings' },
+    //     {name:'Integration', component: 'Integration' },
+    //     {name:'Documentation', component: 'Documentation' },
+    //     {name:'Contact', component: 'Contact' },
+                
+    // ]
+
+    // const handleSideBarItemClick = (item) => {
+    //     if (item.name === 'Collapse Menu') {
+    //         setIsSideBarOpen(!isSideBarOpen);
+    //     } else {
+    //         setActiveTab(item.component);
+    //     }
+    // }
+
 
     useEffect(() => {
         /**
@@ -206,14 +224,24 @@ export default function App() {
             hideProgressBar={false}
             newestOnTop={false}
             closeOnClick
-            rtl={false}
+            rtl={false}       
             pauseOnFocusLoss
             draggable
             pauseOnHover
         />
-        <div className="art-md:block ">
-            <div className="art-border-b art-border-gray-200">
-                <nav aria-label="Tabs" className="art--mb-px art-flex art-space-x-8 art-no-underline">
+
+        <div className="art-bg-white art-w-full art-h-[10vh] art-flex art-justify-start art-items-center art-px-5 ">
+            <h1 className="art-text-black">AtlasAR</h1>
+            <span className="art-text-center art-p-4">Version: 1.6.0</span>
+      
+        </div>
+
+        
+        <div className="art-flex art-h-full ">
+
+
+            <div className="art-w-60 art-border-r art-border-gray-200 art-bg-white">
+                <nav aria-label="Tabs" className="art-flex art-flex-col art-space-y-2 art-p-4">
                     {tabs.map((tab) => (
                         <a
                             key={tab.name}
@@ -234,7 +262,9 @@ export default function App() {
             </div>
             {/*TODO:: Add plugin version*/}
             {/*<div className="art-absolute art-inset-y-0 art-right-0 art-flex art-items-center art-pr-2 art-sm:static art-sm:inset-auto art-sm:ml-6 art-sm:pr-0">1.0.8</div>*/}
-        </div>
+      
+
+         <div className="art-flex-1">
 
         {
             activeTab === 'Settings' &&
@@ -249,10 +279,11 @@ export default function App() {
                          handleChange={handleChange} handleHeaderChange={handleHeaderChange}/>
         }
         {activeTab === 'Documentation' && <Documentation/>}
+        
 
         {/* Submit Button */}
         {activeTab !== 'Documentation' && (
-            <div className="art-space-y-2">
+            <div className="art-mt-6 art-space-y-2">   
                 <button
                     onClick={handleSubmit}
                     className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500"
@@ -260,7 +291,11 @@ export default function App() {
                     Save
                 </button>
             </div>
+            
         )}
+            </div>
+            </div>
+    
     </>;
 }
 
