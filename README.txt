@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -223,6 +223,10 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 == Changelog ==
 
 
+= 1.6.1 ( 26 September 2025 )  =
+Introduced: New modal added for 3d model display.
+Improved: 3d Model loading time improved.
+
 = 1.6.0 ( 04 September 2025 )  =
 Introduced: model generation UI.
 Introduced: User can generate model from post edit page.
@@ -383,5 +387,6 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 0.1 =
-This version fixes a security related bug. Upgrade immediately.
+= 1.6.1 =
+Introduced: New modal added for 3d model display.
+Improved: 3d Model loading time improved.

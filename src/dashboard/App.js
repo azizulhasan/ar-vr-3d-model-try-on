@@ -260,7 +260,7 @@ export default function App() {
         {activeTab === 'Documentation' && <Documentation/>}
 
         {/* Submit Button */}
-        {activeTab !== 'Documentation' && (
+        {(activeTab !== 'Documentation' && activeTab !== 'Features') && (
             <div className="art-space-y-2">
                 <button
                     onClick={handleSubmit}

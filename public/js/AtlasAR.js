@@ -91,9 +91,12 @@ class AtlasAR {
     }
 
 
-    whichExists  (arr = []) {
+    whichExists  (arr = [], product_id = '') {
         if(arr.length < 1) {
             arr = ar_try_on?.cached_ids || []
+        }
+        if(product_id) {
+            if (arr.includes(product_id)) return product_id;
         }
         if (!Array.isArray(arr)) return false;
         if (arr.includes("all")) return "all";
@@ -103,11 +106,11 @@ class AtlasAR {
 
 
     async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer', type='normal') {
-        let modelSessionData = this.getModelSessionData('models', product_id);
         product_id = parseInt(product_id)
+        let modelSessionData = this.getModelSessionData('models', product_id);
         let isSettingsChanged = this.getModelSessionData('isSettingsChanged')
-        const whichExists = this.whichExists(ar_try_on.cached_ids)
-
+        const whichExists = this.whichExists(ar_try_on.cached_ids, product_id)
+        console.log({whichExists, isSettingsChanged, product_id})
         if (whichExists){
             if(isSettingsChanged === whichExists) {
                 this.setModelData(modelSessionData, model_id, type)
@@ -187,10 +190,11 @@ class AtlasAR {
                 url: window.location.href,
                 isSettingsChanged: this.whichExists(),
                 models: {
-                    [postId]: data,
-                    ...storedModelDataObj?.models
+                    ...storedModelDataObj?.models,
+                    [postId]: data
                 }
             }
+            console.log(storedModelData)
             window.sessionStorage.setItem('atlas_ar_model_data', JSON.stringify(storedModelData))
         }
 

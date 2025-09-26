@@ -584,7 +584,7 @@ class AR_TRY_ON_Helper
                 }
 
                 update_option('get_cache_data', $post_cache_data);
-                AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
+                AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
             }
         } elseif ($has_value_changed) {
 
@@ -612,7 +612,7 @@ class AR_TRY_ON_Helper
                 $post_cache_data[] = 'all';
             }
 
-            AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
+            AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
 
         }
 
