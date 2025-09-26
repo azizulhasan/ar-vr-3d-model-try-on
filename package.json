@@ -18,7 +18,8 @@
     "release": "gulp release",
     "copy": "gulp copy",
     "copyProButton": "gulp copyProButton",
-    "tailwind": "npx tailwindcss -i src/tailwind.css -o public/css/ar-try-on.css --watch",
+    "tailwind": "npx tailwindcss -c tailwind.config.js -i src/tailwind.css -o public/css/ar-try-on.css --watch",
+    "modal": "npx tailwindcss -c tailwind.config.modal.js -i src/tailwind.css -o public/css/atlas_ar_modal.css --watch",
     "build": "concurrently \"npm run production\" \"npm run tailwind\" \"npm run compile\" \"gulp copyPro\""
   },
   "keywords": [
@@ -33,7 +34,6 @@
     "@babel/preset-env": "^7.26.0",
     "@wordpress/i18n": "^5.14.0",
     "@wordpress/scripts": "^30.7.0",
-    "alertifyjs": "^1.14.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-router-dom": "^6.28.1",

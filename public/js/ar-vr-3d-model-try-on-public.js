@@ -104,36 +104,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     let loadingMessage;
                     // Show loading message before sending the request
-                    loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
+                    // loadingMessage = atlasAR.alertify.success('Loading 3D model...', 2000);
                     let formData = new FormData();
                     formData.append('post_id', product_id);
-                    await atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), formData)
-                        .then((response) => {
-                            // Hide loading message
-                            if (loadingMessage) {
-                                loadingMessage.dismiss();
-                            }
+                    // await atlasAR.postWithoutImage(atlasAR.getURL('get_model_and_settings'), formData)
+                    //     .then((response) => {
+                    //         // Hide loading message
+                    //         if (loadingMessage) {
+                    //             loadingMessage.dismiss();
+                    //         }
+                    //
+                    //         if (response.success) {
+                    //             const data = response.data;
+                    //             // Use the product name as the modal title
+                    //             const productName = data.product_name || '3D Product';
+                    //
+                    //             atlasAR.alertify
+                    //                 .alert(productName, htmlContent)
+                    //                 .set({
+                    //                     transition: 'zoom',
+                    //                     movable: true,
+                    //                     maximizable: true
+                    //                 }) // Customize options
+                    //                 .setHeader(productName);
+                    //
+                    //             // Check if the data exists before assigning it to model-viewer
+                    //             if (data) {
+                    //                 atlasAR.setModelData(data, '#atlas_ar_model_viewer')
+                    //             }
+                    //         }
+                    //     })
 
-                            if (response.success) {
-                                const data = response.data;
-                                // Use the product name as the modal title
-                                const productName = data.product_name || '3D Product';
-
-                                atlasAR.alertify
-                                    .alert(productName, htmlContent)
-                                    .set({
-                                        transition: 'zoom',
-                                        movable: true,
-                                        maximizable: true
-                                    }) // Customize options
-                                    .setHeader(productName);
-
-                                // Check if the data exists before assigning it to model-viewer
-                                if (data) {
-                                    atlasAR.setModelData(data, '#atlas_ar_model_viewer')
-                                }
-                            }
-                        })
+                    await atlasAR.fetchModelData(product_id, '#atlas_ar_model_viewer__'+product_id, 'modal')
                 }
             })
         });

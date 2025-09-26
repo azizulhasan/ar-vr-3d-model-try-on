@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {getPostID, getURL, postWithoutImage, copyshortcode, getAPITypes} from "../context/utilities";
+import {getPostID, getURL, postWithoutImage, copyshortcode, getAPITypes, isDifferent} from "../context/utilities";
 import ContentSection from "./components/ContentSection.js";
 import CameraSection from "./components/CameraSection.js";
 import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
@@ -66,6 +66,7 @@ const ARProductModelSettings = () => {
     const [settings, setSettings] = useState({})
 
     const [currentApi, setCurrentAPI] = useState(getAPITypes('tripo3d'))
+    const [previousProductModel, setPreviousProductModel] = useState(getAPITypes({}))
 
     // integration settings:
     const addIntegrationField = () => {
@@ -211,9 +212,9 @@ const ARProductModelSettings = () => {
                         if ((!res.data?.exclude_integration_api_body || res.data?.exclude_integration_api_body.length < 1) && currentApi?.body) {
                             productModelData.exclude_integration_api_body = currentApi.body.supported_types[productModelData.exclude_integration_api_model_type].input
                         }
-
                         setProductModel(productModelData);
                         setIsProductModelLoad(true)
+                        setPreviousProductModel(productModelData)
                     });
             }
         }, 1000)
@@ -246,10 +247,19 @@ const ARProductModelSettings = () => {
             return;
         }
 
+        let hasValueChanged = isDifferent(previousProductModel, productModel);
+        if (!hasValueChanged) {
+            notify('No changes detected', 'info',{
+                autoClose: 5000,
+            })
+            return;
+        }
+
         let formData = new FormData();
         formData.append('fields', JSON.stringify(productModel));
         formData.append('post_id', postId);
         formData.append('method', 'POST');
+        formData.append('has_value_changed', hasValueChanged);
         postWithoutImage(getURL('get_model_and_settings'), formData)
             .then((res) => {
                 console.log(res)

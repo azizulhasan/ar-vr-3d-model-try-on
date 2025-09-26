@@ -6,7 +6,7 @@ import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
 import Documentation from "./components/dashboard/Documentation/Documentation";
-import {getAPITypes, getURL, postWithoutImage} from "../context/utilities";
+import {getAPITypes, getURL, isDifferent, postWithoutImage} from "../context/utilities";
 import toast from '../context/Notify';
 import notify from "../context/Notify";
 
@@ -43,6 +43,7 @@ export default function App() {
             {key: 'Content-Type', value: 'application/json'},
         ],
     });
+    const [previousSettings, setPreviousSettings] = useState(null)
     const tabs = [
         {name: 'Settings', href: '#', current: true, component: 'Settings'},
         {name: 'Integration', href: '#', current: false, component: 'Integration'},
@@ -71,6 +72,7 @@ export default function App() {
                     console.log(currentApi)
                     console.log(finalSettings)
                 }
+                setPreviousSettings(finalSettings)
                 setSettings(finalSettings);
             });
     }, []);
@@ -184,11 +186,18 @@ export default function App() {
         }
         console.log({tempSettings})
 
-        // return;
+        let hasValueChanged = isDifferent(previousSettings, tempSettings);
+        if (!hasValueChanged) {
+            notify('No changes detected', 'info',{
+                autoClose: 5000,
+            })
+            return;
+        }
 
         let formData = new FormData();
         formData.append('fields', JSON.stringify(tempSettings));
         formData.append('method', 'post');
+        formData.append('has_value_changed', 'all');
         postWithoutImage(getURL('settings'), formData)
             .then((res) => {
                 setSettings(res.data);
@@ -251,7 +260,7 @@ export default function App() {
         {activeTab === 'Documentation' && <Documentation/>}
 
         {/* Submit Button */}
-        {activeTab !== 'Documentation' && (
+        {(activeTab !== 'Documentation' && activeTab !== 'Features') && (
             <div className="art-space-y-2">
                 <button
                     onClick={handleSubmit}
