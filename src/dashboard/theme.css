@@ -1,0 +1,33 @@
+:root {
+  --theme-bg: #ffffff;
+  --theme-text: #000000;
+  --theme-accent: #3b82f6; /* default blue */
+}
+
+
+
+/* Style the color input */
+/* input[type="color"] {
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+} */
+
+/* Style the inner color box */
+
+/* input[type="color"]::-webkit-color-swatch {
+    border: none !important;
+    border-radius: 1rem !important;
+    padding: 0 !important;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    border: none !important;
+    border-radius: 1rem !important;
+    padding: 0 !important;
+} */
+
+/* For Firefox */
+/* input[type="color"]::-moz-color-swatch {
+    border: none !important;
+    border-radius: 1rem !important;
+} */
