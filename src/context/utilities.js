@@ -43,7 +43,6 @@ export const getPostID = () => {
 }
 
 
-
 function unsecuredCopyToClipboard() {
     const textArea = document.createElement("textarea");
     textArea.value = text;
@@ -127,7 +126,7 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         if (model_settings.canvas_alignment == 'center') {
             modelViewer.style.display = 'block';
             modelViewer.style.margin = '0px auto';
-        } else if (model_settings.canvas_alignment ==   'left') {
+        } else if (model_settings.canvas_alignment == 'left') {
             modelViewer.style.margin = '0 auto 0 0';
         } else if (model_settings.canvas_alignment == 'right') {
             modelViewer.style.margin = '0 0 0 auto';
@@ -149,12 +148,9 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     }
 
 
-
-
     modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
     modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
     modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
-
 
 
     const modelViewerStyle = document.getElementById('model-viewer-style');
@@ -178,7 +174,6 @@ export const setModelAttributes = (modelViewer, model_settings) => {
 }
 
 
-
 export const getAPITypes = (api_type = 'tripo3d') => {
     let api_types = {
         tripo3d: {
@@ -187,8 +182,8 @@ export const getAPITypes = (api_type = 'tripo3d') => {
             url: 'https://api.tripo3d.ai/v2/openapi/task',
             api_key_url: 'https://platform.tripo3d.ai/api-keys',
             headers: [
-                {key: 'Authorization', value: '' },
-                {key: 'Content-Type', value: 'application/json' },
+                {key: 'Authorization', value: ''},
+                {key: 'Content-Type', value: 'application/json'},
             ],
             body: {
                 supported_types: {
@@ -206,19 +201,19 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                     },
                     image_to_model: {
                         input: [
-                            { key: 'type', type: 'text', value: 'image_to_model' },
-                            { key: 'file.type', type: 'text', value: 'png' },
-                            { key: 'file.file_token', type: 'file', value: '' },
-                            { key: 'file.object', type: 'text', value: '' },
-                            { key: 'file.url', type: 'url', value: '' },
-                            { key: 'model_version', type: 'text', value: 'v2.5-20250123' },
-                            { key: 'texture', type: 'boolean', value: true },
-                            { key: 'pbr', type: 'boolean', value: true },
-                            { key: 'texture_alignment', type: 'text', value: 'original_image' }
+                            {key: 'type', type: 'text', value: 'image_to_model'},
+                            {key: 'file.type', type: 'text', value: 'png'},
+                            {key: 'file.file_token', type: 'file', value: ''},
+                            {key: 'file.object', type: 'text', value: ''},
+                            {key: 'file.url', type: 'url', value: ''},
+                            {key: 'model_version', type: 'text', value: 'v2.5-20250123'},
+                            {key: 'texture', type: 'boolean', value: true},
+                            {key: 'pbr', type: 'boolean', value: true},
+                            {key: 'texture_alignment', type: 'text', value: 'original_image'}
                         ],
                         doc: 'https://platform.tripo3d.ai/docs/generation#image-to-model'
-                    },                  
-                    
+                    },
+
                 }
             }
         },
@@ -228,18 +223,18 @@ export const getAPITypes = (api_type = 'tripo3d') => {
             url: 'https://api.meshy.ai/openapi/v2/text-to-3d',
             api_key_url: 'https://www.meshy.ai/settings/api',
             headers: [
-                {key: 'Authorization', value: '' },
-                {key: 'Content-Type', value: 'application/json' },
+                {key: 'Authorization', value: ''},
+                {key: 'Content-Type', value: 'application/json'},
             ],
             body: {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            { key: 'prompt', type: 'textarea', value: '' },
-                            { key: 'mode', type: 'text', value: 'preview' },
-                            { key: 'negative_prompt', type: 'textarea', value: '' },
-                            { key: 'art_style', type: 'text', value: 'realistic' },
-                            { key: 'should_remesh', type: 'boolean', value: true }
+                            {key: 'prompt', type: 'textarea', value: ''},
+                            {key: 'mode', type: 'text', value: 'preview'},
+                            {key: 'negative_prompt', type: 'textarea', value: ''},
+                            {key: 'art_style', type: 'text', value: 'realistic'},
+                            {key: 'should_remesh', type: 'boolean', value: true}
                         ],
                         doc: 'https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request'
                     },
@@ -249,8 +244,133 @@ export const getAPITypes = (api_type = 'tripo3d') => {
 
     }
 
-    if(api_type === 'all'){
+    if (api_type === 'all') {
         return api_types;
     }
     return api_types[api_type];
 }
+
+/**
+ * compare 2 objects
+ * @param obj1
+ * @param obj2
+ * @returns {boolean}
+ */
+export const isDifferent = (obj1, obj2) => {
+    // If both are strictly equal
+    if (obj1 === obj2) return false;
+
+    // If either is null/undefined or types don't match
+    if (typeof obj1 !== typeof obj2 || obj1 === null || obj2 === null) {
+        return true;
+    }
+
+    // Handle arrays
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+        if (obj1.length !== obj2.length) return true;
+        for (let i = 0; i < obj1.length; i++) {
+            if (isDifferent(obj1[i], obj2[i])) return true;
+        }
+        return false;
+    }
+
+    // Handle objects
+    if (typeof obj1 === "object" && typeof obj2 === "object") {
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+
+        // Check if keys length differs
+        if (keys1.length !== keys2.length) return true;
+
+        // Check if any key is missing or values differ
+        for (let key of keys1) {
+            if (!(key in obj2)) return true;
+            if (isDifferent(obj1[key], obj2[key])) return true;
+        }
+        return false;
+    }
+
+    // Primitive values (string, number, boolean, etc.)
+    return obj1 !== obj2;
+}
+
+export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body content...')  =>{
+    // Create overlay
+    const overlay = document.createElement('div');
+    overlay.className = "art-fixed art-inset-0 art-bg-black/50 art-flex art-items-center art-justify-center art-z-50";
+
+    // Create modal container
+    const modal = document.createElement('div');
+    modal.className = "art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg art-flex art-flex-col art-relative";
+
+    // --- Header ---
+    const header = document.createElement('div');
+    header.className = "art-flex art-items-center art-justify-between art-p-4 art-border-b art-border-gray-200";
+
+    // Title
+    const titleEl = document.createElement('h2');
+    titleEl.className = "art-text-lg art-font-semibold";
+    titleEl.textContent = title;
+
+    // Header buttons container
+    const headerButtons = document.createElement('div');
+    headerButtons.className = "art-flex art-gap-2";
+
+    // Expand button (SVG)
+    const expandBtn = document.createElement('button');
+    expandBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
+    expandBtn.innerHTML = `
+    <svg class="art-w-5 art-h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zM14 14h6v6h-6v-6zM4 14h6v6H4v-6zM14 4h6v6h-6V4z"/>
+    </svg>`;
+    console.log(expandBtn)
+    expandBtn.addEventListener('click', () => {
+        modal.classList.toggle('art-fixed');
+        modal.classList.toggle('art-inset-0');
+        modal.classList.toggle('art-w-full');
+        modal.classList.toggle('art-h-full');
+        modal.classList.toggle('art-max-w-none');
+        modal.classList.toggle('art-rounded-none');
+        console.log(modal)
+    });
+
+    // Close button (SVG)
+    const closeBtn = document.createElement('button');
+    closeBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
+    closeBtn.innerHTML = `
+    <svg class="art-w-5 art-h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+    </svg>`;
+    closeBtn.addEventListener('click', () => document.body.removeChild(overlay));
+
+    headerButtons.appendChild(expandBtn);
+    headerButtons.appendChild(closeBtn);
+    header.appendChild(titleEl);
+    header.appendChild(headerButtons);
+
+    // --- Body ---
+    const body = document.createElement('div');
+    body.className = "art-p-4 art-flex-1 art-overflow-y-auto";
+    console.log(bodyContent)
+    body.innerHTML = bodyContent;
+
+    // --- Footer ---
+    const footer = document.createElement('div');
+    footer.className = "art-flex art-justify-end art-p-4 art-border-t art-border-gray-200";
+    const footerCloseBtn = document.createElement('button');
+    footerCloseBtn.className = "art-bg-gray-200 art-hover-bg-gray-300 art-text-gray-700 art-px-4 art-py-2 art-rounded";
+    footerCloseBtn.textContent = "Close";
+    footerCloseBtn.addEventListener('click', () => document.body.removeChild(overlay));
+    footer.appendChild(footerCloseBtn);
+
+    // --- Assemble modal ---
+    modal.appendChild(header);
+    modal.appendChild(body);
+    modal.appendChild(footer);
+    overlay.appendChild(modal);
+
+    // Add to body
+    document.body.appendChild(overlay);
+    return overlay;
+}
+

@@ -1,12 +1,10 @@
-import alertify from 'alertifyjs';
-import { setModelAttributes } from '../../src/context/utilities';
+import {setModelAttributes, createModal} from '../../src/context/utilities';
 
 class AtlasAR {
 
     alertify = null
 
     constructor() {
-        this.alertify = alertify
     }
 
     /**
@@ -78,24 +76,64 @@ class AtlasAR {
         return value !== null && typeof value === 'object' && !Array.isArray(value);
     }
 
-    setModelData(data, model_id = '.atlas_ar_model_viewer') {
+    setModelData(data, model_id = '.atlas_ar_model_viewer', type = 'normal') {
+        if(type === 'modal') {
+            const productName = data.product_name || '3D Product';
+            let model_id_name = model_id.replace('#', '');
+            const htmlContent = this.getModelSkeleton(model_id_name)
+            createModal(productName, htmlContent)
+        }
         const modelViewer = document.querySelectorAll(model_id)[0]
+        console.log({model_id, modelViewer})
         if (modelViewer && this.isObject(data)) {
             setModelAttributes(modelViewer, data)
         }
     }
 
-    async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer') {
+
+    whichExists  (arr = []) {
+        if(arr.length < 1) {
+            arr = ar_try_on?.cached_ids || []
+        }
+        if (!Array.isArray(arr)) return false;
+        if (arr.includes("all")) return "all";
+        if (arr.includes("all_remove")) return "all_remove";
+        return false;
+    }
+
+
+    async fetchModelData(product_id, model_id = '.atlas_ar_model_viewer', type='normal') {
+        let modelSessionData = this.getModelSessionData('models', product_id);
+        product_id = parseInt(product_id)
+        let isSettingsChanged = this.getModelSessionData('isSettingsChanged')
+        const whichExists = this.whichExists(ar_try_on.cached_ids)
+
+        if (whichExists){
+            if(isSettingsChanged === whichExists) {
+                this.setModelData(modelSessionData, model_id, type)
+                return;
+            }
+        }else{
+            if (modelSessionData && !ar_try_on?.cached_ids?.includes(product_id)) {
+                this.setModelData(modelSessionData, model_id, type)
+                return;
+            }
+        }
+
+        // return;
+        let loadingMessage;
+        // Show loading message before sending the request
         let self = this
         let formData = new FormData();
         formData.append('post_id', product_id);
+        formData.append('has_value_changed', true);
         await this.postWithoutImage(this.getURL('get_model_and_settings'), formData)
             .then((response) => {
                 if (response.success) {
                     const data = response.data;
-                    // Check if the data exists before assigning it to model-viewer
+                    self.setModelData(data, model_id, type)
                     if (data) {
-                        self.setModelData(data, model_id)
+                        this.setModelSessionData(data, product_id)
                     }
                 }
             })
@@ -105,6 +143,7 @@ class AtlasAR {
         const el = document.createElement('model-viewer');
         return el instanceof HTMLElement; // works even if <model-viewer> isn't fully registered yet
     }
+
     supportsModelViewer() {
         const supportsCustomElements = 'customElements' in window;
         const supportsWebGL = (() => {
@@ -128,6 +167,41 @@ class AtlasAR {
         );
     }
 
+    getModelSessionData(propertyName = 'models', postId = '') {
+
+        this.storedModelData = this.getStoredModelDataObj();
+        if (propertyName === 'models') {
+            return this.storedModelData?.models?.[postId] ?? false;
+        }
+
+        return this.storedModelData?.[propertyName] ?? false;
+
+    }
+
+    setModelSessionData(data, postId = '', propertyName = '') {
+        // TODO: update this method based on postId.
+        let storedModelDataObj = this.getStoredModelDataObj();
+        let storedModelData = {}
+        if (data && postId) {
+            storedModelData = {
+                url: window.location.href,
+                isSettingsChanged: this.whichExists(),
+                models: {
+                    [postId]: data,
+                    ...storedModelDataObj?.models
+                }
+            }
+            window.sessionStorage.setItem('atlas_ar_model_data', JSON.stringify(storedModelData))
+        }
+
+        this.storedModelData = storedModelData;
+
+        return this.storedModelData;
+    }
+
+    getStoredModelDataObj() {
+        return JSON.parse(window.sessionStorage.getItem('atlas_ar_model_data'));
+    }
 
 
 }
