@@ -6,7 +6,7 @@ import {ToastContainer} from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
 import Documentation from "./components/dashboard/Documentation/Documentation";
-import {getAPITypes, getURL, postWithoutImage} from "../context/utilities";
+import {getAPITypes, getURL, isDifferent, postWithoutImage} from "../context/utilities";
 import toast from '../context/Notify';
 import notify from "../context/Notify";
 import "./theme.css"
@@ -57,6 +57,7 @@ export default function App() {
     const [headers, setHeaders] = useState([]);
     const allApi = getAPITypes('all');
     const [currentApi, setCurrentAPI] = useState(getAPITypes(settings?.ar_try_on_exclude_integration_api_name || 'tripo3d'))
+    const [previousSettings, setPreviousSettings] = useState({})
 
 
     
@@ -115,6 +116,8 @@ useEffect(() => {
                     console.log(finalSettings)
                 }
                 setSettings(finalSettings);
+                setPreviousSettings(finalSettings)
+
             });
     }, []);
 
@@ -227,11 +230,20 @@ useEffect(() => {
         }
         console.log({tempSettings})
 
+        let hasValueChanged = isDifferent(previousSettings, tempSettings);
+        if (!hasValueChanged) {
+            notify('No changes detected', 'info',{
+                autoClose: 5000,
+            })
+            return;
+        }
+
         // return;
 
         let formData = new FormData();
         formData.append('fields', JSON.stringify(tempSettings));
         formData.append('method', 'post');
+        formData.append('has_value_changed', hasValueChanged);
         postWithoutImage(getURL('settings'), formData)
             .then((res) => {
                 setSettings(res.data);
