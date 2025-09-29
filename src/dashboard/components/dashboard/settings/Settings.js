@@ -91,13 +91,13 @@ export default function Settings({ settings, handleChange }) {
         isDataLoaded ? <React.Fragment>
             <div
                 id="ar_try_on_settings"
-                className="art-p-4 art-bg-gray-100 art-space-y-6"
+                className="art-p-4 art-bg-gray-100 art-space-y-6" style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}
             >
 
                 <div className={'art-flex'}>
                     {/* Title Section */}
                     <div className="art-w-1/2">
-                        <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
+                        <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2"style={{ color: "var(--theme-text)" }}>
                             <span className="art-dashicons art-dashicons-admin-generic"></span>
                             View Settings
                         </h3>
@@ -106,7 +106,7 @@ export default function Settings({ settings, handleChange }) {
                         type="button"
                         id={'ar_try_on_demo_id'}
                         onClick={ar_try_on_demo_id}
-                        className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "
+                        className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "style={{ backgroundColor: "var(--theme-accent)", color: "var(--theme-text)" }}
                     >
                         Preview Demo
                     </button>
@@ -144,7 +144,7 @@ export default function Settings({ settings, handleChange }) {
                         </label>
                     </div>
                 </div>
-                <div className="art-space-y-4">
+                <div className="art-space-y-4" >
                     <label
                         htmlFor="ar_try_on_allowed_post_types"
                         className="art-block art-font-medium"

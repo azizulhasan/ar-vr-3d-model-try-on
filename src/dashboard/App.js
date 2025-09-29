@@ -12,11 +12,12 @@ import notify from "../context/Notify";
 import "./theme.css"
 
 
+
 export default function App() {
     const [activeTab, setActiveTab] = useState('Settings');
     const [authType, setAuthType] = useState("Bearer");
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [themeColor, setThemeColor] = useState("#ffffff");
+    const [isDarkMode, setIsDarkMode] = useState("#ffffff");
     const [settings, setSettings] = useState({
         ar_try_on_display_button_automatically: 'yes',
         ar_try_on_allowed_post_types: ['post'],
@@ -61,41 +62,33 @@ export default function App() {
 
 
     
-//THEME ON DASHBOARD
+//DARK/LIGHT THEME ON DASHBOARD
 
-const handleThemeChange = (color) => {
-  setThemeColor(color);
+ const applyTheme = (dark) => {
+    if (dark) {
+      document.documentElement.style.setProperty("--theme-bg", "#1e1e1e");
+      document.documentElement.style.setProperty("--theme-text", "#ffffff");
+      document.documentElement.style.setProperty("--theme-accent", "#333333");
+    } else {
+      document.documentElement.style.setProperty("--theme-bg", "#ffffff");
+      document.documentElement.style.setProperty("--theme-text", "#000000");
+      document.documentElement.style.setProperty("--theme-accent", "#e5e5e5");
+    }
+    localStorage.setItem("isDarkMode", dark ? "true" : "false");
+  };
 
-  // Background color
-  document.documentElement.style.setProperty("--theme-bg", color);
+  useEffect(() => {
+    const saved = localStorage.getItem("isDarkMode");
+    const dark = saved === "true";
+    setIsDarkMode(dark);
+    applyTheme(dark);
+  }, []);
 
-  // Contrast text (black/white)
-  const rgb = parseInt(color.slice(1), 16);
-  const r = (rgb >> 16) & 0xff;
-  const g = (rgb >> 8) & 0xff;
-  const b = rgb & 0xff;
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  const textColor = brightness > 125 ? "#000000" : "#ffffff";
-  document.documentElement.style.setProperty("--theme-text", textColor);
-
-  // Accent color (slightly darker version of main color)
-  const darker = `#${Math.max(r - 40, 0).toString(16).padStart(2, "0")}${Math.max(
-    g - 40,
-    0
-  ).toString(16).padStart(2, "0")}${Math.max(b - 40, 0)
-    .toString(16)
-    .padStart(2, "0")}`;
-  document.documentElement.style.setProperty("--theme-accent", darker);
-
-  // Save to localStorage
-  localStorage.setItem("themeColor", color);
-};
-
-useEffect(() => {
-  const saved = localStorage.getItem("themeColor");
-  if (saved) handleThemeChange(saved);
-}, []);
-
+  const handleThemeToggle = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    applyTheme(next);
+  };
 
 
 
@@ -287,18 +280,60 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /> 
 </svg>
     </button> 
-    <h1 className="art-text-black">AtlasAR</h1>
+    <h1 style={{ color: "var(--theme-text)" }}>AtlasAR</h1>
+
+
     <span className="art-text-center">Version: 1.6.0</span>
   </div>
-  {/* 🎨 Color Picker */}
   <div>
     
   </div>
-    <input
-    type="color"
-    value={themeColor}
-    onChange={(e) => handleThemeChange(e.target.value)}
-    className="art-w-8 art-h-8 art-m-10 art-cursor-pointer art-border-none art-bg-transparent"/>
+  {/* 🌗 Dark/Light Mode Toggle */}
+<button
+  onClick={handleThemeToggle}
+  className="art-w-12 art-h-12 art-m-10 art-rounded-full art-flex art-items-center art-justify-center 
+  art-border-gray-100 art-transition-colors art-duration-300 hover:art-bg-gray-100 dark:hover:art-bg-gray-700 art-cursor-pointer"
+  style={{
+    backgroundColor: "transparent",
+    color: "var(--theme-text)",
+  }}
+>
+  {isDarkMode ? (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="art-h-6 art-w-6"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3v1m0 16v1m8.66-12.66l-.7.7M4.05 19.95l-.7.7M21 12h1M2 12H1m16.95 7.95l-.7-.7M4.05 4.05l-.7-.7"
+      />
+      <circle cx="12" cy="12" r="4" />
+    </svg>
+  ) : (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="art-h-6 art-w-6"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
+      />
+    </svg>
+  )}
+</button>
+
+
+
 </div>
 
    {/* Layout with Sidebar + Main */}
@@ -340,7 +375,7 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
 )}
 
       {/* Main Content */}
-      <div className="art-flex-1 art-p-4">
+      <div className="art-flex-1">
         {activeTab === "Settings" && (
           <Settings setHeaders={setHeaders} settings={settings} handleChange={handleChange} />
         )}
@@ -363,10 +398,10 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
 
         {/* Submit Button */}
         {activeTab !== "Documentation" && (
-          <div className="art-mt-6 art-space-y-2">
+        
         <button
         onClick={handleSubmit}
-        className="art-block art-cursor-pointer art-w-full art-p-2 art-rounded"
+        className="art-block art-cursor-pointer art-w-full art-p-2 "
         style={{
             backgroundColor: "var(--theme-accent)",
             color: "var(--theme-text)",
@@ -376,7 +411,7 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
         Save
         </button>
 
-          </div>
+
         )}
       </div>
     </div>
