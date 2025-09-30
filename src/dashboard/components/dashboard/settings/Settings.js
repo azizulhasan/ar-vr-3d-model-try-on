@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { getURL, postWithoutImage } from '../../../../context/utilities';
 import toast from '../../../../context/Notify';
 import MultiSelect from '../../../../context/MultiSelect';
+import Radio from './Radio';
 
 export default function Settings({ settings, handleChange }) {
     // const [settings, setSettings] = useState({
@@ -91,7 +92,7 @@ export default function Settings({ settings, handleChange }) {
         isDataLoaded ? <React.Fragment>
             <div
                 id="ar_try_on_settings"
-                className="art-p-4 art-bg-gray-100 art-space-y-6" style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}
+                className="art-p-4 art-bg-gray-100 art-space-y-6" style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)",border: "1px solid #ccc" }}
             >
 
                 <div className={'art-flex'}>
@@ -111,39 +112,41 @@ export default function Settings({ settings, handleChange }) {
                         Preview Demo
                     </button>
                 </div>
-                {/* Display AR Button Autometically */}
-                <div className="art-space-y-4">
-                    <label
-                        htmlFor="ar_try_on_single_product_tabs"
-                        className="art-block art-font-medium"
-                    >
-                        Display AR Button Autometically
+            {/* Display AR Button Autometically */} 
+            <div className="art-space-y-4"> 
+                <label htmlFor="ar_try_on_single_product_tabs" className="art-block art-font-medium" >
+                     Display AR Button Autometically  
+                     </label>
+
+                 <div className="art-flex art-space-x-4"> 
+                    
+                    <label className="art-flex art-items-center art-gap-2">
+                        <Radio 
+                        type="radio" 
+                        id="ar_try_on_display_button_automatically1" 
+                        name="ar_try_on_display_button_automatically"
+                        value="yes" 
+                        checked={settings.ar_try_on_display_button_automatically == 'yes'}
+                        onChange={handleSettingsChange} />
+                        <span>Yes</span> 
+                    </label> 
+                        
+                    <label className="art-flex art-items-center art-gap-2">
+                         <Radio 
+                         type="radio"
+                            id="ar_try_on_display_button_automatically2"
+                            name="ar_try_on_display_button_automatically" 
+                            value="no" checked={settings.ar_try_on_display_button_automatically == 'no'}
+                            onChange={handleSettingsChange} /> 
+                            <span>No</span> 
                     </label>
-                    <div className="art-flex art-space-x-4">
-                        <label className="art-flex art-items-center art-gap-2">
-                            <input
-                                type="radio"
-                                id="ar_try_on_display_button_automatically1"
-                                name="ar_try_on_display_button_automatically"
-                                value="yes"
-                                checked={settings.ar_try_on_display_button_automatically == 'yes'}
-                                onChange={handleSettingsChange}
-                            />
-                            <span>Yes</span>
-                        </label>
-                        <label className="art-flex art-items-center art-gap-2">
-                            <input
-                                type="radio"
-                                id="ar_try_on_display_button_automatically2"
-                                name="ar_try_on_display_button_automatically"
-                                value="no"
-                                checked={settings.ar_try_on_display_button_automatically == 'no'}
-                                onChange={handleSettingsChange}
-                            />
-                            <span>No</span>
-                        </label>
-                    </div>
-                </div>
+                        
+                                    
+                             </div> 
+                                    
+                                </div>
+                                
+                                
                 <div className="art-space-y-4" >
                     <label
                         htmlFor="ar_try_on_allowed_post_types"
@@ -171,7 +174,7 @@ export default function Settings({ settings, handleChange }) {
                             <select
                                 id="ar_try_on_wc_hook_position"
                                 name="ar_try_on_wc_hook_position"
-                                className="art-block art-w-full art-p-2 art-border art-rounded"
+                                className="art-block art-w-full art-p-2 art-border art-rounded"style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}
                                 value={settings.ar_try_on_wc_hook_position}
                                 onChange={handleSettingsChange}
                             >
@@ -196,7 +199,7 @@ export default function Settings({ settings, handleChange }) {
                             </label>
                             <div className="art-flex art-space-x-4">
                                 <label className="art-flex art-items-center art-gap-2">
-                                    <input
+                                    <Radio
                                         type="radio"
                                         id="ar_try_on_single_product_tabs1"
                                         name="ar_try_on_single_product_tabs"
@@ -207,7 +210,7 @@ export default function Settings({ settings, handleChange }) {
                                     <span>Yes</span>
                                 </label>
                                 <label className="art-flex art-items-center art-gap-2">
-                                    <input
+                                    <Radio
                                         type="radio"
                                         id="ar_try_on_single_product_tabs2"
                                         name="ar_try_on_single_product_tabs"
@@ -224,7 +227,7 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Loading Attributes */}
                 <div className="art-space-y-4">
-                    <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
+                    <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2" style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}>
                         <span className="art-dashicons art-dashicons-admin-generic"></span>
                         Loading : Attributes
                     </h3>
@@ -236,7 +239,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-space-x-4">
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="try_on_loading_type1"
                                 name="ar_try_on_loading_type"
@@ -247,7 +250,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Auto</span>
                         </label>
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_loading2"
                                 name="ar_try_on_loading_type"
@@ -258,7 +261,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Lazy</span>
                         </label>
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_loading3"
                                 name="ar_try_on_loading_type"
@@ -281,7 +284,7 @@ export default function Settings({ settings, handleChange }) {
 
                 {/* Reveal Attributes */}
                 <div className="art-space-y-4">
-                    <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2">
+                    <h3 className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2" style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}>
                         <span className="art-dashicons art-dashicons-admin-generic"></span>
                         Reveal : Attributes
                     </h3>
@@ -293,7 +296,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-space-x-4">
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_reveal1"
                                 name="ar_try_on_reveal_type"
@@ -304,7 +307,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Auto</span>
                         </label>
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_reveal2"
                                 name="ar_try_on_reveal_type"
@@ -315,7 +318,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Interaction</span>
                         </label>
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_reveal3"
                                 name="ar_try_on_reveal_type"
@@ -377,7 +380,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_ar"
                                 id="ar_try_on_ar1"
@@ -389,7 +392,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Activate</span>
                         </label>
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_ar"
                                 id="ar_try_on_ar2"
@@ -467,7 +470,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_ar_scale"
                                 id="ar_try_on_ar_scale1"
@@ -479,7 +482,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Auto</span>
                         </label>
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_ar_scale"
                                 id="ar_try_on_ar_scale2"
@@ -506,7 +509,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_xr_environment"
                                 id="ar_try_on_xr_environment1"
@@ -518,7 +521,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Activate</span>
                         </label>
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_xr_environment"
                                 id="ar_try_on_xr_environment2"
@@ -545,7 +548,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-items-center art-space-x-4">
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_ar_button"
                                 id="ar_try_on_ar_button1"
@@ -557,7 +560,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Active</span>
                         </label>
                         <label className="art-flex art-items-center art-space-x-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 name="ar_try_on_ar_button"
                                 id="ar_try_on_ar_button2"
@@ -671,7 +674,7 @@ export default function Settings({ settings, handleChange }) {
                     </label>
                     <div className="art-flex art-space-x-4">
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_enable_qr_code"
                                 name="ar_try_on_enable_qr_code"
@@ -682,7 +685,7 @@ export default function Settings({ settings, handleChange }) {
                             <span>Yes</span>
                         </label>
                         <label className="art-flex art-items-center art-gap-2">
-                            <input
+                            <Radio
                                 type="radio"
                                 id="ar_try_on_enable_qr_code"
                                 name="ar_try_on_enable_qr_code"

@@ -26,13 +26,13 @@ export default function Documentation() {
   ];
 
   return (
-    <div className="art-p-8 art-max-w-4xl art-mx-auto art-bg-white art-rounded-2xl art-shadow-md art-mt-4">
+    <div style={{ padding: "20px", border: "1px solid #ccc", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }} >
       {/* Intro about AtlasAR */}
       <div className="art-mb-8">
-        <h1 className="art-text-2xl art-font-bold art-text-gray-800 art-mb-2">
+        <h1 className="art-text-2xl art-font-bold art-mb-2" style={{color: "var(--theme-text"}}>
           AtlasAR – 3D & AR Model Viewer for WordPress
         </h1>
-        <p className="art-text-lg art-text-gray-600 art-leading-relaxed">
+        <p className="art-text-lg art-text-gray-600 art-leading-relaxed" style={{color: "var(--theme-text"}}>
           AtlasAR is a powerful WordPress plugin that enables you to showcase{" "}
           <span className="art-font-semibold">3D models and Augmented Reality (AR)</span>{" "}
           experiences directly on your website. With support for{" "}
@@ -47,20 +47,20 @@ export default function Documentation() {
       </div>
 
       {/* Documentation List */}
-      <h2 className="art-text-xl art-font-semibold art-mb-4">
+      <h2 className="art-text-xl art-font-semibold art-mb-4"style={{color: "var(--theme-text"}}>
         FAQ (Frequently Asked Questions)
       </h2>
       <ul className="art-space-y-3">
         {documentationQuestions.map((doc) => (
           <li
             key={doc.id}
-            className="art-p-4 art-bg-gray-50 art-rounded-lg art-shadow-sm hover:art-bg-gray-100 art-transition"
+            className="art-p-4 art-rounded-lg art-shadow-sm  art-transition"style={{color: "var(--theme-text"}}
           >
             <a
               href={`https://wpaugmentedreality.com/docs/3d-model-viewer/${doc.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="art-text-blue-600 art-font-medium hover:art-underline"
+              className="art-text-blue-600 art-text-xl art-font-medium hover:art-underline"
             >
               {doc.title}
             </a>
