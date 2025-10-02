@@ -511,84 +511,64 @@ export default function Settings({ settings, handleChange }) {
                        resized by pinch.
                    </p>
                </div>
-               {/* XR Environment */}
-               <div className="art-space-y-2">
-                   <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">
-                       XR-Environment
-                   </label>
-                   <div className="art-flex art-items-center art-space-x-4">
-                       <label className="art-flex art-items-center art-space-x-2">
-                           <Radio
-                               type="radio"
-                               name="ar_try_on_xr_environment"
-                               id="ar_try_on_xr_environment1"
-                               value="activate"
-                               checked={settings.ar_try_on_xr_environment == 'activate'}
-                               onChange={handleSettingsChange}
-                               className="art-text-blue-600 art-focus:ring-blue-500"
-                           />
-                           <span>Activate</span>
-                       </label>
-                       <label className="art-flex art-items-center art-space-x-2">
-                           <Radio
-                               type="radio"
-                               name="ar_try_on_xr_environment"
-                               id="ar_try_on_xr_environment2"
-                               value="deactivate"
-                               checked={settings.ar_try_on_xr_environment == 'deactivate'}
-                               onChange={handleSettingsChange}
-                               className="art-text-blue-600 art-focus:ring-blue-500"
-                           />
-                           <span>Deactive</span>
-                       </label>
-                   </div>
-                   <p className="art-text-sm art-text-gray-500">
-                       Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces
-                       the lighting selected with during an AR session. Known issues: sometimes too dark,
-                       sudden
-                       updates, shiny materials look matte.environment-image
-                   </p>
-               </div>
+{/* XR Environment */}
+<div className="art-space-y-2">
+  <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">
+    XR-Environment
+  </label>
+
+  <Switch
+    label={settings.ar_try_on_xr_environment === "activate" ? "Activated" : "Deactivated"}
+    defaultChecked={settings.ar_try_on_xr_environment === "activate"}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_xr_environment",
+          value: checked ? "activate" : "deactivate",
+        },
+      })
+    }
+    color="blue"
+  />
+
+  <p className="art-text-sm art-text-gray-500">
+    Enables AR lighting estimation in WebXR mode; this has a performance cost
+    and replaces the lighting selected with during an AR session. Known issues:
+    sometimes too dark, sudden updates, shiny materials look matte.
+    environment-image
+  </p>
+</div>
 
 
-               {/* Custom AR Button */}
-               <div className="art-space-y-2">
-                   <label htmlFor="ar_try_on_ar_button" className="art-font-medium">
-                       Custom AR Button
-                   </label>
-                   <div className="art-flex art-items-center art-space-x-4">
-                       <label className="art-flex art-items-center art-space-x-2">
-                           <Radio
-                               type="radio"
-                               name="ar_try_on_ar_button"
-                               id="ar_try_on_ar_button1"
-                               value="activate"
-                               checked={settings.ar_try_on_ar_button == 'activate'}
-                               onChange={handleSettingsChange}
-                               className="art-text-blue-600 art-focus:ring-blue-500"
-                           />
-                           <span>Active</span>
-                       </label>
-                       <label className="art-flex art-items-center art-space-x-2">
-                           <Radio
-                               type="radio"
-                               name="ar_try_on_ar_button"
-                               id="ar_try_on_ar_button2"
-                               value="deactivate"
-                               checked={settings.ar_try_on_ar_button == 'deactivate'}
-                               onChange={handleSettingsChange}
-                               className="art-text-blue-600 art-focus:ring-blue-500"
-                           />
-                           <span>Deactive</span>
-                       </label>
-                   </div>
-                   <p className="art-text-sm art-text-gray-500">
-                       By placing a child element under with slot="ar-button", this element will replace the
-                       default "Enter AR" button, which is a icon in the lower right. This button will be
-                       visible
-                       if AR is potentially available (we will have some false positives until the user tries).
-                   </p>
-               </div>
+
+{/* Custom AR Button */}
+<div className="art-space-y-2">
+  <label htmlFor="ar_try_on_ar_button" className="art-font-medium">
+    Custom AR Button
+  </label>
+
+  <Switch
+    label={settings.ar_try_on_ar_button === "deactivate" ? "Deactivated" : "Activated"}
+    defaultChecked={settings.ar_try_on_ar_button === "activate"}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_ar_button",
+          value: checked ? "activate" : "deactivate",
+        },
+      })
+    }
+    color="blue"
+  />
+
+  <p className="art-text-sm art-text-gray-500">
+    By placing a child element under with slot="ar-button", this element will
+    replace the default "Enter AR" button, which is a icon in the lower right.
+    This button will be visible if AR is potentially available (we will have
+    some false positives until the user tries).
+  </p>
+</div>
+
 
 
                {/* Button Text */}
@@ -688,39 +668,31 @@ export default function Settings({ settings, handleChange }) {
                        className="art-block art-p-5 art-border art-rounded"
                    />
                </div>
-               {/* Enable QR Code */}
-               <div className="art-space-y-4">
-                   <label
-                       htmlFor="ar_try_on_enable_qr_code"
-                       className="art-block art-font-medium"
-                   >
-                       Enable QR Code
-                   </label>
-                   <div className="art-flex art-space-x-4">
-                       <label className="art-flex art-items-center art-gap-2">
-                           <Radio
-                               type="radio"
-                               id="ar_try_on_enable_qr_code"
-                               name="ar_try_on_enable_qr_code"
-                               value="yes"
-                               checked={settings.ar_try_on_enable_qr_code == 'yes'}
-                               onChange={handleSettingsChange}
-                           />
-                           <span>Yes</span>
-                       </label>
-                       <label className="art-flex art-items-center art-gap-2">
-                           <Radio
-                               type="radio"
-                               id="ar_try_on_enable_qr_code"
-                               name="ar_try_on_enable_qr_code"
-                               value="no"
-                               checked={settings.ar_try_on_enable_qr_code == 'no'}
-                               onChange={handleSettingsChange}
-                           />
-                           <span>No</span>
-                       </label>
-                   </div>
-               </div>
+          
+{/* Enable QR Code */}
+<div className="art-space-y-4">
+  <label
+    htmlFor="ar_try_on_enable_qr_code"
+    className="art-block art-font-medium"
+  >
+    Enable QR Code
+  </label>
+
+  <Switch
+    label={settings.ar_try_on_enable_qr_code === "yes" ? "Yes" : "No"}
+    defaultChecked={settings.ar_try_on_enable_qr_code === "yes"}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_enable_qr_code",
+          value: checked ? "yes" : "no",
+        },
+      })
+    }
+    color="blue"
+  />
+</div>
+
            </div>
        </React.Fragment>
            :
