@@ -5,10 +5,12 @@ import React, { useState, useEffect } from 'react';
 */
 import { getURL, postWithoutImage } from '../../../../context/utilities';
 import toast from '../../../../context/Notify';
-import MultiSelect from '../../../../context/MultiSelect';
+// import MultiSelect from '../../../../context/MultiSelect';
 import Radio from './Radio';
 import Checkbox from './Checkbox';
 import Switch from './Switch';
+import MultiSelect from './MultiSelect';
+
 
 
 export default function Settings({ settings, handleChange }) {
@@ -151,26 +153,26 @@ export default function Settings({ settings, handleChange }) {
                            onChange={handleSettingsChange} />
                            <span>No</span>
                    </label>
-                      
-                                  
-                            </div>
-                                  
-                               </div>
+                    </div>
+                    </div>
                               
                               
-               <div className="art-space-y-4" >
-                   <label
-                       htmlFor="ar_try_on_allowed_post_types"
-                       className="art-block art-font-medium"
-                   >
-                       Enable AR For Post Types
-                   </label>
-                   <MultiSelect
-                       id="ar_try_on_allowed_post_types"
-                       selectedItems={settings.ar_try_on_allowed_post_types}
-                       options={postTypes}
-                       onChange={(e) => handleSettingsChange(e, 'ar_try_on_allowed_post_types')} />
-               </div>
+            <div className="art-space-y-4">
+            <label
+                htmlFor="ar_try_on_allowed_post_types"
+                className="art-block art-font-medium"
+            >
+                Enable AR For Post Types
+            </label>
+            <MultiSelect
+                id="ar_try_on_allowed_post_types"
+                selectedItems={settings.ar_try_on_allowed_post_types}
+                options={postTypes}
+                onChange={(e) => handleSettingsChange(e, "ar_try_on_allowed_post_types")}
+            />
+            </div>
+
+
 
 
                {/* Dropdown Section */}
