@@ -283,7 +283,7 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
     <h1 style={{ color: "var(--theme-text)" }}>AtlasAR</h1>
 
 
-    <span className="art-text-center">Version: 1.6.0</span>
+    <span className="art-text-center">Version: {ar_try_on.VERSION}</span>
   </div>
   <div>
     

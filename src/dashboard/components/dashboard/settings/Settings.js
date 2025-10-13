@@ -124,10 +124,10 @@ export default function Settings({ settings, handleChange }) {
                        Preview Demo
                    </button>
                </div>
-           {/* Display AR Button Autometically */}
+           {/* Display AR Button Automatically */}
            <div className="art-space-y-4">
                <label htmlFor="ar_try_on_single_product_tabs" className="art-block art-font-medium" >
-                    Display AR Button Autometically 
+                    Display AR Button Automatically
                     </label>
 
 
