@@ -28,20 +28,20 @@ const MultiSelect = ({options, onChange, selectedItems, id, name}) => {
     return (
         <div className="multi-select">
             {/* Trigger button */}
-            <div className="multi-select-trigger" onClick={toggleDropdown}>
+            <div className="multi-select-trigger" onClick={toggleDropdown} style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}>
                 {selectedOptions.length > 0 ? selectedOptions.join(', ') : 'Select...'}
             </div>
 
             {/* Dropdown menu */}
             {isDropdownOpen && (
-                <div className="multi-select-dropdown">
+                <div className="multi-select-dropdown" style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}>
                     {options.map((option) => (
                         <div
                             key={option}
                             id={id}
                             className={`multi-select-option ${
                                 isSelected(option) ? 'selected' : ''
-                            }`}
+                            }`} style={{ backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}
                             onClick={() => handleOptionClick(option)}
                         >
                             <input

@@ -81,8 +81,8 @@ export default function Integration({
     }, [settings])
 
     return (
-        <div style={{maxWidth: "80%", margin: "20px", padding: "20px", border: "1px solid #ccc", borderRadius: "8px"}}>
-            <h2>Integration Settings</h2>
+        <div style={{ padding: "20px", border: "1px solid #ccc", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}  >
+            <h2 style={{ color: "var(--theme-text)" }}>Integration Settings</h2>
 
             {/* API Name */}
             {
