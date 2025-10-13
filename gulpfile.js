@@ -129,7 +129,7 @@ const config = {
 	},
 	release: {
 		src: productionSrc,
-		output: 'D:/mamp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/',
+		output: 'D:/xampp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
