@@ -397,7 +397,7 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
 
 
         {/* Submit Button */}
-        {activeTab !== "Documentation" && (
+        {/* {activeTab !== "Documentation" && activeTab !== "Features" && (
         
         <button
         onClick={handleSubmit}
@@ -411,8 +411,31 @@ className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg
         Save
         </button>
 
+        )} */}
 
-        )}
+        
+{activeTab !== "Documentation" && activeTab !== "Features" && (
+  <div 
+    className={`art-fixed art-bottom-0 art-right-0 art-border-t art-shadow-lg art-p-4 art-z-50 art-transition-all art-duration-300 ${
+      isSidebarOpen ? 'art-left-60' : 'art-left-0'
+    }`}
+    style={{
+      backgroundColor: "var(--theme-bg)",
+    }}
+  >
+    <button
+      onClick={handleSubmit}
+      className="art-w-full art-p-3 art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer"
+      style={{
+        backgroundColor: "var(--theme-accent)",
+        color: "var(--theme-text)",
+        border: "1px solid var(--theme-accent)"
+      }}
+    >
+      Save
+    </button>
+  </div>
+)}
       </div>
     </div>
   </>

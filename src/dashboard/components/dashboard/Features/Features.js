@@ -20,7 +20,7 @@
 
 export default function Features() {
     return (
-        <div style={{ padding: "20px", border: "1px solid #ccc", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }} >
+        <div style={{ padding: "32px", border: "1px solid #ccc", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }} >
         <ul className="art-list-disc art-list-inside">
             <li className="art-text-sm">
                 ✅ <strong>Inspect 3D models from every angle</strong> (rotate/zoom) <a href={'https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/'} target={'_blank'}>Dining Armchair Demo </a>.

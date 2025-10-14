@@ -119,42 +119,42 @@ export default function Settings({ settings, handleChange }) {
                        type="button"
                        id={'ar_try_on_demo_id'}
                        onClick={ar_try_on_demo_id}
-                       className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border art-border-sky-500 "style={{ backgroundColor: "var(--theme-accent)", color: "var(--theme-text)" }}
+                       className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border  "style={{ backgroundColor: "var(--theme-accent)", color: "var(--theme-text)" }}
                    >
                        Preview Demo
                    </button>
                </div>
-           {/* Display AR Button Automatically */}
-           <div className="art-space-y-4">
-               <label htmlFor="ar_try_on_single_product_tabs" className="art-block art-font-medium" >
-                    Display AR Button Automatically
-                    </label>
+         
+{/* Display AR Button Automatically */}
+<div className="art-space-y-2">
+  <label htmlFor="ar_try_on_display_button_automatically" className="art-font-medium">
+    Display AR Button Automatically
+  </label>
 
+  {/* Switch Component */}
+  <Switch
+    label={
+      settings.ar_try_on_display_button_automatically === "yes"
+        ? "Enabled"
+        : "Disabled"
+    }
+    defaultChecked={settings.ar_try_on_display_button_automatically === "yes"}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_display_button_automatically",
+          value: checked ? "yes" : "no",
+        },
+      })
+    }
+    color="blue"
+  />
 
-                <div className="art-flex art-space-x-4">
-                  
-                   <label className="art-flex art-items-center art-gap-2">
-                       <Radio
-                       type="radio"
-                       id="ar_try_on_display_button_automatically1"
-                       name="ar_try_on_display_button_automatically"
-                       value="yes"
-                       checked={settings.ar_try_on_display_button_automatically == 'yes'}
-                       onChange={handleSettingsChange} />
-                       <span>Yes</span>
-                   </label>
-                      
-                   <label className="art-flex art-items-center art-gap-2">
-                        <Radio
-                        type="radio"
-                           id="ar_try_on_display_button_automatically2"
-                           name="ar_try_on_display_button_automatically"
-                           value="no" checked={settings.ar_try_on_display_button_automatically == 'no'}
-                           onChange={handleSettingsChange} />
-                           <span>No</span>
-                   </label>
-                    </div>
-                    </div>
+  <p className="art-text-sm art-text-gray-500">
+    Automatically display the AR button on supported product pages.
+  </p>
+</div>
+
                               
                               
             <div className="art-space-y-4">
@@ -203,39 +203,34 @@ export default function Settings({ settings, handleChange }) {
                                </option>
                            </select>
                        </div>
-                       {/* Radio Section */}
-                       <div className="art-space-y-4">
-                           <label
-                               htmlFor="ar_try_on_single_product_tabs"
-                               className="art-block art-font-medium"
-                           >
-                               Show in Product Tabs
-                           </label>
-                           <div className="art-flex art-space-x-4">
-                               <label className="art-flex art-items-center art-gap-2">
-                                   <Radio
-                                       type="radio"
-                                       id="ar_try_on_single_product_tabs1"
-                                       name="ar_try_on_single_product_tabs"
-                                       value="yes"
-                                       checked={settings.ar_try_on_single_product_tabs == 'yes'}
-                                       onChange={handleSettingsChange}
-                                   />
-                                   <span>Yes</span>
-                               </label>
-                               <label className="art-flex art-items-center art-gap-2">
-                                   <Radio
-                                       type="radio"
-                                       id="ar_try_on_single_product_tabs2"
-                                       name="ar_try_on_single_product_tabs"
-                                       value="no"
-                                       checked={settings.ar_try_on_single_product_tabs == 'no'}
-                                       onChange={handleSettingsChange}
-                                   />
-                                   <span>No</span>
-                               </label>
-                           </div>
-                       </div>
+                       
+{/* Show in Product Tabs */}
+<div className="art-space-y-2">
+  <label htmlFor="ar_try_on_single_product_tabs" className="art-font-medium">
+    Show in Product Tabs
+  </label>
+
+  {/* Switch Component */}
+  <Switch
+    label={
+      settings.ar_try_on_single_product_tabs === "yes"
+        ? "Yes"
+        : "No"
+    }
+    defaultChecked={settings.ar_try_on_single_product_tabs === "yes"}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_single_product_tabs",
+          value: checked ? "yes" : "no",
+        },
+      })
+    }
+    color="blue"
+  />
+
+</div>
+
                    </>
                }
 
@@ -425,7 +420,7 @@ export default function Settings({ settings, handleChange }) {
                        AR Modes
                    </label>
                    <p className="art-text-sm art-text-gray-500">Select / Deselect All</p>
-                   <div className="art-space-y-1">
+                   <div className="art-space-y-1 art-flex art-gap-6">
                        <label className="art-flex art-items-center art-space-x-2">
                            <Checkbox
                                type="checkbox"
@@ -474,45 +469,40 @@ export default function Settings({ settings, handleChange }) {
                </div>
 
 
-               {/* AR Scale */}
-               <div className="art-space-y-2">
-                   <label htmlFor="ar_try_on_ar_scale" className="art-font-medium">
-                       AR Scale
-                   </label>
-                   <div className="art-flex art-items-center art-space-x-4">
-                       <label className="art-flex art-items-center art-space-x-2">
-                           <Radio
-                               type="radio"
-                               name="ar_try_on_ar_scale"
-                               id="ar_try_on_ar_scale1"
-                               value="auto"
-                               checked={settings.ar_try_on_ar_scale == 'auto'}
-                               onChange={handleSettingsChange}
-                               className="art-text-blue-600 art-focus:ring-blue-500"
-                           />
-                           <span>Auto</span>
-                       </label>
-                       <label className="art-flex art-items-center art-space-x-2">
-                           <Radio
-                               type="radio"
-                               name="ar_try_on_ar_scale"
-                               id="ar_try_on_ar_scale2"
-                               value="fixed"
-                               checked={settings.ar_try_on_ar_scale == 'fixed'}
-                               onChange={handleSettingsChange}
-                               className="art-text-blue-600 art-focus:ring-blue-500"
-                           />
-                           <span>Fixed</span>
-                       </label>
-                   </div>
-                   <p className="art-text-sm art-text-gray-500">
-                       Controls the scaling behavior in AR mode. Set to "fixed" to disable scaling of the
-                       model,
-                       which sets it to always be at 100% scale. Defaults to "auto" which allows the model to
-                       be
-                       resized by pinch.
-                   </p>
-               </div>
+{/* AR Scale */}
+<div className="art-space-y-2">
+  <label htmlFor="ar_try_on_ar_scale" className="art-font-medium">
+    AR Scale
+  </label>
+
+  {/* Switch Component */}
+  <Switch
+    label={
+      settings.ar_try_on_ar_scale === "fixed"
+        ? "Fixed"
+        : "Auto"
+    }
+    defaultChecked={settings.ar_try_on_ar_scale === "fixed"}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_ar_scale",
+          value: checked ? "fixed" : "auto",
+        },
+      })
+    }
+    color="blue"
+  />
+
+  <p className="art-text-sm art-text-gray-500">
+    Controls the scaling behavior in AR mode. Set to "fixed" to disable scaling of the model,
+    which sets it to always be at 100% scale.
+    Defaults to "auto" which allows the model to be resized by pinch.
+  </p>
+</div>
+
+
+
 {/* XR Environment */}
 <div className="art-space-y-2">
   <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">
@@ -549,8 +539,13 @@ export default function Settings({ settings, handleChange }) {
     Custom AR Button
   </label>
 
+  {/* Switch Component */}
   <Switch
-    label={settings.ar_try_on_ar_button === "deactivate" ? "Deactivated" : "Activated"}
+    label={
+      settings.ar_try_on_ar_button === "activate"
+        ? "Activated"
+        : "Deactivated"
+    }
     defaultChecked={settings.ar_try_on_ar_button === "activate"}
     onChange={(checked) =>
       handleSettingsChange({
@@ -564,113 +559,98 @@ export default function Settings({ settings, handleChange }) {
   />
 
   <p className="art-text-sm art-text-gray-500">
-    By placing a child element under with slot="ar-button", this element will
-    replace the default "Enter AR" button, which is a icon in the lower right.
-    This button will be visible if AR is potentially available (we will have
-    some false positives until the user tries).
+    By placing a child element under with <code>slot="ar-button"</code>, this
+    element will replace the default "Enter AR" button (icon in the lower right).
+    The custom button will appear if AR is potentially available (we will have some false positives until the user tries).
   </p>
+
+  {/* Conditionally Render Fields when Switch is ON */}
+  {settings.ar_try_on_ar_button === "activate" && (
+    <div className="art-space-y-4 art-mt-4 art-border-t art-pt-4">
+      {/* Button Text */}
+      <div className="art-space-y-2">
+        <label
+          htmlFor="ar_try_on_ar_button_text"
+          className="art-font-medium"
+        >
+          Button Text
+        </label>
+        <input
+          type="text"
+          id="ar_try_on_ar_button_text"
+          name="ar_try_on_ar_button_text"
+          value={settings.ar_try_on_ar_button_text}
+          onChange={handleSettingsChange}
+          className="art-block art-p-2 art-border art-rounded"
+        />
+      </div>
+
+      {/* Button Background Color */}
+      <div className="art-space-y-2">
+        <label
+          htmlFor="ar_try_on_ar_button_background_color"
+          className="art-font-medium"
+        >
+          Button Background Color
+        </label>
+        <div className="art-flex art-items-center art-gap-2">
+          <input
+            type="text"
+            id="ar_try_on_ar_button_background_color"
+            name="ar_try_on_ar_button_background_color"
+            className="art-block art-p-2 art-border art-rounded"
+            value={settings.ar_try_on_ar_button_background_color}
+            onChange={handleSettingsChange}
+          />
+          <input
+            type="color"
+            id="ar_try_on_ar_button_background_color_picker"
+            name="ar_try_on_ar_button_background_color"
+            style={{ backgroundColor: "transparent" }}
+            value={settings.ar_try_on_ar_button_background_color}
+            onChange={(e) =>
+              handleSettingsChange(e, "ar_try_on_ar_button_background_color")
+            }
+            className="art-block art-p-2 art-border art-rounded"
+          />
+        </div>
+      </div>
+
+      {/* Button Text Color */}
+      <div className="art-space-y-2">
+        <label
+          htmlFor="ar_try_on_ar_button_text_color"
+          className="art-font-medium"
+        >
+          Button Text Color
+        </label>
+        <div className="art-flex art-items-center art-gap-2">
+          <input
+            type="text"
+            id="ar_try_on_ar_button_text_color"
+            name="ar_try_on_ar_button_text_color"
+            className="art-block art-p-2 art-border art-rounded"
+            value={settings.ar_try_on_ar_button_text_color}
+            onChange={handleSettingsChange}
+          />
+          <input
+            type="color"
+            id="ar_try_on_ar_button_text_color_picker"
+            name="ar_try_on_ar_button_text_color"
+            style={{ backgroundColor: "transparent" }}
+            value={settings.ar_try_on_ar_button_text_color}
+            onChange={(e) =>
+              handleSettingsChange(e, "ar_try_on_ar_button_text_color")
+            }
+            className="art-block art-p-2 art-border art-rounded"
+          />
+        </div>
+      </div>
+    </div>
+  )}
 </div>
 
 
-
-               {/* Button Text */}
-               <div className="art-space-y-2">
-                   <label htmlFor="ar_try_on_ar_button_text" className="art-font-medium">
-                       Button Text
-                   </label>
-                   <input
-                       type="text"
-                       id="ar_try_on_ar_button_text"
-                       name="ar_try_on_ar_button_text"
-                       value={settings.ar_try_on_ar_button_text}
-                       onChange={handleSettingsChange}
-                       className="art-block art-p-2 art-border art-rounded"
-                   />
-               </div>
-
-
-               {/* Button Color */}
-               <div className="art-space-y-2">
-                   <label htmlFor="ar_try_on_ar_button_background_color"
-                       className="art-font-medium">
-                       Button Background Color
-                   </label>
-                   <div className="art-flex art-items-center art-gap-2">
-                       <input
-                           type="text"
-                           id="ar_try_on_ar_button_background_color"
-                           name="ar_try_on_ar_button_background_color"
-                           className="art-block  art-p-2 art-border art-rounded"
-                           value={settings.ar_try_on_ar_button_background_color}
-                           onChange={handleSettingsChange}
-                       />
-                       <input
-                           type="color"
-                           id="ar_try_on_ar_button_background_color"
-                           name="ar_try_on_ar_button_background_color"
-                           style={{ backgroundColor: "rgba(78, 186, 79, 0)" }}
-                           value={settings.ar_try_on_ar_button_background_color}
-                           onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_button_background_color')}
-                           className="art-block art-p-2 art-border art-rounded"
-                       />
-                   </div>
-               </div>
-
-
-               {/* Button Text color Color */}
-               <div className="art-space-y-2">
-                   <label htmlFor="ar_try_on_ar_button_text_color"
-                       className="art-font-medium">
-                       Button Text Color
-                   </label>
-                   <div className="art-flex art-items-center art-gap-2">
-                       <input
-                           type="text"
-                           id="ar_try_on_ar_button_text_color"
-                           name="ar_try_on_ar_button_text_color"
-                           className="art-block  art-p-2 art-border art-rounded"
-                           value={settings.ar_try_on_ar_button_text_color}
-                           onChange={handleSettingsChange}
-                       />
-                       <input
-                           type="color"
-                           id="ar_try_on_ar_button_text_color"
-                           name="ar_try_on_ar_button_text_color"
-                           style={{ backgroundColor: "rgba(78, 186, 79, 0)" }}
-                           value={settings.ar_try_on_ar_button_text_color}
-                           onChange={(e) => handleSettingsChange(e, 'ar_try_on_ar_button_text_color')}
-                           className="art-block art-p-2 art-border art-rounded"
-                       />
-                   </div>
-               </div>
-
-
-               {/* Clear Cache */}
-               <div className="art-space-y-2 art-mr-1">
-                   <label htmlFor="ar_try_on_clear_cache"
-                       className="art-font-medium">
-                       Clear Cache
-                   </label>
-                   <Checkbox
-                       type="checkbox"
-                       id="ar_try_on_clear_cache"
-                       name="ar_try_on_clear_cache"
-                       checked={settings.ar_try_on_clear_cache}
-                       onChange={(e) => {
-                       // ✅ Create a modified event object with checked as value
-                        const modifiedEvent = {
-                            ...e,
-                            target: {
-                            ...e.target,
-                            value: e.target.checked  // Pass checked state as value
-                        }
-                    };
-                    handleSettingsChange(modifiedEvent, 'ar_try_on_clear_cache');
-                }}
-                       className="art-block art-p-5 art-border art-rounded"
-                   />
-               </div>
-          
 {/* Enable QR Code */}
 <div className="art-space-y-4">
   <label
@@ -694,6 +674,34 @@ export default function Settings({ settings, handleChange }) {
     color="blue"
   />
 </div>
+
+
+            
+{/* Clear Cache */}
+<div className="art-space-y-2 art-mr-1">
+  <label htmlFor="ar_try_on_clear_cache" className="art-font-medium">
+    Clear Cache
+  </label>
+
+  {/* Switch Component */}
+  <Switch
+    label={settings.ar_try_on_clear_cache ? "Enabled" : "Disabled"}
+    defaultChecked={settings.ar_try_on_clear_cache}
+    onChange={(checked) =>
+      handleSettingsChange({
+        target: {
+          name: "ar_try_on_clear_cache",
+          value: checked,
+        },
+      })
+    }
+    color="blue"
+  />
+
+</div>
+
+          
+
 
            </div>
        </React.Fragment>
