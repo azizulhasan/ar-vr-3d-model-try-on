@@ -10,6 +10,8 @@ import Radio from "./Radio";
 import Checkbox from "./Checkbox";
 import Switch from "./Switch";
 import MultiSelect from "./MultiSelect";
+import BorderCard from "./BorderCard";
+
 
 export default function Settings({ settings, handleChange }) {
   // const [settings, setSettings] = useState({
@@ -121,7 +123,7 @@ export default function Settings({ settings, handleChange }) {
             type="button"
             id={"ar_try_on_demo_id"}
             onClick={ar_try_on_demo_id}
-            className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border  "
+            className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border-none"
             style={{
               backgroundColor: "var(--theme-accent)",
               color: "var(--theme-text)",
@@ -132,16 +134,7 @@ export default function Settings({ settings, handleChange }) {
         </div>
 
         {/* Display AR Button Automatically */}
-        {/* Display AR Button Automatically */}
-        <div
-          className="art-p-4 art-rounded-2xl art-bg-white art-shadow-sm art-transition-all art-duration-200 hover:art-shadow-md art-space-y-3"
-          style={{
-            backgroundColor: "var(--theme-bg)",
-            color: "var(--theme-text)",
-            border: "1.5px solid var(--theme-border, rgba(100, 116, 139, 0.4))",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-          }}
-        >
+        <BorderCard>
           {/* Label */}
           <label
             htmlFor="ar_try_on_display_button_automatically"
@@ -177,18 +170,10 @@ export default function Settings({ settings, handleChange }) {
           <p className="art-text-sm art-text-gray-400 art-leading-snug art-ml-px">
             Automatically display the AR button on supported product pages.
           </p>
-        </div>
+        </BorderCard>
 
         {/* Enable AR For Post Types */}
-        <div
-          className="art-p-4 art-rounded-2xl art-bg-white art-shadow-sm art-transition-all art-duration-200 hover:art-shadow-md art-space-y-3"
-          style={{
-            backgroundColor: "var(--theme-bg)",
-            color: "var(--theme-text)",
-            border: "1.5px solid var(--theme-border, rgba(100, 116, 139, 0.4))",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-          }}
-        >
+        <BorderCard>
           {/* Label */}
           <label
             htmlFor="ar_try_on_allowed_post_types"
@@ -211,23 +196,13 @@ export default function Settings({ settings, handleChange }) {
           <p className="art-text-sm art-text-gray-400 art-leading-snug">
             Choose which post types will support AR Try-On functionality.
           </p>
-        </div>
+        </BorderCard>
 
         {/* Dropdown Section */}
         {ar_try_on.is_wc_active && (
           <>
             {/* Show Button In */}
-            <div
-              className="art-p-4 art-rounded-2xl art-bg-white art-shadow-sm art-transition-all art-duration-200 hover:art-shadow-md art-space-y-3"
-              style={{
-                backgroundColor: "var(--theme-bg)",
-                color: "var(--theme-text)",
-                border:
-                  "1.5px solid var(--theme-border, rgba(100, 116, 139, 0.4))",
-                boxShadow:
-                  "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-              }}
-            >
+            <BorderCard>
               <label
                 htmlFor="ar_try_on_wc_hook_position"
                 className="art-block art-font-medium art-text-base"
@@ -264,20 +239,10 @@ export default function Settings({ settings, handleChange }) {
                 Choose where the AR button will appear within WooCommerce
                 product pages.
               </p>
-            </div>
+            </BorderCard>
 
             {/* Show in Product Tabs */}
-            <div
-              className="art-p-4 art-rounded-2xl art-bg-white art-shadow-sm art-transition-all art-duration-200 hover:art-shadow-md art-space-y-3"
-              style={{
-                backgroundColor: "var(--theme-bg)",
-                color: "var(--theme-text)",
-                border:
-                  "1.5px solid var(--theme-border, rgba(100, 116, 139, 0.4))",
-                boxShadow:
-                  "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-              }}
-            >
+            <BorderCard>
               <label
                 htmlFor="ar_try_on_single_product_tabs"
                 className="art-font-medium art-text-base"
@@ -311,7 +276,7 @@ export default function Settings({ settings, handleChange }) {
                 Toggle whether the AR Try-On feature appears in product tab
                 sections.
               </p>
-            </div>
+            </BorderCard>
           </>
         )}
 
@@ -328,17 +293,7 @@ export default function Settings({ settings, handleChange }) {
             Loading : Attributes
           </h3>
           {/* Loading Options */}
-          <div
-            className="art-p-4 art-rounded-2xl art-bg-white art-shadow-sm art-transition-all art-duration-200 hover:art-shadow-md art-space-y-4"
-            style={{
-              backgroundColor: "var(--theme-bg)",
-              color: "var(--theme-text)",
-              border:
-                "1.5px solid var(--theme-border, rgba(100, 116, 139, 0.4))",
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-            }}
-          >
+          <BorderCard>
             {/* Label */}
             <label
               htmlFor="ar_try_on_loading_type"
@@ -394,7 +349,7 @@ export default function Settings({ settings, handleChange }) {
               <strong>Lazy</strong> — Loads only on interaction. <br />
               <strong>Eager</strong> — Loads immediately on page load.
             </p>
-          </div>
+          </BorderCard>
         </div>
 
         {/* Reveal Attributes */}
@@ -410,17 +365,7 @@ export default function Settings({ settings, handleChange }) {
             Reveal : Attributes
           </h3>
           {/* Reveal Options */}
-          <div
-            className="art-p-4 art-rounded-2xl art-bg-white art-shadow-sm art-transition-all art-duration-200 hover:art-shadow-md art-space-y-4"
-            style={{
-              backgroundColor: "var(--theme-bg)",
-              color: "var(--theme-text)",
-              border:
-                "1.5px solid var(--theme-border, rgba(100, 116, 139, 0.4))",
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)",
-            }}
-          >
+          <BorderCard>
             {/* Label */}
             <label
               htmlFor="ar_try_on_reveal_type"
@@ -479,78 +424,96 @@ export default function Settings({ settings, handleChange }) {
               <strong>Manual</strong> — Keeps model hidden until{" "}
               <code>dismissPoster()</code> is called.
             </p>
-          </div>
+          </BorderCard>
         </div>
 
         {/* Poster Color */}
-        <div className="art-space-y-4">
+
+        <BorderCard>
           <label
             htmlFor="ar_try_on_poster_color"
-            className="art-block art-font-medium"
+            className="art-block art-font-medium art-text-base"
           >
             --poster-color
           </label>
-          <div className="art-flex art-items-center art-gap-2">
+
+          <div className="art-flex art-items-center art-gap-3">
             <input
               type="text"
               id="ar_try_on_poster_color"
               name="ar_try_on_poster_color"
-              className="art-block  art-p-2 art-border art-rounded"
+              className="art-block art-w-40 art-px-3 art-py-2 art-border art-rounded-md art-bg-transparent focus:art-ring-1 focus:art-ring-[var(--theme-accent)] focus:art-border-[var(--theme-accent)]"
               value={settings.ar_try_on_poster_color}
               onChange={handleSettingsChange}
             />
             <input
               type="color"
-              className="art-p-2 art-bg-gray-300 art-rounded"
-              style={{ backgroundColor: "rgba(78, 186, 79, 0)" }}
+              className="art-p-2 art-rounded-md art-cursor-pointer art-border"
+              style={{ backgroundColor: "transparent" }}
+              value={settings.ar_try_on_poster_color}
               onChange={(e) =>
                 handleSettingsChange(e, "ar_try_on_poster_color")
               }
             />
           </div>
-          <p className="art-text-sm art-text-gray-400">
-            Sets the background-color of the poster . You may wish to set this
-            to transparent if you are using a seamless poster with transparency
-            (so that the background color of shows through).
+
+          <p className="art-text-sm art-text-gray-500 art-leading-snug">
+            Defines the background color of the poster. Set it to{" "}
+            <code>transparent</code> if your poster image includes transparency,
+            allowing the underlying background to show through.
           </p>
-        </div>
+        </BorderCard>
 
         {/* Enable AR */}
-        <div className="art-space-y-2">
-          <label htmlFor="ar_try_on_ar" className="art-font-medium">
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_ar"
+            className="art-font-medium art-text-base"
+          >
             Enable AR
           </label>
 
           {/* Switch Component */}
-          <Switch
-            label={
-              settings.ar_try_on_ar === "activate" ? "Activated" : "Deactivated"
-            }
-            defaultChecked={settings.ar_try_on_ar === "activate"}
-            onChange={(checked) =>
-              handleSettingsChange({
-                target: {
-                  name: "ar_try_on_ar",
-                  value: checked ? "activate" : "deactivate",
-                },
-              })
-            }
-            color="blue"
-          />
+          <div className="art-flex art-items-center art-justify-between">
+            <Switch
+              label={
+                settings.ar_try_on_ar === "activate"
+                  ? "Activated"
+                  : "Deactivated"
+              }
+              defaultChecked={settings.ar_try_on_ar === "activate"}
+              onChange={(checked) =>
+                handleSettingsChange({
+                  target: {
+                    name: "ar_try_on_ar",
+                    value: checked ? "activate" : "deactivate",
+                  },
+                })
+              }
+              color="blue"
+            />
+          </div>
 
-          <p className="art-text-sm art-text-gray-400">
+          <p className="art-text-sm art-text-gray-500 art-leading-snug">
             Enable the ability to launch AR experiences on supported devices.
           </p>
-        </div>
+        </BorderCard>
 
         {/* AR Modes */}
-        <div className="art-space-y-2">
-          <label htmlFor="ar_try_on_ar_modes" className="art-font-medium">
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_ar_modes"
+            className="art-font-medium art-text-base"
+          >
             AR Modes
           </label>
-          <p className="art-text-sm art-text-gray-400">Select / Deselect All</p>
-          <div className="art-space-y-1 art-flex art-gap-6">
-            <label className="art-flex art-items-center art-space-x-2">
+
+          <p className="art-text-sm art-text-gray-500 art-leading-snug">
+            Select / Deselect All
+          </p>
+
+          <div className="art-flex art-flex-wrap art-gap-6 art-mt-1">
+            <label className="art-flex art-items-center art-gap-2">
               <Checkbox
                 type="checkbox"
                 name="ar_try_on_ar_modes[]"
@@ -560,9 +523,10 @@ export default function Settings({ settings, handleChange }) {
                 onChange={(e) => handleSettingsChange(e, "ar_try_on_ar_modes")}
                 className="art-text-blue-600 art-focus:ring-blue-500"
               />
-              <span>webxr</span>
+              <span className="art-text-base">webxr</span>
             </label>
-            <label className="art-flex art-items-center art-space-x-2">
+
+            <label className="art-flex art-items-center art-gap-2">
               <Checkbox
                 type="checkbox"
                 name="ar_try_on_ar_modes[]"
@@ -572,9 +536,10 @@ export default function Settings({ settings, handleChange }) {
                 onChange={(e) => handleSettingsChange(e, "ar_try_on_ar_modes")}
                 className="art-text-blue-600 art-focus:ring-blue-500"
               />
-              <span>scene-viewer</span>
+              <span className="art-text-base">scene-viewer</span>
             </label>
-            <label className="art-flex art-items-center art-space-x-2">
+
+            <label className="art-flex art-items-center art-gap-2">
               <Checkbox
                 type="checkbox"
                 name="ar_try_on_ar_modes[]"
@@ -584,25 +549,29 @@ export default function Settings({ settings, handleChange }) {
                 onChange={(e) => handleSettingsChange(e, "ar_try_on_ar_modes")}
                 className="art-text-blue-600 art-focus:ring-blue-500"
               />
-              <span>quick-look</span>
+              <span className="art-text-base">quick-look</span>
             </label>
           </div>
-          <p className="art-text-sm art-text-gray-400">
+
+          <p className="art-text-sm art-text-gray-500 art-leading-snug">
             A prioritized list of the types of AR experiences to enable. Allowed
-            values are "webxr", to launch the AR experience in the browser,
-            "scene-viewer", to launch the Scene Viewer app, "quick-look", to
-            launch the iOS Quick Look app. Note that the presence of an ios-src
-            will enable quick-look by itself.
+            values are <code>"webxr"</code> (launches in-browser),{" "}
+            <code>"scene-viewer"</code>
+            (opens Scene Viewer app), and <code>"quick-look"</code> (opens iOS
+            Quick Look). The presence of an <code>ios-src</code> automatically
+            enables Quick Look.
           </p>
-        </div>
+        </BorderCard>
 
         {/* AR Scale */}
-        <div className="art-space-y-2">
-          <label htmlFor="ar_try_on_ar_scale" className="art-font-medium">
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_ar_scale"
+            className="art-font-medium art-text-base"
+          >
             AR Scale
           </label>
 
-          {/* Switch Component */}
           <Switch
             label={settings.ar_try_on_ar_scale === "fixed" ? "Fixed" : "Auto"}
             defaultChecked={settings.ar_try_on_ar_scale === "fixed"}
@@ -618,15 +587,19 @@ export default function Settings({ settings, handleChange }) {
           />
 
           <p className="art-text-sm art-text-gray-400">
-            Controls the scaling behavior in AR mode. Set to "fixed" to disable
-            scaling of the model, which sets it to always be at 100% scale.
-            Defaults to "auto" which allows the model to be resized by pinch.
+            Controls the scaling behavior in AR mode. Set to{" "}
+            <code>"fixed"</code> to disable scaling of the model, which sets it
+            to always be at 100% scale. Defaults to <code>"auto"</code>, which
+            allows the model to be resized by pinch.
           </p>
-        </div>
+        </BorderCard>
 
         {/* XR Environment */}
-        <div className="art-space-y-2">
-          <label htmlFor="ar_try_on_xr_environment" className="art-font-medium">
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_xr_environment"
+            className="art-font-medium art-text-base"
+          >
             XR-Environment
           </label>
 
@@ -654,11 +627,14 @@ export default function Settings({ settings, handleChange }) {
             Known issues: sometimes too dark, sudden updates, shiny materials
             look matte. environment-image
           </p>
-        </div>
+        </BorderCard>
 
         {/* Custom AR Button */}
-        <div className="art-space-y-2">
-          <label htmlFor="ar_try_on_ar_button" className="art-font-medium">
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_ar_button"
+            className="art-font-medium art-text-base"
+          >
             Custom AR Button
           </label>
 
@@ -690,98 +666,103 @@ export default function Settings({ settings, handleChange }) {
 
           {/* Conditionally Render Fields when Switch is ON */}
           {settings.ar_try_on_ar_button === "activate" && (
-            <div className="art-space-y-4 art-mt-4 art-border-t art-pt-4">
-              {/* Button Text */}
-              <div className="art-space-y-2">
-                <label
-                  htmlFor="ar_try_on_ar_button_text"
-                  className="art-font-medium"
-                >
-                  Button Text
-                </label>
-                <input
-                  type="text"
-                  id="ar_try_on_ar_button_text"
-                  name="ar_try_on_ar_button_text"
-                  value={settings.ar_try_on_ar_button_text}
-                  onChange={handleSettingsChange}
-                  className="art-block art-p-2 art-border art-rounded art-w-1/12"
-                />
-              </div>
-
-              {/* Button Background Color */}
-              <div className="art-space-y-2">
-                <label
-                  htmlFor="ar_try_on_ar_button_background_color"
-                  className="art-font-medium"
-                >
-                  Button Background Color
-                </label>
-                <div className="art-flex art-items-center art-gap-2">
+            <div className="art-mt-4 art-border-t art-pt-4">
+              <div className="art-flex art-flex-wrap art-items-start art-gap-6">
+                {/* Button Text */}
+                <div className="art-space-y-2">
+                  <label
+                    htmlFor="ar_try_on_ar_button_text"
+                    className="art-font-medium"
+                  >
+                    Button Text
+                  </label>
                   <input
                     type="text"
-                    id="ar_try_on_ar_button_background_color"
-                    name="ar_try_on_ar_button_background_color"
-                    className="art-block art-p-2 art-border art-rounded art-w-1/12"
-                    value={settings.ar_try_on_ar_button_background_color}
+                    id="ar_try_on_ar_button_text"
+                    name="ar_try_on_ar_button_text"
+                    value={settings.ar_try_on_ar_button_text}
                     onChange={handleSettingsChange}
-                  />
-                  <input
-                    type="color"
-                    id="ar_try_on_ar_button_background_color_picker"
-                    name="ar_try_on_ar_button_background_color"
-                    style={{ backgroundColor: "transparent" }}
-                    value={settings.ar_try_on_ar_button_background_color}
-                    onChange={(e) =>
-                      handleSettingsChange(
-                        e,
-                        "ar_try_on_ar_button_background_color"
-                      )
-                    }
-                    className="art-block art-p-2 art-border art-rounded"
+                    className="art-block art-p-2 art-border art-rounded art-w-[100px]"
                   />
                 </div>
-              </div>
 
-              {/* Button Text Color */}
-              <div className="art-space-y-2">
-                <label
-                  htmlFor="ar_try_on_ar_button_text_color"
-                  className="art-font-medium"
-                >
-                  Button Text Color
-                </label>
-                <div className="art-flex art-items-center art-gap-2">
-                  <input
-                    type="text"
-                    id="ar_try_on_ar_button_text_color"
-                    name="ar_try_on_ar_button_text_color"
-                    className="art-block art-p-2 art-border art-rounded art-w-1/12"
-                    value={settings.ar_try_on_ar_button_text_color}
-                    onChange={handleSettingsChange}
-                  />
-                  <input
-                    type="color"
-                    id="ar_try_on_ar_button_text_color_picker"
-                    name="ar_try_on_ar_button_text_color"
-                    style={{ backgroundColor: "transparent" }}
-                    value={settings.ar_try_on_ar_button_text_color}
-                    onChange={(e) =>
-                      handleSettingsChange(e, "ar_try_on_ar_button_text_color")
-                    }
-                    className="art-block art-p-2 art-border art-rounded"
-                  />
+                {/* Button Background Color */}
+                <div className="art-space-y-2">
+                  <label
+                    htmlFor="ar_try_on_ar_button_background_color"
+                    className="art-font-medium"
+                  >
+                    Button Background Color
+                  </label>
+                  <div className="art-flex art-items-center">
+                    <input
+                      type="text"
+                      id="ar_try_on_ar_button_background_color"
+                      name="ar_try_on_ar_button_background_color"
+                      className="art-block art-p-2 art-border art-rounded art-w-[100px]"
+                      value={settings.ar_try_on_ar_button_background_color}
+                      onChange={handleSettingsChange}
+                    />
+                    <input
+                      type="color"
+                      id="ar_try_on_ar_button_background_color_picker"
+                      name="ar_try_on_ar_button_background_color"
+                      style={{ backgroundColor: "transparent" }}
+                      value={settings.ar_try_on_ar_button_background_color}
+                      onChange={(e) =>
+                        handleSettingsChange(
+                          e,
+                          "ar_try_on_ar_button_background_color"
+                        )
+                      }
+                      className="art-block art-p-2 art-border art-rounded"
+                    />
+                  </div>
+                </div>
+
+                {/* Button Text Color */}
+                <div className="art-space-y-2">
+                  <label
+                    htmlFor="ar_try_on_ar_button_text_color"
+                    className="art-font-medium"
+                  >
+                    Button Text Color
+                  </label>
+                  <div className="art-flex art-items-center">
+                    <input
+                      type="text"
+                      id="ar_try_on_ar_button_text_color"
+                      name="ar_try_on_ar_button_text_color"
+                      className="art-block art-p-2 art-border art-rounded art-w-[100px]"
+                      value={settings.ar_try_on_ar_button_text_color}
+                      onChange={handleSettingsChange}
+                    />
+                    <input
+                      type="color"
+                      id="ar_try_on_ar_button_text_color_picker"
+                      name="ar_try_on_ar_button_text_color"
+                      style={{ backgroundColor: "transparent" }}
+                      value={settings.ar_try_on_ar_button_text_color}
+                      onChange={(e) =>
+                        handleSettingsChange(
+                          e,
+                          "ar_try_on_ar_button_text_color"
+                        )
+                      }
+                      className="art-block art-p-2 art-border art-rounded"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </BorderCard>
 
         {/* Enable QR Code */}
-        <div className="art-space-y-4">
+        <BorderCard>
           <label
             htmlFor="ar_try_on_enable_qr_code"
-            className="art-block art-font-medium"
+            className="art-block art-font-medium art-text-base"
           >
             Enable QR Code
           </label>
@@ -799,11 +780,14 @@ export default function Settings({ settings, handleChange }) {
             }
             color="blue"
           />
-        </div>
+        </BorderCard>
 
         {/* Clear Cache */}
-        <div className="art-space-y-2 art-mr-1">
-          <label htmlFor="ar_try_on_clear_cache" className="art-font-medium">
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_clear_cache"
+            className="art-font-medium art-text-base"
+          >
             Clear Cache
           </label>
 
@@ -821,7 +805,7 @@ export default function Settings({ settings, handleChange }) {
             }
             color="blue"
           />
-        </div>
+        </BorderCard>
       </div>
     </React.Fragment>
   ) : (

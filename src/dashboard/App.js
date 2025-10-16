@@ -304,7 +304,7 @@ export default function App() {
           >
             {/* Hamburger Icon */}
             <svg
-              className="art-h-6 art-w-6"
+              className="art-h-4 art-w-4"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
