@@ -3,6 +3,11 @@
   --theme-text: #000000;
   --theme-accent: #3b82f6; /* default blue */
 }
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
 
 
 

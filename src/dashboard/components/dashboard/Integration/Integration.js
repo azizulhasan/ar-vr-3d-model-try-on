@@ -12,7 +12,10 @@ export default function Integration({
                                         setSettings,
                                         currentApi,
                                         allApi,
-                                        setCurrentAPI
+                                        setCurrentAPI,
+                          
+                                     
+
                                     }) {
 
     const [previousHeaders, setPreviousHeaders] = useState(null)
@@ -203,7 +206,10 @@ export default function Integration({
                                     Delete
                                 </button>
                             </div>
+                            
                         })}
+
+                        
                     </div>
                 </>
             }
