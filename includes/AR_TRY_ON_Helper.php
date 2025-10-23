@@ -187,7 +187,6 @@ class AR_TRY_ON_Helper
             }
         }
 
-
         return $result;
     }
 

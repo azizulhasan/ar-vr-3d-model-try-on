@@ -214,7 +214,39 @@ class AR_TRY_ON {
 			}
 		}
 
-	}
+//        add_action( 'woocommerce_product_thumbnails', [$this, 'add_3d_file_as_product_gallery_item'], 20 );
+        add_action( 'woocommerce_single_product_image_thumbnail_html', [$this, 'replace_woocommerce_single_product_image_thumbnail_html'], 5, 2 );
+
+    }
+
+    public  function add_3d_file_as_product_gallery_item() {
+//        echo '<div class="myplugin-after-featured">';
+//        echo '<img src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" alt="After Featured Image">';
+//        echo '</div>';
+//        echo '<div data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-thumb-alt="Hat - Image 3" data-thumb-srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 150w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 300w" data-thumb-sizes="(max-width: 100px) 100vw, 100px" class="woocommerce-product-gallery__image" style="width: 512px; margin-right: 0px; float: left; display: block;"><a href="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg"><img width="504" height="757" src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" class="" alt="Hat - Image 3" data-caption="" data-src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image_width="504" data-large_image_height="757" decoding="async" srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 504w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2-200x300.jpeg 200w" sizes="(max-width: 504px) 100vw, 504px" draggable="false"></a></div>';
+//        $html = '';
+//        $html .= '<div class="myplugin-before-gallery">Before Gallery Image/HTML1111111111111111111111111111111</div>';
+//        echo $html;
+    }
+
+    public  function replace_woocommerce_single_product_image_thumbnail_html($html, $post_thumbnail_id) {
+//        echo '<div class="myplugin-after-featured">';
+//        echo '<img src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" alt="After Featured Image">';
+//        echo '</div>';
+//        $html .= '<div data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-thumb-alt="Hat - Image 3" data-thumb-srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 150w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 300w" data-thumb-sizes="(max-width: 100px) 100vw, 100px" class="woocommerce-product-gallery__image" style="width: 512px; margin-right: 0px; float: left; display: block;"><a href="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg"><img width="504" height="757" src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" class="" alt="Hat - Image 3" data-caption="" data-src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image_width="504" data-large_image_height="757" decoding="async" srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 504w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2-200x300.jpeg 200w" sizes="(max-width: 504px) 100vw, 504px" draggable="false"></a></div>';
+//        return $html;
+        $current_filter = current_filter();
+//        error_log(print_r($current_filter, true));
+                return AR_TRY_ON_Helper::create_shortcode( [], '' );
+
+//        $html .= AR_TRY_ON_Helper::create_shortcode( [], '' );
+//        return $html;
+//        return '<div data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-thumb-alt="Hat - Image 3" data-thumb-srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 150w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 300w" data-thumb-sizes="(max-width: 100px) 100vw, 100px" class="woocommerce-product-gallery__image" style="width: 512px; margin-right: 0px; float: left; display: block;"><a href="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg"><img width="504" height="757" src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" class="" alt="Hat - Image 3" data-caption="" data-src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image_width="504" data-large_image_height="757" decoding="async" srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 504w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2-200x300.jpeg 200w" sizes="(max-width: 504px) 100vw, 504px" draggable="false"></a></div>';
+
+        //        $html = '';
+//        $html .= '<div class="myplugin-before-gallery">Before Gallery Image/HTML1111111111111111111111111111111</div>';
+//        echo $html;
+    }
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
