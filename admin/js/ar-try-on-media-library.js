@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // When a media file is selected, this function runs
         mediaUploader.on('select', function () {
             const attachment = mediaUploader.state().get('selection').first().toJSON();
-            console.log('Selected file URL:', attachment.url);
+            console.log({attachment});
             if (field) {
                 field.value = attachment.url;
             } else {
@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             wp.hooks.doAction('atlas_ar_on_select_model_file', {
                 name: fieldName,
-                url: attachment.url
+                url: attachment.url,
+                sizes: attachment.sizes
             });
         });
 

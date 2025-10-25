@@ -233,6 +233,7 @@ export default function Settings({ settings, handleChange }) {
                 <option value="4">woocommerce_after_single_product</option>
                 <option value="5">woocommerce_after_add_to_cart_form</option>
                 <option value="6">woocommerce_before_add_to_cart_form</option>
+                <option value="7">woocommerce_product_thumbnails</option>
               </select>
 
               <p className="art-text-sm art-text-gray-400 art-leading-snug">

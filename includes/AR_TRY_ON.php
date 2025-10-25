@@ -203,6 +203,9 @@ class AR_TRY_ON {
 			case 6:
 				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 99999999 );
 				break;
+            case 7:
+				$this->loader->add_action( 'woocommerce_product_thumbnails', $this, 'add_3d_file_as_product_gallery_item', 99999999 );
+                break;
 		}
 
 		$this->loader->add_filter( 'the_content', $this->plugin_public, 'atlas_ar_button', 99999999 );
@@ -214,7 +217,97 @@ class AR_TRY_ON {
 			}
 		}
 
-	}
+    }
+
+    /**
+     * @return void
+     */
+    public function add_3d_file_as_product_gallery_item() {
+        global $product;
+        $product_id = $product->get_id();
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+            return;
+        }
+        $attachment_id = get_post_thumbnail_id( $product_id );
+        $gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+        $thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+        $thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
+
+        ob_start();
+        ?>
+
+        <div id="atlas_ar-3d-gallery-item"
+             data-thumb=""
+             data-thumb-alt=""
+             class="woocommerce-product-gallery__image"
+             style="width: 500px; margin-right: 0; float: left; display: block;"
+             data-thumb-srcset=""
+             data-thumb-sizes="<?php echo $thumbnail_sizes ?>"
+        >
+            <?php echo  AR_TRY_ON_Helper::create_shortcode( [], '' ); ?>
+        </div>
+        <script>
+            (function() {
+                let atlas_ar_product_id = "<?php echo $product_id; ?>";
+
+                function getPosterByProductId(productId) {
+                    const data = sessionStorage.getItem('atlas_ar_model_data');
+                    if (!data) return null;
+
+                    try {
+                        const parsed = JSON.parse(data);
+                        let poster_data = {}
+                        poster_data['url'] =  parsed.models?.[productId]?.poster || '';
+                        poster_data['sizes'] =  parsed.models?.[productId]?.sizes || {};
+                        poster_data['alt'] =  parsed.models?.[productId]?.alt || '';
+                        return  poster_data;
+                    } catch (e) {
+                        console.error('Error parsing model data:', e);
+                        return null;
+                    }
+                }
+
+                const poster_data = getPosterByProductId(atlas_ar_product_id);
+                if (poster_data) {
+                    const div = document.getElementById('atlas_ar-3d-gallery-item');
+                    div.setAttribute('data-thumb', poster_data.url);
+                    div.setAttribute('data-thumb-alt', poster_data.alt);
+                    let srcset = null;
+
+                    if(poster_data.sizes?.thumbnail?.url) {
+                        srcset = `${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w, `;
+                    }
+
+                    if(poster_data.sizes?.medium?.url) {
+                        srcset += `${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w, `;
+                    }
+
+                    if(poster_data.sizes?.large?.url) {
+                        srcset += `${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w`;
+                    }
+
+                    if(srcset) {
+                        div.setAttribute('data-thumb-srcset', srcset);
+                    }
+
+                    if(!srcset){
+                        var default_images = "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp 100w, ' ?>"
+                            default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp 150w, ' ?>"
+                            default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp 300w' ?>"
+                        div.setAttribute('data-thumb-srcset', default_images);
+                    }
+
+                } else {
+                    console.warn('Poster not found for this product.');
+                }
+            })();
+        </script>
+
+        <?php
+        $image  = ob_get_clean();
+
+        echo $image;
+    }
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
