@@ -63,6 +63,7 @@ const productionSrc = [
 	'!admin/js/ar-try-on-media-library.js',
 	'!public/js/AtlasAR.js',
 	'!tailwind.config.modal.js',
+	'!admin/images/.DS_Store'
 ]
 
 

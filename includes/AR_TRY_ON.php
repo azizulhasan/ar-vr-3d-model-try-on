@@ -203,6 +203,9 @@ class AR_TRY_ON {
 			case 6:
 				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 99999999 );
 				break;
+            case 7:
+				$this->loader->add_action( 'woocommerce_product_thumbnails', $this, 'add_3d_file_as_product_gallery_item', 99999999 );
+                break;
 		}
 
 		$this->loader->add_filter( 'the_content', $this->plugin_public, 'atlas_ar_button', 99999999 );
@@ -214,58 +217,29 @@ class AR_TRY_ON {
 			}
 		}
 
-        add_action( 'woocommerce_product_thumbnails', [$this, 'add_3d_file_as_product_gallery_item'], 20 );
-//        add_filter( 'woocommerce_single_product_image_thumbnail_html', [$this, 'replace_woocommerce_single_product_image_thumbnail_html'], 5, 2 );
-
     }
 
+    /**
+     * @return void
+     */
     public function add_3d_file_as_product_gallery_item() {
         global $product;
         $product_id = $product->get_id();
         $attachment_id = get_post_thumbnail_id( $product_id );
-        $html = wc_get_gallery_image_html( $attachment_id );
-//        $flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
         $gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
         $thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
-//        $image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || '' ? 'woocommerce_single' : $thumbnail_size );
-//        $full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
-//        $thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
-//        $thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
         $thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
-//        $full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
-//        $alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-//        $alt_text          = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
-//    error_log(print_r([
-//            '$attachment_id' => $attachment_id,
-//            '$thumbnail_size' => $thumbnail_size,
-//            '$image_size' => $image_size,
-//        '$full_size' => $full_size,
-//        '$thumbnail_src' => $thumbnail_src,
-//        '$full_src' => $full_src,
-//        '$alt_text' => $alt_text,
-//        '$thumbnail_srcset' => $thumbnail_srcset,
-//        '$thumbnail_sizes' => $thumbnail_sizes,
-//
-//    ], true));
 
-//        error_log(print_r( $html, true ));
-//        echo '<div data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296-100x100.jpeg" data-thumb-alt="Shirt - Green" data-thumb-srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296-100x100.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296-150x150.jpeg 150w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296-300x300.jpeg 300w"  data-thumb-sizes="(max-width: 100px) 100vw, 100px" class="woocommerce-product-gallery__image">
-//
-//ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp
-//</div>';
-//        return;
         ob_start();
         ?>
 
-        <div id="atlas-3d-gallery-item"
-             data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296-100x100.jpeg"
-             data-thumb-alt="3D Model Preview"
+        <div id="atlas_ar-3d-gallery-item"
+             data-thumb=""
+             data-thumb-alt=""
              class="woocommerce-product-gallery__image"
-             style="width: 112px; margin-right: 0; float: left; display: block;"
-
-        data-thumb-srcset=""
-
-        data-thumb-sizes="<?php echo $thumbnail_sizes ?>"
+             style="width: 500px; margin-right: 0; float: left; display: block;"
+             data-thumb-srcset=""
+             data-thumb-sizes="<?php echo $thumbnail_sizes ?>"
         >
             <?php echo  AR_TRY_ON_Helper::create_shortcode( [], '' ); ?>
         </div>
@@ -280,8 +254,9 @@ class AR_TRY_ON {
                     try {
                         const parsed = JSON.parse(data);
                         let poster_data = {}
-                        poster_data['url'] =  parsed.models?.[productId]?.poster || null;
-                        poster_data['sizes'] =  parsed.models?.[productId]?.sizes || null;
+                        poster_data['url'] =  parsed.models?.[productId]?.poster || '';
+                        poster_data['sizes'] =  parsed.models?.[productId]?.sizes || {};
+                        poster_data['alt'] =  parsed.models?.[productId]?.alt || '';
                         return  poster_data;
                     } catch (e) {
                         console.error('Error parsing model data:', e);
@@ -291,14 +266,25 @@ class AR_TRY_ON {
 
                 const poster_data = getPosterByProductId(atlas_ar_product_id);
                 if (poster_data) {
-                    const div = document.getElementById('atlas-3d-gallery-item');
+                    const div = document.getElementById('atlas_ar-3d-gallery-item');
                     div.setAttribute('data-thumb', poster_data.url);
-                    div.setAttribute('data-thumb-srcset', `
-                    ${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w,
-                    ${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w,
-                    ${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w,
-
+                    div.setAttribute('data-thumb-alt', poster_data.alt);
+                    if(poster_data.sizes?.thumbnail?.url) {
+                        div.setAttribute('data-thumb-srcset', `
+                        ${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w,
+                        ${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w,
+                        ${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w
                     `);
+                    }else{
+                        var default_images = "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp 100w, ' ?>"
+                            default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp 150w, ' ?>"
+                            default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp 300w' ?>"
+                                console.log(default_images)
+                        div.setAttribute('data-thumb-srcset', `
+                            ${default_images},
+                        `);
+                    }
+
                 } else {
                     console.warn('Poster not found for this product.');
                 }
@@ -307,99 +293,9 @@ class AR_TRY_ON {
 
         <?php
         $image  = ob_get_clean();
+        error_log(print_r($image, true));
 
         echo $image;
-
-        error_log(print_r( [
-            '$html' => $html,
-            '$image' => $image,
-        ], true ));
-    }
-
-    public  function add_3d_file_as_product_gallery_item_old() {
-//        echo '<div class="myplugin-after-featured">';
-//        echo '<img src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" alt="After Featured Image">';
-//        echo '</div>';
-        global $product;
-        $product_id = $product->get_id();
-        ?>
-        <script>
-            let atlas_ar_product_id = "<?php echo $product_id; ?>";
-            function getPosterByProductId(productId) {
-                // Get the session data
-                const data = sessionStorage.getItem('atlas_ar_model_data');
-                if (!data) {
-                    console.warn('No session data found for key "atlas_ar_model_data".');
-                    return null;
-                }
-
-                try {
-                    const parsed = JSON.parse(data);
-
-                    // Check if the product ID exists under "models"
-                    if (
-                        parsed.models &&
-                        parsed.models[productId] &&
-                        parsed.models[productId].poster
-                    ) {
-                        return parsed.models[productId].poster;
-                    } else {
-                        console.warn(`Poster not found for product ID: ${productId}`);
-                        return null;
-                    }
-                } catch (error) {
-                    console.error('Failed to parse session data:', error);
-                    return null;
-                }
-            }
-
-            let posterUrl = getPosterByProductId(atlas_ar_product_id);
-            console.log(posterUrl);
-
-        </script>
-<?php
-
-        $image =  '<div
-  data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg"
-  data-thumb-alt="Hat - Image 3"
-  data-thumb-srcset="
-    http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w,
-    http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 150w,
-    http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 300w
-  "
-  data-thumb-sizes="(max-width: 100px) 100vw, 100px"
-  class="woocommerce-product-gallery__image"
-  style="width: 512px; margin-right: 0px; float: left; display: block;"
->';
-        $image .= AR_TRY_ON_Helper::create_shortcode( [], '' );
-        $image .= '</div>';
-        echo $image;
-
-
-//        echo AR_TRY_ON_Helper::create_shortcode( [], '' );
-
-        //        $html = '';
-//        $html .= '<div class="myplugin-before-gallery">Before Gallery Image/HTML1111111111111111111111111111111</div>';
-//        echo $html;
-    }
-
-    public  function replace_woocommerce_single_product_image_thumbnail_html($html, $post_thumbnail_id) {
-//        echo '<div class="myplugin-after-featured">';
-//        echo '<img src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" alt="After Featured Image">';
-//        echo '</div>';
-//        $html .= '<div data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-thumb-alt="Hat - Image 3" data-thumb-srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 150w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 300w" data-thumb-sizes="(max-width: 100px) 100vw, 100px" class="woocommerce-product-gallery__image" style="width: 512px; margin-right: 0px; float: left; display: block;"><a href="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg"><img width="504" height="757" src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" class="" alt="Hat - Image 3" data-caption="" data-src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image_width="504" data-large_image_height="757" decoding="async" srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 504w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2-200x300.jpeg 200w" sizes="(max-width: 504px) 100vw, 504px" draggable="false"></a></div>';
-//        return $html;
-        $current_filter = current_filter();
-//        error_log(print_r($current_filter, true));
-                return AR_TRY_ON_Helper::create_shortcode( [], '' );
-
-//        $html .= AR_TRY_ON_Helper::create_shortcode( [], '' );
-//        return $html;
-//        return '<div data-thumb="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-thumb-alt="Hat - Image 3" data-thumb-srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 150w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 300w" data-thumb-sizes="(max-width: 100px) 100vw, 100px" class="woocommerce-product-gallery__image" style="width: 512px; margin-right: 0px; float: left; display: block;"><a href="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 100w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg"><img width="504" height="757" src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" class="" alt="Hat - Image 3" data-caption="" data-src="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg" data-large_image_width="504" data-large_image_height="757" decoding="async" srcset="http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg 504w, http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113861-531ebbcd-f9b5-4c18-b5c7-a878d5017ca2-200x300.jpeg 200w" sizes="(max-width: 504px) 100vw, 504px" draggable="false"></a></div>';
-
-        //        $html = '';
-//        $html .= '<div class="myplugin-before-gallery">Before Gallery Image/HTML1111111111111111111111111111111</div>';
-//        echo $html;
     }
 
 	/**
