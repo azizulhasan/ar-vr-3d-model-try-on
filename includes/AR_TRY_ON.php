@@ -224,17 +224,17 @@ class AR_TRY_ON {
         $product_id = $product->get_id();
         $attachment_id = get_post_thumbnail_id( $product_id );
         $html = wc_get_gallery_image_html( $attachment_id );
-        $flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
+//        $flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
         $gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
         $thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
-        $image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || '' ? 'woocommerce_single' : $thumbnail_size );
-        $full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
-        $thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
-        $thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
+//        $image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || '' ? 'woocommerce_single' : $thumbnail_size );
+//        $full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+//        $thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+//        $thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
         $thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
-        $full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
-        $alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-        $alt_text          = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
+//        $full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
+//        $alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+//        $alt_text          = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
 //    error_log(print_r([
 //            '$attachment_id' => $attachment_id,
 //            '$thumbnail_size' => $thumbnail_size,
@@ -279,23 +279,26 @@ class AR_TRY_ON {
 
                     try {
                         const parsed = JSON.parse(data);
-                        return parsed.models?.[productId]?.poster || null;
+                        let poster_data = {}
+                        poster_data['url'] =  parsed.models?.[productId]?.poster || null;
+                        poster_data['sizes'] =  parsed.models?.[productId]?.sizes || null;
+                        return  poster_data;
                     } catch (e) {
                         console.error('Error parsing model data:', e);
                         return null;
                     }
                 }
 
-                const posterUrl = getPosterByProductId(atlas_ar_product_id);
-                if (posterUrl) {
+                const poster_data = getPosterByProductId(atlas_ar_product_id);
+                if (poster_data) {
                     const div = document.getElementById('atlas-3d-gallery-item');
-                    div.setAttribute('data-thumb', posterUrl);
-                    // div.setAttribute('data-thumb-srcset', `
-                    // http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113801-fd8243b7-8465-4f82-86c1-2c54797fe296-100x100.jpeg 100w,
-                    // // ${posterUrl} 100w,
-                    // ${posterUrl} 150w,
-                    // ${posterUrl} 500w
-                    // `);
+                    div.setAttribute('data-thumb', poster_data.url);
+                    div.setAttribute('data-thumb-srcset', `
+                    ${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w,
+                    ${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w,
+                    ${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w,
+
+                    `);
                 } else {
                     console.warn('Poster not found for this product.');
                 }

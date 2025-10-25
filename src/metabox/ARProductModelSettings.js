@@ -162,7 +162,8 @@ const ARProductModelSettings = () => {
         if (Object.keys(currentValue).length) {
             const productModelData = {
                 ...productModel,
-                [currentValue.name]: currentValue.url
+                [currentValue.name]: currentValue.url,
+                sizes: currentValue?.sizes || []
             };
             setProductModel(productModelData);
             wp.hooks.doAction('atlas_ar_preview_data', productModelData);
