@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.7.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -223,6 +223,11 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 == Changelog ==
 
 
+
+= 1.7.2 ( 25 October 2025 )   =
+Added: `woocommerce_product_thumbnails` woocommerce product thumbnail action hook added for Showing 3D file.
+
+
 = 1.7.1 ( 17 October 2025 )   =
 Improved: Dashboard UI improved.
 
@@ -395,5 +400,6 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 1.7.1  =
-Improved: Dashboard UI improved.
+= 1.7.2   =
+Added: `woocommerce_product_thumbnails` woocommerce product thumbnail action hook added for Showing 3D file.
+

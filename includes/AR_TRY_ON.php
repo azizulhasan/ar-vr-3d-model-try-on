@@ -307,7 +307,6 @@ class AR_TRY_ON {
         $image  = ob_get_clean();
 
         echo $image;
-        error_log(print_r($image, true));
     }
 
 	/**
