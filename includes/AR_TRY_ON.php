@@ -225,6 +225,9 @@ class AR_TRY_ON {
     public function add_3d_file_as_product_gallery_item() {
         global $product;
         $product_id = $product->get_id();
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+            return;
+        }
         $attachment_id = get_post_thumbnail_id( $product_id );
         $gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
         $thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
@@ -293,7 +296,6 @@ class AR_TRY_ON {
 
         <?php
         $image  = ob_get_clean();
-        error_log(print_r($image, true));
 
         echo $image;
     }
