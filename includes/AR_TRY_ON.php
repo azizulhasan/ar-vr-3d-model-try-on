@@ -272,20 +272,29 @@ class AR_TRY_ON {
                     const div = document.getElementById('atlas_ar-3d-gallery-item');
                     div.setAttribute('data-thumb', poster_data.url);
                     div.setAttribute('data-thumb-alt', poster_data.alt);
+                    let srcset = null;
+
                     if(poster_data.sizes?.thumbnail?.url) {
-                        div.setAttribute('data-thumb-srcset', `
-                        ${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w,
-                        ${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w,
-                        ${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w
-                    `);
-                    }else{
+                        srcset = `${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w, `;
+                    }
+
+                    if(poster_data.sizes?.medium?.url) {
+                        srcset += `${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w, `;
+                    }
+
+                    if(poster_data.sizes?.large?.url) {
+                        srcset += `${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w`;
+                    }
+
+                    if(srcset) {
+                        div.setAttribute('data-thumb-srcset', srcset);
+                    }
+
+                    if(!srcset){
                         var default_images = "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp 100w, ' ?>"
                             default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp 150w, ' ?>"
                             default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp 300w' ?>"
-                                console.log(default_images)
-                        div.setAttribute('data-thumb-srcset', `
-                            ${default_images},
-                        `);
+                        div.setAttribute('data-thumb-srcset', default_images);
                     }
 
                 } else {
@@ -298,6 +307,7 @@ class AR_TRY_ON {
         $image  = ob_get_clean();
 
         echo $image;
+        error_log(print_r($image, true));
     }
 
 	/**
