@@ -83,6 +83,7 @@ class AR_TRY_ON_Public {
 			'VERSION'       => ATLAS_AR_VERSION,
 			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
             'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
+            'img'    => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
 		];
 
 
@@ -127,12 +128,19 @@ class AR_TRY_ON_Public {
 			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array(), $this->version, true );
             wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
             wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
-			wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
 
 			if(AR_TRY_ON_Helper::is_qr_code_enabled()){
 				wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
 			}
-		}
+
+            if ( function_exists( 'is_product' ) || is_product() ) {
+//                wp_enqueue_script( 'atlas_ar-single-product', ATLAS_AR_PLUGIN_URL . 'public/js/single-product.js', array('jquery'), '1.0', true );
+            }
+
+            wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
+            wp_localize_script( 'atlas_ar-single-product', 'ar_try_on', $this->localize_data );
+
+        }
 
 
 	}
@@ -187,15 +195,15 @@ class AR_TRY_ON_Public {
 
 	public function atlas_ar_button_tab( $content ) {
 		$current_filter = current_filter();
-		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			if ( $current_filter === 'the_content' ) {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+            if ( $current_filter === 'the_content' ) {
 				return $content;
 			}
 
 			return;
 		}
 
-		// Global product variable
+        // Global product variable
 		global $product;
 		global $post;
 		if ( $product ) {
