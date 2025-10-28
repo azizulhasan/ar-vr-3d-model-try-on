@@ -230,20 +230,21 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            {key: 'prompt', type: 'textarea', value: ''},
-                            {key: 'mode', type: 'text', value: 'preview'},
-                            {key: 'negative_prompt', type: 'textarea', value: ''},
-                            {key: 'art_style', type: 'text', value: 'realistic'},
-                            {key: 'should_remesh', type: 'boolean', value: true}
+                            {key: 'prompt', type: 'textarea', value: '', required: true},
+                            {key: 'mode', type: 'text', value: 'preview', required: true},
+                            {key: 'negative_prompt', type: 'textarea', value: '', required: false},
+                            {key: 'art_style', type: 'text', value: 'realistic', required: false},
+                            {key: 'should_remesh', type: 'boolean', value: true, required: false}
                         ],
                         doc: 'https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request'
                     },
                     image_to_model: {
                         input: [
-                            {key: 'image_url', type: 'text', value: ''},
-                            {key: 'should_texture', type: 'boolean', value: true},
-                            {key: 'should_remesh', type: 'boolean', value: true},
-                            {key: 'enable_pbr', type: 'boolean', value: true}
+                            {key: 'image_url', type: 'file', value: '', required: true},
+                            {key: 'should_texture', type: 'boolean', value: true, required: false},
+                            {key: 'should_remesh', type: 'boolean', value: true, required: false},
+                            {key: 'enable_pbr', type: 'boolean', value: false, required: false },
+                            {key: 'ai_model', type: 'text', value: 'meshy-5', required: false}
                         ],
                         doc: 'https://docs.meshy.ai/en/api/image-to-3d#create-an-image-to-3d-task'
                     },
