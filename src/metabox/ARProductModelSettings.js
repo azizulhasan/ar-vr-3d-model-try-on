@@ -126,7 +126,7 @@ const ARProductModelSettings = () => {
             return;
         }
 
-        if (e.target.name === 'exclude_integration_api_model_type' && e.target.value === 'image_to_model') {
+        if (!ar_try_on.is_pro_active && e.target.name === 'exclude_integration_api_model_type' && e.target.value === 'image_to_model') {
             notify('Image to model generation is only available in pro version!', 'warn',{
                 autoClose: 5000,
             });

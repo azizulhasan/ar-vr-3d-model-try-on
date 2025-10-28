@@ -125,9 +125,6 @@ export default function App() {
     });
   }, []);
 
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(" ");
-  }
 
   const handleTabChange = (e, tab) => {
     e.preventDefault();
@@ -147,7 +144,7 @@ export default function App() {
     if (Array.isArray(e)) {
       value = e;
 
-      if (targetName === "ar_try_on_allowed_post_types" && value.length > 1) {
+      if ( !ar_try_on.is_pro_active &&  targetName === "ar_try_on_allowed_post_types" && value.length > 1) {
         toast(
           "Multiple post type is only available in the pro version",
           "error"
@@ -185,12 +182,14 @@ export default function App() {
     if (!e.target.name) return;
 
     if (
-      e.target.name === "ar_try_on_exclude_integration_api_name" &&
-      e.target.value !== "tripo3d"
+      e.target.name === "ar_try_on_exclude_integration_api_name"
+        && e.target.value !== "tripo3d"
+        && !ar_try_on.is_pro_active
     ) {
       notify("API switch is available in pro version", "warn");
       return;
     }
+
 
     console.log({ name: e.target.name, value });
     setSettings({
@@ -248,8 +247,7 @@ export default function App() {
         }
       );
     }
-    console.log({ tempSettings });
-
+    console.log({previousSettings, tempSettings})
     let hasValueChanged = isDifferent(previousSettings, tempSettings);
     if (!hasValueChanged) {
       notify("No changes detected", "info", {

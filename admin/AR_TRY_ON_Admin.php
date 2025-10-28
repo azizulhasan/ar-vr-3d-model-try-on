@@ -84,7 +84,7 @@ class AR_TRY_ON_Admin {
 			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
-			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
+			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php' ),
 
 		];
 	}

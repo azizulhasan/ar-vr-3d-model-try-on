@@ -238,6 +238,15 @@ export const getAPITypes = (api_type = 'tripo3d') => {
                         ],
                         doc: 'https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request'
                     },
+                    image_to_model: {
+                        input: [
+                            {key: 'image_url', type: 'text', value: ''},
+                            {key: 'should_texture', type: 'boolean', value: true},
+                            {key: 'should_remesh', type: 'boolean', value: true},
+                            {key: 'enable_pbr', type: 'boolean', value: true}
+                        ],
+                        doc: 'https://docs.meshy.ai/en/api/image-to-3d#create-an-image-to-3d-task'
+                    },
                 }
             }
         },

@@ -13,9 +13,6 @@ export default function Integration({
                                         currentApi,
                                         allApi,
                                         setCurrentAPI,
-                          
-                                     
-
                                     }) {
 
     const [previousHeaders, setPreviousHeaders] = useState(null)
