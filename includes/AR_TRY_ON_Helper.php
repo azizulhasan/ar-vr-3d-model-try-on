@@ -618,4 +618,8 @@ class AR_TRY_ON_Helper
         return $post_cache_data;
     }
 
+    public static function is_pro_active() {
+        return is_plugin_active( 'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php' );
+    }
+
 }

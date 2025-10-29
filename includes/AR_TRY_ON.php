@@ -137,26 +137,40 @@ class AR_TRY_ON {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_preview', 99999 );
 
+
+        /**
+         * Adds support for Android `.glb` and iOS `.usdz` file types by defining their extensions and mime types.
+         * The function `ar_model_viewer_for_woocommerce_file_and_ext` checks the file type during upload and processing.
+         * This ensures that the file types are correctly identified in WordPress.
+         * It hooks into the `wp_check_filetype_and_ext` filter, with a priority of 10 and passes 4 arguments.
+         */
+        // Allow Android (.glb) and iOS (.usdz) files to be uploaded by adding them to the allowed MIME types.
+        $this->loader->add_filter( 'upload_mimes', $plugin_admin, 'mime_types' );
+
 		/**
 		 * Enqueues the admin scripts for the WordPress admin dashboard.
 		 * The function `enqueue_scripts` in `$plugin_admin` will include the necessary JavaScript files for the plugin.
 		 */
 		// Set the extension and mime type for Android (.glb) and iOS (.usdz) files.
-		$this->loader->add_filter(
-			'wp_check_filetype_and_ext',
-			$plugin_admin,
-			'ATLAS_AR_for_woocommerce_file_and_ext',
-			10,
-			4
-		);
-		/**
-		 * Adds support for Android `.glb` and iOS `.usdz` file types by defining their extensions and mime types.
-		 * The function `ar_model_viewer_for_woocommerce_file_and_ext` checks the file type during upload and processing.
-		 * This ensures that the file types are correctly identified in WordPress.
-		 * It hooks into the `wp_check_filetype_and_ext` filter, with a priority of 10 and passes 4 arguments.
-		 */
-		// Allow Android (.glb) and iOS (.usdz) files to be uploaded by adding them to the allowed MIME types.
-		$this->loader->add_filter( 'upload_mimes', $plugin_admin, 'atlas_ar_for_woocommerce_mime_types' );
+        global $wp_version;
+        if (version_compare($wp_version, '5.1') >= 0) {
+            $this->loader->add_filter(
+                'wp_check_filetype_and_ext',
+                $plugin_admin,
+                'allowed_file_and_ext',
+                10,
+                5
+            );
+        } else {
+            $this->loader->add_filter(
+                'wp_check_filetype_and_ext',
+                $plugin_admin,
+                'allowed_file_and_ext',
+                10,
+                4
+            );
+        }
+
 
 
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'atlas_ar_menu' );
