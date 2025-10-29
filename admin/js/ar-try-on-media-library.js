@@ -14,6 +14,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // });
 
+    const allowedFileTypes = wp.hooks.applyFilters('atlas_ar_allowedFileTypes', {
+        glb: "model/gltf-binary",
+        gltf: "model/gltf-binary",
+        usdz: "model/vnd.pixar.usd",
+    });
+
+    function isAllowedFileTypes (attachment) {
+        const mimeType = attachment.mime; // or file.mime_type depending on version
+        const extension = attachment.filename.split('.').pop().toLowerCase();
+        console.log(allowedFileTypes)
+        if(allowedFileTypes.hasOwnProperty(extension) && allowedFileTypes[extension]) {
+            return true;
+        }
+
+        return false;
+    }
+
     function uploadModelFile(fieldName, field = '') {
 
         // If the media uploader instance already exists, reopen it
@@ -33,12 +50,20 @@ document.addEventListener('DOMContentLoaded', function () {
         // When a media file is selected, this function runs
         mediaUploader.on('select', function () {
             const attachment = mediaUploader.state().get('selection').first().toJSON();
-            console.log({attachment});
+            console.log(isAllowedFileTypes(attachment))
+
+            if(!isAllowedFileTypes(attachment)) {
+                // TODO: update this functionality.
+                document.getElementById('atlas_ar_android_file_notice').innerHTML = 'This file type is not allowed.';
+                return;
+            }
             if (field) {
                 field.value = attachment.url;
             } else {
                 document.getElementById(fieldName).value = attachment.url;
             }
+
+
             wp.hooks.doAction('atlas_ar_on_select_model_file', {
                 name: fieldName,
                 url: attachment.url,

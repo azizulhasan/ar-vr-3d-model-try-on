@@ -249,7 +249,7 @@ class AR_TRY_ON_Admin {
                 'hdr' => 'image/vnd.radiance',
             ];
         }
-        error_log(print_r($mimes, true));
+
         return $mimes;
 	}
 

@@ -92,7 +92,7 @@ const ContentSection = ({
             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
             placeholder="Enter Android model URL"
           />
-          <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
+          <p id='atlas_ar_android_file_notice' className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
         </div>
         <br />
 
