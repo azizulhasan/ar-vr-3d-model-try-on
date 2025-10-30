@@ -233,6 +233,7 @@ class AR_TRY_ON_Admin {
             'usdz' => 'model/vnd.pixar.usd',
         ];
 
+        // TODO: apply this on in from version.
         if(AR_TRY_ON_Helper::is_pro_active()) {
             $mimes += [
                 'obj' => 'model/obj',
