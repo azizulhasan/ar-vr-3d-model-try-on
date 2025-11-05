@@ -1,4 +1,3 @@
-// components/ARSettings/ContentSection.js
 import React from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
 
@@ -12,22 +11,22 @@ const ContentSection = ({
                             handleMediaButtonClick
                         }) => {
     return (
-        <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
+        <div className="art-mb-1 art-border art-border-gray-200 art-rounded">
             <button
                 type="button"
                 onClick={() => toggleAccordion('content')}
                 className="art-w-full art-flex art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
             >
-        <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Content
-          <AccordionIcon status={activeAccordion.content} />
-        </span>
+                <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
+                  Content
+                  <AccordionIcon status={activeAccordion.content} />
+                </span>
             </button>
 
 
             <div className={activeAccordion.content ? " art-block art-px-3 art-py-2 art-bg-white art-border-t " : " art-hidden art-px-3 art-py-2 art-bg-white art-border-t "}>
                 {/* AR Placement */}
-                <div className="art-mb-3">
+                <div className="art-mb-5 art-border art-border-solid art-border-black art-p-4">
                     <label className="art-font-medium art-block art-mb-2">
                         AR Placements / Product Type
                     </label>
@@ -49,7 +48,26 @@ const ContentSection = ({
                     </div>
                 </div>
                 {/*//TODO: AR-40-6 will be implemented here.*/}
-
+                {/* 3D Viewer Position */}
+                <div className="art-mb-5 art-border art-border-solid art-border-black art-p-4">
+                    <label className="art-font-medium art-block art-mb-2">
+                        3D Viewer Position
+                    </label>
+                    <div className="art-relative">
+                        <select
+                            name="position_of_3d"
+                            value={productModel.position_of_3d}
+                            onChange={handleChange}
+                            className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded art-bg-white art-appearance-none art-pr-8"
+                        >
+                            <option value="top_of_feature_image">Top of the product image</option>
+                            <option value="bottom_of_feature_image">Bottom of the product image</option>
+                            <option value="replace_feature_image_with_3d">Replace Product Image with 3D</option>
+                            <option value="first_image_of_wc_gallary">Show 3D on First Image of Woocommerce Gallery</option>
+                            <option value="woocommerce_product_thumbnails">Show 3D on Last Image of Woocommerce Gallery</option>
+                        </select>
+                    </div>
+                </div>
 
                 {/* Android Model */}
                 <div className="art-border art-border-solid art-border-black art-p-4">
@@ -170,7 +188,7 @@ const ContentSection = ({
                 </div>
 
                 {/* Alt Text */}
-                <div className="art-mb-1">
+                <div className="art-mb-3 art-mt-3 art-border art-border-solid art-border-black art-p-4">
                     <label
                         htmlFor="alt"
                         className="art-block art-text-sm art-font-medium art-items-center art-gap-2"

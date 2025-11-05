@@ -321,6 +321,7 @@ class AR_TRY_ON_Helper
             'poster' => 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.webp',
             'alt' => 'NeilArmstrong',
             'ar_placement' => 'floor',
+            'position_of_3d' => 'woocommerce_product_thumbnails',
             // light & environment settings
             'skybox_image' => 'https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg',
             'environment_image' => 'https://modelviewer.dev/shared-assets/environments/moon_1k.hdr',

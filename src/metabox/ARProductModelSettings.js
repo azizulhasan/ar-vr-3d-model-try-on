@@ -26,6 +26,7 @@ const ARProductModelSettings = () => {
         poster: '',
         alt: 'Title',
         ar_placement: 'floor',
+        position_of_3d: 'woocommerce_product_thumbnails',
         // light & environment settings
         skybox_image: '',
         environment_image: '',
