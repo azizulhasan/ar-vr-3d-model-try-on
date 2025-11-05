@@ -1,3 +1,5 @@
+import notify from "../../src/context/Notify";
+
 document.addEventListener('DOMContentLoaded', function () {
     let mediaUploader;
     // Attach click event listener to elements with the class 'ar-try-on-open-media-library'
@@ -23,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function isAllowedFileTypes (attachment) {
         const mimeType = attachment.mime; // or file.mime_type depending on version
         const extension = attachment.filename.split('.').pop().toLowerCase();
-        console.log(allowedFileTypes)
         if(allowedFileTypes.hasOwnProperty(extension) && allowedFileTypes[extension]) {
             return true;
         }
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function uploadModelFile(fieldName, field = '') {
+        console.log(fieldName)
 
         // If the media uploader instance already exists, reopen it
         if (mediaUploader) {
@@ -50,11 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // When a media file is selected, this function runs
         mediaUploader.on('select', function () {
             const attachment = mediaUploader.state().get('selection').first().toJSON();
-            console.log(isAllowedFileTypes(attachment))
-
-            if(!isAllowedFileTypes(attachment)) {
-                // TODO: update this functionality.
-                document.getElementById('atlas_ar_android_file_notice').innerHTML = 'This file type is not allowed.';
+            if(!isAllowedFileTypes(attachment) && (fieldName === 'src' || fieldName === 'ios_src') ) {
+                alert(`This file format is not allowed. Please try to upload one of these files. ${Object.keys(allowedFileTypes).join(', ')}`)
                 return;
             }
             if (field) {
