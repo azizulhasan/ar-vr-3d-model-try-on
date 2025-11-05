@@ -5,6 +5,7 @@ import CameraSection from "./components/CameraSection.js";
 import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
 import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
+import DimensionSection from "./components/DimensionSection.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
 
@@ -364,7 +365,20 @@ const ARProductModelSettings = () => {
                                 />
 
 
+                                <DimensionSection
+
+
+                                    />
+
+
+
+                                
+        
+
                             </div>
+
+                        
+                    
                         )}
 
                         {/* Style Section */}
