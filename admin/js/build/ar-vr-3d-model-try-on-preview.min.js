@@ -22,6 +22,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
@@ -55,7 +66,7 @@ var postWithoutImage = /*#__PURE__*/function () {
             body: data,
             // body data type must match "Content-Type" header
             headers: {
-              'X-WP-Nonce': ar_try_on.rest_nonce
+              "X-WP-Nonce": ar_try_on.rest_nonce
             }
           });
         case 4:
@@ -82,15 +93,15 @@ var postWithoutImage = /*#__PURE__*/function () {
  * @returns {string}
  */
 var getURL = function getURL() {
-  var endpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-  return ar_try_on.api_url + ar_try_on.api_namespace + '/' + ar_try_on.api_version + '/' + endpoint;
+  var endpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  return ar_try_on.api_url + ar_try_on.api_namespace + "/" + ar_try_on.api_version + "/" + endpoint;
 };
 var getPostID = function getPostID() {
   // Parse the URL parameters
   var params = new URLSearchParams(window.location.search);
 
   // Get the 'post' parameter
-  return params.get('post');
+  return params.get("post");
 };
 function unsecuredCopyToClipboard() {
   var textArea = document.createElement("textarea");
@@ -99,14 +110,13 @@ function unsecuredCopyToClipboard() {
   textArea.select();
   textArea.setSelectionRange(0, 99999);
   try {
-    document.execCommand('copy');
-    alert('Copied');
+    document.execCommand("copy");
+    alert("Copied");
   } catch (err) {
-    console.error('Unable to copy to clipboard', err);
+    console.error("Unable to copy to clipboard", err);
   }
   document.body.removeChild(textArea);
 }
-;
 
 /**
  * Copy short Code
@@ -122,7 +132,7 @@ var copyshortcode = function copyshortcode(e) {
   if (window.isSecureContext && navigator.clipboard) {
     /* Copy the text inside the text field */
     navigator.clipboard.writeText(copyText.value).then(function () {
-      alert('Copied');
+      alert("Copied");
     })["catch"](function (e) {
       alert("Something went wrong! " + e);
       // toast('Something went wrong! ');
@@ -131,49 +141,205 @@ var copyshortcode = function copyshortcode(e) {
     unsecuredCopyToClipboard(copyText.value);
   }
 };
+
+/* Helper: draw SVG lines between hotspot pairs. */
+var drawLine = function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+  if (dotHotspot1 && dotHotspot2) {
+    svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
+    svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
+    svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
+    svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
+    if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+      svgLine.classList.add("hide");
+    } else {
+      svgLine.classList.remove("hide");
+    }
+  }
+};
+
+/* Core function: calculate and update dimensions */
+var calculateDimension = function calculateDimension(productModel, modelViewer) {
+  if (!modelViewer) return;
+  var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll("button")), [modelViewer.querySelector("#dimLines")]);
+
+  // Show/hide dimensions
+  function setVisibility(visible) {
+    dimElements.forEach(function (element) {
+      element.classList.toggle("hide", !visible);
+    });
+  }
+  setVisibility(productModel.dimensions.show);
+
+  // Handle AR session toggling visibility
+  modelViewer.addEventListener("ar-status", function () {
+    setVisibility(productModel.dimensions.show);
+  });
+  var dimLines = modelViewer.querySelectorAll("line");
+
+  /* Render/update SVG lines. */
+  var renderSVG = function renderSVG() {
+    drawLine(dimLines[0], modelViewer.queryHotspot("hotspot-dot+X-Y+Z"), modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Y"));
+    drawLine(dimLines[1], modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Z"));
+    drawLine(dimLines[2], modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X+Y-Z"));
+    drawLine(dimLines[3], modelViewer.queryHotspot("hotspot-dot-X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dim-X-Z"));
+    drawLine(dimLines[4], modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y+Z"), modelViewer.queryHotspot("hotspot-dim-X-Y"));
+  };
+
+  // ---------- Utility for unit conversion ----------
+  var convertLength = function convertLength(valueInMeters, unit) {
+    switch (unit) {
+      case "m":
+        return valueInMeters;
+      case "cm":
+        return valueInMeters * 100;
+      case "inch":
+        return valueInMeters * 39.3701;
+      default:
+        return valueInMeters;
+    }
+  };
+
+  // Initial hotspot placement & labels
+  var showDimensions = function showDimensions() {
+    var center = modelViewer.getBoundingBoxCenter();
+    var size = modelViewer.getDimensions();
+    var x2 = size.x / 2;
+    var y2 = size.y / 2;
+    var z2 = size.z / 2;
+    var unit = productModel.dimensions.unit || "cm";
+    var decimals = unit === "m" ? 2 : 0;
+    var convertedX = convertLength(size.x, unit);
+    var convertedY = convertLength(size.y, unit);
+    var convertedZ = convertLength(size.z, unit);
+
+    // Position hotspots + update labels
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X-Y+Z",
+      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+X-Y",
+      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = "".concat(convertedZ.toFixed(decimals), " ").concat(unit);
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X-Y-Z",
+      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+X-Z",
+      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = "".concat(convertedY.toFixed(decimals), " ").concat(unit);
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X+Y-Z",
+      position: "".concat(center.x + x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+Y-Z",
+      position: "".concat(center.x, " ").concat(center.y + y2 * 1.1, " ").concat(center.z - z2 * 1.1)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = "".concat(convertedX.toFixed(decimals), " ").concat(unit);
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X+Y-Z",
+      position: "".concat(center.x - x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim-X-Z",
+      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = "".concat(convertedY.toFixed(decimals), " ").concat(unit);
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X-Y-Z",
+      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim-X-Y",
+      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = "".concat(convertedZ.toFixed(decimals), " ").concat(unit);
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X-Y+Z",
+      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
+    });
+
+    // Keep SVG in sync
+    renderSVG();
+    modelViewer.addEventListener("camera-change", renderSVG);
+
+    // Update React state with dimensions
+    var setProductModel = function setProductModel(prev) {
+      var _prev$dimensions$widt, _prev$dimensions$heig, _prev$dimensions$leng;
+      if (((_prev$dimensions$widt = prev.dimensions.width) === null || _prev$dimensions$widt === void 0 ? void 0 : _prev$dimensions$widt.value) === convertedX && ((_prev$dimensions$heig = prev.dimensions.height) === null || _prev$dimensions$heig === void 0 ? void 0 : _prev$dimensions$heig.value) === convertedY && ((_prev$dimensions$leng = prev.dimensions.length) === null || _prev$dimensions$leng === void 0 ? void 0 : _prev$dimensions$leng.value) === convertedZ && prev.dimensions.unit === unit) {
+        return prev;
+      }
+      return _objectSpread(_objectSpread({}, prev), {}, {
+        dimensions: _objectSpread(_objectSpread({}, prev.dimensions), {}, {
+          width: {
+            value: convertedX,
+            unit: unit
+          },
+          height: {
+            value: convertedY,
+            unit: unit
+          },
+          length: {
+            value: convertedZ,
+            unit: unit
+          }
+        })
+      });
+    };
+    var latestProductModel = setProductModel(productModel);
+    console.log({
+      latestProductModel: latestProductModel
+    });
+  };
+  showDimensions();
+};
 var setModelAttributes = function setModelAttributes(modelViewer, model_settings) {
   var _model_settings$shado;
   console.log({
     model_settings: model_settings
   });
-  modelViewer.setAttribute('src', model_settings.src || '');
-  modelViewer.setAttribute('ios-src', model_settings.ios_src || '');
-  modelViewer.setAttribute('alt', model_settings.alt || '');
-  modelViewer.setAttribute('poster', model_settings.poster || '');
-  modelViewer.setAttribute('ar-placement', model_settings.ar_placement || 'floor');
-  modelViewer.setAttribute('skybox-image', model_settings.skybox_image || '');
-  modelViewer.setAttribute('environment-image', model_settings.environment_image || '');
+  modelViewer.setAttribute("src", model_settings.src || "");
+  modelViewer.setAttribute("ios-src", model_settings.ios_src || "");
+  modelViewer.setAttribute("alt", model_settings.alt || "");
+  modelViewer.setAttribute("poster", model_settings.poster || "");
+  modelViewer.setAttribute("ar-placement", model_settings.ar_placement || "floor");
+  modelViewer.setAttribute("skybox-image", model_settings.skybox_image || "");
+  modelViewer.setAttribute("environment-image", model_settings.environment_image || "");
   if (model_settings.auto_rotate) {
-    modelViewer.setAttribute('auto-rotate', '');
+    modelViewer.setAttribute("auto-rotate", "");
   } else {
-    modelViewer.removeAttribute('auto-rotate');
+    modelViewer.removeAttribute("auto-rotate");
   }
-  modelViewer.setAttribute('shadow-intensity', (_model_settings$shado = model_settings.shadow_intensity) !== null && _model_settings$shado !== void 0 ? _model_settings$shado : '1');
+  modelViewer.setAttribute("shadow-intensity", (_model_settings$shado = model_settings.shadow_intensity) !== null && _model_settings$shado !== void 0 ? _model_settings$shado : "1");
   if (model_settings.camera_orbit) {
-    modelViewer.setAttribute('camera-orbit', model_settings.camera_orbit);
+    modelViewer.setAttribute("camera-orbit", model_settings.camera_orbit);
   } else {
-    modelViewer.removeAttribute('camera-orbit');
+    modelViewer.removeAttribute("camera-orbit");
   }
   if (model_settings.disable_zoom) {
-    modelViewer.setAttribute('disable-zoom', '');
+    modelViewer.setAttribute("disable-zoom", "");
   } else {
-    modelViewer.removeAttribute('disable-zoom');
+    modelViewer.removeAttribute("disable-zoom");
   }
   if (model_settings.disable_tap) {
-    modelViewer.setAttribute('disable-tap', '');
+    modelViewer.setAttribute("disable-tap", "");
   } else {
-    modelViewer.removeAttribute('disable-tap');
+    modelViewer.removeAttribute("disable-tap");
   }
 
   //    Here goes the Canvas Section:
   if (model_settings.canvas_alignment) {
-    if (model_settings.canvas_alignment == 'center') {
-      modelViewer.style.display = 'block';
-      modelViewer.style.margin = '0px auto';
-    } else if (model_settings.canvas_alignment == 'left') {
-      modelViewer.style.margin = '0 auto 0 0';
-    } else if (model_settings.canvas_alignment == 'right') {
-      modelViewer.style.margin = '0 0 0 auto';
+    if (model_settings.canvas_alignment == "center") {
+      modelViewer.style.display = "block";
+      modelViewer.style.margin = "0px auto";
+    } else if (model_settings.canvas_alignment == "left") {
+      modelViewer.style.margin = "0 auto 0 0";
+    } else if (model_settings.canvas_alignment == "right") {
+      modelViewer.style.margin = "0 0 0 auto";
       console.log(model_settings);
     }
   }
@@ -189,196 +355,202 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
   if (model_settings.canvas_padding) {
     modelViewer.style.padding = model_settings.canvas_padding;
   }
-  modelViewer.setAttribute('reveal', model_settings.ar_try_on_reveal_type || 'auto');
-  modelViewer.setAttribute('loading', model_settings.ar_try_on_loading_type || 'auto');
-  modelViewer.setAttribute('ar-modes', (model_settings.ar_try_on_ar_modes || []).join(' '));
-  var modelViewerStyle = document.getElementById('model-viewer-style');
+  modelViewer.setAttribute("reveal", model_settings.ar_try_on_reveal_type || "auto");
+  modelViewer.setAttribute("loading", model_settings.ar_try_on_loading_type || "auto");
+  modelViewer.setAttribute("ar-modes", (model_settings.ar_try_on_ar_modes || []).join(" "));
+  var modelViewerStyle = document.getElementById("model-viewer-style");
   if (modelViewerStyle) {
     modelViewerStyle.innerHTML = model_settings.custom_css;
   }
-  modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || 'rgba(255,255,255,0)';
-  var scale = model_settings.ar_try_on_ar_scale || 'auto'; // Default value if not defined
-  modelViewer.setAttribute('ar-scale', scale); // Use "auto" or "fixed" as needed
+  modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || "rgba(255,255,255,0)";
+  var scale = model_settings.ar_try_on_ar_scale || "auto"; // Default value if not defined
+  modelViewer.setAttribute("ar-scale", scale); // Use "auto" or "fixed" as needed
   if (model_settings.ar_try_on_ar === "deactivate") {
-    modelViewer.removeAttribute('ar');
+    modelViewer.removeAttribute("ar");
   }
   if (model_settings.ar_try_on_xr_environment === "deactivate") {
-    modelViewer.removeAttribute('xr-environment');
+    modelViewer.removeAttribute("xr-environment");
   }
   // TODO: add functionality for this.
   if (model_settings.ar_try_on_ar_button === "activate") {
-    modelViewer.innerHTML = "<button> ".concat(model_settings.ar_try_on_ar_button_text || 'Activate Ar', " </button>");
+    modelViewer.innerHTML = "<button> ".concat(model_settings.ar_try_on_ar_button_text || "Activate Ar", " </button>");
+  }
+  if (model_settings.dimensions.show) {
+    // Add hotspots & SVG lines - CRITICAL for dimensions
+    var hotspotHTML = "\n          <button slot=\"hotspot-dot+X-Y+Z\" class=\"dot\"></button>\n          <button slot=\"hotspot-dot+X-Y-Z\" class=\"dot\"></button>\n          <button slot=\"hotspot-dot+X+Y-Z\" class=\"dot\"></button>\n          <button slot=\"hotspot-dot-X+Y-Z\" class=\"dot\"></button>\n          <button slot=\"hotspot-dot-X-Y-Z\" class=\"dot\"></button>\n          <button slot=\"hotspot-dot-X-Y+Z\" class=\"dot\"></button>\n\n          <button slot=\"hotspot-dim+X-Y\" class=\"dim\"></button>\n          <button slot=\"hotspot-dim+X-Z\" class=\"dim\"></button>\n          <button slot=\"hotspot-dim+Y-Z\" class=\"dim\"></button>\n          <button slot=\"hotspot-dim-X-Z\" class=\"dim\"></button>\n          <button slot=\"hotspot-dim-X-Y\" class=\"dim\"></button>\n\n          <svg id=\"dimLines\" class=\"dimensionLineContainer\">\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n          </svg>\n        ";
+    modelViewer.insertAdjacentHTML("beforeend", hotspotHTML);
+    calculateDimension(model_settings, modelViewer);
   }
 };
 var getAPITypes = function getAPITypes() {
-  var api_type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'tripo3d';
+  var api_type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "tripo3d";
   var api_types = {
     tripo3d: {
-      id: 'tripo3d',
-      name: 'Tripo 3D',
-      url: 'https://api.tripo3d.ai/v2/openapi/task',
-      api_key_url: 'https://platform.tripo3d.ai/api-keys',
+      id: "tripo3d",
+      name: "Tripo 3D",
+      url: "https://api.tripo3d.ai/v2/openapi/task",
+      api_key_url: "https://platform.tripo3d.ai/api-keys",
       headers: [{
-        key: 'Authorization',
-        value: ''
+        key: "Authorization",
+        value: ""
       }, {
-        key: 'Content-Type',
-        value: 'application/json'
+        key: "Content-Type",
+        value: "application/json"
       }],
       body: {
         supported_types: {
           text_to_model: {
             input: [{
-              key: 'prompt',
-              type: 'textarea',
-              value: ''
+              key: "prompt",
+              type: "textarea",
+              value: ""
             }, {
-              key: 'type',
-              type: 'text',
-              value: 'text_to_model'
+              key: "type",
+              type: "text",
+              value: "text_to_model"
             }, {
-              key: 'model_version',
-              type: 'text',
-              value: 'v2.5-20250123'
+              key: "model_version",
+              type: "text",
+              value: "v2.5-20250123"
             }, {
-              key: 'texture',
-              type: 'boolean',
+              key: "texture",
+              type: "boolean",
               value: true
             }, {
-              key: 'pbr',
-              type: 'boolean',
+              key: "pbr",
+              type: "boolean",
               value: true
             }, {
-              key: 'texture_alignment',
-              type: 'text',
-              value: 'geometry'
+              key: "texture_alignment",
+              type: "text",
+              value: "geometry"
             }, {
-              key: 'geometry_quality',
-              type: 'text',
-              value: 'original'
+              key: "geometry_quality",
+              type: "text",
+              value: "original"
             }],
-            doc: 'https://platform.tripo3d.ai/docs/generation#text-to-model'
+            doc: "https://platform.tripo3d.ai/docs/generation#text-to-model"
           },
           image_to_model: {
             input: [{
-              key: 'type',
-              type: 'text',
-              value: 'image_to_model'
+              key: "type",
+              type: "text",
+              value: "image_to_model"
             }, {
-              key: 'file.type',
-              type: 'text',
-              value: 'png'
+              key: "file.type",
+              type: "text",
+              value: "png"
             }, {
-              key: 'file.file_token',
-              type: 'file',
-              value: ''
+              key: "file.file_token",
+              type: "file",
+              value: ""
             }, {
-              key: 'file.object',
-              type: 'text',
-              value: ''
+              key: "file.object",
+              type: "text",
+              value: ""
             }, {
-              key: 'file.url',
-              type: 'url',
-              value: ''
+              key: "file.url",
+              type: "url",
+              value: ""
             }, {
-              key: 'model_version',
-              type: 'text',
-              value: 'v2.5-20250123'
+              key: "model_version",
+              type: "text",
+              value: "v2.5-20250123"
             }, {
-              key: 'texture',
-              type: 'boolean',
+              key: "texture",
+              type: "boolean",
               value: true
             }, {
-              key: 'pbr',
-              type: 'boolean',
+              key: "pbr",
+              type: "boolean",
               value: true
             }, {
-              key: 'texture_alignment',
-              type: 'text',
-              value: 'original_image'
+              key: "texture_alignment",
+              type: "text",
+              value: "original_image"
             }],
-            doc: 'https://platform.tripo3d.ai/docs/generation#image-to-model'
+            doc: "https://platform.tripo3d.ai/docs/generation#image-to-model"
           }
         }
       }
     },
     meshy_ai: {
-      id: 'meshy_ai',
-      name: 'Meshy AI 3D',
-      url: 'https://api.meshy.ai/openapi/v2/text-to-3d',
-      api_key_url: 'https://www.meshy.ai/settings/api',
+      id: "meshy_ai",
+      name: "Meshy AI 3D",
+      url: "https://api.meshy.ai/openapi/v2/text-to-3d",
+      api_key_url: "https://www.meshy.ai/settings/api",
       headers: [{
-        key: 'Authorization',
-        value: ''
+        key: "Authorization",
+        value: ""
       }, {
-        key: 'Content-Type',
-        value: 'application/json'
+        key: "Content-Type",
+        value: "application/json"
       }],
       body: {
         supported_types: {
           text_to_model: {
             input: [{
-              key: 'prompt',
-              type: 'textarea',
-              value: '',
+              key: "prompt",
+              type: "textarea",
+              value: "",
               required: true
             }, {
-              key: 'mode',
-              type: 'text',
-              value: 'preview',
+              key: "mode",
+              type: "text",
+              value: "preview",
               required: true
             }, {
-              key: 'negative_prompt',
-              type: 'textarea',
-              value: '',
+              key: "negative_prompt",
+              type: "textarea",
+              value: "",
               required: false
             }, {
-              key: 'art_style',
-              type: 'text',
-              value: 'realistic',
+              key: "art_style",
+              type: "text",
+              value: "realistic",
               required: false
             }, {
-              key: 'should_remesh',
-              type: 'boolean',
+              key: "should_remesh",
+              type: "boolean",
               value: true,
               required: false
             }],
-            doc: 'https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request'
+            doc: "https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request"
           },
           image_to_model: {
             input: [{
-              key: 'image_url',
-              type: 'file',
-              value: '',
+              key: "image_url",
+              type: "file",
+              value: "",
               required: true
             }, {
-              key: 'should_texture',
-              type: 'boolean',
+              key: "should_texture",
+              type: "boolean",
               value: true,
               required: false
             }, {
-              key: 'should_remesh',
-              type: 'boolean',
+              key: "should_remesh",
+              type: "boolean",
               value: true,
               required: false
             }, {
-              key: 'enable_pbr',
-              type: 'boolean',
+              key: "enable_pbr",
+              type: "boolean",
               value: false,
               required: false
             }, {
-              key: 'ai_model',
-              type: 'text',
-              value: 'meshy-5',
+              key: "ai_model",
+              type: "text",
+              value: "meshy-5",
               required: false
             }],
-            doc: 'https://docs.meshy.ai/en/api/image-to-3d#create-an-image-to-3d-task'
+            doc: "https://docs.meshy.ai/en/api/image-to-3d#create-an-image-to-3d-task"
           }
         }
       }
     }
   };
-  if (api_type === 'all') {
+  if (api_type === "all") {
     return api_types;
   }
   return api_types[api_type];
@@ -430,49 +602,49 @@ var _isDifferent = function isDifferent(obj1, obj2) {
 };
 
 var createModal = function createModal() {
-  var title = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Modal Title';
-  var bodyContent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'Modal body content...';
+  var title = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "Modal Title";
+  var bodyContent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "Modal body content...";
   // Create overlay
-  var overlay = document.createElement('div');
+  var overlay = document.createElement("div");
   overlay.className = "art-fixed art-inset-0 art-bg-black/50 art-flex art-items-center art-justify-center art-z-50";
 
   // Create modal container
-  var modal = document.createElement('div');
+  var modal = document.createElement("div");
   modal.className = "art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg art-flex art-flex-col art-relative";
 
   // --- Header ---
-  var header = document.createElement('div');
+  var header = document.createElement("div");
   header.className = "art-flex art-items-center art-justify-between art-p-4 art-border-b art-border-gray-200";
 
   // Title
-  var titleEl = document.createElement('h2');
+  var titleEl = document.createElement("h2");
   titleEl.className = "art-text-lg art-font-semibold";
   titleEl.textContent = title;
 
   // Header buttons container
-  var headerButtons = document.createElement('div');
+  var headerButtons = document.createElement("div");
   headerButtons.className = "art-flex art-gap-2";
 
   // Expand button (SVG)
-  var expandBtn = document.createElement('button');
+  var expandBtn = document.createElement("button");
   expandBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
   expandBtn.innerHTML = "\n    <svg class=\"art-w-5 art-h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\">\n      <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 4h6v6H4V4zM14 14h6v6h-6v-6zM4 14h6v6H4v-6zM14 4h6v6h-6V4z\"/>\n    </svg>";
   console.log(expandBtn);
-  expandBtn.addEventListener('click', function () {
-    modal.classList.toggle('art-fixed');
-    modal.classList.toggle('art-inset-0');
-    modal.classList.toggle('art-w-full');
-    modal.classList.toggle('art-h-full');
-    modal.classList.toggle('art-max-w-none');
-    modal.classList.toggle('art-rounded-none');
+  expandBtn.addEventListener("click", function () {
+    modal.classList.toggle("art-fixed");
+    modal.classList.toggle("art-inset-0");
+    modal.classList.toggle("art-w-full");
+    modal.classList.toggle("art-h-full");
+    modal.classList.toggle("art-max-w-none");
+    modal.classList.toggle("art-rounded-none");
     console.log(modal);
   });
 
   // Close button (SVG)
-  var closeBtn = document.createElement('button');
+  var closeBtn = document.createElement("button");
   closeBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
   closeBtn.innerHTML = "\n    <svg class=\"art-w-5 art-h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\">\n      <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"/>\n    </svg>";
-  closeBtn.addEventListener('click', function () {
+  closeBtn.addEventListener("click", function () {
     return document.body.removeChild(overlay);
   });
   headerButtons.appendChild(expandBtn);
@@ -481,18 +653,18 @@ var createModal = function createModal() {
   header.appendChild(headerButtons);
 
   // --- Body ---
-  var body = document.createElement('div');
+  var body = document.createElement("div");
   body.className = "art-p-4 art-flex-1 art-overflow-y-auto";
   console.log(bodyContent);
   body.innerHTML = bodyContent;
 
   // --- Footer ---
-  var footer = document.createElement('div');
+  var footer = document.createElement("div");
   footer.className = "art-flex art-justify-end art-p-4 art-border-t art-border-gray-200";
-  var footerCloseBtn = document.createElement('button');
+  var footerCloseBtn = document.createElement("button");
   footerCloseBtn.className = "art-bg-gray-200 art-hover-bg-gray-300 art-text-gray-700 art-px-4 art-py-2 art-rounded";
   footerCloseBtn.textContent = "Close";
-  footerCloseBtn.addEventListener('click', function () {
+  footerCloseBtn.addEventListener("click", function () {
     return document.body.removeChild(overlay);
   });
   footer.appendChild(footerCloseBtn);

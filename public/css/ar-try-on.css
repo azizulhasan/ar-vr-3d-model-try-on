@@ -187,6 +187,10 @@
   height: 10vh
 }
 
+.art-h-\[500px\] {
+  height: 500px
+}
+
 .art-h-full {
   height: 100%
 }
@@ -554,6 +558,11 @@
   background-color: rgb(209 213 219 / var(--tw-bg-opacity, 1))
 }
 
+.art-bg-gray-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
+}
+
 .art-bg-gray-800 {
   --tw-bg-opacity: 1;
   background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
@@ -749,6 +758,16 @@
 .art-text-gray-800 {
   --tw-text-opacity: 1;
   color: rgb(31 41 55 / var(--tw-text-opacity, 1))
+}
+
+.art-text-slate-600 {
+  --tw-text-opacity: 1;
+  color: rgb(71 85 105 / var(--tw-text-opacity, 1))
+}
+
+.art-text-slate-800 {
+  --tw-text-opacity: 1;
+  color: rgb(30 41 59 / var(--tw-text-opacity, 1))
 }
 
 .art-text-white {
