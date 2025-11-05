@@ -3,9 +3,16 @@
     bottom: 16px;
     left: 16px;
     z-index: 100;
+}
+
+#controls {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
     max-width: unset;
     transform: unset;
     pointer-events: auto;
+    z-index: 100;
 }
 
 .dot {
