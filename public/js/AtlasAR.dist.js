@@ -352,6 +352,65 @@ function displayDimensions(modelViewer, model_settings) {
 
   console.log(model_settings.dimensions.show);
   var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll('button')), [modelViewer.querySelector('#dimLines')]);
+  function calculateDimensions(modelViewer, model_settings) {
+    var _model_settings$dimen;
+    var unit = ((_model_settings$dimen = model_settings.dimensions) === null || _model_settings$dimen === void 0 ? void 0 : _model_settings$dimen.unit) || "cm"; // Default: cm
+    var conversion = {
+      cm: function cm(v) {
+        return v * 100;
+      },
+      m: function m(v) {
+        return v;
+      },
+      inch: function inch(v) {
+        return v * 39.3701;
+      }
+    };
+    var unitLabel = {
+      cm: "cm",
+      m: "m",
+      inch: "in"
+    };
+    function formatValue(value) {
+      var converted = conversion[unit](value);
+      return "".concat(converted.toFixed(1), " ").concat(unitLabel[unit]);
+    }
+
+    // Update when model is fully loaded
+    var updateDimensions = function updateDimensions() {
+      var center = modelViewer.getBoundingBoxCenter();
+      var size = modelViewer.getDimensions();
+      if (!center || !size) return;
+      var x2 = size.x / 2;
+      var y2 = size.y / 2;
+      var z2 = size.z / 2;
+      var updateHotspot = function updateHotspot(name, position, labelVal) {
+        modelViewer.updateHotspot({
+          name: name,
+          position: position
+        });
+        var btn = modelViewer.querySelector("button[slot=\"".concat(name, "\"]"));
+        if (btn && labelVal) btn.textContent = labelVal;
+      };
+
+      // === Update all corners and labels dynamically ===
+      updateHotspot("hotspot-dot+X-Y+Z", "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z + z2));
+      updateHotspot("hotspot-dim+X-Y", "".concat(center.x + x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z), formatValue(size.z));
+      updateHotspot("hotspot-dot+X-Y-Z", "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z - z2));
+      updateHotspot("hotspot-dim+X-Z", "".concat(center.x + x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2), formatValue(size.y));
+      updateHotspot("hotspot-dot+X+Y-Z", "".concat(center.x + x2, " ").concat(center.y + y2, " ").concat(center.z - z2));
+      updateHotspot("hotspot-dim+Y-Z", "".concat(center.x, " ").concat(center.y + y2 * 1.1, " ").concat(center.z - z2 * 1.1), formatValue(size.x));
+      updateHotspot("hotspot-dot-X+Y-Z", "".concat(center.x - x2, " ").concat(center.y + y2, " ").concat(center.z - z2));
+      updateHotspot("hotspot-dim-X-Z", "".concat(center.x - x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2), formatValue(size.y));
+      updateHotspot("hotspot-dot-X-Y-Z", "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z - z2));
+      updateHotspot("hotspot-dim-X-Y", "".concat(center.x - x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z), formatValue(size.z));
+      updateHotspot("hotspot-dot-X-Y+Z", "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z + z2));
+      console.log("Model Dimensions \u2192 X: ".concat(formatValue(size.x), ", Y: ").concat(formatValue(size.y), ", Z: ").concat(formatValue(size.z)));
+    };
+
+    // Run once on load
+    modelViewer.addEventListener("load", updateDimensions);
+  }
   function setVisibility(visible) {
     dimElements.forEach(function (element) {
       // console.log(element)
@@ -367,6 +426,7 @@ function displayDimensions(modelViewer, model_settings) {
   // const checkbox = modelViewer.querySelector('#show-dimensions');
 
   setVisibility(model_settings.dimensions.show);
+  calculateDimensions(modelViewer, model_settings);
   modelViewer.addEventListener('ar-status', function (event) {
     setVisibility(model_settings.dimensions.show && event.detail.status !== 'session-started');
   });
@@ -391,64 +451,72 @@ function displayDimensions(modelViewer, model_settings) {
     drawLine(dimLines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
     drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
   };
-  modelViewer.addEventListener('load', function () {
-    var center = modelViewer.getBoundingBoxCenter();
-    var size = modelViewer.getDimensions();
-    var x2 = size.x / 2;
-    var y2 = size.y / 2;
-    var z2 = size.z / 2;
-    modelViewer.updateHotspot({
-      name: 'hotspot-dot+X-Y+Z',
-      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
-    });
-    modelViewer.updateHotspot({
-      name: 'hotspot-dim+X-Y',
-      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
-    });
-    modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = "".concat((size.z * 100).toFixed(0), " cm");
-    modelViewer.updateHotspot({
-      name: 'hotspot-dot+X-Y-Z',
-      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: 'hotspot-dim+X-Z',
-      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
-    });
-    modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = "".concat((size.y * 100).toFixed(0), " cm");
-    modelViewer.updateHotspot({
-      name: 'hotspot-dot+X+Y-Z',
-      position: "".concat(center.x + x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: 'hotspot-dim+Y-Z',
-      position: "".concat(center.x, " ").concat(center.y + y2 * 1.1, " ").concat(center.z - z2 * 1.1)
-    });
-    modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = "".concat((size.x * 100).toFixed(0), " cm");
-    modelViewer.updateHotspot({
-      name: 'hotspot-dot-X+Y-Z',
-      position: "".concat(center.x - x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: 'hotspot-dim-X-Z',
-      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
-    });
-    modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = "".concat((size.y * 100).toFixed(0), " cm");
-    modelViewer.updateHotspot({
-      name: 'hotspot-dot-X-Y-Z',
-      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: 'hotspot-dim-X-Y',
-      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
-    });
-    modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = "".concat((size.z * 100).toFixed(0), " cm");
-    modelViewer.updateHotspot({
-      name: 'hotspot-dot-X-Y+Z',
-      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
-    });
-    renderSVG();
-    modelViewer.addEventListener('camera-change', renderSVG);
-  });
+
+  // modelViewer.addEventListener('load', () => {
+  //     const center = modelViewer.getBoundingBoxCenter();
+  //     const size = modelViewer.getDimensions();
+  //     const x2 = size.x / 2;
+  //     const y2 = size.y / 2;
+  //     const z2 = size.z / 2;
+
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dot+X-Y+Z',
+  //         position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`
+  //     });
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dim+X-Y',
+  //         position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
+  //     });
+  //     modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = `${(size.z * 100).toFixed(0)} cm`;
+
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dot+X-Y-Z',
+  //         position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`
+  //     });
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dim+X-Z',
+  //         position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
+  //     });
+  //     modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = `${(size.y * 100).toFixed(0)} cm`;
+
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dot+X+Y-Z',
+  //         position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`
+  //     });
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dim+Y-Z',
+  //         position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`
+  //     });
+  //     modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = `${(size.x * 100).toFixed(0)} cm`;
+
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dot-X+Y-Z',
+  //         position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`
+  //     });
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dim-X-Z',
+  //         position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
+  //     });
+  //     modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = `${(size.y * 100).toFixed(0)} cm`;
+
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dot-X-Y-Z',
+  //         position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`
+  //     });
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dim-X-Y',
+  //         position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
+  //     });
+  //     modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = `${(size.z * 100).toFixed(0)} cm`;
+
+  //     modelViewer.updateHotspot({
+  //         name: 'hotspot-dot-X-Y+Z',
+  //         position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
+  //     });
+
+  //     renderSVG();
+  //     modelViewer.addEventListener('camera-change', renderSVG);
+  // });
 }
 var isDimensionHTMLAdded = false;
 var setModelAttributes = function setModelAttributes(modelViewer, model_settings) {
@@ -539,6 +607,7 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
   }
 
   // calculateDimension(model_settings, modelViewer);
+  // calculateDimensions(modelViewer, model_settings);
   displayDimensions(modelViewer, model_settings);
 };
 var getAPITypes = function getAPITypes() {

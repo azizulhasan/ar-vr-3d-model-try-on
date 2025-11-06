@@ -478,6 +478,7 @@ const ARProductModelSettings = () => {
                   toggleDimensions={toggleDimensions}
                   handleChange={handleChange}
                   isProductModelLoaded={isProductModelLoaded}
+                 
                 />
               </div>
             )}
