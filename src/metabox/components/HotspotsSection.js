@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
+
 import "../../icons/hotspots.css";
 
 const HotspotsSection = ({
@@ -8,196 +9,98 @@ const HotspotsSection = ({
   activeAccordion,
   toggleAccordion,
 }) => {
-  // ---------- Render Hotspots into <model-viewer> ----------
+  // ---------- Render Hotspots on Model ----------
   const renderHotspots = useCallback(() => {
     const modelViewer = document.querySelector(".atlas_ar_model_viewer");
     if (!modelViewer) return;
 
-    // Remove existing
+    // Clear old hotspots (but keep dimension hotspots)
     modelViewer.querySelectorAll(".hotspot").forEach((h) => h.remove());
 
-    // Append current hotspots
-    (productModel.hotspots || []).forEach((hotspot) => {
-      const button = document.createElement("button");
-      button.className = "hotspot";
-      if (hotspot.slot) button.setAttribute("slot", hotspot.slot);
-      if (hotspot.dataPosition) button.setAttribute("data-position", hotspot.dataPosition);
-      if (hotspot.dataNormal) button.setAttribute("data-normal", hotspot.dataNormal);
-      if (hotspot.dataVisibilityAttribute) {
-        button.setAttribute("data-visibility-attribute", hotspot.dataVisibilityAttribute);
-      }
-      if (hotspot.annotation) {
-        const div = document.createElement("div");
-        div.className = "annotation";
-        div.innerText = hotspot.annotation;
-        button.appendChild(div);
-      }
-      modelViewer.appendChild(button);
+    (productModel.hotspots || []).forEach((hotspot, index) => {
+      const btn = document.createElement("button");
+      btn.className = "hotspot";
+      btn.slot = `hotspot-${index}`;
+      btn.dataset.position = hotspot.position || "0 0 0";
+      btn.dataset.normal = hotspot.normal || "0 0 1";
+      btn.title = hotspot.label;
+
+      const label = document.createElement("div");
+      label.className = "annotation";
+      label.textContent = hotspot.label;
+      btn.appendChild(label);
+
+      modelViewer.appendChild(btn);
     });
   }, [productModel.hotspots]);
 
-  // Re-render hotspots whenever hotspots change
   useEffect(() => {
     renderHotspots();
-  }, [productModel.hotspots, renderHotspots]);
+  }, [renderHotspots]);
 
-  // ---------- Utilities ----------
-  const safeAddHotspot = (hotspotObj) => {
-    setProductModel((prev) => {
-      const prevHotspots = Array.isArray(prev.hotspots) ? prev.hotspots : [];
-      return { ...prev, hotspots: [...prevHotspots, hotspotObj] };
-    });
+  // ---------- Helpers ----------
+  const updateHotspots = (newList) => {
+    setProductModel((prev) => ({ ...prev, hotspots: newList }));
   };
 
-  // Try to call positionAndNormalFromPoint using different param spaces
-  const pickPositionAndNormal = (modelViewer, clientX, clientY, pageX, pageY) => {
-    try {
-      // preferred: element-local coordinates
-      const rect = modelViewer.getBoundingClientRect();
-      const localX = clientX - rect.left;
-      const localY = clientY - rect.top;
-      if (typeof modelViewer.positionAndNormalFromPoint === "function") {
-        const hitLocal = modelViewer.positionAndNormalFromPoint(localX, localY);
-        if (hitLocal) return hitLocal;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    try {
-      // sometimes model-viewer expects page coords — try both
-      if (typeof modelViewer.positionAndNormalFromPoint === "function") {
-        const tryClient = modelViewer.positionAndNormalFromPoint(clientX, clientY);
-        if (tryClient) return tryClient;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    try {
-      if (typeof modelViewer.positionAndNormalFromPoint === "function") {
-        const tryPage = modelViewer.positionAndNormalFromPoint(pageX, pageY);
-        if (tryPage) return tryPage;
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    return null;
-  };
-
-  // ---------- Click / pointer handler (robust) ----------
-  useEffect(() => {
-    let mv = document.querySelector(".atlas_ar_model_viewer");
-    if (!mv) {
-      // if not present yet, keep an interval to wait for it
-      const waitInterval = setInterval(() => {
-        mv = document.querySelector(".atlas_ar_model_viewer");
-        if (mv) {
-          clearInterval(waitInterval);
-          // render and attach listeners below by re-running effect (we don't re-run automatically here,
-          // so manually call initialization)
-          renderHotspots();
-        }
-      }, 400);
-      return () => clearInterval(waitInterval);
-    }
-
-    // Ensure hotspots rendered on load/scene ready
-    const onLoad = () => {
-      console.debug("[Hotspots] model-viewer 'load' fired — rendering hotspots");
-      renderHotspots();
+  const addHotspot = (pos, norm) => {
+    const nextId = (productModel.hotspots?.length || 0) + 1;
+    const newHotspot = {
+      id: nextId,
+      label: `Hotspot ${nextId}`,
+      position: pos,
+      normal: norm,
     };
-    const onSceneReady = () => {
-      console.debug("[Hotspots] model-viewer 'scene-graph-ready' fired — rendering hotspots");
-      renderHotspots();
-    };
-
-    mv.addEventListener("load", onLoad);
-    mv.addEventListener("scene-graph-ready", onSceneReady);
-
-    // Pointerdown on document (capture) to ensure we catch clicks even if shadow DOM/overlay present
-    const onPointerDown = (ev) => {
-      // Only react to primary button
-      if (ev.button && ev.button !== 0) return;
-
-      // Use composedPath to detect model-viewer in path (works through shadow DOM)
-      const path = ev.composedPath ? ev.composedPath() : (ev.path || []);
-      const clickedModelViewer = path.find((el) => {
-        return el && el.tagName && el.tagName.toLowerCase() === "model-viewer";
-      });
-
-      if (!clickedModelViewer && !(ev.target && ev.target.closest && ev.target.closest("model-viewer"))) {
-        // click wasn't on any model-viewer
-        return;
-      }
-
-      // identify the model-viewer element we should query against
-      const targetMV = clickedModelViewer || document.querySelector(".atlas_ar_model_viewer");
-      if (!targetMV) return;
-
-      // ensure method present
-      if (typeof targetMV.positionAndNormalFromPoint !== "function") {
-        console.warn("[Hotspots] positionAndNormalFromPoint not available yet on this model-viewer.");
-        return;
-      }
-
-      // compute coordinates
-      const clientX = ev.clientX;
-      const clientY = ev.clientY;
-      const pageX = ev.pageX;
-      const pageY = ev.pageY;
-
-      const hit = pickPositionAndNormal(targetMV, clientX, clientY, pageX, pageY);
-      if (!hit) {
-        console.debug("[Hotspots] no hit from positionAndNormalFromPoint at", clientX, clientY);
-        return;
-      }
-
-      // got a hit -> add hotspot
-      const { position, normal } = hit;
-      const dataPosition = `${position.x.toFixed(4)} ${position.y.toFixed(4)} ${position.z.toFixed(4)}`;
-      const dataNormal = `${normal.x.toFixed(4)} ${normal.y.toFixed(4)} ${normal.z.toFixed(4)}`;
-
-      console.info("[Hotspots] adding hotspot at", dataPosition, "normal", dataNormal);
-
-      safeAddHotspot({
-        slot: `hotspot-${Date.now()}`,
-        dataPosition,
-        dataNormal,
-        annotation: "New hotspot",
-      });
-
-      // Prevent any further handling if desired:
-      // ev.stopPropagation();
-      // ev.preventDefault();
-    };
-
-    document.addEventListener("pointerdown", onPointerDown, { capture: true });
-
-    // cleanup
-    return () => {
-      mv.removeEventListener("load", onLoad);
-      mv.removeEventListener("scene-graph-ready", onSceneReady);
-      document.removeEventListener("pointerdown", onPointerDown, { capture: true });
-    };
-  }, [renderHotspots, setProductModel]);
-
-  // ---------- CRUD helpers ----------
-  const updateHotspotField = (index, field, value) => {
-    const updated = [...(productModel.hotspots || [])];
-    updated[index] = { ...updated[index], [field]: value };
-    setProductModel((prev) => ({ ...prev, hotspots: updated }));
+    updateHotspots([...(productModel.hotspots || []), newHotspot]);
   };
 
   const removeHotspot = (index) => {
-    setProductModel((prev) => ({
-      ...prev,
-      hotspots: (prev.hotspots || []).filter((_, i) => i !== index),
-    }));
+    const updated = productModel.hotspots.filter((_, i) => i !== index);
+    updateHotspots(updated);
   };
 
-  // ---------- JSX (accordion kept identical to your original) ----------
+  const updateHotspotLabel = (index, newLabel) => {
+    const updated = [...productModel.hotspots];
+    updated[index] = { ...updated[index], label: newLabel };
+    updateHotspots(updated);
+  };
+
+  // ---------- Click to Add Hotspot (ONLY when accordion is open) ----------
+  useEffect(() => {
+    const modelViewer = document.querySelector(".atlas_ar_model_viewer");
+    if (!modelViewer) return;
+
+    const handleClick = (event) => {
+      // CRITICAL: Only add hotspots when the accordion is open
+      if (!activeAccordion.hotspots) return;
+
+      // Get the hit position and normal from the model
+      const hit = modelViewer.positionAndNormalFromPoint?.(
+        event.clientX,
+        event.clientY
+      );
+
+      if (!hit) {
+        console.log("No hit detected on model");
+        return;
+      }
+
+      const pos = `${hit.position.x.toFixed(3)} ${hit.position.y.toFixed(
+        3
+      )} ${hit.position.z.toFixed(3)}`;
+      const norm = `${hit.normal.x.toFixed(3)} ${hit.normal.y.toFixed(
+        3
+      )} ${hit.normal.z.toFixed(3)}`;
+
+      console.log("Adding hotspot at:", pos, "with normal:", norm);
+      addHotspot(pos, norm);
+    };
+
+    modelViewer.addEventListener("click", handleClick);
+    return () => modelViewer.removeEventListener("click", handleClick);
+  }, [activeAccordion.hotspots, productModel.hotspots]); // Re-run when accordion state changes
+
+  // ---------- JSX ----------
   return (
     <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
       <button
@@ -205,7 +108,9 @@ const HotspotsSection = ({
         onClick={() => toggleAccordion("hotspots")}
         className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
       >
-        <span>Hotspots</span>
+        <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
+          Hotspots
+        </span>
         <AccordionIcon status={activeAccordion.hotspots} />
       </button>
 
@@ -216,60 +121,52 @@ const HotspotsSection = ({
               Manage Hotspots
             </h3>
             <p className="art-text-xs art-text-gray-500">
-              💡 Click directly on the 3D model preview to place hotspots.
+              💡 Click on the 3D model to place a hotspot.
             </p>
           </div>
 
           <div className="art-space-y-4">
             {(productModel.hotspots || []).length > 0 ? (
-              (productModel.hotspots || []).map((hotspot, index) => (
+              productModel.hotspots.map((hotspot, index) => (
                 <div
                   key={index}
                   className="art-border art-rounded art-p-3 art-bg-gray-50 art-relative art-shadow-sm"
                 >
                   <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-28">Slot Name:</label>
+                    <label className="art-text-sm art-w-20">Label:</label>
                     <input
                       type="text"
-                      className="art-border art-rounded art-px-2 art-py-1 art-w-full"
-                      value={hotspot.slot || ""}
-                      onChange={(e) => updateHotspotField(index, "slot", e.target.value)}
+                      className="art-border art-rounded art-px-2 art-py-1 art-w-1/2"
+                      value={hotspot.label}
+                      onChange={(e) =>
+                        updateHotspotLabel(index, e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {/* <div className="art-flex art-items-center art-gap-2 art-mb-2">
+                    <label className="art-text-sm art-w-20">Position:</label>
+                    <input
+                      type="text"
+                      readOnly
+                      className="art-border art-rounded art-px-2 art-py-1 art-w-1/2 art-bg-gray-100"
+                      value={hotspot.position}
                     />
                   </div>
 
                   <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-28">Data Position:</label>
+                    <label className="art-text-sm art-w-20">Normal:</label>
                     <input
                       type="text"
-                      className="art-border art-rounded art-px-2 art-py-1 art-w-full"
-                      value={hotspot.dataPosition || ""}
-                      onChange={(e) => updateHotspotField(index, "dataPosition", e.target.value)}
+                      readOnly
+                      className="art-border art-rounded art-px-2 art-py-1 art-w-1/2 art-bg-gray-100"
+                      value={hotspot.normal}
                     />
-                  </div>
-
-                  <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-28">Data Normal:</label>
-                    <input
-                      type="text"
-                      className="art-border art-rounded art-px-2 art-py-1 art-w-full"
-                      value={hotspot.dataNormal || ""}
-                      onChange={(e) => updateHotspotField(index, "dataNormal", e.target.value)}
-                    />
-                  </div>
-
-                  <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-28">Annotation:</label>
-                    <input
-                      type="text"
-                      className="art-border art-rounded art-px-2 art-py-1 art-w-full"
-                      value={hotspot.annotation || ""}
-                      onChange={(e) => updateHotspotField(index, "annotation", e.target.value)}
-                    />
-                  </div>
+                  </div> */}
 
                   <button
                     onClick={() => removeHotspot(index)}
-                    className="art-absolute art-top-2 art-right-2 art-text-red-500 hover:art-text-red-700"
+                    className="art-absolute art-top-2 art-right-2 art-text-red-500 hover:art-text-red-700 art-text-xl art-w-6 art-h-6 art-flex art-items-center art-justify-center"
                     title="Remove hotspot"
                   >
                     &times;
@@ -277,11 +174,11 @@ const HotspotsSection = ({
                 </div>
               ))
             ) : (
-              <p className="art-text-gray-500 art-italic">No hotspots yet. Click the model preview to add one.</p>
+              <p className="art-text-gray-500 art-italic">
+                No hotspots yet. Click the model to add one.
+              </p>
             )}
           </div>
-
-
         </div>
       )}
     </div>

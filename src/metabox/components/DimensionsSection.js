@@ -24,7 +24,7 @@ export const DimensionsSection = ({
   activeAccordion,
   toggleAccordion,
   handleChange,
-  isProductModelLoaded
+  isProductModelLoaded,
 }) => {
   const [showEditor] = useState(true);
 
@@ -34,7 +34,7 @@ export const DimensionsSection = ({
       svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
       svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
       svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
- 
+
       if (dimensionHotspot && !dimensionHotspot.facingCamera) {
         svgLine.classList.add("hide");
       } else {
@@ -42,33 +42,33 @@ export const DimensionsSection = ({
       }
     }
   };
- 
+
   const calculateDimension = useCallback(() => {
     const modelViewer = document.querySelectorAll(".atlas_ar_model_viewer")[0];
- 
+
     if (!modelViewer) return;
- 
+
     const dimElements = [
       ...modelViewer.querySelectorAll("button"),
       modelViewer.querySelector("#dimLines"),
     ];
- 
+
     // Show/hide dimensions
     function setVisibility(visible) {
       dimElements.forEach((element) => {
         element.classList.toggle("hide", !visible);
       });
     }
- 
+
     setVisibility(productModel.dimensions.show);
- 
+
     // Handle AR session toggling visibility
     modelViewer.addEventListener("ar-status", () => {
       setVisibility(productModel.dimensions.show);
     });
- 
+
     const dimLines = modelViewer.querySelectorAll("line");
- 
+
     /* Render/update SVG lines. */
     const renderSVG = () => {
       drawLine(
@@ -101,23 +101,23 @@ export const DimensionsSection = ({
         modelViewer.queryHotspot("hotspot-dim-X-Y")
       );
     };
- 
+
     // Initial hotspot placement & labels
     const showDimensions = () => {
       const center = modelViewer.getBoundingBoxCenter();
       const size = modelViewer.getDimensions();
- 
+
       const x2 = size.x / 2;
       const y2 = size.y / 2;
       const z2 = size.z / 2;
- 
+
       const unit = productModel.dimensions.unit || "cm";
       const decimals = unit === "m" ? 2 : 0;
- 
+
       const convertedX = convertLength(size.x, unit);
       const convertedY = convertLength(size.y, unit);
       const convertedZ = convertLength(size.z, unit);
- 
+
       // Position hotspots + update labels
       modelViewer.updateHotspot({
         name: "hotspot-dot+X-Y+Z",
@@ -130,7 +130,7 @@ export const DimensionsSection = ({
       modelViewer.querySelector(
         'button[slot="hotspot-dim+X-Y"]'
       ).textContent = `${convertedZ.toFixed(decimals)} ${unit}`;
- 
+
       modelViewer.updateHotspot({
         name: "hotspot-dot+X-Y-Z",
         position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`,
@@ -142,7 +142,7 @@ export const DimensionsSection = ({
       modelViewer.querySelector(
         'button[slot="hotspot-dim+X-Z"]'
       ).textContent = `${convertedY.toFixed(decimals)} ${unit}`;
- 
+
       modelViewer.updateHotspot({
         name: "hotspot-dot+X+Y-Z",
         position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`,
@@ -154,7 +154,7 @@ export const DimensionsSection = ({
       modelViewer.querySelector(
         'button[slot="hotspot-dim+Y-Z"]'
       ).textContent = `${convertedX.toFixed(decimals)} ${unit}`;
- 
+
       modelViewer.updateHotspot({
         name: "hotspot-dot-X+Y-Z",
         position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`,
@@ -166,7 +166,7 @@ export const DimensionsSection = ({
       modelViewer.querySelector(
         'button[slot="hotspot-dim-X-Z"]'
       ).textContent = `${convertedY.toFixed(decimals)} ${unit}`;
- 
+
       modelViewer.updateHotspot({
         name: "hotspot-dot-X-Y-Z",
         position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`,
@@ -178,16 +178,16 @@ export const DimensionsSection = ({
       modelViewer.querySelector(
         'button[slot="hotspot-dim-X-Y"]'
       ).textContent = `${convertedZ.toFixed(decimals)} ${unit}`;
- 
+
       modelViewer.updateHotspot({
         name: "hotspot-dot-X-Y+Z",
         position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`,
       });
- 
+
       // Keep SVG in sync
       renderSVG();
       modelViewer.addEventListener("camera-change", renderSVG);
- 
+
       // Update React state with dimensions
       setProductModel((prev) => {
         if (
@@ -198,7 +198,7 @@ export const DimensionsSection = ({
         ) {
           return prev;
         }
- 
+
         return {
           ...prev,
           dimensions: {
@@ -210,14 +210,14 @@ export const DimensionsSection = ({
         };
       });
     };
- 
+
     showDimensions();
   }, [
     productModel.dimensions.show,
     productModel.dimensions.unit,
     setProductModel,
   ]);
- 
+
   useEffect(() => {
     const interval = setInterval(() => {
       const mv = document.querySelectorAll(".atlas_ar_model_viewer")[0];
@@ -225,85 +225,83 @@ export const DimensionsSection = ({
         clearInterval(interval);
         mv.addEventListener("load", calculateDimension);
         mv.addEventListener("camera-change", calculateDimension);
- 
+
         if (productModel.dimensions.show) calculateDimension();
       }
     }, 500);
- 
+
     return () => clearInterval(interval);
   }, [calculateDimension, productModel.dimensions.show]);
- 
-    useEffect(() => {
-      const modelviewer = document.getElementById("atlas_ar_model_viewer");
-      if (!modelviewer) return;
- 
-      modelviewer.addEventListener("load", calculateDimension);
-      modelviewer.addEventListener("camera-change", calculateDimension);
- 
-      if (productModel.dimensions.show) {
-        calculateDimension();
-      }
- 
-      return () => {
-        modelviewer.removeEventListener("load", calculateDimension);
-        modelviewer.removeEventListener("camera-change", calculateDimension);
-      };
-    }, [calculateDimension, productModel.dimensions.show]);
- 
- 
-//  useEffect(() => {
-//     if (isProductModelLoaded) {
-//       const previewContainer = document.getElementById("atlas_ar_preview");
-//       if (!previewContainer) return;
- 
-//       const mv = document.querySelectorAll(".atlas_ar_model_viewer")[0];
- 
-//       // Only create if it doesn't exist
-//       if (mv) {
-//         // Add hotspots & SVG lines - CRITICAL for dimensions
-//         let hotspotHTML = `
-//           <button slot="hotspot-dot+X-Y+Z" class="dot"></button>
-//           <button slot="hotspot-dot+X-Y-Z" class="dot"></button>
-//           <button slot="hotspot-dot+X+Y-Z" class="dot"></button>
-//           <button slot="hotspot-dot-X+Y-Z" class="dot"></button>
-//           <button slot="hotspot-dot-X-Y-Z" class="dot"></button>
-//           <button slot="hotspot-dot-X-Y+Z" class="dot"></button>
- 
-//           <button slot="hotspot-dim+X-Y" class="dim"></button>
-//           <button slot="hotspot-dim+X-Z" class="dim"></button>
-//           <button slot="hotspot-dim+Y-Z" class="dim"></button>
-//           <button slot="hotspot-dim-X-Z" class="dim"></button>
-//           <button slot="hotspot-dim-X-Y" class="dim"></button>
- 
-//           <svg id="dimLines" class="dimensionLineContainer">
-//             <line class="dimensionLine"></line>
-//             <line class="dimensionLine"></line>
-//             <line class="dimensionLine"></line>
-//             <line class="dimensionLine"></line>
-//             <line class="dimensionLine"></line>
-//           </svg>
-//         `;
- 
-//         mv.insertAdjacentHTML("beforeend",hotspotHTML);
-//       }
-//     }
-//   }, [isProductModelLoaded, productModel.src, productModel.ios_src, productModel.poster, productModel.alt, productModel.auto_rotate, productModel.shadow_intensity, productModel.disable_zoom]);
- 
 
+  useEffect(() => {
+    const modelviewer = document.getElementById("atlas_ar_model_viewer");
+    if (!modelviewer) return;
+
+    modelviewer.addEventListener("load", calculateDimension);
+    modelviewer.addEventListener("camera-change", calculateDimension);
+
+    if (productModel.dimensions.show) {
+      calculateDimension();
+    }
+
+    return () => {
+      modelviewer.removeEventListener("load", calculateDimension);
+      modelviewer.removeEventListener("camera-change", calculateDimension);
+    };
+  }, [calculateDimension, productModel.dimensions.show]);
+
+  //  useEffect(() => {
+  //     if (isProductModelLoaded) {
+  //       const previewContainer = document.getElementById("atlas_ar_preview");
+  //       if (!previewContainer) return;
+
+  //       const mv = document.querySelectorAll(".atlas_ar_model_viewer")[0];
+
+  //       // Only create if it doesn't exist
+  //       if (mv) {
+  //         // Add hotspots & SVG lines - CRITICAL for dimensions
+  //         let hotspotHTML = `
+  //           <button slot="hotspot-dot+X-Y+Z" class="dot"></button>
+  //           <button slot="hotspot-dot+X-Y-Z" class="dot"></button>
+  //           <button slot="hotspot-dot+X+Y-Z" class="dot"></button>
+  //           <button slot="hotspot-dot-X+Y-Z" class="dot"></button>
+  //           <button slot="hotspot-dot-X-Y-Z" class="dot"></button>
+  //           <button slot="hotspot-dot-X-Y+Z" class="dot"></button>
+
+  //           <button slot="hotspot-dim+X-Y" class="dim"></button>
+  //           <button slot="hotspot-dim+X-Z" class="dim"></button>
+  //           <button slot="hotspot-dim+Y-Z" class="dim"></button>
+  //           <button slot="hotspot-dim-X-Z" class="dim"></button>
+  //           <button slot="hotspot-dim-X-Y" class="dim"></button>
+
+  //           <svg id="dimLines" class="dimensionLineContainer">
+  //             <line class="dimensionLine"></line>
+  //             <line class="dimensionLine"></line>
+  //             <line class="dimensionLine"></line>
+  //             <line class="dimensionLine"></line>
+  //             <line class="dimensionLine"></line>
+  //           </svg>
+  //         `;
+
+  //         mv.insertAdjacentHTML("beforeend",hotspotHTML);
+  //       }
+  //     }
+  //   }, [isProductModelLoaded, productModel.src, productModel.ios_src, productModel.poster, productModel.alt, productModel.auto_rotate, productModel.shadow_intensity, productModel.disable_zoom]);
 
   const handleUnitChange = (e) => {
     onUpdateDimension("unit", e.target.value);
   };
 
   return (
-    
     <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
       <button
         type="button"
         onClick={() => toggleAccordion("dimensions")}
         className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
       >
-        <span>Dimensions</span>
+        <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
+          Dimensions
+        </span>
         <AccordionIcon status={activeAccordion.dimensions} />
       </button>
 

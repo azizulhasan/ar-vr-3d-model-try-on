@@ -17,6 +17,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getURL: () => (/* binding */ getURL),
 /* harmony export */   isDifferent: () => (/* binding */ _isDifferent),
 /* harmony export */   postWithoutImage: () => (/* binding */ postWithoutImage),
+/* harmony export */   renderUserHotspots: () => (/* binding */ renderUserHotspots),
 /* harmony export */   setModelAttributes: () => (/* binding */ setModelAttributes)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
@@ -37,6 +38,7 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type
+
  * @returns
  */
 var postWithoutImage = /*#__PURE__*/function () {
@@ -135,6 +137,30 @@ var copyshortcode = function copyshortcode(e) {
   } else {
     unsecuredCopyToClipboard(copyText.value);
   }
+};
+var renderUserHotspots = function renderUserHotspots(modelViewer) {
+  var hotspots = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  if (!modelViewer) return;
+
+  // Clear existing user hotspots (not dimension hotspots)
+  modelViewer.querySelectorAll(".hotspot").forEach(function (h) {
+    return h.remove();
+  });
+
+  // Add each hotspot
+  hotspots.forEach(function (hotspot, index) {
+    var btn = document.createElement("button");
+    btn.className = "hotspot";
+    btn.slot = "hotspot-".concat(index);
+    btn.dataset.position = hotspot.position || "0 0 0";
+    btn.dataset.normal = hotspot.normal || "0 0 1";
+    btn.title = hotspot.label;
+    var label = document.createElement("div");
+    label.className = "annotation";
+    label.textContent = hotspot.label;
+    btn.appendChild(label);
+    modelViewer.appendChild(btn);
+  });
 };
 
 /* Helper: draw SVG lines between hotspot pairs. */
@@ -351,7 +377,7 @@ function displayDimensions(modelViewer, model_settings) {
   // modelViewer.src = "Analog_clock.glb"
 
   console.log(model_settings.dimensions.show);
-  var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll('button')), [modelViewer.querySelector('#dimLines')]);
+  var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll("button")), [modelViewer.querySelector("#dimLines")]);
   function calculateDimensions(modelViewer, model_settings) {
     var _model_settings$dimen;
     var unit = ((_model_settings$dimen = model_settings.dimensions) === null || _model_settings$dimen === void 0 ? void 0 : _model_settings$dimen.unit) || "cm"; // Default: cm
@@ -416,9 +442,9 @@ function displayDimensions(modelViewer, model_settings) {
       // console.log(element)
       if (element) {
         if (visible) {
-          element.classList.remove('hide');
+          element.classList.remove("hide");
         } else {
-          element.classList.add('hide');
+          element.classList.add("hide");
         }
       }
     });
@@ -427,29 +453,29 @@ function displayDimensions(modelViewer, model_settings) {
 
   setVisibility(model_settings.dimensions.show);
   calculateDimensions(modelViewer, model_settings);
-  modelViewer.addEventListener('ar-status', function (event) {
-    setVisibility(model_settings.dimensions.show && event.detail.status !== 'session-started');
+  modelViewer.addEventListener("ar-status", function (event) {
+    setVisibility(model_settings.dimensions.show && event.detail.status !== "session-started");
   });
   function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
     if (dotHotspot1 && dotHotspot2) {
-      svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
-      svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
-      svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
-      svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
+      svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
+      svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
+      svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
+      svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
       if (dimensionHotspot && !dimensionHotspot.facingCamera) {
-        svgLine.classList.add('hide');
+        svgLine.classList.add("hide");
       } else {
-        svgLine.classList.remove('hide');
+        svgLine.classList.remove("hide");
       }
     }
   }
-  var dimLines = modelViewer.querySelectorAll('line');
+  var dimLines = modelViewer.querySelectorAll("line");
   var renderSVG = function renderSVG() {
-    drawLine(dimLines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
-    drawLine(dimLines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
-    drawLine(dimLines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z'));
-    drawLine(dimLines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
-    drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
+    drawLine(dimLines[0], modelViewer.queryHotspot("hotspot-dot+X-Y+Z"), modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Y"));
+    drawLine(dimLines[1], modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Z"));
+    drawLine(dimLines[2], modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X+Y-Z"));
+    drawLine(dimLines[3], modelViewer.queryHotspot("hotspot-dot-X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dim-X-Z"));
+    drawLine(dimLines[4], modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y+Z"), modelViewer.queryHotspot("hotspot-dim-X-Y"));
   };
 
   // modelViewer.addEventListener('load', () => {
@@ -609,6 +635,9 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
   // calculateDimension(model_settings, modelViewer);
   // calculateDimensions(modelViewer, model_settings);
   displayDimensions(modelViewer, model_settings);
+  if (model_settings.hotspots && model_settings.hotspots.length > 0) {
+    renderUserHotspots(modelViewer, model_settings.hotspots);
+  }
 };
 var getAPITypes = function getAPITypes() {
   var api_type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "tripo3d";
