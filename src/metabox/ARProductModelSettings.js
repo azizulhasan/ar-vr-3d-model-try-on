@@ -16,6 +16,7 @@ import DimensionsSection from "./components/DimensionsSection.js";
 import HotspotsSection from "./components/HotspotsSection.js";
 import notify from "../context/Notify";
 import { ToastContainer } from "react-toastify";
+import SliderSection from "./components/SliderSection.js";
 
 const ARProductModelSettings = () => {
   const [basicSettings, setBasicSettings] = useState({
@@ -428,6 +429,17 @@ const ARProductModelSettings = () => {
             >
               Integration
             </button>
+            {/*/Slider Tab*/}
+            <button
+              onClick={(e) => toggleSection(e, "slider")}
+              className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${
+                activeSection === "slider"
+                  ? "art-border-blue-500 art-text-blue-600"
+                  : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
+              }`}
+            >
+              Slider
+            </button>
           </div>
           <div>
             <br />
@@ -504,6 +516,13 @@ const ARProductModelSettings = () => {
                 currentApi={currentApi}
                 handleChange={handleChange}
                 setProductModel={setProductModel}
+              />
+            )}
+
+            {/* {Slider Section} */}
+            {activeSection === "slider" && (
+              <SliderSection
+
               />
             )}
           </div>
