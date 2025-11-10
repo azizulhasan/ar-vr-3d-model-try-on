@@ -4,6 +4,8 @@ import { useState } from "react";
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type
+ * @param {HTMLElement} modelViewer - The model-viewer element
+ * @param {Array}
  * 
 
  * @returns
@@ -107,15 +109,39 @@ export const renderUserHotspots = (modelViewer, hotspots = []) => {
     btn.dataset.normal = hotspot.normal || "0 0 1";
     btn.title = hotspot.label;
 
+ // added inline styles as fallback if CSS doesn't load
+    btn.style.cssText = `
+      display: block;
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      border: none;
+      background-color: blue;
+      box-sizing: border-box;
+      pointer-events: auto;
+      position: relative;
+    `;
+
     const label = document.createElement("div");
     label.className = "annotation";
     label.textContent = hotspot.label;
-    btn.appendChild(label);
 
+   // added inline styles for annotation as fallback
+    label.style.cssText = `
+      background-color: #ffffff;
+      position: absolute;
+      transform: translate(10px, 10px);
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      white-space: nowrap;
+      pointer-events: none;
+    `;
+
+    btn.appendChild(label);
     modelViewer.appendChild(btn);
   });
 };
-
 /* Helper: draw SVG lines between hotspot pairs. */
 // const drawLine = (svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) => {
 //   if (dotHotspot1 && dotHotspot2) {
@@ -511,71 +537,81 @@ function displayDimensions(modelViewer, model_settings) {
     );
   };
 
-//   modelViewer.addEventListener('load', () => {
-//       const center = modelViewer.getBoundingBoxCenter();
-//       const size = modelViewer.getDimensions();
-//       const x2 = size.x / 2;
-//       const y2 = size.y / 2;
-//       const z2 = size.z / 2;
+  modelViewer.addEventListener("load", () => {
+    const center = modelViewer.getBoundingBoxCenter();
+    const size = modelViewer.getDimensions();
+    const x2 = size.x / 2;
+    const y2 = size.y / 2;
+    const z2 = size.z / 2;
 
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dot+X-Y+Z',
-//           position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`
-//       });
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dim+X-Y',
-//           position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
-//       });
-//       modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = `${(size.z * 100).toFixed(0)} cm`;
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X-Y+Z",
+      position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`,
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+X-Y",
+      position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`,
+    });
+    modelViewer.querySelector(
+      'button[slot="hotspot-dim+X-Y"]'
+    ).textContent = `${(size.z * 100).toFixed(0)} cm`;
 
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dot+X-Y-Z',
-//           position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`
-//       });
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dim+X-Z',
-//           position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
-//       });
-//       modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = `${(size.y * 100).toFixed(0)} cm`;
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X-Y-Z",
+      position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`,
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+X-Z",
+      position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`,
+    });
+    modelViewer.querySelector(
+      'button[slot="hotspot-dim+X-Z"]'
+    ).textContent = `${(size.y * 100).toFixed(0)} cm`;
 
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dot+X+Y-Z',
-//           position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`
-//       });
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dim+Y-Z',
-//           position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`
-//       });
-//       modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = `${(size.x * 100).toFixed(0)} cm`;
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X+Y-Z",
+      position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`,
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+Y-Z",
+      position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`,
+    });
+    modelViewer.querySelector(
+      'button[slot="hotspot-dim+Y-Z"]'
+    ).textContent = `${(size.x * 100).toFixed(0)} cm`;
 
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dot-X+Y-Z',
-//           position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`
-//       });
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dim-X-Z',
-//           position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
-//       });
-//       modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = `${(size.y * 100).toFixed(0)} cm`;
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X+Y-Z",
+      position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`,
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim-X-Z",
+      position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`,
+    });
+    modelViewer.querySelector(
+      'button[slot="hotspot-dim-X-Z"]'
+    ).textContent = `${(size.y * 100).toFixed(0)} cm`;
 
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dot-X-Y-Z',
-//           position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`
-//       });
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dim-X-Y',
-//           position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
-//       });
-//       modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = `${(size.z * 100).toFixed(0)} cm`;
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X-Y-Z",
+      position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`,
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim-X-Y",
+      position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`,
+    });
+    modelViewer.querySelector(
+      'button[slot="hotspot-dim-X-Y"]'
+    ).textContent = `${(size.z * 100).toFixed(0)} cm`;
 
-//       modelViewer.updateHotspot({
-//           name: 'hotspot-dot-X-Y+Z',
-//           position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
-//       });
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X-Y+Z",
+      position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`,
+    });
 
-//       renderSVG();
-//       modelViewer.addEventListener('camera-change', renderSVG);
-//   });
+    renderSVG();
+    modelViewer.addEventListener("camera-change", renderSVG);
+  });
 }
 
 let isDimensionHTMLAdded = false;
