@@ -2,7 +2,6 @@
 
 export default function SliderSection() {
   return (
-<>
-Hello World
-</>  )
+    <div>SliderSection</div>
+  )
 }
