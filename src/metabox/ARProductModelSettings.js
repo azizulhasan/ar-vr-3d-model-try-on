@@ -70,19 +70,7 @@ const ARProductModelSettings = () => {
     show = true,
   } = dimensions;
 
-  const onUpdateDimension = (key, value) => {
-    setProductModel((prev) => ({
-      ...prev,
-      dimensions: {
-        ...prev.dimensions,
-        [key]: value,
-      },
-    }));
-  };
 
-  const toggleDimensions = (visible) => {
-    onUpdateDimension("show", visible);
-  };
 
   const [currentValue, setCurrentValue] = useState({});
   const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
@@ -191,19 +179,36 @@ const ARProductModelSettings = () => {
       return;
     }
 
-    if (e.target.name == "dimensions") {
+    if (e.target.name === "dimensions") {
       let tempProductModel = structuredClone(productModel);
       let dimensions = tempProductModel.dimensions;
       dimensions.show = e.target.checked;
       value = dimensions;
     }
-
+    let key = e.target.name;
+    if (key === "unit") {
+      let tempProductModel = structuredClone(productModel);
+      let dimensions = tempProductModel.dimensions;
+      dimensions.unit = e.target.value;
+      value = dimensions;
+      key = 'dimensions'
+    }
     const productModelData = {
       ...productModel,
-      [e.target.name]: value,
+      [key]: value,
     };
     setProductModel(productModelData);
     wp.hooks.doAction("atlas_ar_preview_data", productModelData);
+  };
+
+  const onUpdateDimension = (key, value) => {
+    setProductModel((prev) => ({
+      ...prev,
+      dimensions: {
+        ...prev.dimensions,
+        [key]: value,
+      },
+    }));
   };
 
   const handleMediaButtonClick = (fieldName, value) => {
@@ -479,7 +484,6 @@ const ARProductModelSettings = () => {
                   onUpdateDimension={onUpdateDimension}
                   activeAccordion={activeAccordion}
                   toggleAccordion={toggleAccordion}
-                  toggleDimensions={toggleDimensions}
                   handleChange={handleChange}
                   isProductModelLoaded={isProductModelLoaded}
                 />

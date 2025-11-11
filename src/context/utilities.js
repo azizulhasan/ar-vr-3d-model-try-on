@@ -143,15 +143,20 @@ export const renderUserHotspots = (modelViewer, hotspots = []) => {
   });
 };
 
-function displayDimensions(modelViewer, model_settings) {
-  // modelViewer.querySelector('#src').addEventListener('input', (event) => {
-  //     modelViewer.src = event.target.value;
-  // });
+export  const convertLength = (valueInMeters, unit) => {
+  switch (unit) {
+    case "m":
+      return valueInMeters;
+    case "cm":
+      return valueInMeters * 100;
+    case "inch":
+      return valueInMeters * 39.3701;
+    default:
+      return valueInMeters;
+  }
+};
 
-  // modelViewer.src = "Chair.glb"
-  // modelViewer.src = "Analog_clock.glb"
-
-  console.log(model_settings.dimensions.show);
+export const   displayDimensions = (modelViewer, model_settings) => {
 
   const dimElements = [
     ...modelViewer.querySelectorAll("button"),
@@ -160,11 +165,6 @@ function displayDimensions(modelViewer, model_settings) {
 
   function calculateDimensions(modelViewer, model_settings) {
     const unit = model_settings.dimensions?.unit || "cm"; // Default: cm
-    const conversion = {
-      cm: (v) => v * 100,
-      m: (v) => v,
-      inch: (v) => v * 39.3701,
-    };
 
     const unitLabel = {
       cm: "cm",
@@ -173,7 +173,7 @@ function displayDimensions(modelViewer, model_settings) {
     };
 
     function formatValue(value) {
-      const converted = conversion[unit](value);
+      const converted = convertLength(value, unit);
       return `${converted.toFixed(1)} ${unitLabel[unit]}`;
     }
 
@@ -249,15 +249,16 @@ function displayDimensions(modelViewer, model_settings) {
         `${center.x - x2} ${center.y - y2} ${center.z + z2}`
       );
 
-      console.log(
-        `Model Dimensions → X: ${formatValue(size.x)}, Y: ${formatValue(
-          size.y
-        )}, Z: ${formatValue(size.z)}`
-      );
+      // console.log(
+      //   `Model Dimensions → X: ${formatValue(size.x)}, Y: ${formatValue(
+      //     size.y
+      //   )}, Z: ${formatValue(size.z)}`
+      // );
     };
 
     // Run once on load
     modelViewer.addEventListener("camera-change", updateDimensions);
+    modelViewer.addEventListener("load", updateDimensions);
   }
 
   function setVisibility(visible) {
@@ -286,7 +287,7 @@ function displayDimensions(modelViewer, model_settings) {
   });
 
   function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
-    if (dotHotspot1 && dotHotspot2) {
+    if (dotHotspot1 && dotHotspot2 && svgLine) {
       svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
       svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
       svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);

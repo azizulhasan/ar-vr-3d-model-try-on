@@ -10,8 +10,10 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   convertLength: () => (/* binding */ convertLength),
 /* harmony export */   copyshortcode: () => (/* binding */ copyshortcode),
 /* harmony export */   createModal: () => (/* binding */ createModal),
+/* harmony export */   displayDimensions: () => (/* binding */ displayDimensions),
 /* harmony export */   getAPITypes: () => (/* binding */ getAPITypes),
 /* harmony export */   getPostID: () => (/* binding */ getPostID),
 /* harmony export */   getURL: () => (/* binding */ getURL),
@@ -171,37 +173,31 @@ var renderUserHotspots = function renderUserHotspots(modelViewer) {
     modelViewer.appendChild(btn);
   });
 };
-function displayDimensions(modelViewer, model_settings) {
-  // modelViewer.querySelector('#src').addEventListener('input', (event) => {
-  //     modelViewer.src = event.target.value;
-  // });
-
-  // modelViewer.src = "Chair.glb"
-  // modelViewer.src = "Analog_clock.glb"
-
-  console.log(model_settings.dimensions.show);
+var convertLength = function convertLength(valueInMeters, unit) {
+  switch (unit) {
+    case "m":
+      return valueInMeters;
+    case "cm":
+      return valueInMeters * 100;
+    case "inch":
+      return valueInMeters * 39.3701;
+    default:
+      return valueInMeters;
+  }
+};
+var displayDimensions = function displayDimensions(modelViewer, model_settings) {
   var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll("button")), [modelViewer.querySelector("#dimLines")]);
   function calculateDimensions(modelViewer, model_settings) {
     var _model_settings$dimen;
     var unit = ((_model_settings$dimen = model_settings.dimensions) === null || _model_settings$dimen === void 0 ? void 0 : _model_settings$dimen.unit) || "cm"; // Default: cm
-    var conversion = {
-      cm: function cm(v) {
-        return v * 100;
-      },
-      m: function m(v) {
-        return v;
-      },
-      inch: function inch(v) {
-        return v * 39.3701;
-      }
-    };
+
     var unitLabel = {
       cm: "cm",
       m: "m",
       inch: "in"
     };
     function formatValue(value) {
-      var converted = conversion[unit](value);
+      var converted = convertLength(value, unit);
       return "".concat(converted.toFixed(1), " ").concat(unitLabel[unit]);
     }
 
@@ -234,11 +230,17 @@ function displayDimensions(modelViewer, model_settings) {
       updateHotspot("hotspot-dot-X-Y-Z", "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z - z2));
       updateHotspot("hotspot-dim-X-Y", "".concat(center.x - x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z), formatValue(size.z));
       updateHotspot("hotspot-dot-X-Y+Z", "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z + z2));
-      console.log("Model Dimensions \u2192 X: ".concat(formatValue(size.x), ", Y: ").concat(formatValue(size.y), ", Z: ").concat(formatValue(size.z)));
+
+      // console.log(
+      //   `Model Dimensions → X: ${formatValue(size.x)}, Y: ${formatValue(
+      //     size.y
+      //   )}, Z: ${formatValue(size.z)}`
+      // );
     };
 
     // Run once on load
     modelViewer.addEventListener("camera-change", updateDimensions);
+    modelViewer.addEventListener("load", updateDimensions);
   }
   function setVisibility(visible) {
     dimElements.forEach(function (element) {
@@ -260,7 +262,7 @@ function displayDimensions(modelViewer, model_settings) {
     setVisibility(model_settings.dimensions.show && event.detail.status !== "session-started");
   });
   function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
-    if (dotHotspot1 && dotHotspot2) {
+    if (dotHotspot1 && dotHotspot2 && svgLine) {
       svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
       svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
       svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
@@ -338,7 +340,7 @@ function displayDimensions(modelViewer, model_settings) {
     renderSVG();
     modelViewer.addEventListener("camera-change", renderSVG);
   });
-}
+};
 var setModelAttributes = function setModelAttributes(modelViewer, model_settings) {
   var _model_settings$shado;
   console.log({
