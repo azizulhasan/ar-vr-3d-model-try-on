@@ -13,8 +13,10 @@ import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
 import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
 import DimensionsSection from "./components/DimensionsSection.js";
+import HotspotsSection from "./components/HotspotsSection.js";
 import notify from "../context/Notify";
 import { ToastContainer } from "react-toastify";
+import SliderSection from "./components/SliderSection.js";
 
 const ARProductModelSettings = () => {
   const [basicSettings, setBasicSettings] = useState({
@@ -52,10 +54,11 @@ const ARProductModelSettings = () => {
     dimensions: {
       show: true,
       unit: "cm",
-      width: { value: 4 , unit: 'cm'},
-      height: { value: 10, unit: 'cm' },
-      length: { value: 5 , unit: 'cm'},
+      width: { value: 4, unit: "cm" },
+      height: { value: 10, unit: "cm" },
+      length: { value: 5, unit: "cm" },
     },
+    hotspots: [],
   });
 
   const { dimensions = {} } = productModel;
@@ -78,11 +81,8 @@ const ARProductModelSettings = () => {
   };
 
   const toggleDimensions = (visible) => {
-  onUpdateDimension('show', visible);
-};
-
-
-
+    onUpdateDimension("show", visible);
+  };
 
   const [currentValue, setCurrentValue] = useState({});
   const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
@@ -94,7 +94,8 @@ const ARProductModelSettings = () => {
     content: false,
     camera: false,
     advance: false,
-    dimensions: false, 
+    dimensions: false,
+    hotspots: false,
   });
   const [styleAccordion, setStyleAccordion] = useState({
     canvas: false,
@@ -190,11 +191,11 @@ const ARProductModelSettings = () => {
       return;
     }
 
-    if(e.target.name == 'dimensions') {
-        let tempProductModel= structuredClone(productModel)
-        let dimensions = tempProductModel.dimensions;
-        dimensions.show = e.target.checked;
-        value = dimensions
+    if (e.target.name == "dimensions") {
+      let tempProductModel = structuredClone(productModel);
+      let dimensions = tempProductModel.dimensions;
+      dimensions.show = e.target.checked;
+      value = dimensions;
     }
 
     const productModelData = {
@@ -304,14 +305,6 @@ const ARProductModelSettings = () => {
       wp.hooks.doAction("atlas_ar_preview_data", productModel);
     }
   }, [isProductModelLoaded]);
-  
-
-
-
-
-
-
-
 
   useEffect(() => {
     if (productModel.exclude_integration_api_model_type && currentApi?.body) {
@@ -436,6 +429,17 @@ const ARProductModelSettings = () => {
             >
               Integration
             </button>
+            {/*/Slider Tab*/}
+            <button
+              onClick={(e) => toggleSection(e, "slider")}
+              className={`art-px-4 art-py-2 art-font-medium art-cursor-pointer art-border-b-2 ${
+                activeSection === "slider"
+                  ? "art-border-blue-500 art-text-blue-600"
+                  : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
+              }`}
+            >
+              Slider
+            </button>
           </div>
           <div>
             <br />
@@ -478,7 +482,12 @@ const ARProductModelSettings = () => {
                   toggleDimensions={toggleDimensions}
                   handleChange={handleChange}
                   isProductModelLoaded={isProductModelLoaded}
-                 
+                />
+                <HotspotsSection
+                  productModel={productModel}
+                  setProductModel={setProductModel}
+                  activeAccordion={activeAccordion}
+                  toggleAccordion={toggleAccordion}
                 />
               </div>
             )}
@@ -507,6 +516,13 @@ const ARProductModelSettings = () => {
                 currentApi={currentApi}
                 handleChange={handleChange}
                 setProductModel={setProductModel}
+              />
+            )}
+
+            {/* {Slider Section} */}
+            {activeSection === "slider" && (
+              <SliderSection
+
               />
             )}
           </div>

@@ -17,6 +17,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   getURL: () => (/* binding */ getURL),
 /* harmony export */   isDifferent: () => (/* binding */ _isDifferent),
 /* harmony export */   postWithoutImage: () => (/* binding */ postWithoutImage),
+/* harmony export */   renderUserHotspots: () => (/* binding */ renderUserHotspots),
 /* harmony export */   setModelAttributes: () => (/* binding */ setModelAttributes)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
@@ -37,6 +38,10 @@ function _asyncToGenerator(n) { return function () { var t = this, e = arguments
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type
+ * @param {HTMLElement} modelViewer - The model-viewer element
+ * @param {Array}
+ * 
+
  * @returns
  */
 var postWithoutImage = /*#__PURE__*/function () {
@@ -136,212 +141,36 @@ var copyshortcode = function copyshortcode(e) {
     unsecuredCopyToClipboard(copyText.value);
   }
 };
+var renderUserHotspots = function renderUserHotspots(modelViewer) {
+  var hotspots = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  if (!modelViewer) return;
 
-/* Helper: draw SVG lines between hotspot pairs. */
-// const drawLine = (svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) => {
-//   if (dotHotspot1 && dotHotspot2) {
-//     svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
-//     svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
-//     svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
-//     svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
-//
-//     if (dimensionHotspot && !dimensionHotspot.facingCamera) {
-//       svgLine.classList.add("hide");
-//     } else {
-//       svgLine.classList.remove("hide");
-//     }
-//   }
-// };
-//
-// /* Core function: calculate and update dimensions */
-// const calculateDimension = (productModel, modelViewer) => {
-//   if (!modelViewer) return;
-//
-//   const dimElements = [
-//     ...modelViewer.querySelectorAll("button"),
-//     modelViewer.querySelector("#dimLines"),
-//   ];
-//
-//   // Show/hide dimensions
-//   function setVisibility(visible) {
-//     dimElements.forEach((element) => {
-//       element.classList.toggle("hide", !visible);
-//     });
-//   }
-//
-//   setVisibility(productModel.dimensions.show);
-//
-//   // Handle AR session toggling visibility
-//   modelViewer.addEventListener("ar-status", () => {
-//     setVisibility(productModel.dimensions.show);
-//   });
-//
-//   const dimLines = modelViewer.querySelectorAll("line");
-//
-//   /* Render/update SVG lines. */
-//   const renderSVG = () => {
-//     drawLine(
-//       dimLines[0],
-//       modelViewer.queryHotspot("hotspot-dot+X-Y+Z"),
-//       modelViewer.queryHotspot("hotspot-dot+X-Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dim+X-Y")
-//     );
-//     drawLine(
-//       dimLines[1],
-//       modelViewer.queryHotspot("hotspot-dot+X-Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dot+X+Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dim+X-Z")
-//     );
-//     drawLine(
-//       dimLines[2],
-//       modelViewer.queryHotspot("hotspot-dot+X+Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dot-X+Y-Z")
-//     );
-//     drawLine(
-//       dimLines[3],
-//       modelViewer.queryHotspot("hotspot-dot-X+Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dot-X-Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dim-X-Z")
-//     );
-//     drawLine(
-//       dimLines[4],
-//       modelViewer.queryHotspot("hotspot-dot-X-Y-Z"),
-//       modelViewer.queryHotspot("hotspot-dot-X-Y+Z"),
-//       modelViewer.queryHotspot("hotspot-dim-X-Y")
-//     );
-//   };
-//
-//   // ---------- Utility for unit conversion ----------
-//   const convertLength = (valueInMeters, unit) => {
-//     switch (unit) {
-//       case "m":
-//         return valueInMeters;
-//       case "cm":
-//         return valueInMeters * 100;
-//       case "inch":
-//         return valueInMeters * 39.3701;
-//       default:
-//         return valueInMeters;
-//     }
-//   };
-//
-//   // Initial hotspot placement & labels
-//   const showDimensions = () => {
-//     const center = modelViewer.getBoundingBoxCenter();
-//     const size = modelViewer.getDimensions();
-//
-//     const x2 = size.x / 2;
-//     const y2 = size.y / 2;
-//     const z2 = size.z / 2;
-//
-//     const unit = productModel.dimensions.unit || "cm";
-//     const decimals = unit === "m" ? 2 : 0;
-//
-//     const convertedX = convertLength(size.x, unit);
-//     const convertedY = convertLength(size.y, unit);
-//     const convertedZ = convertLength(size.z, unit);
-//
-//     // Position hotspots + update labels
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dot+X-Y+Z",
-//       position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`,
-//     });
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dim+X-Y",
-//       position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`,
-//     });
-//     modelViewer.querySelector(
-//       'button[slot="hotspot-dim+X-Y"]'
-//     ).textContent = `${convertedZ.toFixed(decimals)} ${unit}`;
-//
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dot+X-Y-Z",
-//       position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`,
-//     });
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dim+X-Z",
-//       position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`,
-//     });
-//     modelViewer.querySelector(
-//       'button[slot="hotspot-dim+X-Z"]'
-//     ).textContent = `${convertedY.toFixed(decimals)} ${unit}`;
-//
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dot+X+Y-Z",
-//       position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`,
-//     });
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dim+Y-Z",
-//       position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`,
-//     });
-//     modelViewer.querySelector(
-//       'button[slot="hotspot-dim+Y-Z"]'
-//     ).textContent = `${convertedX.toFixed(decimals)} ${unit}`;
-//
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dot-X+Y-Z",
-//       position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`,
-//     });
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dim-X-Z",
-//       position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`,
-//     });
-//     modelViewer.querySelector(
-//       'button[slot="hotspot-dim-X-Z"]'
-//     ).textContent = `${convertedY.toFixed(decimals)} ${unit}`;
-//
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dot-X-Y-Z",
-//       position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`,
-//     });
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dim-X-Y",
-//       position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`,
-//     });
-//     modelViewer.querySelector(
-//       'button[slot="hotspot-dim-X-Y"]'
-//     ).textContent = `${convertedZ.toFixed(decimals)} ${unit}`;
-//
-//     modelViewer.updateHotspot({
-//       name: "hotspot-dot-X-Y+Z",
-//       position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`,
-//     });
-//
-//     // Keep SVG in sync
-//     renderSVG();
-//     modelViewer.addEventListener("camera-change", renderSVG);
-//
-//     // Update React state with dimensions
-//     const  setProductModel = (prev) => {
-//         if (
-//         prev.dimensions.width?.value === convertedX &&
-//         prev.dimensions.height?.value === convertedY &&
-//         prev.dimensions.length?.value === convertedZ &&
-//         prev.dimensions.unit === unit
-//         ) {
-//         return prev;
-//         }
-//
-//         return {
-//         ...prev,
-//         dimensions: {
-//                 ...prev.dimensions,
-//                 width: { value: convertedX, unit },
-//                 height: { value: convertedY, unit },
-//                 length: { value: convertedZ, unit },
-//             },
-//         };
-//     };
-//
-//     let latestProductModel = setProductModel(productModel)
-//
-//     console.log({latestProductModel})
-//
-//   };
-//
-//   showDimensions();
-// };
+  // Clear existing user hotspots (not dimension hotspots)
+  modelViewer.querySelectorAll(".hotspot").forEach(function (h) {
+    return h.remove();
+  });
 
+  // Add each hotspot
+  hotspots.forEach(function (hotspot, index) {
+    var btn = document.createElement("button");
+    btn.className = "hotspot";
+    btn.slot = "hotspot-".concat(index);
+    btn.dataset.position = hotspot.position || "0 0 0";
+    btn.dataset.normal = hotspot.normal || "0 0 1";
+    btn.title = hotspot.label;
+
+    // added inline styles as fallback if CSS doesn't load
+    btn.style.cssText = "\n      display: block;\n      width: 20px;\n      height: 20px;\n      border-radius: 10px;\n      border: none;\n      background-color: blue;\n      box-sizing: border-box;\n      pointer-events: auto;\n      position: relative;\n    ";
+    var label = document.createElement("div");
+    label.className = "annotation";
+    label.textContent = hotspot.label;
+
+    // added inline styles for annotation as fallback
+    label.style.cssText = "\n      background-color: #ffffff;\n      position: absolute;\n      transform: translate(10px, 10px);\n      border-radius: 10px;\n      padding: 10px;\n      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);\n      white-space: nowrap;\n      pointer-events: none;\n    ";
+    btn.appendChild(label);
+    modelViewer.appendChild(btn);
+  });
+};
 function displayDimensions(modelViewer, model_settings) {
   // modelViewer.querySelector('#src').addEventListener('input', (event) => {
   //     modelViewer.src = event.target.value;
@@ -351,7 +180,7 @@ function displayDimensions(modelViewer, model_settings) {
   // modelViewer.src = "Analog_clock.glb"
 
   console.log(model_settings.dimensions.show);
-  var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll('button')), [modelViewer.querySelector('#dimLines')]);
+  var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll("button")), [modelViewer.querySelector("#dimLines")]);
   function calculateDimensions(modelViewer, model_settings) {
     var _model_settings$dimen;
     var unit = ((_model_settings$dimen = model_settings.dimensions) === null || _model_settings$dimen === void 0 ? void 0 : _model_settings$dimen.unit) || "cm"; // Default: cm
@@ -409,16 +238,16 @@ function displayDimensions(modelViewer, model_settings) {
     };
 
     // Run once on load
-    modelViewer.addEventListener("load", updateDimensions);
+    modelViewer.addEventListener("camera-change", updateDimensions);
   }
   function setVisibility(visible) {
     dimElements.forEach(function (element) {
       // console.log(element)
       if (element) {
         if (visible) {
-          element.classList.remove('hide');
+          element.classList.remove("hide");
         } else {
-          element.classList.add('hide');
+          element.classList.add("hide");
         }
       }
     });
@@ -427,98 +256,89 @@ function displayDimensions(modelViewer, model_settings) {
 
   setVisibility(model_settings.dimensions.show);
   calculateDimensions(modelViewer, model_settings);
-  modelViewer.addEventListener('ar-status', function (event) {
-    setVisibility(model_settings.dimensions.show && event.detail.status !== 'session-started');
+  modelViewer.addEventListener("ar-status", function (event) {
+    setVisibility(model_settings.dimensions.show && event.detail.status !== "session-started");
   });
   function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
     if (dotHotspot1 && dotHotspot2) {
-      svgLine.setAttribute('x1', dotHotspot1.canvasPosition.x);
-      svgLine.setAttribute('y1', dotHotspot1.canvasPosition.y);
-      svgLine.setAttribute('x2', dotHotspot2.canvasPosition.x);
-      svgLine.setAttribute('y2', dotHotspot2.canvasPosition.y);
+      svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
+      svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
+      svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
+      svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
       if (dimensionHotspot && !dimensionHotspot.facingCamera) {
-        svgLine.classList.add('hide');
+        svgLine.classList.add("hide");
       } else {
-        svgLine.classList.remove('hide');
+        svgLine.classList.remove("hide");
       }
     }
   }
-  var dimLines = modelViewer.querySelectorAll('line');
+  var dimLines = modelViewer.querySelectorAll("line");
   var renderSVG = function renderSVG() {
-    drawLine(dimLines[0], modelViewer.queryHotspot('hotspot-dot+X-Y+Z'), modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Y'));
-    drawLine(dimLines[1], modelViewer.queryHotspot('hotspot-dot+X-Y-Z'), modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dim+X-Z'));
-    drawLine(dimLines[2], modelViewer.queryHotspot('hotspot-dot+X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X+Y-Z'));
-    drawLine(dimLines[3], modelViewer.queryHotspot('hotspot-dot-X+Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dim-X-Z'));
-    drawLine(dimLines[4], modelViewer.queryHotspot('hotspot-dot-X-Y-Z'), modelViewer.queryHotspot('hotspot-dot-X-Y+Z'), modelViewer.queryHotspot('hotspot-dim-X-Y'));
+    drawLine(dimLines[0], modelViewer.queryHotspot("hotspot-dot+X-Y+Z"), modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Y"));
+    drawLine(dimLines[1], modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Z"));
+    drawLine(dimLines[2], modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X+Y-Z"));
+    drawLine(dimLines[3], modelViewer.queryHotspot("hotspot-dot-X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dim-X-Z"));
+    drawLine(dimLines[4], modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y+Z"), modelViewer.queryHotspot("hotspot-dim-X-Y"));
   };
-
-  // modelViewer.addEventListener('load', () => {
-  //     const center = modelViewer.getBoundingBoxCenter();
-  //     const size = modelViewer.getDimensions();
-  //     const x2 = size.x / 2;
-  //     const y2 = size.y / 2;
-  //     const z2 = size.z / 2;
-
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dot+X-Y+Z',
-  //         position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`
-  //     });
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dim+X-Y',
-  //         position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
-  //     });
-  //     modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = `${(size.z * 100).toFixed(0)} cm`;
-
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dot+X-Y-Z',
-  //         position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`
-  //     });
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dim+X-Z',
-  //         position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
-  //     });
-  //     modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = `${(size.y * 100).toFixed(0)} cm`;
-
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dot+X+Y-Z',
-  //         position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`
-  //     });
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dim+Y-Z',
-  //         position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`
-  //     });
-  //     modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = `${(size.x * 100).toFixed(0)} cm`;
-
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dot-X+Y-Z',
-  //         position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`
-  //     });
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dim-X-Z',
-  //         position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`
-  //     });
-  //     modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = `${(size.y * 100).toFixed(0)} cm`;
-
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dot-X-Y-Z',
-  //         position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`
-  //     });
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dim-X-Y',
-  //         position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`
-  //     });
-  //     modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = `${(size.z * 100).toFixed(0)} cm`;
-
-  //     modelViewer.updateHotspot({
-  //         name: 'hotspot-dot-X-Y+Z',
-  //         position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`
-  //     });
-
-  //     renderSVG();
-  //     modelViewer.addEventListener('camera-change', renderSVG);
-  // });
+  modelViewer.addEventListener("load", function () {
+    var center = modelViewer.getBoundingBoxCenter();
+    var size = modelViewer.getDimensions();
+    var x2 = size.x / 2;
+    var y2 = size.y / 2;
+    var z2 = size.z / 2;
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X-Y+Z",
+      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+X-Y",
+      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = "".concat((size.z * 100).toFixed(0), " cm");
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X-Y-Z",
+      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+X-Z",
+      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = "".concat((size.y * 100).toFixed(0), " cm");
+    modelViewer.updateHotspot({
+      name: "hotspot-dot+X+Y-Z",
+      position: "".concat(center.x + x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim+Y-Z",
+      position: "".concat(center.x, " ").concat(center.y + y2 * 1.1, " ").concat(center.z - z2 * 1.1)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = "".concat((size.x * 100).toFixed(0), " cm");
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X+Y-Z",
+      position: "".concat(center.x - x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim-X-Z",
+      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = "".concat((size.y * 100).toFixed(0), " cm");
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X-Y-Z",
+      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
+    });
+    modelViewer.updateHotspot({
+      name: "hotspot-dim-X-Y",
+      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
+    });
+    modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = "".concat((size.z * 100).toFixed(0), " cm");
+    modelViewer.updateHotspot({
+      name: "hotspot-dot-X-Y+Z",
+      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
+    });
+    renderSVG();
+    modelViewer.addEventListener("camera-change", renderSVG);
+  });
 }
-var isDimensionHTMLAdded = false;
 var setModelAttributes = function setModelAttributes(modelViewer, model_settings) {
   var _model_settings$shado;
   console.log({
@@ -585,30 +405,29 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
     modelViewerStyle.innerHTML = model_settings.custom_css;
   }
   modelViewer.style.backgroundColor = model_settings.ar_try_on_poster_color || "rgba(255,255,255,0)";
-  var scale = model_settings.ar_try_on_ar_scale || "auto"; // Default value if not defined
-  modelViewer.setAttribute("ar-scale", scale); // Use "auto" or "fixed" as needed
+  var scale = model_settings.ar_try_on_ar_scale || "auto";
+  modelViewer.setAttribute("ar-scale", scale);
   if (model_settings.ar_try_on_ar === "deactivate") {
     modelViewer.removeAttribute("ar");
   }
   if (model_settings.ar_try_on_xr_environment === "deactivate") {
     modelViewer.removeAttribute("xr-environment");
   }
-  // TODO: add functionality for this.
   if (model_settings.ar_try_on_ar_button === "activate") {
     modelViewer.innerHTML = "<button> ".concat(model_settings.ar_try_on_ar_button_text || "Activate Ar", " </button>");
   }
-  if (model_settings.dimensions.show) {}
-  // Add hotspots & SVG lines - CRITICAL for dimensions
 
-  var hotspotHTML = "\n              <!-- Hotspots -->\n              <button slot=\"hotspot-dot+X-Y+Z\" class=\"dot\" data-position=\"1 -1 1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Y\" class=\"dim\" data-position=\"1 -1 0\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X-Y-Z\" class=\"dot\" data-position=\"1 -1 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Z\" class=\"dim\" data-position=\"1 0 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X+Y-Z\" class=\"dot\" data-position=\"1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim+Y-Z\" class=\"dim\" data-position=\"0 -1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dot-X+Y-Z\" class=\"dot\" data-position=\"-1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim-X-Z\" class=\"dim\" data-position=\"-1 0 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y-Z\" class=\"dot\" data-position=\"-1 -1 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dim-X-Y\" class=\"dim\" data-position=\"-1 -1 0\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y+Z\" class=\"dot\" data-position=\"-1 -1 1\" data-normal=\"-1 0 0\"></button>\n\n        <!-- Dimension lines -->\n        <svg id=\"dimLines\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dimensionLineContainer\">\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n        </svg>\n        ";
-  if (!isDimensionHTMLAdded) {
-    isDimensionHTMLAdded = true;
+  // FIXED: Check if dimension elements already exist before adding
+  var existingDimLines = modelViewer.querySelector("#dimLines");
+  var existingHotspots = modelViewer.querySelector('[slot="hotspot-dot+X-Y+Z"]');
+  if (!existingDimLines || !existingHotspots) {
+    var hotspotHTML = "\n              <!-- Hotspots -->\n              <button slot=\"hotspot-dot+X-Y+Z\" class=\"dot\" data-position=\"1 -1 1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Y\" class=\"dim\" data-position=\"1 -1 0\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X-Y-Z\" class=\"dot\" data-position=\"1 -1 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Z\" class=\"dim\" data-position=\"1 0 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X+Y-Z\" class=\"dot\" data-position=\"1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim+Y-Z\" class=\"dim\" data-position=\"0 -1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dot-X+Y-Z\" class=\"dot\" data-position=\"-1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim-X-Z\" class=\"dim\" data-position=\"-1 0 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y-Z\" class=\"dot\" data-position=\"-1 -1 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dim-X-Y\" class=\"dim\" data-position=\"-1 -1 0\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y+Z\" class=\"dot\" data-position=\"-1 -1 1\" data-normal=\"-1 0 0\"></button>\n\n        <!-- Dimension lines -->\n        <svg id=\"dimLines\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dimensionLineContainer\">\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n        </svg>\n        ";
     modelViewer.insertAdjacentHTML("beforeend", hotspotHTML);
   }
-
-  // calculateDimension(model_settings, modelViewer);
-  // calculateDimensions(modelViewer, model_settings);
   displayDimensions(modelViewer, model_settings);
+  if (model_settings.hotspots && model_settings.hotspots.length > 0) {
+    renderUserHotspots(modelViewer, model_settings.hotspots);
+  }
 };
 var getAPITypes = function getAPITypes() {
   var api_type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "tripo3d";
