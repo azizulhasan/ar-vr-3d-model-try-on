@@ -1,7 +1,6 @@
 import {useState, useEffect, useCallback} from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
 import {displayDimensions, convertLength} from '../../context/utilities'
-import "../../icons/dimensions.css";
 
 
 export const DimensionsSection = ({
@@ -17,18 +16,6 @@ export const DimensionsSection = ({
 
 
     useEffect(() => {
-        console.log({isProductModelLoaded})
-        if (isProductModelLoaded) {
-            const mv = document.querySelectorAll(".atlas_ar_model_viewer")[0];
-            if (mv) {
-                // mv.addEventListener("load", applyDimensions(productModel));
-                // mv.addEventListener("camera-change", applyDimensions(productModel));
-              displayDimensions(mv, productModel)
-            }
-        }
-    }, [isProductModelLoaded]);
-
-    useEffect(() => {
         function updateHeightWithPreview() {
             const modelViewer = document.querySelectorAll(".atlas_ar_model_viewer")[0];
             if (!modelViewer) return;
@@ -36,7 +23,6 @@ export const DimensionsSection = ({
             // Update React state with dimensions after calculation
             const center = modelViewer.getBoundingBoxCenter();
             const size = modelViewer.getDimensions();
-            console.log(size)
             if (center && size) {
                 const unit = productModel.dimensions.unit || "cm";
 
@@ -67,7 +53,6 @@ export const DimensionsSection = ({
             }
         }
         if(isProductModelLoaded) {
-            console.log('test')
             updateHeightWithPreview()
         }
     }, [productModel.dimensions.unit, isProductModelLoaded]);
