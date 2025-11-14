@@ -1,57 +1,21 @@
 import { useEffect, useCallback } from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
 
-import "../../icons/hotspots.css";
-
 const HotspotsSection = ({
   productModel,
   setProductModel,
   activeAccordion,
   toggleAccordion,
 }) => {
-  // ---------- Render Hotspots on Model ----------
-  const renderHotspots = useCallback(() => {
-    const modelViewer = document.querySelector(".atlas_ar_model_viewer");
-    if (!modelViewer) return;
 
-    // Clear old hotspots (but keep dimension hotspots)
-    modelViewer.querySelectorAll(".hotspot").forEach((h) => h.remove());
-
-    (productModel.hotspots || []).forEach((hotspot, index) => {
-      const btn = document.createElement("button");
-      btn.className = "hotspot";
-      btn.slot = `hotspot-${index}`;
-      btn.dataset.position = hotspot.position || "0 0 0";
-      btn.dataset.normal = hotspot.normal || "0 0 1";
-      btn.title = hotspot.label;
-
-      const label = document.createElement("div");
-      label.className = "annotation";
-      label.textContent = hotspot.label;
-      btn.appendChild(label);
-
-      modelViewer.appendChild(btn);
-    });
-  }, [productModel.hotspots]);
 
   useEffect(() => {
-    renderHotspots();
-  }, [renderHotspots]);
+    wp.hooks.doAction("atlas_ar_preview_data", productModel);
+  }, [productModel.hotspots]);
 
   // ---------- Helpers ----------
   const updateHotspots = (newList) => {
     setProductModel((prev) => ({ ...prev, hotspots: newList }));
-  };
-
-  const addHotspot = (pos, norm) => {
-    const nextId = (productModel.hotspots?.length || 0) + 1;
-    const newHotspot = {
-      id: nextId,
-      label: `Hotspot ${nextId}`,
-      position: pos,
-      normal: norm,
-    };
-    updateHotspots([...(productModel.hotspots || []), newHotspot]);
   };
 
   const removeHotspot = (index) => {
@@ -93,7 +57,15 @@ const HotspotsSection = ({
       )} ${hit.normal.z.toFixed(3)}`;
 
       console.log("Adding hotspot at:", pos, "with normal:", norm);
-      addHotspot(pos, norm);
+
+      const nextId = (productModel.hotspots?.length || 0) + 1;
+      const newHotspot = {
+        id: nextId,
+        label: `Hotspot ${nextId}`,
+        position: pos,
+        normal: norm,
+      };
+      updateHotspots([...(productModel.hotspots || []), newHotspot]);
     };
 
     modelViewer.addEventListener("click", handleClick);

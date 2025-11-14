@@ -91,12 +91,6 @@
 /*************************
 DIMENSIONS
  ************************/
-#controls {
-	position: absolute;
-	bottom: 16px;
-	left: 16px;
-	z-index: 100;
-}
 
 #controls {
 	position: absolute;
@@ -166,4 +160,58 @@ DIMENSIONS
 :not(:defined) > * {
 	display: none;
 }
+
+/**************************
+hotspot
+ */
+/*.hotspot {*/
+/*	display: block;*/
+/*	width: 20px;*/
+/*	height: 20px;*/
+/*	border-radius: 10px;*/
+/*	border: none;*/
+/*	background-color: blue;*/
+/*	box-sizing: border-box;*/
+/*	pointer-events: none;*/
+/*}*/
+/*.annotation {*/
+/*	background-color: rgba(0, 0, 0, 0.7);*/
+/*	color: white;*/
+/*	position: absolute;*/
+/*	transform: translate(10px, 10px);*/
+/*	border-radius: 10px;*/
+/*	padding: 4px 8px;*/
+/*	font-size: 12px;*/
+/*	pointer-events: none;*/
+/*}*/
+
+.hotspot {
+	display: block;
+	width: 20px;
+	height: 20px;
+	border-radius: 10px;
+	border: none;
+	background-color: blue;
+	box-sizing: border-box;
+	pointer-events: none;
+}
+
+.hotspot[slot="hotspot-hand"] {
+	--min-hotspot-opacity: 0;
+	background-color: red;
+}
+
+.hotspot[slot="hotspot-foot"]:not([data-visible]) {
+	background-color: transparent;
+	border: 3px solid blue;
+}
+
+.annotation {
+	background-color: #ffffff;
+	position: absolute;
+	transform: translate(10px, 10px);
+	border-radius: 10px;
+	padding: 10px;
+}
+
 

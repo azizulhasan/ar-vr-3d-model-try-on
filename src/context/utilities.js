@@ -109,34 +109,37 @@ export const renderUserHotspots = (modelViewer, hotspots = []) => {
         btn.dataset.normal = hotspot.normal || "0 0 1";
         btn.title = hotspot.label;
 
-        // added inline styles as fallback if CSS doesn't load
-        btn.style.cssText = `
-      display: block;
-      width: 20px;
-      height: 20px;
-      border-radius: 10px;
-      border: none;
-      background-color: blue;
-      box-sizing: border-box;
-      pointer-events: auto;
-      position: relative;
-    `;
+        //TODO : don't remove these css. current static css is added to
+        // ar-vr-3d-model-try-on-public.css file. in future on demand this can be changed.
+    //     btn.style.cssText = `
+    //   display: block;
+    //   width: 20px;
+    //   height: 20px;
+    //   border-radius: 10px;
+    //   border: none;
+    //   background-color: blue;
+    //   box-sizing: border-box;
+    //   pointer-events: auto;
+    //   position: relative;
+    // `;
 
         const label = document.createElement("div");
         label.className = "annotation";
         label.textContent = hotspot.label;
 
-        // added inline styles for annotation as fallback
-        label.style.cssText = `
-      background-color: #ffffff;
-      position: absolute;
-      transform: translate(10px, 10px);
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-      white-space: nowrap;
-      pointer-events: none;
-    `;
+        //TODO : don't remove these css. current static css is added to
+        // ar-vr-3d-model-try-on-public.css file. in future on demand this can be changed.
+
+    //     label.style.cssText = `
+    //   background-color: #ffffff;
+    //   position: absolute;
+    //   transform: translate(10px, 10px);
+    //   border-radius: 10px;
+    //   padding: 10px;
+    //   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    //   white-space: nowrap;
+    //   pointer-events: none;
+    // `;
 
         btn.appendChild(label);
         modelViewer.appendChild(btn);
@@ -457,14 +460,13 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     }
     if (model_settings.ar_try_on_ar_button === "activate") {
         modelViewer.innerHTML = `<button> ${
-            model_settings.ar_try_on_ar_button_text || "Activate Ar"
+            model_settings.ar_try_on_ar_button_text || "Activate AR"
         } </button>`;
     }
 
 
+    // Dimension
     displayDimensions(modelViewer, model_settings);
-
-
 
 
     if (model_settings.hotspots && model_settings.hotspots.length > 0) {
