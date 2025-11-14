@@ -353,7 +353,6 @@ export const displayDimensions = (modelViewer, model_settings) => {
     });
 
     modelViewer.addEventListener("camera-change", UpdateDimensionAndLabels(modelViewer, model_settings));
-    // renderSVG();
 }
 
 
