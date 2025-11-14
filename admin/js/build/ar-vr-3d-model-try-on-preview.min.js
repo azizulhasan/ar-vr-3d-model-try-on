@@ -13,7 +13,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   convertLength: () => (/* binding */ convertLength),
 /* harmony export */   copyshortcode: () => (/* binding */ copyshortcode),
 /* harmony export */   createModal: () => (/* binding */ createModal),
-/* harmony export */   displayDimensions: () => (/* binding */ displayDimensions),
 /* harmony export */   getAPITypes: () => (/* binding */ getAPITypes),
 /* harmony export */   getPostID: () => (/* binding */ getPostID),
 /* harmony export */   getURL: () => (/* binding */ getURL),
@@ -27,10 +26,14 @@ __webpack_require__.r(__webpack_exports__);
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
@@ -197,132 +200,371 @@ function getDimensionLabel(value, model_settings) {
   var converted = convertLength(value, unit);
   return "".concat(converted.toFixed(1), " ").concat(unitLabel[unit]);
 }
-var displayDimensions = function displayDimensions(modelViewer, model_settings) {
-  var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll("button")), [modelViewer.querySelector("#dimLines")]);
-  function setVisibility(visible) {
-    dimElements.forEach(function (element) {
-      // console.log(element)
-      if (element) {
-        if (visible) {
-          element.classList.remove("hide");
-        } else {
-          element.classList.add("hide");
-        }
-      }
-    });
+
+// export const displayDimensions = (modelViewer, model_settings) => {
+//
+//     const dimElements = [
+//         ...modelViewer.querySelectorAll("button"),
+//         modelViewer.querySelector("#dimLines"),
+//     ];
+//
+//
+//     function setVisibility(visible) {
+//         dimElements.forEach((element) => {
+//             // console.log(element)
+//             if (element) {
+//                 if (visible) {
+//                     element.classList.remove("hide");
+//                 } else {
+//                     element.classList.add("hide");
+//                 }
+//             }
+//         });
+//     }
+//
+//     setVisibility(model_settings.dimensions.show);
+//
+//     modelViewer.addEventListener("ar-status", (event) => {
+//         console.log(event.detail)
+//         setVisibility(
+//             model_settings.dimensions.show &&
+//             event.detail.status !== "session-started"
+//         );
+//     });
+//     function UpdateDimensionAndLabels(modelViewer, model_settings, eventType = 'load') {
+//         const center = modelViewer.getBoundingBoxCenter();
+//         const size = modelViewer.getDimensions();
+//         if (!center || !size) return;
+//
+//         const x2 = size.x / 2;
+//         const y2 = size.y / 2;
+//         const z2 = size.z / 2;
+//
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dot+X-Y+Z",
+//             position: `${center.x + x2} ${center.y - y2} ${center.z + z2}`,
+//         });
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dim+X-Y",
+//             position: `${center.x + x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`,
+//         });
+//         // modelViewer.querySelector(
+//         //   'button[slot="hotspot-dim+X-Y"]'
+//         // ).textContent = `${(size.z * 100).toFixed(0)} cm`;
+//
+//         modelViewer.querySelector(
+//             'button[slot="hotspot-dim+X-Y"]'
+//         ).textContent = getDimensionLabel(size.z, model_settings);
+//
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dot+X-Y-Z",
+//             position: `${center.x + x2} ${center.y - y2} ${center.z - z2}`,
+//         });
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dim+X-Z",
+//             position: `${center.x + x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`,
+//         });
+//         // modelViewer.querySelector(
+//         //   'button[slot="hotspot-dim+X-Z"]'
+//         // ).textContent = `${(size.y * 100).toFixed(0)} cm`;
+//
+//         modelViewer.querySelector(
+//             'button[slot="hotspot-dim+X-Z"]'
+//         ).textContent = getDimensionLabel(size.y, model_settings);
+//
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dot+X+Y-Z",
+//             position: `${center.x + x2} ${center.y + y2} ${center.z - z2}`,
+//         });
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dim+Y-Z",
+//             position: `${center.x} ${center.y + y2 * 1.1} ${center.z - z2 * 1.1}`,
+//         });
+//
+//         // modelViewer.querySelector(
+//         //   'button[slot="hotspot-dim+Y-Z"]'
+//         // ).textContent = `${(size.x * 100).toFixed(0)} cm`;
+//
+//         modelViewer.querySelector(
+//             'button[slot="hotspot-dim+Y-Z"]'
+//         ).textContent = getDimensionLabel(size.x, model_settings);
+//
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dot-X+Y-Z",
+//             position: `${center.x - x2} ${center.y + y2} ${center.z - z2}`,
+//         });
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dim-X-Z",
+//             position: `${center.x - x2 * 1.2} ${center.y} ${center.z - z2 * 1.2}`,
+//         });
+//         // modelViewer.querySelector(
+//         //   'button[slot="hotspot-dim-X-Z"]'
+//         // ).textContent = `${(size.y * 100).toFixed(0)} cm`;
+//
+//         modelViewer.querySelector(
+//             'button[slot="hotspot-dim-X-Z"]'
+//         ).textContent = getDimensionLabel(size.y, model_settings);
+//
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dot-X-Y-Z",
+//             position: `${center.x - x2} ${center.y - y2} ${center.z - z2}`,
+//         });
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dim-X-Y",
+//             position: `${center.x - x2 * 1.2} ${center.y - y2 * 1.1} ${center.z}`,
+//         });
+//         // modelViewer.querySelector(
+//         //   'button[slot="hotspot-dim-X-Y"]'
+//         // ).textContent = `${(size.z * 100).toFixed(0)} cm`;
+//
+//         modelViewer.querySelector(
+//             'button[slot="hotspot-dim-X-Y"]'
+//         ).textContent = getDimensionLabel(size.z, model_settings);
+//
+//         modelViewer.updateHotspot({
+//             name: "hotspot-dot-X-Y+Z",
+//             position: `${center.x - x2} ${center.y - y2} ${center.z + z2}`,
+//         });
+//         if(eventType === 'load') {
+//             renderSVG()
+//         }else {
+//             setTimeout(() =>{
+//                 renderSVG()
+//             },1000)
+//         }
+//     }
+//
+//     function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
+//         console.log({dotHotspot1, dotHotspot2 , dimensionHotspot})
+//         if (dotHotspot1 && dotHotspot2 && svgLine) {
+//             svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
+//             svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
+//             svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
+//             svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
+//             if (dimensionHotspot && !dimensionHotspot.facingCamera) {
+//                 svgLine.classList.add("hide");
+//             } else {
+//                 svgLine.classList.remove("hide");
+//             }
+//         }
+//     }
+//
+//     const dimLines = modelViewer.querySelectorAll("line");
+//
+//     const renderSVG = () => {
+//         drawLine(
+//             dimLines[0],
+//             modelViewer.queryHotspot("hotspot-dot+X-Y+Z"),
+//             modelViewer.queryHotspot("hotspot-dot+X-Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dim+X-Y")
+//         );
+//         drawLine(
+//             dimLines[1],
+//             modelViewer.queryHotspot("hotspot-dot+X-Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dot+X+Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dim+X-Z")
+//         );
+//         drawLine(
+//             dimLines[2],
+//             modelViewer.queryHotspot("hotspot-dot+X+Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dot-X+Y-Z")
+//         );
+//         drawLine(
+//             dimLines[3],
+//             modelViewer.queryHotspot("hotspot-dot-X+Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dot-X-Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dim-X-Z")
+//         );
+//         drawLine(
+//             dimLines[4],
+//             modelViewer.queryHotspot("hotspot-dot-X-Y-Z"),
+//             modelViewer.queryHotspot("hotspot-dot-X-Y+Z"),
+//             modelViewer.queryHotspot("hotspot-dim-X-Y")
+//         );
+//     };
+//
+//     modelViewer.addEventListener("load", () => {
+//         UpdateDimensionAndLabels(modelViewer, model_settings)
+//     });
+//
+//     modelViewer.addEventListener("camera-change", UpdateDimensionAndLabels(modelViewer, model_settings, 'camera-change'));
+// }
+
+function displayDimensions(modelViewer, model_settings) {
+  var _model_settings$dimen2;
+  // FIXED: Check if dimension elements already exist before adding
+  var existingDimLines = modelViewer.querySelector("#dimLines");
+  var existingHotspots = modelViewer.querySelectorAll('.dot');
+  if (!existingDimLines || !existingHotspots) {
+    var hotspotHTML = "\n              <!-- Hotspots -->\n              <button slot=\"hotspot-dot+X-Y+Z\" class=\"dot\" data-position=\"1 -1 1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Y\" class=\"dim\" data-position=\"1 -1 0\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X-Y-Z\" class=\"dot\" data-position=\"1 -1 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Z\" class=\"dim\" data-position=\"1 0 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X+Y-Z\" class=\"dot\" data-position=\"1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim+Y-Z\" class=\"dim\" data-position=\"0 -1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dot-X+Y-Z\" class=\"dot\" data-position=\"-1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim-X-Z\" class=\"dim\" data-position=\"-1 0 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y-Z\" class=\"dot\" data-position=\"-1 -1 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dim-X-Y\" class=\"dim\" data-position=\"-1 -1 0\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y+Z\" class=\"dot\" data-position=\"-1 -1 1\" data-normal=\"-1 0 0\"></button>\n\n        <!-- Dimension lines -->\n        <svg id=\"dimLines\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dimensionLineContainer\">\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n        </svg>\n        ";
+    modelViewer.insertAdjacentHTML("beforeend", hotspotHTML);
   }
-  setVisibility(model_settings.dimensions.show);
-  modelViewer.addEventListener("ar-status", function (event) {
-    console.log(event.detail);
-    setVisibility(model_settings.dimensions.show && event.detail.status !== "session-started");
-  });
-  function UpdateDimensionAndLabels(modelViewer, model_settings) {
+  var unit = ((_model_settings$dimen2 = model_settings.dimensions) === null || _model_settings$dimen2 === void 0 ? void 0 : _model_settings$dimen2.unit) || "cm";
+  var conversion = {
+    cm: function cm(v) {
+      return v * 100;
+    },
+    m: function m(v) {
+      return v;
+    },
+    inch: function inch(v) {
+      return v * 39.3701;
+    }
+  };
+  var unitLabel = {
+    cm: "cm",
+    m: "m",
+    inch: "in"
+  };
+  var formatValue = function formatValue(v) {
+    return "".concat(conversion[unit](v).toFixed(1), " ").concat(unitLabel[unit]);
+  };
+  var hotspots = [{
+    dot: "hotspot-dot+X-Y+Z",
+    pos: function pos(c, s) {
+      return [c.x + s.x / 2, c.y - s.y / 2, c.z + s.z / 2];
+    }
+  }, {
+    dot: "hotspot-dot+X-Y-Z",
+    pos: function pos(c, s) {
+      return [c.x + s.x / 2, c.y - s.y / 2, c.z - s.z / 2];
+    }
+  }, {
+    dot: "hotspot-dot+X+Y-Z",
+    pos: function pos(c, s) {
+      return [c.x + s.x / 2, c.y + s.y / 2, c.z - s.z / 2];
+    }
+  }, {
+    dot: "hotspot-dot-X+Y-Z",
+    pos: function pos(c, s) {
+      return [c.x - s.x / 2, c.y + s.y / 2, c.z - s.z / 2];
+    }
+  }, {
+    dot: "hotspot-dot-X-Y-Z",
+    pos: function pos(c, s) {
+      return [c.x - s.x / 2, c.y - s.y / 2, c.z - s.z / 2];
+    }
+  }, {
+    dot: "hotspot-dot-X-Y+Z",
+    pos: function pos(c, s) {
+      return [c.x - s.x / 2, c.y - s.y / 2, c.z + s.z / 2];
+    }
+  }];
+  var dimLabels = [{
+    name: "hotspot-dim+X-Y",
+    pos: function pos(c, s) {
+      return [c.x + s.x * 0.6, c.y - s.y * 0.55, c.z];
+    },
+    value: function value(s) {
+      return formatValue(s.z);
+    }
+  }, {
+    name: "hotspot-dim+X-Z",
+    pos: function pos(c, s) {
+      return [c.x + s.x * 0.6, c.y, c.z - s.z * 0.6];
+    },
+    value: function value(s) {
+      return formatValue(s.y);
+    }
+  }, {
+    name: "hotspot-dim+Y-Z",
+    pos: function pos(c, s) {
+      return [c.x, c.y + s.y * 0.55, c.z - s.z * 0.55];
+    },
+    value: function value(s) {
+      return formatValue(s.x);
+    }
+  }, {
+    name: "hotspot-dim-X-Z",
+    pos: function pos(c, s) {
+      return [c.x - s.x * 0.6, c.y, c.z - s.z * 0.6];
+    },
+    value: function value(s) {
+      return formatValue(s.y);
+    }
+  }, {
+    name: "hotspot-dim-X-Y",
+    pos: function pos(c, s) {
+      return [c.x - s.x * 0.6, c.y - s.y * 0.55, c.z];
+    },
+    value: function value(s) {
+      return formatValue(s.z);
+    }
+  }];
+  function updateHotspots() {
     var center = modelViewer.getBoundingBoxCenter();
     var size = modelViewer.getDimensions();
     if (!center || !size) return;
-    var x2 = size.x / 2;
-    var y2 = size.y / 2;
-    var z2 = size.z / 2;
-    modelViewer.updateHotspot({
-      name: "hotspot-dot+X-Y+Z",
-      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
-    });
-    modelViewer.updateHotspot({
-      name: "hotspot-dim+X-Y",
-      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
-    });
-    // modelViewer.querySelector(
-    //   'button[slot="hotspot-dim+X-Y"]'
-    // ).textContent = `${(size.z * 100).toFixed(0)} cm`;
 
-    modelViewer.querySelector('button[slot="hotspot-dim+X-Y"]').textContent = getDimensionLabel(size.z, model_settings);
-    modelViewer.updateHotspot({
-      name: "hotspot-dot+X-Y-Z",
-      position: "".concat(center.x + x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: "hotspot-dim+X-Z",
-      position: "".concat(center.x + x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
-    });
-    // modelViewer.querySelector(
-    //   'button[slot="hotspot-dim+X-Z"]'
-    // ).textContent = `${(size.y * 100).toFixed(0)} cm`;
-
-    modelViewer.querySelector('button[slot="hotspot-dim+X-Z"]').textContent = getDimensionLabel(size.z, model_settings);
-    modelViewer.updateHotspot({
-      name: "hotspot-dot+X+Y-Z",
-      position: "".concat(center.x + x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: "hotspot-dim+Y-Z",
-      position: "".concat(center.x, " ").concat(center.y + y2 * 1.1, " ").concat(center.z - z2 * 1.1)
+    // Dot hotspots (6)
+    hotspots.forEach(function (h) {
+      var _h$pos = h.pos(center, size),
+        _h$pos2 = _slicedToArray(_h$pos, 3),
+        x = _h$pos2[0],
+        y = _h$pos2[1],
+        z = _h$pos2[2];
+      modelViewer.updateHotspot({
+        name: h.dot,
+        position: "".concat(x, " ").concat(y, " ").concat(z)
+      });
     });
 
-    // modelViewer.querySelector(
-    //   'button[slot="hotspot-dim+Y-Z"]'
-    // ).textContent = `${(size.x * 100).toFixed(0)} cm`;
-
-    modelViewer.querySelector('button[slot="hotspot-dim+Y-Z"]').textContent = getDimensionLabel(size.z, model_settings);
-    modelViewer.updateHotspot({
-      name: "hotspot-dot-X+Y-Z",
-      position: "".concat(center.x - x2, " ").concat(center.y + y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: "hotspot-dim-X-Z",
-      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y, " ").concat(center.z - z2 * 1.2)
-    });
-    // modelViewer.querySelector(
-    //   'button[slot="hotspot-dim-X-Z"]'
-    // ).textContent = `${(size.y * 100).toFixed(0)} cm`;
-
-    modelViewer.querySelector('button[slot="hotspot-dim-X-Z"]').textContent = getDimensionLabel(size.z, model_settings);
-    modelViewer.updateHotspot({
-      name: "hotspot-dot-X-Y-Z",
-      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z - z2)
-    });
-    modelViewer.updateHotspot({
-      name: "hotspot-dim-X-Y",
-      position: "".concat(center.x - x2 * 1.2, " ").concat(center.y - y2 * 1.1, " ").concat(center.z)
-    });
-    // modelViewer.querySelector(
-    //   'button[slot="hotspot-dim-X-Y"]'
-    // ).textContent = `${(size.z * 100).toFixed(0)} cm`;
-
-    modelViewer.querySelector('button[slot="hotspot-dim-X-Y"]').textContent = getDimensionLabel(size.z, model_settings);
-    modelViewer.updateHotspot({
-      name: "hotspot-dot-X-Y+Z",
-      position: "".concat(center.x - x2, " ").concat(center.y - y2, " ").concat(center.z + z2)
+    // Dimension label hotspots (5)
+    dimLabels.forEach(function (h) {
+      var _h$pos3 = h.pos(center, size),
+        _h$pos4 = _slicedToArray(_h$pos3, 3),
+        x = _h$pos4[0],
+        y = _h$pos4[1],
+        z = _h$pos4[2];
+      modelViewer.updateHotspot({
+        name: h.name,
+        position: "".concat(x, " ").concat(y, " ").concat(z)
+      });
+      var btn = modelViewer.querySelector("button[slot=\"".concat(h.name, "\"]"));
+      if (btn) btn.textContent = h.value(size);
     });
   }
-  function drawLine(svgLine, dotHotspot1, dotHotspot2, dimensionHotspot) {
-    if (dotHotspot1 && dotHotspot2 && svgLine) {
-      svgLine.setAttribute("x1", dotHotspot1.canvasPosition.x);
-      svgLine.setAttribute("y1", dotHotspot1.canvasPosition.y);
-      svgLine.setAttribute("x2", dotHotspot2.canvasPosition.x);
-      svgLine.setAttribute("y2", dotHotspot2.canvasPosition.y);
-      if (dimensionHotspot && !dimensionHotspot.facingCamera) {
-        svgLine.classList.add("hide");
-      } else {
-        svgLine.classList.remove("hide");
-      }
-    }
+
+  // Show or hide dimension UI
+  function setVisibility(visible) {
+    var dimElements = [].concat(_toConsumableArray(modelViewer.querySelectorAll("button")), [modelViewer.querySelector("#dimLines")]);
+    dimElements.forEach(function (el) {
+      return el === null || el === void 0 ? void 0 : el.classList.toggle("hide", !visible);
+    });
   }
+  setVisibility(model_settings.dimensions.show);
+
+  // SVG line redraw
   var dimLines = modelViewer.querySelectorAll("line");
+  function draw(line, a, b, label) {
+    if (!a || !b) return;
+    line.setAttribute("x1", a.canvasPosition.x);
+    line.setAttribute("y1", a.canvasPosition.y);
+    line.setAttribute("x2", b.canvasPosition.x);
+    line.setAttribute("y2", b.canvasPosition.y);
+    line.classList.toggle("hide", label && !label.facingCamera);
+  }
   var renderSVG = function renderSVG() {
-    drawLine(dimLines[0], modelViewer.queryHotspot("hotspot-dot+X-Y+Z"), modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Y"));
-    drawLine(dimLines[1], modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Z"));
-    drawLine(dimLines[2], modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X+Y-Z"));
-    drawLine(dimLines[3], modelViewer.queryHotspot("hotspot-dot-X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dim-X-Z"));
-    drawLine(dimLines[4], modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y+Z"), modelViewer.queryHotspot("hotspot-dim-X-Y"));
+    draw(dimLines[0], modelViewer.queryHotspot("hotspot-dot+X-Y+Z"), modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Y"));
+    draw(dimLines[1], modelViewer.queryHotspot("hotspot-dot+X-Y-Z"), modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dim+X-Z"));
+    draw(dimLines[2], modelViewer.queryHotspot("hotspot-dot+X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X+Y-Z"));
+    draw(dimLines[3], modelViewer.queryHotspot("hotspot-dot-X+Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dim-X-Z"));
+    draw(dimLines[4], modelViewer.queryHotspot("hotspot-dot-X-Y-Z"), modelViewer.queryHotspot("hotspot-dot-X-Y+Z"), modelViewer.queryHotspot("hotspot-dim-X-Y"));
   };
+
+  // Events
   modelViewer.addEventListener("load", function () {
-    UpdateDimensionAndLabels(modelViewer, model_settings);
+    updateHotspots();
     renderSVG();
-    modelViewer.addEventListener("camera-change", renderSVG);
   });
-  modelViewer.addEventListener("camera-change", UpdateDimensionAndLabels(modelViewer, model_settings));
-  // renderSVG();
-};
+  modelViewer.addEventListener("camera-change", function () {
+    updateHotspots();
+    renderSVG();
+  });
+  modelViewer.addEventListener("ar-status", function (event) {
+    setVisibility(model_settings.dimensions.show && event.detail.status !== "session-started");
+  });
+}
 var setModelAttributes = function setModelAttributes(modelViewer, model_settings) {
   var _model_settings$shado;
   console.log({
@@ -400,33 +642,7 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
   if (model_settings.ar_try_on_ar_button === "activate") {
     modelViewer.innerHTML = "<button> ".concat(model_settings.ar_try_on_ar_button_text || "Activate Ar", " </button>");
   }
-
-  // FIXED: Check if dimension elements already exist before adding
-  var existingDimLines = modelViewer.querySelector("#dimLines");
-  var existingHotspots = modelViewer.querySelectorAll('.dot');
-  if (model_settings.dimensions.show) {
-    if (!existingDimLines || !existingHotspots) {
-      var hotspotHTML = "\n              <!-- Hotspots -->\n              <button slot=\"hotspot-dot+X-Y+Z\" class=\"dot\" data-position=\"1 -1 1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Y\" class=\"dim\" data-position=\"1 -1 0\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X-Y-Z\" class=\"dot\" data-position=\"1 -1 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dim+X-Z\" class=\"dim\" data-position=\"1 0 -1\" data-normal=\"1 0 0\"></button>\n              <button slot=\"hotspot-dot+X+Y-Z\" class=\"dot\" data-position=\"1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim+Y-Z\" class=\"dim\" data-position=\"0 -1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dot-X+Y-Z\" class=\"dot\" data-position=\"-1 1 -1\" data-normal=\"0 1 0\"></button>\n              <button slot=\"hotspot-dim-X-Z\" class=\"dim\" data-position=\"-1 0 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y-Z\" class=\"dot\" data-position=\"-1 -1 -1\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dim-X-Y\" class=\"dim\" data-position=\"-1 -1 0\" data-normal=\"-1 0 0\"></button>\n              <button slot=\"hotspot-dot-X-Y+Z\" class=\"dot\" data-position=\"-1 -1 1\" data-normal=\"-1 0 0\"></button>\n\n        <!-- Dimension lines -->\n        <svg id=\"dimLines\" width=\"100%\" height=\"100%\" xmlns=\"http://www.w3.org/2000/svg\" class=\"dimensionLineContainer\">\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n            <line class=\"dimensionLine\"></line>\n        </svg>\n        ";
-      modelViewer.insertAdjacentHTML("beforeend", hotspotHTML);
-    }
-    displayDimensions(modelViewer, model_settings);
-  } else {
-    if (existingDimLines) {
-      existingDimLines.remove();
-    }
-    if (existingHotspots) {
-      var existingDims = modelViewer.querySelectorAll('.dim');
-      if (existingDims) {
-        _toConsumableArray(existingDims).forEach(function (item) {
-          console.log(item);
-          item.remove();
-        });
-      }
-      _toConsumableArray(existingHotspots).forEach(function (item) {
-        item.remove();
-      });
-    }
-  }
+  displayDimensions(modelViewer, model_settings);
   if (model_settings.hotspots && model_settings.hotspots.length > 0) {
     renderUserHotspots(modelViewer, model_settings.hotspots);
   }
