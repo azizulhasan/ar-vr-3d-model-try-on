@@ -147,12 +147,12 @@
   margin-top: 0.5rem
 }
 
-.art-mt-4 {
-  margin-top: 1rem
-}
-
 .art-mt-3 {
   margin-top: 0.75rem
+}
+
+.art-mt-4 {
+  margin-top: 1rem
 }
 
 .art-block {
@@ -283,12 +283,20 @@
   width: 100%
 }
 
+.art-w-\[200\] {
+  width: 200
+}
+
 .art-max-w-lg {
   max-width: 32rem
 }
 
 .art-max-w-none {
   max-width: none
+}
+
+.art-max-w-4xl {
+  max-width: 56rem
 }
 
 .art-flex-1 {
@@ -310,6 +318,14 @@
 
 .art-cursor-pointer {
   cursor: pointer
+}
+
+.art-cursor-grab {
+  cursor: grab
+}
+
+.art-cursor-move {
+  cursor: move
 }
 
 .art-select-none {
@@ -796,6 +812,11 @@
   color: rgb(255 255 255 / var(--tw-text-opacity, 1))
 }
 
+.art-text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}
+
 .art-underline {
   text-decoration-line: underline
 }
@@ -911,6 +932,16 @@
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
 }
 
+.hover\:art-bg-blue-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}
+
+.hover\:art-bg-red-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}
+
 .hover\:art-bg-opacity-10:hover {
   --tw-bg-opacity: 0.1
 }
@@ -982,6 +1013,10 @@
 .focus\:art-ring-blue-400:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(96 165 250 / var(--tw-ring-opacity, 1))
+}
+
+.active\:art-cursor-grabbing:active {
+  cursor: grabbing
 }
 
 .art-group:hover .group-hover\:art-visible {
