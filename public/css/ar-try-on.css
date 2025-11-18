@@ -30,6 +30,10 @@
   position: relative
 }
 
+.art-sticky {
+  position: sticky
+}
+
 .art-inset-0 {
   inset: 0px
 }
@@ -77,6 +81,10 @@
 
 .art-top-2 {
   top: 0.5rem
+}
+
+.art-top-5 {
+  top: 1.25rem
 }
 
 .art-top-\[-1px\] {
@@ -199,6 +207,11 @@
   height: 10vh
 }
 
+.art-h-fit {
+  height: -moz-fit-content;
+  height: fit-content
+}
+
 .art-h-full {
   height: 100%
 }
@@ -283,20 +296,12 @@
   width: 100%
 }
 
-.art-w-\[200\] {
-  width: 200
-}
-
 .art-max-w-lg {
   max-width: 32rem
 }
 
 .art-max-w-none {
   max-width: none
-}
-
-.art-max-w-4xl {
-  max-width: 56rem
 }
 
 .art-flex-1 {
@@ -312,20 +317,16 @@
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
 }
 
+.art-cursor-move {
+  cursor: move
+}
+
 .art-cursor-not-allowed {
   cursor: not-allowed
 }
 
 .art-cursor-pointer {
   cursor: pointer
-}
-
-.art-cursor-grab {
-  cursor: grab
-}
-
-.art-cursor-move {
-  cursor: move
 }
 
 .art-select-none {
@@ -812,11 +813,6 @@
   color: rgb(255 255 255 / var(--tw-text-opacity, 1))
 }
 
-.art-text-red-600 {
-  --tw-text-opacity: 1;
-  color: rgb(220 38 38 / var(--tw-text-opacity, 1))
-}
-
 .art-underline {
   text-decoration-line: underline
 }
@@ -917,6 +913,11 @@
   background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1))
 }
 
+.hover\:art-bg-blue-600:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}
+
 .hover\:art-bg-gray-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1))
@@ -930,16 +931,6 @@
 .hover\:art-bg-gray-50:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
-}
-
-.hover\:art-bg-blue-600:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
-}
-
-.hover\:art-bg-red-100:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
 }
 
 .hover\:art-bg-opacity-10:hover {
@@ -1013,10 +1004,6 @@
 .focus\:art-ring-blue-400:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(96 165 250 / var(--tw-ring-opacity, 1))
-}
-
-.active\:art-cursor-grabbing:active {
-  cursor: grabbing
 }
 
 .art-group:hover .group-hover\:art-visible {

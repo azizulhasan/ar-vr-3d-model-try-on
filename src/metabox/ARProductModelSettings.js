@@ -25,6 +25,8 @@ const ARProductModelSettings = () => {
     environment_source_type: "upload",
     skybox_source_type: "upload",
     ios_src: "upload",
+    thumbnail_image: "upload"
+
   });
   const [productModel, setProductModel] = useState({
     src: "",
@@ -59,6 +61,8 @@ const ARProductModelSettings = () => {
       length: { value: 5, unit: "cm" },
     },
     hotspots: [],
+    thumbnail_image: "",
+
   });
 
   const { dimensions = {} } = productModel;
@@ -563,7 +567,12 @@ const ARProductModelSettings = () => {
             <SaveButton classes="art-w-96 art-mb-4" />
           </div>
 
-          <div id="atlas_ar_preview"></div>
+
+<div id="atlas_ar_preview" className="art-sticky art-top-5 art-h-fit"></div>
+
+
+
+
         </div>
         <div className="art-hidden art-w-96 art-w-1/3"></div>
       </div>
