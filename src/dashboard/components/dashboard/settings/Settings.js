@@ -125,8 +125,8 @@ export default function Settings({ settings, handleChange }) {
             onClick={ar_try_on_demo_id}
             className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border-none"
             style={{
-              backgroundColor: "var(--theme-accent)",
-              color: "var(--theme-text)",
+              backgroundColor: "#1E88E5",
+              color: "white",
             }}
           >
             Preview Demo

@@ -162,7 +162,7 @@ export default function Integration({
                             style={{
                                 padding: "8px 12px",
                                 marginBottom: "10px",
-                                background: "#4CAF50",
+                                background: "#1E88E5",
                                 color: "white",
                                 border: "none",
                                 borderRadius: "4px",
@@ -203,7 +203,8 @@ export default function Integration({
                                         visibility: index != 0 ? 'visible' : 'hidden'
                                     }}
                                 >
-                                    Delete
+                                 <span class="dashicons dashicons-trash"></span>
+
                                 </button>
                             </div>
                             
