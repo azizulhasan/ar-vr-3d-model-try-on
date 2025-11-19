@@ -394,7 +394,7 @@ export default function App() {
                   style={{
                     backgroundColor:
                       activeTab === tab.name
-                        ? "rgba(0, 0, 0, 0.4)"
+                        ? "rgb(59,130,246)"
                         : "transparent",
                     color: activeTab === tab.name ? "#ffffff" : "inherit",
                     border: "none",
@@ -452,28 +452,24 @@ export default function App() {
 
           {activeTab !== "Documentation" && activeTab !== "Features" && (
             <div
-              className={`art-border-t art-shadow-lg art-p-4 art-z-50 art-transition-all art-duration-300 ${
+              className={`art-border-t art-shadow-lg art-z-50 art-transition-all art-duration-300 ${
                 activeTab === "Integration"
                   ? "art-relative"
                   : `art-fixed art-bottom-0 art-right-0 ${
-                      isSidebarOpen ? "art-left-[410px]" : "art-left-0"
+                      isSidebarOpen ? "art-left-[415px]" : "art-left-0"
                     }`
               }`}
               style={{
                 backgroundColor: "var(--theme-bg)",
               }}
             >
-              <button
-                onClick={handleSubmit}
-                className="art-w-full art-p-3 art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer"
-                style={{
-                  backgroundColor: "var(--theme-accent)",
-                  color: "var(--theme-text)",
-                  border: "1px solid var(--theme-accent)",
-                }}
-              >
-                Save
-              </button>
+<button
+  onClick={handleSubmit}
+  className="art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer"
+
+>
+  Save
+</button>
             </div>
           )}
         </div>
