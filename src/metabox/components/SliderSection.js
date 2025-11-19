@@ -20,13 +20,17 @@ const SliderSection = ({
         alt: "",
         skybox_image: "",
         environment_image: "",
+        thumbnail_image: ""
       },
     },
   ]);
 
-
-console.log({ items})
-
+  console.log({
+    items: Object.assign(
+      {},
+      items.map((item) => ({ ...item.data }))
+    ),
+  });
 
 
   const [dragIndex, setDragIndex] = useState(null);
@@ -66,6 +70,7 @@ console.log({ items})
         alt: "",
         skybox_image: "",
         environment_image: "",
+        thumbnail_image: ""
       },
     };
 

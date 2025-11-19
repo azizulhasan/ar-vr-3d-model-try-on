@@ -14,6 +14,10 @@
   pointer-events: none
 }
 
+.art-visible {
+  visibility: visible
+}
+
 .art-invisible {
   visibility: hidden
 }
@@ -231,8 +235,16 @@
   margin-top: 1rem
 }
 
+.art-mb-2\.5 {
+  margin-bottom: 0.625rem
+}
+
 .art-block {
   display: block
+}
+
+.art-inline-block {
+  display: inline-block
 }
 
 .art-flex {
@@ -412,12 +424,30 @@
   flex: 1 1 0%
 }
 
+.art-flex-shrink-0 {
+  flex-shrink: 0
+}
+
 .art-shrink-0 {
   flex-shrink: 0
 }
 
+.art-translate-x-0 {
+  --tw-translate-x: 0px;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.art-translate-x-5 {
+  --tw-translate-x: 1.25rem;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
 .art-rotate-180 {
   --tw-rotate: 180deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
+}
+
+.art-transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))
 }
 
@@ -547,6 +577,12 @@
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
 }
 
+.art-space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))
+}
+
 .art-overflow-hidden {
   overflow: hidden
 }
@@ -597,6 +633,10 @@
 
 .art-border-\[1\.25px\] {
   border-width: 1.25px
+}
+
+.art-border-0 {
+  border-width: 0px
 }
 
 .art-border-b {
@@ -713,6 +753,26 @@
 .art-bg-\[\#1E88E5\] {
   --tw-bg-opacity: 1;
   background-color: rgb(30 136 229 / var(--tw-bg-opacity, 1))
+}
+
+.art-bg-red-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1))
+}
+
+.art-bg-gray-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(107 114 128 / var(--tw-bg-opacity, 1))
+}
+
+.art-bg-blue-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 246 255 / var(--tw-bg-opacity, 1))
+}
+
+.art-bg-blue-600 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
 }
 
 .art-fill-current {
@@ -922,6 +982,15 @@
   color: rgb(30 41 59 / var(--tw-text-opacity, 1))
 }
 
+.art-text-inherit {
+  color: inherit
+}
+
+.art-text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1))
+}
+
 .art-underline {
   text-decoration-line: underline
 }
@@ -962,6 +1031,23 @@
   --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}
+
+.art-shadow {
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
+}
+
+.art-outline-none {
+  outline: 2px solid transparent;
+  outline-offset: 2px
+}
+
+.art-ring-0 {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)
 }
 
 .art-transition {
@@ -1042,6 +1128,11 @@
   background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1))
 }
 
+.hover\:art-bg-red-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 226 226 / var(--tw-bg-opacity, 1))
+}
+
 .hover\:art-bg-opacity-10:hover {
   --tw-bg-opacity: 0.1
 }
@@ -1094,6 +1185,11 @@
   border-color: rgb(96 165 250 / var(--tw-border-opacity, 1))
 }
 
+.focus\:art-outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px
+}
+
 .focus\:art-ring-1:focus {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
@@ -1113,6 +1209,15 @@
 .focus\:art-ring-blue-400:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(96 165 250 / var(--tw-ring-opacity, 1))
+}
+
+.focus\:art-ring-blue-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(59 130 246 / var(--tw-ring-opacity, 1))
+}
+
+.focus\:art-ring-offset-2:focus {
+  --tw-ring-offset-width: 2px
 }
 
 .art-group:hover .group-hover\:art-visible {
