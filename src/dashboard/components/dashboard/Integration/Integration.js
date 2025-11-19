@@ -156,15 +156,8 @@ export default function Integration({
                         <button
                             type="button"
                             onClick={addHeader}
-                            style={{
-                                padding: "8px 12px",
-                                marginBottom: "10px",
-                                background: "#4CAF50",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                            }}
+                            className="art-px-3 art-py-2 art-mb-2.5 art-bg-blue-500 art-text-white art-border-0 art-rounded art-cursor-pointer"
+
                         >
                             Add Header
                         </button>
@@ -190,17 +183,12 @@ export default function Integration({
                                 <button
                                     type="button"
                                     onClick={() => removeHeader(index)}
-                                    style={{
-                                        padding: "8px 12px",
-                                        background: "#f44336",
-                                        color: "white",
-                                        border: "none",
-                                        borderRadius: "4px",
-                                        cursor: "pointer",
-                                        visibility: index != 0 ? 'visible' : 'hidden'
-                                    }}
+                                    className={"art-px-3 art-py-2 art-bg-gray-200 art-text-black art-border-1 art-rounded art-cursor-pointer " + (index !== 0 ? "art-visible" : "art-invisible")
+}
+
                                 >
-                                    Delete
+                                 <span class="dashicons dashicons-trash"></span>
+
                                 </button>
                             </div>
                             

@@ -33,6 +33,7 @@ const SliderSection = ({
   });
 
 
+
   const [dragIndex, setDragIndex] = useState(null);
 
   const handleDragStart = (index) => {
