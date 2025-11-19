@@ -394,7 +394,7 @@ export default function App() {
                   style={{
                     backgroundColor:
                       activeTab === tab.name
-                        ? "#1E88E5"
+                        ? "rgb(59,130,246)"
                         : "transparent",
                     color: activeTab === tab.name ? "#ffffff" : "inherit",
                     border: "none",
@@ -465,12 +465,8 @@ export default function App() {
             >
 <button
   onClick={handleSubmit}
-  className="art-w-full art-p-3 art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer"
-  style={{
-    backgroundColor: "#1E88E5",
-    color: "#FFFFFF",
-    border: "1px solid #1E88E5",
-  }}
+  className="art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer"
+
 >
   Save
 </button>
