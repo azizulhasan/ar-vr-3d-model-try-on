@@ -124,10 +124,6 @@ export default function Settings({ settings, handleChange }) {
             id={"ar_try_on_demo_id"}
             onClick={ar_try_on_demo_id}
             className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border-none"
-            style={{
-              backgroundColor: "var(--theme-accent)",
-              color: "var(--theme-text)",
-            }}
           >
             Preview Demo
           </button>

@@ -378,7 +378,7 @@ const ARProductModelSettings = () => {
                             />
                         )}
 
-                        {(activeSection === 'settings' || activeSection === 'style') && <SaveButton/>}
+                        {(activeSection === 'settings' || activeSection === 'style') && <SaveButton classes="art-fixed art-left-6 art-bottom-6 art-w-[575px]" />}
 
                         {activeSection === 'integration' && isProductModelLoaded && (
                             <IntegrationSection
@@ -421,7 +421,7 @@ const ARProductModelSettings = () => {
                         <SaveButton classes="art-w-96 art-mb-4"/>
                     </div>
 
-                    <div id='atlas_ar_preview'></div>
+                    <div id='atlas_ar_preview' className="art-sticky art-top-5 art-h-fit"></div>
                 </div>
                 <div className="art-hidden art-w-96 art-w-1/3"></div>
             </div>
