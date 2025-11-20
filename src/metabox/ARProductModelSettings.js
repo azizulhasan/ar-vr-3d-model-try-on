@@ -7,7 +7,7 @@ import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
-
+import SpinnerModal from "./components/SpinnerModal.js";
 
 
 const ARProductModelSettings = () => {
@@ -49,6 +49,8 @@ const ARProductModelSettings = () => {
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(false)
+         const [isSaving, setIsSaving] = useState(false);
+      
 
 
     // Accordion state
@@ -238,47 +240,60 @@ const ARProductModelSettings = () => {
     }, [productModel.exclude_integration_api_model_type]);
 
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const postId = getPostID()
-        if (!postId) {
-            notify('Please publish the post first. Then reload the page and save.', 'warn',{
-                autoClose: 5000,
-            })
-            return;
-        }
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const postId = getPostID()
+    if (!postId) {
+        notify('Please publish the post first. Then reload the page and save.', 'warn',{
+            autoClose: 5000,
+        })
+        return;
+    }
 
-        let hasValueChanged = isDifferent(previousProductModel, productModel);
-        if (!hasValueChanged) {
-            notify('No changes detected', 'info',{
-                autoClose: 5000,
-            })
-            return;
-        }
+    let hasValueChanged = isDifferent(previousProductModel, productModel);
+    if (!hasValueChanged) {
+        notify('No changes detected', 'info',{
+            autoClose: 5000,
+        })
+        return;
+    }
 
+    setIsSaving(true); 
+
+    try {
         let formData = new FormData();
         formData.append('fields', JSON.stringify(productModel));
         formData.append('post_id', postId);
         formData.append('method', 'POST');
         formData.append('has_value_changed', hasValueChanged);
-        postWithoutImage(getURL('get_model_and_settings'), formData)
-            .then((res) => {
-                console.log(res)
-                setProductModel({...productModel, ...res.data});
-                notify('Successfully Saved Data.', 'success',{
-                    autoClose: 5000,
-                })
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    };
+        
+        const res = await postWithoutImage(getURL('get_model_and_settings'), formData);
+        
+        console.log(res)
+        setProductModel({...productModel, ...res.data});
+        setPreviousProductModel({...productModel, ...res.data}); 
+        notify('Successfully Saved Data.', 'success',{
+            autoClose: 5000,
+        })
+    } catch (err) {
+        console.log(err);
+        notify('Error saving data', 'error', {
+            autoClose: 5000,
+        });
+    } finally {
+        setIsSaving(false); 
+    }
+};
 
     const SaveButton = ({classes = 'art-w-full'}) => (
         <button
             type="button"
             onClick={handleSubmit}
-            className={"art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 " + classes}
+            disabled={isSaving}
+            className={`art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ${
+                isSaving ? 'art-opacity-70 art-cursor-not-allowed' : ''
+            } ${classes}`}
         >
             Save
         </button>
@@ -286,6 +301,9 @@ const ARProductModelSettings = () => {
 
     return (
         <>
+
+            <SpinnerModal isVisible={isSaving} message="Saving… Please wait" />
+
             <ToastContainer
                 position='top-right'
                 autoClose={5000}
