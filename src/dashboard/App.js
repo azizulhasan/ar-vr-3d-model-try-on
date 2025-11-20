@@ -288,7 +288,8 @@ export default function App() {
 
       {/* Top Navbar */}
       <div
-        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b"
+className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-0 art-z-50 "
+
         style={{
           backgroundColor: "var(--theme-bg)",
           color: "var(--theme-text)",
@@ -371,7 +372,8 @@ export default function App() {
         {/* Sidebar */}
         {isSidebarOpen && (
           <div
-            className="art-w-60 art-border-r"
+            className="art-w-60 art-border-r art-sticky art-top-[10vh] art-h-[90vh] art-overflow-y-auto"
+
             style={{
               backgroundColor: "var(--theme-bg)",
               color: "var(--theme-text)",

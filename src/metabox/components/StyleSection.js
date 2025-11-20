@@ -9,7 +9,7 @@ const StyleSection = ({
   toggleStyleAccordion
 }) => {
   return (
-    <div className="art-bg-gray-100 art-p-4 art-rounded">
+    <div className="art-bg-gray-100 art-rounded">
       {/* Canvas Accordion */}
       <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
         <button
@@ -93,6 +93,7 @@ const StyleSection = ({
             </div>
           </div>
         )}
+        <br/>
 
         {/* Custom CSS Accordion */}
         <div className="art-mb-4 art-border art-border-gray-200 art-rounded">

@@ -9,6 +9,12 @@
   }
 }
 
+/* Prevent horizontal scroll */
+body {
+  overflow-x: hidden;
+  /* margin: 0;
+  padding: 0; */
+}
 
 
 /* Style the color input */

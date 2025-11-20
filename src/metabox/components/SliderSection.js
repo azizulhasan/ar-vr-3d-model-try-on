@@ -577,7 +577,7 @@ const SliderSection = ({
             <button
               type="button"
               onClick={handleAddNewItem}
-              className="art-bg-blue-500 art-text-white art-w-full art-px-4 art-py-2 art-rounded hover:art-bg-blue-600 art-transition-colors"
+              className="art-bg-blue-500 art-text-white art-w-full art-px-4 art-py-2 art-rounded hover:art-bg-blue-600 art-transition-colors art-border-none"
             >
               <span className="dashicon dashicons dashicons-plus"></span> Add
               New Item

@@ -559,12 +559,12 @@ const ARProductModelSettings = () => {
                             style={{cursor: "copy"}}
                             onClick={copyshortcode}
                             // className="art-w-1/5 art-h-1/5 art-cursor-pointer art-p-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500"
-                            className="art-mt-2 art-mb-4 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
+                            className="art-mt-2 art-mb-4 art-cursor-pointer art-px-2 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
                         >
                             <span className="dashicons dashicons-admin-page"></span>
                             Copy ShortCode
                         </div>
-                        <SaveButton/>
+                        <SaveButton classes="art-w-96 art-mb-4"/>
                     </div>
                     <div id='atlas_ar_preview' className="art-sticky art-top-20 art-h-fit"></div>
                     <div className="art-hidden art-w-96 art-w-1/3"></div>
