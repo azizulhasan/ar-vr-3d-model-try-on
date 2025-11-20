@@ -564,7 +564,7 @@ const ARProductModelSettings = () => {
                             <span className="dashicons dashicons-admin-page"></span>
                             Copy ShortCode
                         </div>
-                        <SaveButton classes="art-w-96 art-mb-4"/>
+                        <SaveButton/>
                     </div>
                     <div id='atlas_ar_preview' className="art-sticky art-top-20 art-h-fit"></div>
                     <div className="art-hidden art-w-96 art-w-1/3"></div>

@@ -286,10 +286,10 @@ export default function App() {
         pauseOnHover
       />
 
+
       {/* Top Navbar */}
       <div
-className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-0 art-z-50 "
-
+        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b"
         style={{
           backgroundColor: "var(--theme-bg)",
           color: "var(--theme-text)",
@@ -372,8 +372,7 @@ className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center
         {/* Sidebar */}
         {isSidebarOpen && (
           <div
-            className="art-w-60 art-border-r art-sticky art-top-[10vh] art-h-[90vh] art-overflow-y-auto"
-
+            className="art-w-60 art-border-r"
             style={{
               backgroundColor: "var(--theme-bg)",
               color: "var(--theme-text)",
