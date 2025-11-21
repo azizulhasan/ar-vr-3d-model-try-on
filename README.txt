@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.8.3
 Requires PHP: 7.4
-Stable tag: 1.7.3
+Stable tag: 1.7.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -223,6 +223,17 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 == Changelog ==
 
 
+= 1.7.5 ( 21 November 2025 )   =
+Improved : Fatal error fixed
+
+
+= 1.7.4 ( 21 November 2025 )   =
+Improved : Spinner added during saving.
+Improved : Modal UI improved.
+Fixed : Modal title special character issue fixed.
+Fixed : Modal title special character issue fixed.
+Improved : Dashboard UI improved.
+
 = 1.7.3 ( 19 November 2025 )   =
 Improved : Settings buttons primary color set.
 Improved : Integration buttons color matched to settings page.
@@ -405,8 +416,10 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 1.7.3  =
-Improved : Settings buttons primary color set.
-Improved : Integration buttons color matched to settings page.
-Fixed :  3d model hide after scroll down in metabox,  issue fixed.
+= 1.7.5    =
+Improved : Spinner added during saving.
+Improved : Modal UI improved.
+Fixed : Modal title special character issue fixed.
+Fixed : Modal title special character issue fixed.
+Improved : Dashboard UI improved.
 

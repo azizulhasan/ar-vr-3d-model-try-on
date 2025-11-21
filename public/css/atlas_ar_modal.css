@@ -10,8 +10,8 @@
   inset: 0px
 }
 
-.art-z-50 {
-  z-index: 50
+.art-z-\[999999\] {
+  z-index: 999999
 }
 
 .art-flex {
@@ -48,6 +48,24 @@
 
 .art-flex-1 {
   flex: 1 1 0%
+}
+
+.art-shrink-0 {
+  flex-shrink: 0
+}
+
+@keyframes art-spin {
+  to {
+    transform: rotate(360deg)
+  }
+}
+
+.art-animate-spin {
+  animation: art-spin 1s linear infinite
+}
+
+.art-cursor-pointer {
+  cursor: pointer
 }
 
 .art-flex-col {
@@ -155,7 +173,7 @@
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
 }
 
-.hover\:art-bg-gray-200:hover {
+.hover\:art-bg-gray-400:hover {
   --tw-bg-opacity: 1;
-  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1))
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1))
 }

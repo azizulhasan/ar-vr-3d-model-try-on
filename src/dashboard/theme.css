@@ -9,7 +9,12 @@
   }
 }
 
-
+/* For preventing bottom horizontal scroll bar */
+body{
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
 
 /* Style the color input */
 /* input[type="color"] {
