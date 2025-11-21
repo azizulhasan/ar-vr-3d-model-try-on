@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback} from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
-import {displayDimensions, convertLength} from '../../context/utilities'
+import {convertLength} from '../../context/utilities'
 
 
 export const DimensionsSection = ({

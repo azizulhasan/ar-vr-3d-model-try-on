@@ -323,7 +323,7 @@ class AR_TRY_ON_Helper
             'ar_placement' => 'floor',
             // light & environment settings
             'skybox_image' => 'https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg',
-            'environment_image' => 'https://modelviewer.dev/shared-assets/environments/moon_1k.hdr',
+            'environment_image' => '',
             // Camera settings
             'auto_rotate' => false,
             'shadow_intensity' => '1',
@@ -335,7 +335,7 @@ class AR_TRY_ON_Helper
             'canvas_width' => '100%',
             'canvas_height' => '400px',
             'canvas_margin' => '0',
-            'canvas_padding' => '20px 0',
+            'canvas_padding' => '2px 0',
             'custom_css' => '',
         ];
     }

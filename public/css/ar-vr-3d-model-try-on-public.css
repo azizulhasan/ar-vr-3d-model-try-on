@@ -215,3 +215,24 @@ hotspot
 }
 
 
+.ar_vr_3d_model_try_on{
+	cursor: pointer;
+}
+
+
+@keyframes art-spin {
+	to {
+		transform: rotate(360deg)
+	}
+}
+
+.art-animate-spin {
+	animation: art-spin 1s linear infinite
+}
+.art-h-5 {
+	height: 1.25rem
+}
+
+.art-w-5 {
+	width: 1.25rem
+}
