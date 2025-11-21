@@ -14,6 +14,10 @@
   z-index: 50
 }
 
+.art-z-\[999999\] {
+  z-index: 999999
+}
+
 .art-flex {
   display: flex
 }
@@ -48,6 +52,14 @@
 
 .art-flex-1 {
   flex: 1 1 0%
+}
+
+.art-shrink-0 {
+  flex-shrink: 0
+}
+
+.art-cursor-pointer {
+  cursor: pointer
 }
 
 .art-flex-col {
@@ -135,6 +147,15 @@
   padding-bottom: 0.5rem
 }
 
+.art-py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem
+}
+
+.art-pt-4 {
+  padding-top: 1rem
+}
+
 .art-text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem
@@ -155,7 +176,7 @@
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
 }
 
-.hover\:art-bg-gray-200:hover {
+.hover\:art-bg-gray-400:hover {
   --tw-bg-opacity: 1;
-  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1))
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1))
 }

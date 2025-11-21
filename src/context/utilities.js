@@ -1,4 +1,4 @@
-import {useState} from "react";
+// import React, {useState} from "react";
 
 
 /**
@@ -297,15 +297,15 @@ export const isDifferent = (obj1, obj2) => {
 export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body content...')  =>{
     // Create overlay
     const overlay = document.createElement('div');
-    overlay.className = "art-fixed art-inset-0 art-bg-black/50 art-flex art-items-center art-justify-center art-z-50";
+    overlay.className = "art-fixed art-inset-0 art-bg-black/50 art-flex art-items-center art-justify-center art-z-[999999]";
 
     // Create modal container
     const modal = document.createElement('div');
-    modal.className = "art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg art-flex art-flex-col art-relative";
+    modal.className = "art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg  art-flex art-flex-col art-relative";
 
     // --- Header ---
     const header = document.createElement('div');
-    header.className = "art-flex art-items-center art-justify-between art-p-4 art-border-b art-border-gray-200";
+    header.className = "art-flex art-items-center art-justify-between art-shrink-0 art-px-4 art-border-b art-border-gray-200";
 
     // Title
     const titleEl = document.createElement('h2');
@@ -318,7 +318,7 @@ export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body co
 
     // Expand button (SVG)
     const expandBtn = document.createElement('button');
-    expandBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
+    expandBtn.className = "art-p-1 art-cursor-pointer art-rounded hover:art-bg-gray-400";
     expandBtn.innerHTML = `
     <svg class="art-w-5 art-h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h6v6H4V4zM14 14h6v6h-6v-6zM4 14h6v6H4v-6zM14 4h6v6h-6V4z"/>
@@ -335,8 +335,9 @@ export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body co
     });
 
     // Close button (SVG)
+
     const closeBtn = document.createElement('button');
-    closeBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
+    closeBtn.className = "art-p-1 art-cursor-pointer art-rounded hover:art-bg-gray-400";
     closeBtn.innerHTML = `
     <svg class="art-w-5 art-h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -350,15 +351,15 @@ export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body co
 
     // --- Body ---
     const body = document.createElement('div');
-    body.className = "art-p-4 art-flex-1 art-overflow-y-auto";
+    body.className = "art-px-4 art-flex-1 art-overflow-y-auto";
     console.log(bodyContent)
     body.innerHTML = bodyContent;
 
     // --- Footer ---
     const footer = document.createElement('div');
-    footer.className = "art-flex art-justify-end art-p-4 art-border-t art-border-gray-200";
+    footer.className = "art-flex art-justify-end art-border-t art-p-4 art-border-gray-200";
     const footerCloseBtn = document.createElement('button');
-    footerCloseBtn.className = "art-bg-gray-200 art-hover-bg-gray-300 art-text-gray-700 art-px-4 art-py-2 art-rounded";
+    footerCloseBtn.className = "art-bg-gray-200 art-cursor-pointer hover:art-bg-gray-400 art-text-gray-700 art-px-4 art-py-2 art-rounded";
     footerCloseBtn.textContent = "Close";
     footerCloseBtn.addEventListener('click', () => document.body.removeChild(overlay));
     footer.appendChild(footerCloseBtn);
@@ -373,4 +374,22 @@ export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body co
     document.body.appendChild(overlay);
     return overlay;
 }
+
+
+export const SpinnerModal = () => {
+    return <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        className="art-w-5 art-h-5 art-animate-spin"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M4.5 12a7.5 7.5 0 0015 0"
+        />
+    </svg>
+};
 

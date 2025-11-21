@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
 import Documentation from "./components/dashboard/Documentation/Documentation";
+import SpinnerModal from "../metabox/components/SpinnerModal";
 import {
   getAPITypes,
   getURL,
@@ -20,6 +21,7 @@ export default function App() {
   const [authType, setAuthType] = useState("Bearer");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState("#ffffff");
+  const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState({
     ar_try_on_display_button_automatically: "yes",
     ar_try_on_allowed_post_types: ["post"],
@@ -93,6 +95,7 @@ export default function App() {
     localStorage.setItem("isDarkMode", dark ? "true" : "false");
   };
 
+
   useEffect(() => {
     const saved = localStorage.getItem("isDarkMode");
     const dark = saved === "true";
@@ -125,10 +128,6 @@ export default function App() {
     });
   }, []);
 
-  function classNames(...classes) {
-    return classes.filter(Boolean).join(" ");
-  }
-
   const handleTabChange = (e, tab) => {
     e.preventDefault();
     if (tab.href !== "#") {
@@ -147,7 +146,11 @@ export default function App() {
     if (Array.isArray(e)) {
       value = e;
 
-      if (targetName === "ar_try_on_allowed_post_types" && value.length > 1) {
+      if (
+        !ar_try_on.is_pro_active &&
+        targetName === "ar_try_on_allowed_post_types" &&
+        value.length > 1
+      ) {
         toast(
           "Multiple post type is only available in the pro version",
           "error"
@@ -186,7 +189,8 @@ export default function App() {
 
     if (
       e.target.name === "ar_try_on_exclude_integration_api_name" &&
-      e.target.value !== "tripo3d"
+      e.target.value !== "tripo3d" &&
+      !ar_try_on.is_pro_active
     ) {
       notify("API switch is available in pro version", "warn");
       return;
@@ -221,8 +225,11 @@ export default function App() {
   /**
    * Handle form Submit
    */
-  const handleSubmit = (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSaving(true);
+
+  try {
     let tempSettings = structuredClone(settings);
 
     if (
@@ -233,6 +240,7 @@ export default function App() {
         (header, index) => {
           if (header.key === "" && header.value === "") {
             alert("Please fill all of the API headers with proper value");
+            setIsSaving(false); 
             return;
           }
 
@@ -248,31 +256,32 @@ export default function App() {
         }
       );
     }
-    console.log({ tempSettings });
-
+    console.log({ previousSettings, tempSettings });
     let hasValueChanged = isDifferent(previousSettings, tempSettings);
     if (!hasValueChanged) {
       notify("No changes detected", "info", {
         autoClose: 5000,
       });
+      setIsSaving(false); 
       return;
     }
-
-    // return;
 
     let formData = new FormData();
     formData.append("fields", JSON.stringify(tempSettings));
     formData.append("method", "post");
     formData.append("has_value_changed", hasValueChanged);
-    postWithoutImage(getURL("settings"), formData)
-      .then((res) => {
-        setSettings(res.data);
-        toast("Successfully Saved.", "info");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+
+    const res = await postWithoutImage(getURL("settings"), formData);
+
+    setSettings(res.data);
+    setPreviousSettings(res.data);
+    toast("Successfully Saved.", "info");
+  } catch (err) {
+    console.log(err);
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   return (
     <>
@@ -290,7 +299,7 @@ export default function App() {
 
       {/* Top Navbar */}
       <div
-        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b"
+        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-5 art-z-50 "
         style={{
           backgroundColor: "var(--theme-bg)",
           color: "var(--theme-text)",
@@ -326,8 +335,8 @@ export default function App() {
         {/* 🌗 Dark/Light Mode Toggle */}
         <button
           onClick={handleThemeToggle}
-          className="art-w-12 art-h-12 art-m-10 art-rounded-full art-flex art-items-center art-justify-center 
-  art-border-gray-100 art-transition-colors art-duration-300 hover:art-bg-gray-100 dark:hover:art-bg-gray-700 art-cursor-pointer"
+          className="art-w-12 art-h-12 art-m-10 art-rounded-full art-flex art-items-center art-justify-center
+ art-border-gray-100 art-transition-colors art-duration-300 hover:art-bg-gray-100 dark:hover:art-bg-gray-700 art-cursor-pointer"
           style={{
             backgroundColor: "transparent",
             color: "var(--theme-text)",
@@ -373,7 +382,7 @@ export default function App() {
         {/* Sidebar */}
         {isSidebarOpen && (
           <div
-            className="art-w-60 art-border-r"
+            className="art-w-60 art-border-r art-sticky art-top-[10vh] art-h-[90vh] art-overflow-y-auto"
             style={{
               backgroundColor: "var(--theme-bg)",
               color: "var(--theme-text)",
@@ -435,20 +444,21 @@ export default function App() {
 
           {/* Submit Button */}
           {/* {activeTab !== "Documentation" && activeTab !== "Features" && (
-        
-        <button
-        onClick={handleSubmit}
-        className="art-block art-cursor-pointer art-w-full art-p-2 "
-        style={{
-            backgroundColor: "var(--theme-accent)",
-            color: "var(--theme-text)",
-            border: "1px solid var(--theme-accent)"
-        }}
-        >
-        Save
-        </button>
+      
+       <button
+       onClick={handleSubmit}
+       className="art-block art-cursor-pointer art-w-full art-p-2 "
+       style={{
+           backgroundColor: "var(--theme-accent)",
+           color: "var(--theme-text)",
+           border: "1px solid var(--theme-accent)"
+       }}
+       >
+       Save
+       </button>
 
-        )} */}
+
+       )} */}
 
           {activeTab !== "Documentation" && activeTab !== "Features" && (
             <div
@@ -465,11 +475,22 @@ export default function App() {
             >
 <button
   onClick={handleSubmit}
-  className="art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer"
-
+  disabled={isSaving}
+  className={`art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer ${
+    isSaving ? "art-opacity-70 art-cursor-not-allowed" : ""
+  }`}
 >
-  Save
+  {isSaving ? (
+    <div className="art-flex art-items-center art-justify-center art-gap-2">
+      <SpinnerModal />
+      <span>Saving...</span>
+    </div>
+  ) : (
+    "Save"
+  )}
 </button>
+
+
             </div>
           )}
         </div>
@@ -477,3 +498,4 @@ export default function App() {
     </>
   );
 }
+
