@@ -133,9 +133,9 @@ class AR_TRY_ON_Public {
 				wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
 			}
 
-            if ( function_exists( 'is_product' ) || is_product() ) {
+//            if ( function_exists( 'is_product' ) || is_product() ) {
 //                wp_enqueue_script( 'atlas_ar-single-product', ATLAS_AR_PLUGIN_URL . 'public/js/single-product.js', array('jquery'), '1.0', true );
-            }
+//            }
 
             wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
             wp_localize_script( 'atlas_ar-single-product', 'ar_try_on', $this->localize_data );
