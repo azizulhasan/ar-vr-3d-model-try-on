@@ -1,4 +1,4 @@
-import { setModelAttributes, createModal } from "../../src/context/utilities";
+import {setModelAttributes, createModal, SpinnerModal} from "../../src/context/utilities";
 
 class AtlasAR {
   alertify = null;
@@ -112,6 +112,20 @@ class AtlasAR {
     return false;
   }
 
+  spinLoader() {
+    return `
+    <svg xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 24 24"
+         class="art-w-5 art-h-5 art-animate-spin"
+         fill="none"
+         stroke="currentColor"
+         stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M4.5 12a7.5 7.5 0 0015 0" />
+    </svg>
+  `;
+  }
+
   async fetchModelData(
     product_id,
     model_id = ".atlas_ar_model_viewer",
@@ -134,9 +148,11 @@ class AtlasAR {
       }
     }
 
-    // return;
-    let loadingMessage;
+
     // Show loading message before sending the request
+    let button = document.querySelector(`[product-id="${product_id}"]`);
+    let buttonText = button.innerText;
+    button.innerHTML = `Loading 3D Model ${this.spinLoader()}`;
     let self = this;
     let formData = new FormData();
     formData.append("post_id", product_id);
@@ -151,6 +167,7 @@ class AtlasAR {
         if (data) {
           this.setModelSessionData(data, product_id);
         }
+        button.innerHTML = buttonText;
       }
     });
   }

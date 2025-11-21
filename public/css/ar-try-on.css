@@ -95,20 +95,12 @@
   top: 10vh
 }
 
-.art-top-0 {
-  top: 0px
-}
-
 .art-z-40 {
   z-index: 40
 }
 
 .art-z-50 {
   z-index: 50
-}
-
-.art-z-\[9999\] {
-  z-index: 9999
 }
 
 .art-m-10 {
@@ -234,14 +226,6 @@
 
 .art-max-h-60 {
   max-height: 15rem
-}
-
-.art-max-h-\[90vh\] {
-  max-height: 90vh
-}
-
-.art-max-h-none {
-  max-height: none
 }
 
 .art-min-h-\[150px\] {
@@ -395,10 +379,6 @@
   align-items: center
 }
 
-.art-items-stretch {
-  align-items: stretch
-}
-
 .art-justify-end {
   justify-content: flex-end
 }
@@ -409,10 +389,6 @@
 
 .art-justify-between {
   justify-content: space-between
-}
-
-.art-justify-stretch {
-  justify-content: stretch
 }
 
 .art-gap-1 {
@@ -475,12 +451,6 @@
   --tw-space-y-reverse: 0;
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
-}
-
-.art-space-x-2 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 0;
-  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
-  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))
 }
 
 .art-overflow-hidden {
@@ -636,11 +606,6 @@
   background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1))
 }
 
-.art-bg-gray-900 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(17 24 39 / var(--tw-bg-opacity, 1))
-}
-
 .art-bg-transparent {
   background-color: transparent
 }
@@ -650,20 +615,12 @@
   background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1))
 }
 
-.art-bg-opacity-50 {
-  --tw-bg-opacity: 0.5
-}
-
 .art-fill-current {
   fill: currentColor
 }
 
 .art-p-1 {
   padding: 0.25rem
-}
-
-.art-p-10 {
-  padding: 2.5rem
 }
 
 .art-p-2 {
@@ -676,10 +633,6 @@
 
 .art-p-4 {
   padding: 1rem
-}
-
-.art-p-0 {
-  padding: 0px
 }
 
 .art-px-2 {
@@ -876,12 +829,6 @@
 
 .art-opacity-70 {
   opacity: 0.7
-}
-
-.art-shadow-2xl {
-  --tw-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);
-  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)
 }
 
 .art-shadow-lg {
