@@ -404,11 +404,11 @@ var createModal = function createModal() {
 
   // Create modal container
   var modal = document.createElement('div');
-  modal.className = "art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg art-flex art-flex-col art-relative";
+  modal.className = "art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg  art-flex art-flex-col art-relative";
 
   // --- Header ---
   var header = document.createElement('div');
-  header.className = "art-flex art-items-center art-justify-between art-p-4 art-border-b art-border-gray-200";
+  header.className = "art-flex art-items-center art-justify-between art-shrink-0 art-p-4 art-border-b art-border-gray-200";
 
   // Title
   var titleEl = document.createElement('h2');
@@ -421,7 +421,7 @@ var createModal = function createModal() {
 
   // Expand button (SVG)
   var expandBtn = document.createElement('button');
-  expandBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
+  expandBtn.className = "art-p-1 art-cursor-pointer art-rounded hover:art-bg-gray-400";
   expandBtn.innerHTML = "\n    <svg class=\"art-w-5 art-h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\">\n      <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M4 4h6v6H4V4zM14 14h6v6h-6v-6zM4 14h6v6H4v-6zM14 4h6v6h-6V4z\"/>\n    </svg>";
   console.log(expandBtn);
   expandBtn.addEventListener('click', function () {
@@ -435,8 +435,9 @@ var createModal = function createModal() {
   });
 
   // Close button (SVG)
+
   var closeBtn = document.createElement('button');
-  closeBtn.className = "art-p-1 art-rounded hover:art-bg-gray-200";
+  closeBtn.className = "art-p-1 art-cursor-pointer art-rounded hover:art-bg-gray-400";
   closeBtn.innerHTML = "\n    <svg class=\"art-w-5 art-h-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\">\n      <path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M6 18L18 6M6 6l12 12\"/>\n    </svg>";
   closeBtn.addEventListener('click', function () {
     return document.body.removeChild(overlay);
@@ -456,7 +457,7 @@ var createModal = function createModal() {
   var footer = document.createElement('div');
   footer.className = "art-flex art-justify-end art-p-4 art-border-t art-border-gray-200";
   var footerCloseBtn = document.createElement('button');
-  footerCloseBtn.className = "art-bg-gray-200 art-hover-bg-gray-300 art-text-gray-700 art-px-4 art-py-2 art-rounded";
+  footerCloseBtn.className = "art-bg-gray-200 art-cursor-pointer hover:art-bg-gray-400 art-text-gray-700 art-px-4 art-py-2 art-rounded";
   footerCloseBtn.textContent = "Close";
   footerCloseBtn.addEventListener('click', function () {
     return document.body.removeChild(overlay);
@@ -3373,7 +3374,7 @@ var AtlasAR = /*#__PURE__*/function () {
               body: data,
               // body data type must match "Content-Type" header
               headers: {
-                'X-WP-Nonce': ar_try_on.rest_nonce
+                "X-WP-Nonce": ar_try_on.rest_nonce
               }
             });
           case 4:
@@ -3395,37 +3396,38 @@ var AtlasAR = /*#__PURE__*/function () {
      * @returns {string}
      */
     _defineProperty(this, "getURL", function () {
-      var endpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-      return ar_try_on.api_url + ar_try_on.api_namespace + '/' + ar_try_on.api_version + '/' + endpoint;
+      var endpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+      return ar_try_on.api_url + ar_try_on.api_namespace + "/" + ar_try_on.api_version + "/" + endpoint;
     });
     _defineProperty(this, "getPostID", function () {
       // Parse the URL parameters
       var params = new URLSearchParams(window.location.search);
 
       // Get the 'post' parameter
-      return params.get('post');
+      return params.get("post");
     });
   }
   return _createClass(AtlasAR, [{
     key: "getModelSkeleton",
     value: function getModelSkeleton() {
-      var model_id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'atlas_ar_model_viewer';
+      var model_id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "atlas_ar_model_viewer";
       // TODO: user should add custom class for there own sake.
       return "\n                <style id=\"model-viewer-style\"></style>\n                    <div style=\"display: flex; justify-content: center; align-items: center; height: 100%;\">\n                        <model-viewer\n                            id=\"".concat(model_id, "\"\n                            class=\"atlas_ar_model_viewer\" \n                            src=\"\"\n                            alt=\"\"\n                            poster=\"\"\n                            reveal=\"\"\n                            loading=\"\"\n                            ar\n                            ar-modes=\"\"\n                            camera-controls\n                            ar-scale=\"auto\"\n                            xr-environment\n                            style=\"width: 100%; height: 400px;\"\n                        ></model-viewer>\n                    </div>");
     }
   }, {
     key: "isObject",
     value: function isObject(value) {
-      return value !== null && _typeof(value) === 'object' && !Array.isArray(value);
+      return value !== null && _typeof(value) === "object" && !Array.isArray(value);
     }
   }, {
     key: "setModelData",
     value: function setModelData(data) {
-      var model_id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '.atlas_ar_model_viewer';
-      var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'normal';
-      if (type === 'modal') {
-        var productName = data.product_name || '3D Product';
-        var model_id_name = model_id.replace('#', '');
+      var model_id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ".atlas_ar_model_viewer";
+      var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "normal";
+      if (type === "modal") {
+        var productName = data.product_name || "3D Product";
+        productName = this.decodeHtml(productName);
+        var model_id_name = model_id.replace("#", "");
         var htmlContent = this.getModelSkeleton(model_id_name);
         (0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_0__.createModal)(productName, htmlContent);
       }
@@ -3439,10 +3441,15 @@ var AtlasAR = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "decodeHtml",
+    value: function decodeHtml(html) {
+      return new DOMParser().parseFromString(html, "text/html").documentElement.textContent;
+    }
+  }, {
     key: "whichExists",
     value: function whichExists() {
       var arr = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-      var product_id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var product_id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
       if (arr.length < 1) {
         var _ar_try_on;
         arr = ((_ar_try_on = ar_try_on) === null || _ar_try_on === void 0 ? void 0 : _ar_try_on.cached_ids) || [];
@@ -3473,11 +3480,11 @@ var AtlasAR = /*#__PURE__*/function () {
         return _regeneratorRuntime().wrap(function _callee2$(_context2) {
           while (1) switch (_context2.prev = _context2.next) {
             case 0:
-              model_id = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : '.atlas_ar_model_viewer';
-              type = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : 'normal';
+              model_id = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : ".atlas_ar_model_viewer";
+              type = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : "normal";
               product_id = parseInt(product_id);
-              modelSessionData = this.getModelSessionData('models', product_id);
-              isSettingsChanged = this.getModelSessionData('isSettingsChanged');
+              modelSessionData = this.getModelSessionData("models", product_id);
+              isSettingsChanged = this.getModelSessionData("isSettingsChanged");
               whichExists = this.whichExists(ar_try_on.cached_ids, product_id);
               console.log({
                 whichExists: whichExists,
@@ -3508,10 +3515,10 @@ var AtlasAR = /*#__PURE__*/function () {
               // Show loading message before sending the request
               self = this;
               formData = new FormData();
-              formData.append('post_id', product_id);
-              formData.append('has_value_changed', true);
+              formData.append("post_id", product_id);
+              formData.append("has_value_changed", true);
               _context2.next = 22;
-              return this.postWithoutImage(this.getURL('get_model_and_settings'), formData).then(function (response) {
+              return this.postWithoutImage(this.getURL("get_model_and_settings"), formData).then(function (response) {
                 if (response.success) {
                   var data = response.data;
                   self.setModelData(data, model_id, type);
@@ -3534,37 +3541,37 @@ var AtlasAR = /*#__PURE__*/function () {
   }, {
     key: "supportsModelViewerTag",
     value: function supportsModelViewerTag() {
-      var el = document.createElement('model-viewer');
+      var el = document.createElement("model-viewer");
       return el instanceof HTMLElement; // works even if <model-viewer> isn't fully registered yet
     }
   }, {
     key: "supportsModelViewer",
     value: function supportsModelViewer() {
-      var supportsCustomElements = 'customElements' in window;
+      var supportsCustomElements = "customElements" in window;
       var supportsWebGL = function () {
         try {
-          var canvas = document.createElement('canvas');
-          return !!(window.WebGLRenderingContext && canvas.getContext('webgl'));
+          var canvas = document.createElement("canvas");
+          return !!(window.WebGLRenderingContext && canvas.getContext("webgl"));
         } catch (e) {
           return false;
         }
       }();
-      var supportsWebXR = 'xr' in navigator;
+      var supportsWebXR = "xr" in navigator;
       return supportsCustomElements && supportsWebGL; // Optional: && supportsWebXR
     }
   }, {
     key: "isModelViewerSupported",
     value: function isModelViewerSupported() {
-      return 'customElements' in window && typeof customElements.get('model-viewer') !== 'undefined';
+      return "customElements" in window && typeof customElements.get("model-viewer") !== "undefined";
     }
   }, {
     key: "getModelSessionData",
     value: function getModelSessionData() {
       var _this$storedModelData3, _this$storedModelData4;
-      var propertyName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'models';
-      var postId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var propertyName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "models";
+      var postId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
       this.storedModelData = this.getStoredModelDataObj();
-      if (propertyName === 'models') {
+      if (propertyName === "models") {
         var _this$storedModelData, _this$storedModelData2;
         return (_this$storedModelData = (_this$storedModelData2 = this.storedModelData) === null || _this$storedModelData2 === void 0 || (_this$storedModelData2 = _this$storedModelData2.models) === null || _this$storedModelData2 === void 0 ? void 0 : _this$storedModelData2[postId]) !== null && _this$storedModelData !== void 0 ? _this$storedModelData : false;
       }
@@ -3573,8 +3580,8 @@ var AtlasAR = /*#__PURE__*/function () {
   }, {
     key: "setModelSessionData",
     value: function setModelSessionData(data) {
-      var postId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-      var propertyName = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+      var postId = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+      var propertyName = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
       // TODO: update this method based on postId.
       var storedModelDataObj = this.getStoredModelDataObj();
       var storedModelData = {};
@@ -3585,7 +3592,7 @@ var AtlasAR = /*#__PURE__*/function () {
           models: _objectSpread(_objectSpread({}, storedModelDataObj === null || storedModelDataObj === void 0 ? void 0 : storedModelDataObj.models), {}, _defineProperty({}, postId, data))
         };
         console.log(storedModelData);
-        window.sessionStorage.setItem('atlas_ar_model_data', JSON.stringify(storedModelData));
+        window.sessionStorage.setItem("atlas_ar_model_data", JSON.stringify(storedModelData));
       }
       this.storedModelData = storedModelData;
       return this.storedModelData;
@@ -3593,7 +3600,7 @@ var AtlasAR = /*#__PURE__*/function () {
   }, {
     key: "getStoredModelDataObj",
     value: function getStoredModelDataObj() {
-      return JSON.parse(window.sessionStorage.getItem('atlas_ar_model_data'));
+      return JSON.parse(window.sessionStorage.getItem("atlas_ar_model_data"));
     }
   }]);
 }();

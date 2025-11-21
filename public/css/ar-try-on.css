@@ -75,10 +75,6 @@
   right: 100%
 }
 
-.art-top-0 {
-  top: 0px
-}
-
 .art-top-0\.5 {
   top: 0.125rem
 }
@@ -87,12 +83,20 @@
   top: 5rem
 }
 
+.art-top-5 {
+  top: 1.25rem
+}
+
 .art-top-\[-1px\] {
   top: -1px
 }
 
 .art-top-\[10vh\] {
   top: 10vh
+}
+
+.art-top-0 {
+  top: 0px
 }
 
 .art-z-40 {
@@ -230,6 +234,14 @@
 
 .art-max-h-60 {
   max-height: 15rem
+}
+
+.art-max-h-\[90vh\] {
+  max-height: 90vh
+}
+
+.art-max-h-none {
+  max-height: none
 }
 
 .art-min-h-\[150px\] {
@@ -383,6 +395,10 @@
   align-items: center
 }
 
+.art-items-stretch {
+  align-items: stretch
+}
+
 .art-justify-end {
   justify-content: flex-end
 }
@@ -393,6 +409,10 @@
 
 .art-justify-between {
   justify-content: space-between
+}
+
+.art-justify-stretch {
+  justify-content: stretch
 }
 
 .art-gap-1 {
@@ -455,6 +475,12 @@
   --tw-space-y-reverse: 0;
   margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse))
+}
+
+.art-space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))
 }
 
 .art-overflow-hidden {
@@ -650,6 +676,10 @@
 
 .art-p-4 {
   padding: 1rem
+}
+
+.art-p-0 {
+  padding: 0px
 }
 
 .art-px-2 {
@@ -935,9 +965,9 @@
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1))
 }
 
-.hover\:art-bg-gray-200:hover {
+.hover\:art-bg-gray-400:hover {
   --tw-bg-opacity: 1;
-  background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1))
+  background-color: rgb(156 163 175 / var(--tw-bg-opacity, 1))
 }
 
 .hover\:art-bg-gray-50:hover {
@@ -1085,5 +1115,3 @@
     color: rgb(209 213 219 / var(--tw-text-opacity, 1))
   }
 }
-
-

@@ -22,7 +22,6 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState("#ffffff");
   const [isSaving, setIsSaving] = useState(false);
-
   const [settings, setSettings] = useState({
     ar_try_on_display_button_automatically: "yes",
     ar_try_on_allowed_post_types: ["post"],
@@ -95,7 +94,6 @@ export default function App() {
     }
     localStorage.setItem("isDarkMode", dark ? "true" : "false");
   };
-
 
 
   useEffect(() => {
@@ -242,6 +240,7 @@ const handleSubmit = async (e) => {
         (header, index) => {
           if (header.key === "" && header.value === "") {
             alert("Please fill all of the API headers with proper value");
+            setIsSaving(false); 
             return;
           }
 
@@ -257,14 +256,14 @@ const handleSubmit = async (e) => {
         }
       );
     }
-    
     console.log({ previousSettings, tempSettings });
     let hasValueChanged = isDifferent(previousSettings, tempSettings);
     if (!hasValueChanged) {
       notify("No changes detected", "info", {
         autoClose: 5000,
       });
-      return; 
+      setIsSaving(false); 
+      return;
     }
 
     let formData = new FormData();
@@ -275,21 +274,17 @@ const handleSubmit = async (e) => {
     const res = await postWithoutImage(getURL("settings"), formData);
 
     setSettings(res.data);
-    setPreviousSettings(res.data); 
+    setPreviousSettings(res.data);
     toast("Successfully Saved.", "info");
   } catch (err) {
     console.log(err);
-    notify("Error saving settings", "error", { autoClose: 5000 }); 
   } finally {
-    setIsSaving(false); 
+    setIsSaving(false);
   }
 };
 
   return (
     <>
-
-       <SpinnerModal isVisible={isSaving} message="Saving… Please wait" />
-
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -304,7 +299,7 @@ const handleSubmit = async (e) => {
 
       {/* Top Navbar */}
       <div
-        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-0 art-z-50 "
+        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-5 art-z-50 "
         style={{
           backgroundColor: "var(--theme-bg)",
           color: "var(--theme-text)",
@@ -478,10 +473,24 @@ const handleSubmit = async (e) => {
                 backgroundColor: "var(--theme-bg)",
               }}
             >
-<button onClick={handleSubmit} 
-className="art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer" >
-   Save 
-   </button>
+<button
+  onClick={handleSubmit}
+  disabled={isSaving}
+  className={`art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art-rounded art-font-medium art-transition-colors hover:art-opacity-90 art-cursor-pointer ${
+    isSaving ? "art-opacity-70 art-cursor-not-allowed" : ""
+  }`}
+>
+  {isSaving ? (
+    <div className="art-flex art-items-center art-justify-center art-gap-2">
+      <SpinnerModal />
+      <span>Saving...</span>
+    </div>
+  ) : (
+    "Save"
+  )}
+</button>
+
+
             </div>
           )}
         </div>
@@ -489,3 +498,4 @@ className="art-w-full art-bg-blue-500 art-text-white art-p-3 art-border-none art
     </>
   );
 }
+

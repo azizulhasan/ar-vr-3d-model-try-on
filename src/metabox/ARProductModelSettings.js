@@ -5,9 +5,11 @@ import CameraSection from "./components/CameraSection.js";
 import LightEnvironmentSection from "./components/LightEnvrionmentSection.js";
 import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
+import SpinnerModal from "./components/SpinnerModal.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
-import SpinnerModal from "./components/SpinnerModal.js";
+// import SpinnerModalIcon from "../dashboard/App.js"
+
 
 
 const ARProductModelSettings = () => {
@@ -49,8 +51,7 @@ const ARProductModelSettings = () => {
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(false)
-         const [isSaving, setIsSaving] = useState(false);
-      
+     const [isSaving, setIsSaving] = useState(false);
 
 
     // Accordion state
@@ -240,15 +241,14 @@ const ARProductModelSettings = () => {
     }, [productModel.exclude_integration_api_model_type]);
 
 
-const handleSubmit = async (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
-    
     const postId = getPostID()
     if (!postId) {
         notify('Please publish the post first. Then reload the page and save.', 'warn',{
             autoClose: 5000,
         })
-        return;
+        return; // This is fine - no setIsSaving was called yet
     }
 
     let hasValueChanged = isDifferent(previousProductModel, productModel);
@@ -256,53 +256,56 @@ const handleSubmit = async (e) => {
         notify('No changes detected', 'info',{
             autoClose: 5000,
         })
-        return;
+        return; // This is fine - no setIsSaving was called yet
     }
 
-    setIsSaving(true); 
+    setIsSaving(true); // Move this AFTER the validation checks
 
-    try {
-        let formData = new FormData();
-        formData.append('fields', JSON.stringify(productModel));
-        formData.append('post_id', postId);
-        formData.append('method', 'POST');
-        formData.append('has_value_changed', hasValueChanged);
-        
-        const res = await postWithoutImage(getURL('get_model_and_settings'), formData);
-        
-        console.log(res)
-        setProductModel({...productModel, ...res.data});
-        setPreviousProductModel({...productModel, ...res.data}); 
-        notify('Successfully Saved Data.', 'success',{
-            autoClose: 5000,
+    let formData = new FormData();
+    formData.append('fields', JSON.stringify(productModel));
+    formData.append('post_id', postId);
+    formData.append('method', 'POST');
+    formData.append('has_value_changed', hasValueChanged);
+    postWithoutImage(getURL('get_model_and_settings'), formData)
+        .then((res) => {
+            console.log(res)
+            setProductModel({...productModel, ...res.data});
+            setPreviousProductModel({...productModel, ...res.data});
+            notify('Successfully Saved Data.', 'success',{
+                autoClose: 5000,
+            })
         })
-    } catch (err) {
-        console.log(err);
-        notify('Error saving data', 'error', {
-            autoClose: 5000,
+        .catch((err) => {
+            console.log(err);
+        })
+        .finally(() => {
+            setIsSaving(false);
         });
-    } finally {
-        setIsSaving(false); 
-    }
 };
 
-    const SaveButton = ({classes = 'art-w-full'}) => (
-        <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSaving}
-            className={`art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ${
-                isSaving ? 'art-opacity-70 art-cursor-not-allowed' : ''
-            } ${classes}`}
-        >
-            Save
-        </button>
-    );
+const SaveButton = ({classes = 'art-w-full'}) => (
+    <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={isSaving}
+        className={`art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-transition-colors hover:art-opacity-90 ${
+            isSaving ? 'art-opacity-70 art-cursor-not-allowed' : ''
+        } ${classes}`}
+    >
+        {isSaving ? (
+            <div className="art-flex art-items-center art-justify-center art-gap-2">
+                <SpinnerModal />
+                <span>Saving...</span>
+            </div>
+        ) : (
+            "Save"
+        )}
+    </button>
+);
 
     return (
         <>
 
-            <SpinnerModal isVisible={isSaving} message="Saving… Please wait" />
 
             <ToastContainer
                 position='top-right'
