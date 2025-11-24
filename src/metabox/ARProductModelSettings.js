@@ -63,7 +63,74 @@ const ARProductModelSettings = () => {
         },
         hotspots: [],
         thumbnail_image: "",
-
+        isMultiple: false,
+        multipleItems: [
+            {
+                id: 1,
+                isExpanded: true,
+                data: {
+                    src: "https://modelviewer.dev/assets/ShopifyModels/Chair.glb",
+                    ios_src: "",
+                    poster: "https://modelviewer.dev/assets/ShopifyModels/Chair.webp",
+                    alt: "Chair",
+                    skybox_image: "",
+                    environment_image: "",
+                    thumbnail_image: ""
+                },
+            },
+            {
+                id: 2,
+                isExpanded: true,
+                data: {
+                    src: "https://modelviewer.dev/assets/ShopifyModels/Mixer.glb",
+                    ios_src: "",
+                    poster: "https://modelviewer.dev/assets/ShopifyModels/Mixer.webp",
+                    alt: "Mixer",
+                    skybox_image: "",
+                    environment_image: "",
+                    thumbnail_image: ""
+                },
+            },
+            {
+                id: 3,
+                isExpanded: true,
+                data: {
+                    src: "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.glb",
+                    ios_src: "",
+                    poster: "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.webp",
+                    alt: "GeoPlanter",
+                    skybox_image: "",
+                    environment_image: "",
+                    thumbnail_image: ""
+                },
+            },
+            {
+                id: 4,
+                isExpanded: true,
+                data: {
+                    src: "https://modelviewer.dev/assets/ShopifyModels/ToyTrain.glb",
+                    ios_src: "",
+                    poster: "https://modelviewer.dev/assets/ShopifyModels/ToyTrain.webp",
+                    alt: "ToyTrain",
+                    skybox_image: "",
+                    environment_image: "",
+                    thumbnail_image: ""
+                },
+            },
+            {
+                id: 5,
+                isExpanded: true,
+                data: {
+                    src: "https://modelviewer.dev/assets/ShopifyModels/Canoe.glb",
+                    ios_src: "",
+                    poster: "https://modelviewer.dev/assets/ShopifyModels/Canoe.webp",
+                    alt: "Canoe",
+                    skybox_image: "",
+                    environment_image: "",
+                    thumbnail_image: ""
+                },
+            },
+        ],
     });
 
     const {dimensions = {}} = productModel;
@@ -82,7 +149,7 @@ const ARProductModelSettings = () => {
 
 
     // Accordion state
-    const [activeSection, setActiveSection] = useState("settings");
+    const [activeSection, setActiveSection] = useState("slider");
     const [activeAccordion, setActiveAccordion] = useState({
         content: false,
         camera: false,
@@ -548,6 +615,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                 handleChange={handleChange}
                                 setBasicSettings={setBasicSettings}
                                 handleMediaButtonClick={handleMediaButtonClick}
+                                setProductModel={setProductModel}
                             />
                         )}
                     </div>

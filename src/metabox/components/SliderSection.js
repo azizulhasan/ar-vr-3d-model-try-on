@@ -7,17 +7,69 @@ const SliderSection = ({
   handleChange,
   setBasicSettings,
   handleMediaButtonClick,
+  setProductModel
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
   const [items, setItems] = useState([
     {
       id: 1,
       isExpanded: true,
       data: {
-        src: "",
+        src: "https://modelviewer.dev/assets/ShopifyModels/Chair.glb",
         ios_src: "",
-        poster: "",
-        alt: "",
+        poster: "https://modelviewer.dev/assets/ShopifyModels/Chair.webp",
+        alt: "Chair",
+        skybox_image: "",
+        environment_image: "",
+        thumbnail_image: ""
+      },
+    },
+    {
+      id: 2,
+      isExpanded: true,
+      data: {
+        src: "https://modelviewer.dev/assets/ShopifyModels/Mixer.glb",
+        ios_src: "",
+        poster: "https://modelviewer.dev/assets/ShopifyModels/Mixer.webp",
+        alt: "Mixer",
+        skybox_image: "",
+        environment_image: "",
+        thumbnail_image: ""
+      },
+    },
+    {
+      id: 3,
+      isExpanded: true,
+      data: {
+        src: "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.glb",
+        ios_src: "",
+        poster: "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.webp",
+        alt: "GeoPlanter",
+        skybox_image: "",
+        environment_image: "",
+        thumbnail_image: ""
+      },
+    },
+    {
+      id: 4,
+      isExpanded: true,
+      data: {
+        src: "https://modelviewer.dev/assets/ShopifyModels/ToyTrain.glb",
+        ios_src: "",
+        poster: "https://modelviewer.dev/assets/ShopifyModels/ToyTrain.webp",
+        alt: "ToyTrain",
+        skybox_image: "",
+        environment_image: "",
+        thumbnail_image: ""
+      },
+    },
+    {
+      id: 5,
+      isExpanded: true,
+      data: {
+        src: "https://modelviewer.dev/assets/ShopifyModels/Canoe.glb",
+        ios_src: "",
+        poster: "https://modelviewer.dev/assets/ShopifyModels/Canoe.webp",
+        alt: "Canoe",
         skybox_image: "",
         environment_image: "",
         thumbnail_image: ""
@@ -65,10 +117,10 @@ const SliderSection = ({
       id: items.length + 1,
       isExpanded: true,
       data: {
-        src: "",
+        src: "https://modelviewer.dev/assets/ShopifyModels/Chair.glb",
         ios_src: "",
-        poster: "",
-        alt: "",
+        poster: "https://modelviewer.dev/assets/ShopifyModels/Chair.webp",
+        alt: "Chair",
         skybox_image: "",
         environment_image: "",
         thumbnail_image: ""
@@ -125,18 +177,29 @@ const SliderSection = ({
     );
   };
 
-
+  const enableSlider =(checked) => {
+    setProductModel((prev) => ({
+      ...prev,
+      isMultiple: checked,
+      multipleItems: items
+    }));
+  }
+  useEffect(()=>{
+    if(productModel.isMultiple) {
+      wp.hooks.doAction("atlas_ar_preview_data", productModel)
+    }
+  },[productModel])
   return (
     <div className="art-mb-4">
       <div className="art-mb-2">
         <Switch
           label="Use Slider with multiple model?"
-          defaultChecked={false}
-          onChange={(checked) => setIsVisible(checked)}
+          defaultChecked={productModel.isMultiple || false}
+          onChange={(checked) => enableSlider(checked)}
         />
       </div>
 
-      {isVisible && (
+      {productModel.isMultiple && (
         <div className="art-mt-3">
           {items.map((item, index) => (
             <div

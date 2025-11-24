@@ -407,8 +407,24 @@ function displayDimensions(modelViewer, model_settings) {
     setVisibility(model_settings.dimensions.show && event.detail.status !== "session-started");
   });
 }
+window.atlasARSwitchSrc = function (event, element, name) {
+  console.log(element);
+  // 🔹 Stop form submit / page reload
+  if (event && event.preventDefault) {
+    event.preventDefault();
+  }
+  var modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0];
+  var base = "https://modelviewer.dev/assets/ShopifyModels/" + name;
+  modelViewer.src = base + '.glb';
+  modelViewer.poster = base + '.webp';
+  var slides = document.querySelectorAll(".slide");
+  slides.forEach(function (element) {
+    element.classList.remove("selected");
+  });
+  element.classList.add("selected");
+};
 var setModelAttributes = function setModelAttributes(modelViewer, model_settings) {
-  var _model_settings$shado;
+  var _model_settings$shado, _model_settings$multi, _model_settings$multi2;
   console.log({
     model_settings: model_settings
   });
@@ -487,8 +503,33 @@ var setModelAttributes = function setModelAttributes(modelViewer, model_settings
 
   // Dimension
   displayDimensions(modelViewer, model_settings);
+
+  // hotspots
   if (model_settings.hotspots && model_settings.hotspots.length > 0) {
     renderUserHotspots(modelViewer, model_settings.hotspots);
+  }
+  console.log(model_settings === null || model_settings === void 0 || (_model_settings$multi = model_settings.multipleItems) === null || _model_settings$multi === void 0 ? void 0 : _model_settings$multi.length);
+  if (model_settings !== null && model_settings !== void 0 && model_settings.isMultiple && (model_settings === null || model_settings === void 0 || (_model_settings$multi2 = model_settings.multipleItems) === null || _model_settings$multi2 === void 0 ? void 0 : _model_settings$multi2.length) > 0) {
+    // FIXED: Check if slider elements already exist before adding
+    var ar_button = modelViewer.querySelector("#ar-button");
+    var ar_prompt = modelViewer.querySelector("#ar-prompt");
+    var sliderHTML = '';
+    if (!ar_button || !ar_prompt) {
+      sliderHTML = "\n              <button slot=\"ar-button\" id=\"ar-button\">\n                View in your space\n              </button>\n            \n              <div id=\"ar-prompt\">\n                <img src=\"https://modelviewer.dev/assets/hand.png\">\n              </div>\n            \n              <button id=\"ar-failure\">\n                AR is not tracking!\n              </button>\n        ";
+    }
+
+    // model_settings.src = 'https://modelviewer.dev//assets/ShopifyModels/Chair.glb';
+    model_settings.src = model_settings.multipleItems[0].data.src;
+    // model_settings.poster = 'https://modelviewer.dev//assets/ShopifyModels/Chair.webp';
+    model_settings.poster = model_settings.multipleItems[0].data.poster;
+    modelViewer.setAttribute("src", model_settings.src || "");
+    modelViewer.setAttribute("poster", model_settings.poster || "");
+    sliderHTML += "<div class=\"slider\">\n                <div class=\"slides\">";
+    model_settings.multipleItems.map(function (item, index) {
+      sliderHTML += "<button class=\"slide ".concat(index < 1 ? 'selected' : '', "\" type=\"submit\" onClick=\"atlasARSwitchSrc(event, this, ").concat(item.data.alt, ")\"\n                    style=\"background-image: url(").concat(item.data.poster, ");\">");
+    });
+    sliderHTML += "</div></div>";
+    modelViewer.insertAdjacentHTML("beforeend", sliderHTML);
   }
 };
 var getAPITypes = function getAPITypes() {
