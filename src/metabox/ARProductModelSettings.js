@@ -614,7 +614,6 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                 productModel={productModel}
                                 handleChange={handleChange}
                                 setBasicSettings={setBasicSettings}
-                                handleMediaButtonClick={handleMediaButtonClick}
                                 setProductModel={setProductModel}
                             />
                         )}

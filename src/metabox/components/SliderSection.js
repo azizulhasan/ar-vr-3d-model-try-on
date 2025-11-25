@@ -2,11 +2,8 @@ import {useState, useEffect} from "react";
 import Switch from "../../dashboard/components/dashboard/settings/Switch";
 
 const SliderSection = ({
-                           basicSettings,
                            productModel,
                            handleChange,
-                           setBasicSettings,
-                           handleMediaButtonClick,
                            setProductModel
                        }) => {
     const [items, setItems] = useState([
@@ -77,15 +74,20 @@ const SliderSection = ({
         },
     ]);
 
-    console.log({
-        items: Object.assign(
-            {},
-            items.map((item) => ({...item.data}))
-        ),
-    });
 
 
     const [dragIndex, setDragIndex] = useState(null);
+
+    const [demoBasicData, setDemoBasicData] = useState({
+        src: "upload",
+        poster: "upload",
+        environment_source_type: "upload",
+        skybox_source_type: "upload",
+        ios_src: "upload",
+        thumbnail_image: "upload",
+    })
+    const [basicSettings, setBasicSettings] = useState({});
+
 
     const handleDragStart = (index) => {
         setDragIndex(index);
@@ -186,14 +188,6 @@ const SliderSection = ({
     };
 
     const handleItemChange = (itemId, fieldName, value) => {
-        // setItems((prevItems) =>
-        //     prevItems.map((item) =>
-        //         item.id === itemId
-        //             ? {...item, data: {...item.data, [fieldName]: value}}
-        //             : item
-        //     )
-        // );
-        //
         setProductModel((prev) => {
             let prevItems = prev.multipleItems
             prevItems = prevItems.map((item) =>
@@ -206,18 +200,88 @@ const SliderSection = ({
         })
     };
 
+    const populateBasicSettings = (fieldName = '', value = '', id = '') => {
+        let newBasicSettings = {}
+        productModel.multipleItems.map((item, index)=>{
+            newBasicSettings[index+1] = demoBasicData;
+        })
+        if(fieldName && value && id) {
+            newBasicSettings[id][fieldName] = value
+        }
+        setBasicSettings(newBasicSettings)
+    }
+
+    const updateBasicSettings = (fieldName, value, id ) => {
+        // If new basic data is already not generated then generate it first.
+        if( productModel.multipleItems.length > 0 && productModel.multipleItems.length !== Object.keys(basicSettings).length) {
+            populateBasicSettings(fieldName, value, id)
+        }else{
+            setBasicSettings((prev) => {
+                let updated = prev[id]
+                updated[fieldName] = value;
+                return {...prev, ...{[id]: updated }}
+            });
+        }
+    }
     const enableSlider = (checked) => {
-        setProductModel((prev) => ({
-            ...prev,
-            isMultiple: checked
-        }));
+        setProductModel((prev) =>{
+            if(checked && prev.multipleItems.length < 1) {
+                return {
+                    ...prev,
+                    isMultiple: checked,
+                    multipleItems: items
+                }
+            }
+
+            return {
+                ...prev,
+                isMultiple: checked
+            }
+        });
     }
     useEffect(() => {
-        if (productModel.isMultiple) {
+        if (productModel.isMultiple && productModel?.multipleItems?.length) {
+            if(productModel.multipleItems.length !== Object.keys(basicSettings).length) {
+                populateBasicSettings()
+            }
+            console.log({abc: productModel})
             wp.hooks.doAction("atlas_ar_preview_data", productModel)
         }
-        console.log({productModel})
     }, [productModel])
+
+    const handleMediaButtonClick = (fieldName, value, id) => {
+        updateBasicSettings(fieldName, value,id)
+        let inputField = document.getElementById(fieldName);
+        if(inputField) {
+            wp.hooks.doAction("atlas_ar_select_light_and_envirement_files", {
+                name: fieldName,
+                field: inputField,
+                isMultiple: true,
+            });
+        }
+    };
+    useEffect(() => {
+        if (wp?.hooks) {
+            wp.hooks.addAction(
+                "atlas_ar_on_select_multiple_model_file",
+                "ar_try_on",
+                function (val) {
+                    if (Object.keys(val).length) {
+                        let fieldAndId = val.name.split('-')
+                        const fieldName = fieldAndId[0]
+                        const id = fieldAndId[1] - 1;
+                        setProductModel((prev)=>{
+                            let prevItems = prev.multipleItems;
+                            prevItems[id]['data'][fieldName] = val.url;
+                            return  {...prev, multipleItems: prevItems}
+                        });
+                    }
+                }
+            );
+        }
+    }, [wp.hooks]);
+
+
     return (
         <div className="art-mb-4">
             <div className="art-mb-2">
@@ -230,7 +294,9 @@ const SliderSection = ({
 
             {productModel.isMultiple && (
                 <div className="art-mt-3">
-                    {productModel.multipleItems.length > 0 && productModel.multipleItems.map((item, index) => (
+                    {productModel.multipleItems.length > 0
+                        && productModel.multipleItems.length === Object.keys(basicSettings).length
+                        && productModel.multipleItems.map((item, index) => (
                         <div
                             key={item.id}
                             className="art-border art-border-solid art-border-gray-300 art-rounded art-mb-3"
@@ -244,16 +310,16 @@ const SliderSection = ({
                                 onClick={() => toggleItemExpansion(item.id)}
                             >
                                 <div className="art-flex art-items-center art-gap-2">
-                  <span
-                      className="dashicons dashicons-menu art-text-gray-600 art-cursor-move"
-                      draggable
-                      onClick={(e) => e.stopPropagation()}
-                      onDragStart={(e) => {
-                          e.stopPropagation();
-                          handleDragStart(index);
-                      }}
-                  ></span>
-                                    <span className="art-font-medium">Item {item.id}</span>
+                                      <span
+                                          className="dashicons dashicons-menu art-text-gray-600 art-cursor-move"
+                                          draggable
+                                          onClick={(e) => e.stopPropagation()}
+                                          onDragStart={(e) => {
+                                              e.stopPropagation();
+                                              handleDragStart(index);
+                                          }}
+                                      ></span>
+                                      <span className="art-font-medium">Item {item.id}</span>
                                 </div>
                                 <div className="art-flex art-items-center art-gap-2">
                                     <button
@@ -267,7 +333,7 @@ const SliderSection = ({
                                     >
                                         <span className="dashicons dashicons-admin-page"></span>
                                     </button>
-                                    {items.length > 1 && (
+                                    {productModel.multipleItems.length > 1 && (
                                         <button
                                             type="button"
                                             onClick={(e) => {
@@ -290,15 +356,15 @@ const SliderSection = ({
                                     <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                                            MODEL {basicSettings.src === "upload" ? "File" : "URL"}{" "}
+                                            MODEL {basicSettings[item.id].src === "upload" ? "File" : "URL"}{" "}
                                             FOR ANDROID
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
                                                 type="button"
-                                                onClick={() => handleMediaButtonClick("src", "upload")}
+                                                onClick={() => handleMediaButtonClick(`src-${item.id}`, "upload", item.id)}
                                                 className={`art-cursor-pointer art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.src === "upload"
+                                                    basicSettings[item.id].src === "upload"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -308,10 +374,10 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    setBasicSettings((prev) => ({...prev, src: "url"}))
+                                                    updateBasicSettings('src', 'url', item.id)
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.src === "url"
+                                                    basicSettings[item.id].src === "url"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -324,10 +390,11 @@ const SliderSection = ({
                                         </label>
                                         <input
                                             type="text"
-                                            name="src"
+                                            name={`src-${item.id}`}
+                                            id={`src-${item.id}`}
                                             value={item.data.src || ""}
                                             onChange={(e) =>
-                                                handleItemChange(item.id, "src", e.target.value)
+                                                handleItemChange(item.id, `src-${item.id}`, e.target.value)
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
                                             placeholder="Enter Android model URL"
@@ -342,7 +409,7 @@ const SliderSection = ({
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1 art-mt-4">
                                             MODEL{" "}
-                                            {basicSettings.ios_src === "upload" ? "File" : "URL"} FOR
+                                            {basicSettings[item.id].ios_src === "upload" ? "File" : "URL"} FOR
                                             IOS
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
@@ -352,7 +419,7 @@ const SliderSection = ({
                                                     handleMediaButtonClick("ios_src", "upload")
                                                 }
                                                 className={`art-cursor-pointer art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.ios_src === "upload"
+                                                    basicSettings[item.id].ios_src === "upload"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -368,7 +435,7 @@ const SliderSection = ({
                                                     }))
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.ios_src === "url"
+                                                    basicSettings[item.id].ios_src === "url"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -382,6 +449,7 @@ const SliderSection = ({
                                         <input
                                             type="text"
                                             name="ios_src"
+                                            id="ios_src"
                                             value={item.data.ios_src || ""}
                                             onChange={(e) =>
                                                 handleItemChange(item.id, "ios_src", e.target.value)
@@ -399,7 +467,7 @@ const SliderSection = ({
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-mt-4 art-block">
                                             POSTER SOURCE{" "}
-                                            {basicSettings.poster === "upload" ? "File" : "URL"}
+                                            {basicSettings[item.id].poster === "upload" ? "File" : "URL"}
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -408,7 +476,7 @@ const SliderSection = ({
                                                     handleMediaButtonClick("poster", "upload")
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.poster === "upload"
+                                                    basicSettings[item.id].poster === "upload"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -424,7 +492,7 @@ const SliderSection = ({
                                                     }))
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.poster === "url"
+                                                    basicSettings[item.id].poster === "url"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -438,6 +506,7 @@ const SliderSection = ({
                                         <input
                                             type="text"
                                             name="poster"
+                                            id="poster"
                                             value={item.data.poster || ""}
                                             onChange={(e) =>
                                                 handleItemChange(item.id, "poster", e.target.value)
@@ -487,7 +556,7 @@ const SliderSection = ({
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-mt-4 art-block">
                                             SKYBOX SOURCE{" "}
-                                            {basicSettings.skybox_source_type == "upload"
+                                            {basicSettings[item.id].skybox_source_type == "upload"
                                                 ? "File"
                                                 : "URL"}
                                         </label>
@@ -499,7 +568,7 @@ const SliderSection = ({
                                                 }
                                                 data-name="skybox_image"
                                                 className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${
-                                                    basicSettings.skybox_source_type === "upload"
+                                                    basicSettings[item.id].skybox_source_type === "upload"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -518,7 +587,7 @@ const SliderSection = ({
                                                     }))
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.skybox_source_type === "url"
+                                                    basicSettings[item.id].skybox_source_type === "url"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -554,7 +623,7 @@ const SliderSection = ({
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-mt-4 art-block">
                                             ENVIRONMENT IMAGE SOURCE{" "}
-                                            {basicSettings.environment_source_type == "upload"
+                                            {basicSettings[item.id].environment_source_type == "upload"
                                                 ? "File"
                                                 : "URL"}
                                         </label>
@@ -566,7 +635,7 @@ const SliderSection = ({
                                                 }
                                                 data-name="environment_image"
                                                 className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${
-                                                    basicSettings.environment_source_type === "upload"
+                                                    basicSettings[item.id].environment_source_type === "upload"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -585,7 +654,7 @@ const SliderSection = ({
                                                     }))
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
-                                                    basicSettings.environment_source_type === "url"
+                                                    basicSettings[item.id].environment_source_type === "url"
                                                         ? "art-bg-black art-text-white"
                                                         : "art-bg-white art-text-black"
                                                 }`}
@@ -634,10 +703,10 @@ const SliderSection = ({
                                                 data-name="thumbnail_image"
                                                 className="art-cursor-pointer art-p-2 art-bg-white art-text-black ar-try-on-open-media-library"
                                             >
-                        <span
-                            data-name="thumbnail_image"
-                            className="dashicons dashicons-images-alt2"
-                        ></span>
+                                                <span
+                                                    data-name="thumbnail_image"
+                                                    className="dashicons dashicons-images-alt2"
+                                                ></span>
                                             </button>
                                         </div>
 
@@ -648,12 +717,12 @@ const SliderSection = ({
                                         <input
                                             type="text"
                                             id={`thumbnail_image-${item.id}`}
-                                            name="thumbnail_image"
+                                            name={`thumbnail_image-${item.id}`}
                                             value={item.data.thumbnail_image}
                                             onChange={(e) =>
                                                 handleItemChange(
                                                     item.id,
-                                                    "thumbnail_image",
+                                                    `thumbnail_image-${item.id}`,
                                                     e.target.value
                                                 )
                                             }

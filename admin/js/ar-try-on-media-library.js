@@ -32,9 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    function uploadModelFile(fieldName, field = '') {
-        console.log(fieldName)
-
+    function uploadModelFile(fieldName, field = '', isMultiple = false) {
+        console.log({fieldName, field})
         // If the media uploader instance already exists, reopen it
         if (mediaUploader) {
             mediaUploader = null;
@@ -61,13 +60,22 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 document.getElementById(fieldName).value = attachment.url;
             }
+            console.log(fieldName, field)
+            if(isMultiple) {
+                wp.hooks.doAction('atlas_ar_on_select_multiple_model_file', {
+                    name: fieldName,
+                    url: attachment.url,
+                    sizes: attachment.sizes
+                });
+            }else{
+                wp.hooks.doAction('atlas_ar_on_select_model_file', {
+                    name: fieldName,
+                    url: attachment.url,
+                    sizes: attachment.sizes
+                });
+            }
 
 
-            wp.hooks.doAction('atlas_ar_on_select_model_file', {
-                name: fieldName,
-                url: attachment.url,
-                sizes: attachment.sizes
-            });
         });
 
         // Open the media uploader
@@ -75,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    wp.hooks.addAction('atlas_ar_select_light_and_envirement_files', 'ar_try_on', function ({ name, field }) {
-        uploadModelFile(name, field)
+    wp.hooks.addAction('atlas_ar_select_light_and_envirement_files', 'ar_try_on', function ({ name, field, isMultiple }) {
+        uploadModelFile(name, field, isMultiple)
     });
 });
