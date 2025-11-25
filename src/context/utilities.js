@@ -362,7 +362,6 @@ function displayDimensions(modelViewer, model_settings) {
 }
 
 window.atlasARSwitchSrc = (event ,element, name ) => {
-    console.log(element)
     // 🔹 Stop form submit / page reload
     if (event && event.preventDefault) {
         event.preventDefault();
@@ -489,7 +488,7 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     if (model_settings.hotspots && model_settings.hotspots.length > 0) {
         renderUserHotspots(modelViewer, model_settings.hotspots);
     }
-    console.log(model_settings?.multipleItems?.length)
+
     if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
         // FIXED: Check if slider elements already exist before adding
         const ar_button = modelViewer.querySelector("#ar-button");
@@ -511,16 +510,20 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         `
         }
 
-        // model_settings.src = 'https://modelviewer.dev//assets/ShopifyModels/Chair.glb';
         model_settings.src = model_settings.multipleItems[0].data.src;
-        // model_settings.poster = 'https://modelviewer.dev//assets/ShopifyModels/Chair.webp';
         model_settings.poster = model_settings.multipleItems[0].data.poster;
         modelViewer.setAttribute("src", model_settings.src || "");
         modelViewer.setAttribute("poster", model_settings.poster || "");
+
+        const prevSlider = modelViewer.querySelector(".slider");
+        if(prevSlider) {
+            prevSlider.remove();
+        }
+
         sliderHTML += `<div class="slider">
                 <div class="slides">`;
         model_settings.multipleItems.map((item, index)=>{
-            sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick="atlasARSwitchSrc(event, this, ${item.data.alt})"
+            sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, "${item.data.alt}")'
                     style="background-image: url(${item.data.poster});">`
         });
 

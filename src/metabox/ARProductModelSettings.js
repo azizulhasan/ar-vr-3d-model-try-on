@@ -80,7 +80,7 @@ const ARProductModelSettings = () => {
             },
             {
                 id: 2,
-                isExpanded: true,
+                isExpanded: false,
                 data: {
                     src: "https://modelviewer.dev/assets/ShopifyModels/Mixer.glb",
                     ios_src: "",
@@ -93,7 +93,7 @@ const ARProductModelSettings = () => {
             },
             {
                 id: 3,
-                isExpanded: true,
+                isExpanded: false,
                 data: {
                     src: "https://modelviewer.dev/assets/ShopifyModels/GeoPlanter.glb",
                     ios_src: "",
@@ -106,7 +106,7 @@ const ARProductModelSettings = () => {
             },
             {
                 id: 4,
-                isExpanded: true,
+                isExpanded: false,
                 data: {
                     src: "https://modelviewer.dev/assets/ShopifyModels/ToyTrain.glb",
                     ios_src: "",
@@ -119,7 +119,7 @@ const ARProductModelSettings = () => {
             },
             {
                 id: 5,
-                isExpanded: true,
+                isExpanded: false,
                 data: {
                     src: "https://modelviewer.dev/assets/ShopifyModels/Canoe.glb",
                     ios_src: "",
