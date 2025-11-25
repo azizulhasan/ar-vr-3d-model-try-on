@@ -361,16 +361,19 @@ function displayDimensions(modelViewer, model_settings) {
     });
 }
 
-window.atlasARSwitchSrc = (event ,element, name ) => {
+window.atlasARSwitchSrc = (event ,element, data ) => {
     // 🔹 Stop form submit / page reload
     if (event && event.preventDefault) {
         event.preventDefault();
     }
     const modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0]
+    modelViewer.src = data.src ?? '';
+    modelViewer['ios-src'] = data.ios_src ?? '';
+    modelViewer.poster = data.poster ?? '';
+    modelViewer.alt = data.alt ?? '';
+    modelViewer['skybox-image'] = data.skybox_image ?? '';
+    modelViewer['environment-image'] = data.environment_image ?? '';
 
-    const base = "https://modelviewer.dev/assets/ShopifyModels/" + name;
-    modelViewer.src = base + '.glb';
-    modelViewer.poster = base + '.webp';
     const slides = document.querySelectorAll(".slide");
     slides.forEach((element) => {element.classList.remove("selected");});
     element.classList.add("selected");
@@ -523,7 +526,7 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         sliderHTML += `<div class="slider">
                 <div class="slides">`;
         model_settings.multipleItems.map((item, index)=>{
-            sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, "${item.data.alt}")'
+            sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, ${JSON.stringify(item.data)})'
                     style="background-image: url(${item.data.poster});">`
         });
 

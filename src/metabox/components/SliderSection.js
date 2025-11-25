@@ -17,7 +17,6 @@ const SliderSection = ({
                 alt: "Chair",
                 skybox_image: "",
                 environment_image: "",
-                thumbnail_image: ""
             },
         },
         {
@@ -30,7 +29,6 @@ const SliderSection = ({
                 alt: "Mixer",
                 skybox_image: "",
                 environment_image: "",
-                thumbnail_image: ""
             },
         },
         {
@@ -43,7 +41,6 @@ const SliderSection = ({
                 alt: "GeoPlanter",
                 skybox_image: "",
                 environment_image: "",
-                thumbnail_image: ""
             },
         },
         {
@@ -56,7 +53,6 @@ const SliderSection = ({
                 alt: "ToyTrain",
                 skybox_image: "",
                 environment_image: "",
-                thumbnail_image: ""
             },
         },
         {
@@ -69,7 +65,6 @@ const SliderSection = ({
                 alt: "Canoe",
                 skybox_image: "",
                 environment_image: "",
-                thumbnail_image: ""
             },
         },
     ]);
@@ -84,7 +79,6 @@ const SliderSection = ({
         environment_source_type: "upload",
         skybox_source_type: "upload",
         ios_src: "upload",
-        thumbnail_image: "upload",
     })
     const [basicSettings, setBasicSettings] = useState({});
 
@@ -118,13 +112,12 @@ const SliderSection = ({
             id: productModel.multipleItems.length + 1,
             isExpanded: true,
             data: {
-                src: "",
+                src: "https://modelviewer.dev/assets/ShopifyModels/Chair.glb",
                 ios_src: "",
-                poster: "",
-                alt: "",
+                poster: "https://modelviewer.dev/assets/ShopifyModels/Chair.webp",
+                alt: "Chair",
                 skybox_image: "",
                 environment_image: "",
-                thumbnail_image: ""
             },
         };
 
@@ -394,7 +387,7 @@ const SliderSection = ({
                                             id={`src-${item.id}`}
                                             value={item.data.src || ""}
                                             onChange={(e) =>
-                                                handleItemChange(item.id, `src-${item.id}`, e.target.value)
+                                                handleItemChange(item.id, `src`, e.target.value)
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
                                             placeholder="Enter Android model URL"
@@ -416,7 +409,7 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    handleMediaButtonClick("ios_src", "upload")
+                                                    handleMediaButtonClick(`ios_src-${item.id}`, "upload", item.id)
                                                 }
                                                 className={`art-cursor-pointer art-p-2 art-transition-all art-duration-200 ${
                                                     basicSettings[item.id].ios_src === "upload"
@@ -429,10 +422,7 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    setBasicSettings((prev) => ({
-                                                        ...prev,
-                                                        ios_src: "url",
-                                                    }))
+                                                    updateBasicSettings('ios_src', 'url', item.id)
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
                                                     basicSettings[item.id].ios_src === "url"
@@ -448,8 +438,8 @@ const SliderSection = ({
                                         </label>
                                         <input
                                             type="text"
-                                            name="ios_src"
-                                            id="ios_src"
+                                            name={`ios_src-${item.id}`}
+                                            id={`ios_src-${item.id}`}
                                             value={item.data.ios_src || ""}
                                             onChange={(e) =>
                                                 handleItemChange(item.id, "ios_src", e.target.value)
@@ -473,7 +463,7 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    handleMediaButtonClick("poster", "upload")
+                                                    handleMediaButtonClick(`poster-${item.id}`, "upload", item.id)
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
                                                     basicSettings[item.id].poster === "upload"
@@ -486,10 +476,7 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    setBasicSettings((prev) => ({
-                                                        ...prev,
-                                                        poster: "url",
-                                                    }))
+                                                    updateBasicSettings('poster', 'url', item.id)
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
                                                     basicSettings[item.id].poster === "url"
@@ -505,8 +492,8 @@ const SliderSection = ({
                                         </label>
                                         <input
                                             type="text"
-                                            name="poster"
-                                            id="poster"
+                                            name={`poster-${item.id}`}
+                                            id={`poster-${item.id}`}
                                             value={item.data.poster || ""}
                                             onChange={(e) =>
                                                 handleItemChange(item.id, "poster", e.target.value)
@@ -564,7 +551,7 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={(e) =>
-                                                    handleMediaButtonClick("skybox_image", "upload")
+                                                    handleMediaButtonClick(`skybox_image-${item.id}`, "upload", item.id)
                                                 }
                                                 data-name="skybox_image"
                                                 className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${
@@ -573,18 +560,15 @@ const SliderSection = ({
                                                         : "art-bg-white art-text-black"
                                                 }`}
                                             >
-                        <span
-                            data-name="skybox_image"
-                            className="dashicons dashicons-cloud-upload"
-                        ></span>
+                                            <span
+                                                data-name="skybox_image"
+                                                className="dashicons dashicons-cloud-upload"
+                                            ></span>
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    setBasicSettings((prev) => ({
-                                                        ...prev,
-                                                        skybox_source_type: "url",
-                                                    }))
+                                                    updateBasicSettings( 'skybox_source_type', 'url', item.id)
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
                                                     basicSettings[item.id].skybox_source_type === "url"
@@ -601,7 +585,7 @@ const SliderSection = ({
                                         <input
                                             type="text"
                                             id={`skybox_image-${item.id}`}
-                                            name="skybox_image"
+                                            name={`skybox_image-${item.id}`}
                                             value={item.data.skybox_image}
                                             onChange={(e) =>
                                                 handleItemChange(
@@ -631,7 +615,7 @@ const SliderSection = ({
                                             <button
                                                 type="button"
                                                 onClick={(e) =>
-                                                    handleMediaButtonClick("environment_image", "upload")
+                                                    handleMediaButtonClick(`environment_image-${item.id}`, "upload", item.id)
                                                 }
                                                 data-name="environment_image"
                                                 className={`art-p-2 ar-try-on-open-media-library art-transition-all art-duration-200 ${
@@ -640,18 +624,15 @@ const SliderSection = ({
                                                         : "art-bg-white art-text-black"
                                                 }`}
                                             >
-                        <span
-                            data-name="environment_image"
-                            className="dashicons dashicons-cloud-upload"
-                        ></span>
+                                            <span
+                                                data-name="environment_image"
+                                                className="dashicons dashicons-cloud-upload"
+                                            ></span>
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    setBasicSettings((prev) => ({
-                                                        ...prev,
-                                                        environment_source_type: "url",
-                                                    }))
+                                                    updateBasicSettings('environment_source_type', 'url', item.id)
                                                 }
                                                 className={`art-p-2 art-transition-all art-duration-200 ${
                                                     basicSettings[item.id].environment_source_type === "url"
@@ -668,7 +649,7 @@ const SliderSection = ({
                                         <input
                                             type="text"
                                             id={`environment_image-${item.id}`}
-                                            name="environment_image"
+                                            name={`environment_image-${item.id}`}
                                             value={item.data.environment_image}
                                             onChange={(e) =>
                                                 handleItemChange(
@@ -685,55 +666,53 @@ const SliderSection = ({
                                         </p>
                                     </div>
 
-                                    <br/>
-
                                     {/* Thumbnail */}
-                                    <div className="art-border art-border-solid art-border-black art-p-4">
-                                        <label
-                                            className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                                            UPLOAD THUMBNAIL FOR SLIDER
-                                        </label>
+                                    {/*<div className="art-border art-border-solid art-border-black art-p-4">*/}
+                                    {/*    <label*/}
+                                    {/*        className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">*/}
+                                    {/*        UPLOAD THUMBNAIL FOR SLIDER*/}
+                                    {/*    </label>*/}
 
-                                        <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleMediaButtonClick("thumbnail_image", "upload")
-                                                }
-                                                data-name="thumbnail_image"
-                                                className="art-cursor-pointer art-p-2 art-bg-white art-text-black ar-try-on-open-media-library"
-                                            >
-                                                <span
-                                                    data-name="thumbnail_image"
-                                                    className="dashicons dashicons-images-alt2"
-                                                ></span>
-                                            </button>
-                                        </div>
+                                    {/*    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">*/}
+                                    {/*        <button*/}
+                                    {/*            type="button"*/}
+                                    {/*            onClick={() =>*/}
+                                    {/*                handleMediaButtonClick("thumbnail_image", "upload")*/}
+                                    {/*            }*/}
+                                    {/*            data-name="thumbnail_image"*/}
+                                    {/*            className="art-cursor-pointer art-p-2 art-bg-white art-text-black ar-try-on-open-media-library"*/}
+                                    {/*        >*/}
+                                    {/*            <span*/}
+                                    {/*                data-name="thumbnail_image"*/}
+                                    {/*                className="dashicons dashicons-images-alt2"*/}
+                                    {/*            ></span>*/}
+                                    {/*        </button>*/}
+                                    {/*    </div>*/}
 
-                                        <label className="art-mt-2 art-block art-text-sm art-font-medium">
-                                            THUMBNAIL IMAGE
-                                        </label>
+                                    {/*    <label className="art-mt-2 art-block art-text-sm art-font-medium">*/}
+                                    {/*        THUMBNAIL IMAGE*/}
+                                    {/*    </label>*/}
 
-                                        <input
-                                            type="text"
-                                            id={`thumbnail_image-${item.id}`}
-                                            name={`thumbnail_image-${item.id}`}
-                                            value={item.data.thumbnail_image}
-                                            onChange={(e) =>
-                                                handleItemChange(
-                                                    item.id,
-                                                    `thumbnail_image-${item.id}`,
-                                                    e.target.value
-                                                )
-                                            }
-                                            className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                            placeholder="Enter thumbnail image URL"
-                                        />
+                                    {/*    <input*/}
+                                    {/*        type="text"*/}
+                                    {/*        id={`thumbnail_image-${item.id}`}*/}
+                                    {/*        name={`thumbnail_image-${item.id}`}*/}
+                                    {/*        value={item.data.thumbnail_image}*/}
+                                    {/*        onChange={(e) =>*/}
+                                    {/*            handleItemChange(*/}
+                                    {/*                item.id,*/}
+                                    {/*                `thumbnail_image-${item.id}`,*/}
+                                    {/*                e.target.value*/}
+                                    {/*            )*/}
+                                    {/*        }*/}
+                                    {/*        className="art-w-full art-mt-1 art-p-2 art-border art-rounded"*/}
+                                    {/*        placeholder="Enter thumbnail image URL"*/}
+                                    {/*    />*/}
 
-                                        <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                            Upload or paste the thumbnail image URL.
-                                        </p>
-                                    </div>
+                                    {/*    <p className="art-text-sm art-text-gray-600 art-mt-1">*/}
+                                    {/*        Upload or paste the thumbnail image URL.*/}
+                                    {/*    </p>*/}
+                                    {/*</div>*/}
                                 </div>
                             )}
                         </div>
