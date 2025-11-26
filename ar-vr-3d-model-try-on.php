@@ -218,6 +218,11 @@ register_deactivation_hook( __FILE__, function () {
 } );
 
 
+register_block_type( 'atlas/ar-shortcode', array(
+    'editor_script' => 'atlas-ar-block',
+    'editor_style'  => 'atlas-ar-block-editor',
+) );
+
 /**
  *
  * Create short code for qr code.
@@ -252,3 +257,5 @@ function atlas_ar_allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 
     return $output;
 }
+
+
