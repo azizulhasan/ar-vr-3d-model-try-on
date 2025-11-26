@@ -140,13 +140,19 @@ const SliderSection = ({
     };
 
     const handleDeleteItem = (id) => {
-        if (productModel.multipleItems.length > 1) {
+        if (productModel.multipleItems.length > 0) {
             setProductModel(prev => {
                 let prevItems = prev.multipleItems
                 return {
                     ...prev, multipleItems: prevItems.filter((item) => item.id !== id)
                 }
             })
+            setBasicSettings((prev) => {
+                if (prev.hasOwnProperty(id)) {
+                    delete prev[id];  // removes the key
+                }
+                return prev;
+            });
         }
     };
 
@@ -199,10 +205,10 @@ const SliderSection = ({
         })
     };
 
-    const populateBasicSettings = (fieldName = '', value = '', id = '') => {
+    const populateBasicSettings = ( fieldName = '', value = '', id = '') => {
         let newBasicSettings = {}
         productModel.multipleItems.map((item, index)=>{
-            newBasicSettings[index+1] = demoBasicData;
+            newBasicSettings[item.id] = demoBasicData;
         })
         if(fieldName && value && id) {
             newBasicSettings[id][fieldName] = value
@@ -306,8 +312,10 @@ const SliderSection = ({
                 <div className="art-mt-3">
                     {productModel.multipleItems.length > 0
                         && productModel.multipleItems.length === Object.keys(basicSettings).length
-                        && productModel.multipleItems.map((item, index) => (
-                        <div
+                        && productModel.multipleItems.map((item, index) => {
+                            console.log({basicSettings})
+                            console.log({items:productModel.multipleItems})
+                        return <div
                             key={item.id}
                             className="art-border art-border-solid art-border-gray-300 art-rounded art-mb-3"
                             draggable={false} // prevent full card dragging
@@ -343,19 +351,30 @@ const SliderSection = ({
                                     >
                                         <span className="dashicons dashicons-admin-page"></span>
                                     </button>
-                                    {productModel.multipleItems.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDeleteItem(item.id);
-                                            }}
-                                            className="art-p-1 hover:art-bg-gray-200 art-rounded art-transition-colors"
-                                            title="Delete"
-                                        >
-                                            <span className="dashicons dashicons-trash"></span>
-                                        </button>
-                                    )}
+                                    {/*{productModel.multipleItems.length > 1 && (*/}
+                                    {/*    <button*/}
+                                    {/*        type="button"*/}
+                                    {/*        onClick={(e) => {*/}
+                                    {/*            e.stopPropagation();*/}
+                                    {/*            handleDeleteItem(item.id);*/}
+                                    {/*        }}*/}
+                                    {/*        className="art-p-1 hover:art-bg-gray-200 art-rounded art-transition-colors"*/}
+                                    {/*        title="Delete"*/}
+                                    {/*    >*/}
+                                    {/*        <span className="dashicons dashicons-trash"></span>*/}
+                                    {/*    </button>*/}
+                                    {/*)}*/}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteItem(item.id);
+                                        }}
+                                        className="art-p-1 hover:art-bg-gray-200 art-rounded art-transition-colors"
+                                        title="Delete"
+                                    >
+                                        <span className="dashicons dashicons-trash"></span>
+                                    </button>
                                 </div>
                             </div>
 
@@ -683,57 +702,10 @@ const SliderSection = ({
                                         </p>
                                     </div>
 
-                                    {/* Thumbnail */}
-                                    {/*<div className="art-border art-border-solid art-border-black art-p-4">*/}
-                                    {/*    <label*/}
-                                    {/*        className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">*/}
-                                    {/*        UPLOAD THUMBNAIL FOR SLIDER*/}
-                                    {/*    </label>*/}
-
-                                    {/*    <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">*/}
-                                    {/*        <button*/}
-                                    {/*            type="button"*/}
-                                    {/*            onClick={() =>*/}
-                                    {/*                handleMediaButtonClick("thumbnail_image", "upload")*/}
-                                    {/*            }*/}
-                                    {/*            data-name="thumbnail_image"*/}
-                                    {/*            className="art-cursor-pointer art-p-2 art-bg-white art-text-black ar-try-on-open-media-library"*/}
-                                    {/*        >*/}
-                                    {/*            <span*/}
-                                    {/*                data-name="thumbnail_image"*/}
-                                    {/*                className="dashicons dashicons-images-alt2"*/}
-                                    {/*            ></span>*/}
-                                    {/*        </button>*/}
-                                    {/*    </div>*/}
-
-                                    {/*    <label className="art-mt-2 art-block art-text-sm art-font-medium">*/}
-                                    {/*        THUMBNAIL IMAGE*/}
-                                    {/*    </label>*/}
-
-                                    {/*    <input*/}
-                                    {/*        type="text"*/}
-                                    {/*        id={`thumbnail_image-${item.id}`}*/}
-                                    {/*        name={`thumbnail_image-${item.id}`}*/}
-                                    {/*        value={item.data.thumbnail_image}*/}
-                                    {/*        onChange={(e) =>*/}
-                                    {/*            handleItemChange(*/}
-                                    {/*                item.id,*/}
-                                    {/*                `thumbnail_image-${item.id}`,*/}
-                                    {/*                e.target.value*/}
-                                    {/*            )*/}
-                                    {/*        }*/}
-                                    {/*        className="art-w-full art-mt-1 art-p-2 art-border art-rounded"*/}
-                                    {/*        placeholder="Enter thumbnail image URL"*/}
-                                    {/*    />*/}
-
-                                    {/*    <p className="art-text-sm art-text-gray-600 art-mt-1">*/}
-                                    {/*        Upload or paste the thumbnail image URL.*/}
-                                    {/*    </p>*/}
-                                    {/*</div>*/}
                                 </div>
                             )}
                         </div>
-                    ))}
+                    })}
 
                     {/* Add New Item Button */}
                     <div className="art-flex art-w-full art-mt-4">
