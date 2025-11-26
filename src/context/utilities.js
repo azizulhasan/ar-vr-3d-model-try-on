@@ -527,7 +527,7 @@ export const setModelAttributes = (modelViewer, model_settings) => {
                 <div class="slides">`;
         model_settings.multipleItems.map((item, index)=>{
             sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, ${JSON.stringify(item.data)})'
-                    style="background-image: url(${item.data.poster});">`
+                    style="background-image: url(${item.data.thumbnail || item.data.poster});">`
         });
 
         sliderHTML += `</div></div>`;

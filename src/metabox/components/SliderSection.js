@@ -17,6 +17,7 @@ const SliderSection = ({
                 alt: "Chair",
                 skybox_image: "",
                 environment_image: "",
+                thumbnail: "",
             },
         },
         {
@@ -29,6 +30,7 @@ const SliderSection = ({
                 alt: "Mixer",
                 skybox_image: "",
                 environment_image: "",
+                thumbnail: "",
             },
         },
         {
@@ -41,6 +43,7 @@ const SliderSection = ({
                 alt: "GeoPlanter",
                 skybox_image: "",
                 environment_image: "",
+                thumbnail: "",
             },
         },
         {
@@ -53,6 +56,7 @@ const SliderSection = ({
                 alt: "ToyTrain",
                 skybox_image: "",
                 environment_image: "",
+                thumbnail: "",
             },
         },
         {
@@ -65,6 +69,7 @@ const SliderSection = ({
                 alt: "Canoe",
                 skybox_image: "",
                 environment_image: "",
+                thumbnail: "",
             },
         },
     ]);
@@ -118,6 +123,7 @@ const SliderSection = ({
                 alt: "Chair",
                 skybox_image: "",
                 environment_image: "",
+                thumbnail: "",
             },
         };
 
@@ -263,9 +269,20 @@ const SliderSection = ({
                         let fieldAndId = val.name.split('-')
                         const fieldName = fieldAndId[0]
                         const id = fieldAndId[1] - 1;
+                        console.log(val)
                         setProductModel((prev)=>{
                             let prevItems = prev.multipleItems;
                             prevItems[id]['data'][fieldName] = val.url;
+                            if(fieldName === 'poster') {
+                                if(val.sizes?.thumbnail?.url) {
+                                    prevItems[id]['data']['thumbnail'] = val.sizes.thumbnail.url;
+                                }else if(val.sizes?.medium?.url) {
+                                    prevItems[id]['data']['thumbnail'] = val?.sizes.medium.url;
+                                }else if(val.sizes?.large?.url) {
+                                    prevItems[id]['data']['thumbnail'] = val?.sizes.large.url;
+                                }
+                            }
+                            console.log(prevItems[id])
                             return  {...prev, multipleItems: prevItems}
                         });
                     }

@@ -60,21 +60,15 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 document.getElementById(fieldName).value = attachment.url;
             }
-            console.log(fieldName, field)
+            let actionName = 'atlas_ar_on_select_model_file';
             if(isMultiple) {
-                wp.hooks.doAction('atlas_ar_on_select_multiple_model_file', {
-                    name: fieldName,
-                    url: attachment.url,
-                    sizes: attachment.sizes
-                });
-            }else{
-                wp.hooks.doAction('atlas_ar_on_select_model_file', {
-                    name: fieldName,
-                    url: attachment.url,
-                    sizes: attachment.sizes
-                });
+                actionName = 'atlas_ar_on_select_multiple_model_file';
             }
-
+            wp.hooks.doAction(actionName, {
+                name: fieldName,
+                url: attachment.url,
+                sizes: attachment.sizes
+            });
 
         });
 
