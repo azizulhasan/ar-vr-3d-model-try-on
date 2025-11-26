@@ -151,8 +151,11 @@ class AtlasAR {
 
     // Show loading message before sending the request
     let button = document.querySelector(`[product-id="${product_id}"]`);
-    let buttonText = button.innerText;
-    button.innerHTML = `Loading 3D Model ${this.spinLoader()}`;
+    let buttonText = 'View In 3D'
+    if(button){
+      buttonText = button.innerText;
+      button.innerHTML = `Loading 3D Model ${this.spinLoader()}`;
+    }
     let self = this;
     let formData = new FormData();
     formData.append("post_id", product_id);
@@ -167,7 +170,9 @@ class AtlasAR {
         if (data) {
           this.setModelSessionData(data, product_id);
         }
-        button.innerHTML = buttonText;
+        if(button){
+          button.innerHTML = buttonText;
+        }
       }
     });
   }
