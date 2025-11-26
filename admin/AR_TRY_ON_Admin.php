@@ -178,7 +178,10 @@ class AR_TRY_ON_Admin {
 			ATLAS_AR_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
 			20
 		);
-	}
+
+        do_action( 'atlas_ar_menu', $this );
+
+    }
 
 	public function ar_try_on_settings() {
 		echo wp_kses( "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>", array(
