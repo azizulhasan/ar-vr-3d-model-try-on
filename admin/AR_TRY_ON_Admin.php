@@ -142,7 +142,23 @@ class AR_TRY_ON_Admin {
 				true
 			);
 		}
+        // JS
+        wp_enqueue_script(
+            'atlas-ar-block',
+            ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block.js',
+            array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-editor', 'wp-block-editor' ),
+            $this->version,
+            true
+        );
 
+        // CSS (editor only)
+        wp_enqueue_style(
+            'atlas-ar-block-editor',
+            ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block-editor.css',
+            array( 'wp-edit-blocks' ),
+            $this->version,
+            'all'
+        );
 	}
 
 	public function enqueue_preview() {

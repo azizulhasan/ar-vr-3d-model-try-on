@@ -199,7 +199,6 @@ class AR_TRY_ON_Helper
         ), $attr);
 
         $current_filter = current_filter();
-
         if (!AR_TRY_ON_Helper::is_ar_supported_post_type('shortcode')) {
             if ($current_filter === 'the_content') {
                 return $content;
@@ -207,6 +206,7 @@ class AR_TRY_ON_Helper
 
             return;
         }
+
 
         // Global product variable
         global $product;
