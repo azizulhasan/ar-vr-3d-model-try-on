@@ -133,14 +133,6 @@ const ARProductModelSettings = () => {
         ],
     });
 
-    const {dimensions = {}} = productModel;
-    const {
-        width = {value: 0},
-        height = {value: 0},
-        length = {value: 0},
-        unit = "cm",
-        show = true,
-    } = dimensions;
 
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
