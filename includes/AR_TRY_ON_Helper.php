@@ -176,7 +176,6 @@ class AR_TRY_ON_Helper
         if (!is_admin()) {
             $product_settings = (array)get_post_meta($post->ID, 'ar_try_on_product_settings', true);
             $product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
-            error_log(print_r([$post->ID, $product_settings], true));
 
             //Get the file url for android
             if (!isset($product_settings['src'])) {
@@ -187,7 +186,6 @@ class AR_TRY_ON_Helper
                 $result = false;
             }
         }
-        error_log(print_r($result, true));
 
         return $result;
     }
