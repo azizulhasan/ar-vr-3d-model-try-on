@@ -5,7 +5,7 @@ import {
     postWithoutImage,
     copyshortcode,
     getAPITypes,
-    isDifferent,
+    isDifferent, CTANotice, is_premium_active, findWatchedPropertyChanges,
 } from "../context/utilities";
 import ContentSection from "./components/ContentSection.js";
 import CameraSection from "./components/CameraSection.js";
@@ -55,11 +55,11 @@ const ARProductModelSettings = () => {
         exclude_integration_api_body: [],
         exclude_integration_api_model_type: "text_to_model",
         dimensions: {
-            show: true,
+            show: false,
             unit: "cm",
-            width: {value: 4, unit: "cm"},
-            height: {value: 10, unit: "cm"},
-            length: {value: 5, unit: "cm"},
+            width: {value: 0, unit: "cm"},
+            height: {value: 0, unit: "cm"},
+            length: {value: 0, unit: "cm"},
         },
         hotspots: [],
         thumbnail_image: "",
@@ -137,11 +137,11 @@ const ARProductModelSettings = () => {
     const [currentValue, setCurrentValue] = useState({});
     const [isProductModelLoaded, setIsProductModelLoad] = useState(false);
     const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
-     const [isSaving, setIsSaving] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
 
     // Accordion state
-    const [activeSection, setActiveSection] = useState("slider");
+    const [activeSection, setActiveSection] = useState("settings");
     const [activeAccordion, setActiveAccordion] = useState({
         content: false,
         camera: false,
@@ -387,72 +387,105 @@ const ARProductModelSettings = () => {
     }, [productModel.exclude_integration_api_model_type]);
 
 
-const handleSubmit = (e) => {
-    e.preventDefault();
-    const postId = getPostID()
-    if (!postId) {
-        notify('Please publish the post first. Then reload the page and save.', 'warn',{
-            autoClose: 5000,
-        })
-        return; // This is fine - no setIsSaving was called yet
+    const  maybeModifiedProductModel = async (data) => {
+        let is_pro_active = false;
+        let formData = new FormData();
+        formData.append('data', ar_try_on.premium_file);
+        formData.append('method', 'POST');
+        await postWithoutImage(getURL('should_save_data'), formData)
+            .then((res) => {
+                is_pro_active = is_premium_active(res.status);
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+
+
+        let tempProductModel = structuredClone(data)
+        let isProFeaturesChanged = findWatchedPropertyChanges(previousProductModel, data);
+        console.log(isProFeaturesChanged)
+        // Remove pro feature related data
+        if(!is_pro_active && isProFeaturesChanged?.changed ) {
+            CTANotice('Dimensions, HotSpots, Slider is Premium version feature. To use there features Upgrade To Premium Version')
+            tempProductModel.hotspots = [];
+            tempProductModel.dimensions = {};
+            tempProductModel.isMultiple = false;
+            tempProductModel.multipleItems = [];
+        }
+
+        return tempProductModel;
     }
 
-    let hasValueChanged = isDifferent(previousProductModel, productModel);
-    if (!hasValueChanged) {
-        notify('No changes detected', 'info',{
-            autoClose: 5000,
-        })
-        return; // This is fine - no setIsSaving was called yet
-    }
-
-    setIsSaving(true); // Move this AFTER the validation checks
-
-    let formData = new FormData();
-    formData.append('fields', JSON.stringify(productModel));
-    formData.append('post_id', postId);
-    formData.append('method', 'POST');
-    formData.append('has_value_changed', hasValueChanged);
-    postWithoutImage(getURL('get_model_and_settings'), formData)
-        .then((res) => {
-            console.log(res)
-            setProductModel({...productModel, ...res.data});
-            setPreviousProductModel({...productModel, ...res.data});
-            notify('Successfully Saved Data.', 'success',{
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const postId = getPostID()
+        if (!postId) {
+            notify('Please publish the post first. Then reload the page and save.', 'warn',{
                 autoClose: 5000,
             })
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-        .finally(() => {
-            setIsSaving(false);
-        });
-};
+            return; // This is fine - no setIsSaving was called yet
+        }
 
-const SaveButton = ({classes = 'art-w-full'}) => (
-    <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isSaving}
-        className={`art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-transition-colors hover:art-opacity-90 ${
-            isSaving ? 'art-opacity-70 art-cursor-not-allowed' : ''
-        } ${classes}`}
-    >
-        {isSaving ? (
-            <div className="art-flex art-items-center art-justify-center art-gap-2">
-                <SpinnerModal />
-                <span>Saving...</span>
-            </div>
-        ) : (
-            "Save"
-        )}
-    </button>
-);
+        let hasValueChanged = isDifferent(previousProductModel, productModel);
+        if (!hasValueChanged) {
+            notify('No changes detected', 'info',{
+                autoClose: 5000,
+            })
+            // return; // This is fine - no setIsSaving was called yet
+        }
+
+        setIsSaving(true); // Move this AFTER the validation checks
+        let modifiedProductModel = await maybeModifiedProductModel(productModel)
+        console.log(modifiedProductModel)
+        let formData = new FormData();
+        formData.append('fields', JSON.stringify(modifiedProductModel));
+        formData.append('post_id', postId);
+        formData.append('method', 'POST');
+        formData.append('has_value_changed', hasValueChanged);
+
+        // for(let val of formData.values()) {
+        //     console.log(val)
+        // }
+        // return;
+        postWithoutImage(getURL('get_model_and_settings'), formData)
+            .then((res) => {
+                console.log(res)
+                setProductModel({...productModel, ...res.data});
+                setPreviousProductModel({...productModel, ...res.data});
+                notify('Successfully Saved Data.', 'success',{
+                    autoClose: 5000,
+                })
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+            .finally(() => {
+                setIsSaving(false);
+            });
+    };
+
+    const SaveButton = ({classes = 'art-w-full'}) => (
+        <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSaving}
+            className={`art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-transition-colors hover:art-opacity-90 ${
+                isSaving ? 'art-opacity-70 art-cursor-not-allowed' : ''
+            } ${classes}`}
+        >
+            {isSaving ? (
+                <div className="art-flex art-items-center art-justify-center art-gap-2">
+                    <SpinnerModal />
+                    <span>Saving...</span>
+                </div>
+            ) : (
+                "Save"
+            )}
+        </button>
+    );
 
     return (
         <>
-
-
             <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -519,7 +552,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
                             }`}
                         >
-                            Slider
+                            Slider {!ar_try_on.is_pro_active ? ' Pro': ''}
                         </button>
                     </div>
                     <div>

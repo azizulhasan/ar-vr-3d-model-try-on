@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {toast}  from "./Notify";
 
 /**
  * Post data method.
@@ -485,7 +485,9 @@ export const setModelAttributes = (modelViewer, model_settings) => {
 
 
     // Dimension
-    displayDimensions(modelViewer, model_settings);
+    if(model_settings?.dimensions?.show) {
+        displayDimensions(modelViewer, model_settings);
+    }
 
     // hotspots
     if (model_settings.hotspots && model_settings.hotspots.length > 0) {
@@ -803,4 +805,105 @@ export const SpinnerModal = () => {
             d="M4.5 12a7.5 7.5 0 0015 0"
         />
     </svg>
+};
+
+export  const CTANotice = (text_content = '' ) => {
+    toast(<>
+        <h6>{text_content}</h6>
+        <button onClick={(e) => {
+            window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
+        }} className='atlas_ar_btn'>
+            Upgrade Now
+        </button>
+    </>, 'info', {
+        position: 'top-right',
+        autoClose: 10000,
+    });
+}
+
+
+export const is_premium_active = (should_save_data = null) => {
+    let result = true;
+    if(!ar_try_on?.plugins?.includes(ar_try_on.premium_file)) {
+        result = false;
+    }
+
+    if(ar_try_on?.active_plugins &&  !Object.values(ar_try_on.active_plugins)?.includes(ar_try_on.premium_file)) {
+        result = false;
+    }
+
+
+    if(!ar_try_on?.is_pro_active) {
+        result = false;
+    }
+
+    if(should_save_data !== null) {
+        if(should_save_data) {
+            result = true;
+        }else{
+            result = false;
+        }
+    }
+
+    return result;
+}
+
+
+export  const findWatchedPropertyChanges = (
+    prev,
+    next,
+    watchedKeys = [ 'hotspots', "multipleItems", "dimensions", "isMultiple"]
+) => {
+    const changes = [];
+
+    function walk(prevNode, nextNode, path = "") {
+        const isObjPrev = prevNode && typeof prevNode === "object";
+        const isObjNext = nextNode && typeof nextNode === "object";
+
+        if (!isObjPrev && !isObjNext) return;
+
+        // 1) Check watched keys at this level
+        for (const key of watchedKeys) {
+            const prevHas =
+                isObjPrev && Object.prototype.hasOwnProperty.call(prevNode, key);
+            const nextHas =
+                isObjNext && Object.prototype.hasOwnProperty.call(nextNode, key);
+
+            if (prevHas || nextHas) {
+                const prevVal = prevHas ? prevNode[key] : undefined;
+                const nextVal = nextHas ? nextNode[key] : undefined;
+
+                if (isDifferent(prevVal, nextVal)) {
+                    changes.push({
+                        key,
+                        path: path ? `${path}.${key}` : key,
+                        prev: prevVal,
+                        next: nextVal,
+                    });
+                }
+            }
+        }
+
+        // 2) Recurse into children
+        const keys = new Set([
+            ...(isObjPrev ? Object.keys(prevNode) : []),
+            ...(isObjNext ? Object.keys(nextNode) : []),
+        ]);
+
+        for (const key of keys) {
+            const childPath = path ? `${path}.${key}` : key;
+            walk(
+                isObjPrev ? prevNode[key] : undefined,
+                isObjNext ? nextNode[key] : undefined,
+                childPath
+            );
+        }
+    }
+
+    walk(prev, next);
+
+    return {
+        changed: changes.length > 0,
+        changes, // array of all found differences
+    };
 };

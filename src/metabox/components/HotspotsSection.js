@@ -81,7 +81,7 @@ const HotspotsSection = ({
         className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
       >
         <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Hotspots
+          Hotspots {!ar_try_on.is_pro_active ? ' Pro': ''}
         </span>
         <AccordionIcon status={activeAccordion.hotspots} />
       </button>

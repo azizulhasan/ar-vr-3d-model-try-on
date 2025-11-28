@@ -52,10 +52,10 @@ export const DimensionsSection = ({
                 });
             }
         }
-        if(isProductModelLoaded) {
+        if(isProductModelLoaded && productModel?.dimensions?.show) {
             updateHeightWithPreview()
         }
-    }, [productModel.dimensions.unit, isProductModelLoaded]);
+    }, [productModel?.dimensions?.unit, isProductModelLoaded]);
 
 
 
@@ -68,7 +68,7 @@ export const DimensionsSection = ({
             >
         <span
             className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Dimensions
+          Dimensions {!ar_try_on.is_pro_active ? ' Pro': ''}
         </span>
                 <AccordionIcon status={activeAccordion.dimensions}/>
             </button>
@@ -102,7 +102,7 @@ export const DimensionsSection = ({
                                     type="checkbox"
                                     name="dimensions"
                                     id="dimensions"
-                                    checked={productModel.dimensions.show !== false}
+                                    checked={productModel?.dimensions?.show === true}
                                     onChange={(e) => handleChange(e)}
                                     className="art-rounded"
                                 />

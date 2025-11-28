@@ -622,4 +622,33 @@ class AR_TRY_ON_Helper
         return is_plugin_active( 'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php' );
     }
 
+    public static function get_plugins() {
+
+        // 2) Get all plugins
+        $all_plugins = get_plugins(); // key => data (what you pasted)
+
+        // Optional: filter only active plugins
+        $active_plugins = get_option( 'active_plugins', array() );
+
+        // Optional: if you want only specific fields or a smaller payload:
+        $sanitized = array();
+
+        foreach ( $all_plugins as $plugin_file => $data ) {
+            array_push( $sanitized, $plugin_file );
+        }
+
+        return $sanitized;
+
+    }
+
+    public static function get_active_plugins() {
+
+        // Optional: filter only active plugins
+        $active_plugins = get_option( 'active_plugins', array() );
+
+
+        return $active_plugins;
+
+    }
+
 }

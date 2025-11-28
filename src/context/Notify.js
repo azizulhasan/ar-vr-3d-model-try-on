@@ -34,3 +34,5 @@ const notify = (message, type = "success", config = {}) => {
 };
 
 export default notify;
+
+export {toast}

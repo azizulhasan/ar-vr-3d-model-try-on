@@ -92,6 +92,20 @@ class AR_TRY_ON_Api_Routes
             )
         );
 
+        // register should_save_data route.
+        register_rest_route(
+            $this->namespace,
+            '/should_save_data',
+            array(
+                array(
+                    'methods' => \WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'should_save_data'),
+                    'permission_callback' => array($this, 'get_route_access'),
+                    'args' => array(),
+                ),
+            )
+        );
+
 
     }
 
@@ -202,8 +216,8 @@ class AR_TRY_ON_Api_Routes
     }
 
     /*
- * Manage product settings data
- */
+     * Manage product settings data
+     */
     public function demo_preview($request)
     {
         $response['status'] = true;
@@ -364,5 +378,35 @@ class AR_TRY_ON_Api_Routes
 
 
         return apply_filters('ATLAS_AR_rest_route_access', true);
+    }
+
+    /*
+    * Manage product settings data
+    */
+    public function should_save_data($request)
+    {
+        $response['status'] = true;
+        // save data about recording.
+        if ('POST' == $request['method']) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+            $plugin_file = $request['data'];
+
+            if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_file ) ) {
+
+                if ( is_plugin_active( $plugin_file ) ) {
+                    // Installed and active
+                    $response['status'] = true;
+                } else {
+                    $response['status'] = false;
+                }
+
+            } else {
+                $response['status'] = false;
+            }
+
+
+            return rest_ensure_response($response);
+        }
     }
 }
