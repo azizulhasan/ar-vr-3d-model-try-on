@@ -400,7 +400,7 @@ const handleSubmit = (e) => {
     let hasValueChanged = isDifferent(previousProductModel, productModel);
     if (!hasValueChanged) {
         notify('No changes detected', 'info',{
-            autoClose: 5000,
+            autoClose: 5000000000000,
         })
         return; // This is fine - no setIsSaving was called yet
     }
@@ -454,7 +454,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
 
 
             <ToastContainer
-                position="top-right"
+                position="bottom-center"
                 autoClose={5000}
                 hideProgressBar={false}
                 newestOnTop={false}
