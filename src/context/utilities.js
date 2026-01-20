@@ -95,7 +95,10 @@ export const copyshortcode = (e) => {
 };
 
 export const renderUserHotspots = (modelViewer, hotspots = []) => {
-    if (!modelViewer) return;
+
+    if(!ar_try_on.is_pro_active || !modelViewer) {
+        return;
+    }
 
     // Clear existing user hotspots (not dimension hotspots)
     modelViewer.querySelectorAll(".hotspot").forEach((h) => h.remove());
@@ -173,6 +176,9 @@ function getDimensionLabel(value, model_settings) {
 
 function displayDimensions(modelViewer, model_settings) {
 
+    if(!ar_try_on.is_pro_active || !model_settings?.dimensions?.unit) {
+        return;
+    }
     // FIXED: Check if dimension elements already exist before adding
     const existingDimLines = modelViewer.querySelector("#dimLines");
     const existingHotspots = modelViewer.querySelectorAll('.dot');
@@ -380,6 +386,55 @@ window.atlasARSwitchSrc = (event ,element, data ) => {
 };
 
 
+function showMultipleItems(modelViewer, model_settings) {
+
+    if(!ar_try_on.is_pro_active) {
+        return;
+    }
+
+    // FIXED: Check if slider elements already exist before adding
+    const ar_button = modelViewer.querySelector("#ar-button");
+    const ar_prompt = modelViewer.querySelector("#ar-prompt");
+    let sliderHTML = '';
+    if (!ar_button || !ar_prompt) {
+        sliderHTML = `
+              <button slot="ar-button" id="ar-button">
+                View in your space
+              </button>
+            
+              <div id="ar-prompt">
+                <img src="https://modelviewer.dev/assets/hand.png">
+              </div>
+            
+              <button id="ar-failure">
+                AR is not tracking!
+              </button>
+        `
+    }
+
+    model_settings.src = model_settings.multipleItems[0].data.src;
+    model_settings.poster = model_settings.multipleItems[0].data.poster;
+    modelViewer.setAttribute("src", model_settings.src || "");
+    modelViewer.setAttribute("poster", model_settings.poster || "");
+
+    const prevSlider = modelViewer.querySelector(".slider");
+    if(prevSlider) {
+        prevSlider.remove();
+    }
+
+    sliderHTML += `<div class="slider">
+                <div class="slides">`;
+    model_settings.multipleItems.map((item, index)=>{
+        sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, ${JSON.stringify(item.data)})'
+                    style="background-image: url(${item.data.thumbnail || item.data.poster});">`
+    });
+
+    sliderHTML += `</div></div>`;
+
+
+    modelViewer.insertAdjacentHTML("beforeend", sliderHTML);
+}
+
 export const setModelAttributes = (modelViewer, model_settings) => {
     console.log({model_settings});
     modelViewer.setAttribute("src", model_settings.src || "");
@@ -487,53 +542,13 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     // Dimension
     displayDimensions(modelViewer, model_settings);
 
-    // hotspots
+    // // hotspots
     if (model_settings.hotspots && model_settings.hotspots.length > 0) {
         renderUserHotspots(modelViewer, model_settings.hotspots);
     }
 
     if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
-        // FIXED: Check if slider elements already exist before adding
-        const ar_button = modelViewer.querySelector("#ar-button");
-        const ar_prompt = modelViewer.querySelector("#ar-prompt");
-        let sliderHTML = '';
-        if (!ar_button || !ar_prompt) {
-            sliderHTML = `
-              <button slot="ar-button" id="ar-button">
-                View in your space
-              </button>
-            
-              <div id="ar-prompt">
-                <img src="https://modelviewer.dev/assets/hand.png">
-              </div>
-            
-              <button id="ar-failure">
-                AR is not tracking!
-              </button>
-        `
-        }
-
-        model_settings.src = model_settings.multipleItems[0].data.src;
-        model_settings.poster = model_settings.multipleItems[0].data.poster;
-        modelViewer.setAttribute("src", model_settings.src || "");
-        modelViewer.setAttribute("poster", model_settings.poster || "");
-
-        const prevSlider = modelViewer.querySelector(".slider");
-        if(prevSlider) {
-            prevSlider.remove();
-        }
-
-        sliderHTML += `<div class="slider">
-                <div class="slides">`;
-        model_settings.multipleItems.map((item, index)=>{
-            sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, ${JSON.stringify(item.data)})'
-                    style="background-image: url(${item.data.thumbnail || item.data.poster});">`
-        });
-
-        sliderHTML += `</div></div>`;
-
-
-        modelViewer.insertAdjacentHTML("beforeend", sliderHTML);
+        showMultipleItems(modelViewer, model_settings);
     }
 };
 

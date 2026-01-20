@@ -400,15 +400,33 @@ const handleSubmit = (e) => {
     let hasValueChanged = isDifferent(previousProductModel, productModel);
     if (!hasValueChanged) {
         notify('No changes detected', 'info',{
-            autoClose: 5000000000000,
+            autoClose: 5000,
         })
         return; // This is fine - no setIsSaving was called yet
     }
 
     setIsSaving(true); // Move this AFTER the validation checks
 
+    // Prepare data to save - conditionally exclude pro features if pro version is not active
+    let dataToSave = {...productModel};
+
+    if (!ar_try_on.is_pro_active) {
+        // Remove pro features from data to be saved
+        delete dataToSave.dimensions;
+        delete dataToSave.hotspots;
+        delete dataToSave.isMultiple;
+        delete dataToSave.multipleItems;
+
+        // Notify user that pro features won't be saved
+        if (productModel.dimensions || productModel.hotspots?.length > 0 || productModel.isMultiple) {
+            notify('Pro features (dimensions, hotspots, slider) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
+                autoClose: 6000,
+            });
+        }
+    }
+
     let formData = new FormData();
-    formData.append('fields', JSON.stringify(productModel));
+    formData.append('fields', JSON.stringify(dataToSave));
     formData.append('post_id', postId);
     formData.append('method', 'POST');
     formData.append('has_value_changed', hasValueChanged);

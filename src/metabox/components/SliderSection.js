@@ -1,5 +1,6 @@
 import {useState, useEffect} from "react";
 import Switch from "../../dashboard/components/dashboard/settings/Switch";
+import notify from "../../context/Notify";
 
 const SliderSection = ({
                            productModel,
@@ -77,6 +78,17 @@ const SliderSection = ({
 
 
     const [dragIndex, setDragIndex] = useState(null);
+    const [hasShownWarning, setHasShownWarning] = useState(false);
+
+    // Show warning when user interacts with slider in free version
+    const showProWarning = () => {
+        if (!ar_try_on.is_pro_active && !hasShownWarning) {
+            notify('Slider (Multiple Models) is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
+                autoClose: 5000,
+            });
+            setHasShownWarning(true);
+        }
+    };
 
     const [demoBasicData, setDemoBasicData] = useState({
         src: "upload",
@@ -113,6 +125,7 @@ const SliderSection = ({
     };
 
     const handleAddNewItem = () => {
+        showProWarning();
         const newItem = {
             id: productModel.multipleItems.length + 1,
             isExpanded: true,
@@ -193,6 +206,7 @@ const SliderSection = ({
     };
 
     const handleItemChange = (itemId, fieldName, value) => {
+        showProWarning();
         setProductModel((prev) => {
             let prevItems = prev.multipleItems
             prevItems = prevItems.map((item) =>
@@ -229,6 +243,9 @@ const SliderSection = ({
         }
     }
     const enableSlider = (checked) => {
+        if (checked) {
+            showProWarning();
+        }
         setProductModel((prev) =>{
             if(checked && prev.multipleItems.length < 1) {
                 return {

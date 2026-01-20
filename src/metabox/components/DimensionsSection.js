@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback} from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
-import {convertLength} from '../../context/utilities'
+import {convertLength} from '../../context/utilities';
+import notify from "../../context/Notify";
 
 
 export const DimensionsSection = ({
@@ -13,7 +14,17 @@ export const DimensionsSection = ({
                                       isProductModelLoaded,
                                   }) => {
     const [showEditor] = useState(true);
+    const [hasShownWarning, setHasShownWarning] = useState(false);
 
+    // Show warning when user interacts with dimensions in free version
+    const showProWarning = () => {
+        if (!ar_try_on.is_pro_active && !hasShownWarning) {
+            notify('Dimensions is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
+                autoClose: 5000,
+            });
+            setHasShownWarning(true);
+        }
+    };
 
     useEffect(() => {
         function updateHeightWithPreview() {
@@ -85,7 +96,10 @@ export const DimensionsSection = ({
                                 id="unit"
                                 name="unit"
                                 value={productModel.dimensions.unit || "cm"}
-                                onChange={(e) => handleChange(e)}
+                                onChange={(e) => {
+                                    showProWarning();
+                                    handleChange(e);
+                                }}
                                 className="art-border art-rounded art-px-2 art-py-1"
                             >
                                 <option value="inch">Inch</option>
@@ -103,7 +117,10 @@ export const DimensionsSection = ({
                                     name="dimensions"
                                     id="dimensions"
                                     checked={productModel.dimensions.show !== false}
-                                    onChange={(e) => handleChange(e)}
+                                    onChange={(e) => {
+                                        showProWarning();
+                                        handleChange(e);
+                                    }}
                                     className="art-rounded"
                                 />
                                 Show Dimensions

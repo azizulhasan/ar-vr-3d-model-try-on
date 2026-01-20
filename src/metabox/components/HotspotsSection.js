@@ -1,5 +1,6 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
+import notify from "../../context/Notify";
 
 const HotspotsSection = ({
   productModel,
@@ -8,6 +9,17 @@ const HotspotsSection = ({
   toggleAccordion,
 }) => {
 
+  const [hasShownWarning, setHasShownWarning] = useState(false);
+
+  // Show warning when user interacts with hotspots in free version
+  const showProWarning = () => {
+    if (!ar_try_on.is_pro_active && !hasShownWarning) {
+      notify('Hotspots is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
+        autoClose: 5000,
+      });
+      setHasShownWarning(true);
+    }
+  };
 
   useEffect(() => {
     wp.hooks.doAction("atlas_ar_preview_data", productModel);
@@ -15,15 +27,18 @@ const HotspotsSection = ({
 
   // ---------- Helpers ----------
   const updateHotspots = (newList) => {
+    showProWarning();
     setProductModel((prev) => ({ ...prev, hotspots: newList }));
   };
 
   const removeHotspot = (index) => {
+    showProWarning();
     const updated = productModel.hotspots.filter((_, i) => i !== index);
     updateHotspots(updated);
   };
 
   const updateHotspotLabel = (index, newLabel) => {
+    showProWarning();
     const updated = [...productModel.hotspots];
     updated[index] = { ...updated[index], label: newLabel };
     updateHotspots(updated);
