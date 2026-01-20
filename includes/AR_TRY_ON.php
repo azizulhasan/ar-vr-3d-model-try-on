@@ -198,7 +198,7 @@ class AR_TRY_ON {
 		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_scripts', 10 );
 
 		// Add defer attribute to frontend scripts for better performance
-//		$this->loader->add_filter( 'script_loader_tag', $this->plugin_public, 'add_defer_attribute', 10, 3 );
+		$this->loader->add_filter( 'script_loader_tag', $this->plugin_public, 'add_defer_attribute', 10, 3 );
 
 	}
 

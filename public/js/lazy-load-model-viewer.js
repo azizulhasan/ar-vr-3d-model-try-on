@@ -23,16 +23,30 @@
 
     // Configuration
     const MODEL_VIEWER_SCRIPT_URL = ar_try_on.plugin_url + 'public/js/google-model-viewer.js';
+    const element = document.querySelector('[id^="atlas_ar_shortcode_"]');
+
+    /**
+     * GET shortcode id dynamically
+     * @type {null}
+     */
+    let shortcode_id = null;
+    if (element) {
+        const number = element.id.replace('atlas_ar_shortcode_', '');
+        console.log('Extracted number:', number);
+        shortcode_id = '#atlas_ar_shortcode_'+number;
+    } else {
+        console.log('No matching element found');
+    }
     const AR_VIEWER_SELECTORS = [
         'model-viewer',
         '.ar_vr_3d_model_try_on',
         '#atlas_ar_preview',
         '[data-atlas-ar]',
-        '#atlas_ar_shortcode_156',
-        '#model_viewer_shortcode_156',
-        '.atlas_ar_model_viewer'
     ];
-
+    if(shortcode_id) {
+        AR_VIEWER_SELECTORS.push(shortcode_id);
+    }
+    console.log(AR_VIEWER_SELECTORS);
     /**
      * Load the model-viewer script dynamically
      */

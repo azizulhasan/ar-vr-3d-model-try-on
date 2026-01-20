@@ -539,7 +539,6 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         } </button>`;
     }
 
-    console.log('uuuuuuuuuuuuuu')
     // Dimension
     // displayDimensions(modelViewer, model_settings);
     //
