@@ -134,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     //             }
                     //         }
                     //     })
-
                     await atlasAR.fetchModelData(product_id, '#atlas_ar_model_viewer__'+product_id, 'modal')
                 }
             })

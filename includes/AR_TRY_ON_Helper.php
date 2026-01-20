@@ -25,6 +25,37 @@ namespace AR_TRY_ON;
  */
 class AR_TRY_ON_Helper
 {
+    /**
+     * Static cache for plugin settings to avoid repeated database queries
+     *
+     * @since 1.7.9
+     * @var array|null
+     */
+    private static $settings_cache = null;
+
+    /**
+     * Get plugin settings with caching to reduce database queries
+     *
+     * @since 1.7.9
+     * @return array Plugin settings
+     */
+    public static function get_settings() {
+        if ( self::$settings_cache === null ) {
+            self::$settings_cache = (array) get_option( 'ar_try_on_settings', array() );
+        }
+        return self::$settings_cache;
+    }
+
+    /**
+     * Clear the settings cache (call after settings update)
+     *
+     * @since 1.7.9
+     * @return void
+     */
+    public static function clear_settings_cache() {
+        self::$settings_cache = null;
+    }
+
     public static function is_atlas_ar_page()
     {
         // Ensure we are in the admin area
@@ -252,7 +283,7 @@ class AR_TRY_ON_Helper
     public static function is_qr_code_enabled($settings = [])
     {
         if (empty($settings)) {
-            $settings = (array)get_option('ar_try_on_settings');
+            $settings = self::get_settings();
         }
         if (!wp_is_mobile() && isset($settings['ar_try_on_enable_qr_code']) && $settings['ar_try_on_enable_qr_code'] == 'yes') {
             return true;
@@ -277,13 +308,16 @@ class AR_TRY_ON_Helper
         <script>
             var typeNumber = 0;
             var errorCorrectionLevel = 'L';
-            var qr = qrcode(typeNumber, errorCorrectionLevel);
-            qr.addData("<?php echo esc_url($url) ?>");
-            qr.make();
-            document.getElementById("atlas_ar_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag();
-            document.getElementById("ar_close_btn").addEventListener("click", function () {
-                document.getElementById("atlas_ar_qr_code").style.display = "none";
-            });
+            if(window.qrcode){
+                var qr = qrcode(typeNumber, errorCorrectionLevel);
+                qr.addData("<?php echo esc_url($url) ?>");
+                qr.make();
+                document.getElementById("atlas_ar_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag();
+                document.getElementById("ar_close_btn").addEventListener("click", function () {
+                    document.getElementById("atlas_ar_qr_code").style.display = "none";
+                });
+            }
+
         </script>
         <?php
         $ar_button_content = ob_get_clean();
@@ -573,14 +607,11 @@ class AR_TRY_ON_Helper
                 update_option('get_cache_data', $post_cache_data);
                 AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
             } elseif ($state === 'remove' && is_array($post_cache_data)) {
-                // Search for the item
-                $index = array_search($post_id, $post_cache_data);
-
-                if ($index !== false) {
-                    unset($post_cache_data[$index]);
-                    // Reindex the array if needed
-                    $post_cache_data = array_values($post_cache_data);
-                }
+                // Optimized: Use array_filter instead of array_search + unset + array_values
+                // This is more efficient - single pass O(n) instead of multiple passes
+                $post_cache_data = array_values(array_filter($post_cache_data, function($id) use ($post_id) {
+                    return $id != $post_id;
+                }));
 
                 update_option('get_cache_data', $post_cache_data);
                 AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
@@ -588,25 +619,23 @@ class AR_TRY_ON_Helper
         } elseif ($has_value_changed) {
 
             $post_cache_data = is_array($post_cache_data) ? $post_cache_data : [];
-            // Search for the item
-            $all_index = array_search('all', $post_cache_data);
-            if ($all_index !== false) {
-                unset($post_cache_data[$all_index]);
-                // Reindex the array if needed
-                $post_cache_data = array_values($post_cache_data);
-                $post_cache_data[] = 'all_remove';
-            }else{
-                // Search for the item
-                $all_remove_index = array_search('all_remove', $post_cache_data);
 
-                if ($all_remove_index !== false) {
-                    unset($post_cache_data[$all_remove_index]);
-                    // Reindex the array if needed
-                    $post_cache_data = array_values($post_cache_data);
-                    $post_cache_data[] = 'all';
-                }
+            // Optimized: Use in_array check first, then array_filter for removal
+            if (in_array('all', $post_cache_data)) {
+                // Remove 'all' and add 'all_remove' in one operation
+                $post_cache_data = array_values(array_filter($post_cache_data, function($item) {
+                    return $item !== 'all';
+                }));
+                $post_cache_data[] = 'all_remove';
+            } elseif (in_array('all_remove', $post_cache_data)) {
+                // Remove 'all_remove' and add 'all' in one operation
+                $post_cache_data = array_values(array_filter($post_cache_data, function($item) {
+                    return $item !== 'all_remove';
+                }));
+                $post_cache_data[] = 'all';
             }
 
+            // Add 'all' if neither exists
             if(!in_array('all', $post_cache_data) && !in_array('all_remove', $post_cache_data)) {
                 $post_cache_data[] = 'all';
             }

@@ -437,6 +437,7 @@ function showMultipleItems(modelViewer, model_settings) {
 
 export const setModelAttributes = (modelViewer, model_settings) => {
     console.log({model_settings});
+
     modelViewer.setAttribute("src", model_settings.src || "");
     modelViewer.setAttribute("ios-src", model_settings.ios_src || "");
     modelViewer.setAttribute("alt", model_settings.alt || "");
@@ -538,18 +539,18 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         } </button>`;
     }
 
-
+    console.log('uuuuuuuuuuuuuu')
     // Dimension
-    displayDimensions(modelViewer, model_settings);
-
-    // // hotspots
-    if (model_settings.hotspots && model_settings.hotspots.length > 0) {
-        renderUserHotspots(modelViewer, model_settings.hotspots);
-    }
-
-    if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
-        showMultipleItems(modelViewer, model_settings);
-    }
+    // displayDimensions(modelViewer, model_settings);
+    //
+    // // // hotspots
+    // if (model_settings.hotspots && model_settings.hotspots.length > 0) {
+    //     renderUserHotspots(modelViewer, model_settings.hotspots);
+    // }
+    //
+    // if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
+    //     showMultipleItems(modelViewer, model_settings);
+    // }
 };
 
 export const getAPITypes = (api_type = "tripo3d") => {

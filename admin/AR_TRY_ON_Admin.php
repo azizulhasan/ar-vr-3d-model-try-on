@@ -208,6 +208,66 @@ class AR_TRY_ON_Admin {
 		) );
 	}
 
+	/**
+	 * Add defer attribute to plugin scripts for better performance
+	 *
+	 * @param string $tag The script tag HTML
+	 * @param string $handle The script handle
+	 * @param string $src The script source URL
+	 * @return string Modified script tag
+	 */
+	public function add_defer_attribute( $tag, $handle, $src ) {
+		// List of plugin scripts that should be deferred
+		$defer_scripts = array(
+			'ar-try-on-dashboard-ui',
+			'ar-try-on-metabox-ui',
+			'ar-try-on-media-library',
+			'atlas-ar-block',
+			$this->plugin_name . '-preview'
+		);
+
+		// Add defer attribute if this is one of our scripts
+		if ( in_array( $handle, $defer_scripts, true ) ) {
+			// Only add defer if not already present
+			if ( strpos( $tag, ' defer' ) === false ) {
+				$tag = str_replace( ' src=', ' defer src=', $tag );
+			}
+		}
+
+		return $tag;
+	}
+
+	/**
+	 * Add version query string to assets for cache busting
+	 * This ensures users get the latest version after plugin updates
+	 *
+	 * @since 1.7.9
+	 * @param string $src The source URL
+	 * @param string $handle The script/style handle
+	 * @return string Modified source URL with version
+	 */
+	public function add_version_to_assets( $src, $handle ) {
+		// List of our plugin handles
+		$plugin_handles = array(
+			'ar-try-on-dashboard-ui',
+			'ar-try-on-metabox-ui',
+			'ar-try-on-media-library',
+			'atlas-ar-block',
+			$this->plugin_name . '-preview',
+			$this->plugin_name,
+			'ar-try-on-admin',
+			'atlas_ar_toastify'
+		);
+
+		if ( in_array( $handle, $plugin_handles, true ) ) {
+			// Add version as query parameter for cache busting
+			if ( strpos( $src, 'ver=' ) === false ) {
+				$src = add_query_arg( 'ver', $this->version, $src );
+			}
+		}
+
+		return $src;
+	}
 
 	/**
 	 * Sets the extension and mime type for Android - .gbl and IOS - .usdz files.

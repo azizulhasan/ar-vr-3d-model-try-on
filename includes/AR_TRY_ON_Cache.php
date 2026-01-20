@@ -36,9 +36,9 @@ class AR_TRY_ON_Cache {
 		}
 
 		if ( false === $expiration ) {
-			// TODO: this dynamic.
-//			$expiration = get_option( '_settings', array( 'cache_ttl' => 6 * HOUR_IN_SECONDS ) );
-//			$expiration =  6 * HOUR_IN_SECONDS;
+			// Set default cache expiration to 6 hours for performance
+			// This prevents cache from persisting indefinitely and ensures data freshness
+			$expiration = 6 * HOUR_IN_SECONDS; // 6 hours = 21600 seconds
 		}
 
 		return set_transient( $prefix . $key, $data, $expiration );
