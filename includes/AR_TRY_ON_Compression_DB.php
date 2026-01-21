@@ -278,7 +278,7 @@ class AR_TRY_ON_Compression_DB {
 	 * @since 1.8.0
 	 * @return array Statistics data.
 	 */
-	public static function get_compression_stats() {
+	public static function get_compression_stats_old() {
 		global $wpdb;
 
 		$table = $wpdb->prefix . 'ar_compression_log';
@@ -305,7 +305,37 @@ class AR_TRY_ON_Compression_DB {
 		return $stats ? $stats : array();
 	}
 
-	/**
+
+    public static function get_compression_stats() {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'ar_compression_log';
+
+        if ( ! self::table_exists( $table ) ) {
+            return [];
+        }
+
+        $stats = $wpdb->get_row(
+            "SELECT
+            COUNT(*) AS total_compressions,
+            SUM(status = 'complete') AS successful_compressions,
+            SUM(status = 'failed') AS failed_compressions,
+            SUM(original_size) AS total_original_size,
+            SUM(compressed_size) AS total_compressed_size,
+            AVG(compression_ratio) AS avg_compression_ratio,
+            SUM(
+                CAST(original_size AS SIGNED) - CAST(compressed_size AS SIGNED)
+            ) AS total_saved_space
+        FROM {$table}
+        WHERE status = 'complete'",
+            ARRAY_A
+        );
+
+        return $stats ?: [];
+    }
+
+
+    /**
 	 * Count user's compressed models (for free user limit)
 	 *
 	 * @since 1.8.0
