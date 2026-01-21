@@ -4,7 +4,9 @@
       "Bash(find:*)",
       "Bash(npm run production:*)",
       "Bash(npm install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(timeout 5 tail:*)",
+      "Bash(where npm:*)"
     ]
   }
 }

@@ -242,9 +242,9 @@ class AR_TRY_ON_Compression {
 		$file_size = file_exists( $file_path ) ? filesize( $file_path ) : 0;
 
 		// Small files: Client-side (both free and pro)
-//		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
-//			return 'client';
-//		}
+		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
+			return 'client';
+		}
 
 		// Large files: Server-side (Pro only)
 		if ( self::is_pro_active() ) {
@@ -333,7 +333,12 @@ class AR_TRY_ON_Compression {
 	}
 
 	/**
-	 * Compress model using server-side compression (Pro only)
+	 * Compress model using server-side compression (Smart Router)
+	 *
+	 * Automatically chooses between local or API compression based on:
+	 * - User's compression method preference
+	 * - Availability of local dependencies
+	 * - API configuration status
 	 *
 	 * @since 1.8.0
 	 * @param string $input_file Input file path.
@@ -346,6 +351,182 @@ class AR_TRY_ON_Compression {
 			return new \WP_Error( 'pro_only', __( 'Server-side compression is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
 		}
 
+		if ( ! file_exists( $input_file ) ) {
+			return new \WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		$method = self::get_compression_system();
+
+		// Option 1: Automatic (try local first, fallback to API)
+		if ( $method === 'auto' ) {
+			// Try local first
+			if ( self::is_local_compression_available() ) {
+				$result = self::compress_server_side_local( $input_file, $output_file, $quality );
+
+				// If local succeeds, return immediately
+				if ( ! is_wp_error( $result ) ) {
+					return $result;
+				}
+
+				// Local failed, log the error
+				error_log( '[AR Try On] Local compression failed: ' . $result->get_error_message() );
+			}
+
+			// Fallback to API
+			if ( self::is_api_compression_available() ) {
+				return self::compress_server_side_api( $input_file, $output_file, $quality );
+			}
+
+			// Neither available
+			return new \WP_Error(
+				'no_compression_available',
+				__( 'Server compression is not configured. Please install local dependencies or configure API URL in plugin settings.', 'ar-vr-3d-model-try-on' )
+			);
+		}
+
+		// Option 2: Local only
+		if ( $method === 'local' ) {
+			if ( ! self::is_local_compression_available() ) {
+				return new \WP_Error(
+					'local_not_available',
+					__( 'Local compression is not available. Please install dependencies in plugin settings.', 'ar-vr-3d-model-try-on' )
+				);
+			}
+
+			return self::compress_server_side_local( $input_file, $output_file, $quality );
+		}
+
+		// Option 3: API only
+		if ( $method === 'api' ) {
+			if ( ! self::is_api_compression_available() ) {
+				return new \WP_Error(
+					'api_not_configured',
+					__( 'API compression URL is not configured. Please configure it in plugin settings.', 'ar-vr-3d-model-try-on' )
+				);
+			}
+
+			return self::compress_server_side_api( $input_file, $output_file, $quality );
+		}
+
+		// Invalid method
+		return new \WP_Error( 'invalid_method', __( 'Invalid compression method.', 'ar-vr-3d-model-try-on' ) );
+	}
+
+	/**
+	 * Compress model using external API compression service (Pro only)
+	 *
+	 * @since 1.8.0
+	 * @param string $input_file Input file path.
+	 * @param string $output_file Output file path.
+	 * @param int    $quality Quality (1-100).
+	 * @return array|\WP_Error Result array or error.
+	 */
+	public static function compress_server_side_api( $input_file, $output_file, $quality = 85 ) {
+		// Get compression API URL from settings
+		$api_url = get_option( 'ar_try_on_compression_api_url', '' );
+		if ( empty( $api_url ) ) {
+			return new \WP_Error( 'api_not_configured', __( 'API URL is not configured.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		$api_endpoint = trailingslashit( $api_url ) . 'compress-url';
+
+		// Get file URL
+		$input_file_url = self::get_file_url_from_path( $input_file );
+		if ( ! $input_file_url ) {
+			return new \WP_Error( 'url_not_found', __( 'Could not determine file URL.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		// Prepare API request
+		$body = array(
+			'url'     => $input_file_url,
+			'quality' => intval( $quality ),
+		);
+
+		// Make API request
+		$response = wp_remote_post(
+			$api_endpoint,
+			array(
+				'body'    => wp_json_encode( $body ),
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+				'timeout' => 300, // 5 minutes timeout
+			)
+		);
+
+		// Check for request errors
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error(
+				'api_request_failed',
+				sprintf( __( 'API request failed: %s', 'ar-vr-3d-model-try-on' ), $response->get_error_message() )
+			);
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		if ( $response_code !== 200 ) {
+			return new \WP_Error(
+				'api_error',
+				sprintf( __( 'API returned error code %d: %s', 'ar-vr-3d-model-try-on' ), $response_code, $response_body )
+			);
+		}
+
+		// Parse response
+		$result = json_decode( $response_body, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return new \WP_Error( 'json_parse_error', __( 'Failed to parse API response.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		if ( ! isset( $result['success'] ) || ! $result['success'] ) {
+			$error_message = isset( $result['message'] ) ? $result['message'] : __( 'Compression failed.', 'ar-vr-3d-model-try-on' );
+			return new \WP_Error( 'compression_failed', $error_message );
+		}
+
+		// Download compressed file
+		$download_url = trailingslashit( $api_url ) . ltrim( $result['data']['download_url'], '/' );
+		$download_response = wp_remote_get(
+			$download_url,
+			array(
+				'timeout' => 300,
+			)
+		);
+
+		if ( is_wp_error( $download_response ) ) {
+			return new \WP_Error(
+				'download_failed',
+				sprintf( __( 'Failed to download compressed file: %s', 'ar-vr-3d-model-try-on' ), $download_response->get_error_message() )
+			);
+		}
+
+		// Save compressed file
+		$compressed_data = wp_remote_retrieve_body( $download_response );
+		if ( ! file_put_contents( $output_file, $compressed_data ) ) {
+			return new \WP_Error( 'save_failed', __( 'Failed to save compressed file.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		return array(
+			'success'            => true,
+			'original_size'      => $result['data']['original_size'],
+			'compressed_size'    => $result['data']['compressed_size'],
+			'compression_ratio'  => $result['data']['compression_ratio'],
+			'compression_time'   => $result['data']['compression_time'],
+			'output_file'        => $output_file,
+		);
+	}
+
+	/**
+	 * Compress model using local Node.js compression (Pro only)
+	 *
+	 * Executes server-compress.js script directly on the server.
+	 *
+	 * @since 1.8.0
+	 * @param string $input_file Input file path.
+	 * @param string $output_file Output file path.
+	 * @param int    $quality Quality (1-100).
+	 * @return array|\WP_Error Result array or error.
+	 */
+	public static function compress_server_side_local( $input_file, $output_file, $quality = 85 ) {
 		if ( ! file_exists( $input_file ) ) {
 			return new \WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
 		}
@@ -492,6 +673,321 @@ class AR_TRY_ON_Compression {
 		return new \WP_Error( 'parse_error', __( 'Failed to parse conversion result: ', 'ar-vr-3d-model-try-on' ) . $output_text );
 	}
 
+
+
+	/**
+	 * Convert file path to URL
+	 *
+	 * @since 1.8.0
+	 * @param string $file_path File path.
+	 * @return string|false File URL or false on failure.
+	 */
+	private static function get_file_url_from_path( $file_path ) {
+		$wp_upload_dir = wp_upload_dir();
+		$base_dir = $wp_upload_dir['basedir'];
+		$base_url = $wp_upload_dir['baseurl'];
+
+		// Check if file is in uploads directory
+		if ( strpos( $file_path, $base_dir ) === 0 ) {
+			return str_replace( $base_dir, $base_url, $file_path );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if Node.js is available
+	 *
+	 * @since 1.8.0
+	 * @return array Status array with 'available', 'version', 'path', 'message'.
+	 */
+	public static function check_node_available() {
+		$node_path = self::get_node_path();
+
+		if ( is_wp_error( $node_path ) ) {
+			return array(
+				'available' => false,
+				'version'   => null,
+				'path'      => null,
+				'message'   => $node_path->get_error_message(),
+			);
+		}
+
+		// Get Node.js version
+		$output = array();
+		$return_var = 0;
+		exec( escapeshellarg( $node_path ) . ' --version 2>&1', $output, $return_var );
+
+		$version = $return_var === 0 && ! empty( $output ) ? trim( $output[0] ) : 'unknown';
+
+		return array(
+			'available' => true,
+			'version'   => $version,
+			'path'      => $node_path,
+			'message'   => sprintf( __( 'Node.js detected: %s', 'ar-vr-3d-model-try-on' ), $version ),
+		);
+	}
+
+	/**
+	 * Check if local compression dependencies are installed
+	 *
+	 * @since 1.8.0
+	 * @return array Status array with 'installed', 'packages', 'message'.
+	 */
+	public static function check_dependencies_installed() {
+		$plugin_dir = dirname( dirname( __FILE__ ) );
+		$node_modules_dir = $plugin_dir . '/includes/compression/node_modules';
+		$package_json = $plugin_dir . '/includes/compression/package.json';
+
+		if ( ! file_exists( $package_json ) ) {
+			return array(
+				'installed' => false,
+				'packages'  => array(),
+				'message'   => __( 'package.json not found.', 'ar-vr-3d-model-try-on' ),
+			);
+		}
+
+		if ( ! is_dir( $node_modules_dir ) ) {
+			return array(
+				'installed' => false,
+				'packages'  => array(),
+				'message'   => __( 'Dependencies not installed.', 'ar-vr-3d-model-try-on' ),
+			);
+		}
+
+		// Read package.json to get required dependencies
+		$package_data = json_decode( file_get_contents( $package_json ), true );
+		$required_packages = isset( $package_data['dependencies'] ) ? array_keys( $package_data['dependencies'] ) : array();
+		$installed_packages = array();
+
+		// Check if required packages exist
+		foreach ( $required_packages as $package ) {
+			$package_dir = $node_modules_dir . '/' . $package;
+			if ( is_dir( $package_dir ) ) {
+				// Try to get version
+				$package_json_path = $package_dir . '/package.json';
+				if ( file_exists( $package_json_path ) ) {
+					$pkg_data = json_decode( file_get_contents( $package_json_path ), true );
+					$version = isset( $pkg_data['version'] ) ? $pkg_data['version'] : 'unknown';
+				} else {
+					$version = 'unknown';
+				}
+
+				$installed_packages[] = array(
+					'name'    => $package,
+					'version' => $version,
+				);
+			}
+		}
+
+		$all_installed = count( $installed_packages ) === count( $required_packages );
+
+		return array(
+			'installed' => $all_installed,
+			'packages'  => $installed_packages,
+			'message'   => $all_installed
+				? sprintf( __( '%d packages installed.', 'ar-vr-3d-model-try-on' ), count( $installed_packages ) )
+				: sprintf( __( 'Only %d of %d packages installed.', 'ar-vr-3d-model-try-on' ), count( $installed_packages ), count( $required_packages ) ),
+		);
+	}
+
+	/**
+	 * Check if local compression is available
+	 *
+	 * @since 1.8.0
+	 * @return bool Whether local compression is available.
+	 */
+	public static function is_local_compression_available() {
+		$node_status = self::check_node_available();
+		$deps_status = self::check_dependencies_installed();
+
+		return $node_status['available'] && $deps_status['installed'];
+	}
+
+	/**
+	 * Check if API compression is available
+	 *
+	 * @since 1.8.0
+	 * @return bool Whether API compression is configured.
+	 */
+	public static function is_api_compression_available() {
+		$api_url = get_option( 'ar_try_on_compression_api_url', '' );
+		return ! empty( $api_url );
+	}
+
+	/**
+	 * Get compression method from settings
+	 *
+	 * @since 1.8.0
+	 * @return string 'auto', 'local', or 'api'.
+	 */
+	public static function get_compression_system() {
+		return get_option( 'ar_try_on_compression_method', 'auto' );
+	}
+
+	/**
+	 * Check disk space before installation
+	 *
+	 * @since 1.8.0
+	 * @param int $required_mb Required space in MB.
+	 * @return array Status array with 'available', 'free_space_mb', 'message'.
+	 */
+	public static function check_disk_space( $required_mb = 200 ) {
+		$plugin_dir = dirname( dirname( __FILE__ ) );
+		$free_space = disk_free_space( $plugin_dir );
+
+		if ( $free_space === false ) {
+			return array(
+				'available'    => false,
+				'free_space_mb' => 0,
+				'message'      => __( 'Unable to determine disk space.', 'ar-vr-3d-model-try-on' ),
+			);
+		}
+
+		$free_space_mb = round( $free_space / 1024 / 1024 );
+		$has_space = $free_space_mb >= $required_mb;
+
+		return array(
+			'available'    => $has_space,
+			'free_space_mb' => $free_space_mb,
+			'message'      => $has_space
+				? sprintf( __( '%d MB available.', 'ar-vr-3d-model-try-on' ), $free_space_mb )
+				: sprintf( __( 'Insufficient disk space. %d MB required, %d MB available.', 'ar-vr-3d-model-try-on' ), $required_mb, $free_space_mb ),
+		);
+	}
+
+	/**
+	 * Install compression dependencies via npm
+	 *
+	 * @since 1.8.0
+	 * @return array|\WP_Error Installation result or error.
+	 */
+	public static function install_dependencies() {
+		// Check if Node.js is available
+		$node_status = self::check_node_available();
+		if ( ! $node_status['available'] ) {
+			return new \WP_Error( 'node_not_found', $node_status['message'] );
+		}
+
+		// Check disk space
+		$disk_status = self::check_disk_space( 200 );
+		if ( ! $disk_status['available'] ) {
+			return new \WP_Error( 'insufficient_disk_space', $disk_status['message'] );
+		}
+
+		$plugin_dir = dirname( dirname( __FILE__ ) );
+		$compression_dir = $plugin_dir . '/includes/compression';
+
+		if ( ! file_exists( $compression_dir . '/package.json' ) ) {
+			return new \WP_Error( 'package_json_not_found', __( 'package.json not found.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		// Get npm path
+		$npm_path = self::get_npm_path();
+		if ( is_wp_error( $npm_path ) ) {
+			return $npm_path;
+		}
+
+		// Change to compression directory and run npm install
+		$command = sprintf(
+			'cd %s && %s install 2>&1',
+			escapeshellarg( $compression_dir ),
+			escapeshellarg( $npm_path )
+		);
+
+		$output = array();
+		$return_var = 0;
+		$start_time = time();
+        error_log(print_r([$command, $output, $return_var], true ));
+		exec( $command, $output, $return_var );
+
+		$installation_time = time() - $start_time;
+		$output_text = implode( "\n", $output );
+
+		if ( $return_var !== 0 ) {
+			return new \WP_Error(
+				'installation_failed',
+				sprintf( __( 'npm install failed with exit code %d: %s', 'ar-vr-3d-model-try-on' ), $return_var, $output_text )
+			);
+		}
+
+		// Verify installation
+		$deps_status = self::check_dependencies_installed();
+
+		if ( ! $deps_status['installed'] ) {
+			return new \WP_Error(
+				'verification_failed',
+				__( 'Installation completed but dependencies verification failed.', 'ar-vr-3d-model-try-on' )
+			);
+		}
+
+		return array(
+			'success'           => true,
+			'installation_time' => $installation_time,
+			'packages_count'    => count( $deps_status['packages'] ),
+			'packages'          => $deps_status['packages'],
+			'message'           => sprintf(
+				__( 'Successfully installed %d packages in %d seconds.', 'ar-vr-3d-model-try-on' ),
+				count( $deps_status['packages'] ),
+				$installation_time
+			),
+		);
+	}
+
+	/**
+	 * Uninstall compression dependencies
+	 *
+	 * @since 1.8.0
+	 * @return array|\WP_Error Uninstallation result or error.
+	 */
+	public static function uninstall_dependencies() {
+		$plugin_dir = dirname( dirname( __FILE__ ) );
+		$node_modules_dir = $plugin_dir . '/includes/compression/node_modules';
+
+		if ( ! is_dir( $node_modules_dir ) ) {
+			return new \WP_Error( 'not_installed', __( 'Dependencies are not installed.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		// Recursively delete node_modules directory
+		$deleted = self::delete_directory_recursive( $node_modules_dir );
+
+		if ( ! $deleted ) {
+			return new \WP_Error( 'deletion_failed', __( 'Failed to delete node_modules directory.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		return array(
+			'success' => true,
+			'message' => __( 'Dependencies uninstalled successfully.', 'ar-vr-3d-model-try-on' ),
+		);
+	}
+
+	/**
+	 * Recursively delete a directory
+	 *
+	 * @since 1.8.0
+	 * @param string $dir Directory path.
+	 * @return bool Success status.
+	 */
+	private static function delete_directory_recursive( $dir ) {
+		if ( ! is_dir( $dir ) ) {
+			return false;
+		}
+
+		$files = array_diff( scandir( $dir ), array( '.', '..' ) );
+
+		foreach ( $files as $file ) {
+			$path = $dir . '/' . $file;
+
+			if ( is_dir( $path ) ) {
+				self::delete_directory_recursive( $path );
+			} else {
+				unlink( $path );
+			}
+		}
+
+		return rmdir( $dir );
+	}
+
 	/**
 	 * Get Node.js executable path
 	 *
@@ -522,6 +1018,88 @@ class AR_TRY_ON_Compression {
 		return new \WP_Error(
 			'node_not_found',
 			__( 'Node.js is not installed or not found in system PATH. Server-side compression requires Node.js to be installed.', 'ar-vr-3d-model-try-on' )
+		);
+	}
+
+	/**
+	 * Get npm executable path based on Node.js path
+	 *
+	 * @since 1.8.0
+	 * @return string|\WP_Error npm path or error.
+	 */
+	private static function get_npm_path() {
+		$node_path = self::get_node_path();
+
+		if ( is_wp_error( $node_path ) ) {
+			return $node_path;
+		}
+
+		$is_windows = strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN';
+
+		// Try to find npm using system commands
+		$possible_npm_paths = array();
+
+		// On Windows, use 'where' command to find npm
+		if ( $is_windows ) {
+			$where_output = array();
+			$where_return = 0;
+			exec( 'where npm 2>&1', $where_output, $where_return );
+
+			if ( $where_return === 0 && ! empty( $where_output ) ) {
+				// Add all found npm paths
+				foreach ( $where_output as $npm_location ) {
+					$npm_location = trim( $npm_location );
+					if ( ! empty( $npm_location ) && file_exists( $npm_location ) ) {
+						$possible_npm_paths[] = $npm_location;
+					}
+				}
+			}
+
+			// Also try common paths
+			$possible_npm_paths[] = 'npm.cmd';
+			$possible_npm_paths[] = 'npm';
+		} else {
+			// On Unix, use 'which' command
+			$which_output = array();
+			$which_return = 0;
+			exec( 'which npm 2>&1', $which_output, $which_return );
+
+			if ( $which_return === 0 && ! empty( $which_output ) ) {
+				$npm_location = trim( $which_output[0] );
+				if ( ! empty( $npm_location ) && file_exists( $npm_location ) ) {
+					$possible_npm_paths[] = $npm_location;
+				}
+			}
+
+			$possible_npm_paths[] = 'npm';
+		}
+
+		// Also try deriving from node path
+		if ( $node_path !== 'node' ) {
+			$node_dir = dirname( $node_path );
+			if ( $is_windows ) {
+				$possible_npm_paths[] = $node_dir . '\\npm.cmd';
+				$possible_npm_paths[] = $node_dir . '\\npm';
+			} else {
+				$possible_npm_paths[] = $node_dir . '/npm';
+			}
+		}
+
+		// Test each possible path
+		foreach ( $possible_npm_paths as $npm_path ) {
+			$test_output = array();
+			$test_return = 0;
+			exec( escapeshellarg( $npm_path ) . ' --version 2>&1', $test_output, $test_return );
+
+			if ( $test_return === 0 ) {
+				return $npm_path;
+			}
+		}
+
+		// If all paths failed, return error with helpful message
+		return new \WP_Error(
+			'npm_not_found',
+			__( 'npm is not installed or not found. npm is required to install dependencies. Please ensure npm is installed and accessible from the command line.', 'ar-vr-3d-model-try-on' )
 		);
 	}
 

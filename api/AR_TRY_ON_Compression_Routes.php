@@ -312,6 +312,109 @@ class AR_TRY_ON_Compression_Routes {
 				'permission_callback' => array( $this, 'check_permission' ),
 			)
 		);
+
+		// Check Node.js status
+		register_rest_route(
+			$this->namespace,
+			'/compression/node-status',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_node_status' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			)
+		);
+
+		// Check dependencies status
+		register_rest_route(
+			$this->namespace,
+			'/compression/dependencies-status',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_dependencies_status' ),
+				'permission_callback' => array( $this, 'check_permission' ),
+			)
+		);
+
+		// Install dependencies (Pro only)
+		register_rest_route(
+			$this->namespace,
+			'/compression/install-dependencies',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'install_dependencies' ),
+				'permission_callback' => array( $this, 'check_pro_permission' ),
+			)
+		);
+
+		// Uninstall dependencies (Pro only)
+		register_rest_route(
+			$this->namespace,
+			'/compression/uninstall-dependencies',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'uninstall_dependencies' ),
+				'permission_callback' => array( $this, 'check_pro_permission' ),
+			)
+		);
+
+		// Update compression method
+		register_rest_route(
+			$this->namespace,
+			'/compression/method',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'update_compression_method' ),
+				'permission_callback' => array( $this, 'check_pro_permission' ),
+				'args'                => array(
+					'method' => array(
+						'type'     => 'string',
+						'enum'     => array( 'auto', 'local', 'api' ),
+						'required' => true,
+					),
+				),
+			)
+		);
+
+        // get compression method
+        register_rest_route(
+            $this->namespace,
+            '/compression/method',
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_compression_method' ),
+                'permission_callback' => array( $this, 'check_pro_permission' ),
+                'args'                => array(),
+            )
+        );
+
+		// Update API URL
+		register_rest_route(
+			$this->namespace,
+			'/compression/api-url',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'update_api_url' ),
+				'permission_callback' => array( $this, 'check_pro_permission' ),
+				'args'                => array(
+					'url' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
+
+        // GET API URL
+        register_rest_route(
+            $this->namespace,
+            '/compression/api-url',
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_api_url' ),
+                'permission_callback' => array( $this, 'check_pro_permission' ),
+                'args'                => array(),
+            )
+        );
 	}
 
 	/**
@@ -855,6 +958,192 @@ class AR_TRY_ON_Compression_Routes {
 			200
 		);
 	}
+
+	/**
+	 * Get Node.js status
+	 *
+	 * @since 1.8.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
+	 */
+	public function get_node_status( $request ) {
+		$status = AR_TRY_ON_Compression::check_node_available();
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $status,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get dependencies status
+	 *
+	 * @since 1.8.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
+	 */
+	public function get_dependencies_status( $request ) {
+		$status = AR_TRY_ON_Compression::check_dependencies_installed();
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => $status,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Install dependencies
+	 *
+	 * @since 1.8.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
+	 */
+	public function install_dependencies( $request ) {
+		$result = AR_TRY_ON_Compression::install_dependencies();
+
+		if ( is_wp_error( $result ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => $result->get_error_message(),
+					'code'    => $result->get_error_code(),
+				),
+				400
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => $result['message'],
+				'data'    => $result,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Uninstall dependencies
+	 *
+	 * @since 1.8.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
+	 */
+	public function uninstall_dependencies( $request ) {
+		$result = AR_TRY_ON_Compression::uninstall_dependencies();
+
+		if ( is_wp_error( $result ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => $result->get_error_message(),
+					'code'    => $result->get_error_code(),
+				),
+				400
+			);
+		}
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => $result['message'],
+			),
+			200
+		);
+	}
+
+	/**
+	 * Update compression method
+	 *
+	 * @since 1.8.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
+	 */
+	public function update_compression_method( $request ) {
+		$method = $request->get_param( 'method' );
+		update_option( 'ar_try_on_compression_method', $method );
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => sprintf( __( 'Compression method updated to: %s', 'ar-vr-3d-model-try-on' ), $method ),
+				'method'  => $method,
+			),
+			200
+		);
+	}
+
+    /**
+     * GET compression method
+     *
+     * @since 1.8.0
+     * @param WP_REST_Request $request Request object.
+     * @return \WP_REST_Response Response object.
+     */
+    public function get_compression_method( $request ) {
+
+        $method = get_option( 'ar_try_on_compression_method', 'auto' );
+
+        return new \WP_REST_Response(
+            array(
+                'success' => true,
+                'data' => [
+                    'method' => $method,
+                ]
+            ),
+            200
+        );
+    }
+
+
+	/**
+	 * Update API URL
+	 *
+	 * @since 1.8.0
+	 * @param WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object.
+	 */
+	public function update_api_url( $request ) {
+		$url = esc_url_raw( $request->get_param( 'url' ) );
+		update_option( 'ar_try_on_compression_api_url', $url );
+
+		return new \WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'API URL updated successfully.', 'ar-vr-3d-model-try-on' ),
+				'url'     => $url,
+			),
+			200
+		);
+	}
+
+    /**
+     * Update API URL
+     *
+     * @since 1.8.0
+     * @param WP_REST_Request $request Request object.
+     * @return \WP_REST_Response Response object.
+     */
+    public function get_api_url( $request ) {
+        $url = get_option( 'ar_try_on_compression_api_url' );
+
+        return new \WP_REST_Response(
+            array(
+                'success' => true,
+                'data' => [
+                    'url' => $url,
+                ]
+            ),
+            200
+        );
+    }
+
 
 	/**
 	 * Check if current user has permission

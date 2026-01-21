@@ -28,3 +28,48 @@
 if (!defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
+
+/**
+ * Cleanup compression dependencies and settings
+ */
+function ar_try_on_cleanup_compression() {
+    // Delete node_modules directory if exists
+    $compression_dir = plugin_dir_path(__FILE__) . 'includes/compression';
+    $node_modules_dir = $compression_dir . '/node_modules';
+
+    if (is_dir($node_modules_dir)) {
+        ar_try_on_recursive_rmdir($node_modules_dir);
+    }
+
+    // Delete compression-related database options
+    delete_option('ar_try_on_compression_method');
+    delete_option('ar_try_on_compression_api_url');
+}
+
+/**
+ * Recursively delete a directory and all its contents
+ *
+ * @param string $dir Directory path
+ * @return bool True on success, false on failure
+ */
+function ar_try_on_recursive_rmdir($dir) {
+    if (!is_dir($dir)) {
+        return false;
+    }
+
+    $files = array_diff(scandir($dir), array('.', '..'));
+
+    foreach ($files as $file) {
+        $path = $dir . '/' . $file;
+        if (is_dir($path)) {
+            ar_try_on_recursive_rmdir($path);
+        } else {
+            @unlink($path);
+        }
+    }
+
+    return @rmdir($dir);
+}
+
+// Run cleanup
+ar_try_on_cleanup_compression();

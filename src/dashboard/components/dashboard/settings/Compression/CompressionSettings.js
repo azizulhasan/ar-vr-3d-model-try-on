@@ -34,10 +34,20 @@ export default function CompressionSettings({ isProActive }) {
     });
     const [showManageModal, setShowManageModal] = useState(false);
 
+    // Server compression state
+    const [serverLoading, setServerLoading] = useState(true);
+    const [nodeStatus, setNodeStatus] = useState(null);
+    const [dependenciesStatus, setDependenciesStatus] = useState(null);
+    const [compressionMethod, setCompressionMethod] = useState('auto');
+    const [apiUrl, setApiUrl] = useState('');
+    const [installing, setInstalling] = useState(false);
+    const [uninstalling, setUninstalling] = useState(false);
+
     // Fetch settings and user limit on mount
     useEffect(() => {
         fetchSettings();
         fetchUserLimit();
+        fetchServerStatus();
     }, []);
 
     /**
@@ -117,6 +127,184 @@ export default function CompressionSettings({ isProActive }) {
             toast.error('❌ Failed to save settings: ' + error.message);
         } finally {
             setSaving(false);
+        }
+    };
+
+    /**
+     * Fetch server compression status (Node.js, dependencies, method, API URL)
+     */
+    const fetchServerStatus = async () => {
+        try {
+            // Fetch Node.js status
+            const nodeResponse = await fetch(getURL('compression/node-status'), {
+                headers: {
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+            });
+            const nodeData = await nodeResponse.json();
+            if (nodeData.success) {
+                setNodeStatus(nodeData.data);
+            }
+
+            // Fetch dependencies status
+            const depsResponse = await fetch(getURL('compression/dependencies-status'), {
+                headers: {
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+            });
+            const depsData = await depsResponse.json();
+            if (depsData.success) {
+                setDependenciesStatus(depsData.data);
+            }
+
+            // Fetch compression method
+            const methodResponse = await fetch(getURL('compression/method'), {
+                headers: {
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+            });
+            const methodData = await methodResponse.json();
+            if (methodData.success) {
+                setCompressionMethod(methodData.data.method);
+            }
+
+            // Fetch API URL
+            const apiResponse = await fetch(getURL('compression/api-url'), {
+                headers: {
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+            });
+            const apiData = await apiResponse.json();
+            if (apiData.success) {
+                setApiUrl(apiData.data.url);
+            }
+        } catch (error) {
+            console.error('Error fetching server status:', error);
+        } finally {
+            setServerLoading(false);
+        }
+    };
+
+    /**
+     * Install dependencies
+     */
+    const handleInstallDependencies = async () => {
+        if (!isProActive) {
+            handleProFeatureClick('Local Compression');
+            return;
+        }
+
+        setInstalling(true);
+        toast.info('📦 Installing compression dependencies... This may take a few minutes.');
+
+        try {
+            const response = await fetch(getURL('compression/install-dependencies'), {
+                method: 'POST',
+                headers: {
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                toast.success('✅ Dependencies installed successfully!');
+                await fetchServerStatus(); // Refresh status
+            } else {
+                throw new Error(data.message || 'Failed to install dependencies');
+            }
+        } catch (error) {
+            console.error('Error installing dependencies:', error);
+            toast.error('❌ Failed to install dependencies: ' + error.message);
+        } finally {
+            setInstalling(false);
+        }
+    };
+
+    /**
+     * Uninstall dependencies
+     */
+    const handleUninstallDependencies = async () => {
+        if (!confirm('Are you sure you want to uninstall compression dependencies? This will remove all installed packages.')) {
+            return;
+        }
+
+        setUninstalling(true);
+        toast.info('🗑️ Uninstalling dependencies...');
+
+        try {
+            const response = await fetch(getURL('compression/uninstall-dependencies'), {
+                method: 'POST',
+                headers: {
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                toast.success('✅ Dependencies uninstalled successfully!');
+                await fetchServerStatus(); // Refresh status
+            } else {
+                throw new Error(data.message || 'Failed to uninstall dependencies');
+            }
+        } catch (error) {
+            console.error('Error uninstalling dependencies:', error);
+            toast.error('❌ Failed to uninstall dependencies: ' + error.message);
+        } finally {
+            setUninstalling(false);
+        }
+    };
+
+    /**
+     * Update compression method
+     */
+    const handleMethodChange = async (method) => {
+        try {
+            const response = await fetch(getURL('compression/method'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+                body: JSON.stringify({ method }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setCompressionMethod(method);
+                toast.success('✅ Compression method updated!');
+            } else {
+                throw new Error(data.message || 'Failed to update method');
+            }
+        } catch (error) {
+            console.error('Error updating method:', error);
+            toast.error('❌ Failed to update method: ' + error.message);
+        }
+    };
+
+    /**
+     * Update API URL
+     */
+    const handleApiUrlChange = async (newUrl) => {
+        try {
+            const response = await fetch(getURL('compression/api-url'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+                body: JSON.stringify({ url: newUrl }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                setApiUrl(newUrl);
+                toast.success('✅ API URL updated!');
+            } else {
+                throw new Error(data.message || 'Failed to update API URL');
+            }
+        } catch (error) {
+            console.error('Error updating API URL:', error);
+            toast.error('❌ Failed to update API URL: ' + error.message);
         }
     };
 
@@ -207,6 +395,235 @@ export default function CompressionSettings({ isProActive }) {
                             isProActive={isProActive}
                             onProFeatureClick={handleProFeatureClick}
                         />
+                    </div>
+
+                    {/* Server-Side Compression Setup */}
+                    <div className="art-mb-6 art-p-4 art-bg-gradient-to-r art-from-purple-50 art-to-blue-50 art-border art-border-purple-200 art-rounded-lg">
+                        <div className="art-mb-4">
+                            <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-2">
+                                ⚡ Server-Side Compression Setup
+                            </h3>
+                            <p className="art-text-sm art-text-gray-600">
+                                Configure advanced compression for better performance and quality.
+                            </p>
+                        </div>
+
+                        {serverLoading ? (
+                            <div className="art-flex art-items-center art-justify-center art-py-6">
+                                <div className="art-animate-spin art-rounded-full art-h-8 art-w-8 art-border-b-2 art-border-purple-600"></div>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Compression Method Selection */}
+                                <div className="art-mb-4 art-p-3 art-bg-white art-rounded-md">
+                                    <label className="art-block art-text-sm art-font-semibold art-text-gray-900 art-mb-2">
+                                        Compression Method
+                                    </label>
+                                    <div className="art-space-y-2">
+                                        {/* Automatic */}
+                                        <label className="art-flex art-items-start art-p-2 art-border art-border-gray-200 art-rounded art-cursor-pointer hover:art-bg-gray-50">
+                                            <input
+                                                type="radio"
+                                                name="compression_method"
+                                                value="auto"
+                                                checked={compressionMethod === 'auto'}
+                                                onChange={(e) => handleMethodChange(e.target.value)}
+                                                className="art-mt-0.5 art-mr-3"
+                                            />
+                                            <div>
+                                                <div className="art-font-medium art-text-sm art-text-gray-900">
+                                                    🎯 Automatic (Recommended)
+                                                </div>
+                                                <div className="art-text-xs art-text-gray-600">
+                                                    Try local first for fastest compression, fallback to API if unavailable
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                        {/* Local Only */}
+                                        <label className="art-flex art-items-start art-p-2 art-border art-border-gray-200 art-rounded art-cursor-pointer hover:art-bg-gray-50">
+                                            <input
+                                                type="radio"
+                                                name="compression_method"
+                                                value="local"
+                                                checked={compressionMethod === 'local'}
+                                                onChange={(e) => handleMethodChange(e.target.value)}
+                                                className="art-mt-0.5 art-mr-3"
+                                            />
+                                            <div>
+                                                <div className="art-font-medium art-text-sm art-text-gray-900">
+                                                    💻 Local Only
+                                                </div>
+                                                <div className="art-text-xs art-text-gray-600">
+                                                    Use only local Node.js compression (fastest, requires dependencies)
+                                                </div>
+                                            </div>
+                                        </label>
+
+                                        {/* API Only */}
+                                        <label className="art-flex art-items-start art-p-2 art-border art-border-gray-200 art-rounded art-cursor-pointer hover:art-bg-gray-50">
+                                            <input
+                                                type="radio"
+                                                name="compression_method"
+                                                value="api"
+                                                checked={compressionMethod === 'api'}
+                                                onChange={(e) => handleMethodChange(e.target.value)}
+                                                className="art-mt-0.5 art-mr-3"
+                                            />
+                                            <div>
+                                                <div className="art-font-medium art-text-sm art-text-gray-900">
+                                                    🌐 API Only
+                                                </div>
+                                                <div className="art-text-xs art-text-gray-600">
+                                                    Use only external API compression (slower, no local dependencies needed)
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Local Compression Setup */}
+                                <div className="art-mb-4 art-p-3 art-bg-white art-rounded-md">
+                                    <div className="art-flex art-items-center art-justify-between art-mb-3">
+                                        <h4 className="art-text-sm art-font-semibold art-text-gray-900">
+                                            💻 Local Compression
+                                        </h4>
+                                        {!isProActive && (
+                                            <span className="art-px-2 art-py-0.5 art-text-xs art-font-medium art-bg-yellow-100 art-text-yellow-800 art-rounded">
+                                                PRO
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Node.js Status */}
+                                    <div className="art-mb-3 art-flex art-items-center art-justify-between art-p-2 art-bg-gray-50 art-rounded">
+                                        <span className="art-text-sm art-text-gray-700">Node.js Status:</span>
+                                        {nodeStatus?.available ? (
+                                            <span className="art-text-sm art-text-green-600 art-font-medium">
+                                                ✅ Available ({nodeStatus.version})
+                                            </span>
+                                        ) : (
+                                            <span className="art-text-sm art-text-red-600 art-font-medium">
+                                                ❌ Not Available
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* Dependencies Status */}
+                                    <div className="art-mb-3 art-p-2 art-bg-gray-50 art-rounded">
+                                        <div className="art-flex art-items-center art-justify-between art-mb-2">
+                                            <span className="art-text-sm art-text-gray-700">Dependencies:</span>
+                                            {dependenciesStatus?.installed ? (
+                                                <span className="art-text-sm art-text-green-600 art-font-medium">
+                                                    ✅ Installed
+                                                </span>
+                                            ) : (
+                                                <span className="art-text-sm art-text-orange-600 art-font-medium">
+                                                    ⚠️ Not Installed
+                                                </span>
+                                            )}
+                                        </div>
+                                        {dependenciesStatus?.installed && dependenciesStatus?.packages && (
+                                            <div className="art-text-xs art-text-gray-600 art-space-y-1">
+                                                {Object.entries(dependenciesStatus.packages).map( (packageObj, index) => (
+                                                    <div key={packageObj.name} className="art-flex art-justify-between">
+                                                        <span>{packageObj.name}</span>
+                                                        <span className="art-text-gray-500">{packageObj.version}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Install/Uninstall Buttons */}
+                                    <div className="art-flex art-gap-2">
+                                        {!dependenciesStatus?.installed ? (
+                                            <button
+                                                onClick={handleInstallDependencies}
+                                                disabled={installing || !nodeStatus?.available || !isProActive}
+                                                className={`art-flex-1 art-px-4 art-py-2 art-text-sm art-font-medium art-rounded-md ${
+                                                    installing || !nodeStatus?.available || !isProActive
+                                                        ? 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
+                                                        : 'art-bg-green-600 art-text-white hover:art-bg-green-700'
+                                                }`}
+                                            >
+                                                {installing ? (
+                                                    <>
+                                                        <span className="art-inline-block art-animate-spin art-mr-2">⏳</span>
+                                                        Installing...
+                                                    </>
+                                                ) : !isProActive ? (
+                                                    '🔒 Upgrade to Install'
+                                                ) : !nodeStatus?.available ? (
+                                                    '❌ Node.js Required'
+                                                ) : (
+                                                    '📦 Install Dependencies'
+                                                )}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handleUninstallDependencies}
+                                                disabled={uninstalling}
+                                                className={`art-flex-1 art-px-4 art-py-2 art-text-sm art-font-medium art-rounded-md ${
+                                                    uninstalling
+                                                        ? 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
+                                                        : 'art-bg-red-600 art-text-white hover:art-bg-red-700'
+                                                }`}
+                                            >
+                                                {uninstalling ? (
+                                                    <>
+                                                        <span className="art-inline-block art-animate-spin art-mr-2">⏳</span>
+                                                        Uninstalling...
+                                                    </>
+                                                ) : (
+                                                    '🗑️ Uninstall Dependencies'
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Node.js Not Available Notice */}
+                                    {!nodeStatus?.available && (
+                                        <div className="art-mt-3 art-p-2 art-bg-yellow-50 art-border art-border-yellow-200 art-rounded art-text-xs art-text-yellow-800">
+                                            ⚠️ Node.js is not available on your server. You can still use API compression below.
+                                        </div>
+                                    )}
+
+                                    {/* Performance Notice */}
+                                    {isProActive && dependenciesStatus?.installed && (
+                                        <div className="art-mt-3 art-p-2 art-bg-green-50 art-border art-border-green-200 art-rounded art-text-xs art-text-green-800">
+                                            ⚡ Local compression is up to 10x faster than API compression!
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* API Compression Setup */}
+                                <div className="art-p-3 art-bg-white art-rounded-md">
+                                    <h4 className="art-text-sm art-font-semibold art-text-gray-900 art-mb-3">
+                                        🌐 API Compression
+                                    </h4>
+
+                                    <div className="art-mb-3">
+                                        <label className="art-block art-text-xs art-text-gray-700 art-mb-1">
+                                            API URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={apiUrl}
+                                            onChange={(e) => setApiUrl(e.target.value)}
+                                            onBlur={(e) => handleApiUrlChange(e.target.value)}
+                                            placeholder="http://localhost:3000"
+                                            className="art-w-full art-px-3 art-py-2 art-text-sm art-border art-border-gray-300 art-rounded-md focus:art-outline-none focus:art-ring-2 focus:art-ring-blue-500"
+                                        />
+                                    </div>
+
+                                    {/* API Performance Notice */}
+                                    <div className="art-p-2 art-bg-blue-50 art-border art-border-blue-200 art-rounded art-text-xs art-text-blue-800">
+                                        ℹ️ API compression is slower than local compression but doesn't require Node.js on your server.
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Free User Limit */}
