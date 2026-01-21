@@ -308,16 +308,19 @@ class AR_TRY_ON_Helper
         <script>
             var typeNumber = 0;
             var errorCorrectionLevel = 'L';
-            if(window.qrcode){
-                var qr = qrcode(typeNumber, errorCorrectionLevel);
-                qr.addData("<?php echo esc_url($url) ?>");
-                qr.make();
-                document.getElementById("atlas_ar_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag();
-                document.getElementById("ar_close_btn").addEventListener("click", function () {
-                    document.getElementById("atlas_ar_qr_code").style.display = "none";
-                });
-            }
-
+            let qrcodeInterval = setTimeout(function () {
+                if(window.qrcode){
+                    clearInterval(qrcodeInterval);
+                    qrcodeInterval = null;
+                    var qr = qrcode(typeNumber, errorCorrectionLevel);
+                    qr.addData("<?php echo esc_url($url) ?>");
+                    qr.make();
+                    document.getElementById("atlas_ar_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag();
+                    document.getElementById("ar_close_btn").addEventListener("click", function () {
+                        document.getElementById("atlas_ar_qr_code").style.display = "none";
+                    });
+                }
+            },100)
         </script>
         <?php
         $ar_button_content = ob_get_clean();

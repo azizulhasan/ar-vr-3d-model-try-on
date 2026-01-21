@@ -32,7 +32,6 @@
     let shortcode_id = null;
     if (element) {
         const number = element.id.replace('atlas_ar_shortcode_', '');
-        console.log('Extracted number:', number);
         shortcode_id = '#atlas_ar_shortcode_'+number;
     } else {
         console.log('No matching element found');
@@ -46,7 +45,7 @@
     if(shortcode_id) {
         AR_VIEWER_SELECTORS.push(shortcode_id);
     }
-    console.log(AR_VIEWER_SELECTORS);
+
     /**
      * Load the model-viewer script dynamically
      */
