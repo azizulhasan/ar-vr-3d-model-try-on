@@ -438,6 +438,7 @@ class AR_TRY_ON_Compression_Routes {
 			array(
 				'success' => false,
 				'message' => __( 'Failed to complete compression.', 'ar-vr-3d-model-try-on' ),
+				'$result' => $result,
 			),
 			500
 		);
@@ -762,6 +763,7 @@ class AR_TRY_ON_Compression_Routes {
 	 */
 	public function upload_compressed_file( $request ) {
 		$files = $request->get_file_params();
+		$target_path = $request->get_param( 'target_path' );
 
 		if ( empty( $files['file'] ) ) {
 			return new \WP_REST_Response(
@@ -780,10 +782,30 @@ class AR_TRY_ON_Compression_Routes {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
+        add_filter( 'upload_dir',  function ( $dirs ) use ( $target_path ) {
+            $custom_subdir = str_replace( $dirs['basedir'], '', $target_path );
+
+            $dirs['subdir'] = $custom_subdir;
+            $dirs['path']   = $dirs['basedir'] . $custom_subdir;
+            $dirs['url']    = $dirs['baseurl'] . $custom_subdir;
+
+            return $dirs;
+        } );
+
 		$upload_overrides = array( 'test_form' => false );
 		$uploaded_file    = wp_handle_upload( $file, $upload_overrides );
 
-		if ( isset( $uploaded_file['error'] ) ) {
+        remove_filter( 'upload_dir',  function ( $dirs ) use ( $target_path ) {
+            $custom_subdir = str_replace( $dirs['basedir'], '', $target_path );
+
+            $dirs['subdir'] = $custom_subdir;
+            $dirs['path']   = $dirs['basedir'] . $custom_subdir;
+            $dirs['url']    = $dirs['baseurl'] . $custom_subdir;
+
+            return $dirs;
+        } );
+
+        if ( isset( $uploaded_file['error'] ) ) {
 			return new \WP_REST_Response(
 				array(
 					'success' => false,

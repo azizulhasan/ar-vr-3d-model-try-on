@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import {getURL} from "../../../../../context/utilities";
 
 /**
  * Compression Statistics Component (Pro Only)
@@ -18,9 +19,9 @@ export default function CompressionStats() {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('/wp-json/ar_try_on/v1/compression/stats', {
+            const response = await fetch(getURL('compression/stats'), {
                 headers: {
-                    'X-WP-Nonce': window.ar_try_on?.nonce || '',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
                 },
             });
 

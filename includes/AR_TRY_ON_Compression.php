@@ -225,6 +225,7 @@ class AR_TRY_ON_Compression {
 			'base_url'  => $base_url,
 			'post_dir'  => $post_dir,
 			'post_url'  => $post_url,
+			'url'  => trailingslashit( $post_url ) . 'original.glb',
 			'original'  => trailingslashit( $post_dir ) . 'original.glb',
 			'compressed' => trailingslashit( $post_dir ) . 'compressed.glb',
 		);
@@ -254,23 +255,25 @@ class AR_TRY_ON_Compression {
 		return 'client';
 	}
 
-	/**
+
+    /**
 	 * Prepare file for compression
 	 *
 	 * @since 1.8.0
 	 * @param int    $post_id Post ID.
-	 * @param string $source_file Source file path.
-	 * @return array|WP_Error Preparation result or error.
+	 * @param string $source_url Source file path.
+	 * @return array|\WP_Error Preparation result or error.
 	 */
-	public static function prepare_compression( $post_id, $source_file ) {
+	public static function prepare_compression( $post_id, $source_url ) {
 		// Check if compression is enabled
 		if ( ! self::is_enabled() ) {
-			return new WP_Error( 'compression_disabled', __( 'Compression is currently disabled.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'compression_disabled', __( 'Compression is currently disabled.', 'ar-vr-3d-model-try-on' ) );
 		}
+        $source_file = AR_TRY_ON_Helper::get_file_path_from_url( $source_url );
 
 		// Check if file exists
-		if ( ! file_exists( $source_file ) ) {
-			return new WP_Error( 'file_not_found', __( 'Source file not found.', 'ar-vr-3d-model-try-on' ) );
+		if ( ! $source_file ) {
+			return new \WP_Error( 'file_not_found', __( 'Source file not found.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		// Check user limits
@@ -279,7 +282,7 @@ class AR_TRY_ON_Compression {
 			// Check if this post already has compression (updating existing)
 			$existing_log = AR_TRY_ON_Compression_DB::get_compression_log( $post_id );
 			if ( ! $existing_log ) {
-				return new WP_Error(
+				return new \WP_Error(
 					'limit_reached',
 					sprintf(
 						__( 'You have reached the free limit of %d compressed models. Delete a compressed model or upgrade to Pro for unlimited compression.', 'ar-vr-3d-model-try-on' ),
@@ -296,7 +299,7 @@ class AR_TRY_ON_Compression {
 		$settings = self::get_settings();
 		if ( $settings['keep_original'] ) {
 			if ( ! copy( $source_file, $paths['original'] ) ) {
-				return new WP_Error( 'copy_failed', __( 'Failed to copy original file.', 'ar-vr-3d-model-try-on' ) );
+				return new \WP_Error( 'copy_failed', __( 'Failed to copy original file.', 'ar-vr-3d-model-try-on' ) );
 			}
 		}
 
@@ -336,15 +339,15 @@ class AR_TRY_ON_Compression {
 	 * @param string $input_file Input file path.
 	 * @param string $output_file Output file path.
 	 * @param int    $quality Quality (1-100).
-	 * @return array|WP_Error Result array or error.
+	 * @return array|\WP_Error Result array or error.
 	 */
 	public static function compress_server_side( $input_file, $output_file, $quality = 85 ) {
 		if ( ! self::is_pro_active() ) {
-			return new WP_Error( 'pro_only', __( 'Server-side compression is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'pro_only', __( 'Server-side compression is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		if ( ! file_exists( $input_file ) ) {
-			return new WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		// Get plugin directory
@@ -352,7 +355,7 @@ class AR_TRY_ON_Compression {
 		$script_path = $plugin_dir . '/includes/compression/server-compress.js';
 
 		if ( ! file_exists( $script_path ) ) {
-			return new WP_Error( 'script_not_found', __( 'Compression script not found.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'script_not_found', __( 'Compression script not found.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		// Check if Node.js is available
@@ -394,7 +397,7 @@ class AR_TRY_ON_Compression {
 						'output_file'        => $result['outputFile'],
 					);
 				} else {
-					return new WP_Error(
+					return new \WP_Error(
 						'compression_failed',
 						isset( $result['error'] ) ? $result['error'] : __( 'Compression failed.', 'ar-vr-3d-model-try-on' )
 					);
@@ -403,7 +406,7 @@ class AR_TRY_ON_Compression {
 		}
 
 		// If we couldn't parse result, return raw output as error
-		return new WP_Error( 'parse_error', __( 'Failed to parse compression result: ', 'ar-vr-3d-model-try-on' ) . $output_text );
+		return new \WP_Error( 'parse_error', __( 'Failed to parse compression result: ', 'ar-vr-3d-model-try-on' ) . $output_text );
 	}
 
 	/**
@@ -413,21 +416,21 @@ class AR_TRY_ON_Compression {
 	 * @param string $input_file Input file path (FBX or OBJ).
 	 * @param string $output_file Output file path (GLB).
 	 * @param int    $quality Quality (1-100).
-	 * @return array|WP_Error Result array or error.
+	 * @return array|\WP_Error Result array or error.
 	 */
 	public static function convert_format( $input_file, $output_file, $quality = 85 ) {
 		if ( ! self::is_pro_active() ) {
-			return new WP_Error( 'pro_only', __( 'Format conversion is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'pro_only', __( 'Format conversion is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		if ( ! file_exists( $input_file ) ) {
-			return new WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		// Validate input format
 		$input_ext = strtolower( pathinfo( $input_file, PATHINFO_EXTENSION ) );
 		if ( ! in_array( $input_ext, array( 'fbx', 'obj' ), true ) ) {
-			return new WP_Error( 'unsupported_format', __( 'Unsupported input format. Only FBX and OBJ are supported.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'unsupported_format', __( 'Unsupported input format. Only FBX and OBJ are supported.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		// Get plugin directory
@@ -435,7 +438,7 @@ class AR_TRY_ON_Compression {
 		$script_path = $plugin_dir . '/includes/compression/format-converter.js';
 
 		if ( ! file_exists( $script_path ) ) {
-			return new WP_Error( 'script_not_found', __( 'Format conversion script not found.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'script_not_found', __( 'Format conversion script not found.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		// Check if Node.js is available
@@ -477,7 +480,7 @@ class AR_TRY_ON_Compression {
 						'format'           => $result['format'],
 					);
 				} else {
-					return new WP_Error(
+					return new \WP_Error(
 						'conversion_failed',
 						isset( $result['error'] ) ? $result['error'] : __( 'Format conversion failed.', 'ar-vr-3d-model-try-on' )
 					);
@@ -486,14 +489,14 @@ class AR_TRY_ON_Compression {
 		}
 
 		// If we couldn't parse result, return raw output as error
-		return new WP_Error( 'parse_error', __( 'Failed to parse conversion result: ', 'ar-vr-3d-model-try-on' ) . $output_text );
+		return new \WP_Error( 'parse_error', __( 'Failed to parse conversion result: ', 'ar-vr-3d-model-try-on' ) . $output_text );
 	}
 
 	/**
 	 * Get Node.js executable path
 	 *
 	 * @since 1.8.0
-	 * @return string|WP_Error Node path or error.
+	 * @return string|\WP_Error Node path or error.
 	 */
 	private static function get_node_path() {
 		// Try common paths
@@ -516,7 +519,7 @@ class AR_TRY_ON_Compression {
 			}
 		}
 
-		return new WP_Error(
+		return new \WP_Error(
 			'node_not_found',
 			__( 'Node.js is not installed or not found in system PATH. Server-side compression requires Node.js to be installed.', 'ar-vr-3d-model-try-on' )
 		);
@@ -537,7 +540,7 @@ class AR_TRY_ON_Compression {
 		}
 
 		$compressed_size = filesize( $compressed_file );
-		$log             = AR_TRY_ON_Compression_DB::get_compression_log( $log_id );
+		$log             = AR_TRY_ON_Compression_DB::get_compression_log( $log_id, 'id' );
 
 		if ( ! $log ) {
 			return false;
@@ -581,11 +584,11 @@ class AR_TRY_ON_Compression {
 	 * @param int    $post_id Post ID.
 	 * @param string $file_path File path.
 	 * @param array  $options Compression options.
-	 * @return int|WP_Error Queue ID or error.
+	 * @return int|\WP_Error Queue ID or error.
 	 */
 	public static function add_to_queue( $post_id, $file_path, $options = array() ) {
 		if ( ! self::is_pro_active() ) {
-			return new WP_Error( 'pro_only', __( 'Background processing is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'pro_only', __( 'Background processing is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
 		}
 
 		$settings = self::get_settings();
@@ -607,7 +610,7 @@ class AR_TRY_ON_Compression {
 			)
 		);
 
-		return $queue_id ? $queue_id : new WP_Error( 'queue_failed', __( 'Failed to add to queue.', 'ar-vr-3d-model-try-on' ) );
+		return $queue_id ? $queue_id : new \WP_Error( 'queue_failed', __( 'Failed to add to queue.', 'ar-vr-3d-model-try-on' ) );
 	}
 
 	/**
@@ -755,7 +758,7 @@ class AR_TRY_ON_Compression {
 	 * @return bool Whether Pro is active.
 	 */
 	public static function is_pro_active() {
-		return function_exists( 'is_pro_active' ) && is_pro_active();
+		return function_exists( 'is_pro_active' ) && AR_TRY_ON_Helper::is_pro_active();
 	}
 
 	/**

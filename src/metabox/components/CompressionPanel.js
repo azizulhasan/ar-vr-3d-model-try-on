@@ -84,6 +84,8 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             toast.error('No model file selected');
             return;
         }
+        console.log(modelFile)
+        // return;
 
         // Check user limit
         if (!isProActive && userLimit?.at_limit) {
@@ -130,9 +132,21 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
             const { log_id, method, paths, quality } = prepareData.data;
 
+            console.log()
+            async function urlToFile(url) {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const name = url.split('/').pop();
+
+                return new File([blob], name, { type: blob.type });
+            }
+
+            console.log(prepareData)
+            let file = await urlToFile(paths?.url )
+            console.log({file})
             // Step 2: Compress the model
             if (method === 'client') {
-                await compressClientSide(log_id, modelFile, paths, quality);
+                await compressClientSide(log_id, file, paths, quality);
             } else {
                 // Server-side compression (Pro only)
                 toast.info('🚀 Large file detected. Processing on server (Pro feature)...');
@@ -181,7 +195,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
             // Upload compressed file
             setProgressMessage('Uploading compressed file...');
-            const uploadedFile = await uploadCompressedFile(compressedBlob, file.name, paths.compressed);
+            const uploadedFile = await uploadCompressedFile(compressedBlob, file.name, paths.post_dir);
 
             // Complete compression
             const completeResponse = await fetch(getURL('compression/complete'), {

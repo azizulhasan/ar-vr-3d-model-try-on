@@ -676,4 +676,31 @@ class AR_TRY_ON_Helper
         return $status;
     }
 
+    /**
+     * Get absolute file system path from a WordPress URL
+     *
+     * @param string $url File URL.
+     * @return string|false Absolute file path or false if not found.
+     */
+    public  static  function get_file_path_from_url( $url ) {
+        $upload_dir = wp_upload_dir();
+
+        // Only handle uploads URLs
+        if ( strpos( $url, $upload_dir['baseurl'] ) === false ) {
+            return false;
+        }
+
+        // Convert URL to path
+        $file_path = str_replace(
+            $upload_dir['baseurl'],
+            $upload_dir['basedir'],
+            $url
+        );
+
+        // Normalize path
+        $file_path = wp_normalize_path( $file_path );
+
+        return file_exists( $file_path ) ? $file_path : false;
+    }
+
 }

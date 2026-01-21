@@ -142,7 +142,7 @@ const ARProductModelSettings = () => {
 
 
     // Accordion state
-    const [activeSection, setActiveSection] = useState("slider");
+    const [activeSection, setActiveSection] = useState("settings");
     const [activeAccordion, setActiveAccordion] = useState({
         content: false,
         camera: false,

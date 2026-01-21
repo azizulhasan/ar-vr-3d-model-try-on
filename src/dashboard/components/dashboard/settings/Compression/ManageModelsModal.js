@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+import {getURL} from "../../../../../context/utilities";
 
 /**
  * Manage Compressed Models Modal
@@ -22,9 +23,9 @@ export default function ManageModelsModal({ isOpen, onClose }) {
     const fetchModels = async () => {
         setLoading(true);
         try {
-            const response = await fetch('/wp-json/ar_try_on/v1/compression/models?status=complete', {
+            const response = await fetch(getURL('compression/models?status=complete'), {
                 headers: {
-                    'X-WP-Nonce': window.ar_try_on?.nonce || '',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
                 },
             });
 
@@ -50,10 +51,10 @@ export default function ManageModelsModal({ isOpen, onClose }) {
         setDeleting(postId);
 
         try {
-            const response = await fetch(`/wp-json/ar_try_on/v1/compression/delete/${postId}`, {
+            const response = await fetch(getURL(`compression/delete/${postId}`), {
                 method: 'DELETE',
                 headers: {
-                    'X-WP-Nonce': window.ar_try_on?.nonce || '',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
                 },
             });
 

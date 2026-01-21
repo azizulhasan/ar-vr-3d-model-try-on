@@ -40,6 +40,7 @@ require_once 'vendor/autoload.php';
 use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
+use AR_TRY_ON\AR_TRY_ON_Compression;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
@@ -197,11 +198,10 @@ function atlas_ar_run() {
 	new AR_TRY_ON_Api_Routes();
 
 	// Initialize Compression feature (v1.8.0+)
-	if ( class_exists( 'AR_TRY_ON_Compression' ) ) {
-		AR_TRY_ON_Compression::init();
-	}
+    AR_TRY_ON_Compression::init();
 
-	// Register Compression REST API routes
+
+    // Register Compression REST API routes
 	add_action( 'rest_api_init', function() {
 		$compression_routes = new AR_TRY_ON_Compression_Routes();
 		$compression_routes->register_routes();

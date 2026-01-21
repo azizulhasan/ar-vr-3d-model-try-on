@@ -14,6 +14,7 @@ import {
     Legend,
     Filler
 } from 'chart.js';
+import {getURL} from "../../../../../context/utilities";
 
 // Register Chart.js components
 ChartJS.register(
@@ -52,9 +53,9 @@ export default function AnalyticsDashboard() {
             setLoading(true);
 
             // Fetch stats
-            const statsResponse = await fetch('/wp-json/ar_try_on/v1/compression/stats', {
+            const statsResponse = await fetch(getURL('compression/stats'), {
                 headers: {
-                    'X-WP-Nonce': window.ar_try_on?.nonce || '',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
                 },
             });
 
@@ -66,9 +67,9 @@ export default function AnalyticsDashboard() {
             }
 
             // Fetch models list
-            const modelsResponse = await fetch('/wp-json/ar_try_on/v1/compression/models?limit=100', {
+            const modelsResponse = await fetch(getURL('compression/models?limit=100'), {
                 headers: {
-                    'X-WP-Nonce': window.ar_try_on?.nonce || '',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
                 },
             });
 

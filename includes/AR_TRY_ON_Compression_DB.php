@@ -40,10 +40,9 @@ class AR_TRY_ON_Compression_DB {
 	 */
 	public static function init() {
 		$current_version = get_option( self::VERSION_OPTION, '0.0.0' );
-
 		if ( version_compare( $current_version, self::DB_VERSION, '<' ) ) {
 			self::create_tables();
-			update_option( self::VERSION_OPTION, self::DB_VERSION );
+            update_option( self::VERSION_OPTION, self::DB_VERSION );
 		}
 	}
 
@@ -155,8 +154,14 @@ class AR_TRY_ON_Compression_DB {
 			$data['compression_ratio'] = ( 1 - ( $data['compressed_size'] / $data['original_size'] ) ) * 100;
 		}
 
+        $table = $wpdb->prefix . 'ar_compression_log';
+
+        if ( ! self::table_exists( $table ) ) {
+            return false; // graceful fallback
+        }
+
 		$result = $wpdb->insert(
-			$wpdb->prefix . 'ar_compression_log',
+			$table,
 			$data,
 			array( '%d', '%s', '%s', '%d', '%d', '%f', '%s', '%d', '%s', '%s', '%d' )
 		);
@@ -175,8 +180,14 @@ class AR_TRY_ON_Compression_DB {
 	public static function update_compression_log( $log_id, $data ) {
 		global $wpdb;
 
+        $table = $wpdb->prefix . 'ar_compression_log';
+
+        if ( ! self::table_exists( $table ) ) {
+            return false; // graceful fallback
+        }
+
 		return (bool) $wpdb->update(
-			$wpdb->prefix . 'ar_compression_log',
+			$table,
 			$data,
 			array( 'id' => $log_id ),
 			null,
@@ -184,26 +195,43 @@ class AR_TRY_ON_Compression_DB {
 		);
 	}
 
-	/**
+    private static function table_exists( $table ) {
+        global $wpdb;
+
+        return $wpdb->get_var(
+                $wpdb->prepare(
+                    "SHOW TABLES LIKE %s",
+                    $table
+                )
+            ) === $table;
+    }
+
+
+    /**
 	 * Get compression log for a post
 	 *
 	 * @since 1.8.0
 	 * @param int $post_id Post ID.
 	 * @return array|null Compression log data or null.
 	 */
-	public static function get_compression_log( $post_id ) {
-		global $wpdb;
+    public static function get_compression_log( $post_id , $type = 'post_id') {
+        global $wpdb;
 
-		$table = $wpdb->prefix . 'ar_compression_log';
+        $table = $wpdb->prefix . 'ar_compression_log';
 
-		return $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM $table WHERE post_id = %d ORDER BY created_at DESC LIMIT 1",
-				$post_id
-			),
-			ARRAY_A
-		);
-	}
+        if ( ! self::table_exists( $table ) ) {
+            return null; // graceful fallback
+        }
+
+        return $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM $table WHERE $type = %d ORDER BY created_at DESC LIMIT 1",
+                $post_id
+            ),
+            ARRAY_A
+        );
+    }
+
 
 	/**
 	 * Get all compression logs
@@ -226,7 +254,12 @@ class AR_TRY_ON_Compression_DB {
 		$args  = wp_parse_args( $args, $defaults );
 		$table = $wpdb->prefix . 'ar_compression_log';
 
-		$where = '1=1';
+        if ( ! self::table_exists( $table ) ) {
+            return array(); // graceful fallback
+        }
+
+
+        $where = '1=1';
 		if ( ! is_null( $args['status'] ) ) {
 			$where .= $wpdb->prepare( ' AND status = %s', $args['status'] );
 		}
@@ -250,7 +283,12 @@ class AR_TRY_ON_Compression_DB {
 
 		$table = $wpdb->prefix . 'ar_compression_log';
 
-		$stats = $wpdb->get_row(
+        if ( ! self::table_exists( $table ) ) {
+            return array(); // graceful fallback
+        }
+
+
+        $stats = $wpdb->get_row(
 			"SELECT
 				COUNT(*) as total_compressions,
 				COUNT(CASE WHEN status = 'complete' THEN 1 END) as successful_compressions,
@@ -273,17 +311,21 @@ class AR_TRY_ON_Compression_DB {
 	 * @since 1.8.0
 	 * @return int Number of compressed models.
 	 */
-	public static function count_user_compressions() {
-		global $wpdb;
+    public static function count_user_compressions() {
+        global $wpdb;
 
-		$table = $wpdb->prefix . 'ar_compression_log';
+        $table = $wpdb->prefix . 'ar_compression_log';
 
-		return (int) $wpdb->get_var(
-			"SELECT COUNT(DISTINCT post_id) FROM $table WHERE status = 'complete'"
-		);
-	}
+        if ( ! self::table_exists( $table ) ) {
+            return 0;
+        }
 
-	/**
+        return (int) $wpdb->get_var(
+            "SELECT COUNT(DISTINCT post_id) FROM $table WHERE status = 'complete'"
+        );
+    }
+
+    /**
 	 * Add item to compression queue (Pro feature)
 	 *
 	 * @since 1.8.0
@@ -307,7 +349,14 @@ class AR_TRY_ON_Compression_DB {
 
 		$data = wp_parse_args( $data, $defaults );
 
-		$result = $wpdb->insert(
+        $table = $wpdb->prefix . 'ar_compression_queue';
+
+        if ( ! self::table_exists( $table ) ) {
+            return false; // graceful fallback
+        }
+
+
+        $result = $wpdb->insert(
 			$wpdb->prefix . 'ar_compression_queue',
 			$data,
 			array( '%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d' )
@@ -326,6 +375,10 @@ class AR_TRY_ON_Compression_DB {
 		global $wpdb;
 
 		$table = $wpdb->prefix . 'ar_compression_queue';
+
+        if ( ! self::table_exists( $table ) ) {
+            return array(); // graceful fallback
+        }
 
 		return $wpdb->get_row(
 			"SELECT * FROM $table
@@ -362,11 +415,18 @@ class AR_TRY_ON_Compression_DB {
 			$data['error_message'] = $error_message;
 		}
 
+
+        $table = $wpdb->prefix . 'ar_compression_queue';
+
+        if ( ! self::table_exists( $table ) ) {
+            return false; // graceful fallback
+        }
+
 		// Handle attempts increment
 		if ( isset( $data['attempts'] ) ) {
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE {$wpdb->prefix}ar_compression_queue
+					"UPDATE $table
 					SET status = %s, started_at = %s, attempts = attempts + 1
 					WHERE id = %d",
 					$status,
@@ -384,7 +444,7 @@ class AR_TRY_ON_Compression_DB {
 		}
 
 		return (bool) $wpdb->update(
-			$wpdb->prefix . 'ar_compression_queue',
+            $table,
 			$data,
 			array( 'id' => $queue_id ),
 			null,
@@ -401,6 +461,12 @@ class AR_TRY_ON_Compression_DB {
 	 */
 	public static function delete_compression_log( $post_id ) {
 		global $wpdb;
+
+        $table = $wpdb->prefix . 'ar_compression_log';
+
+        if ( ! self::table_exists( $table ) ) {
+            return false; // graceful fallback
+        }
 
 		return (bool) $wpdb->delete(
 			$wpdb->prefix . 'ar_compression_log',
@@ -420,6 +486,10 @@ class AR_TRY_ON_Compression_DB {
 		global $wpdb;
 
 		$table = $wpdb->prefix . 'ar_compression_log';
+
+        if ( ! self::table_exists( $table ) ) {
+            return false; // graceful fallback
+        }
 
 		return $wpdb->query(
 			$wpdb->prepare(
