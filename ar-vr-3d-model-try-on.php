@@ -41,6 +41,7 @@ use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
+use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 
@@ -194,7 +195,27 @@ function atlas_ar_run() {
 		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
 //	}
 	new AR_TRY_ON_Api_Routes();
+
+	// Initialize Compression feature (v1.8.0+)
+	if ( class_exists( 'AR_TRY_ON_Compression' ) ) {
+		AR_TRY_ON_Compression::init();
+	}
+
+	// Register Compression REST API routes
+	add_action( 'rest_api_init', function() {
+		$compression_routes = new AR_TRY_ON_Compression_Routes();
+		$compression_routes->register_routes();
+	} );
 }
+
+// Add custom cron schedule for compression queue processing
+add_filter( 'cron_schedules', function( $schedules ) {
+	$schedules['every_five_minutes'] = array(
+		'interval' => 300, // 5 minutes in seconds
+		'display'  => __( 'Every 5 Minutes', 'ar-vr-3d-model-try-on' ),
+	);
+	return $schedules;
+} );
 
 
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );

@@ -14,6 +14,7 @@ import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
 import DimensionsSection from "./components/DimensionsSection.js";
 import HotspotsSection from "./components/HotspotsSection.js";
+import CompressionPanel from "./components/CompressionPanel.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
 import SliderSection from "./components/SliderSection.js";
@@ -554,6 +555,18 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     toggleAccordion={toggleAccordion}
                                     handleMediaButtonClick={handleMediaButtonClick}
                                 />
+
+                                {/* Compression Panel - Show after model upload */}
+                                {productModel.src && (
+                                    <CompressionPanel
+                                        postId={getPostID()}
+                                        modelFile={productModel.src}
+                                        onCompressionComplete={(meta) => {
+                                            console.log('Compression complete:', meta);
+                                            notify('Model compressed successfully!', 'success');
+                                        }}
+                                    />
+                                )}
 
                                 <CameraSection
                                     productModel={productModel}

@@ -72,7 +72,12 @@ class AR_TRY_ON_Activator {
 			update_option( 'ar_try_on_settings', $all_settings );
 			AR_TRY_ON_Cache::set( 'settings', $all_settings );
 		}
-		
+
+		// Schedule background compression queue processing (Pro feature)
+		if ( ! wp_next_scheduled( 'ar_try_on_process_compression_queue' ) ) {
+			wp_schedule_event( time(), 'every_five_minutes', 'ar_try_on_process_compression_queue' );
+		}
+
 		return $all_settings;
 	}
 

@@ -447,6 +447,12 @@
   margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)))
 }
 
+.art-space-x-8 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(2rem * var(--tw-space-x-reverse));
+  margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)))
+}
+
 .art-space-y-0 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0px * calc(1 - var(--tw-space-y-reverse)));
@@ -664,6 +670,11 @@
   padding: 1rem
 }
 
+.art-px-1 {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem
+}
+
 .art-px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem
@@ -689,6 +700,11 @@
   padding-right: 1.25rem
 }
 
+.art-px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem
+}
+
 .art-py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem
@@ -702,6 +718,10 @@
 .art-py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem
+}
+
+.art-pb-6 {
+  padding-bottom: 1.5rem
 }
 
 .art-pr-8 {
@@ -943,6 +963,11 @@
 .checked\:art-bg-blue-600:checked {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity, 1))
+}
+
+.hover\:art-border-gray-300:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(209 213 219 / var(--tw-border-opacity, 1))
 }
 
 .hover\:art-border-gray-400:hover {

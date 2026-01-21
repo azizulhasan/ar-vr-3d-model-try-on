@@ -136,11 +136,20 @@ class AR_TRY_ON_Admin {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
-			
+
 			wp_enqueue_script(
 				'ar-try-on-media-library',
 				ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
 				['ar-try-on-metabox-ui'], // Dependencies
+				$this->version,
+				true
+			);
+
+			// Enqueue compression client script
+			wp_enqueue_script(
+				'ar-compression-client',
+				ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-compression-client.min.js',
+				array('ar-try-on-metabox-ui'),
 				$this->version,
 				true
 			);

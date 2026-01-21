@@ -30,7 +30,11 @@ class AR_TRY_ON_Deactivate {
      * @since    1.0.0
      */
     public static function deactivate() {
-		//
+		// Clear scheduled cron jobs
+		$timestamp = wp_next_scheduled( 'ar_try_on_process_compression_queue' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'ar_try_on_process_compression_queue' );
+		}
     }
 
 }

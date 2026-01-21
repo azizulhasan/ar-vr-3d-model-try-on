@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import Settings from "./components/dashboard/settings/Settings";
+import SettingsWrapper from "./components/dashboard/settings/SettingsWrapper";
 import { ToastContainer } from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
@@ -419,7 +419,7 @@ const handleSubmit = async (e) => {
         {/* Main Content */}
         <div className="art-flex-1">
           {activeTab === "Settings" && (
-            <Settings
+            <SettingsWrapper
               setHeaders={setHeaders}
               settings={settings}
               handleChange={handleChange}
