@@ -26,7 +26,7 @@
     const element = document.querySelector('[id^="atlas_ar_shortcode_"]');
 
     /**
-     * GET shortcode id dynamically
+     * GET shortcode id dynamically from DOM
      * @type {null}
      */
     let shortcode_id = null;
