@@ -39,16 +39,16 @@ export default function SupportedFormats({ isProActive, onProFeatureClick }) {
     ];
 
     return (
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900 mb-3">
+        <div className="art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
+            <h3 className="art-text-base art-font-semibold art-text-gray-900 art-mb-3">
                 Supported Formats
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="art-text-sm art-text-gray-600 art-mb-4">
                 The following file formats can be compressed. Pro features include automatic
                 format conversion and additional format support.
             </p>
 
-            <div className="space-y-2">
+            <div className="art-space-y-2">
                 {formats.map((format, index) => (
                     <div
                         key={index}
@@ -57,35 +57,35 @@ export default function SupportedFormats({ isProActive, onProFeatureClick }) {
                                 onProFeatureClick(`${format.name} Compression`);
                             }
                         }}
-                        className={`flex items-start p-3 rounded-lg border ${
+                        className={`art-flex art-items-start art-p-3 art-rounded-lg art-border ${
                             format.supported
-                                ? 'bg-white border-gray-200'
-                                : 'bg-gray-100 border-gray-300 cursor-pointer hover:bg-gray-200'
+                                ? 'art-bg-white art-border-gray-200'
+                                : 'art-bg-gray-100 art-border-gray-300 art-cursor-pointer hover:art-bg-gray-200'
                         }`}
                     >
-                        <div className="flex-shrink-0 mr-3">
+                        <div className="art-flex-shrink-0 art-mr-3">
                             <span
-                                className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm ${
+                                className={`art-inline-flex art-items-center art-justify-center art-w-6 art-h-6 art-rounded-full art-text-sm ${
                                     format.supported
-                                        ? 'bg-green-100 text-green-600'
-                                        : 'bg-gray-200 text-gray-600'
+                                        ? 'art-bg-green-100 art-text-green-600'
+                                        : 'art-bg-gray-200 art-text-gray-600'
                                 }`}
                             >
                                 {format.icon}
                             </span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center">
-                                <span className="text-sm font-medium text-gray-900">
+                        <div className="art-flex-1 art-min-w-0">
+                            <div className="art-flex art-items-center">
+                                <span className="art-text-sm art-font-medium art-text-gray-900">
                                     {format.name}
                                 </span>
                                 {format.pro && (
-                                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
+                                    <span className="art-ml-2 art-px-2 art-py-0.5 art-text-xs art-font-medium art-bg-yellow-100 art-text-yellow-800 art-rounded">
                                         PRO
                                     </span>
                                 )}
                             </div>
-                            <p className="text-xs text-gray-600 mt-0.5">
+                            <p className="art-text-xs art-text-gray-600 art-mt-0.5">
                                 {format.description}
                             </p>
                         </div>
@@ -94,11 +94,11 @@ export default function SupportedFormats({ isProActive, onProFeatureClick }) {
             </div>
 
             {/* Benefits Section */}
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                <p className="text-sm text-gray-700">
+            <div className="art-mt-4 art-p-3 art-bg-blue-50 art-border art-border-blue-200 art-rounded">
+                <p className="art-text-sm art-text-gray-700">
                     <strong>💡 Why compression matters:</strong>
                 </p>
-                <ul className="text-xs text-gray-600 mt-2 space-y-1 ml-4 list-disc">
+                <ul className="art-text-xs art-text-gray-600 art-mt-2 art-space-y-1 art-ml-4 art-list-disc">
                     <li>50-70% smaller file sizes = faster loading</li>
                     <li>Reduced bandwidth usage = lower hosting costs</li>
                     <li>Better user experience on mobile devices</li>

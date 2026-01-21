@@ -17,40 +17,40 @@ export default function KeepOriginalToggle({ keepOriginal, onChange }) {
     };
 
     return (
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <h3 className="text-base font-semibold text-gray-900 mb-1">
+        <div className="art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
+            <div className="art-flex art-items-start art-justify-between">
+                <div className="art-flex-1">
+                    <h3 className="art-text-base art-font-semibold art-text-gray-900 art-mb-1">
                         Keep Original Files
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2">
+                    <p className="art-text-sm art-text-gray-600 art-mb-2">
                         Store both original and compressed versions. Useful for reverting changes
                         or comparing quality.
                     </p>
                     {isEnabled && (
-                        <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-sm text-orange-700">
+                        <div className="art-mt-2 art-p-2 art-bg-orange-50 art-border art-border-orange-200 art-rounded art-text-sm art-text-orange-700">
                             ⚠️ <strong>Note:</strong> Keeping originals will use approximately 2x storage space.
                         </div>
                     )}
                     {!isEnabled && (
-                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-700">
+                        <div className="art-mt-2 art-p-2 art-bg-yellow-50 art-border art-border-yellow-200 art-rounded art-text-sm art-text-yellow-700">
                             ⚠️ <strong>Warning:</strong> Original files will be permanently deleted after compression.
                             This action cannot be undone.
                         </div>
                     )}
                 </div>
-                <div className="ml-4">
+                <div className="art-ml-4">
                     <button
                         onClick={handleToggle}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                            isEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                        className={`art-relative art-inline-flex art-h-6 art-w-11 art-items-center art-rounded-full art-transition-colors focus:art-outline-none focus:art-ring-2 focus:art-ring-blue-500 focus:art-ring-offset-2 ${
+                            isEnabled ? 'art-bg-blue-600' : 'art-bg-gray-300'
                         }`}
                         role="switch"
                         aria-checked={isEnabled}
                     >
                         <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                isEnabled ? 'translate-x-6' : 'translate-x-1'
+                            className={`art-inline-block art-h-4 art-w-4 art-transform art-rounded-full art-bg-white art-transition-transform ${
+                                isEnabled ? 'art-translate-x-6' : 'art-translate-x-1'
                             }`}
                         />
                     </button>
@@ -58,19 +58,19 @@ export default function KeepOriginalToggle({ keepOriginal, onChange }) {
             </div>
 
             {/* Storage Info */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="text-xs text-gray-500">
+            <div className="art-mt-3 art-pt-3 art-border-t art-border-gray-200">
+                <div className="art-text-xs art-text-gray-500">
                     {isEnabled ? (
                         <>
                             ✓ Original files stored in:{' '}
-                            <code className="px-1 py-0.5 bg-gray-200 rounded">
+                            <code className="art-px-1 art-py-0.5 art-bg-gray-200 art-rounded">
                                 /uploads/atlas_ar/{'{post_id}'}/original.glb
                             </code>
                         </>
                     ) : (
                         <>
                             Only compressed files will be stored in:{' '}
-                            <code className="px-1 py-0.5 bg-gray-200 rounded">
+                            <code className="art-px-1 art-py-0.5 art-bg-gray-200 art-rounded">
                                 /uploads/atlas_ar/{'{post_id}'}/compressed.glb
                             </code>
                         </>

@@ -41,12 +41,12 @@ export default function CompressionStats() {
 
     if (loading) {
         return (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="animate-pulse">
-                    <div className="h-4 bg-gray-300 rounded w-1/3 mb-4"></div>
-                    <div className="space-y-2">
-                        <div className="h-3 bg-gray-300 rounded"></div>
-                        <div className="h-3 bg-gray-300 rounded w-5/6"></div>
+            <div className="art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
+                <div className="art-animate-pulse">
+                    <div className="art-h-4 art-bg-gray-300 art-rounded art-w-1/3 art-mb-4"></div>
+                    <div className="art-space-y-2">
+                        <div className="art-h-3 art-bg-gray-300 art-rounded"></div>
+                        <div className="art-h-3 art-bg-gray-300 art-rounded art-w-5/6"></div>
                     </div>
                 </div>
             </div>
@@ -55,11 +55,11 @@ export default function CompressionStats() {
 
     if (!stats || !stats.total_compressions) {
         return (
-            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 className="text-base font-semibold text-gray-900 mb-2">
+            <div className="art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
+                <h3 className="art-text-base art-font-semibold art-text-gray-900 art-mb-2">
                     Compression Statistics
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="art-text-sm art-text-gray-600">
                     No compression data available yet. Start compressing models to see statistics!
                 </p>
             </div>
@@ -67,65 +67,65 @@ export default function CompressionStats() {
     }
 
     return (
-        <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold text-gray-900">
+        <div className="art-p-4 art-bg-gradient-to-br art-from-blue-50 art-to-indigo-50 art-rounded-lg art-border art-border-blue-200">
+            <div className="art-flex art-items-center art-justify-between art-mb-4">
+                <h3 className="art-text-base art-font-semibold art-text-gray-900">
                     📊 Compression Statistics
                 </h3>
-                <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+                <span className="art-px-2 art-py-1 art-text-xs art-font-medium art-bg-green-100 art-text-green-800 art-rounded">
                     PRO
                 </span>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-blue-600">
+            <div className="art-grid art-grid-cols-2 md:art-grid-cols-4 art-gap-4 art-mb-4">
+                <div className="art-bg-white art-p-3 art-rounded-lg art-shadow-sm">
+                    <div className="art-text-2xl art-font-bold art-text-blue-600">
                         {stats.total_compressions || 0}
                     </div>
-                    <div className="text-xs text-gray-600 mt-1">Total Models</div>
+                    <div className="art-text-xs art-text-gray-600 art-mt-1">Total Models</div>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-green-600">
+                <div className="art-bg-white art-p-3 art-rounded-lg art-shadow-sm">
+                    <div className="art-text-2xl art-font-bold art-text-green-600">
                         {stats.avg_compression_ratio || 0}%
                     </div>
-                    <div className="text-xs text-gray-600 mt-1">Avg. Reduction</div>
+                    <div className="art-text-xs art-text-gray-600 art-mt-1">Avg. Reduction</div>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-purple-600">
+                <div className="art-bg-white art-p-3 art-rounded-lg art-shadow-sm">
+                    <div className="art-text-2xl art-font-bold art-text-purple-600">
                         {stats.total_saved_space_formatted || '0 MB'}
                     </div>
-                    <div className="text-xs text-gray-600 mt-1">Space Saved</div>
+                    <div className="art-text-xs art-text-gray-600 art-mt-1">Space Saved</div>
                 </div>
 
-                <div className="bg-white p-3 rounded-lg shadow-sm">
-                    <div className="text-2xl font-bold text-orange-600">
+                <div className="art-bg-white art-p-3 art-rounded-lg art-shadow-sm">
+                    <div className="art-text-2xl art-font-bold art-text-orange-600">
                         {stats.successful_compressions || 0}
                     </div>
-                    <div className="text-xs text-gray-600 mt-1">Successful</div>
+                    <div className="art-text-xs art-text-gray-600 art-mt-1">Successful</div>
                 </div>
             </div>
 
             {/* Detailed Stats */}
-            <div className="bg-white p-3 rounded-lg shadow-sm">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="art-bg-white art-p-3 art-rounded-lg art-shadow-sm">
+                <div className="art-grid art-grid-cols-2 art-gap-4 art-text-sm">
                     <div>
-                        <span className="text-gray-600">Original Size:</span>
-                        <span className="ml-2 font-semibold text-gray-900">
+                        <span className="art-text-gray-600">Original Size:</span>
+                        <span className="art-ml-2 art-font-semibold art-text-gray-900">
                             {stats.total_original_size_formatted || '0 MB'}
                         </span>
                     </div>
                     <div>
-                        <span className="text-gray-600">Compressed Size:</span>
-                        <span className="ml-2 font-semibold text-gray-900">
+                        <span className="art-text-gray-600">Compressed Size:</span>
+                        <span className="art-ml-2 art-font-semibold art-text-gray-900">
                             {stats.total_compressed_size_formatted || '0 MB'}
                         </span>
                     </div>
                     <div>
-                        <span className="text-gray-600">Success Rate:</span>
-                        <span className="ml-2 font-semibold text-green-600">
+                        <span className="art-text-gray-600">Success Rate:</span>
+                        <span className="art-ml-2 art-font-semibold art-text-green-600">
                             {stats.total_compressions > 0
                                 ? Math.round(
                                       (stats.successful_compressions / stats.total_compressions) * 100
@@ -135,8 +135,8 @@ export default function CompressionStats() {
                         </span>
                     </div>
                     <div>
-                        <span className="text-gray-600">Failed:</span>
-                        <span className="ml-2 font-semibold text-red-600">
+                        <span className="art-text-gray-600">Failed:</span>
+                        <span className="art-ml-2 art-font-semibold art-text-red-600">
                             {stats.failed_compressions || 0}
                         </span>
                     </div>
@@ -144,10 +144,10 @@ export default function CompressionStats() {
             </div>
 
             {/* Refresh Button */}
-            <div className="mt-4 text-center">
+            <div className="art-mt-4 art-text-center">
                 <button
                     onClick={fetchStats}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    className="art-text-sm art-text-blue-600 hover:art-text-blue-800 art-font-medium"
                 >
                     🔄 Refresh Statistics
                 </button>

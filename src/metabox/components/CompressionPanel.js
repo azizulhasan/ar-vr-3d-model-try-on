@@ -324,24 +324,24 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
     if (loading) {
         return (
-            <div className="compression-panel p-4 border border-gray-300 rounded-md bg-gray-50">
-                <div className="animate-pulse">
-                    <div className="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
-                    <div className="h-3 bg-gray-300 rounded w-2/3"></div>
+            <div className="compression-panel art-p-4 art-border art-border-gray-300 art-rounded-md art-bg-gray-50">
+                <div className="art-animate-pulse">
+                    <div className="art-h-4 art-bg-gray-300 art-rounded art-w-1/3 art-mb-2"></div>
+                    <div className="art-h-3 art-bg-gray-300 art-rounded art-w-2/3"></div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="compression-panel p-4 border border-gray-300 rounded-md bg-white">
-            <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-semibold text-gray-900 flex items-center">
-                    <span className="mr-2">🗜️</span>
+        <div className="compression-panel art-p-4 art-border art-border-gray-300 art-rounded-md art-bg-white">
+            <div className="art-flex art-items-center art-justify-between art-mb-3">
+                <h4 className="art-text-sm art-font-semibold art-text-gray-900 art-flex art-items-center">
+                    <span className="art-mr-2">🗜️</span>
                     Model Compression
                 </h4>
                 {!isProActive && userLimit && (
-                    <span className="text-xs text-gray-600">
+                    <span className="art-text-xs art-text-gray-600">
                         {userLimit.used}/{userLimit.limit} models
                     </span>
                 )}
@@ -350,18 +350,18 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             {/* Not compressed yet */}
             {!compressionStatus && (
                 <div>
-                    <p className="text-sm text-gray-600 mb-3">
+                    <p className="art-text-sm art-text-gray-600 art-mb-3">
                         Compress this model to reduce file size and improve loading speed.
                     </p>
                     {!isProActive && userLimit?.at_limit && (
-                        <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+                        <div className="art-mb-3 art-p-2 art-bg-orange-50 art-border art-border-orange-200 art-rounded art-text-xs art-text-orange-700">
                             ⚠️ You've reached the free limit. Delete a compressed model to compress this one.
                         </div>
                     )}
                     <button
                         onClick={handleCompress}
                         disabled={!canCompress || !modelFile}
-                        className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="art-w-full art-px-4 art-py-2 art-bg-blue-600 art-text-white art-text-sm art-font-medium art-rounded-md hover:art-bg-blue-700 disabled:art-bg-gray-400 disabled:art-cursor-not-allowed"
                     >
                         {canCompress ? '🚀 Compress Model' : '🔒 Limit Reached'}
                     </button>
@@ -371,19 +371,19 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             {/* Compressing */}
             {compressionStatus === 'compressing' && (
                 <div>
-                    <div className="mb-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                    <div className="art-mb-2">
+                        <div className="art-flex art-items-center art-justify-between art-text-xs art-text-gray-600 art-mb-1">
                             <span>{progressMessage}</span>
-                            <span className="font-semibold">{progress}%</span>
+                            <span className="art-font-semibold">{progress}%</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="art-w-full art-bg-gray-200 art-rounded-full art-h-2">
                             <div
-                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                className="art-bg-blue-600 art-h-2 art-rounded-full art-transition-all art-duration-300"
                                 style={{ width: `${progress}%` }}
                             ></div>
                         </div>
                     </div>
-                    <p className="text-xs text-gray-500 text-center">
+                    <p className="art-text-xs art-text-gray-500 art-text-center">
                         Please wait, this may take a few moments...
                     </p>
                 </div>
@@ -392,38 +392,38 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             {/* Complete */}
             {compressionStatus === 'complete' && compressionData && (
                 <div>
-                    <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded">
-                        <div className="flex items-center mb-2">
-                            <span className="text-green-600 mr-2">✅</span>
-                            <span className="text-sm font-semibold text-green-800">Compressed Successfully!</span>
+                    <div className="art-mb-3 art-p-3 art-bg-green-50 art-border art-border-green-200 art-rounded">
+                        <div className="art-flex art-items-center art-mb-2">
+                            <span className="art-text-green-600 art-mr-2">✅</span>
+                            <span className="art-text-sm art-font-semibold art-text-green-800">Compressed Successfully!</span>
                         </div>
-                        <div className="space-y-1 text-xs text-gray-700">
-                            <div className="flex justify-between">
+                        <div className="art-space-y-1 art-text-xs art-text-gray-700">
+                            <div className="art-flex art-justify-between">
                                 <span>Original:</span>
-                                <span className="font-semibold">{compressionData.original_size_formatted}</span>
+                                <span className="art-font-semibold">{compressionData.original_size_formatted}</span>
                             </div>
-                            <div className="flex justify-between">
+                            <div className="art-flex art-justify-between">
                                 <span>Compressed:</span>
-                                <span className="font-semibold">{compressionData.compressed_size_formatted}</span>
+                                <span className="art-font-semibold">{compressionData.compressed_size_formatted}</span>
                             </div>
-                            <div className="flex justify-between text-green-600">
+                            <div className="art-flex art-justify-between art-text-green-600">
                                 <span>Saved:</span>
-                                <span className="font-semibold">
+                                <span className="art-font-semibold">
                                     {compressionData.saved_space_formatted} ({compressionData.compressionRatio || compressionData.compression_ratio}%)
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="art-flex art-space-x-2">
                         <button
                             onClick={handleCompress}
-                            className="flex-1 px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300"
+                            className="art-flex-1 art-px-3 art-py-1.5 art-bg-gray-200 art-text-gray-700 art-text-xs art-font-medium art-rounded hover:art-bg-gray-300"
                         >
                             🔄 Re-compress
                         </button>
                         <button
                             onClick={handleDeleteCompression}
-                            className="flex-1 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded hover:bg-red-200"
+                            className="art-flex-1 art-px-3 art-py-1.5 art-bg-red-100 art-text-red-700 art-text-xs art-font-medium art-rounded hover:art-bg-red-200"
                         >
                             🗑️ Delete
                         </button>
@@ -434,18 +434,18 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             {/* Failed */}
             {compressionStatus === 'failed' && (
                 <div>
-                    <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded">
-                        <div className="flex items-center mb-1">
-                            <span className="text-red-600 mr-2">❌</span>
-                            <span className="text-sm font-semibold text-red-800">Compression Failed</span>
+                    <div className="art-mb-3 art-p-3 art-bg-red-50 art-border art-border-red-200 art-rounded">
+                        <div className="art-flex art-items-center art-mb-1">
+                            <span className="art-text-red-600 art-mr-2">❌</span>
+                            <span className="art-text-sm art-font-semibold art-text-red-800">Compression Failed</span>
                         </div>
-                        <p className="text-xs text-gray-600">
+                        <p className="art-text-xs art-text-gray-600">
                             An error occurred during compression. Please try again.
                         </p>
                     </div>
                     <button
                         onClick={handleCompress}
-                        className="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700"
+                        className="art-w-full art-px-4 art-py-2 art-bg-blue-600 art-text-white art-text-sm art-font-medium art-rounded-md hover:art-bg-blue-700"
                     >
                         🔄 Try Again
                     </button>

@@ -31,32 +31,32 @@ export default function QualitySlider({ quality, onChange }) {
     };
 
     return (
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-base font-semibold text-gray-900">
+        <div className="art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
+            <div className="art-mb-4">
+                <div className="art-flex art-items-center art-justify-between art-mb-2">
+                    <h3 className="art-text-base art-font-semibold art-text-gray-900">
                         Compression Quality
                     </h3>
-                    <div className="flex items-center">
-                        <span className={`text-2xl font-bold ${getQualityColor(currentQuality)}`}>
+                    <div className="art-flex art-items-center">
+                        <span className={`art-text-2xl art-font-bold ${getQualityColor(currentQuality)}`}>
                             {currentQuality}%
                         </span>
                     </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="art-text-sm art-text-gray-600 art-mb-3">
                     {getQualityLabel(currentQuality)}
                 </p>
             </div>
 
             {/* Slider */}
-            <div className="mb-3">
+            <div className="art-mb-3">
                 <input
                     type="range"
                     min="0"
                     max="100"
                     value={currentQuality}
                     onChange={handleChange}
-                    className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer slider"
+                    className="slider art-w-full art-h-2 art-bg-gray-300 art-rounded-lg art-appearance-none art-cursor-pointer"
                     style={{
                         background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${currentQuality}%, #d1d5db ${currentQuality}%, #d1d5db 100%)`,
                     }}
@@ -64,14 +64,14 @@ export default function QualitySlider({ quality, onChange }) {
             </div>
 
             {/* Quality Guide */}
-            <div className="flex items-center justify-between text-xs text-gray-500">
+            <div className="art-flex art-items-center art-justify-between art-text-xs art-text-gray-500">
                 <span>0% (Smallest)</span>
                 <span>50% (Balanced)</span>
                 <span>100% (Best)</span>
             </div>
 
             {/* Quality Description */}
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded text-sm text-gray-700">
+            <div className="art-mt-4 art-p-3 art-bg-blue-50 art-border art-border-blue-200 art-rounded art-text-sm art-text-gray-700">
                 <strong>💡 Tip:</strong> For most models, 75-85% quality provides excellent results
                 with 50-70% file size reduction. Higher quality = better visuals but larger files.
             </div>

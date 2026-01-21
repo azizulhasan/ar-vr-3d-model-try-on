@@ -17,28 +17,28 @@ export default function CompressionToggle({ enabled, onChange }) {
     };
 
     return (
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="flex-1">
-                <h3 className="text-base font-semibold text-gray-900 mb-1">
+        <div className="art-flex art-items-center art-justify-between art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
+            <div className="art-flex-1">
+                <h3 className="art-text-base art-font-semibold art-text-gray-900 art-mb-1">
                     Enable Auto-Compression
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="art-text-sm art-text-gray-600">
                     Automatically compress 3D models when uploaded to reduce file sizes.
                     This improves loading speed and reduces bandwidth usage.
                 </p>
             </div>
-            <div className="ml-4">
+            <div className="art-ml-4">
                 <button
                     onClick={handleToggle}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        isEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                    className={`art-relative art-inline-flex art-h-6 art-w-11 art-items-center art-rounded-full art-transition-colors focus:art-outline-none focus:art-ring-2 focus:art-ring-blue-500 focus:art-ring-offset-2 ${
+                        isEnabled ? 'art-bg-blue-600' : 'art-bg-gray-300'
                     }`}
                     role="switch"
                     aria-checked={isEnabled}
                 >
                     <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            isEnabled ? 'translate-x-6' : 'translate-x-1'
+                        className={`art-inline-block art-h-4 art-w-4 art-transform art-rounded-full art-bg-white art-transition-transform ${
+                            isEnabled ? 'art-translate-x-6' : 'art-translate-x-1'
                         }`}
                     />
                 </button>

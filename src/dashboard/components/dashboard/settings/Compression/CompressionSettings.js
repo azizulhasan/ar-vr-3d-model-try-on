@@ -151,23 +151,23 @@ export default function CompressionSettings({ isProActive }) {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="art-flex art-items-center art-justify-center art-py-12">
+                <div className="art-animate-spin art-rounded-full art-h-12 art-w-12 art-border-b-2 art-border-blue-600"></div>
             </div>
         );
     }
 
     return (
-        <div className="compression-settings p-6 bg-white rounded-lg shadow-sm">
+        <div className="compression-settings art-p-6 art-bg-white art-rounded-lg art-shadow-sm">
             {/* Header */}
-            <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="art-mb-6">
+                <h2 className="art-text-2xl art-font-bold art-text-gray-900 art-mb-2">
                     3D Model Compression Settings
                 </h2>
-                <p className="text-gray-600">
+                <p className="art-text-gray-600">
                     Automatically compress 3D models to reduce file sizes and improve loading speed.
                     {!isProActive && (
-                        <span className="text-blue-600 ml-1">
+                        <span className="art-text-blue-600 art-ml-1">
                             Free users can compress up to 5 models.
                         </span>
                     )}
@@ -175,7 +175,7 @@ export default function CompressionSettings({ isProActive }) {
             </div>
 
             {/* Enable/Disable Compression */}
-            <div className="mb-6">
+            <div className="art-mb-6">
                 <CompressionToggle
                     enabled={settings.enabled}
                     onChange={(enabled) => setSettings({ ...settings, enabled })}
@@ -186,7 +186,7 @@ export default function CompressionSettings({ isProActive }) {
             {settings.enabled && (
                 <>
                     {/* Quality Slider */}
-                    <div className="mb-6">
+                    <div className="art-mb-6">
                         <QualitySlider
                             quality={settings.quality}
                             onChange={(quality) => setSettings({ ...settings, quality })}
@@ -194,7 +194,7 @@ export default function CompressionSettings({ isProActive }) {
                     </div>
 
                     {/* Keep Original Files */}
-                    <div className="mb-6">
+                    <div className="art-mb-6">
                         <KeepOriginalToggle
                             keepOriginal={settings.keep_original}
                             onChange={(keep_original) => setSettings({ ...settings, keep_original })}
@@ -202,7 +202,7 @@ export default function CompressionSettings({ isProActive }) {
                     </div>
 
                     {/* Supported Formats */}
-                    <div className="mb-6">
+                    <div className="art-mb-6">
                         <SupportedFormats
                             isProActive={isProActive}
                             onProFeatureClick={handleProFeatureClick}
@@ -211,30 +211,30 @@ export default function CompressionSettings({ isProActive }) {
 
                     {/* Free User Limit */}
                     {!isProActive && (
-                        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                    <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                        <div className="art-mb-6 art-p-4 art-bg-blue-50 art-border art-border-blue-200 art-rounded-lg">
+                            <div className="art-flex art-items-start art-justify-between">
+                                <div className="art-flex-1">
+                                    <h3 className="art-text-sm art-font-semibold art-text-gray-900 art-mb-1">
                                         Free User Limit
                                     </h3>
-                                    <p className="text-sm text-gray-600 mb-2">
+                                    <p className="art-text-sm art-text-gray-600 art-mb-2">
                                         You have compressed <strong>{userLimit.used}</strong> out of{' '}
                                         <strong>{userLimit.limit}</strong> models.
                                         {userLimit.at_limit && (
-                                            <span className="text-orange-600 ml-1">
+                                            <span className="art-text-orange-600 art-ml-1">
                                                 ⚠️ Limit reached. Delete a compressed model to compress new ones.
                                             </span>
                                         )}
                                     </p>
                                     <button
                                         onClick={() => setShowManageModal(true)}
-                                        className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                        className="art-text-sm art-text-blue-600 hover:art-text-blue-800 art-font-medium"
                                     >
                                         Manage Compressed Models →
                                     </button>
                                 </div>
-                                <div className="ml-4">
-                                    <div className="text-2xl font-bold text-blue-600">
+                                <div className="art-ml-4">
+                                    <div className="art-text-2xl art-font-bold art-text-blue-600">
                                         {userLimit.used}/{userLimit.limit}
                                     </div>
                                 </div>
@@ -243,29 +243,29 @@ export default function CompressionSettings({ isProActive }) {
                     )}
 
                     {/* Bulk Compression (Pro) */}
-                    <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <div className="flex items-center mb-2">
-                                    <h3 className="text-sm font-semibold text-gray-900">
+                    <div className="art-mb-6 art-p-4 art-bg-gray-50 art-border art-border-gray-200 art-rounded-lg">
+                        <div className="art-flex art-items-start art-justify-between">
+                            <div className="art-flex-1">
+                                <div className="art-flex art-items-center art-mb-2">
+                                    <h3 className="art-text-sm art-font-semibold art-text-gray-900">
                                         Bulk Compression
                                     </h3>
                                     {!isProActive && (
-                                        <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
+                                        <span className="art-ml-2 art-px-2 art-py-0.5 art-text-xs art-font-medium art-bg-yellow-100 art-text-yellow-800 art-rounded">
                                             PRO
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-sm text-gray-600 mb-3">
+                                <p className="art-text-sm art-text-gray-600 art-mb-3">
                                     Compress all existing models at once. Save hours of manual work!
                                 </p>
                                 <button
                                     onClick={handleBulkCompress}
                                     disabled={!isProActive}
-                                    className={`px-4 py-2 text-sm font-medium rounded-md ${
+                                    className={`art-px-4 art-py-2 art-text-sm art-font-medium art-rounded-md ${
                                         isProActive
-                                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                            : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                            ? 'art-bg-blue-600 art-text-white hover:art-bg-blue-700'
+                                            : 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
                                     }`}
                                 >
                                     {isProActive ? '🚀 Compress All Models' : '🔒 Upgrade to Pro'}
@@ -277,12 +277,12 @@ export default function CompressionSettings({ isProActive }) {
                     {/* Compression Statistics (Pro) */}
                     {isProActive && (
                         <>
-                            <div className="mb-6">
+                            <div className="art-mb-6">
                                 <CompressionStats />
                             </div>
 
                             {/* Analytics Dashboard (Pro) */}
-                            <div className="mb-6">
+                            <div className="art-mb-6">
                                 <AnalyticsDashboard />
                             </div>
                         </>
@@ -291,18 +291,18 @@ export default function CompressionSettings({ isProActive }) {
             )}
 
             {/* Save Button */}
-            <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div className="text-sm text-gray-500">
+            <div className="art-flex art-items-center art-justify-between art-pt-6 art-border-t art-border-gray-200">
+                <div className="art-text-sm art-text-gray-500">
                     Changes will take effect immediately after saving.
                 </div>
                 <button
                     onClick={handleSaveSettings}
                     disabled={saving}
-                    className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="art-px-6 art-py-2 art-bg-blue-600 art-text-white art-font-medium art-rounded-md hover:art-bg-blue-700 disabled:art-bg-gray-400 disabled:art-cursor-not-allowed"
                 >
                     {saving ? (
                         <>
-                            <span className="inline-block animate-spin mr-2">⏳</span>
+                            <span className="art-inline-block art-animate-spin art-mr-2">⏳</span>
                             Saving...
                         </>
                     ) : (

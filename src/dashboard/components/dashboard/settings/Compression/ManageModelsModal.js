@@ -79,68 +79,68 @@ export default function ManageModelsModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="art-fixed art-inset-0 art-z-50 art-overflow-y-auto">
             {/* Backdrop */}
             <div
-                className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+                className="art-fixed art-inset-0 art-bg-black art-bg-opacity-50 art-transition-opacity"
                 onClick={onClose}
             ></div>
 
             {/* Modal */}
-            <div className="flex items-center justify-center min-h-screen p-4">
-                <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            <div className="art-flex art-items-center art-justify-center art-min-h-screen art-p-4">
+                <div className="art-relative art-bg-white art-rounded-lg art-shadow-xl art-max-w-4xl art-w-full art-max-h-[90vh] art-overflow-hidden">
                     {/* Header */}
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xl font-bold text-gray-900">
+                    <div className="art-px-6 art-py-4 art-border-b art-border-gray-200">
+                        <div className="art-flex art-items-center art-justify-between">
+                            <h2 className="art-text-xl art-font-bold art-text-gray-900">
                                 Manage Compressed Models
                             </h2>
                             <button
                                 onClick={onClose}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="art-text-gray-400 hover:art-text-gray-600"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="art-w-6 art-h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="art-text-sm art-text-gray-600 art-mt-1">
                             Delete compressed models to free up slots. You can re-compress them later.
                         </p>
                     </div>
 
                     {/* Content */}
-                    <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-200px)]">
+                    <div className="art-px-6 art-py-4 art-overflow-y-auto art-max-h-[calc(90vh-200px)]">
                         {loading ? (
-                            <div className="flex items-center justify-center py-12">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                            <div className="art-flex art-items-center art-justify-center art-py-12">
+                                <div className="art-animate-spin art-rounded-full art-h-12 art-w-12 art-border-b-2 art-border-blue-600"></div>
                             </div>
                         ) : models.length === 0 ? (
-                            <div className="text-center py-12">
-                                <div className="text-gray-400 mb-4">
-                                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="art-text-center art-py-12">
+                                <div className="art-text-gray-400 art-mb-4">
+                                    <svg className="art-w-16 art-h-16 art-mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                <h3 className="art-text-lg art-font-medium art-text-gray-900 art-mb-2">
                                     No compressed models yet
                                 </h3>
-                                <p className="text-gray-600">
+                                <p className="art-text-gray-600">
                                     Start compressing models to see them here.
                                 </p>
                             </div>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="art-space-y-3">
                                 {models.map((model) => (
                                     <div
                                         key={model.post_id}
-                                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                                        className="art-flex art-items-center art-justify-between art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200 hover:art-bg-gray-100 art-transition-colors"
                                     >
-                                        <div className="flex-1 min-w-0 mr-4">
-                                            <h3 className="text-sm font-medium text-gray-900 truncate">
+                                        <div className="art-flex-1 art-min-w-0 art-mr-4">
+                                            <h3 className="art-text-sm art-font-medium art-text-gray-900 art-truncate">
                                                 {model.post_title || `Post #${model.post_id}`}
                                             </h3>
-                                            <div className="flex items-center space-x-4 mt-1 text-xs text-gray-600">
+                                            <div className="art-flex art-items-center art-space-x-4 art-mt-1 art-text-xs art-text-gray-600">
                                                 <span>
                                                     Original: <strong>{model.original_size_formatted}</strong>
                                                 </span>
@@ -148,21 +148,21 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                                                 <span>
                                                     Compressed: <strong>{model.compressed_size_formatted}</strong>
                                                 </span>
-                                                <span className="text-green-600 font-semibold">
+                                                <span className="art-text-green-600 art-font-semibold">
                                                     ({model.compression_ratio}% reduction)
                                                 </span>
                                             </div>
-                                            <div className="text-xs text-gray-500 mt-1">
+                                            <div className="art-text-xs art-text-gray-500 art-mt-1">
                                                 Saved: <strong>{model.saved_space_formatted}</strong>
                                             </div>
                                         </div>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="art-flex art-items-center art-space-x-2">
                                             {model.post_url && (
                                                 <a
                                                     href={model.post_url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-800"
+                                                    className="art-px-3 art-py-1.5 art-text-sm art-font-medium art-text-blue-600 hover:art-text-blue-800"
                                                 >
                                                     View
                                                 </a>
@@ -170,11 +170,11 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                                             <button
                                                 onClick={() => handleDelete(model.post_id, model.post_title)}
                                                 disabled={deleting === model.post_id}
-                                                className="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                                className="art-px-3 art-py-1.5 art-text-sm art-font-medium art-text-red-600 hover:art-text-red-800 disabled:art-text-gray-400 disabled:art-cursor-not-allowed"
                                             >
                                                 {deleting === model.post_id ? (
                                                     <>
-                                                        <span className="inline-block animate-spin mr-1">⏳</span>
+                                                        <span className="art-inline-block art-animate-spin art-mr-1">⏳</span>
                                                         Deleting...
                                                     </>
                                                 ) : (
@@ -189,14 +189,14 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                     </div>
 
                     {/* Footer */}
-                    <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                        <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">
+                    <div className="art-px-6 art-py-4 art-border-t art-border-gray-200 art-bg-gray-50">
+                        <div className="art-flex art-items-center art-justify-between">
+                            <div className="art-text-sm art-text-gray-600">
                                 {models.length} compressed model{models.length !== 1 ? 's' : ''}
                             </div>
                             <button
                                 onClick={onClose}
-                                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
+                                className="art-px-4 art-py-2 art-bg-blue-600 art-text-white art-font-medium art-rounded-md hover:art-bg-blue-700"
                             >
                                 Close
                             </button>

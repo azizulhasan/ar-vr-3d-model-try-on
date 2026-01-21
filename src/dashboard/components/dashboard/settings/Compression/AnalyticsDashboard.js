@@ -235,14 +235,14 @@ export default function AnalyticsDashboard() {
 
     if (loading) {
         return (
-            <div className="p-6 bg-white rounded-lg shadow">
-                <div className="animate-pulse space-y-4">
-                    <div className="h-8 bg-gray-300 rounded w-1/3"></div>
-                    <div className="h-64 bg-gray-300 rounded"></div>
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="h-32 bg-gray-300 rounded"></div>
-                        <div className="h-32 bg-gray-300 rounded"></div>
-                        <div className="h-32 bg-gray-300 rounded"></div>
+            <div className="art-p-6 art-bg-white art-rounded-lg art-shadow">
+                <div className="art-animate-pulse art-space-y-4">
+                    <div className="art-h-8 art-bg-gray-300 art-rounded art-w-1/3"></div>
+                    <div className="art-h-64 art-bg-gray-300 art-rounded"></div>
+                    <div className="art-grid art-grid-cols-3 art-gap-4">
+                        <div className="art-h-32 art-bg-gray-300 art-rounded"></div>
+                        <div className="art-h-32 art-bg-gray-300 art-rounded"></div>
+                        <div className="art-h-32 art-bg-gray-300 art-rounded"></div>
                     </div>
                 </div>
             </div>
@@ -251,14 +251,14 @@ export default function AnalyticsDashboard() {
 
     if (!stats || !stats.total_compressions) {
         return (
-            <div className="p-6 bg-white rounded-lg shadow">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <div className="art-p-6 art-bg-white art-rounded-lg art-shadow">
+                <h2 className="art-text-xl art-font-bold art-text-gray-900 art-mb-4">
                     📊 Analytics Dashboard
-                    <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+                    <span className="art-ml-2 art-px-2 art-py-1 art-text-xs art-font-medium art-bg-green-100 art-text-green-800 art-rounded">
                         PRO
                     </span>
                 </h2>
-                <p className="text-gray-600">
+                <p className="art-text-gray-600">
                     No compression data available yet. Start compressing models to see detailed analytics!
                 </p>
             </div>
@@ -270,40 +270,40 @@ export default function AnalyticsDashboard() {
     const trendData = getCompressionTrendChart();
 
     return (
-        <div className="space-y-6">
+        <div className="art-space-y-6">
             {/* Header */}
-            <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
+                <div className="art-flex art-items-center art-justify-between art-mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">
+                        <h2 className="art-text-2xl art-font-bold art-text-gray-900">
                             📊 Analytics Dashboard
-                            <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">
+                            <span className="art-ml-2 art-px-2 art-py-1 art-text-xs art-font-medium art-bg-green-100 art-text-green-800 art-rounded">
                                 PRO
                             </span>
                         </h2>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="art-text-sm art-text-gray-600 art-mt-1">
                             Advanced analytics and insights for your 3D model compression
                         </p>
                     </div>
                     <button
                         onClick={fetchData}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                        className="art-px-4 art-py-2 art-bg-blue-600 art-text-white art-rounded-lg hover:art-bg-blue-700 art-transition art-text-sm art-font-medium"
                     >
                         🔄 Refresh Data
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="border-b border-gray-200">
-                    <nav className="-mb-px flex space-x-8">
+                <div className="art-border-b art-border-gray-200">
+                    <nav className="art--mb-px art-flex art-space-x-8">
                         {['overview', 'trends', 'models'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                className={`art-py-2 art-px-1 art-border-b-2 art-font-medium art-text-sm ${
                                     activeTab === tab
-                                        ? 'border-blue-500 text-blue-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        ? 'art-border-blue-500 art-text-blue-600'
+                                        : 'art-border-transparent art-text-gray-500 hover:art-text-gray-700 hover:art-border-gray-300'
                                 }`}
                             >
                                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -317,52 +317,52 @@ export default function AnalyticsDashboard() {
             {activeTab === 'overview' && (
                 <>
                     {/* Key Metrics */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg shadow p-6">
-                            <div className="text-4xl font-bold">{stats.total_compressions || 0}</div>
-                            <div className="text-blue-100 mt-1">Total Models Compressed</div>
+                    <div className="art-grid art-grid-cols-1 md:art-grid-cols-2 lg:art-grid-cols-4 art-gap-4">
+                        <div className="art-bg-gradient-to-br art-from-blue-500 art-to-blue-600 art-text-white art-rounded-lg art-shadow art-p-6">
+                            <div className="art-text-4xl art-font-bold">{stats.total_compressions || 0}</div>
+                            <div className="art-text-blue-100 art-mt-1">Total Models Compressed</div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg shadow p-6">
-                            <div className="text-4xl font-bold">{stats.avg_compression_ratio || 0}%</div>
-                            <div className="text-green-100 mt-1">Avg. Compression Ratio</div>
+                        <div className="art-bg-gradient-to-br art-from-green-500 art-to-green-600 art-text-white art-rounded-lg art-shadow art-p-6">
+                            <div className="art-text-4xl art-font-bold">{stats.avg_compression_ratio || 0}%</div>
+                            <div className="art-text-green-100 art-mt-1">Avg. Compression Ratio</div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg shadow p-6">
-                            <div className="text-4xl font-bold">{stats.total_saved_space_formatted || '0 MB'}</div>
-                            <div className="text-purple-100 mt-1">Total Space Saved</div>
+                        <div className="art-bg-gradient-to-br art-from-purple-500 art-to-purple-600 art-text-white art-rounded-lg art-shadow art-p-6">
+                            <div className="art-text-4xl art-font-bold">{stats.total_saved_space_formatted || '0 MB'}</div>
+                            <div className="art-text-purple-100 art-mt-1">Total Space Saved</div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg shadow p-6">
-                            <div className="text-4xl font-bold">
+                        <div className="art-bg-gradient-to-br art-from-orange-500 art-to-orange-600 art-text-white art-rounded-lg art-shadow art-p-6">
+                            <div className="art-text-4xl art-font-bold">
                                 {stats.total_compressions > 0
                                     ? Math.round((stats.successful_compressions / stats.total_compressions) * 100)
                                     : 0}
                                 %
                             </div>
-                            <div className="text-orange-100 mt-1">Success Rate</div>
+                            <div className="art-text-orange-100 art-mt-1">Success Rate</div>
                         </div>
                     </div>
 
                     {/* Charts */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="art-grid art-grid-cols-1 lg:art-grid-cols-2 art-gap-6">
                         {compressionRatioData && (
-                            <div className="bg-white rounded-lg shadow p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
+                                <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">
                                     Compression Ratio Distribution
                                 </h3>
-                                <div className="h-64">
+                                <div className="art-h-64">
                                     <Pie data={compressionRatioData} options={chartOptions} />
                                 </div>
                             </div>
                         )}
 
                         {fileSizeData && (
-                            <div className="bg-white rounded-lg shadow p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
+                                <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">
                                     Top 10 Models - Size Comparison
                                 </h3>
-                                <div className="h-64">
+                                <div className="art-h-64">
                                     <Bar data={fileSizeData} options={chartOptions} />
                                 </div>
                             </div>
@@ -373,9 +373,9 @@ export default function AnalyticsDashboard() {
 
             {/* Trends Tab */}
             {activeTab === 'trends' && trendData && (
-                <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Compression Trends Over Time</h3>
-                    <div className="h-96">
+                <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
+                    <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">Compression Trends Over Time</h3>
+                    <div className="art-h-96">
                         <Line data={trendData} options={lineChartOptions} />
                     </div>
                 </div>
@@ -383,62 +383,62 @@ export default function AnalyticsDashboard() {
 
             {/* Models Tab */}
             {activeTab === 'models' && (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900">Compressed Models</h3>
+                <div className="art-bg-white art-rounded-lg art-shadow art-overflow-hidden">
+                    <div className="art-px-6 art-py-4 art-border-b art-border-gray-200">
+                        <h3 className="art-text-lg art-font-semibold art-text-gray-900">Compressed Models</h3>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                    <div className="art-overflow-x-auto">
+                        <table className="art-min-w-full art-divide-y art-divide-gray-200">
+                            <thead className="art-bg-gray-50">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
                                         Model
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
                                         Original Size
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
                                         Compressed Size
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
                                         Ratio
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
                                         Saved
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
                                         Status
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="art-bg-white art-divide-y art-divide-gray-200">
                                 {models.slice(0, 20).map((model) => (
-                                    <tr key={model.id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <tr key={model.id} className="hover:art-bg-gray-50">
+                                        <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-font-medium art-text-gray-900">
                                             {model.post_title || `Model ${model.post_id}`}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-text-gray-500">
                                             {model.original_size_formatted}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-text-gray-500">
                                             {model.compressed_size_formatted}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded font-medium">
+                                        <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-text-gray-500">
+                                            <span className="art-px-2 art-py-1 art-bg-green-100 art-text-green-800 art-rounded art-font-medium">
                                                 {model.compression_ratio}%
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-text-gray-500">
                                             {model.saved_space_formatted}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="art-px-6 art-py-4 art-whitespace-nowrap">
                                             <span
-                                                className={`px-2 py-1 text-xs font-medium rounded ${
+                                                className={`art-px-2 art-py-1 art-text-xs art-font-medium art-rounded ${
                                                     model.status === 'complete'
-                                                        ? 'bg-green-100 text-green-800'
+                                                        ? 'art-bg-green-100 art-text-green-800'
                                                         : model.status === 'failed'
-                                                        ? 'bg-red-100 text-red-800'
-                                                        : 'bg-yellow-100 text-yellow-800'
+                                                        ? 'art-bg-red-100 art-text-red-800'
+                                                        : 'art-bg-yellow-100 art-text-yellow-800'
                                                 }`}
                                             >
                                                 {model.status}

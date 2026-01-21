@@ -227,7 +227,7 @@ class AR_TRY_ON_Compression {
 			'post_url'  => $post_url,
 			'url'  => trailingslashit( $post_url ) . 'original.glb',
 			'original'  => trailingslashit( $post_dir ) . 'original.glb',
-			'compressed' => trailingslashit( $post_dir ) . 'compressed.glb',
+			'compressed' => trailingslashit( $post_dir ) . 'original_compressed.glb',
 		);
 	}
 
