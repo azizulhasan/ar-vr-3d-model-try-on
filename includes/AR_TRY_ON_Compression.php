@@ -700,7 +700,7 @@ class AR_TRY_ON_Compression {
 			$stats['total_original_size_formatted']   = size_format( $stats['total_original_size'], 2 );
 			$stats['total_compressed_size_formatted'] = size_format( $stats['total_compressed_size'], 2 );
 			$stats['total_saved_space_formatted']     = size_format( $stats['total_saved_space'], 2 );
-			$stats['avg_compression_ratio']           = round( $stats['avg_compression_ratio'], 1 );
+			$stats['avg_compression_ratio']           = isset( $stats['avg_compression_ratio'] )  ? round( (float) $stats['avg_compression_ratio'], 1 )  : 0;
 		}
 
 		return $stats;
@@ -784,7 +784,7 @@ class AR_TRY_ON_Compression {
 			$log['compressed_size_formatted'] = size_format( $log['compressed_size'], 2 );
 			$log['saved_space']               = $log['original_size'] - $log['compressed_size'];
 			$log['saved_space_formatted']     = size_format( $log['saved_space'], 2 );
-			$log['compression_ratio']         = round( $log['compression_ratio'], 1 );
+			$log['compression_ratio']         = isset( $stats['compression_ratio'] )  ? round( (float) $stats['compression_ratio'], 1 )  : 0;
 		}
 
 		return $logs;
