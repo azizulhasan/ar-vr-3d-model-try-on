@@ -758,7 +758,7 @@ class AR_TRY_ON_Compression {
 	 * @return bool Whether Pro is active.
 	 */
 	public static function is_pro_active() {
-		return function_exists( 'is_pro_active' ) && AR_TRY_ON_Helper::is_pro_active();
+		return AR_TRY_ON_Helper::is_pro_active();
 	}
 
 	/**
