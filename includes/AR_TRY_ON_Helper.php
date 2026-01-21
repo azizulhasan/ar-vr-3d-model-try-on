@@ -703,4 +703,38 @@ class AR_TRY_ON_Helper
         return file_exists( $file_path ) ? $file_path : false;
     }
 
+    /**
+     * Get public WordPress upload URL from an absolute file system path
+     *
+     * @param string $file_path Absolute file path.
+     * @return string|false File URL or false if not resolvable.
+     */
+    public static function get_file_url_from_path( $file_path ) {
+
+        if ( empty( $file_path ) ) {
+            return false;
+        }
+
+        $upload_dir = wp_upload_dir();
+
+        // Normalize paths for cross-platform compatibility
+        $file_path  = wp_normalize_path( $file_path );
+        $basedir    = wp_normalize_path( $upload_dir['basedir'] );
+
+        // Ensure file is inside uploads directory
+        if ( strpos( $file_path, $basedir ) !== 0 ) {
+            return false;
+        }
+
+        // Convert path → URL
+        $file_url = str_replace(
+            $basedir,
+            $upload_dir['baseurl'],
+            $file_path
+        );
+
+        return file_exists( $file_path ) ? $file_url : false;
+    }
+
+
 }

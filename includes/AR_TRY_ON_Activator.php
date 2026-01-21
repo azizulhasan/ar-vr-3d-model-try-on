@@ -78,6 +78,9 @@ class AR_TRY_ON_Activator {
 			wp_schedule_event( time(), 'every_five_minutes', 'ar_try_on_process_compression_queue' );
 		}
 
+		// Initialize compression database tables
+		AR_TRY_ON_Compression_DB::init();
+
 		return $all_settings;
 	}
 

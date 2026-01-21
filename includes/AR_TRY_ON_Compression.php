@@ -242,9 +242,9 @@ class AR_TRY_ON_Compression {
 		$file_size = file_exists( $file_path ) ? filesize( $file_path ) : 0;
 
 		// Small files: Client-side (both free and pro)
-		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
-			return 'client';
-		}
+//		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
+//			return 'client';
+//		}
 
 		// Large files: Server-side (Pro only)
 		if ( self::is_pro_active() ) {

@@ -206,6 +206,15 @@ function atlas_ar_run() {
 		$compression_routes = new AR_TRY_ON_Compression_Routes();
 		$compression_routes->register_routes();
 	} );
+
+	// Admin action to manually create compression database tables
+	add_action( 'admin_init', function() {
+		if ( isset( $_GET['ar_create_compression_tables'] ) && current_user_can( 'manage_options' ) ) {
+			AR_TRY_ON_Compression_DB::init();
+			wp_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
+			exit;
+		}
+	} );
 }
 
 // Add custom cron schedule for compression queue processing

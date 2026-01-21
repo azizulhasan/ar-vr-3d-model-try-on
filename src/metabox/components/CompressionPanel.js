@@ -149,9 +149,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                 await compressClientSide(log_id, file, paths, quality);
             } else {
                 // Server-side compression (Pro only)
-                toast.info('🚀 Large file detected. Processing on server (Pro feature)...');
-                // TODO: Implement server-side compression in Phase 4
-                throw new Error('Server-side compression not yet implemented');
+                await compressServerSide(log_id, paths, quality);
             }
 
         } catch (error) {
@@ -232,6 +230,111 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
             if (onCompressionComplete) {
                 onCompressionComplete(compressedBlob.compressionMeta);
+            }
+
+            // Refresh user limit
+            await fetchUserLimit();
+
+        } catch (error) {
+            // Fail compression in database
+            await fetch(getURL('compression/fail'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+                body: JSON.stringify({
+                    log_id: logId,
+                    error_message: error.message,
+                }),
+            });
+
+            throw error;
+        }
+    };
+
+    /**
+     * Compress using server-side (Node.js with Draco compression)
+     */
+    const compressServerSide = async (logId, paths, quality) => {
+        try {
+            setProgressMessage('Starting server-side compression...');
+            setProgress(10);
+            console.log(paths)
+
+            toast.info('🚀 Processing large file on server (Pro feature)...', { autoClose: 3000 });
+
+            // Call server-side compression API
+            const compressResponse = await fetch(getURL('compression/server-compress'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+                body: JSON.stringify({
+                    input_file: paths.original,
+                    output_file: paths.compressed,
+                    quality: quality,
+                }),
+            });
+
+            setProgress(50);
+            setProgressMessage('Compressing model on server...');
+
+            if (!compressResponse.ok) {
+                const errorData = await compressResponse.json();
+                throw new Error(errorData.message || 'Server-side compression failed');
+            }
+
+            const compressData = await compressResponse.json();
+            if (!compressData.success) {
+                throw new Error(compressData.message || 'Server-side compression failed');
+            }
+
+            setProgress(80);
+            setProgressMessage('Finalizing compression...');
+
+            const compressionResult = compressData.data;
+
+            // Complete compression
+            const completeResponse = await fetch(getURL('compression/complete'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                },
+                body: JSON.stringify({
+                    log_id: logId,
+                    compressed_file: compressionResult.output_file,
+                    compression_time: compressionResult.compression_time,
+                }),
+            });
+
+            if (!completeResponse.ok) {
+                throw new Error('Failed to complete compression');
+            }
+
+            setProgress(100);
+
+            // Success!
+            setCompressionStatus('complete');
+            setCompressionData({
+                original_size: compressionResult.original_size,
+                compressed_size: compressionResult.compressed_size,
+                compression_ratio: compressionResult.compression_ratio,
+                original_size_formatted: formatFileSize(compressionResult.original_size),
+                compressed_size_formatted: formatFileSize(compressionResult.compressed_size),
+                saved_space_formatted: formatFileSize(
+                    compressionResult.original_size - compressionResult.compressed_size
+                ),
+            });
+
+            toast.success(
+                `✅ Server compression complete! Saved ${compressionResult.compression_ratio}% (${formatFileSize(compressionResult.original_size - compressionResult.compressed_size)})`
+            );
+
+            if (onCompressionComplete) {
+                onCompressionComplete(compressionResult);
             }
 
             // Refresh user limit

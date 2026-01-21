@@ -1,0 +1,25 @@
+{
+  "name": "ar-try-on-compression",
+  "version": "1.8.0",
+  "description": "Server-side compression scripts for AR Try On plugin",
+  "main": "server-compress.js",
+  "scripts": {
+    "install-deps": "npm install"
+  },
+  "keywords": [
+    "3d",
+    "gltf",
+    "glb",
+    "compression",
+    "draco"
+  ],
+  "author": "AtlasAiDev",
+  "license": "GPL-3.0+",
+  "dependencies": {
+    "@gltf-transform/core": "^3.10.0",
+    "@gltf-transform/extensions": "^3.10.0",
+    "@gltf-transform/functions": "^3.10.0",
+    "draco3dgltf": "^1.5.7",
+    "sharp": "^0.33.2"
+  }
+}

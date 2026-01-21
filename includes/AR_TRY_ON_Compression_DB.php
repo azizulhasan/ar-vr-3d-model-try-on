@@ -47,6 +47,26 @@ class AR_TRY_ON_Compression_DB
             self::create_tables();
             update_option(self::VERSION_OPTION, self::DB_VERSION);
         }
+
+        // Add admin action to manually create tables if needed
+        add_action('admin_init', array(__CLASS__, 'maybe_create_tables'));
+    }
+
+    /**
+     * Check and create tables if they don't exist
+     *
+     * @since 1.8.0
+     */
+    public static function maybe_create_tables()
+    {
+        // Check if tables exist, if not create them
+        global $wpdb;
+        $log_table = $wpdb->prefix . 'ar_compression_log';
+
+        if (!self::table_exists($log_table)) {
+            self::create_tables();
+            update_option(self::VERSION_OPTION, self::DB_VERSION);
+        }
     }
 
     /**
@@ -60,77 +80,70 @@ class AR_TRY_ON_Compression_DB
 
         $charset_collate = $wpdb->get_charset_collate();
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
         // Table 1: Compression Log - Tracks all compression operations
         $compression_log_table = $wpdb->prefix . 'ar_compression_log';
-        if (!self::table_exists($compression_log_table)) {
-            $sql_log = "CREATE TABLE IF NOT EXISTS $compression_log_table (
-                id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-                post_id BIGINT(20) UNSIGNED NOT NULL,
-                original_file VARCHAR(255) NOT NULL,
-                compressed_file VARCHAR(255) NOT NULL,
-                original_size BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
-                compressed_size BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
-                compression_ratio FLOAT NOT NULL DEFAULT 0,
-                format VARCHAR(10) NOT NULL DEFAULT 'glb',
-                quality INT NOT NULL DEFAULT 85,
-                status VARCHAR(20) NOT NULL DEFAULT 'pending',
-                error_message TEXT NULL,
-                compression_time INT UNSIGNED NULL,
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                PRIMARY KEY (id),
-                KEY post_id (post_id),
-                KEY status (status),
-                KEY format (format),
-                KEY created_at (created_at)
-            ) $charset_collate;";
-            dbDelta( $sql_log );
-        }
-
+        $sql_log = "CREATE TABLE $compression_log_table (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            post_id BIGINT(20) UNSIGNED NOT NULL,
+            original_file VARCHAR(255) NOT NULL,
+            compressed_file VARCHAR(255) NOT NULL,
+            original_size BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
+            compressed_size BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
+            compression_ratio FLOAT NOT NULL DEFAULT 0,
+            format VARCHAR(10) NOT NULL DEFAULT 'glb',
+            quality INT NOT NULL DEFAULT 85,
+            status VARCHAR(20) NOT NULL DEFAULT 'pending',
+            error_message TEXT NULL,
+            compression_time INT UNSIGNED NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY  (id),
+            KEY post_id (post_id),
+            KEY status (status),
+            KEY format (format),
+            KEY created_at (created_at)
+        ) $charset_collate;";
+        dbDelta( $sql_log );
 
         // Table 2: Compression Queue - For background processing (Pro feature)
         $compression_queue_table = $wpdb->prefix . 'ar_compression_queue';
-        if(!self::table_exists($compression_queue_table)) {
-            $sql_queue = "CREATE TABLE IF NOT EXISTS $compression_queue_table (
-                id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-                post_id BIGINT(20) UNSIGNED NOT NULL,
-                file_path VARCHAR(255) NOT NULL,
-                file_type VARCHAR(50) NOT NULL DEFAULT 'model',
-                format VARCHAR(10) NOT NULL DEFAULT 'glb',
-                quality INT NOT NULL DEFAULT 85,
-                status ENUM('queued','processing','complete','failed') NOT NULL DEFAULT 'queued',
-                priority INT NOT NULL DEFAULT 10,
-                attempts INT UNSIGNED NOT NULL DEFAULT 0,
-                max_attempts INT UNSIGNED NOT NULL DEFAULT 3,
-                error_message TEXT NULL,
-                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                started_at DATETIME NULL,
-                completed_at DATETIME NULL,
-                PRIMARY KEY (id),
-                KEY post_id (post_id),
-                KEY status (status),
-                KEY priority (priority),
-                KEY created_at (created_at)
-            ) $charset_collate;";
-
-            dbDelta( $sql_queue );
-        }
+        $sql_queue = "CREATE TABLE $compression_queue_table (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            post_id BIGINT(20) UNSIGNED NOT NULL,
+            file_path VARCHAR(255) NOT NULL,
+            file_type VARCHAR(50) NOT NULL DEFAULT 'model',
+            format VARCHAR(10) NOT NULL DEFAULT 'glb',
+            quality INT NOT NULL DEFAULT 85,
+            status VARCHAR(20) NOT NULL DEFAULT 'queued',
+            priority INT NOT NULL DEFAULT 10,
+            attempts INT UNSIGNED NOT NULL DEFAULT 0,
+            max_attempts INT UNSIGNED NOT NULL DEFAULT 3,
+            error_message TEXT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            started_at DATETIME NULL,
+            completed_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            KEY post_id (post_id),
+            KEY status (status),
+            KEY priority (priority),
+            KEY created_at (created_at)
+        ) $charset_collate;";
+        dbDelta( $sql_queue );
 
         // Table 3: Compression Settings - User preferences per model
         $compression_settings_table = $wpdb->prefix . 'ar_compression_settings';
-        if( !self::table_exists($compression_settings_table) ) {
-            $sql_settings = "CREATE TABLE IF NOT EXISTS $compression_settings_table (
-                id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-                post_id BIGINT(20) UNSIGNED NOT NULL,
-                keep_original TINYINT(1) NOT NULL DEFAULT 1,
-                auto_compress TINYINT(1) NOT NULL DEFAULT 1,
-                quality INT NOT NULL DEFAULT 85,
-                last_compressed_at DATETIME NULL,
-                PRIMARY KEY (id),
-                UNIQUE KEY post_id (post_id)
-            ) $charset_collate;";
-            dbDelta($sql_settings);
-        }
+        $sql_settings = "CREATE TABLE $compression_settings_table (
+            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+            post_id BIGINT(20) UNSIGNED NOT NULL,
+            keep_original TINYINT(1) NOT NULL DEFAULT 1,
+            auto_compress TINYINT(1) NOT NULL DEFAULT 1,
+            quality INT NOT NULL DEFAULT 85,
+            last_compressed_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY post_id (post_id)
+        ) $charset_collate;";
+        dbDelta($sql_settings);
     }
 
     /**
@@ -280,8 +293,6 @@ class AR_TRY_ON_Compression_DB
         }
 
         $query = "SELECT * FROM $table WHERE $where ORDER BY {$args['orderby']} {$args['order']} LIMIT %d OFFSET %d";
-
-        error_log(print_r([$query, $args], true));
 
         return $wpdb->get_results(
             $wpdb->prepare($query, $args['limit'], $args['offset']),

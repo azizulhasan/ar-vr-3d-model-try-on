@@ -4,6 +4,8 @@ namespace ATLAS_AR_API;
 use AR_TRY_ON\AR_TRY_ON_Compression_DB;
 use AR_TRY_ON\AR_TRY_ON_Compression;
 use AR_TRY_ON\AR_TRY_ON_Format_Converter;
+use AR_TRY_ON\AR_TRY_ON_Helper;
+
 /**
  * AR Try On - Compression REST API Routes
  *
@@ -421,6 +423,8 @@ class AR_TRY_ON_Compression_Routes {
 		$log_id           = $request->get_param( 'log_id' );
 		$compressed_file  = $request->get_param( 'compressed_file' );
 		$compression_time = $request->get_param( 'compression_time' );
+
+        $compressed_file_url = AR_TRY_ON_Helper::get_file_url_from_path( $compressed_file );
 
 		$result = AR_TRY_ON_Compression::complete_compression( $log_id, $compressed_file, $compression_time );
 
