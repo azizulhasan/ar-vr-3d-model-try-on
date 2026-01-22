@@ -307,9 +307,19 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
             setProgress(80);
             setProgressMessage('Finalizing compression...');
+            console.log(compressData)
 
             const compressionResult = compressData.data;
+            console.log(compressionResult)
 
+            // const data = await response.json();
+            if(compressionResult?.output_url) {
+                let productModelCloned = structuredClone(productModel)
+                productModelCloned.src = compressionResult.output_url;
+                setProductModel(productModelCloned);
+                wp.hooks.doAction("atlas_ar_preview_data", productModelCloned);
+                console.log({productModelCloned})
+            }
             // Complete compression
             const completeResponse = await fetch(getURL('compression/complete'), {
                 method: 'POST',

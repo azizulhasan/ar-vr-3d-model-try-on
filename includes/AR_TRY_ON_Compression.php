@@ -242,9 +242,9 @@ class AR_TRY_ON_Compression {
 		$file_size = file_exists( $file_path ) ? filesize( $file_path ) : 0;
 
 		// Small files: Client-side (both free and pro)
-		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
-			return 'client';
-		}
+//		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
+//			return 'client';
+//		}
 
 		// Large files: Server-side (Pro only)
 		if ( self::is_pro_active() ) {
@@ -366,7 +366,6 @@ class AR_TRY_ON_Compression {
 			// Try local first
 			if ( self::is_local_compression_available() ) {
 				$result = self::compress_server_side_local( $input_file, $output_file, $quality );
-
 				// If local succeeds, return immediately
 				if ( ! is_wp_error( $result ) ) {
 					return $result;
@@ -402,6 +401,7 @@ class AR_TRY_ON_Compression {
 
 		// Option 3: API only
 		if ( $method === 'api' ) {
+
 			if ( ! self::is_api_compression_available() ) {
 				return new \WP_Error(
 					'api_not_configured',
@@ -435,8 +435,9 @@ class AR_TRY_ON_Compression {
 		$api_endpoint = trailingslashit( $api_url ) . 'compress-url';
 
 		// Get file URL
-		$input_file_url = self::get_file_url_from_path( $input_file );
-		if ( ! $input_file_url ) {
+		$input_file_url = AR_TRY_ON_Helper::get_file_url_from_path( $input_file );
+
+        if ( ! $input_file_url ) {
 			return new \WP_Error( 'url_not_found', __( 'Could not determine file URL.', 'ar-vr-3d-model-try-on' ) );
 		}
 
@@ -516,6 +517,7 @@ class AR_TRY_ON_Compression {
 			'compression_ratio'  => $result['data']['compression_ratio'],
 			'compression_time'   => $result['data']['compression_time'],
 			'output_file'        => $output_file,
+			'output_url'        => AR_TRY_ON_Helper::get_file_url_from_path( $output_file ),
 		);
 	}
 
@@ -580,6 +582,7 @@ class AR_TRY_ON_Compression {
 						'compression_ratio'  => $result['compressionRatio'],
 						'compression_time'   => $result['compressionTime'],
 						'output_file'        => $result['outputFile'],
+						'output_url'        => AR_TRY_ON_Helper::get_file_url_from_path( $result['outputFile'] ),
 					);
 				} else {
 					return new \WP_Error(
@@ -677,27 +680,6 @@ class AR_TRY_ON_Compression {
 		return new \WP_Error( 'parse_error', __( 'Failed to parse conversion result: ', 'ar-vr-3d-model-try-on' ) . $output_text );
 	}
 
-
-
-	/**
-	 * Convert file path to URL
-	 *
-	 * @since 1.8.0
-	 * @param string $file_path File path.
-	 * @return string|false File URL or false on failure.
-	 */
-	private static function get_file_url_from_path( $file_path ) {
-		$wp_upload_dir = wp_upload_dir();
-		$base_dir = $wp_upload_dir['basedir'];
-		$base_url = $wp_upload_dir['baseurl'];
-
-		// Check if file is in uploads directory
-		if ( strpos( $file_path, $base_dir ) === 0 ) {
-			return str_replace( $base_dir, $base_url, $file_path );
-		}
-
-		return false;
-	}
 
 	/**
 	 * Check if Node.js is available
