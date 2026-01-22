@@ -10,16 +10,22 @@
  * @since      1.8.0
  */
 
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
+import { Document, NodeIO } from '@gltf-transform/core';
+import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
+import {
+    draco,
+    dedup,
+    prune,
+    textureCompress,
+    resample,
+    flatten,
+    join,
+    weld
+} from '@gltf-transform/functions';
 
 class ARCompressionClient {
     constructor() {
-        this.loader = null;
-        this.exporter = null;
-        this.dracoLoader = null;
+        this.io = null;
         this.compressionQuality = 85; // Default quality (0-100)
         this.maxFileSize = 5 * 1024 * 1024; // 5MB threshold for client-side
 
@@ -27,23 +33,14 @@ class ARCompressionClient {
     }
 
     /**
-     * Initialize loaders and exporters
+     * Initialize gltf-transform IO
      */
     init() {
-        // Setup GLTF Loader
-        this.loader = new GLTFLoader();
+        // Setup NodeIO with all extensions
+        this.io = new NodeIO()
+            .registerExtensions(ALL_EXTENSIONS);
 
-        // Setup Draco Loader
-        this.dracoLoader = new DRACOLoader();
-        // Use Three.js CDN for Draco decoder (or host locally if preferred)
-        this.dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
-        this.dracoLoader.setDecoderConfig({ type: 'js' });
-        this.loader.setDRACOLoader(this.dracoLoader);
-
-        // Setup GLTF Exporter
-        this.exporter = new GLTFExporter();
-
-        console.log('AR Compression Client initialized');
+        console.log('AR Compression Client initialized with gltf-transform');
     }
 
     /**
@@ -109,58 +106,209 @@ class ARCompressionClient {
             // Set quality
             this.compressionQuality = options.quality || 85;
 
-            // Step 1: Load the file (20% progress)
+            // Step 1: Load the file
             if (onProgress) onProgress(10, 'Reading model file...');
             const arrayBuffer = await this.readFileAsArrayBuffer(file);
 
             if (onProgress) onProgress(20, 'Parsing 3D model...');
-            const gltf = await this.parseGLTF(arrayBuffer);
+            const document = await this.io.readBinary(new Uint8Array(arrayBuffer));
 
-            // Step 2: Process geometry (40% progress)
-            if (onProgress) onProgress(40, 'Optimizing geometry...');
-            await this.optimizeGeometry(gltf.scene);
+            const originalSize = arrayBuffer.byteLength;
 
-            // Step 3: Compress textures (60% progress)
-            if (onProgress) onProgress(60, 'Compressing textures...');
-            await this.compressTextures(gltf.scene);
+            // Try progressive compression strategies
+            let result = await this.tryCompressionStrategies(document, originalSize, arrayBuffer, onProgress);
 
-            // Step 4: Export compressed model (80% progress)
-            if (onProgress) onProgress(80, 'Generating compressed file...');
-            const compressedData = await this.exportGLTF(gltf.scene, {
-                binary: file.name.toLowerCase().endsWith('.glb'),
-                includeCustomExtensions: true,
-                truncateDrawRange: true,
-                embedImages: true
-            });
+            if (result.success) {
+                const compressionTime = Date.now() - startTime;
 
-            // Step 5: Create blob (95% progress)
-            if (onProgress) onProgress(95, 'Finalizing...');
-            let blob;
-            if (compressedData instanceof ArrayBuffer) {
-                blob = new Blob([compressedData], { type: 'model/gltf-binary' });
+                result.blob.compressionMeta = {
+                    originalSize: originalSize,
+                    compressedSize: result.blob.size,
+                    compressionRatio: ((1 - (result.blob.size / originalSize)) * 100).toFixed(1),
+                    compressionTime: compressionTime,
+                    quality: this.compressionQuality,
+                    strategy: result.strategy,
+                    skipped: false
+                };
+
+                return result.blob;
             } else {
-                const jsonString = JSON.stringify(compressedData);
-                blob = new Blob([jsonString], { type: 'model/gltf+json' });
+                // All strategies failed - return original file
+                const compressionTime = Date.now() - startTime;
+                const originalBlob = new Blob([arrayBuffer], { type: 'model/gltf-binary' });
+
+                originalBlob.compressionMeta = {
+                    originalSize: originalSize,
+                    compressedSize: originalSize,
+                    compressionRatio: 0,
+                    compressionTime: compressionTime,
+                    quality: this.compressionQuality,
+                    strategy: 'none',
+                    skipped: true,
+                    reason: result.reason
+                };
+
+                if (onProgress) onProgress(100, result.reason);
+                return originalBlob;
             }
-
-            const compressionTime = Date.now() - startTime;
-
-            if (onProgress) onProgress(100, 'Compression complete!');
-
-            // Return blob with metadata
-            blob.compressionMeta = {
-                originalSize: file.size,
-                compressedSize: blob.size,
-                compressionRatio: ((1 - (blob.size / file.size)) * 100).toFixed(1),
-                compressionTime: compressionTime,
-                quality: this.compressionQuality
-            };
-
-            return blob;
 
         } catch (error) {
             console.error('Compression error:', error);
             throw new Error(`Compression failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Try multiple compression strategies progressively
+     */
+    async tryCompressionStrategies(document, originalSize, originalArrayBuffer, onProgress) {
+        // Strategy 1: Full compression with current quality
+        if (onProgress) onProgress(30, 'Trying full compression...');
+        let result = await this.tryFullCompression(document, originalSize, onProgress, 40);
+        if (result.success) {
+            return { success: true, blob: result.blob, strategy: 'full' };
+        }
+
+        // Strategy 2: Aggressive compression with lower quality
+        if (onProgress) onProgress(50, 'Trying aggressive compression...');
+        const originalQuality = this.compressionQuality;
+        this.compressionQuality = Math.max(50, this.compressionQuality - 20); // Lower quality
+
+        // Re-parse document for fresh attempt
+        const document2 = await this.io.readBinary(new Uint8Array(originalArrayBuffer));
+        result = await this.tryFullCompression(document2, originalSize, onProgress, 60);
+        this.compressionQuality = originalQuality; // Restore original quality
+
+        if (result.success) {
+            return { success: true, blob: result.blob, strategy: 'aggressive' };
+        }
+
+        // Strategy 3: Basic optimization without Draco
+        if (onProgress) onProgress(70, 'Trying basic optimization...');
+        const document3 = await this.io.readBinary(new Uint8Array(originalArrayBuffer));
+        result = await this.tryBasicOptimization(document3, originalSize, onProgress, 80);
+        if (result.success) {
+            return { success: true, blob: result.blob, strategy: 'basic' };
+        }
+
+        // Strategy 4: Minimal optimization (dedup and prune only)
+        if (onProgress) onProgress(85, 'Trying minimal optimization...');
+        const document4 = await this.io.readBinary(new Uint8Array(originalArrayBuffer));
+        result = await this.tryMinimalOptimization(document4, originalSize, onProgress, 95);
+        if (result.success) {
+            return { success: true, blob: result.blob, strategy: 'minimal' };
+        }
+
+        // All strategies failed
+        return {
+            success: false,
+            reason: 'Model is already optimized. No compression method reduced file size.'
+        };
+    }
+
+    /**
+     * Try full compression with Draco
+     */
+    async tryFullCompression(document, originalSize, onProgress, baseProgress) {
+        try {
+            // Apply all optimizations
+            await document.transform(
+                dedup(),
+                prune()
+            );
+
+            await document.transform(
+                weld({ tolerance: 0.0001 })
+            );
+
+            await document.transform(
+                draco({
+                    quantizationBits: this.getDracoQuantizationBits(),
+                    quantizationVolume: 'mesh'
+                })
+            );
+
+            const maxTextureSize = this.getMaxTextureSize();
+            if (maxTextureSize < 4096) {
+                await document.transform(
+                    resample({
+                        size: [maxTextureSize, maxTextureSize]
+                    })
+                );
+            }
+
+            await document.transform(join());
+
+            const compressedArrayBuffer = await this.io.writeBinary(document);
+            const blob = new Blob([compressedArrayBuffer], { type: 'model/gltf-binary' });
+
+            if (blob.size < originalSize) {
+                return { success: true, blob };
+            }
+
+            return { success: false };
+        } catch (error) {
+            console.warn('Full compression failed:', error);
+            return { success: false };
+        }
+    }
+
+    /**
+     * Try basic optimization without Draco
+     */
+    async tryBasicOptimization(document, originalSize, onProgress, baseProgress) {
+        try {
+            await document.transform(
+                dedup(),
+                prune(),
+                weld({ tolerance: 0.0001 }),
+                join()
+            );
+
+            const maxTextureSize = this.getMaxTextureSize();
+            if (maxTextureSize < 2048) {
+                await document.transform(
+                    resample({
+                        size: [maxTextureSize, maxTextureSize]
+                    })
+                );
+            }
+
+            const compressedArrayBuffer = await this.io.writeBinary(document);
+            const blob = new Blob([compressedArrayBuffer], { type: 'model/gltf-binary' });
+
+            if (blob.size < originalSize) {
+                return { success: true, blob };
+            }
+
+            return { success: false };
+        } catch (error) {
+            console.warn('Basic optimization failed:', error);
+            return { success: false };
+        }
+    }
+
+    /**
+     * Try minimal optimization (dedup and prune only)
+     */
+    async tryMinimalOptimization(document, originalSize, onProgress, baseProgress) {
+        try {
+            await document.transform(
+                dedup(),
+                prune()
+            );
+
+            const compressedArrayBuffer = await this.io.writeBinary(document);
+            const blob = new Blob([compressedArrayBuffer], { type: 'model/gltf-binary' });
+
+            if (blob.size < originalSize) {
+                return { success: true, blob };
+            }
+
+            return { success: false };
+        } catch (error) {
+            console.warn('Minimal optimization failed:', error);
+            return { success: false };
         }
     }
 
@@ -177,175 +325,44 @@ class ARCompressionClient {
     }
 
     /**
-     * Parse GLTF/GLB file
+     * Get Draco quantization bits based on quality setting
      */
-    parseGLTF(arrayBuffer) {
-        return new Promise((resolve, reject) => {
-            this.loader.parse(
-                arrayBuffer,
-                '',
-                (gltf) => resolve(gltf),
-                (error) => reject(error)
-            );
-        });
+    getDracoQuantizationBits() {
+        const quality = this.compressionQuality;
+        if (quality >= 90) return 14; // High quality
+        if (quality >= 70) return 12; // Medium quality
+        if (quality >= 50) return 10; // Low quality
+        return 8; // Very low quality
     }
 
     /**
-     * Optimize geometry (merge, simplify)
+     * Get max texture size based on quality setting
      */
-    async optimizeGeometry(scene) {
-        scene.traverse((child) => {
-            if (child.isMesh && child.geometry) {
-                const geometry = child.geometry;
-
-                // Compute bounding box/sphere for better culling
-                if (!geometry.boundingBox) {
-                    geometry.computeBoundingBox();
-                }
-                if (!geometry.boundingSphere) {
-                    geometry.computeBoundingSphere();
-                }
-
-                // Remove unused vertex attributes
-                const attributes = geometry.attributes;
-                if (attributes.uv2 && !this.usesUV2(child)) {
-                    geometry.deleteAttribute('uv2');
-                }
-
-                // Optimize buffer attributes
-                if (attributes.position) {
-                    geometry.attributes.position.needsUpdate = true;
-                }
-            }
-        });
+    getMaxTextureSize() {
+        const quality = this.compressionQuality;
+        if (quality >= 90) return 4096;
+        if (quality >= 70) return 2048;
+        if (quality >= 50) return 1024;
+        return 512;
     }
 
     /**
-     * Check if mesh uses UV2 (lightmap)
+     * Format bytes to human readable size
      */
-    usesUV2(mesh) {
-        if (!mesh.material) return false;
-        const material = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-        return material.lightMap !== null;
-    }
-
-    /**
-     * Compress textures
-     */
-    async compressTextures(scene) {
-        const textures = [];
-
-        scene.traverse((child) => {
-            if (child.isMesh && child.material) {
-                const materials = Array.isArray(child.material) ? child.material : [child.material];
-
-                materials.forEach((material) => {
-                    // Collect all texture maps
-                    ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap'].forEach((mapName) => {
-                        if (material[mapName] && !textures.includes(material[mapName])) {
-                            textures.push(material[mapName]);
-                        }
-                    });
-                });
-            }
-        });
-
-        // Optimize textures
-        for (const texture of textures) {
-            if (texture.image) {
-                // Ensure power-of-two dimensions for better compression
-                if (!this.isPowerOfTwo(texture.image.width) || !this.isPowerOfTwo(texture.image.height)) {
-                    await this.resizeTextureToPowerOfTwo(texture);
-                }
-
-                // Reduce quality based on compression setting
-                const qualityFactor = this.compressionQuality / 100;
-                if (qualityFactor < 0.9 && texture.image.width > 512) {
-                    await this.downsampleTexture(texture, qualityFactor);
-                }
-            }
-        }
-    }
-
-    /**
-     * Check if number is power of two
-     */
-    isPowerOfTwo(value) {
-        return (value & (value - 1)) === 0 && value !== 0;
-    }
-
-    /**
-     * Resize texture to nearest power of two
-     */
-    async resizeTextureToPowerOfTwo(texture) {
-        if (!texture.image) return;
-
-        const image = texture.image;
-        const canvas = document.createElement('canvas');
-        const width = this.nearestPowerOfTwo(image.width);
-        const height = this.nearestPowerOfTwo(image.height);
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(image, 0, 0, width, height);
-
-        texture.image = canvas;
-        texture.needsUpdate = true;
-    }
-
-    /**
-     * Get nearest power of two
-     */
-    nearestPowerOfTwo(value) {
-        return Math.pow(2, Math.round(Math.log(value) / Math.log(2)));
-    }
-
-    /**
-     * Downsample texture based on quality
-     */
-    async downsampleTexture(texture, qualityFactor) {
-        if (!texture.image) return;
-
-        const image = texture.image;
-        const canvas = document.createElement('canvas');
-        const newWidth = Math.max(256, Math.floor(image.width * qualityFactor));
-        const newHeight = Math.max(256, Math.floor(image.height * qualityFactor));
-
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(image, 0, 0, newWidth, newHeight);
-
-        texture.image = canvas;
-        texture.needsUpdate = true;
-    }
-
-    /**
-     * Export scene as GLTF
-     */
-    exportGLTF(scene, options) {
-        return new Promise((resolve, reject) => {
-            this.exporter.parse(
-                scene,
-                (result) => resolve(result),
-                (error) => reject(error),
-                options
-            );
-        });
+    formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     /**
      * Cleanup resources
      */
     dispose() {
-        if (this.dracoLoader) {
-            this.dracoLoader.dispose();
-        }
+        // gltf-transform doesn't require explicit disposal
+        this.io = null;
     }
 }
 

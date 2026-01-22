@@ -214,22 +214,36 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             }
 
             // Success!
+            const meta = compressedBlob.compressionMeta;
             setCompressionStatus('complete');
             setCompressionData({
-                ...compressedBlob.compressionMeta,
-                original_size_formatted: formatFileSize(compressedBlob.compressionMeta.originalSize),
-                compressed_size_formatted: formatFileSize(compressedBlob.compressionMeta.compressedSize),
+                ...meta,
+                original_size_formatted: formatFileSize(meta.originalSize),
+                compressed_size_formatted: formatFileSize(meta.compressedSize),
                 saved_space_formatted: formatFileSize(
-                    compressedBlob.compressionMeta.originalSize - compressedBlob.compressionMeta.compressedSize
+                    meta.originalSize - meta.compressedSize
                 ),
             });
 
-            toast.success(
-                `✅ Compression complete! Saved ${compressedBlob.compressionMeta.compressionRatio}% (${formatFileSize(compressedBlob.compressionMeta.originalSize - compressedBlob.compressionMeta.compressedSize)})`
-            );
+            // Show appropriate message based on whether compression was applied or skipped
+            if (meta.skipped) {
+                toast.info(
+                    `ℹ️ ${meta.reason}`,
+                    { autoClose: 8000 }
+                );
+            } else {
+                const strategyText = meta.strategy === 'full' ? '' :
+                    meta.strategy === 'aggressive' ? ' (aggressive mode)' :
+                    meta.strategy === 'basic' ? ' (basic optimization)' :
+                    meta.strategy === 'minimal' ? ' (minimal optimization)' : '';
+
+                toast.success(
+                    `✅ Compression complete${strategyText}! Saved ${meta.compressionRatio}% (${formatFileSize(meta.originalSize - meta.compressedSize)})`
+                );
+            }
 
             if (onCompressionComplete) {
-                onCompressionComplete(compressedBlob.compressionMeta);
+                onCompressionComplete(meta);
             }
 
             // Refresh user limit
@@ -495,28 +509,58 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             {/* Complete */}
             {compressionStatus === 'complete' && compressionData && (
                 <div>
-                    <div className="art-mb-3 art-p-3 art-bg-green-50 art-border art-border-green-200 art-rounded">
-                        <div className="art-flex art-items-center art-mb-2">
-                            <span className="art-text-green-600 art-mr-2">✅</span>
-                            <span className="art-text-sm art-font-semibold art-text-green-800">Compressed Successfully!</span>
+                    {compressionData.skipped ? (
+                        // Model was not compressed (already optimized)
+                        <div className="art-mb-3 art-p-3 art-bg-blue-50 art-border art-border-blue-200 art-rounded">
+                            <div className="art-flex art-items-center art-mb-2">
+                                <span className="art-text-blue-600 art-mr-2">ℹ️</span>
+                                <span className="art-text-sm art-font-semibold art-text-blue-800">Already Optimized</span>
+                            </div>
+                            <div className="art-space-y-1 art-text-xs art-text-gray-700">
+                                <p className="art-mb-2">{compressionData.reason}</p>
+                                <div className="art-flex art-justify-between">
+                                    <span>File Size:</span>
+                                    <span className="art-font-semibold">{compressionData.original_size_formatted}</span>
+                                </div>
+                                <p className="art-text-xs art-text-gray-500 art-mt-2">
+                                    Your model is already well-optimized and couldn't be compressed further without quality loss.
+                                </p>
+                            </div>
                         </div>
-                        <div className="art-space-y-1 art-text-xs art-text-gray-700">
-                            <div className="art-flex art-justify-between">
-                                <span>Original:</span>
-                                <span className="art-font-semibold">{compressionData.original_size_formatted}</span>
-                            </div>
-                            <div className="art-flex art-justify-between">
-                                <span>Compressed:</span>
-                                <span className="art-font-semibold">{compressionData.compressed_size_formatted}</span>
-                            </div>
-                            <div className="art-flex art-justify-between art-text-green-600">
-                                <span>Saved:</span>
-                                <span className="art-font-semibold">
-                                    {compressionData.saved_space_formatted} ({compressionData.compressionRatio || compressionData.compression_ratio}%)
+                    ) : (
+                        // Model was successfully compressed
+                        <div className="art-mb-3 art-p-3 art-bg-green-50 art-border art-border-green-200 art-rounded">
+                            <div className="art-flex art-items-center art-mb-2">
+                                <span className="art-text-green-600 art-mr-2">✅</span>
+                                <span className="art-text-sm art-font-semibold art-text-green-800">
+                                    Compressed Successfully!
+                                    {compressionData.strategy && compressionData.strategy !== 'full' && (
+                                        <span className="art-text-xs art-font-normal art-text-gray-600 art-ml-1">
+                                            ({compressionData.strategy === 'aggressive' ? 'aggressive' :
+                                              compressionData.strategy === 'basic' ? 'basic' :
+                                              compressionData.strategy === 'minimal' ? 'minimal' : compressionData.strategy})
+                                        </span>
+                                    )}
                                 </span>
                             </div>
+                            <div className="art-space-y-1 art-text-xs art-text-gray-700">
+                                <div className="art-flex art-justify-between">
+                                    <span>Original:</span>
+                                    <span className="art-font-semibold">{compressionData.original_size_formatted}</span>
+                                </div>
+                                <div className="art-flex art-justify-between">
+                                    <span>Compressed:</span>
+                                    <span className="art-font-semibold">{compressionData.compressed_size_formatted}</span>
+                                </div>
+                                <div className="art-flex art-justify-between art-text-green-600">
+                                    <span>Saved:</span>
+                                    <span className="art-font-semibold">
+                                        {compressionData.saved_space_formatted} ({compressionData.compressionRatio || compressionData.compression_ratio}%)
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className="art-flex art-space-x-2">
                         <button
                             onClick={handleCompress}
