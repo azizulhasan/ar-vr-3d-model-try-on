@@ -269,6 +269,7 @@ class AR_TRY_ON_Compression {
 		if ( ! self::is_enabled() ) {
 			return new \WP_Error( 'compression_disabled', __( 'Compression is currently disabled.', 'ar-vr-3d-model-try-on' ) );
 		}
+
         $source_file = AR_TRY_ON_Helper::get_file_path_from_url( $source_url );
 
 		// Check if file exists
@@ -301,7 +302,10 @@ class AR_TRY_ON_Compression {
 			if ( ! copy( $source_file, $paths['original'] ) ) {
 				return new \WP_Error( 'copy_failed', __( 'Failed to copy original file.', 'ar-vr-3d-model-try-on' ) );
 			}
-		}
+		}else{
+            $paths['original'] = $source_file;
+            $paths['url'] = $source_url;
+        }
 
 		// Determine compression method
 		$method    = self::get_compression_method( $source_file );

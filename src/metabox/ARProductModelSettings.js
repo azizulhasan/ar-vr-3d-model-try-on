@@ -561,6 +561,8 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     <CompressionPanel
                                         postId={getPostID()}
                                         modelFile={productModel.src}
+                                        productModel={productModel}
+                                        setProductModel={setProductModel}
                                         onCompressionComplete={(meta) => {
                                             console.log('Compression complete:', meta);
                                             notify('Model compressed successfully!', 'success');

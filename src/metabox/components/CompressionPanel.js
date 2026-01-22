@@ -10,7 +10,7 @@ import { getURL } from "../../context/utilities";
  *
  * @since 1.8.0
  */
-export default function CompressionPanel({ postId, modelFile, onCompressionComplete }) {
+export default function CompressionPanel({ postId, modelFile, onCompressionComplete, setProductModel, productModel }) {
     const [compressionStatus, setCompressionStatus] = useState(null); // null, 'compressing', 'complete', 'failed'
     const [compressionData, setCompressionData] = useState(null);
     const [progress, setProgress] = useState(0);
@@ -394,8 +394,21 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
         }
 
         const data = await response.json();
+        if(data?.file_url) {
+            let productModelCloned = structuredClone(productModel)
+            productModelCloned.src = data.file_url;
+            setProductModel(productModelCloned);
+            wp.hooks.doAction("atlas_ar_preview_data", productModelCloned);
+            console.log({productModelCloned})
+
+        }
+
         return data.file_path;
     };
+
+    useEffect(()=> {
+        console.log(productModel.src)
+    },[productModel.src])
 
     /**
      * Format file size
