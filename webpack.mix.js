@@ -10,4 +10,17 @@ mix.js('admin/js/ar-vr-3d-model-try-on-preview.js', 'admin/js/build/ar-vr-3d-mod
 mix.js('public/js/AtlasAR.js', 'public/js/AtlasAR.dist.js');
 
 
-mix.webpackConfig({});
+mix.webpackConfig({
+    output: {
+        chunkFilename: '[name].js', // Keep chunks in same directory as main file
+    },
+    optimization: {
+        splitChunks: false, // Disable code splitting to prevent chunks folder
+        runtimeChunk: false, // Disable runtime chunk
+    },
+});
+
+// Override Mix's default behavior
+mix.options({
+    processCssUrls: false,
+});
