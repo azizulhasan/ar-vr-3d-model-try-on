@@ -427,7 +427,8 @@ class AR_TRY_ON_Compression {
 	 */
 	public static function compress_server_side_api( $input_file, $output_file, $quality = 85 ) {
 		// Get compression API URL from settings
-		$api_url = get_option( 'ar_try_on_compression_api_url', '' );
+//		$api_url = get_option( 'ar_try_on_compression_api_url', ATLAS_AR_COMPRESSION_API_URL );
+		$api_url = ATLAS_AR_COMPRESSION_API_URL;
 		if ( empty( $api_url ) ) {
 			return new \WP_Error( 'api_not_configured', __( 'API URL is not configured.', 'ar-vr-3d-model-try-on' ) );
 		}
@@ -469,6 +470,7 @@ class AR_TRY_ON_Compression {
 
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_body = wp_remote_retrieve_body( $response );
+        error_log(print_r( $response_body, true ) );
 
 		if ( $response_code !== 200 ) {
 			return new \WP_Error(
