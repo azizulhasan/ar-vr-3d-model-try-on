@@ -41,6 +41,7 @@ use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON\AR_TRY_ON_Compression;
+use AR_TRY_ON\AR_TRY_ON_Compression_DB;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;

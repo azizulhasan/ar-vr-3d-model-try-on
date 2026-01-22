@@ -17,6 +17,7 @@
     "makeZip": "gulp makeZip",
     "release": "gulp release",
     "copy": "gulp copy",
+    "zip": "gulp zip",
     "copyProButton": "gulp copyProButton",
     "tailwind": "npx tailwindcss -c tailwind.config.js -i src/tailwind.css -o public/css/ar-try-on.css --watch",
     "modal": "npx tailwindcss -c tailwind.config.modal.js -i src/tailwind.css -o public/css/atlas_ar_modal.css --watch",

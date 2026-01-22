@@ -1112,7 +1112,9 @@ class AR_TRY_ON_Compression_Routes {
 	public function update_api_url( $request ) {
 		$url = esc_url_raw( $request->get_param( 'url' ) );
 		update_option( 'ar_try_on_compression_api_url', $url );
-
+        if( empty( $url ) ) {
+            $url = ATLAS_AR_COMPRESSION_API_URL;
+        }
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
@@ -1131,7 +1133,7 @@ class AR_TRY_ON_Compression_Routes {
      * @return \WP_REST_Response Response object.
      */
     public function get_api_url( $request ) {
-        $url = get_option( 'ar_try_on_compression_api_url' );
+        $url = get_option( 'ar_try_on_compression_api_url', ATLAS_AR_COMPRESSION_API_URL );
 
         return new \WP_REST_Response(
             array(
