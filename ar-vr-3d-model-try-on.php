@@ -42,6 +42,7 @@ use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON\AR_TRY_ON_Compression;
 use AR_TRY_ON\AR_TRY_ON_Compression_DB;
+use AR_TRY_ON\AR_TRY_ON_Format_Converter;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
@@ -124,7 +125,7 @@ if ( ! defined( 'ATLAS_AR_ADMIN_PATH' ) ) {
 
 if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 
-	define( 'ATLAS_AR_DEBUG_MODE', 0 );
+	define( 'ATLAS_AR_DEBUG_MODE', 1 );
 }
 
 
@@ -201,6 +202,8 @@ function atlas_ar_run() {
 	// Initialize Compression feature (v1.8.0+)
     AR_TRY_ON_Compression::init();
 
+	// Initialize Format Converter (v1.8.0+)
+//	AR_TRY_ON_Format_Converter::init();
 
     // Register Compression REST API routes
 	add_action( 'rest_api_init', function() {
