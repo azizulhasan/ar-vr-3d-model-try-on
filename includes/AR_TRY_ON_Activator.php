@@ -73,13 +73,10 @@ class AR_TRY_ON_Activator {
 			AR_TRY_ON_Cache::set( 'settings', $all_settings );
 		}
 
-		// Schedule background compression queue processing (Pro feature)
-		if ( ! wp_next_scheduled( 'ar_try_on_process_compression_queue' ) ) {
-			wp_schedule_event( time(), 'every_five_minutes', 'ar_try_on_process_compression_queue' );
-		}
-
-		// Initialize compression database tables
+		// Initialize compression database tables (log table only - queue is Pro)
 		AR_TRY_ON_Compression_DB::init();
+
+		// Note: Queue table and cron job are handled by Pro plugin
 
 		return $all_settings;
 	}

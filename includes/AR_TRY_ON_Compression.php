@@ -52,7 +52,14 @@ class AR_TRY_ON_Compression {
 	 * @since 1.8.0
 	 */
 	public static function init() {
-		// Initialize database tables
+		// If Pro is active, delegate to Pro compression
+		if ( self::is_pro_active() && class_exists( 'AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression' ) ) {
+			\AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression::init();
+			return; // Pro handles everything
+		}
+
+		// Free version: Client-side compression only
+		// Initialize database tables (log table only - queue is Pro)
 		AR_TRY_ON_Compression_DB::init();
 
 		// Register settings
@@ -61,51 +68,11 @@ class AR_TRY_ON_Compression {
 		// Handle post deletion (cleanup files)
 		add_action( 'before_delete_post', array( __CLASS__, 'cleanup_on_post_delete' ) );
 
-		// Cron job for background processing (Pro only)
-		if ( self::is_pro_active() ) {
-			add_action( 'ar_try_on_process_compression_queue', array( __CLASS__, 'process_queue' ) );
-
-			// Schedule cron if not already scheduled
-			if ( ! wp_next_scheduled( 'ar_try_on_process_compression_queue' ) ) {
-				wp_schedule_event( time(), 'every_5_minutes', 'ar_try_on_process_compression_queue' );
-			}
-		}
-
-		// Add custom cron schedule
-		add_filter( 'cron_schedules', array( __CLASS__, 'add_cron_schedules' ) );
-
-		// Plugin deactivation hook to clear scheduled events
-		register_deactivation_hook( plugin_dir_path( dirname( __FILE__ ) ) . 'ar-vr-3d-model-try-on.php', array( __CLASS__, 'deactivation_cleanup' ) );
+		// No cron job in Free version (Pro feature)
+		// No background queue in Free version (Pro feature)
 	}
 
-	/**
-	 * Add custom cron schedules
-	 *
-	 * @since 1.8.0
-	 * @param array $schedules Existing schedules.
-	 * @return array Modified schedules.
-	 */
-	public static function add_cron_schedules( $schedules ) {
-		if ( ! isset( $schedules['every_5_minutes'] ) ) {
-			$schedules['every_5_minutes'] = array(
-				'interval' => 300, // 5 minutes
-				'display'  => __( 'Every 5 Minutes', 'ar-vr-3d-model-try-on' ),
-			);
-		}
-		return $schedules;
-	}
-
-	/**
-	 * Cleanup on plugin deactivation
-	 *
-	 * @since 1.8.0
-	 */
-	public static function deactivation_cleanup() {
-		$timestamp = wp_next_scheduled( 'ar_try_on_process_compression_queue' );
-		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, 'ar_try_on_process_compression_queue' );
-		}
-	}
+	// Cron schedules and cleanup moved to Pro plugin (AR_TRY_ON_Pro_Compression)
 
 	/**
 	 * Register compression settings
@@ -338,9 +305,7 @@ class AR_TRY_ON_Compression {
 	}
 
 	/**
-	 * Compress model using API-based compression
-	 *
-	 * Always uses external API for compression (WordPress.org compliant - no exec()).
+	 * Compress model using API-based compression (Pro only - delegates to Pro plugin)
 	 *
 	 * @since 1.8.0
 	 * @param string $input_file Input file path.
@@ -353,124 +318,20 @@ class AR_TRY_ON_Compression {
 			return new \WP_Error( 'pro_only', __( 'Server-side compression is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
 		}
 
-		if ( ! file_exists( $input_file ) ) {
-			return new \WP_Error( 'file_not_found', __( 'Input file not found.', 'ar-vr-3d-model-try-on' ) );
+		// Delegate to Pro plugin
+		if ( class_exists( 'AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression' ) ) {
+			return \AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression::compress_server_side( $input_file, $output_file, $quality );
 		}
 
-		// Always use API compression (WordPress.org compliant)
-		return self::compress_server_side_api( $input_file, $output_file, $quality );
+		return new \WP_Error( 'pro_not_loaded', __( 'Pro plugin not properly loaded.', 'ar-vr-3d-model-try-on' ) );
 	}
 
-	/**
-	 * Compress model using external API compression service (Pro only)
-	 *
-	 * @since 1.8.0
-	 * @param string $input_file Input file path.
-	 * @param string $output_file Output file path.
-	 * @param int    $quality Quality (1-100).
-	 * @return array|\WP_Error Result array or error.
-	 */
-	public static function compress_server_side_api( $input_file, $output_file, $quality = 85 ) {
-		// Get compression API URL from constant (auto-configured based on debug mode)
-		$api_url = defined( 'ATLAS_AR_COMPRESSION_API_URL' ) ? ATLAS_AR_COMPRESSION_API_URL : '';
-
-		if ( empty( $api_url ) ) {
-			return new \WP_Error( 'api_not_configured', __( 'API URL is not configured.', 'ar-vr-3d-model-try-on' ) );
-		}
-
-		$api_endpoint = trailingslashit( $api_url ) . 'compress-url';
-
-		// Get file URL
-		$input_file_url = AR_TRY_ON_Helper::get_file_url_from_path( $input_file );
-
-        if ( ! $input_file_url ) {
-			return new \WP_Error( 'url_not_found', __( 'Could not determine file URL.', 'ar-vr-3d-model-try-on' ) );
-		}
-
-		// Prepare API request
-		$body = array(
-			'url'     => $input_file_url,
-			'quality' => intval( $quality ),
-		);
-
-		// Make API request
-		$response = wp_remote_post(
-			$api_endpoint,
-			array(
-				'body'    => wp_json_encode( $body ),
-				'headers' => array(
-					'Content-Type' => 'application/json',
-				),
-				'timeout' => 300, // 5 minutes timeout
-			)
-		);
-
-		// Check for request errors
-		if ( is_wp_error( $response ) ) {
-			return new \WP_Error(
-				'api_request_failed',
-				sprintf( __( 'API request failed: %s', 'ar-vr-3d-model-try-on' ), $response->get_error_message() )
-			);
-		}
-
-		$response_code = wp_remote_retrieve_response_code( $response );
-		$response_body = wp_remote_retrieve_body( $response );
-
-		if ( $response_code !== 200 ) {
-			return new \WP_Error(
-				'api_error',
-				sprintf( __( 'API returned error code %d: %s', 'ar-vr-3d-model-try-on' ), $response_code, $response_body )
-			);
-		}
-
-		// Parse response
-		$result = json_decode( $response_body, true );
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new \WP_Error( 'json_parse_error', __( 'Failed to parse API response.', 'ar-vr-3d-model-try-on' ) );
-		}
-
-		if ( ! isset( $result['success'] ) || ! $result['success'] ) {
-			$error_message = isset( $result['message'] ) ? $result['message'] : __( 'Compression failed.', 'ar-vr-3d-model-try-on' );
-			return new \WP_Error( 'compression_failed', $error_message );
-		}
-
-		// Download compressed file
-		$download_url = trailingslashit( $api_url ) . ltrim( $result['data']['download_url'], '/' );
-		$download_response = wp_remote_get(
-			$download_url,
-			array(
-				'timeout' => 300,
-			)
-		);
-
-		if ( is_wp_error( $download_response ) ) {
-			return new \WP_Error(
-				'download_failed',
-				sprintf( __( 'Failed to download compressed file: %s', 'ar-vr-3d-model-try-on' ), $download_response->get_error_message() )
-			);
-		}
-
-		// Save compressed file
-		$compressed_data = wp_remote_retrieve_body( $download_response );
-		if ( ! file_put_contents( $output_file, $compressed_data ) ) {
-			return new \WP_Error( 'save_failed', __( 'Failed to save compressed file.', 'ar-vr-3d-model-try-on' ) );
-		}
-
-		return array(
-			'success'            => true,
-			'original_size'      => $result['data']['original_size'],
-			'compressed_size'    => $result['data']['compressed_size'],
-			'compression_ratio'  => $result['data']['compression_ratio'],
-			'compression_time'   => $result['data']['compression_time'],
-			'output_file'        => $output_file,
-			'output_url'        => AR_TRY_ON_Helper::get_file_url_from_path( $output_file ),
-		);
-	}
+	// Server-side API compression moved to Pro plugin (AR_TRY_ON_Pro_Compression)
 
 	/**
-	 * Convert model format (FBX/OBJ → GLB) using API-based conversion (Pro only)
+	 * Convert model format (FBX/OBJ → GLB) - Pro only feature
 	 *
-	 * Delegates to AR_TRY_ON_Format_Converter for actual conversion.
+	 * Delegates to Pro plugin format converter.
 	 *
 	 * @since 1.8.0
 	 * @param string $input_file Input file path (FBX or OBJ).
@@ -479,7 +340,16 @@ class AR_TRY_ON_Compression {
 	 * @return array|\WP_Error Result array or error.
 	 */
 	public static function convert_format( $input_file, $output_file, $quality = 85 ) {
-		return AR_TRY_ON_Format_Converter::convert_format( $input_file, $output_file, $quality );
+		if ( ! self::is_pro_active() ) {
+			return new \WP_Error( 'pro_only', __( 'Format conversion is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
+		}
+
+		// Delegate to Pro plugin
+		if ( class_exists( 'AR_TRY_ON_Pro\AR_TRY_ON_Pro_Format_Converter' ) ) {
+			return \AR_TRY_ON_Pro\AR_TRY_ON_Pro_Format_Converter::convert_format( $input_file, $output_file, $quality );
+		}
+
+		return new \WP_Error( 'pro_not_loaded', __( 'Pro plugin not properly loaded.', 'ar-vr-3d-model-try-on' ) );
 	}
 
 
@@ -536,7 +406,7 @@ class AR_TRY_ON_Compression {
 	}
 
 	/**
-	 * Add file to background compression queue (Pro only)
+	 * Add file to background compression queue (Pro only - delegates to Pro plugin)
 	 *
 	 * @since 1.8.0
 	 * @param int    $post_id Post ID.
@@ -549,30 +419,16 @@ class AR_TRY_ON_Compression {
 			return new \WP_Error( 'pro_only', __( 'Background processing is a Pro feature.', 'ar-vr-3d-model-try-on' ) );
 		}
 
-		$settings = self::get_settings();
-		$defaults = array(
-			'format'   => pathinfo( $file_path, PATHINFO_EXTENSION ),
-			'quality'  => $settings['quality'],
-			'priority' => 10,
-		);
+		// Delegate to Pro plugin
+		if ( class_exists( 'AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression' ) ) {
+			return \AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression::add_to_queue( $post_id, $file_path, $options );
+		}
 
-		$options = wp_parse_args( $options, $defaults );
-
-		$queue_id = AR_TRY_ON_Compression_DB::add_to_queue(
-			array(
-				'post_id'   => $post_id,
-				'file_path' => $file_path,
-				'format'    => $options['format'],
-				'quality'   => $options['quality'],
-				'priority'  => $options['priority'],
-			)
-		);
-
-		return $queue_id ? $queue_id : new \WP_Error( 'queue_failed', __( 'Failed to add to queue.', 'ar-vr-3d-model-try-on' ) );
+		return new \WP_Error( 'pro_not_loaded', __( 'Pro plugin not properly loaded.', 'ar-vr-3d-model-try-on' ) );
 	}
 
 	/**
-	 * Process compression queue (Pro only, called by WP-Cron)
+	 * Process compression queue (Pro only - delegates to Pro plugin)
 	 *
 	 * @since 1.8.0
 	 */
@@ -581,66 +437,9 @@ class AR_TRY_ON_Compression {
 			return;
 		}
 
-		// Process up to 5 items per run to prevent server overload
-		$max_items = 5;
-		$processed = 0;
-
-		while ( $processed < $max_items ) {
-			$item = AR_TRY_ON_Compression_DB::get_next_queue_item();
-
-			if ( ! $item ) {
-				break; // No more items in queue
-			}
-
-			// Mark as processing
-			AR_TRY_ON_Compression_DB::update_queue_item( $item['id'], 'processing' );
-
-			// Prepare compression
-			$preparation = self::prepare_compression( $item['post_id'], $item['file_path'] );
-
-			if ( is_wp_error( $preparation ) ) {
-				AR_TRY_ON_Compression_DB::update_queue_item(
-					$item['id'],
-					'failed',
-					$preparation->get_error_message()
-				);
-				$processed++;
-				continue;
-			}
-
-			// Execute server-side compression
-			if ( $preparation['method'] === 'server' ) {
-				$result = self::compress_server_side(
-					$preparation['source_file'],
-					$preparation['paths']['compressed'],
-					$preparation['quality']
-				);
-
-				if ( is_wp_error( $result ) ) {
-					self::fail_compression( $preparation['log_id'], $result->get_error_message() );
-					AR_TRY_ON_Compression_DB::update_queue_item(
-						$item['id'],
-						'failed',
-						$result->get_error_message()
-					);
-				} else {
-					self::complete_compression(
-						$preparation['log_id'],
-						$result['output_file'],
-						$result['compression_time']
-					);
-					AR_TRY_ON_Compression_DB::update_queue_item( $item['id'], 'complete' );
-				}
-			} else {
-				// Client-side compression is handled by JavaScript
-				AR_TRY_ON_Compression_DB::update_queue_item(
-					$item['id'],
-					'failed',
-					__( 'Client-side compression cannot be processed in queue.', 'ar-vr-3d-model-try-on' )
-				);
-			}
-
-			$processed++;
+		// Delegate to Pro plugin
+		if ( class_exists( 'AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression' ) ) {
+			\AR_TRY_ON_Pro\AR_TRY_ON_Pro_Compression::process_queue();
 		}
 	}
 

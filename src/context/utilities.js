@@ -43,6 +43,17 @@ export const getURL = (endpoint = "") => {
     );
 };
 
+export const getProURL = (endpoint = "") => {
+    return (
+        ar_try_on.api_url +
+        ar_try_on.api_namespace + '_pro'+
+            "/" +
+            ar_try_on.api_version +
+            "/" +
+            endpoint
+    );
+};
+
 export const getPostID = () => {
     // Parse the URL parameters
     const params = new URLSearchParams(window.location.search);

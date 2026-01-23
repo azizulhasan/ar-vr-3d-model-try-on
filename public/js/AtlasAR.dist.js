@@ -16,6 +16,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   createModal: () => (/* binding */ createModal),
 /* harmony export */   getAPITypes: () => (/* binding */ getAPITypes),
 /* harmony export */   getPostID: () => (/* binding */ getPostID),
+/* harmony export */   getProURL: () => (/* binding */ getProURL),
 /* harmony export */   getURL: () => (/* binding */ getURL),
 /* harmony export */   isDifferent: () => (/* binding */ _isDifferent),
 /* harmony export */   postWithoutImage: () => (/* binding */ postWithoutImage),
@@ -103,6 +104,10 @@ var postWithoutImage = /*#__PURE__*/function () {
 var getURL = function getURL() {
   var endpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
   return ar_try_on.api_url + ar_try_on.api_namespace + "/" + ar_try_on.api_version + "/" + endpoint;
+};
+var getProURL = function getProURL() {
+  var endpoint = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+  return ar_try_on.api_url + ar_try_on.api_namespace + '_pro' + "/" + ar_try_on.api_version + "/" + endpoint;
 };
 var getPostID = function getPostID() {
   // Parse the URL parameters

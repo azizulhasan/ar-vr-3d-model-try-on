@@ -125,7 +125,7 @@ if ( ! defined( 'ATLAS_AR_ADMIN_PATH' ) ) {
 
 if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 
-	define( 'ATLAS_AR_DEBUG_MODE', 1 );
+	define( 'ATLAS_AR_DEBUG_MODE', 0 );
 }
 
 

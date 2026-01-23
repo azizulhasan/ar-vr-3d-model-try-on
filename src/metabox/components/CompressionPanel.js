@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getURL } from "../../context/utilities";
+import {getProURL, getURL} from "../../context/utilities";
 import { __ } from "@wordpress/i18n";
 
 /**
@@ -299,12 +299,13 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
             toast.info('🚀 Processing large file on server (Pro feature)...', { autoClose: 3000 });
 
+
             // Call server-side compression API
-            const compressResponse = await fetch(getURL('compression/server-compress'), {
+            const compressResponse = await fetch(getProURL('compression/server-compress'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                    'X-WP-Nonce':  window?.ar_try_on?.rest_nonce || '',
                 },
                 body: JSON.stringify({
                     input_file: paths.original,

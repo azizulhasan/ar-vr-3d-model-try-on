@@ -106,30 +106,7 @@ class AR_TRY_ON_Compression_DB
         ) $charset_collate;";
         dbDelta( $sql_log );
 
-        // Table 2: Compression Queue - For background processing (Pro feature)
-        $compression_queue_table = $wpdb->prefix . 'ar_compression_queue';
-        $sql_queue = "CREATE TABLE $compression_queue_table (
-            id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            post_id BIGINT(20) UNSIGNED NOT NULL,
-            file_path VARCHAR(255) NOT NULL,
-            file_type VARCHAR(50) NOT NULL DEFAULT 'model',
-            format VARCHAR(10) NOT NULL DEFAULT 'glb',
-            quality INT NOT NULL DEFAULT 85,
-            status VARCHAR(20) NOT NULL DEFAULT 'queued',
-            priority INT NOT NULL DEFAULT 10,
-            attempts INT UNSIGNED NOT NULL DEFAULT 0,
-            max_attempts INT UNSIGNED NOT NULL DEFAULT 3,
-            error_message TEXT NULL,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            started_at DATETIME NULL,
-            completed_at DATETIME NULL,
-            PRIMARY KEY  (id),
-            KEY post_id (post_id),
-            KEY status (status),
-            KEY priority (priority),
-            KEY created_at (created_at)
-        ) $charset_collate;";
-        dbDelta( $sql_queue );
+        // Queue table moved to Pro plugin (wp_ar_compression_queue)
 
         // Table 3: Compression Settings - User preferences per model
         $compression_settings_table = $wpdb->prefix . 'ar_compression_settings';
@@ -386,135 +363,7 @@ class AR_TRY_ON_Compression_DB
         );
     }
 
-    /**
-     * Add item to compression queue (Pro feature)
-     *
-     * @param array $data Queue item data.
-     * @return int|false Queue ID on success, false on failure.
-     * @since 1.8.0
-     */
-    public static function add_to_queue($data)
-    {
-        global $wpdb;
-
-        $defaults = array(
-            'post_id' => 0,
-            'file_path' => '',
-            'file_type' => 'model',
-            'format' => 'glb',
-            'quality' => 85,
-            'status' => 'queued',
-            'priority' => 10,
-            'attempts' => 0,
-            'max_attempts' => 3,
-        );
-
-        $data = wp_parse_args($data, $defaults);
-
-        $table = $wpdb->prefix . 'ar_compression_queue';
-
-        if (!self::table_exists($table)) {
-            return false; // graceful fallback
-        }
-
-
-        $result = $wpdb->insert(
-            $wpdb->prefix . 'ar_compression_queue',
-            $data,
-            array('%d', '%s', '%s', '%s', '%d', '%s', '%d', '%d', '%d')
-        );
-
-        return $result ? $wpdb->insert_id : false;
-    }
-
-    /**
-     * Get next queued item for processing (Pro feature)
-     *
-     * @return array|null Queue item or null.
-     * @since 1.8.0
-     */
-    public static function get_next_queue_item()
-    {
-        global $wpdb;
-
-        $table = $wpdb->prefix . 'ar_compression_queue';
-
-        if (!self::table_exists($table)) {
-            return array(); // graceful fallback
-        }
-
-        return $wpdb->get_row(
-            "SELECT * FROM $table
-			WHERE status = 'queued'
-			AND attempts < max_attempts
-			ORDER BY priority DESC, created_at ASC
-			LIMIT 1",
-            ARRAY_A
-        );
-    }
-
-    /**
-     * Update queue item status
-     *
-     * @param int $queue_id Queue item ID.
-     * @param string $status New status.
-     * @param string $error_message Optional error message.
-     * @return bool Success status.
-     * @since 1.8.0
-     */
-    public static function update_queue_item($queue_id, $status, $error_message = null)
-    {
-        global $wpdb;
-
-        $data = array('status' => $status);
-
-        if ('processing' === $status) {
-            $data['started_at'] = current_time('mysql');
-            $data['attempts'] = new stdClass(); // Increment attempts
-        } elseif (in_array($status, array('complete', 'failed'), true)) {
-            $data['completed_at'] = current_time('mysql');
-        }
-
-        if (!is_null($error_message)) {
-            $data['error_message'] = $error_message;
-        }
-
-
-        $table = $wpdb->prefix . 'ar_compression_queue';
-
-        if (!self::table_exists($table)) {
-            return false; // graceful fallback
-        }
-
-        // Handle attempts increment
-        if (isset($data['attempts'])) {
-            $wpdb->query(
-                $wpdb->prepare(
-                    "UPDATE $table
-					SET status = %s, started_at = %s, attempts = attempts + 1
-					WHERE id = %d",
-                    $status,
-                    $data['started_at'],
-                    $queue_id
-                )
-            );
-            unset($data['attempts']);
-            unset($data['started_at']);
-            unset($data['status']);
-        }
-
-        if (empty($data)) {
-            return true;
-        }
-
-        return (bool)$wpdb->update(
-            $table,
-            $data,
-            array('id' => $queue_id),
-            null,
-            array('%d')
-        );
-    }
+    // Queue methods moved to Pro plugin (AR_TRY_ON_Pro_Compression_DB)
 
     /**
      * Delete compression log entry
@@ -566,7 +415,7 @@ class AR_TRY_ON_Compression_DB
     }
 
     /**
-     * Drop all compression tables (used on plugin uninstall)
+     * Drop compression tables (used on plugin uninstall) - Free version only drops log table
      *
      * @since 1.8.0
      */
@@ -576,7 +425,6 @@ class AR_TRY_ON_Compression_DB
 
         $tables = array(
             $wpdb->prefix . 'ar_compression_log',
-            $wpdb->prefix . 'ar_compression_queue',
             $wpdb->prefix . 'ar_compression_settings',
         );
 
@@ -585,5 +433,6 @@ class AR_TRY_ON_Compression_DB
         }
 
         delete_option(self::VERSION_OPTION);
+        // Note: Queue table is managed by Pro plugin
     }
 }
