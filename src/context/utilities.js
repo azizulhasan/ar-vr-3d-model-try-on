@@ -96,7 +96,10 @@ export const copyshortcode = (e) => {
 
 export const renderUserHotspots = (modelViewer, hotspots = []) => {
 
-    if(!ar_try_on.is_pro_active || !modelViewer) {
+    if (
+        (!ar_try_on.is_pro_active || !modelViewer) &&
+        !ar_try_on.is_admin
+    ) {
         return;
     }
 
@@ -176,7 +179,10 @@ function getDimensionLabel(value, model_settings) {
 
 function displayDimensions(modelViewer, model_settings) {
 
-    if(!ar_try_on.is_pro_active || !model_settings?.dimensions?.unit) {
+    if (
+        (!ar_try_on.is_pro_active || !model_settings?.dimensions?.unit) &&
+        !ar_try_on.is_admin
+    ) {
         return;
     }
     // FIXED: Check if dimension elements already exist before adding
@@ -388,7 +394,7 @@ window.atlasARSwitchSrc = (event ,element, data ) => {
 
 function showMultipleItems(modelViewer, model_settings) {
 
-    if(!ar_try_on.is_pro_active) {
+    if (!ar_try_on.is_pro_active && !ar_try_on.is_admin) {
         return;
     }
 
@@ -539,17 +545,17 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         } </button>`;
     }
 
-    // Dimension
-    // displayDimensions(modelViewer, model_settings);
-    //
-    // // // hotspots
-    // if (model_settings.hotspots && model_settings.hotspots.length > 0) {
-    //     renderUserHotspots(modelViewer, model_settings.hotspots);
-    // }
-    //
-    // if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
-    //     showMultipleItems(modelViewer, model_settings);
-    // }
+    //Dimension
+    displayDimensions(modelViewer, model_settings);
+
+    // // hotspots
+    if (model_settings.hotspots && model_settings.hotspots.length > 0) {
+        renderUserHotspots(modelViewer, model_settings.hotspots);
+    }
+
+    if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
+        showMultipleItems(modelViewer, model_settings);
+    }
 };
 
 export const getAPITypes = (api_type = "tripo3d") => {

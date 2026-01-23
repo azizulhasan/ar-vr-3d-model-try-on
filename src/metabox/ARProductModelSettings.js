@@ -56,7 +56,7 @@ const ARProductModelSettings = () => {
         exclude_integration_api_body: [],
         exclude_integration_api_model_type: "text_to_model",
         dimensions: {
-            show: true,
+            show: !!ar_try_on.is_pro_active,
             unit: "cm",
             width: {value: 4, unit: "cm"},
             height: {value: 10, unit: "cm"},
@@ -419,7 +419,7 @@ const handleSubmit = (e) => {
         delete dataToSave.multipleItems;
 
         // Notify user that pro features won't be saved
-        if (productModel.dimensions || productModel.hotspots?.length > 0 || productModel.isMultiple) {
+        if (dataToSave.dimensions || dataToSave.hotspots?.length > 0 || dataToSave.isMultiple) {
             notify('Pro features (dimensions, hotspots, slider) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
                 autoClose: 6000,
             });

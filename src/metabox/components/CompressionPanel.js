@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { getURL } from "../../context/utilities";
+import { __ } from "@wordpress/i18n";
 
 /**
  * Compression Panel Component
@@ -130,7 +131,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                 throw new Error(prepareData.message || 'Failed to prepare compression');
             }
 
-            const { log_id, method, paths, quality } = prepareData.data;
+            const { log_id, method, paths, quality, file_size } = prepareData.data;
 
             console.log()
             async function urlToFile(url) {
@@ -146,7 +147,27 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             console.log({file})
             // Step 2: Compress the model
             if (method === 'client') {
-                await compressClientSide(log_id, file, paths, quality);
+
+                if(file_size > wp.hooks.applyFilters('ar_try_on_client_compress_file_size_limit',  10485760)) {
+                    setCompressionStatus('failed');
+                    let error_message = __('Compression size exceeded: In free version you can compress less than 10MB. Buy Pro', 'ar-vr-3d-model-try-on');
+                    toast.error(error_message);
+                    await fetch(getURL('compression/fail'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-WP-Nonce': window?.ar_try_on?.rest_nonce || '',
+                        },
+                        body: JSON.stringify({
+                            log_id: log_id,
+                            error_message: error_message,
+                        }),
+                    });
+
+                }else{
+                    await compressClientSide(log_id, file, paths, quality);
+                }
+
             } else {
                 // Server-side compression (Pro only)
                 await compressServerSide(log_id, paths, quality);

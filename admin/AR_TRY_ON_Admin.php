@@ -85,6 +85,7 @@ class AR_TRY_ON_Admin {
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
+			'is_admin' => is_admin(),
 
 		];
 	}

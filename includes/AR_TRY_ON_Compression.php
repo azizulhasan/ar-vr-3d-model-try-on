@@ -37,7 +37,7 @@ class AR_TRY_ON_Compression {
 	 *
 	 * @var int
 	 */
-	const CLIENT_SIDE_THRESHOLD = 5242880; // 5MB in bytes
+	const CLIENT_SIDE_THRESHOLD = 10485760; //5242880; // 5MB in bytes,  15 MB = 15,728,640 bytes (which is 15 × 1024 × 1024)
 
 	/**
 	 * Upload directory for original and compressed files
@@ -245,6 +245,7 @@ class AR_TRY_ON_Compression {
 		if ( $file_size < self::CLIENT_SIDE_THRESHOLD ) {
 			return 'client';
 		}
+
 
 		// Large files: Server-side (Pro only)
 		if ( self::is_pro_active() ) {
