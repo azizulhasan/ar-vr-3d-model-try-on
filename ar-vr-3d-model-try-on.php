@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           1.7.8
+ * Version:           1.8.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -50,8 +50,27 @@ use AR_TRY_ON\AR_TRY_ON_Helper;
 
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
+/**
+ * Is plugin active
+ */
+function atlas_ar_is_pro_plugin_exists() {
+    $plugin_path = \WP_PLUGIN_DIR;
+    $pro_plugins = [
+        '/ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+        '/ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+    ];
 
-if ( ! function_exists( 'av3mto_fs' ) ) {
+    foreach ( $pro_plugins as $pro_plugin ) {
+        if ( file_exists( $plugin_path . $pro_plugin ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function av3mto_fs() {
 		global $av3mto_fs;
@@ -73,6 +92,7 @@ if ( ! function_exists( 'av3mto_fs' ) ) {
                 'has_premium_version' => true,
                 'has_paid_plans'      => true,
 				'has_addons'          => false,
+                'has_affiliation'     => 'all',
 				'menu'                => array(
 					'slug'           => 'ar-vr-3d-model-try-on',
 					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',
@@ -169,7 +189,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '1.7.8' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '1.8.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {

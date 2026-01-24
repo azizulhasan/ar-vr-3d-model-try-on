@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.7.8
+Stable tag: 1.8.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -222,6 +222,13 @@ A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to wo
 
 == Changelog ==
 
+= 1.8.0 ( 25 January 2026 )   =
+Added : `.glb` file compression feature added.
+Added : `Dimensions` feature added. ( Pro )
+Added : `Hotspots`  feature added. ( Pro )
+Added : `Slider` feature added.( Pro )
+Added : Pro version released. ( Pro )
+Improved : Plugin performance improved.
 
 = 1.7.8 ( 28 December 2025 )   =
 Updated : documentation updated
@@ -424,6 +431,11 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 1.7.8  =
-Updated : documentation updated
+= 1.8.0    =
+Added : `.glb` file compression feature added.
+Added : `Dimensions` feature added. ( Pro )
+Added : `Hotspots`  feature added. ( Pro )
+Added : `Slider` feature added.( Pro )
+Added : Pro version released. ( Pro )
+Improved : Plugin performance improved.
 
