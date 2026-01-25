@@ -41,6 +41,8 @@ const gulpCopy = require('gulp-copy');
 const productionSrc = [
 	'**/*',
 	'!.git/**',
+	'!.github/**',
+	'!.claude/**',
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
@@ -55,16 +57,20 @@ const productionSrc = [
 	'!phpcs.xml',
 	'!.cpanel.yml',
 	'!README.md',
+	'!*.md',
+	'!admin/js/build/*.LICENSE.txt',
 	'!package-lock.json',
 	'!mix-manifest.json',
 	'!webpack.mix.js',
 	'!tailwind.config.js',
 	'!public/js/ar-vr-3d-model-try-on-public.js',
 	'!admin/js/ar-try-on-media-library.js',
+	'!admin/js/ar-vr-3d-model-try-on-preview.js',
 	'!public/js/AtlasAR.js',
 	'!tailwind.config.modal.js',
 	'!admin/images/.DS_Store',
-	'!public/js/single-product.js' // TODO:: this file is might be necessary in the near future.
+	'!public/js/single-product.js', // TODO:: this file is might be necessary in the near future.
+	'!admin/js/ar-compression-client.js'
 ]
 
 

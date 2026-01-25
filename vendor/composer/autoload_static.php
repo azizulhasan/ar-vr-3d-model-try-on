@@ -38,7 +38,10 @@ class ComposerStaticInit84dbd1765bc8075c6306831ae4ea4ff5
     public static $classMap = array (
         'AR_TRY_ON\\AR_TRY_ON' => __DIR__ . '/../..' . '/includes/AR_TRY_ON.php',
         'AR_TRY_ON\\AR_TRY_ON_Activator' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Activator.php',
+        'AR_TRY_ON\\AR_TRY_ON_Admin_Notice' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Admin_Notice.php',
         'AR_TRY_ON\\AR_TRY_ON_Cache' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Cache.php',
+        'AR_TRY_ON\\AR_TRY_ON_Compression' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Compression.php',
+        'AR_TRY_ON\\AR_TRY_ON_Compression_DB' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Compression_DB.php',
         'AR_TRY_ON\\AR_TRY_ON_Constants' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Constants.php',
         'AR_TRY_ON\\AR_TRY_ON_Deactivate' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Deactivate.php',
         'AR_TRY_ON\\AR_TRY_ON_Helper' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Helper.php',
@@ -48,6 +51,7 @@ class ComposerStaticInit84dbd1765bc8075c6306831ae4ea4ff5
         'AR_TRY_ON_Admin\\AR_TRY_ON_Admin' => __DIR__ . '/../..' . '/admin/AR_TRY_ON_Admin.php',
         'AR_TRY_ON_Public\\AR_TRY_ON_Public' => __DIR__ . '/../..' . '/public/AR_TRY_ON_Public.php',
         'ATLAS_AR_API\\AR_TRY_ON_Api_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Api_Routes.php',
+        'ATLAS_AR_API\\AR_TRY_ON_Compression_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Compression_Routes.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

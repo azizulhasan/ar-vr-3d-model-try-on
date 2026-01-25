@@ -134,6 +134,12 @@ class AR_TRY_ON_Constants {
 
         }
 
+        if(ATLAS_AR_DEBUG_MODE) {
+            define( 'ATLAS_AR_COMPRESSION_API_URL', 'http://localhost:3000' );
+        }else{
+            define( 'ATLAS_AR_COMPRESSION_API_URL', 'https://compress.atlasaidev.com' );
+        }
+
 	}
 }
 (new AR_TRY_ON_Constants())->init();

@@ -17,6 +17,7 @@
     "makeZip": "gulp makeZip",
     "release": "gulp release",
     "copy": "gulp copy",
+    "zip": "gulp zip",
     "copyProButton": "gulp copyProButton",
     "tailwind": "npx tailwindcss -c tailwind.config.js -i src/tailwind.css -o public/css/ar-try-on.css --watch",
     "modal": "npx tailwindcss -c tailwind.config.modal.js -i src/tailwind.css -o public/css/atlas_ar_modal.css --watch",
@@ -32,13 +33,22 @@
   "license": "ISC",
   "dependencies": {
     "@babel/preset-env": "^7.26.0",
+    "@gltf-transform/core": "^4.3.0",
+    "@gltf-transform/extensions": "^4.3.0",
+    "@gltf-transform/functions": "^4.3.0",
     "@wordpress/i18n": "^5.14.0",
     "@wordpress/scripts": "^30.7.0",
+    "chart.js": "^4.5.1",
+    "draco3dgltf": "^1.5.7",
+    "obj2gltf": "^3.2.0",
     "react": "^18.3.0",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^18.3.0",
     "react-router-dom": "^6.28.1",
     "react-scripts": "^5.0.1",
-    "react-toastify": "^11.0.2"
+    "react-toastify": "^11.0.2",
+    "sharp": "^0.34.5",
+    "three": "^0.182.0"
   },
   "browser": {
     "child_process": false

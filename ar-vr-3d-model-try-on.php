@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           1.7.8
+ * Version:           1.8.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -40,14 +40,40 @@ require_once 'vendor/autoload.php';
 use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
+use AR_TRY_ON\AR_TRY_ON_Compression;
+use AR_TRY_ON\AR_TRY_ON_Compression_DB;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
+use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
+use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
+
+// Load Admin Notice System
+require_once plugin_dir_path( __FILE__ ) . 'includes/AR_TRY_ON_Admin_Notice.php';
 
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
+/**
+ * Is plugin active
+ */
+function atlas_ar_is_pro_plugin_exists() {
+    $plugin_path = \WP_PLUGIN_DIR;
+    $pro_plugins = [
+        '/ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+        '/ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+    ];
 
-if ( ! function_exists( 'av3mto_fs' ) ) {
+    foreach ( $pro_plugins as $pro_plugin ) {
+        if ( file_exists( $plugin_path . $pro_plugin ) ) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function av3mto_fs() {
 		global $av3mto_fs;
@@ -66,12 +92,15 @@ if ( ! function_exists( 'av3mto_fs' ) ) {
 				'type'                => 'plugin',
 				'public_key'          => 'pk_28cf95aad28914518f7065b97bbe4',
 				'is_premium'          => false,
+                'has_premium_version' => true,
+                'has_paid_plans'      => true,
 				'has_addons'          => false,
-				'has_paid_plans'      => false,
+                'has_affiliation'     => 'all',
 				'menu'                => array(
 					'slug'           => 'ar-vr-3d-model-try-on',
 					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',
-					'support' => false,
+                    'support' => 1,
+                    'pricing' => 1,
 					'contact' => true,
 					'account' => true,
 				),
@@ -163,7 +192,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '1.7.8' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '1.8.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
@@ -194,7 +223,38 @@ function atlas_ar_run() {
 		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
 //	}
 	new AR_TRY_ON_Api_Routes();
+
+	// Initialize Compression feature (v1.8.0+)
+    AR_TRY_ON_Compression::init();
+
+
+    // Register Compression REST API routes
+	add_action( 'rest_api_init', function() {
+		$compression_routes = new AR_TRY_ON_Compression_Routes();
+		$compression_routes->register_routes();
+	} );
+
+	// Initialize Admin Notice System (v1.8.0+)
+	AR_TRY_ON_Admin_Notice::instance();
+
+	// Admin action to manually create compression database tables
+	add_action( 'admin_init', function() {
+		if ( isset( $_GET['ar_create_compression_tables'] ) && current_user_can( 'manage_options' ) ) {
+			AR_TRY_ON_Compression_DB::init();
+			wp_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
+			exit;
+		}
+	} );
 }
+
+// Add custom cron schedule for compression queue processing
+add_filter( 'cron_schedules', function( $schedules ) {
+	$schedules['every_five_minutes'] = array(
+		'interval' => 300, // 5 minutes in seconds
+		'display'  => __( 'Every 5 Minutes', 'ar-vr-3d-model-try-on' ),
+	);
+	return $schedules;
+} );
 
 
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );

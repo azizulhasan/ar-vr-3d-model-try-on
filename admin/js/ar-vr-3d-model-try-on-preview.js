@@ -2,6 +2,13 @@
 import { getURL, postWithoutImage, getPostID, setModelAttributes } from "../../src/context/utilities";
 
 
+
+// document.querySelector(".slider").addEventListener('beforexrselect', (ev) => {
+//     // Keep slider interactions from affecting the XR scene.
+//     ev.preventDefault();
+// });
+
+
 const product_id = getPostID();
 
 console.log({ product_id })
@@ -131,17 +138,12 @@ if (false) {
     wp.hooks.addAction('atlas_ar_preview_data', 'ar_try_on', function (data) {
 
         model_settings = { ...model_settings, ...data }
-        console.log(model_settings)
-
         // Check if the data exists before assigning it to model-viewer
         if (model_settings) {
             const modelViewer = document.querySelectorAll('.atlas_ar_model_viewer')[0]
             if (modelViewer) {
                 setModelAttributes(modelViewer, model_settings)
-
             }
-
-
         }
     });
 
