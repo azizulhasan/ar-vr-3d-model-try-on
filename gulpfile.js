@@ -65,6 +65,7 @@ const productionSrc = [
 	'!tailwind.config.js',
 	'!public/js/ar-vr-3d-model-try-on-public.js',
 	'!admin/js/ar-try-on-media-library.js',
+	'!admin/js/ar-vr-3d-model-try-on-preview.js',
 	'!public/js/AtlasAR.js',
 	'!tailwind.config.modal.js',
 	'!admin/images/.DS_Store',
