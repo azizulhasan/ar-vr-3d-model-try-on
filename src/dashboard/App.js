@@ -326,7 +326,7 @@ const handleSubmit = async (e) => {
               />
             </svg>
           </button>
-          <h1 style={{ color: "var(--theme-text)" }}>AtlasAR</h1>
+          <h1 style={{ color: "var(--theme-text)" }}>{ar_try_on.plugin_name}</h1>
 
           <span className="art-text-center">Version: {ar_try_on.VERSION}</span>
         </div>

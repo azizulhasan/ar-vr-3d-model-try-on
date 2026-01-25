@@ -42,11 +42,14 @@ use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON\AR_TRY_ON_Compression;
 use AR_TRY_ON\AR_TRY_ON_Compression_DB;
-use AR_TRY_ON\AR_TRY_ON_Format_Converter;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
+use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
+
+// Load Admin Notice System
+require_once plugin_dir_path( __FILE__ ) . 'includes/AR_TRY_ON_Admin_Notice.php';
 
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
@@ -224,14 +227,15 @@ function atlas_ar_run() {
 	// Initialize Compression feature (v1.8.0+)
     AR_TRY_ON_Compression::init();
 
-	// Initialize Format Converter (v1.8.0+)
-//	AR_TRY_ON_Format_Converter::init();
 
     // Register Compression REST API routes
 	add_action( 'rest_api_init', function() {
 		$compression_routes = new AR_TRY_ON_Compression_Routes();
 		$compression_routes->register_routes();
 	} );
+
+	// Initialize Admin Notice System (v1.8.0+)
+	AR_TRY_ON_Admin_Notice::instance();
 
 	// Admin action to manually create compression database tables
 	add_action( 'admin_init', function() {
