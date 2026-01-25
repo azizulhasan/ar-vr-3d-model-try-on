@@ -32,12 +32,6 @@ class AR_TRY_ON_Hooks {
 		// Hook to update cache when any post is deleted
 		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
 
-		// Hook to update cache when any post is created or updated
-		add_action( 'save_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
-
-		// Hook to update cache when any post is deleted
-		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
-
 		add_filter( 'wp_kses_allowed_html', [ $this, 'allow_model_viewer_attributes' ], 10, 2 );
 	}
 

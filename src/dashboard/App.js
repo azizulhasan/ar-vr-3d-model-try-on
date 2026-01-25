@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import Settings from "./components/dashboard/settings/Settings";
+import SettingsWrapper from "./components/dashboard/settings/SettingsWrapper";
 import { ToastContainer } from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
 import Integration from "./components/dashboard/Integration/Integration";
@@ -146,11 +146,7 @@ export default function App() {
     if (Array.isArray(e)) {
       value = e;
 
-      if (
-        !ar_try_on.is_pro_active &&
-        targetName === "ar_try_on_allowed_post_types" &&
-        value.length > 1
-      ) {
+      if ( !ar_try_on.is_pro_active &&  targetName === "ar_try_on_allowed_post_types" && value.length > 1) {
         toast(
           "Multiple post type is only available in the pro version",
           "error"
@@ -188,6 +184,7 @@ export default function App() {
     if (!e.target.name) return;
 
     if (
+
       e.target.name === "ar_try_on_exclude_integration_api_name" &&
       e.target.value !== "tripo3d" &&
       !ar_try_on.is_pro_active
@@ -195,6 +192,7 @@ export default function App() {
       notify("API switch is available in pro version", "warn");
       return;
     }
+
 
     console.log({ name: e.target.name, value });
     setSettings({
@@ -256,7 +254,7 @@ const handleSubmit = async (e) => {
         }
       );
     }
-    console.log({ previousSettings, tempSettings });
+
     let hasValueChanged = isDifferent(previousSettings, tempSettings);
     if (!hasValueChanged) {
       notify("No changes detected", "info", {
@@ -297,6 +295,7 @@ const handleSubmit = async (e) => {
         pauseOnHover
       />
 
+
       {/* Top Navbar */}
       <div
         className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-5 art-z-50 "
@@ -327,7 +326,7 @@ const handleSubmit = async (e) => {
               />
             </svg>
           </button>
-          <h1 style={{ color: "var(--theme-text)" }}>AtlasAR</h1>
+          <h1 style={{ color: "var(--theme-text)" }}>{ar_try_on.plugin_name}</h1>
 
           <span className="art-text-center">Version: {ar_try_on.VERSION}</span>
         </div>
@@ -420,7 +419,7 @@ const handleSubmit = async (e) => {
         {/* Main Content */}
         <div className="art-flex-1">
           {activeTab === "Settings" && (
-            <Settings
+            <SettingsWrapper
               setHeaders={setHeaders}
               settings={settings}
               handleChange={handleChange}

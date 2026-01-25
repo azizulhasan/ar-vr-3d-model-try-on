@@ -393,6 +393,7 @@ export default function IntegrationSection({
                         <option value="text">Text</option>
                         <option value="number">Number</option>
                         <option value="textarea">Textarea</option>
+                        <option value="file">File</option>
                     </select>
 
                     {field.type === "textarea" ? (
@@ -435,7 +436,6 @@ export default function IntegrationSection({
                     ) : (
                         <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center"
                              title="Required field">
-
                         </div>
                     )}
 

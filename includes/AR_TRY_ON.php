@@ -133,30 +133,50 @@ class AR_TRY_ON {
 
 		$plugin_admin = new AR_TRY_ON_Admin( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999 );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999 );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_preview', 99999 );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 10 );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 10 );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_preview', 10 );
+
+		// Add defer attribute to admin scripts for better performance
+//		$this->loader->add_filter( 'script_loader_tag', $plugin_admin, 'add_defer_attribute', 10, 3 );
+
+		// Add version to assets for cache busting
+		$this->loader->add_filter( 'script_loader_src', $plugin_admin, 'add_version_to_assets', 10, 2 );
+		$this->loader->add_filter( 'style_loader_src', $plugin_admin, 'add_version_to_assets', 10, 2 );
+
+        /**
+         * Adds support for Android `.glb` and iOS `.usdz` file types by defining their extensions and mime types.
+         * The function `ar_model_viewer_for_woocommerce_file_and_ext` checks the file type during upload and processing.
+         * This ensures that the file types are correctly identified in WordPress.
+         * It hooks into the `wp_check_filetype_and_ext` filter, with a priority of 10 and passes 4 arguments.
+         */
+        // Allow Android (.glb) and iOS (.usdz) files to be uploaded by adding them to the allowed MIME types.
+        $this->loader->add_filter( 'upload_mimes', $plugin_admin, 'mime_types' );
 
 		/**
 		 * Enqueues the admin scripts for the WordPress admin dashboard.
 		 * The function `enqueue_scripts` in `$plugin_admin` will include the necessary JavaScript files for the plugin.
 		 */
 		// Set the extension and mime type for Android (.glb) and iOS (.usdz) files.
-		$this->loader->add_filter(
-			'wp_check_filetype_and_ext',
-			$plugin_admin,
-			'ATLAS_AR_for_woocommerce_file_and_ext',
-			10,
-			4
-		);
-		/**
-		 * Adds support for Android `.glb` and iOS `.usdz` file types by defining their extensions and mime types.
-		 * The function `ar_model_viewer_for_woocommerce_file_and_ext` checks the file type during upload and processing.
-		 * This ensures that the file types are correctly identified in WordPress.
-		 * It hooks into the `wp_check_filetype_and_ext` filter, with a priority of 10 and passes 4 arguments.
-		 */
-		// Allow Android (.glb) and iOS (.usdz) files to be uploaded by adding them to the allowed MIME types.
-		$this->loader->add_filter( 'upload_mimes', $plugin_admin, 'atlas_ar_for_woocommerce_mime_types' );
+        global $wp_version;
+        if (version_compare($wp_version, '5.1') >= 0) {
+            $this->loader->add_filter(
+                'wp_check_filetype_and_ext',
+                $plugin_admin,
+                'allowed_file_and_ext',
+                10,
+                5
+            );
+        } else {
+            $this->loader->add_filter(
+                'wp_check_filetype_and_ext',
+                $plugin_admin,
+                'allowed_file_and_ext',
+                10,
+                4
+            );
+        }
+
 
 
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'atlas_ar_menu' );
@@ -173,42 +193,45 @@ class AR_TRY_ON {
 
 		$this->plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_styles', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_styles', 10 );
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_scripts', 99999 );
+		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_scripts', 10 );
+
+		// Add defer attribute to frontend scripts for better performance
+		$this->loader->add_filter( 'script_loader_tag', $this->plugin_public, 'add_defer_attribute', 10, 3 );
 
 	}
 
 	public function define_wc_hooks() {
 
-		$settings = (array) get_option( 'ar_try_on_settings' );
+		$settings = AR_TRY_ON_Helper::get_settings();
 
 		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : false;
 		switch ( $wc_hook_id ) {
 			case 1:
-				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'atlas_ar_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
 			case 2:
-				$this->loader->add_action( 'woocommerce_after_single_product_summary', $this->plugin_public, 'atlas_ar_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_after_single_product_summary', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
 			case 3:
-				$this->loader->add_action( 'woocommerce_before_single_product', $this->plugin_public, 'atlas_ar_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_before_single_product', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
 			case 4:
-				$this->loader->add_action( 'woocommerce_after_single_product', $this->plugin_public, 'atlas_ar_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_after_single_product', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
 			case 5:
-				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_after_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
 			case 6:
-				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 99999999 );
+				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
             case 7:
-				$this->loader->add_action( 'woocommerce_product_thumbnails', $this, 'add_3d_file_as_product_gallery_item', 99999999 );
+				$this->loader->add_action( 'woocommerce_product_thumbnails', $this, 'add_3d_file_as_product_gallery_item', 20 );
                 break;
 		}
 
-		$this->loader->add_filter( 'the_content', $this->plugin_public, 'atlas_ar_button', 99999999 );
+		$this->loader->add_filter( 'the_content', $this->plugin_public, 'atlas_ar_button', 20 );
 
 
 		if ( isset( $settings['ar_try_on_single_product_tabs'] ) ) {

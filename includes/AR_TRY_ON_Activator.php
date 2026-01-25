@@ -72,7 +72,12 @@ class AR_TRY_ON_Activator {
 			update_option( 'ar_try_on_settings', $all_settings );
 			AR_TRY_ON_Cache::set( 'settings', $all_settings );
 		}
-		
+
+		// Initialize compression database tables (log table only - queue is Pro)
+		AR_TRY_ON_Compression_DB::init();
+
+		// Note: Queue table and cron job are handled by Pro plugin
+
 		return $all_settings;
 	}
 

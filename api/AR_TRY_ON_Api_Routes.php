@@ -107,6 +107,8 @@ class AR_TRY_ON_Api_Routes
             $fields = json_decode($request['fields'], true);
             update_option('ar_try_on_settings', $fields);
             AR_TRY_ON_Cache::delete('settings');
+            // Clear static settings cache in Helper class
+            AR_TRY_ON_Helper::clear_settings_cache();
 
             if (isset($fields['ar_try_on_clear_cache']) && $fields['ar_try_on_clear_cache']) {
                 AR_TRY_ON_Cache::flush();

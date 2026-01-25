@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(npm run production:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 5 tail:*)",
+      "Bash(where npm:*)",
+      "Bash(curl:*)",
+      "Bash(python -c:*)",
+      "Bash(powershell -Command \"Get-Content .\\\\mcp-wpaugmentedreality-run_api_function-1769324064024.txt | Select-String -Pattern ''Convert unlimited'' -Context 0,10\")"
+    ]
+  }
+}

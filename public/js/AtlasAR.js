@@ -148,7 +148,6 @@ class AtlasAR {
       }
     }
 
-
     // Show loading message before sending the request
     let button = document.querySelector(`[product-id="${product_id}"]`);
     let buttonText = 'View In 3D'
