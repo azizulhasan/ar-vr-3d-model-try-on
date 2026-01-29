@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import OverviewWrapper from "./components/dashboard/overview/OverviewWrapper";
 import SettingsWrapper from "./components/dashboard/settings/SettingsWrapper";
 import { ToastContainer } from "react-toastify";
 import Features from "./components/dashboard/Features/Features";
@@ -17,7 +18,7 @@ import notify from "../context/Notify";
 import "./theme.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState("Settings");
+  const [activeTab, setActiveTab] = useState("Overview");
   const [authType, setAuthType] = useState("Bearer");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState("#ffffff");
@@ -52,6 +53,7 @@ export default function App() {
     ],
   });
   const tabs = [
+     { name: "Overview", href: "#", current: true, component: "Overview" },
     { name: "Settings", href: "#", current: true, component: "Settings" },
     {
       name: "Integration",
@@ -418,6 +420,7 @@ const handleSubmit = async (e) => {
 
         {/* Main Content */}
         <div className="art-flex-1">
+              {activeTab === "Overview" && <OverviewWrapper />}
           {activeTab === "Settings" && (
             <SettingsWrapper
               setHeaders={setHeaders}
@@ -459,7 +462,7 @@ const handleSubmit = async (e) => {
 
        )} */}
 
-          {activeTab !== "Documentation" && activeTab !== "Features" && (
+          {activeTab !== "Documentation" && activeTab !== "Features" && activeTab !== "Overview" && (
             <div
               className={`art-border-t art-shadow-lg art-z-50 art-transition-all art-duration-300 ${
                 activeTab === "Integration"
