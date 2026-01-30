@@ -9,59 +9,79 @@ import React from 'react';
  */
 export default function FeatureComparison() {
     const features = [
-        {
-            name: 'Embed 3D Models in Posts, Pages, and Widgets',
+{
+            name: 'Unlimited 3D Model Uploads',
             free: true,
             pro: true,
         },
         {
-            name: 'Supports Popular 3D Formats (.GLB, .GLTF, .OBJ, .STL, and more)',
+            name: 'Supports GLB, GLTF, USDZ formats',
             free: true,
             pro: true,
         },
         {
-            name: 'Support for external model URLs',
+            name: 'Mobile AR for Android & iOS (No App Required)',
             free: true,
             pro: true,
         },
         {
-            name: 'Show 3D product on your WooCommerce product pages',
+            name: 'Floor Placement AR Mode',
             free: true,
             pro: true,
         },
         {
-            name: 'Add multiple 3D models into a single viewer gallery',
+            name: 'Wall Placement AR Mode',
             free: true,
             pro: true,
         },
         {
-            name: 'Add 3D models for each variant for the WooCommerce product',
-            free: false,
-            pro: true,
-        },
-        {
-            name: 'Touch, Pan, Zoom & Rotate controls',
+            name: 'WooCommerce Integration with Auto Buttons',
             free: true,
             pro: true,
         },
         {
-            name: 'Auto-Rotation to view in 360° without interaction',
+            name: 'Interactive 3D Viewer (Rotate, Zoom, Pan)',
             free: true,
             pro: true,
         },
         {
-            name: 'Preset to save your preferred viewer configurations',
+            name: 'Custom Poster/Thumbnail Images',
             free: true,
             pro: true,
         },
         {
-            name: 'Elementor widget available',
+            name: 'QR Code Generation for Mobile AR',
             free: true,
             pro: true,
         },
         {
-            name: 'Full viewer settings on Elementor widget',
-            free: false,
+            name: 'Shortcode Support [atlas_ar]',
+            free: true,
+            pro: true,
+        },
+        {
+            name: 'Tripo3D AI Model Generation (usage fees apply)',
+            free: true,
+            pro: true,
+        },
+        {
+            name: 'Gutenberg Block Support',
+            free: true,
+            pro: true,
+        },
+        {
+            name: 'Auto-Rotation Settings',
+            free: true,
+            pro: true,
+        },
+        {
+            name: 'Environment & Skybox Images',
+            free: true,
+            pro: true,
+        },
+        {
+            name: 'Shadow Intensity Control',
+            free: true,
             pro: true,
         },
         {
@@ -70,27 +90,62 @@ export default function FeatureComparison() {
             pro: true,
         },
         {
-            name: 'Adjust lighting, shadow intensity, and exposure',
+            name: 'Custom CSS & Styling Options',
+            free: true,
+            pro: true,
+        },
+        {
+            name: 'Dimensions Display (Length, Width, Height)',
             free: false,
             pro: true,
         },
         {
-            name: 'Add a poster image to show while the model is loading',
+            name: 'Interactive Hotspots (Unlimited)',
             free: false,
             pro: true,
         },
         {
-            name: 'Display a progress bar until the 3D file is fully loaded',
+            name: 'Slider/Multiple Model Display',
             free: false,
             pro: true,
         },
         {
-            name: 'Enable or disable auto-rotate, fullscreen, and autoplay',
+            name: 'Automatic Compression (70% file size reduction)',
             free: false,
             pro: true,
         },
         {
-            name: 'Set a custom camera angle for the perfect first impression',
+            name: 'Product Configurators (Colors, Materials, Finishes)',
+            free: false,
+            pro: true,
+        },
+        {
+            name: 'Priority Email Support (24h Response)',
+            free: false,
+            pro: true,
+        },
+        {
+            name: 'Analytics Dashboard (Coming Q1 2026)',
+            free: false,
+            pro: true,
+        },
+        {
+            name: 'Per-Variation 3D Models (Coming Q1 2026)',
+            free: false,
+            pro: true,
+        },
+        {
+            name: 'Background Processing for Large Files (Coming Q2 2026)',
+            free: false,
+            pro: true,
+        },
+        {
+            name: 'Glass Mode Virtual Try-On for Eyewear & Jewelry (Coming Q2 2026)',
+            free: false,
+            pro: true,
+        },
+        {
+            name: 'Desktop WebAR Experiences (Coming Q3 2026)',
             free: false,
             pro: true,
         },
