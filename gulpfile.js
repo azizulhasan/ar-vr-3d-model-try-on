@@ -47,15 +47,10 @@ const productionSrc = [
 	'!public/js/AtlasAR.js',
 	'!tailwind.config.modal.js',
 	'!admin/images/.DS_Store',
-<<<<<<< HEAD
-	'!public/js/single-product.js' // TODO:: this file might be necessary in the near future.
-];
-=======
+	'!*.DS_Store',
 	'!public/js/single-product.js', // TODO:: this file is might be necessary in the near future.
 	'!admin/js/ar-compression-client.js'
 ]
-
->>>>>>> release/1.8.0
 
 const config = {
 	babel: {
