@@ -14,6 +14,7 @@ import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
 import DimensionsSection from "./components/DimensionsSection.js";
 import HotspotsSection from "./components/HotspotsSection.js";
+import SettingsSection from "./components/SettingsSection.js";
 import CompressionPanel from "./components/CompressionPanel.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
@@ -64,6 +65,7 @@ const ARProductModelSettings = () => {
         },
         hotspots: [],
         thumbnail_image: "",
+        show_button_in: "global",
         isMultiple: false,
         multipleItems: [
             {
@@ -149,6 +151,7 @@ const ARProductModelSettings = () => {
         advance: false,
         dimensions: false,
         hotspots: false,
+        settings: false,
     });
     const [styleAccordion, setStyleAccordion] = useState({
         canvas: false,
@@ -203,6 +206,9 @@ const ARProductModelSettings = () => {
             content: false,
             camera: false,
             advance: false,
+            dimensions: false,
+            hotspots: false,
+            settings: false,
             [section]: !prev[section],
         }));
     };
@@ -599,6 +605,12 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                 <HotspotsSection
                                     productModel={productModel}
                                     setProductModel={setProductModel}
+                                    activeAccordion={activeAccordion}
+                                    toggleAccordion={toggleAccordion}
+                                />
+                                <SettingsSection
+                                    productModel={productModel}
+                                    handleChange={handleChange}
                                     activeAccordion={activeAccordion}
                                     toggleAccordion={toggleAccordion}
                                 />

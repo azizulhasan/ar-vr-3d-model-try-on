@@ -26,7 +26,7 @@ export default function App() {
   const [settings, setSettings] = useState({
     ar_try_on_display_button_automatically: "yes",
     ar_try_on_allowed_post_types: ["post"],
-    ar_try_on_wc_hook_position: "3",
+    ar_try_on_wc_hook_position: "product_image",
     ar_try_on_single_product_tabs: "yes",
     ar_try_on_loading_type: "auto",
     ar_try_on_reveal_type: "auto",

@@ -1,0 +1,167 @@
+/**
+ * Image/3D Toggle Styles
+ * Toggle button overlays on the featured product image
+ *
+ * @since 1.8.2
+ */
+
+/* Main image container needs position relative for overlay */
+.woocommerce-product-gallery__image {
+    position: relative;
+}
+
+/* Toggle button container - positioned on top of featured image */
+.atlas-ar-toggle-container {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+/* Toggle button */
+.atlas-ar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid #333;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.atlas-ar-toggle-btn:hover {
+    background-color: #333;
+    color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.atlas-ar-toggle-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.3);
+}
+
+.atlas-ar-toggle-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: fill 0.3s ease;
+}
+
+.atlas-ar-toggle-btn:hover svg {
+    fill: #fff;
+}
+
+/* 3D Viewer overlay container - positioned on top of featured image */
+.atlas-ar-3d-viewer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    background-color: #f5f5f5;
+    display: none;
+}
+
+.atlas-ar-3d-viewer-overlay.atlas-ar-active {
+    display: block;
+    animation: atlasArFadeIn 0.3s ease;
+}
+
+/* Model viewer inside overlay */
+.atlas-ar-3d-viewer-overlay model-viewer,
+.atlas-ar-3d-viewer-overlay .atlas_ar_model_viewer {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100%;
+}
+
+.atlas-ar-3d-viewer-overlay > div {
+    width: 100%;
+    height: 100%;
+}
+
+/* Fade in animation */
+@keyframes atlasArFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .atlas-ar-toggle-container {
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .atlas-ar-toggle-btn {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+    }
+
+    .atlas-ar-toggle-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .atlas-ar-toggle-btn {
+        background-color: rgba(51, 51, 51, 0.95);
+        color: #fff;
+        border-color: #fff;
+    }
+
+    .atlas-ar-toggle-btn:hover {
+        background-color: #fff;
+        color: #333;
+    }
+
+    .atlas-ar-toggle-btn svg {
+        fill: #fff;
+    }
+
+    .atlas-ar-toggle-btn:hover svg {
+        fill: #333;
+    }
+
+    .atlas-ar-3d-viewer-overlay {
+        background-color: #2a2a2a;
+    }
+}
+
+/* WooCommerce specific fixes */
+.woocommerce-product-gallery {
+    position: relative;
+}
+
+/* Ensure toggle button appears above WooCommerce gallery elements */
+.woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 10;
+}
+
+/* Fix for flex slider viewport */
+.woocommerce-product-gallery .flex-viewport {
+    position: relative;
+}
+
+/* Ensure the 3D viewer overlay works with flexslider */
+.woocommerce-product-gallery .flex-viewport .atlas-ar-3d-viewer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

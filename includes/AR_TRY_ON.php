@@ -206,7 +206,8 @@ class AR_TRY_ON {
 
 		$settings = AR_TRY_ON_Helper::get_settings();
 
-		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : false;
+		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : 'product_image';
+
 		switch ( $wc_hook_id ) {
 			case 1:
 				$this->loader->add_action( 'woocommerce_before_single_product_summary', $this->plugin_public, 'atlas_ar_button', 20 );
@@ -226,9 +227,14 @@ class AR_TRY_ON {
 			case 6:
 				$this->loader->add_action( 'woocommerce_before_add_to_cart_form', $this->plugin_public, 'atlas_ar_button', 20 );
 				break;
-            case 7:
+			case 7:
 				$this->loader->add_action( 'woocommerce_product_thumbnails', $this, 'add_3d_file_as_product_gallery_item', 20 );
-                break;
+				break;
+			case 'product_image':
+			case '3d_viewer':
+				// Add toggle functionality - output in footer to overlay on featured image
+				$this->loader->add_action( 'wp_footer', $this, 'add_image_3d_toggle_to_gallery', 20 );
+				break;
 		}
 
 		$this->loader->add_filter( 'the_content', $this->plugin_public, 'atlas_ar_button', 20 );
@@ -330,6 +336,184 @@ class AR_TRY_ON {
         $image  = ob_get_clean();
 
         echo $image;
+    }
+
+    /**
+     * Add image/3D toggle functionality to product gallery
+     * Places toggle button on top of the featured image as overlay
+     *
+     * @since 1.8.2
+     * @return void
+     */
+    public function add_image_3d_toggle_to_gallery() {
+        // Only run on single product pages
+        if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+            return;
+        }
+
+        global $product;
+        if ( ! $product ) {
+            return;
+        }
+
+        $product_id = $product->get_id();
+
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+            return;
+        }
+
+        // Check if product has 3D model
+        if ( ! AR_TRY_ON_Helper::has_3d_model( $product_id ) ) {
+            return;
+        }
+
+        // Get the effective display mode for this product
+        $display_mode = AR_TRY_ON_Helper::get_effective_show_button_in( $product_id );
+
+        // Only proceed if toggle mode
+        if ( ! AR_TRY_ON_Helper::is_toggle_display_mode( $display_mode ) ) {
+            return;
+        }
+
+        ob_start();
+        ?>
+        <!-- 3D Viewer Container for Toggle (hidden initially, inserted via JS) -->
+        <div id="atlas_ar-toggle-3d-container" style="display: none;">
+            <?php echo AR_TRY_ON_Helper::create_shortcode( ['height' => '100%', 'width' => '100%'], '' ); ?>
+        </div>
+
+        <script>
+            (function() {
+                'use strict';
+
+                const atlas_ar_product_id = "<?php echo esc_js( $product_id ); ?>";
+                const atlas_ar_display_mode = "<?php echo esc_js( $display_mode ); ?>";
+
+                // SVG Icons
+                const icon3D = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l6.9 3.45L12 11.09 5.1 7.63 12 4.18zM4 8.82l7 3.5v7.36l-7-3.5V8.82zm9 10.86v-7.36l7-3.5v7.36l-7 3.5z"/>
+                </svg>`;
+
+                const iconImage = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>`;
+
+                function initToggle() {
+                    // Find the main featured image container
+                    const mainImageContainer = document.querySelector('.woocommerce-product-gallery__image');
+                    const viewer3DSource = document.getElementById('atlas_ar-toggle-3d-container');
+
+                    if (!mainImageContainer || !viewer3DSource) {
+                        return;
+                    }
+
+                    // Get the actual image element inside
+                    const mainImage = mainImageContainer.querySelector('a, img');
+
+                    if (!mainImage) {
+                        return;
+                    }
+
+                    // Make the main image container position relative for overlay
+                    mainImageContainer.style.position = 'relative';
+
+                    // Create the 3D viewer container inside the main image container
+                    const viewer3DContainer = document.createElement('div');
+                    viewer3DContainer.id = 'atlas_ar-3d-viewer-overlay';
+                    viewer3DContainer.className = 'atlas-ar-3d-viewer-overlay';
+                    viewer3DContainer.innerHTML = viewer3DSource.innerHTML;
+                    viewer3DContainer.style.cssText = 'display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #f5f5f5;';
+
+                    // Insert the 3D viewer container inside the main image container
+                    mainImageContainer.appendChild(viewer3DContainer);
+
+                    // Remove the source container from footer
+                    viewer3DSource.remove();
+
+                    // Create toggle button container
+                    const toggleContainer = document.createElement('div');
+                    toggleContainer.className = 'atlas-ar-toggle-container';
+
+                    // Create toggle button
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.type = 'button';
+                    toggleBtn.className = 'atlas-ar-toggle-btn';
+                    toggleBtn.setAttribute('aria-label', 'Toggle between product image and 3D viewer');
+
+                    // Track current view state
+                    let currentView = atlas_ar_display_mode; // 'product_image' or '3d_viewer'
+                    let model3DLoaded = false;
+
+                    // Set initial state based on display mode
+                    if (currentView === '3d_viewer') {
+                        // Show 3D viewer first
+                        toggleBtn.innerHTML = iconImage;
+                        toggleBtn.title = 'View Product Image';
+                        mainImage.style.visibility = 'hidden';
+                        viewer3DContainer.style.display = 'block';
+                        load3DModel();
+                    } else {
+                        // Show product image first (default)
+                        toggleBtn.innerHTML = icon3D;
+                        toggleBtn.title = 'View in 3D';
+                        mainImage.style.visibility = 'visible';
+                        viewer3DContainer.style.display = 'none';
+                    }
+
+                    // Toggle click handler
+                    toggleBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        if (currentView === 'product_image') {
+                            // Switch to 3D viewer
+                            mainImage.style.visibility = 'hidden';
+                            viewer3DContainer.style.display = 'block';
+                            toggleBtn.innerHTML = iconImage;
+                            toggleBtn.title = 'View Product Image';
+                            currentView = '3d_viewer';
+
+                            if (!model3DLoaded) {
+                                load3DModel();
+                            }
+                        } else {
+                            // Switch to product image
+                            mainImage.style.visibility = 'visible';
+                            viewer3DContainer.style.display = 'none';
+                            toggleBtn.innerHTML = icon3D;
+                            toggleBtn.title = 'View in 3D';
+                            currentView = 'product_image';
+                        }
+                    });
+
+                    toggleContainer.appendChild(toggleBtn);
+
+                    // Append toggle button to the main image container (on top of featured image)
+                    mainImageContainer.appendChild(toggleContainer);
+
+                    function load3DModel() {
+                        if (model3DLoaded) return;
+
+                        const modelViewer = viewer3DContainer.querySelector('model-viewer');
+                        if (modelViewer && window.AtlasAR) {
+                            const atlasAR = new window.AtlasAR();
+                            const modelId = modelViewer.id ? '#' + modelViewer.id : '.atlas_ar_model_viewer';
+                            atlasAR.fetchModelData(atlas_ar_product_id, modelId, 'normal');
+                            model3DLoaded = true;
+                        }
+                    }
+                }
+
+                // Initialize when DOM is ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initToggle);
+                } else {
+                    initToggle();
+                }
+            })();
+        </script>
+        <?php
+        echo ob_get_clean();
     }
 
 	/**
