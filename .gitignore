@@ -108,3 +108,6 @@ dist
 
 # production
 production/
+
+.DS_Store
+admin/images/.DS_Store
