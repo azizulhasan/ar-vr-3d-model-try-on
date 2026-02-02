@@ -398,6 +398,14 @@ class AR_TRY_ON {
                     <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                 </svg>`;
 
+                const iconFullscreen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                </svg>`;
+
+                const iconClose = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>`;
+
                 function initToggle() {
                     // Find the main featured image container
                     const mainImageContainer = document.querySelector('.woocommerce-product-gallery__image');
@@ -434,6 +442,15 @@ class AR_TRY_ON {
                     const toggleContainer = document.createElement('div');
                     toggleContainer.className = 'atlas-ar-toggle-container';
 
+                    // Create fullscreen button (hidden initially, shown when 3D is active)
+                    const fullscreenBtn = document.createElement('button');
+                    fullscreenBtn.type = 'button';
+                    fullscreenBtn.className = 'atlas-ar-toggle-btn atlas-ar-fullscreen-btn';
+                    fullscreenBtn.setAttribute('aria-label', 'View 3D model in fullscreen');
+                    fullscreenBtn.innerHTML = iconFullscreen;
+                    fullscreenBtn.title = 'Fullscreen';
+                    fullscreenBtn.style.display = 'none'; // Hidden initially
+
                     // Create toggle button
                     const toggleBtn = document.createElement('button');
                     toggleBtn.type = 'button';
@@ -444,6 +461,28 @@ class AR_TRY_ON {
                     let currentView = atlas_ar_display_mode; // 'product_image' or '3d_viewer'
                     let model3DLoaded = false;
 
+                    // Create fullscreen overlay container
+                    const fullscreenOverlay = document.createElement('div');
+                    fullscreenOverlay.id = 'atlas_ar-fullscreen-overlay';
+                    fullscreenOverlay.className = 'atlas-ar-fullscreen-overlay';
+                    fullscreenOverlay.style.display = 'none';
+
+                    // Create close button for fullscreen
+                    const closeBtn = document.createElement('button');
+                    closeBtn.type = 'button';
+                    closeBtn.className = 'atlas-ar-fullscreen-close-btn';
+                    closeBtn.setAttribute('aria-label', 'Close fullscreen');
+                    closeBtn.innerHTML = iconClose;
+                    closeBtn.title = 'Close';
+
+                    // Create fullscreen 3D viewer container
+                    const fullscreen3DContainer = document.createElement('div');
+                    fullscreen3DContainer.className = 'atlas-ar-fullscreen-viewer';
+
+                    fullscreenOverlay.appendChild(closeBtn);
+                    fullscreenOverlay.appendChild(fullscreen3DContainer);
+                    document.body.appendChild(fullscreenOverlay);
+
                     // Set initial state based on display mode
                     if (currentView === '3d_viewer') {
                         // Show 3D viewer first
@@ -451,6 +490,7 @@ class AR_TRY_ON {
                         toggleBtn.title = 'View Product Image';
                         mainImage.style.visibility = 'hidden';
                         viewer3DContainer.style.display = 'block';
+                        fullscreenBtn.style.display = 'flex'; // Show fullscreen button
                         load3DModel();
                     } else {
                         // Show product image first (default)
@@ -458,6 +498,7 @@ class AR_TRY_ON {
                         toggleBtn.title = 'View in 3D';
                         mainImage.style.visibility = 'visible';
                         viewer3DContainer.style.display = 'none';
+                        fullscreenBtn.style.display = 'none'; // Hide fullscreen button
                     }
 
                     // Toggle click handler
@@ -471,6 +512,7 @@ class AR_TRY_ON {
                             viewer3DContainer.style.display = 'block';
                             toggleBtn.innerHTML = iconImage;
                             toggleBtn.title = 'View Product Image';
+                            fullscreenBtn.style.display = 'flex'; // Show fullscreen button
                             currentView = '3d_viewer';
 
                             if (!model3DLoaded) {
@@ -482,11 +524,35 @@ class AR_TRY_ON {
                             viewer3DContainer.style.display = 'none';
                             toggleBtn.innerHTML = icon3D;
                             toggleBtn.title = 'View in 3D';
+                            fullscreenBtn.style.display = 'none'; // Hide fullscreen button
                             currentView = 'product_image';
                         }
                     });
 
+                    // Fullscreen click handler
+                    fullscreenBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openFullscreen();
+                    });
+
+                    // Close fullscreen click handler
+                    closeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeFullscreen();
+                    });
+
+                    // Close fullscreen on escape key
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && fullscreenOverlay.style.display === 'flex') {
+                            closeFullscreen();
+                        }
+                    });
+
+                    // Add buttons to container (toggle on left, fullscreen on right - horizontal layout)
                     toggleContainer.appendChild(toggleBtn);
+                    toggleContainer.appendChild(fullscreenBtn);
 
                     // Append toggle button to the main image container (on top of featured image)
                     mainImageContainer.appendChild(toggleContainer);
@@ -501,6 +567,27 @@ class AR_TRY_ON {
                             atlasAR.fetchModelData(atlas_ar_product_id, modelId, 'normal');
                             model3DLoaded = true;
                         }
+                    }
+
+                    function openFullscreen() {
+                        // Clone the 3D viewer content into fullscreen container
+                        fullscreen3DContainer.innerHTML = viewer3DContainer.innerHTML;
+                        fullscreenOverlay.style.display = 'flex';
+                        document.body.style.overflow = 'hidden'; // Prevent scrolling
+
+                        // Load model in fullscreen viewer
+                        const fullscreenModelViewer = fullscreen3DContainer.querySelector('model-viewer');
+                        if (fullscreenModelViewer && window.AtlasAR) {
+                            const atlasAR = new window.AtlasAR();
+                            const modelId = fullscreenModelViewer.id ? '#' + fullscreenModelViewer.id : '.atlas_ar_model_viewer';
+                            atlasAR.fetchModelData(atlas_ar_product_id, modelId, 'normal');
+                        }
+                    }
+
+                    function closeFullscreen() {
+                        fullscreenOverlay.style.display = 'none';
+                        document.body.style.overflow = ''; // Restore scrolling
+                        fullscreen3DContainer.innerHTML = ''; // Clear content
                     }
                 }
 
