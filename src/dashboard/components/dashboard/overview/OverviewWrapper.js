@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Welcome from './Welcome';
 import FeatureComparison from './FeatureComparison';
-import Demos from './Demos';
+// import Demos from './Demos';
 import Pricing from './Pricing';
 
 /**
@@ -21,11 +21,11 @@ export default function OverviewWrapper() {
             name: 'Welcome',
             icon: '👋',
         },
-        {
-            id: 'demos',
-            name: 'Demos',
-            icon: '🎮',
-        },
+        // {
+        //     id: 'demos',
+        //     name: 'Demos',
+        //     icon: '🎮',
+        // },
         {
             id: 'pricing',
             name: 'Pricing',
@@ -75,7 +75,7 @@ export default function OverviewWrapper() {
             {/* Subtab Content */}
             <div className="art-px-6 art-pb-6">
                 {activeSubtab === 'welcome' && <Welcome />}
-                {activeSubtab === 'demos' && <Demos/>}
+                {/* {activeSubtab === 'demos' && <Demos/>} */}
                 {activeSubtab === 'pricing' && <Pricing/>}
                 {activeSubtab === 'feature-comparison' && <FeatureComparison />}
             </div>

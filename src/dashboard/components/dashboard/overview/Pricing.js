@@ -18,7 +18,7 @@ export default function Pricing() {
                 period: '/monthly',
                 sites: '10 Sites',
                 subtitle: 'For Enterprises',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=1',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
@@ -27,7 +27,7 @@ export default function Pricing() {
                 period: '/monthly',
                 sites: '5 Sites',
                 subtitle: 'For Professionals',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=2',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
@@ -36,7 +36,7 @@ export default function Pricing() {
                 period: '/monthly',
                 sites: '1 Site',
                 subtitle: 'For Starter',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=3',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: true,
             },
         ],
@@ -47,7 +47,7 @@ export default function Pricing() {
                 period: '/year',
                 sites: '10 Sites',
                 subtitle: 'Enterprise',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=4',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
@@ -56,7 +56,7 @@ export default function Pricing() {
                 period: '/year',
                 sites: '5 Sites',
                 subtitle: 'Professional',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=5',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
@@ -65,7 +65,7 @@ export default function Pricing() {
                 period: '/year',
                 sites: '1 Site',
                 subtitle: 'Starter',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=6',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: true,
             },
         ],
@@ -76,7 +76,7 @@ export default function Pricing() {
                 period: '/lifetime',
                 sites: '10 Sites',
                 subtitle: 'For Enterprises',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=7',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
@@ -85,7 +85,7 @@ export default function Pricing() {
                 period: '/lifetime',
                 sites: '5 Sites',
                 subtitle: 'For Professionals',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=8',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
@@ -94,7 +94,7 @@ export default function Pricing() {
                 period: '/lifetime',
                 sites: '1 Site',
                 subtitle: 'Most Popular',
-                url: 'https://wpaugmentedreality.com/checkout/?edd_action=add_to_cart&download_id=123&edd_options[price_id]=9',
+                url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: true,
             },
         ],
@@ -117,7 +117,7 @@ export default function Pricing() {
     const currentPlans = plans[activePlan];
 
     return (
-        <div className="art-w-full art-max-w-7xl art-mx-auto art-p-6">
+        <div className="art-w-full art-mx-auto">
             {/* Pricing Toggle */}
             <div className="art-flex art-justify-center art-mb-8">
                 <div 

@@ -110,45 +110,45 @@ export default function FeatureComparison() {
             pro: true,
         },
         {
-            name: 'Automatic Compression (70% file size reduction)',
+            name: 'Automatic Compression (Upto 50% file size reduction)',
             free: false,
             pro: true,
         },
-        {
-            name: 'Product Configurators (Colors, Materials, Finishes)',
-            free: false,
-            pro: true,
-        },
+        // {
+        //     name: 'Product Configurators (Colors, Materials, Finishes)',
+        //     free: false,
+        //     pro: true,
+        // },
         {
             name: 'Priority Email Support (24h Response)',
             free: false,
             pro: true,
         },
-        {
-            name: 'Analytics Dashboard (Coming Q1 2026)',
-            free: false,
-            pro: true,
-        },
-        {
-            name: 'Per-Variation 3D Models (Coming Q1 2026)',
-            free: false,
-            pro: true,
-        },
-        {
-            name: 'Background Processing for Large Files (Coming Q2 2026)',
-            free: false,
-            pro: true,
-        },
-        {
-            name: 'Glass Mode Virtual Try-On for Eyewear & Jewelry (Coming Q2 2026)',
-            free: false,
-            pro: true,
-        },
-        {
-            name: 'Desktop WebAR Experiences (Coming Q3 2026)',
-            free: false,
-            pro: true,
-        },
+        // {
+        //     name: 'Analytics Dashboard (Coming Q1 2026)',
+        //     free: false,
+        //     pro: true,
+        // },
+        // {
+        //     name: 'Per-Variation 3D Models (Coming Q1 2026)',
+        //     free: false,
+        //     pro: true,
+        // },
+        // {
+        //     name: 'Background Processing for Large Files (Coming Q2 2026)',
+        //     free: false,
+        //     pro: true,
+        // },
+        // {
+        //     name: 'Glass Mode Virtual Try-On for Eyewear & Jewelry (Coming Q2 2026)',
+        //     free: false,
+        //     pro: true,
+        // },
+        // {
+        //     name: 'Desktop WebAR Experiences (Coming Q3 2026)',
+        //     free: false,
+        //     pro: true,
+        // },
     ];
 
     return (
