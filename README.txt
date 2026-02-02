@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -332,6 +332,11 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 1.8.1 ( 2 February 2026 )   =
+Added : Overview section added
+
+
+
 = 1.8.0 ( 25 January 2026 )   =
 Added : `.glb` file compression feature added (Pro).
 Added : `Dimensions` feature added (Pro) - Display product measurements in AR.
@@ -543,11 +548,5 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 1.8.0    =
-🚀 **PRO VERSION RELEASED!** Upgrade to unlock powerful features:
-✅ Dimensions Display - Show product measurements in AR
-✅ Interactive Hotspots - Educate customers with clickable info points
-✅ Product Configurators - Let customers customize colors and options
-✅ Automatic Compression - Reduce file sizes by 70% for faster loading
-👉 [View Pro Pricing & Features](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
-💰 **Early Adopter Discount: Save 40% - Limited Time!**
+= 1.8.1  =
+Added : Overview section added
