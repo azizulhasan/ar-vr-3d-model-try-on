@@ -25,7 +25,7 @@ export default function Welcome() {
                             className="art-text-base art-leading-relaxed"
                             // style={{ color: 'var(--theme-text)', opacity: 0.8 }}
                         >
-                            Easily display interactive 3D models on the web. Supported File type .glb, .gltf, obj 3ds stl ply off 3dm fbx dae wrl 3mf amf ifc brep step iges fcstd bim
+                            Easily display interactive 3D models on the web. Supported File type .glb, .gltf
                         </p>
                     </div>
 
