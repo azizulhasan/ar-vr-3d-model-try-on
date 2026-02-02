@@ -1,4 +1,5 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Feature Comparison Component
@@ -9,143 +10,143 @@ import React from 'react';
  */
 export default function FeatureComparison() {
     const features = [
-{
-            name: 'Unlimited 3D Model Uploads',
+        {
+            name: __('Unlimited 3D Model Uploads', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Supports GLB, GLTF, USDZ formats',
+            name: __('Supports GLB, GLTF, USDZ formats', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Mobile AR for Android & iOS (No App Required)',
+            name: __('Mobile AR for Android & iOS (No App Required)', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Floor Placement AR Mode',
+            name: __('Floor Placement AR Mode', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Wall Placement AR Mode',
+            name: __('Wall Placement AR Mode', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'WooCommerce Integration with Auto Buttons',
+            name: __('WooCommerce Integration with Auto Buttons', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Interactive 3D Viewer (Rotate, Zoom, Pan)',
+            name: __('Interactive 3D Viewer (Rotate, Zoom, Pan)', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Custom Poster/Thumbnail Images',
+            name: __('Custom Poster/Thumbnail Images', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'QR Code Generation for Mobile AR',
+            name: __('QR Code Generation for Mobile AR', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Shortcode Support [atlas_ar]',
+            name: __('Shortcode Support [atlas_ar]', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Tripo3D AI Model Generation (usage fees apply)',
+            name: __('Tripo3D AI Model Generation (usage fees apply)', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Gutenberg Block Support',
+            name: __('Gutenberg Block Support', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Auto-Rotation Settings',
+            name: __('Auto-Rotation Settings', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Environment & Skybox Images',
+            name: __('Environment & Skybox Images', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Shadow Intensity Control',
+            name: __('Shadow Intensity Control', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Lazy Loading for Performance',
+            name: __('Lazy Loading for Performance', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Custom CSS & Styling Options',
+            name: __('Custom CSS & Styling Options', 'ar-vr-3d-model-try-on'),
             free: true,
             pro: true,
         },
         {
-            name: 'Dimensions Display (Length, Width, Height)',
+            name: __('Dimensions Display (Length, Width, Height)', 'ar-vr-3d-model-try-on'),
             free: false,
             pro: true,
         },
         {
-            name: 'Interactive Hotspots (Unlimited)',
+            name: __('Interactive Hotspots (Unlimited)', 'ar-vr-3d-model-try-on'),
             free: false,
             pro: true,
         },
         {
-            name: 'Slider/Multiple Model Display',
+            name: __('Slider/Multiple Model Display', 'ar-vr-3d-model-try-on'),
             free: false,
             pro: true,
         },
         {
-            name: 'Automatic Compression (Upto 50% file size reduction)',
+            name: __('Automatic Compression (Upto 50% file size reduction)', 'ar-vr-3d-model-try-on'),
             free: false,
             pro: true,
         },
         // {
-        //     name: 'Product Configurators (Colors, Materials, Finishes)',
+        //     name: __('Product Configurators (Colors, Materials, Finishes)', 'ar-vr-3d-model-try-on'),
         //     free: false,
         //     pro: true,
         // },
         {
-            name: 'Priority Email Support (24h Response)',
+            name: __('Priority Email Support (24h Response)', 'ar-vr-3d-model-try-on'),
             free: false,
             pro: true,
         },
         // {
-        //     name: 'Analytics Dashboard (Coming Q1 2026)',
+        //     name: __('Analytics Dashboard (Coming Q1 2026)', 'ar-vr-3d-model-try-on'),
         //     free: false,
         //     pro: true,
         // },
         // {
-        //     name: 'Per-Variation 3D Models (Coming Q1 2026)',
+        //     name: __('Per-Variation 3D Models (Coming Q1 2026)', 'ar-vr-3d-model-try-on'),
         //     free: false,
         //     pro: true,
         // },
         // {
-        //     name: 'Background Processing for Large Files (Coming Q2 2026)',
+        //     name: __('Background Processing for Large Files (Coming Q2 2026)', 'ar-vr-3d-model-try-on'),
         //     free: false,
         //     pro: true,
         // },
         // {
-        //     name: 'Glass Mode Virtual Try-On for Eyewear & Jewelry (Coming Q2 2026)',
+        //     name: __('Glass Mode Virtual Try-On for Eyewear & Jewelry (Coming Q2 2026)', 'ar-vr-3d-model-try-on'),
         //     free: false,
         //     pro: true,
         // },
         // {
-        //     name: 'Desktop WebAR Experiences (Coming Q3 2026)',
+        //     name: __('Desktop WebAR Experiences (Coming Q3 2026)', 'ar-vr-3d-model-try-on'),
         //     free: false,
         //     pro: true,
         // },
@@ -170,7 +171,7 @@ export default function FeatureComparison() {
                             className="art-text-xl art-font-semibold"
                             // style={{ color: 'var(--theme-text)' }}
                         >
-                            Features
+                            {__('Features', 'ar-vr-3d-model-try-on')}
                         </h2>
                     </div>
                     <div className="art-col-span-3 art-text-center">
@@ -178,7 +179,7 @@ export default function FeatureComparison() {
                             className="art-text-lg art-font-semibold"
                             // style={{ color: 'var(--theme-text)' }}
                         >
-                            Free Plan
+                            {__('Free Plan', 'ar-vr-3d-model-try-on')}
                         </h3>
                     </div>
                     <div className="art-col-span-3 art-text-center">
@@ -186,7 +187,7 @@ export default function FeatureComparison() {
                             className="art-text-lg art-font-semibold"
                             // style={{ color: 'rgb(59,130,246)' }}
                         >
-                            Pro Start from <span className="art-text-2xl art-text-blue-800">49.99/y</span>
+                            {__('Pro Start from', 'ar-vr-3d-model-try-on')} <span className="art-text-2xl art-text-blue-800">49.99/y</span>
                         </h3>
                     </div>
                 </div>
