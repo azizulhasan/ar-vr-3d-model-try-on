@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { __ } from '@wordpress/i18n';
 /**
  * Pricing Component
  * 
@@ -12,88 +12,88 @@ export default function Pricing() {
 
     const plans = {
         monthly: [
-            {
-                name: '10 Sites',
+              {
+                name: __('10 Sites', 'ar-vr-3d-model-try-on'),
                 price: '$19.99',
-                period: '/monthly',
-                sites: '10 Sites',
-                subtitle: 'For Enterprises',
+                period: __('/monthly', 'ar-vr-3d-model-try-on'),
+                sites: __('10 Sites', 'ar-vr-3d-model-try-on'),
+                subtitle: __('For Enterprises', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
-                name: '5 Sites',
+                name: __('5 Sites', 'ar-vr-3d-model-try-on'),
                 price: '$9.99',
-                period: '/monthly',
-                sites: '5 Sites',
-                subtitle: 'For Professionals',
+                period: __('/monthly', 'ar-vr-3d-model-try-on'),
+                sites: __('5 Sites', 'ar-vr-3d-model-try-on'),
+                subtitle: __('For Professionals', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
-                name: '1 Site',
+                name: __('1 Site', 'ar-vr-3d-model-try-on'),
                 price: '$4.99',
-                period: '/monthly',
-                sites: '1 Site',
-                subtitle: 'For Starter',
+                period: __('/monthly', 'ar-vr-3d-model-try-on'),
+                sites: __('1 Site', 'ar-vr-3d-model-try-on'),
+                subtitle: __('For Starter', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: true,
             },
         ],
         yearly: [
             {
-                name: '10 Sites',
+                name: __('10 Sites', 'ar-vr-3d-model-try-on'),
                 price: '$149.99',
-                period: '/year',
-                sites: '10 Sites',
-                subtitle: 'Enterprise',
+                period: __('/year', 'ar-vr-3d-model-try-on'),
+                sites: __('10 Sites', 'ar-vr-3d-model-try-on'),
+                subtitle: __('Enterprise', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
-                name: '5 Sites',
+                name: __('5 Sites', 'ar-vr-3d-model-try-on'),
                 price: '$99.99',
-                period: '/year',
-                sites: '5 Sites',
-                subtitle: 'Professional',
+                period: __('/year', 'ar-vr-3d-model-try-on'),
+                sites: __('5 Sites', 'ar-vr-3d-model-try-on'),
+                subtitle: __('Professional', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
-                name: '1 Site',
+                name: __('1 Site', 'ar-vr-3d-model-try-on'),
                 price: '$49.99',
-                period: '/year',
-                sites: '1 Site',
-                subtitle: 'Starter',
+                period: __('/year', 'ar-vr-3d-model-try-on'),
+                sites: __('1 Site', 'ar-vr-3d-model-try-on'),
+                subtitle: __('Starter', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: true,
             },
         ],
         lifetime: [
-            {
-                name: '10 Sites',
+                       {
+                name: __('10 Sites', 'ar-vr-3d-model-try-on'),
                 price: '$399.99',
-                period: '/lifetime',
-                sites: '10 Sites',
-                subtitle: 'For Enterprises',
+                period: __('/lifetime', 'ar-vr-3d-model-try-on'),
+                sites: __('10 Sites', 'ar-vr-3d-model-try-on'),
+                subtitle: __('For Enterprises', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
-                name: '5 Sites',
+                name: __('5 Sites', 'ar-vr-3d-model-try-on'),
                 price: '$249.99',
-                period: '/lifetime',
-                sites: '5 Sites',
-                subtitle: 'For Professionals',
+                period: __('/lifetime', 'ar-vr-3d-model-try-on'),
+                sites: __('5 Sites', 'ar-vr-3d-model-try-on'),
+                subtitle: __('For Professionals', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: false,
             },
             {
-                name: '1 Site',
+                name: __('1 Site', 'ar-vr-3d-model-try-on'),
                 price: '$149.99',
-                period: '/lifetime',
-                sites: '1 Site',
-                subtitle: 'Most Popular',
+                period: __('/lifetime', 'ar-vr-3d-model-try-on'),
+                sites: __('1 Site', 'ar-vr-3d-model-try-on'),
+                subtitle: __('Most Popular', 'ar-vr-3d-model-try-on'),
                 url: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
                 featured: true,
             },
@@ -101,17 +101,17 @@ export default function Pricing() {
     };
 
     const features = [
-        'All Pro Features',
-        'Dimensions Display',
-        'Interactive Hotspots',
-        'Slider/Multiple Model Display',
-        'Auto Compression (70% savings)',
-        'Unlimited 3D Model Uploads',
-        'Generate 3D by AI ( usage fees apply )',
-        'Full iOS & Android AR Support (USDZ + GLB)',
-        'WooCommerce Integration with Auto Buttons',
-        'QR Code Generation for Mobile AR',
-        'Priority Email Support (24h response)',
+        __('All Pro Features', 'ar-vr-3d-model-try-on'),
+        __('Dimensions Display', 'ar-vr-3d-model-try-on'),
+        __('Interactive Hotspots', 'ar-vr-3d-model-try-on'),
+        __('Slider/Multiple Model Display', 'ar-vr-3d-model-try-on'),
+        __('Auto Compression (70% savings)', 'ar-vr-3d-model-try-on'),
+        __('Unlimited 3D Model Uploads', 'ar-vr-3d-model-try-on'),
+        __('Generate 3D by AI ( usage fees apply )', 'ar-vr-3d-model-try-on'),
+        __('Full iOS & Android AR Support (USDZ + GLB)', 'ar-vr-3d-model-try-on'),
+        __('WooCommerce Integration with Auto Buttons', 'ar-vr-3d-model-try-on'),
+        __('QR Code Generation for Mobile AR', 'ar-vr-3d-model-try-on'),
+        __('Priority Email Support (24h response)', 'ar-vr-3d-model-try-on'),
     ];
 
     const currentPlans = plans[activePlan];
@@ -136,7 +136,7 @@ export default function Pricing() {
                             color: activePlan === 'monthly' ? '#fff' : 'var(--theme-text)',
                         }}
                     >
-                        Monthly
+                          {__('Monthly', 'ar-vr-3d-model-try-on')}
                     </button>
                     <button
                         onClick={() => setActivePlan('yearly')}
@@ -150,7 +150,7 @@ export default function Pricing() {
                             color: activePlan === 'yearly' ? '#fff' : 'var(--theme-text)',
                         }}
                     >
-                        Yearly
+                        {__('Yearly', 'ar-vr-3d-model-try-on')}
                     </button>
                     <button
                         onClick={() => setActivePlan('lifetime')}
@@ -164,7 +164,7 @@ export default function Pricing() {
                             color: activePlan === 'lifetime' ? '#fff' : 'var(--theme-text)',
                         }}
                     >
-                        Lifetime
+                        {__('Lifetime', 'ar-vr-3d-model-try-on')}
                     </button>
                 </div>
             </div>
@@ -244,7 +244,7 @@ export default function Pricing() {
                                     color: '#fff',
                                 }}
                             >
-                                Buy Now
+                                {__('Buy Now', 'ar-vr-3d-model-try-on')}
                             </a>
 
                             {/* Features List */}
@@ -290,7 +290,7 @@ export default function Pricing() {
                     className="art-text-sm"
                     style={{ color: 'var(--theme-text)', opacity: 0.8 }}
                 >
-                    ✅ 14-Day Money-Back Guarantee • ✅ No Setup Fees • ✅ Cancel Anytime
+                     {__('✅ 14-Day Money-Back Guarantee • ✅ No Setup Fees • ✅ Cancel Anytime', 'ar-vr-3d-model-try-on')}
                 </p>
             </div>
         </div>

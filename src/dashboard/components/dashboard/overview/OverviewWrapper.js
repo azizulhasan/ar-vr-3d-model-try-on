@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 import Welcome from './Welcome';
 import FeatureComparison from './FeatureComparison';
 // import Demos from './Demos';
@@ -14,26 +15,26 @@ import Pricing from './Pricing';
  */
 export default function OverviewWrapper() {
     const [activeSubtab, setActiveSubtab] = useState('welcome');
-
+    
     const subtabs = [
         {
             id: 'welcome',
-            name: 'Welcome',
+            name: __('Welcome', 'ar-vr-3d-model-try-on'),
             icon: '👋',
         },
         // {
         //     id: 'demos',
-        //     name: 'Demos',
+        //     name: __('Demos', 'ar-vr-3d-model-try-on'),
         //     icon: '🎮',
         // },
         {
             id: 'pricing',
-            name: 'Pricing',
+            name: __('Pricing', 'ar-vr-3d-model-try-on'),
             icon: '💰',
         },
         {
             id: 'feature-comparison',
-            name: 'Feature Comparison',
+            name: __('Feature Comparison', 'ar-vr-3d-model-try-on'),
             icon: '📊',
         },
     ];
@@ -48,7 +49,7 @@ export default function OverviewWrapper() {
                     borderBottom: "1px solid var(--theme-accent)",
                 }}
             >
-                <nav className="art-flex art-space-x-8 art-px-6" aria-label="Subtabs">
+                <nav className="art-flex art-space-x-8 art-px-6" aria-label={__('Subtabs', 'ar-vr-3d-model-try-on')}>
                     {subtabs.map((subtab) => (
                         <button
                             key={subtab.id}
