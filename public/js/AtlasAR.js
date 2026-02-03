@@ -1,4 +1,4 @@
-import {setModelAttributes, createModal, SpinnerModal} from "../../src/context/utilities";
+import {setModelAttributes, createModal, SpinnerModal, switchModelVariant} from "../../src/context/utilities";
 
 class AtlasAR {
   alertify = null;
@@ -240,6 +240,60 @@ class AtlasAR {
 
   getStoredModelDataObj() {
     return JSON.parse(window.sessionStorage.getItem("atlas_ar_model_data"));
+  }
+
+  /**
+   * Switch 3D model variant based on WooCommerce variation selection
+   * @param {string} variantName - The WooCommerce variant name (e.g., "Blue", "Large")
+   * @param {string} modelSelector - Optional selector for the model-viewer element
+   * @returns {boolean} - Whether the variant was successfully switched
+   */
+  switchVariant(variantName, modelSelector = '.atlas_ar_model_viewer') {
+    const modelViewer = document.querySelector(modelSelector);
+    if (!modelViewer) {
+      console.warn('Model viewer not found:', modelSelector);
+      return false;
+    }
+    return switchModelVariant(modelViewer, variantName);
+  }
+
+  /**
+   * Initialize WooCommerce variation listener
+   * Automatically switches 3D model when user selects a product variation
+   * @param {string} modelSelector - Optional selector for the model-viewer element
+   */
+  initVariationListener(modelSelector = '.atlas_ar_model_viewer') {
+    // WooCommerce fires 'found_variation' event when a variation is selected
+    const variationsForm = document.querySelector('.variations_form');
+    if (!variationsForm) {
+      return;
+    }
+
+    const self = this;
+
+    // Listen for WooCommerce variation selection
+    jQuery(variationsForm).on('found_variation', function(event, variation) {
+      // Get the selected attributes
+      const attributes = variation.attributes || {};
+
+      // Try each attribute value to find a matching variant
+      Object.values(attributes).forEach(attrValue => {
+        if (attrValue) {
+          // Clean up the attribute value (remove 'pa_' prefix if present)
+          const cleanValue = attrValue.replace(/^pa_/, '');
+          self.switchVariant(cleanValue, modelSelector);
+        }
+      });
+    });
+
+    // Listen for reset (when user clears selection)
+    jQuery(variationsForm).on('reset_data', function() {
+      const modelViewer = document.querySelector(modelSelector);
+      if (modelViewer && modelViewer.dataset.originalSrc) {
+        modelViewer.src = modelViewer.dataset.originalSrc;
+        modelViewer.variantName = null;
+      }
+    });
   }
 }
 

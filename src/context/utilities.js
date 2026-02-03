@@ -567,7 +567,88 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
         showMultipleItems(modelViewer, model_settings);
     }
+
+    // Handle variation settings
+    if(model_settings?.variationSettings) {
+        setupVariationHandling(modelViewer, model_settings);
+    }
 };
+
+/**
+ * Setup variation handling for WooCommerce variable products
+ * @param {HTMLElement} modelViewer - The model-viewer element
+ * @param {Object} model_settings - Model settings including variationSettings
+ */
+function setupVariationHandling(modelViewer, model_settings) {
+    if (!ar_try_on.is_pro_active && !ar_try_on.is_admin) {
+        return;
+    }
+
+    const variationSettings = model_settings.variationSettings;
+    if (!variationSettings) return;
+
+    // Store original model src for fallback
+    const originalSrc = modelViewer.getAttribute('src');
+    modelViewer.dataset.originalSrc = originalSrc;
+
+    // Store variation settings on the model viewer for frontend access
+    modelViewer.dataset.variationSettings = JSON.stringify(variationSettings);
+
+    // Listen for model load to get available variants
+    modelViewer.addEventListener('load', function onLoad() {
+        const availableVariants = modelViewer.availableVariants;
+        if (availableVariants && availableVariants.length > 0) {
+            modelViewer.dataset.modelVariants = JSON.stringify(Array.from(availableVariants));
+        }
+    }, { once: true });
+}
+
+/**
+ * Switch 3D model variant based on WooCommerce variation selection
+ * @param {HTMLElement} modelViewer - The model-viewer element
+ * @param {string} variantName - The WooCommerce variant name (e.g., "Blue", "Large")
+ * @returns {boolean} - Whether the variant was successfully switched
+ */
+export const switchModelVariant = (modelViewer, variantName) => {
+    if (!modelViewer || !variantName) return false;
+
+    try {
+        const variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
+        const modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
+        const originalSrc = modelViewer.dataset.originalSrc;
+
+        // Check if this variant is mapped to a model's built-in variant
+        const mappedVariant = variationSettings.variantMapping?.[variantName];
+        if (mappedVariant && modelVariants.includes(mappedVariant)) {
+            // Use the model's built-in variant
+            modelViewer.variantName = mappedVariant;
+            return true;
+        }
+
+        // Check if there's a separate model for this variant
+        const separateModelUrl = variationSettings.variants?.[variantName];
+        if (separateModelUrl) {
+            // Load the separate model
+            modelViewer.src = separateModelUrl;
+            modelViewer.variantName = null; // Reset variant name
+            return true;
+        }
+
+        // Fallback: Reset to original/default model
+        if (originalSrc) {
+            modelViewer.src = originalSrc;
+            modelViewer.variantName = null;
+        }
+
+        return false;
+    } catch (e) {
+        console.error('Error switching model variant:', e);
+        return false;
+    }
+};
+
+// Make switchModelVariant available globally for frontend use
+window.atlasARSwitchVariant = switchModelVariant;
 
 export const getAPITypes = (api_type = "tripo3d") => {
     let api_types = {

@@ -66,6 +66,11 @@ const ARProductModelSettings = () => {
         hotspots: [],
         thumbnail_image: "",
         show_button_in: "global",
+        variationSettings: {
+            variantAttribute: [],
+            variantMapping: {},
+            variants: {}
+        },
         isMultiple: false,
         multipleItems: [
             {
@@ -423,10 +428,11 @@ const handleSubmit = (e) => {
         delete dataToSave.hotspots;
         delete dataToSave.isMultiple;
         delete dataToSave.multipleItems;
+        delete dataToSave.variationSettings;
 
         // Notify user that pro features won't be saved
-        if (dataToSave.dimensions || dataToSave.hotspots?.length > 0 || dataToSave.isMultiple) {
-            notify('Pro features (dimensions, hotspots, slider) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
+        if (dataToSave.dimensions || dataToSave.hotspots?.length > 0 || dataToSave.isMultiple || dataToSave.variationSettings) {
+            notify('Pro features (dimensions, hotspots, slider, variations) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
                 autoClose: 6000,
             });
         }
@@ -560,6 +566,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     activeAccordion={activeAccordion}
                                     toggleAccordion={toggleAccordion}
                                     handleMediaButtonClick={handleMediaButtonClick}
+                                    setProductModel={setProductModel}
                                 />
 
                                 {/* Compression Panel - Show after model upload */}
