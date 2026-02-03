@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n';
 import { toast } from 'react-toastify';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import {
@@ -59,7 +60,7 @@ export default function AnalyticsDashboard() {
                 },
             });
 
-            if (!statsResponse.ok) throw new Error('Failed to fetch stats');
+            if (!statsResponse.ok) throw new Error(__('Failed to fetch stats', 'ar-vr-3d-model-try-on'));
 
             const statsData = await statsResponse.json();
             if (statsData.success) {
@@ -73,7 +74,7 @@ export default function AnalyticsDashboard() {
                 },
             });
 
-            if (!modelsResponse.ok) throw new Error('Failed to fetch models');
+            if (!modelsResponse.ok) throw new Error(__('Failed to fetch models', 'ar-vr-3d-model-try-on'));
 
             const modelsData = await modelsResponse.json();
             if (modelsData.success) {
@@ -81,7 +82,7 @@ export default function AnalyticsDashboard() {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
-            toast.error('Failed to load analytics data');
+            toast.error(__('Failed to load analytics data', 'ar-vr-3d-model-try-on'));
         } finally {
             setLoading(false);
         }
@@ -91,7 +92,12 @@ export default function AnalyticsDashboard() {
     const getCompressionRatioChart = () => {
         if (!models.length) return null;
 
-        const ranges = { '0-25%': 0, '25-50%': 0, '50-75%': 0, '75-100%': 0 };
+        const ranges = { 
+            '0-25%': 0, 
+            '25-50%': 0, 
+            '50-75%': 0, 
+            '75-100%': 0 
+        };
 
         models.forEach((model) => {
             const ratio = parseFloat(model.compression_ratio);
@@ -105,7 +111,7 @@ export default function AnalyticsDashboard() {
             labels: Object.keys(ranges),
             datasets: [
                 {
-                    label: 'Models',
+                    label: __('Models', 'ar-vr-3d-model-try-on'),
                     data: Object.values(ranges),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.7)',
@@ -132,17 +138,17 @@ export default function AnalyticsDashboard() {
         const topModels = models.slice(0, 10);
 
         return {
-            labels: topModels.map((m) => m.post_title || `Model ${m.post_id}`).map((t) => t.substring(0, 20)),
+            labels: topModels.map((m) => m.post_title || `${__('Model', 'ar-vr-3d-model-try-on')} ${m.post_id}`).map((t) => t.substring(0, 20)),
             datasets: [
                 {
-                    label: 'Original Size (MB)',
+                    label: __('Original Size (MB)', 'ar-vr-3d-model-try-on'),
                     data: topModels.map((m) => (m.original_size / (1024 * 1024)).toFixed(2)),
                     backgroundColor: 'rgba(54, 162, 235, 0.7)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1,
                 },
                 {
-                    label: 'Compressed Size (MB)',
+                    label: __('Compressed Size (MB)', 'ar-vr-3d-model-try-on'),
                     data: topModels.map((m) => (m.compressed_size / (1024 * 1024)).toFixed(2)),
                     backgroundColor: 'rgba(75, 192, 192, 0.7)',
                     borderColor: 'rgba(75, 192, 192, 1)',
@@ -175,7 +181,7 @@ export default function AnalyticsDashboard() {
             labels: dates,
             datasets: [
                 {
-                    label: 'Avg. Compression Ratio (%)',
+                    label: __('Avg. Compression Ratio (%)', 'ar-vr-3d-model-try-on'),
                     data: avgRatios,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -184,7 +190,7 @@ export default function AnalyticsDashboard() {
                     yAxisID: 'y',
                 },
                 {
-                    label: 'Models Compressed',
+                    label: __('Models Compressed', 'ar-vr-3d-model-try-on'),
                     data: counts,
                     borderColor: 'rgba(255, 99, 132, 1)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -215,7 +221,7 @@ export default function AnalyticsDashboard() {
                 position: 'left',
                 title: {
                     display: true,
-                    text: 'Compression Ratio (%)',
+                    text: __('Compression Ratio (%)', 'ar-vr-3d-model-try-on'),
                 },
             },
             y1: {
@@ -224,7 +230,7 @@ export default function AnalyticsDashboard() {
                 position: 'right',
                 title: {
                     display: true,
-                    text: 'Model Count',
+                    text: __('Model Count', 'ar-vr-3d-model-try-on'),
                 },
                 grid: {
                     drawOnChartArea: false,
@@ -253,13 +259,13 @@ export default function AnalyticsDashboard() {
         return (
             <div className="art-p-6 art-bg-white art-rounded-lg art-shadow">
                 <h2 className="art-text-xl art-font-bold art-text-gray-900 art-mb-4">
-                    📊 Analytics Dashboard
+                    {__('📊 Analytics Dashboard', 'ar-vr-3d-model-try-on')}
                     <span className="art-ml-2 art-px-2 art-py-1 art-text-xs art-font-medium art-bg-green-100 art-text-green-800 art-rounded">
-                        PRO
+                        {__('PRO', 'ar-vr-3d-model-try-on')}
                     </span>
                 </h2>
                 <p className="art-text-gray-600">
-                    No compression data available yet. Start compressing models to see detailed analytics!
+                    {__('No compression data available yet. Start compressing models to see detailed analytics!', 'ar-vr-3d-model-try-on')}
                 </p>
             </div>
         );
@@ -276,37 +282,41 @@ export default function AnalyticsDashboard() {
                 <div className="art-flex art-items-center art-justify-between art-mb-6">
                     <div>
                         <h2 className="art-text-2xl art-font-bold art-text-gray-900">
-                            📊 Analytics Dashboard
+                            {__('📊 Analytics Dashboard', 'ar-vr-3d-model-try-on')}
                             <span className="art-ml-2 art-px-2 art-py-1 art-text-xs art-font-medium art-bg-green-100 art-text-green-800 art-rounded">
-                                PRO
+                                {__('PRO', 'ar-vr-3d-model-try-on')}
                             </span>
                         </h2>
                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                            Advanced analytics and insights for your 3D model compression
+                            {__('Advanced analytics and insights for your 3D model compression', 'ar-vr-3d-model-try-on')}
                         </p>
                     </div>
                     <button
                         onClick={fetchData}
                         className="art-px-4 art-py-2 art-bg-blue-600 art-text-white art-rounded-lg hover:art-bg-blue-700 art-transition art-text-sm art-font-medium"
                     >
-                        🔄 Refresh Data
+                        {__('🔄 Refresh Data', 'ar-vr-3d-model-try-on')}
                     </button>
                 </div>
 
                 {/* Tabs */}
                 <div className="art-border-b art-border-gray-200">
                     <nav className="art--mb-px art-flex art-space-x-8">
-                        {['overview', 'trends', 'models'].map((tab) => (
+                        {[
+                            { key: 'overview', label: __('Overview', 'ar-vr-3d-model-try-on') },
+                            { key: 'trends', label: __('Trends', 'ar-vr-3d-model-try-on') },
+                            { key: 'models', label: __('Models', 'ar-vr-3d-model-try-on') }
+                        ].map((tab) => (
                             <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
                                 className={`art-py-2 art-px-1 art-border-b-2 art-font-medium art-text-sm ${
-                                    activeTab === tab
+                                    activeTab === tab.key
                                         ? 'art-border-blue-500 art-text-blue-600'
                                         : 'art-border-transparent art-text-gray-500 hover:art-text-gray-700 hover:art-border-gray-300'
                                 }`}
                             >
-                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                {tab.label}
                             </button>
                         ))}
                     </nav>
@@ -320,17 +330,17 @@ export default function AnalyticsDashboard() {
                     <div className="art-grid art-grid-cols-1 md:art-grid-cols-2 lg:art-grid-cols-4 art-gap-4">
                         <div className="art-bg-gradient-to-br art-from-blue-500 art-to-blue-600 art-text-white art-rounded-lg art-shadow art-p-6">
                             <div className="art-text-4xl art-font-bold">{stats.total_compressions || 0}</div>
-                            <div className="art-text-blue-100 art-mt-1">Total Models Compressed</div>
+                            <div className="art-text-blue-100 art-mt-1">{__('Total Models Compressed', 'ar-vr-3d-model-try-on')}</div>
                         </div>
 
                         <div className="art-bg-gradient-to-br art-from-green-500 art-to-green-600 art-text-white art-rounded-lg art-shadow art-p-6">
                             <div className="art-text-4xl art-font-bold">{stats.avg_compression_ratio || 0}%</div>
-                            <div className="art-text-green-100 art-mt-1">Avg. Compression Ratio</div>
+                            <div className="art-text-green-100 art-mt-1">{__('Avg. Compression Ratio', 'ar-vr-3d-model-try-on')}</div>
                         </div>
 
                         <div className="art-bg-gradient-to-br art-from-purple-500 art-to-purple-600 art-text-white art-rounded-lg art-shadow art-p-6">
                             <div className="art-text-4xl art-font-bold">{stats.total_saved_space_formatted || '0 MB'}</div>
-                            <div className="art-text-purple-100 art-mt-1">Total Space Saved</div>
+                            <div className="art-text-purple-100 art-mt-1">{__('Total Space Saved', 'ar-vr-3d-model-try-on')}</div>
                         </div>
 
                         <div className="art-bg-gradient-to-br art-from-orange-500 art-to-orange-600 art-text-white art-rounded-lg art-shadow art-p-6">
@@ -340,7 +350,7 @@ export default function AnalyticsDashboard() {
                                     : 0}
                                 %
                             </div>
-                            <div className="art-text-orange-100 art-mt-1">Success Rate</div>
+                            <div className="art-text-orange-100 art-mt-1">{__('Success Rate', 'ar-vr-3d-model-try-on')}</div>
                         </div>
                     </div>
 
@@ -349,7 +359,7 @@ export default function AnalyticsDashboard() {
                         {compressionRatioData && (
                             <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
                                 <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">
-                                    Compression Ratio Distribution
+                                    {__('Compression Ratio Distribution', 'ar-vr-3d-model-try-on')}
                                 </h3>
                                 <div className="art-h-64">
                                     <Pie data={compressionRatioData} options={chartOptions} />
@@ -360,7 +370,7 @@ export default function AnalyticsDashboard() {
                         {fileSizeData && (
                             <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
                                 <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">
-                                    Top 10 Models - Size Comparison
+                                    {__('Top 10 Models - Size Comparison', 'ar-vr-3d-model-try-on')}
                                 </h3>
                                 <div className="art-h-64">
                                     <Bar data={fileSizeData} options={chartOptions} />
@@ -374,7 +384,9 @@ export default function AnalyticsDashboard() {
             {/* Trends Tab */}
             {activeTab === 'trends' && trendData && (
                 <div className="art-bg-white art-rounded-lg art-shadow art-p-6">
-                    <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">Compression Trends Over Time</h3>
+                    <h3 className="art-text-lg art-font-semibold art-text-gray-900 art-mb-4">
+                        {__('Compression Trends Over Time', 'ar-vr-3d-model-try-on')}
+                    </h3>
                     <div className="art-h-96">
                         <Line data={trendData} options={lineChartOptions} />
                     </div>
@@ -385,29 +397,31 @@ export default function AnalyticsDashboard() {
             {activeTab === 'models' && (
                 <div className="art-bg-white art-rounded-lg art-shadow art-overflow-hidden">
                     <div className="art-px-6 art-py-4 art-border-b art-border-gray-200">
-                        <h3 className="art-text-lg art-font-semibold art-text-gray-900">Compressed Models</h3>
+                        <h3 className="art-text-lg art-font-semibold art-text-gray-900">
+                            {__('Compressed Models', 'ar-vr-3d-model-try-on')}
+                        </h3>
                     </div>
                     <div className="art-overflow-x-auto">
                         <table className="art-min-w-full art-divide-y art-divide-gray-200">
                             <thead className="art-bg-gray-50">
                                 <tr>
                                     <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
-                                        Model
+                                        {__('Model', 'ar-vr-3d-model-try-on')}
                                     </th>
                                     <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
-                                        Original Size
+                                        {__('Original Size', 'ar-vr-3d-model-try-on')}
                                     </th>
                                     <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
-                                        Compressed Size
+                                        {__('Compressed Size', 'ar-vr-3d-model-try-on')}
                                     </th>
                                     <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
-                                        Ratio
+                                        {__('Ratio', 'ar-vr-3d-model-try-on')}
                                     </th>
                                     <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
-                                        Saved
+                                        {__('Saved', 'ar-vr-3d-model-try-on')}
                                     </th>
                                     <th className="art-px-6 art-py-3 art-text-left art-text-xs art-font-medium art-text-gray-500 art-uppercase art-tracking-wider">
-                                        Status
+                                        {__('Status', 'ar-vr-3d-model-try-on')}
                                     </th>
                                 </tr>
                             </thead>
@@ -415,7 +429,7 @@ export default function AnalyticsDashboard() {
                                 {models.slice(0, 20).map((model) => (
                                     <tr key={model.id} className="hover:art-bg-gray-50">
                                         <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-font-medium art-text-gray-900">
-                                            {model.post_title || `Model ${model.post_id}`}
+                                            {model.post_title || `${__('Model', 'ar-vr-3d-model-try-on')} ${model.post_id}`}
                                         </td>
                                         <td className="art-px-6 art-py-4 art-whitespace-nowrap art-text-sm art-text-gray-500">
                                             {model.original_size_formatted}

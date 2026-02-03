@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Keep Original Files Toggle Component
@@ -21,21 +22,19 @@ export default function KeepOriginalToggle({ keepOriginal, onChange }) {
             <div className="art-flex art-items-start art-justify-between">
                 <div className="art-flex-1">
                     <h3 className="art-text-base art-font-semibold art-text-gray-900 art-mb-1">
-                        Keep Original Files
+                        {__('Keep Original Files', 'ar-vr-3d-model-try-on')}
                     </h3>
                     <p className="art-text-sm art-text-gray-600 art-mb-2">
-                        Store both original and compressed versions. Useful for reverting changes
-                        or comparing quality.
+                        {__('Store both original and compressed versions. Useful for reverting changes or comparing quality.', 'ar-vr-3d-model-try-on')}
                     </p>
                     {isEnabled && (
                         <div className="art-mt-2 art-p-2 art-bg-orange-50 art-border art-border-orange-200 art-rounded art-text-sm art-text-orange-700">
-                            ⚠️ <strong>Note:</strong> Keeping originals will use approximately 2x storage space.
+                            ⚠️ <strong>{__('Note:', 'ar-vr-3d-model-try-on')}</strong> {__('Keeping originals will use approximately 2x storage space.', 'ar-vr-3d-model-try-on')}
                         </div>
                     )}
                     {!isEnabled && (
                         <div className="art-mt-2 art-p-2 art-bg-yellow-50 art-border art-border-yellow-200 art-rounded art-text-sm art-text-yellow-700">
-                            ⚠️ <strong>Warning:</strong> Original files will be permanently deleted after compression.
-                            This action cannot be undone.
+                            ⚠️ <strong>{__('Warning:', 'ar-vr-3d-model-try-on')}</strong> {__('Original files will be permanently deleted after compression. This action cannot be undone.', 'ar-vr-3d-model-try-on')}
                         </div>
                     )}
                 </div>
@@ -62,14 +61,14 @@ export default function KeepOriginalToggle({ keepOriginal, onChange }) {
                 <div className="art-text-xs art-text-gray-500">
                     {isEnabled ? (
                         <>
-                            ✓ Original files stored in:{' '}
+                            {__('✓ Original files stored in:', 'ar-vr-3d-model-try-on')}{' '}
                             <code className="art-px-1 art-py-0.5 art-bg-gray-200 art-rounded">
                                 /uploads/atlas_ar/{'{post_id}'}/original.glb
                             </code>
                         </>
                     ) : (
                         <>
-                            Only compressed files will be stored in:{' '}
+                            {__('Only compressed files will be stored in:', 'ar-vr-3d-model-try-on')}{' '}
                             <code className="art-px-1 art-py-0.5 art-bg-gray-200 art-rounded">
                                 /uploads/atlas_ar/{'{post_id}'}/compressed.glb
                             </code>

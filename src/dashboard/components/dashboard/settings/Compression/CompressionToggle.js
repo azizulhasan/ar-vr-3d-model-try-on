@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Compression Toggle Component
@@ -20,11 +21,10 @@ export default function CompressionToggle({ enabled, onChange }) {
         <div className="art-flex art-items-center art-justify-between art-p-4 art-bg-gray-50 art-rounded-lg art-border art-border-gray-200">
             <div className="art-flex-1">
                 <h3 className="art-text-base art-font-semibold art-text-gray-900 art-mb-1">
-                    Enable Auto-Compression
+                    {__('Enable Auto-Compression', 'ar-vr-3d-model-try-on')}
                 </h3>
                 <p className="art-text-sm art-text-gray-600">
-                    Automatically compress 3D models when uploaded to reduce file sizes.
-                    This improves loading speed and reduces bandwidth usage.
+                    {__('Automatically compress 3D models when uploaded to reduce file sizes. This improves loading speed and reduces bandwidth usage.', 'ar-vr-3d-model-try-on')}
                 </p>
             </div>
             <div className="art-ml-4">

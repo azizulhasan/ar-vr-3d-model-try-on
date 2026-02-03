@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { __ } from '@wordpress/i18n';
 
 import OverviewWrapper from "./components/dashboard/overview/OverviewWrapper";
 import SettingsWrapper from "./components/dashboard/settings/SettingsWrapper";
@@ -53,23 +54,23 @@ export default function App() {
     ],
   });
   const tabs = [
-     { name: "Overview", href: "#", current: true, component: "Overview" },
-    { name: "Settings", href: "#", current: true, component: "Settings" },
+    { name: __("Overview", "ar-vr-3d-model-try-on"), href: "#", current: true, component: "Overview" },
+    { name: __("Settings", "ar-vr-3d-model-try-on"), href: "#", current: true, component: "Settings" },
     {
-      name: "Integration",
+      name: __("Integration", "ar-vr-3d-model-try-on"),
       href: "#",
       current: false,
       component: "Integration",
     },
-    { name: "Features", href: "#", current: false, component: "Features" },
+    { name: __("Features", "ar-vr-3d-model-try-on"), href: "#", current: false, component: "Features" },
     {
-      name: "Documentation",
+      name: __("Documentation", "ar-vr-3d-model-try-on"),
       href: "#",
       current: false,
       component: "Documentation",
     },
     {
-      name: "Contact Us",
+      name: __("Contact Us", "ar-vr-3d-model-try-on"),
       href: "https://wpaugmentedreality.com/contact-us/",
       current: false,
       component: "Contact",
@@ -150,7 +151,7 @@ export default function App() {
 
       if ( !ar_try_on.is_pro_active &&  targetName === "ar_try_on_allowed_post_types" && value.length > 1) {
         toast(
-          "Multiple post type is only available in the pro version",
+          __("Multiple post type is only available in the pro version", "ar-vr-3d-model-try-on"),
           "error"
         );
         return;
@@ -191,7 +192,7 @@ export default function App() {
       e.target.value !== "tripo3d" &&
       !ar_try_on.is_pro_active
     ) {
-      notify("API switch is available in pro version", "warn");
+      notify(__("API switch is available in pro version", "ar-vr-3d-model-try-on"), "warn");
       return;
     }
 
@@ -239,7 +240,7 @@ const handleSubmit = async (e) => {
       tempSettings.ar_try_on_exclude_integration_api_headers.forEach(
         (header, index) => {
           if (header.key === "" && header.value === "") {
-            alert("Please fill all of the API headers with proper value");
+            alert(__("Please fill all of the API headers with proper value", "ar-vr-3d-model-try-on"));
             setIsSaving(false); 
             return;
           }
@@ -259,7 +260,7 @@ const handleSubmit = async (e) => {
 
     let hasValueChanged = isDifferent(previousSettings, tempSettings);
     if (!hasValueChanged) {
-      notify("No changes detected", "info", {
+      notify(__("No changes detected", "ar-vr-3d-model-try-on"), "info", {
         autoClose: 5000,
       });
       setIsSaving(false); 
@@ -275,7 +276,7 @@ const handleSubmit = async (e) => {
 
     setSettings(res.data);
     setPreviousSettings(res.data);
-    toast("Successfully Saved.", "info");
+    toast(__("Successfully Saved.", "ar-vr-3d-model-try-on"), "info");
   } catch (err) {
     console.log(err);
   } finally {
@@ -330,7 +331,7 @@ const handleSubmit = async (e) => {
           </button>
           <h1 style={{ color: "var(--theme-text)" }}>{ar_try_on.plugin_name}</h1>
 
-          <span className="art-text-center">Version: {ar_try_on.VERSION}</span>
+       <span className="art-text-center">{__("Version:", "ar-vr-3d-model-try-on")} {ar_try_on.VERSION}</span>
         </div>
         <div></div>
         {/* 🌗 Dark/Light Mode Toggle */}
@@ -485,10 +486,10 @@ const handleSubmit = async (e) => {
   {isSaving ? (
     <div className="art-flex art-items-center art-justify-center art-gap-2">
       <SpinnerModal />
-      <span>Saving...</span>
+      <span>{__("Saving...", "ar-vr-3d-model-try-on")}</span>
     </div>
   ) : (
-    "Save"
+   __("Save", "ar-vr-3d-model-try-on")
   )}
 </button>
 

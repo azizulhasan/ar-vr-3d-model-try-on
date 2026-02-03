@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n';
 import { toast } from 'react-toastify';
 import CompressionToggle from './CompressionToggle';
 import QualitySlider from './QualitySlider';
@@ -51,7 +52,7 @@ export default function CompressionSettings({ isProActive }) {
                 },
             });
 
-            if (!response.ok) throw new Error('Failed to fetch settings');
+            if (!response.ok) throw new Error(__('Failed to fetch settings', 'ar-vr-3d-model-try-on'));
 
             const data = await response.json();
             if (data.success) {
@@ -59,7 +60,7 @@ export default function CompressionSettings({ isProActive }) {
             }
         } catch (error) {
             console.error('Error fetching settings:', error);
-            toast.error('Failed to load compression settings');
+            toast.error(__('Failed to load compression settings', 'ar-vr-3d-model-try-on'));
         } finally {
             setLoading(false);
         }
@@ -76,7 +77,7 @@ export default function CompressionSettings({ isProActive }) {
                 },
             });
 
-            if (!response.ok) throw new Error('Failed to fetch user limit');
+            if (!response.ok) throw new Error(__('Failed to fetch user limit', 'ar-vr-3d-model-try-on'));
 
             const data = await response.json();
             if (data.success) {
@@ -103,18 +104,18 @@ export default function CompressionSettings({ isProActive }) {
                 body: JSON.stringify(settings),
             });
 
-            if (!response.ok) throw new Error('Failed to save settings');
+            if (!response.ok) throw new Error(__('Failed to save settings', 'ar-vr-3d-model-try-on'));
 
             const data = await response.json();
             if (data.success) {
-                toast.success('✅ Compression settings saved successfully!');
+                toast.success(__('✅ Compression settings saved successfully!', 'ar-vr-3d-model-try-on'));
                 setSettings(data.data);
             } else {
-                throw new Error(data.message || 'Failed to save settings');
+                throw new Error(data.message || __('Failed to save settings', 'ar-vr-3d-model-try-on'));
             }
         } catch (error) {
             console.error('Error saving settings:', error);
-            toast.error('❌ Failed to save settings: ' + error.message);
+            toast.error(__('❌ Failed to save settings: ', 'ar-vr-3d-model-try-on') + error.message);
         } finally {
             setSaving(false);
         }
@@ -125,7 +126,7 @@ export default function CompressionSettings({ isProActive }) {
      */
     const handleProFeatureClick = (featureName) => {
         toast.info(
-            `🔒 ${featureName} is a Pro feature. Upgrade to unlock this powerful feature!`,
+            __('🔒 ', 'ar-vr-3d-model-try-on') + featureName + __(' is a Pro feature. Upgrade to unlock this powerful feature!', 'ar-vr-3d-model-try-on'),
             {
                 position: 'top-center',
                 autoClose: 5000,
@@ -141,12 +142,12 @@ export default function CompressionSettings({ isProActive }) {
      */
     const handleBulkCompress = () => {
         if (!isProActive) {
-            handleProFeatureClick('Bulk Compression');
+            handleProFeatureClick(__('Bulk Compression', 'ar-vr-3d-model-try-on'));
             return;
         }
 
         // TODO: Implement bulk compression
-        toast.info('🚀 Bulk compression will be implemented in the next phase');
+        toast.info(__('🚀 Bulk compression will be implemented in the next phase', 'ar-vr-3d-model-try-on'));
     };
 
     if (loading) {
@@ -162,13 +163,13 @@ export default function CompressionSettings({ isProActive }) {
             {/* Header */}
             <div className="art-mb-6">
                 <h2 className="art-text-2xl art-font-bold art-text-gray-900 art-mb-2">
-                    3D Model Compression Settings
+                    {__('3D Model Compression Settings', 'ar-vr-3d-model-try-on')}
                 </h2>
                 <p className="art-text-gray-600">
-                    Automatically compress 3D models to reduce file sizes and improve loading speed.
+                    {__('Automatically compress 3D models to reduce file sizes and improve loading speed.', 'ar-vr-3d-model-try-on')}
                     {!isProActive && (
                         <span className="art-text-blue-600 art-ml-1">
-                            Free users can compress up to 5 models.
+                            {__('Free users can compress up to 5 models.', 'ar-vr-3d-model-try-on')}
                         </span>
                     )}
                 </p>
@@ -215,14 +216,14 @@ export default function CompressionSettings({ isProActive }) {
                             <div className="art-flex art-items-start art-justify-between">
                                 <div className="art-flex-1">
                                     <h3 className="art-text-sm art-font-semibold art-text-gray-900 art-mb-1">
-                                        Free User Limit
+                                        {__('Free User Limit', 'ar-vr-3d-model-try-on')}
                                     </h3>
                                     <p className="art-text-sm art-text-gray-600 art-mb-2">
-                                        You have compressed <strong>{userLimit.used}</strong> out of{' '}
-                                        <strong>{userLimit.limit}</strong> models.
+                                        {__('You have compressed', 'ar-vr-3d-model-try-on')} <strong>{userLimit.used}</strong> {__('out of', 'ar-vr-3d-model-try-on')}{' '}
+                                        <strong>{userLimit.limit}</strong> {__('models.', 'ar-vr-3d-model-try-on')}
                                         {userLimit.at_limit && (
                                             <span className="art-text-orange-600 art-ml-1">
-                                                ⚠️ Limit reached. Delete a compressed model to compress new ones.
+                                                {__('⚠️ Limit reached. Delete a compressed model to compress new ones.', 'ar-vr-3d-model-try-on')}
                                             </span>
                                         )}
                                     </p>
@@ -230,7 +231,7 @@ export default function CompressionSettings({ isProActive }) {
                                         onClick={() => setShowManageModal(true)}
                                         className="art-text-sm art-text-blue-600 hover:art-text-blue-800 art-font-medium"
                                     >
-                                        Manage Compressed Models →
+                                        {__('Manage Compressed Models →', 'ar-vr-3d-model-try-on')}
                                     </button>
                                 </div>
                                 <div className="art-ml-4">
@@ -248,16 +249,16 @@ export default function CompressionSettings({ isProActive }) {
                             <div className="art-flex-1">
                                 <div className="art-flex art-items-center art-mb-2">
                                     <h3 className="art-text-sm art-font-semibold art-text-gray-900">
-                                        Bulk Compression
+                                        {__('Bulk Compression', 'ar-vr-3d-model-try-on')}
                                     </h3>
                                     {!isProActive && (
                                         <span className="art-ml-2 art-px-2 art-py-0.5 art-text-xs art-font-medium art-bg-yellow-100 art-text-yellow-800 art-rounded">
-                                            PRO
+                                            {__('PRO', 'ar-vr-3d-model-try-on')}
                                         </span>
                                     )}
                                 </div>
                                 <p className="art-text-sm art-text-gray-600 art-mb-3">
-                                    Compress all existing models at once. Save hours of manual work!
+                                    {__('Compress all existing models at once. Save hours of manual work!', 'ar-vr-3d-model-try-on')}
                                 </p>
                                 <button
                                     onClick={handleBulkCompress}
@@ -268,7 +269,7 @@ export default function CompressionSettings({ isProActive }) {
                                             : 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
                                     }`}
                                 >
-                                    {isProActive ? '🚀 Compress All Models' : '🔒 Upgrade to Pro'}
+                                    {isProActive ? __('🚀 Compress All Models', 'ar-vr-3d-model-try-on') : __('🔒 Upgrade to Pro', 'ar-vr-3d-model-try-on')}
                                 </button>
                             </div>
                         </div>
@@ -293,7 +294,7 @@ export default function CompressionSettings({ isProActive }) {
             {/* Save Button */}
             <div className="art-flex art-items-center art-justify-between art-pt-6 art-border-t art-border-gray-200">
                 <div className="art-text-sm art-text-gray-500">
-                    Changes will take effect immediately after saving.
+                    {__('Changes will take effect immediately after saving.', 'ar-vr-3d-model-try-on')}
                 </div>
                 <button
                     onClick={handleSaveSettings}
@@ -303,10 +304,10 @@ export default function CompressionSettings({ isProActive }) {
                     {saving ? (
                         <>
                             <span className="art-inline-block art-animate-spin art-mr-2">⏳</span>
-                            Saving...
+                            {__('Saving...', 'ar-vr-3d-model-try-on')}
                         </>
                     ) : (
-                        '💾 Save Settings'
+                        __('💾 Save Settings', 'ar-vr-3d-model-try-on')
                     )}
                 </button>
             </div>

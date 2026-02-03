@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Quality Slider Component
@@ -17,11 +18,11 @@ export default function QualitySlider({ quality, onChange }) {
     };
 
     const getQualityLabel = (value) => {
-        if (value >= 90) return 'Maximum Quality (Larger file)';
-        if (value >= 75) return 'High Quality (Recommended)';
-        if (value >= 60) return 'Balanced (Good quality, smaller file)';
-        if (value >= 40) return 'Low Quality (Smaller file)';
-        return 'Minimum Quality (Smallest file)';
+        if (value >= 90) return __('Maximum Quality (Larger file)', 'ar-vr-3d-model-try-on');
+        if (value >= 75) return __('High Quality (Recommended)', 'ar-vr-3d-model-try-on');
+        if (value >= 60) return __('Balanced (Good quality, smaller file)', 'ar-vr-3d-model-try-on');
+        if (value >= 40) return __('Low Quality (Smaller file)', 'ar-vr-3d-model-try-on');
+        return __('Minimum Quality (Smallest file)', 'ar-vr-3d-model-try-on');
     };
 
     const getQualityColor = (value) => {
@@ -35,7 +36,7 @@ export default function QualitySlider({ quality, onChange }) {
             <div className="art-mb-4">
                 <div className="art-flex art-items-center art-justify-between art-mb-2">
                     <h3 className="art-text-base art-font-semibold art-text-gray-900">
-                        Compression Quality
+                        {__('Compression Quality', 'ar-vr-3d-model-try-on')}
                     </h3>
                     <div className="art-flex art-items-center">
                         <span className={`art-text-2xl art-font-bold ${getQualityColor(currentQuality)}`}>
@@ -65,15 +66,14 @@ export default function QualitySlider({ quality, onChange }) {
 
             {/* Quality Guide */}
             <div className="art-flex art-items-center art-justify-between art-text-xs art-text-gray-500">
-                <span>0% (Smallest)</span>
-                <span>50% (Balanced)</span>
-                <span>100% (Best)</span>
+                <span>{__('0% (Smallest)', 'ar-vr-3d-model-try-on')}</span>
+                <span>{__('50% (Balanced)', 'ar-vr-3d-model-try-on')}</span>
+                <span>{__('100% (Best)', 'ar-vr-3d-model-try-on')}</span>
             </div>
 
             {/* Quality Description */}
             <div className="art-mt-4 art-p-3 art-bg-blue-50 art-border art-border-blue-200 art-rounded art-text-sm art-text-gray-700">
-                <strong>💡 Tip:</strong> For most models, 75-85% quality provides excellent results
-                with 50-70% file size reduction. Higher quality = better visuals but larger files.
+                <strong>{__('💡 Tip:', 'ar-vr-3d-model-try-on')}</strong> {__('For most models, 75-85% quality provides excellent results with 50-70% file size reduction. Higher quality = better visuals but larger files.', 'ar-vr-3d-model-try-on')}
             </div>
         </div>
     );

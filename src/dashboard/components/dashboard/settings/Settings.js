@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { __ } from '@wordpress/i18n';
 /**
  *
  * Scripts
@@ -67,7 +68,7 @@ export default function Settings({ settings, handleChange }) {
     postWithoutImage(getURL("settings"), formData)
       .then((res) => {
         setSettings(res.data);
-        toast("Successfully Saved.", "info", {
+        toast(__("Successfully Saved.", "ar-vr-3d-model-try-on"), "info", {
           autoClose: 15000,
         });
         setIsDataLoaded(true);
@@ -80,7 +81,7 @@ export default function Settings({ settings, handleChange }) {
   const ar_try_on_demo_id = (e) => {
     e.preventDefault();
     // window.open('https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/', '_blank');
-    document.getElementById("ar_try_on_demo_id").innerHTML = "Setting Up Preview";
+    document.getElementById("ar_try_on_demo_id").innerHTML = __("Setting Up Preview", "ar-vr-3d-model-try-on");
     console.log(document.getElementById("ar_try_on_demo_id"))
     let formData = new FormData();
     formData.append("method", "post");
@@ -88,10 +89,10 @@ export default function Settings({ settings, handleChange }) {
       .then((res) => {
 
         if (res?.data?.ar_try_on_ar_demo?.url) {
-          document.getElementById("ar_try_on_demo_id").innerHTML = "Preview Demo";
+          document.getElementById("ar_try_on_demo_id").innerHTML = __("Preview Demo", "ar-vr-3d-model-try-on");
           window.open(res?.data?.ar_try_on_ar_demo?.url, "_blank");
         } else {
-          document.getElementById("ar_try_on_demo_id").innerHTML = "Try Again";
+          document.getElementById("ar_try_on_demo_id").innerHTML = __("Try Again", "ar-vr-3d-model-try-on");
         }
       })
       .catch((err) => {
@@ -118,7 +119,7 @@ export default function Settings({ settings, handleChange }) {
               style={{ color: "var(--theme-text)" }}
             >
               <span className="art-dashicons art-dashicons-admin-generic"></span>
-              View Settings
+                {__('View Settings', 'ar-vr-3d-model-try-on')}
             </h3>
           </div>
           <button
@@ -127,7 +128,7 @@ export default function Settings({ settings, handleChange }) {
             onClick={ar_try_on_demo_id}
             className="art-w-40 art-h-12  art-cursor-pointer art-rounded art-bg-blue-500 art-text-white art-border-none"
           >
-            Preview Demo
+           {__('Preview Demo', 'ar-vr-3d-model-try-on')}
           </button>
         </div>
 
@@ -138,7 +139,7 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_display_button_automatically"
             className="art-font-medium art-text-base"
           >
-            Display AR Button Automatically
+             {__('Display AR Button Automatically', 'ar-vr-3d-model-try-on')}
           </label>
 
           {/* Switch Component (now below the label) */}
@@ -146,8 +147,8 @@ export default function Settings({ settings, handleChange }) {
             <Switch
               label={
                 settings.ar_try_on_display_button_automatically === "yes"
-                  ? "Enabled"
-                  : "Disabled"
+                  ? __("Enabled", "ar-vr-3d-model-try-on")
+                  : __("Disabled", "ar-vr-3d-model-try-on")
               }
               defaultChecked={
                 settings.ar_try_on_display_button_automatically === "yes"
@@ -166,7 +167,7 @@ export default function Settings({ settings, handleChange }) {
 
           {/* Description */}
           <p className="art-text-sm art-text-gray-400 art-leading-snug art-ml-px">
-            Automatically display the AR button on supported product pages.
+            {__('Automatically display the AR button on supported product pages.', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -177,7 +178,7 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_allowed_post_types"
             className="art-block art-font-medium art-text-base"
           >
-            Enable AR For Post Types
+                 {__('Enable AR For Post Types', 'ar-vr-3d-model-try-on')}
           </label>
 
           {/* MultiSelect Field */}
@@ -192,7 +193,7 @@ export default function Settings({ settings, handleChange }) {
 
           {/* Description */}
           <p className="art-text-sm art-text-gray-400 art-leading-snug">
-            Choose which post types will support AR Try-On functionality.
+            {__('Choose which post types will support AR Try-On functionality.', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -205,7 +206,7 @@ export default function Settings({ settings, handleChange }) {
                 htmlFor="ar_try_on_wc_hook_position"
                 className="art-block art-font-medium art-text-base"
               >
-                Show Button In
+                 {__('Show Button In', 'ar-vr-3d-model-try-on')}
               </label>
 
               <select
@@ -220,23 +221,22 @@ export default function Settings({ settings, handleChange }) {
                 value={settings.ar_try_on_wc_hook_position}
                 onChange={handleSettingsChange}
               >
-                <option value="">None</option>
+                <option value="">{__('None', 'ar-vr-3d-model-try-on')}</option>
                 <option value="1">
-                  woocommerce_before_single_product_summary
+                  {__("woocommerce_before_single_product_summary", "ar-vr-3d-model-try-on")}
                 </option>
                 <option value="2">
-                  woocommerce_after_single_product_summary
+                  {__("woocommerce_after_single_product_summary", "ar-vr-3d-model-try-on")}
                 </option>
-                <option value="3">woocommerce_before_single_product</option>
-                <option value="4">woocommerce_after_single_product</option>
-                <option value="5">woocommerce_after_add_to_cart_form</option>
-                <option value="6">woocommerce_before_add_to_cart_form</option>
-                <option value="7">woocommerce_product_thumbnails</option>
+                <option value="3">{__("woocommerce_before_single_product", "ar-vr-3d-model-try-on")}</option>
+                <option value="4">{__("woocommerce_after_single_product", "ar-vr-3d-model-try-on")}</option>
+                <option value="5">{__("woocommerce_after_add_to_cart_form", "ar-vr-3d-model-try-on")}</option>
+                <option value="6">{__("woocommerce_before_add_to_cart_form", "ar-vr-3d-model-try-on")}</option>
+                <option value="7">{__("woocommerce_product_thumbnails", "ar-vr-3d-model-try-on")}</option>
               </select>
 
               <p className="art-text-sm art-text-gray-400 art-leading-snug">
-                Choose where the AR button will appear within WooCommerce
-                product pages.
+                {__('Choose where the AR button will appear within WooCommerce product pages.', 'ar-vr-3d-model-try-on')}
               </p>
             </BorderCard>
 
@@ -246,15 +246,15 @@ export default function Settings({ settings, handleChange }) {
                 htmlFor="ar_try_on_single_product_tabs"
                 className="art-font-medium art-text-base"
               >
-                Show in Product Tabs
+                    {__('Show in Product Tabs', 'ar-vr-3d-model-try-on')}
               </label>
 
               <div className="art-flex art-items-center art-gap-3">
                 <Switch
                   label={
                     settings.ar_try_on_single_product_tabs === "yes"
-                      ? "Yes"
-                      : "No"
+                      ? __("Yes", "ar-vr-3d-model-try-on")
+                      : __("No", "ar-vr-3d-model-try-on")
                   }
                   defaultChecked={
                     settings.ar_try_on_single_product_tabs === "yes"
@@ -272,8 +272,7 @@ export default function Settings({ settings, handleChange }) {
               </div>
 
               <p className="art-text-sm art-text-gray-400 art-leading-snug">
-                Toggle whether the AR Try-On feature appears in product tab
-                sections.
+                {__('Toggle whether the AR Try-On feature appears in product tab sections.', 'ar-vr-3d-model-try-on')}
               </p>
             </BorderCard>
           </>
@@ -289,7 +288,7 @@ export default function Settings({ settings, handleChange }) {
             }}
           >
             <span className="art-dashicons art-dashicons-admin-generic"></span>
-            Loading : Attributes
+             {__('Loading : Attributes', 'ar-vr-3d-model-try-on')}
           </h3>
           {/* Loading Options */}
           <BorderCard>
@@ -298,7 +297,7 @@ export default function Settings({ settings, handleChange }) {
               htmlFor="ar_try_on_loading_type"
               className="art-block art-font-medium art-text-base"
             >
-              Loading Type
+               {__('Loading Type', 'ar-vr-3d-model-try-on')}
             </label>
 
             {/* Radio Options */}
@@ -312,7 +311,7 @@ export default function Settings({ settings, handleChange }) {
                   checked={settings.ar_try_on_loading_type === "auto"}
                   onChange={handleSettingsChange}
                 />
-                <span>Auto</span>
+                <span>{__('Auto', 'ar-vr-3d-model-try-on')}</span>
               </label>
 
               <label className="art-flex art-items-center art-gap-2 art-cursor-pointer">
@@ -324,7 +323,7 @@ export default function Settings({ settings, handleChange }) {
                   checked={settings.ar_try_on_loading_type === "lazy"}
                   onChange={handleSettingsChange}
                 />
-                <span>Lazy</span>
+                <span>{__('Lazy', 'ar-vr-3d-model-try-on')}</span>
               </label>
 
               <label className="art-flex art-items-center art-gap-2 art-cursor-pointer">
@@ -336,17 +335,17 @@ export default function Settings({ settings, handleChange }) {
                   checked={settings.ar_try_on_loading_type === "eager"}
                   onChange={handleSettingsChange}
                 />
-                <span>Eager</span>
+                <span>{__('Eager', 'ar-vr-3d-model-try-on')}</span>
               </label>
             </div>
 
             {/* Description */}
             <p className="art-text-sm art-text-gray-500 art-leading-snug">
-              Determines how the model should be preloaded:
+              {__('Determines how the model should be preloaded:', 'ar-vr-3d-model-try-on')}
               <br />
-              <strong>Auto</strong> — Loads when near the viewport. <br />
-              <strong>Lazy</strong> — Loads only on interaction. <br />
-              <strong>Eager</strong> — Loads immediately on page load.
+              <strong>{__('Auto', 'ar-vr-3d-model-try-on')}</strong> — {__('Loads when near the viewport.', 'ar-vr-3d-model-try-on')} <br />
+              <strong>{__('Lazy', 'ar-vr-3d-model-try-on')}</strong> — {__('Loads only on interaction.', 'ar-vr-3d-model-try-on')} <br />
+              <strong>{__('Eager', 'ar-vr-3d-model-try-on')}</strong> — {__('Loads immediately on page load.', 'ar-vr-3d-model-try-on')}
             </p>
           </BorderCard>
         </div>
@@ -361,7 +360,7 @@ export default function Settings({ settings, handleChange }) {
             }}
           >
             <span className="art-dashicons art-dashicons-admin-generic"></span>
-            Reveal : Attributes
+              {__('Reveal : Attributes', 'ar-vr-3d-model-try-on')}
           </h3>
           {/* Reveal Options */}
           <BorderCard>
@@ -370,7 +369,7 @@ export default function Settings({ settings, handleChange }) {
               htmlFor="ar_try_on_reveal_type"
               className="art-block art-font-medium art-text-base"
             >
-              Reveal Type
+              {__('Reveal Type', 'ar-vr-3d-model-try-on')}
             </label>
 
             {/* Radio Options */}
@@ -384,7 +383,7 @@ export default function Settings({ settings, handleChange }) {
                   checked={settings.ar_try_on_reveal_type === "auto"}
                   onChange={handleSettingsChange}
                 />
-                <span>Auto</span>
+                <span>{__('Auto', 'ar-vr-3d-model-try-on')}</span>
               </label>
 
               <label className="art-flex art-items-center art-gap-2 art-cursor-pointer">
@@ -396,7 +395,7 @@ export default function Settings({ settings, handleChange }) {
                   checked={settings.ar_try_on_reveal_type === "interaction"}
                   onChange={handleSettingsChange}
                 />
-                <span>Interaction</span>
+                <span>{__('Interaction', 'ar-vr-3d-model-try-on')}</span>
               </label>
 
               <label className="art-flex art-items-center art-gap-2 art-cursor-pointer">
@@ -408,20 +407,18 @@ export default function Settings({ settings, handleChange }) {
                   checked={settings.ar_try_on_reveal_type === "manual"}
                   onChange={handleSettingsChange}
                 />
-                <span>Manual</span>
+                <span>{__('Manual', 'ar-vr-3d-model-try-on')}</span>
               </label>
             </div>
 
             {/* Description */}
             <p className="art-text-sm art-text-gray-500 art-leading-snug">
-              Controls when the model should be revealed:
+              {__('Controls when the model should be revealed:', 'ar-vr-3d-model-try-on')}
               <br />
-              <strong>Auto</strong> — Reveals automatically once loading
-              completes. <br />
-              <strong>Interaction</strong> — Waits for user interaction before
-              revealing. <br />
-              <strong>Manual</strong> — Keeps model hidden until{" "}
-              <code>dismissPoster()</code> is called.
+              <strong>{__('Auto', 'ar-vr-3d-model-try-on')}</strong> — {__('Reveals automatically once loading completes.', 'ar-vr-3d-model-try-on')} <br />
+              <strong>{__('Interaction', 'ar-vr-3d-model-try-on')}</strong> — {__('Waits for user interaction before revealing.', 'ar-vr-3d-model-try-on')} <br />
+              <strong>{__('Manual', 'ar-vr-3d-model-try-on')}</strong> — {__('Keeps model hidden until', 'ar-vr-3d-model-try-on')}{" "}
+              <code>dismissPoster()</code> {__('is called.', 'ar-vr-3d-model-try-on')}
             </p>
           </BorderCard>
         </div>
@@ -433,7 +430,7 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_poster_color"
             className="art-block art-font-medium art-text-base"
           >
-            --poster-color
+            {__("--poster-color", "ar-vr-3d-model-try-on")}
           </label>
 
           <div className="art-flex art-items-center art-gap-3">
@@ -457,9 +454,8 @@ export default function Settings({ settings, handleChange }) {
           </div>
 
           <p className="art-text-sm art-text-gray-500 art-leading-snug">
-            Defines the background color of the poster. Set it to{" "}
-            <code>transparent</code> if your poster image includes transparency,
-            allowing the underlying background to show through.
+            {__('Defines the background color of the poster. Set it to', 'ar-vr-3d-model-try-on')}{" "}
+            <code>transparent</code> {__('if your poster image includes transparency, allowing the underlying background to show through.', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -469,7 +465,7 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_ar"
             className="art-font-medium art-text-base"
           >
-            Enable AR
+              {__('Enable AR', 'ar-vr-3d-model-try-on')}
           </label>
 
           {/* Switch Component */}
@@ -477,8 +473,8 @@ export default function Settings({ settings, handleChange }) {
             <Switch
               label={
                 settings.ar_try_on_ar === "activate"
-                  ? "Activated"
-                  : "Deactivated"
+                  ? __("Activated", "ar-vr-3d-model-try-on")
+                  : __("Deactivated", "ar-vr-3d-model-try-on")
               }
               defaultChecked={settings.ar_try_on_ar === "activate"}
               onChange={(checked) =>
@@ -494,7 +490,7 @@ export default function Settings({ settings, handleChange }) {
           </div>
 
           <p className="art-text-sm art-text-gray-500 art-leading-snug">
-            Enable the ability to launch AR experiences on supported devices.
+            {__('Enable the ability to launch AR experiences on supported devices.', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -504,11 +500,11 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_ar_modes"
             className="art-font-medium art-text-base"
           >
-            AR Modes
+            {__('AR Modes', 'ar-vr-3d-model-try-on')}
           </label>
 
           <p className="art-text-sm art-text-gray-500 art-leading-snug">
-            Select / Deselect All
+             {__('Select / Deselect All', 'ar-vr-3d-model-try-on')}
           </p>
 
           <div className="art-flex art-flex-wrap art-gap-6 art-mt-1">
@@ -553,12 +549,10 @@ export default function Settings({ settings, handleChange }) {
           </div>
 
           <p className="art-text-sm art-text-gray-500 art-leading-snug">
-            A prioritized list of the types of AR experiences to enable. Allowed
-            values are <code>"webxr"</code> (launches in-browser),{" "}
+            {__('A prioritized list of the types of AR experiences to enable. Allowed values are', 'ar-vr-3d-model-try-on')}{" "}
+            <code>"webxr"</code> {__('(launches in-browser),', 'ar-vr-3d-model-try-on')}{" "}
             <code>"scene-viewer"</code>
-            (opens Scene Viewer app), and <code>"quick-look"</code> (opens iOS
-            Quick Look). The presence of an <code>ios-src</code> automatically
-            enables Quick Look.
+            {" "}{__('(opens Scene Viewer app), and', 'ar-vr-3d-model-try-on')}{" "}<code>"quick-look"</code> {__('(opens iOS Quick Look). The presence of an', 'ar-vr-3d-model-try-on')}{" "}<code>ios-src</code> {__('automatically enables Quick Look.', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -568,11 +562,11 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_ar_scale"
             className="art-font-medium art-text-base"
           >
-            AR Scale
+                   {__('AR Scale', 'ar-vr-3d-model-try-on')}
           </label>
 
           <Switch
-            label={settings.ar_try_on_ar_scale === "fixed" ? "Fixed" : "Auto"}
+            label={settings.ar_try_on_ar_scale === "fixed" ? __("Fixed", "ar-vr-3d-model-try-on") : __("Auto", "ar-vr-3d-model-try-on")}
             defaultChecked={settings.ar_try_on_ar_scale === "fixed"}
             onChange={(checked) =>
               handleSettingsChange({
@@ -586,10 +580,8 @@ export default function Settings({ settings, handleChange }) {
           />
 
           <p className="art-text-sm art-text-gray-400">
-            Controls the scaling behavior in AR mode. Set to{" "}
-            <code>"fixed"</code> to disable scaling of the model, which sets it
-            to always be at 100% scale. Defaults to <code>"auto"</code>, which
-            allows the model to be resized by pinch.
+            {__('Controls the scaling behavior in AR mode. Set to', 'ar-vr-3d-model-try-on')}{" "}
+            <code>"fixed"</code> {__('to disable scaling of the model, which sets it to always be at 100% scale. Defaults to', 'ar-vr-3d-model-try-on')}{" "}<code>"auto"</code>, {__('which allows the model to be resized by pinch.', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -599,14 +591,14 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_xr_environment"
             className="art-font-medium art-text-base"
           >
-            XR-Environment
+                  {__('XR-Environment', 'ar-vr-3d-model-try-on')}
           </label>
 
           <Switch
             label={
               settings.ar_try_on_xr_environment === "activate"
-                ? "Activated"
-                : "Deactivated"
+                ? __("Activated", "ar-vr-3d-model-try-on")
+                : __("Deactivated", "ar-vr-3d-model-try-on")
             }
             defaultChecked={settings.ar_try_on_xr_environment === "activate"}
             onChange={(checked) =>
@@ -621,10 +613,7 @@ export default function Settings({ settings, handleChange }) {
           />
 
           <p className="art-text-sm art-text-gray-400">
-            Enables AR lighting estimation in WebXR mode; this has a performance
-            cost and replaces the lighting selected with during an AR session.
-            Known issues: sometimes too dark, sudden updates, shiny materials
-            look matte. environment-image
+            {__('Enables AR lighting estimation in WebXR mode; this has a performance cost and replaces the lighting selected with during an AR session. Known issues: sometimes too dark, sudden updates, shiny materials look matte. environment-image', 'ar-vr-3d-model-try-on')}
           </p>
         </BorderCard>
 
@@ -634,16 +623,16 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_ar_button"
             className="art-font-medium art-text-base"
           >
-            Custom AR Button
+                 {__('Custom AR Button', 'ar-vr-3d-model-try-on')}
           </label>
 
           {/* Switch Component */}
           <Switch
             label={
               settings.ar_try_on_ar_button === "activate"
-                ? "Activated"
-                : "Deactivated"
-            }
+                ? __("Activated", "ar-vr-3d-model-try-on")
+                : __("Deactivated", "ar-vr-3d-model-try-on")
+            } 
             defaultChecked={settings.ar_try_on_ar_button === "activate"}
             onChange={(checked) =>
               handleSettingsChange({
@@ -656,12 +645,12 @@ export default function Settings({ settings, handleChange }) {
             color="blue"
           />
 
+
           <p className="art-text-sm art-text-gray-400">
-            By placing a child element under with <code>slot="ar-button"</code>,
-            this element will replace the default "Enter AR" button (icon in the
-            lower right). The custom button will appear if AR is potentially
-            available (we will have some false positives until the user tries).
+            {__('By placing a child element under with', 'ar-vr-3d-model-try-on')}{" "}<code>slot="ar-button"</code>,
+            {" "}{__('this element will replace the default "Enter AR" button (icon in the lower right). The custom button will appear if AR is potentially available (we will have some false positives until the user tries).', 'ar-vr-3d-model-try-on')}
           </p>
+
 
           {/* Conditionally Render Fields when Switch is ON */}
           {settings.ar_try_on_ar_button === "activate" && (
@@ -673,7 +662,7 @@ export default function Settings({ settings, handleChange }) {
                     htmlFor="ar_try_on_ar_button_text"
                     className="art-font-medium"
                   >
-                    Button Text
+                     {__('Button Text', 'ar-vr-3d-model-try-on')}
                   </label>
                   <input
                     type="text"
@@ -691,7 +680,7 @@ export default function Settings({ settings, handleChange }) {
                     htmlFor="ar_try_on_ar_button_background_color"
                     className="art-font-medium"
                   >
-                    Button Background Color
+                      {__('Button Background Color', 'ar-vr-3d-model-try-on')}
                   </label>
                   <div className="art-flex art-items-center">
                     <input
@@ -725,7 +714,7 @@ export default function Settings({ settings, handleChange }) {
                     htmlFor="ar_try_on_ar_button_text_color"
                     className="art-font-medium"
                   >
-                    Button Text Color
+                        {__('Button Text Color', 'ar-vr-3d-model-try-on')}
                   </label>
                   <div className="art-flex art-items-center">
                     <input
@@ -763,11 +752,11 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_enable_qr_code"
             className="art-block art-font-medium art-text-base"
           >
-            Enable QR Code
+                  {__('Enable QR Code', 'ar-vr-3d-model-try-on')}
           </label>
 
           <Switch
-            label={settings.ar_try_on_enable_qr_code === "yes" ? "Yes" : "No"}
+            label={settings.ar_try_on_enable_qr_code === "yes" ? __("Yes", "ar-vr-3d-model-try-on") : __("No", "ar-vr-3d-model-try-on")}
             defaultChecked={settings.ar_try_on_enable_qr_code === "yes"}
             onChange={(checked) =>
               handleSettingsChange({
@@ -787,12 +776,12 @@ export default function Settings({ settings, handleChange }) {
             htmlFor="ar_try_on_clear_cache"
             className="art-font-medium art-text-base"
           >
-            Clear Cache
+             {__('Clear Cache', 'ar-vr-3d-model-try-on')}
           </label>
 
           {/* Switch Component */}
           <Switch
-            label={settings.ar_try_on_clear_cache ? "Enabled" : "Disabled"}
+            label={settings.ar_try_on_clear_cache ? __("Enabled", "ar-vr-3d-model-try-on") : __("Disabled", "ar-vr-3d-model-try-on")}
             defaultChecked={settings.ar_try_on_clear_cache}
             onChange={(checked) =>
               handleSettingsChange({
@@ -808,6 +797,6 @@ export default function Settings({ settings, handleChange }) {
       </div>
     </React.Fragment>
   ) : (
-    <h1>Loading</h1>
+    <h1>{__('Loading', 'ar-vr-3d-model-try-on')}</h1>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 import Settings from './Settings';
 import CompressionSettings from './Compression/CompressionSettings';
 
@@ -20,12 +21,12 @@ export default function SettingsWrapper({ setHeaders, settings, handleChange }) 
     const subtabs = [
         {
             id: 'general',
-            name: 'General',
+            name: __('General', 'ar-vr-3d-model-try-on'),
             icon: '⚙️',
         },
         {
             id: 'compression',
-            name: 'Compression',
+            name: __('Compression', 'ar-vr-3d-model-try-on'),
             icon: '🗜️',
         },
     ];
@@ -40,7 +41,7 @@ export default function SettingsWrapper({ setHeaders, settings, handleChange }) 
                     borderBottom: "1px solid var(--theme-accent)",
                 }}
             >
-                <nav className="art-flex art-space-x-8 art-px-6" aria-label="Subtabs">
+                <nav className="art-flex art-space-x-8 art-px-6" aria-label={__('Subtabs', 'ar-vr-3d-model-try-on')}>
                     {subtabs.map((subtab) => (
                         <button
                             key={subtab.id}

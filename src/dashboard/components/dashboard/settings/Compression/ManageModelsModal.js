@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 import { toast } from 'react-toastify';
 import {getURL} from "../../../../../context/utilities";
 
@@ -29,7 +30,7 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                 },
             });
 
-            if (!response.ok) throw new Error('Failed to fetch models');
+             if (!response.ok) throw new Error(__('Failed to fetch models', 'ar-vr-3d-model-try-on'));
 
             const data = await response.json();
             if (data.success) {
@@ -37,14 +38,14 @@ export default function ManageModelsModal({ isOpen, onClose }) {
             }
         } catch (error) {
             console.error('Error fetching models:', error);
-            toast.error('Failed to load compressed models');
+             toast.error(__('Failed to load compressed models', 'ar-vr-3d-model-try-on'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (postId, postTitle) => {
-        if (!confirm(`Are you sure you want to delete compression for "${postTitle}"? This will free up one slot.`)) {
+        if (!confirm(sprintf(__('Are you sure you want to delete compression for "%s"? This will free up one slot.', 'ar-vr-3d-model-try-on'), postTitle))) {
             return;
         }
 
@@ -58,19 +59,19 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                 },
             });
 
-            if (!response.ok) throw new Error('Failed to delete compression');
+                if (!response.ok) throw new Error(__('Failed to delete compression', 'ar-vr-3d-model-try-on'));
 
             const data = await response.json();
             if (data.success) {
-                toast.success(`✅ Compression deleted for "${postTitle}"`);
+                toast.success(sprintf(__('✅ Compression deleted for "%s"', 'ar-vr-3d-model-try-on'), postTitle));
                 // Remove from list
                 setModels(models.filter((m) => m.post_id !== postId));
             } else {
-                throw new Error(data.message || 'Failed to delete');
+                 throw new Error(data.message || __('Failed to delete', 'ar-vr-3d-model-try-on'));
             }
         } catch (error) {
             console.error('Error deleting compression:', error);
-            toast.error('❌ Failed to delete compression: ' + error.message);
+              toast.error(__('❌ Failed to delete compression: ', 'ar-vr-3d-model-try-on') + error.message);
         } finally {
             setDeleting(null);
         }
@@ -93,7 +94,7 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                     <div className="art-px-6 art-py-4 art-border-b art-border-gray-200">
                         <div className="art-flex art-items-center art-justify-between">
                             <h2 className="art-text-xl art-font-bold art-text-gray-900">
-                                Manage Compressed Models
+                                  {__('Manage Compressed Models', 'ar-vr-3d-model-try-on')}
                             </h2>
                             <button
                                 onClick={onClose}
@@ -105,7 +106,7 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                             </button>
                         </div>
                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                            Delete compressed models to free up slots. You can re-compress them later.
+                              {__('Delete compressed models to free up slots. You can re-compress them later.', 'ar-vr-3d-model-try-on')}
                         </p>
                     </div>
 
@@ -123,10 +124,10 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                                     </svg>
                                 </div>
                                 <h3 className="art-text-lg art-font-medium art-text-gray-900 art-mb-2">
-                                    No compressed models yet
+                                     {__('No compressed models yet', 'ar-vr-3d-model-try-on')}
                                 </h3>
                                 <p className="art-text-gray-600">
-                                    Start compressing models to see them here.
+                                      {__('Start compressing models to see them here.', 'ar-vr-3d-model-try-on')}
                                 </p>
                             </div>
                         ) : (
@@ -138,22 +139,22 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                                     >
                                         <div className="art-flex-1 art-min-w-0 art-mr-4">
                                             <h3 className="art-text-sm art-font-medium art-text-gray-900 art-truncate">
-                                                {model.post_title || `Post #${model.post_id}`}
+                                                 {model.post_title || sprintf(__('Post #%s', 'ar-vr-3d-model-try-on'), model.post_id)}
                                             </h3>
                                             <div className="art-flex art-items-center art-space-x-4 art-mt-1 art-text-xs art-text-gray-600">
                                                 <span>
-                                                    Original: <strong>{model.original_size_formatted}</strong>
+                                                    {__('Original:', 'ar-vr-3d-model-try-on')} <strong>{model.original_size_formatted}</strong>
                                                 </span>
                                                 <span>→</span>
                                                 <span>
-                                                    Compressed: <strong>{model.compressed_size_formatted}</strong>
+                                                    {__('Compressed:', 'ar-vr-3d-model-try-on')} <strong>{model.compressed_size_formatted}</strong>
                                                 </span>
                                                 <span className="art-text-green-600 art-font-semibold">
-                                                    ({model.compression_ratio}% reduction)
+                                                     ({sprintf(__('%s%% reduction', 'ar-vr-3d-model-try-on'), model.compression_ratio)})
                                                 </span>
                                             </div>
                                             <div className="art-text-xs art-text-gray-500 art-mt-1">
-                                                Saved: <strong>{model.saved_space_formatted}</strong>
+                                                 {__('Saved:', 'ar-vr-3d-model-try-on')}<strong>{model.saved_space_formatted}</strong>
                                             </div>
                                         </div>
                                         <div className="art-flex art-items-center art-space-x-2">
@@ -164,7 +165,7 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                                                     rel="noopener noreferrer"
                                                     className="art-px-3 art-py-1.5 art-text-sm art-font-medium art-text-blue-600 hover:art-text-blue-800"
                                                 >
-                                                    View
+                                                    {__('View', 'ar-vr-3d-model-try-on')}
                                                 </a>
                                             )}
                                             <button
@@ -175,10 +176,10 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                                                 {deleting === model.post_id ? (
                                                     <>
                                                         <span className="art-inline-block art-animate-spin art-mr-1">⏳</span>
-                                                        Deleting...
+                                                        {__('Deleting...', 'ar-vr-3d-model-try-on')}
                                                     </>
                                                 ) : (
-                                                    '🗑️ Delete'
+                                                     __('🗑️ Delete', 'ar-vr-3d-model-try-on')
                                                 )}
                                             </button>
                                         </div>
@@ -192,13 +193,18 @@ export default function ManageModelsModal({ isOpen, onClose }) {
                     <div className="art-px-6 art-py-4 art-border-t art-border-gray-200 art-bg-gray-50">
                         <div className="art-flex art-items-center art-justify-between">
                             <div className="art-text-sm art-text-gray-600">
-                                {models.length} compressed model{models.length !== 1 ? 's' : ''}
+                                {sprintf(
+                                    models.length !== 1 
+                                        ? __('%d compressed models', 'ar-vr-3d-model-try-on')
+                                        : __('%d compressed model', 'ar-vr-3d-model-try-on'),
+                                    models.length
+                                )}
                             </div>
                             <button
                                 onClick={onClose}
                                 className="art-px-4 art-py-2 art-bg-blue-600 art-text-white art-font-medium art-rounded-md hover:art-bg-blue-700"
                             >
-                                Close
+                                 {__('Close', 'ar-vr-3d-model-try-on')}
                             </button>
                         </div>
                     </div>
