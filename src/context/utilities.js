@@ -609,18 +609,21 @@ function setupVariationHandling(modelViewer, model_settings) {
  * @param {string} variantName - The WooCommerce variant name (e.g., "Blue", "Large")
  * @returns {boolean} - Whether the variant was successfully switched
  */
-export const switchModelVariant = (modelViewer, variantName) => {
+export const switchModelVariant = (modelViewer, variantName, modelSessionData={}) => {
     if (!modelViewer || !variantName) return false;
 
     try {
-        const variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
-        const modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
-        const originalSrc = modelViewer.dataset.originalSrc;
 
+        // const variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
+        const variationSettings = modelSessionData.variationSettings || '{}';
+        // const modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
+        const modelVariants  = Array.from(modelViewer.availableVariants || []);
+        const originalSrc = modelViewer.dataset.originalSrc;
         // Check if this variant is mapped to a model's built-in variant
         const mappedVariant = variationSettings.variantMapping?.[variantName];
         if (mappedVariant && modelVariants.includes(mappedVariant)) {
             // Use the model's built-in variant
+            modelViewer.src = originalSrc;
             modelViewer.variantName = mappedVariant;
             return true;
         }
@@ -637,7 +640,7 @@ export const switchModelVariant = (modelViewer, variantName) => {
         // Fallback: Reset to original/default model
         if (originalSrc) {
             modelViewer.src = originalSrc;
-            modelViewer.variantName = null;
+            modelViewer.variantName = mappedVariant;
         }
 
         return false;

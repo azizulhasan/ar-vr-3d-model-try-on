@@ -596,17 +596,20 @@ function setupVariationHandling(modelViewer, model_settings) {
  * @returns {boolean} - Whether the variant was successfully switched
  */
 var switchModelVariant = function switchModelVariant(modelViewer, variantName) {
+  var modelSessionData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
   if (!modelViewer || !variantName) return false;
   try {
     var _variationSettings$va, _variationSettings$va2;
-    var variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
-    var modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
+    // const variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
+    var variationSettings = modelSessionData.variationSettings || '{}';
+    // const modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
+    var modelVariants = Array.from(modelViewer.availableVariants || []);
     var originalSrc = modelViewer.dataset.originalSrc;
-
     // Check if this variant is mapped to a model's built-in variant
     var mappedVariant = (_variationSettings$va = variationSettings.variantMapping) === null || _variationSettings$va === void 0 ? void 0 : _variationSettings$va[variantName];
     if (mappedVariant && modelVariants.includes(mappedVariant)) {
       // Use the model's built-in variant
+      modelViewer.src = originalSrc;
       modelViewer.variantName = mappedVariant;
       return true;
     }
@@ -623,7 +626,7 @@ var switchModelVariant = function switchModelVariant(modelViewer, variantName) {
     // Fallback: Reset to original/default model
     if (originalSrc) {
       modelViewer.src = originalSrc;
-      modelViewer.variantName = null;
+      modelViewer.variantName = mappedVariant;
     }
     return false;
   } catch (e) {
@@ -5178,6 +5181,8 @@ var AtlasAR = /*#__PURE__*/function () {
   function AtlasAR() {
     _classCallCheck(this, AtlasAR);
     _defineProperty(this, "alertify", null);
+    _defineProperty(this, "modelsData", {});
+    _defineProperty(this, "product_id", null);
     /**
      * Post data method.
      * @param {url} url api url
@@ -5255,6 +5260,7 @@ var AtlasAR = /*#__PURE__*/function () {
     value: function setModelData(data) {
       var model_id = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ".atlas_ar_model_viewer";
       var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "normal";
+      // this.modelsData[this.product_id] = data;
       if (type === "modal") {
         var productName = data.product_name || "3D Product";
         productName = this.decodeHtml(productName);
@@ -5320,6 +5326,7 @@ var AtlasAR = /*#__PURE__*/function () {
               model_id = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : ".atlas_ar_model_viewer";
               type = _args2.length > 2 && _args2[2] !== undefined ? _args2[2] : "normal";
               product_id = parseInt(product_id);
+              this.product_id = product_id;
               modelSessionData = this.getModelSessionData("models", product_id);
               isSettingsChanged = this.getModelSessionData("isSettingsChanged");
               whichExists = this.whichExists(ar_try_on.cached_ids, product_id);
@@ -5329,26 +5336,26 @@ var AtlasAR = /*#__PURE__*/function () {
                 product_id: product_id
               });
               if (!whichExists) {
-                _context2.next = 13;
+                _context2.next = 14;
                 break;
               }
               if (!(isSettingsChanged === whichExists)) {
-                _context2.next = 11;
+                _context2.next = 12;
                 break;
               }
               this.setModelData(modelSessionData, model_id, type);
               return _context2.abrupt("return");
-            case 11:
-              _context2.next = 16;
+            case 12:
+              _context2.next = 17;
               break;
-            case 13:
+            case 14:
               if (!(modelSessionData && !((_ar_try_on2 = ar_try_on) !== null && _ar_try_on2 !== void 0 && (_ar_try_on2 = _ar_try_on2.cached_ids) !== null && _ar_try_on2 !== void 0 && _ar_try_on2.includes(product_id)))) {
-                _context2.next = 16;
+                _context2.next = 17;
                 break;
               }
               this.setModelData(modelSessionData, model_id, type);
               return _context2.abrupt("return");
-            case 16:
+            case 17:
               // Show loading message before sending the request
               button = document.querySelector("[product-id=\"".concat(product_id, "\"]"));
               buttonText = 'View In 3D';
@@ -5360,7 +5367,7 @@ var AtlasAR = /*#__PURE__*/function () {
               formData = new FormData();
               formData.append("post_id", product_id);
               formData.append("has_value_changed", true);
-              _context2.next = 25;
+              _context2.next = 26;
               return this.postWithoutImage(this.getURL("get_model_and_settings"), formData).then(function (response) {
                 if (response.success) {
                   var data = response.data;
@@ -5373,7 +5380,7 @@ var AtlasAR = /*#__PURE__*/function () {
                   }
                 }
               });
-            case 25:
+            case 26:
             case "end":
               return _context2.stop();
           }
@@ -5464,7 +5471,8 @@ var AtlasAR = /*#__PURE__*/function () {
         console.warn('Model viewer not found:', modelSelector);
         return false;
       }
-      return (0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_0__.switchModelVariant)(modelViewer, variantName);
+      var modelSessionData = this.getModelSessionData("models", modelViewer.dataset.id);
+      return (0,_src_context_utilities__WEBPACK_IMPORTED_MODULE_0__.switchModelVariant)(modelViewer, variantName, modelSessionData);
     }
 
     /**

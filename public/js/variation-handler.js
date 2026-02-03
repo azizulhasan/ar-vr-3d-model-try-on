@@ -9,6 +9,7 @@
 
     // Wait for DOM ready
     $(document).ready(function() {
+
         initVariationHandler();
     });
 
@@ -16,6 +17,7 @@
      * Initialize the variation handler
      */
     function initVariationHandler() {
+
         const variationsForm = document.querySelector('.variations_form');
         if (!variationsForm) {
             return;
@@ -32,7 +34,7 @@
      * @param {Function} callback - Callback function when model viewer is found
      */
     function waitForModelViewer(callback) {
-        const maxAttempts = 20;
+        const maxAttempts = 120;
         let attempts = 0;
 
         const checkInterval = setInterval(function() {
@@ -57,8 +59,9 @@
     function setupVariationListeners(variationsForm, modelViewer) {
         // Store original model source for fallback
         const originalSrc = modelViewer.getAttribute('src');
+        const id = modelViewer.getAttribute('id');
         modelViewer.dataset.originalSrc = originalSrc;
-
+        modelViewer.dataset.id = id.replace(/[a-zA-Z_-]/g, '');
         // Listen for WooCommerce variation selection
         $(variationsForm).on('found_variation', function(event, variation) {
             handleVariationChange(variation, modelViewer);
@@ -120,7 +123,21 @@
         value = value.replace(/^pa_/, '');
 
         // Capitalize first letter for display names
-        return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+        return value;
+        // return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    }
+
+    function getStoredModelDataObj() {
+        return JSON.parse(window.sessionStorage.getItem("atlas_ar_model_data"));
+    }
+
+    function getModelSessionData(propertyName = "models", postId = "") {
+        const storedModelData = getStoredModelDataObj();
+        if (propertyName === "models") {
+            return storedModelData?.models?.[postId] ?? false;
+        }
+
+        return storedModelData?.[propertyName] ?? false;
     }
 
     /**
@@ -132,7 +149,9 @@
     function tryVariantSwitch(variantName, modelViewer) {
         // Use the global function if available
         if (window.atlasARSwitchVariant) {
-            return window.atlasARSwitchVariant(modelViewer, variantName);
+            let modelSessionData = getModelSessionData("models", modelViewer.dataset.id)
+            console.log(modelSessionData);
+            return window.atlasARSwitchVariant(modelViewer, variantName, modelSessionData);
         }
 
         // Fallback: Try using AtlasAR class

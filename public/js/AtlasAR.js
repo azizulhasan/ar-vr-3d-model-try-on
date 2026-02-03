@@ -2,6 +2,8 @@ import {setModelAttributes, createModal, SpinnerModal, switchModelVariant} from 
 
 class AtlasAR {
   alertify = null;
+  modelsData = {};
+  product_id = null;
 
   constructor() {}
 
@@ -80,6 +82,7 @@ class AtlasAR {
   }
 
   setModelData(data, model_id = ".atlas_ar_model_viewer", type = "normal") {
+    // this.modelsData[this.product_id] = data;
     if (type === "modal") {
       let productName = data.product_name || "3D Product";
       productName = this.decodeHtml(productName);
@@ -132,6 +135,7 @@ class AtlasAR {
     type = "normal"
   ) {
     product_id = parseInt(product_id);
+    this.product_id = product_id;
     let modelSessionData = this.getModelSessionData("models", product_id);
     let isSettingsChanged = this.getModelSessionData("isSettingsChanged");
     const whichExists = this.whichExists(ar_try_on.cached_ids, product_id);
@@ -254,7 +258,10 @@ class AtlasAR {
       console.warn('Model viewer not found:', modelSelector);
       return false;
     }
-    return switchModelVariant(modelViewer, variantName);
+
+    let modelSessionData = this.getModelSessionData("models", modelViewer.dataset.id);
+
+    return switchModelVariant(modelViewer, variantName, modelSessionData);
   }
 
   /**
