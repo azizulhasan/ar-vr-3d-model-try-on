@@ -66,7 +66,6 @@ const ContentSection = ({
     const loadModelVariants = () => {
         setIsLoadingVariants(true);
         const checkModelViewer = setInterval(() => {
-            console.log('onload')
             const modelViewer = document.querySelector('.atlas_ar_model_viewer');
             if (modelViewer && modelViewer.availableVariants) {
                 clearInterval(checkModelViewer);
@@ -78,7 +77,7 @@ const ContentSection = ({
         setTimeout(() => {
             clearInterval(checkModelViewer);
             setIsLoadingVariants(false);
-        }, 29000);
+        }, 59000);
     };
 
     // Handle attribute selection change
@@ -154,11 +153,14 @@ const ContentSection = ({
         }
     };
 
+    useEffect(()=> {
+        console.log({variationSettings: productModel.variationSettings})
+    },[productModel.variationSettings])
     // Check if variant is mapped
     const isVariantMapped = (variantName) => {
-        console.log({variantName, modelVariants});
-        return productModel.variationSettings?.variantMapping?.[variantName] &&
-               productModel.variationSettings.variantMapping[variantName] !== '';
+        let modelVariant = productModel.variationSettings?.variantMapping?.[variantName];
+        return modelVariants.includes(modelVariant);
+
     };
 
     // Check if variant has separate model
@@ -441,6 +443,10 @@ const ContentSection = ({
                                         const mapping = productModel.variationSettings?.variantMapping?.[variantName];
                                         const separateModel = productModel.variationSettings?.variants?.[variantName];
                                         if (mapping && modelVariants.includes(mapping)) {
+                                            console.log(modelViewer.src , productModel.src)
+                                            if(modelViewer.src !== productModel.src) {
+                                                modelViewer.src = productModel.src;
+                                            }
                                             modelViewer.variantName = mapping;
                                         } else if (separateModel) {
                                             modelViewer.src = separateModel;
