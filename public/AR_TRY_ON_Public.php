@@ -145,11 +145,6 @@ class AR_TRY_ON_Public {
             wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
             wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->localize_data );
 
-            // Enqueue variation handler for WooCommerce variable products
-            if ( function_exists( 'is_product' ) && is_product() ) {
-                wp_enqueue_script( 'atlas-ar-variation-handler', ATLAS_AR_PLUGIN_URL . 'public/js/variation-handler.js', array( 'jquery', 'AtlasAR' ), $this->version, true );
-            }
-
 //            if ( function_exists( 'is_product' ) || is_product() ) {
 //                wp_enqueue_script( 'atlas_ar-single-product', ATLAS_AR_PLUGIN_URL . 'public/js/single-product.js', array('jquery'), '1.0', true );
 //            }
