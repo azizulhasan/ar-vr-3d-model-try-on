@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState } from "react";
+import { __ } from '@wordpress/i18n';
 import AccordionIcon from "../../icons/AccordionIcon";
 import notify from "../../context/Notify";
 
@@ -14,7 +15,7 @@ const HotspotsSection = ({
   // Show warning when user interacts with hotspots in free version
   const showProWarning = () => {
     if (!ar_try_on.is_pro_active && !hasShownWarning) {
-      notify('Hotspots is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
+      notify(__('Hotspots is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'ar-vr-3d-model-try-on'), 'warn', {
         autoClose: 5000,
       });
       setHasShownWarning(true);
@@ -76,7 +77,7 @@ const HotspotsSection = ({
       const nextId = (productModel.hotspots?.length || 0) + 1;
       const newHotspot = {
         id: nextId,
-        label: `Hotspot ${nextId}`,
+        label: __('Hotspot', 'ar-vr-3d-model-try-on') + ` ${nextId}`,
         position: pos,
         normal: norm,
       };
@@ -96,7 +97,7 @@ const HotspotsSection = ({
         className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
       >
         <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Hotspots
+          {__('Hotspots', 'ar-vr-3d-model-try-on')}
         </span>
         <AccordionIcon status={activeAccordion.hotspots} />
       </button>
@@ -105,10 +106,10 @@ const HotspotsSection = ({
         <div className="art-px-3 art-py-2 art-bg-white art-border-t">
           <div className="art-flex art-items-center art-justify-between art-mb-4">
             <h3 className="art-font-semibold art-text-lg art-text-slate-800">
-              Manage Hotspots
+              {__('Manage Hotspots', 'ar-vr-3d-model-try-on')}
             </h3>
             <p className="art-text-xs art-text-gray-500">
-              💡 Click on the 3D model to place a hotspot.
+              {__('💡 Click on the 3D model to place a hotspot.', 'ar-vr-3d-model-try-on')}
             </p>
           </div>
 
@@ -120,7 +121,7 @@ const HotspotsSection = ({
                   className="art-border art-rounded art-p-3 art-bg-gray-50 art-relative art-shadow-sm"
                 >
                   <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-20">Label:</label>
+                    <label className="art-text-sm art-w-20">{__('Label:', 'ar-vr-3d-model-try-on')}</label>
                     <input
                       type="text"
                       className="art-border art-rounded art-px-2 art-py-1 art-w-1/2"
@@ -132,7 +133,7 @@ const HotspotsSection = ({
                   </div>
 
                   {/* <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-20">Position:</label>
+                    <label className="art-text-sm art-w-20">{__('Position:', 'ar-vr-3d-model-try-on')}</label>
                     <input
                       type="text"
                       readOnly
@@ -142,7 +143,7 @@ const HotspotsSection = ({
                   </div>
 
                   <div className="art-flex art-items-center art-gap-2 art-mb-2">
-                    <label className="art-text-sm art-w-20">Normal:</label>
+                    <label className="art-text-sm art-w-20">{__('Normal:', 'ar-vr-3d-model-try-on')}</label>
                     <input
                       type="text"
                       readOnly
@@ -154,7 +155,7 @@ const HotspotsSection = ({
                   <button
                     onClick={() => removeHotspot(index)}
                     className="art-absolute art-top-2 art-right-2 art-text-red-500 hover:art-text-red-700 art-text-xl art-w-6 art-h-6 art-flex art-items-center art-justify-center"
-                    title="Remove hotspot"
+                    title={__('Remove hotspot', 'ar-vr-3d-model-try-on')}
                   >
                     &times;
                   </button>
@@ -162,7 +163,7 @@ const HotspotsSection = ({
               ))
             ) : (
               <p className="art-text-gray-500 art-italic">
-                No hotspots yet. Click the model to add one.
+                {__('No hotspots yet. Click the model to add one.', 'ar-vr-3d-model-try-on')}
               </p>
             )}
           </div>

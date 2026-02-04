@@ -518,7 +518,7 @@ export default function Settings({ settings, handleChange }) {
                 onChange={(e) => handleSettingsChange(e, "ar_try_on_ar_modes")}
                 className="art-text-blue-600 art-focus:ring-blue-500"
               />
-              <span className="art-text-base">webxr</span>
+              <span className="art-text-base">{__("webxr",'ar-vr-3d-model-try-on')}</span>
             </label>
 
             <label className="art-flex art-items-center art-gap-2">
@@ -531,7 +531,7 @@ export default function Settings({ settings, handleChange }) {
                 onChange={(e) => handleSettingsChange(e, "ar_try_on_ar_modes")}
                 className="art-text-blue-600 art-focus:ring-blue-500"
               />
-              <span className="art-text-base">scene-viewer</span>
+              <span className="art-text-base">{__("scene-viewer", 'ar-vr-3d-model-try-on')}</span>
             </label>
 
             <label className="art-flex art-items-center art-gap-2">
@@ -544,7 +544,7 @@ export default function Settings({ settings, handleChange }) {
                 onChange={(e) => handleSettingsChange(e, "ar_try_on_ar_modes")}
                 className="art-text-blue-600 art-focus:ring-blue-500"
               />
-              <span className="art-text-base">quick-look</span>
+              <span className="art-text-base">{__("quick-look",'ar-vr-3d-model-try-on')}</span>
             </label>
           </div>
 

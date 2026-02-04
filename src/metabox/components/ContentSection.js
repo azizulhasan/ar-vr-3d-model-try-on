@@ -1,5 +1,6 @@
 // components/ARSettings/ContentSection.js
 import React from "react";
+import { __ } from '@wordpress/i18n';
 import AccordionIcon from "../../icons/AccordionIcon";
 
 const ContentSection = ({
@@ -19,7 +20,7 @@ const ContentSection = ({
                 className="art-w-full art-flex art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
             >
         <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Content
+          {__('Content', 'ar-vr-3d-model-try-on')}
           <AccordionIcon status={activeAccordion.content} />
         </span>
             </button>
@@ -29,7 +30,7 @@ const ContentSection = ({
                 {/* AR Placement */}
                 <div className="art-mb-3">
                     <label className="art-font-medium art-block art-mb-2">
-                        AR Placements / Product Type
+                        {__('AR Placements / Product Type', 'ar-vr-3d-model-try-on')}
                     </label>
                     <div className="art-relative">
                         <select
@@ -38,8 +39,8 @@ const ContentSection = ({
                             onChange={handleChange}
                             className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded art-bg-white art-appearance-none art-pr-8"
                         >
-                            <option value="floor">Floor</option>
-                            <option value="wall">Wall</option>
+                            <option value="floor">{__('Floor', 'ar-vr-3d-model-try-on')}</option>
+                            <option value="wall">{__('Wall', 'ar-vr-3d-model-try-on')}</option>
                             {/*TODO: this option will be enable when MIndar will be active*/}
                             {/*<option value="168">Glass Pro</option>*/}
                         </select>
@@ -54,7 +55,7 @@ const ContentSection = ({
                 {/* Android Model */}
                 <div className="art-border art-border-solid art-border-black art-p-4">
                     <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                        MODEL {basicSettings.src == 'upload' ? "File" : 'URL'} FOR ANDROID
+                        {__('MODEL', 'ar-vr-3d-model-try-on')} {basicSettings.src == 'upload' ? __('File', 'ar-vr-3d-model-try-on') : __('URL', 'ar-vr-3d-model-try-on')} {__('FOR ANDROID', 'ar-vr-3d-model-try-on')}
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M17.523 15.3414c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm-11.046 0c-.5077 0-.91-.4023-.91-.8999 0-.4976.4023-.8999.91-.8999.5077 0 .91.4023.91.8999 0 .4976-.4023.8999-.91.8999zm11.405-6.02L19.76 6.394c.095-.152.043-.348-.109-.442-.15-.095-.348-.043-.442.109l-1.906 3.038C16.04 8.73 14.06 8.366 12 8.366c-2.06 0-4.04.364-5.303.733L4.791 6.061c-.095-.152-.292-.204-.442-.109-.152.095-.204.291-.109.442L6.118 9.32C3.264 10.558 1.5 12.833 1.5 15.441v1.2h21v-1.2c0-2.608-1.764-4.883-4.618-6.121z" fill="#3DDC84" />
                         </svg>
@@ -78,7 +79,7 @@ const ContentSection = ({
                         </button>
                     </div>
 
-                    <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR ANDROID</label>
+                    <label className="art-mt-2 art-block art-text-sm art-font-medium">{__('MODEL URL FOR ANDROID', 'ar-vr-3d-model-try-on')}</label>
                     <input
                         type="text"
                         id="src"
@@ -86,16 +87,16 @@ const ContentSection = ({
                         value={productModel.src || ''}
                         onChange={handleChange}
                         className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                        placeholder="Enter Android model URL"
+                        placeholder={__('Enter Android model URL', 'ar-vr-3d-model-try-on')}
                     />
-                    <p id='atlas_ar_android_file_notice' className="art-text-sm art-text-gray-600 art-mt-1">The URL of the Android model file.</p>
+                    <p id='atlas_ar_android_file_notice' className="art-text-sm art-text-gray-600 art-mt-1">{__('The URL of the Android model file.', 'ar-vr-3d-model-try-on')}</p>
                 </div>
                 <br />
 
                 {/* iOS Model */}
                 <div className="art-border art-border-solid art-border-black art-p-4">
                     <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                        MODEL {basicSettings.ios_src == 'upload' ? "File" : 'URL'} FOR IOS
+                        {__('MODEL', 'ar-vr-3d-model-try-on')} {basicSettings.ios_src == 'upload' ? __('File', 'ar-vr-3d-model-try-on') : __('URL', 'ar-vr-3d-model-try-on')} {__('FOR IOS', 'ar-vr-3d-model-try-on')}
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" fill="#000000" />
                         </svg>
@@ -120,7 +121,7 @@ const ContentSection = ({
                         </button>
                     </div>
 
-                    <label className="art-mt-2 art-block art-text-sm art-font-medium">MODEL URL FOR IOS</label>
+                    <label className="art-mt-2 art-block art-text-sm art-font-medium">{__('MODEL URL FOR IOS', 'ar-vr-3d-model-try-on')}</label>
                     <input
                         type="text"
                         id="ios_src"
@@ -128,15 +129,15 @@ const ContentSection = ({
                         value={productModel.ios_src || ''}
                         onChange={handleChange}
                         className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                        placeholder="Enter iOS model URL"
+                        placeholder={__('Enter iOS model URL', 'ar-vr-3d-model-try-on')}
                     />
-                    <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the iOS model file.</p>
+                    <p className="art-text-sm art-text-gray-600 art-mt-1">{__('The URL of the iOS model file.', 'ar-vr-3d-model-try-on')}</p>
                 </div>
                 <br />
 
                 {/* Poster Source */}
                 <div className="art-border art-border-solid art-border-black art-p-4">
-                    <label className="art-text-xs art-font-semibold art-uppercase"> POSTER SOURCE {basicSettings.poster == 'upload' ? "File" : 'URL'}</label>
+                    <label className="art-text-xs art-font-semibold art-uppercase">{__('POSTER SOURCE', 'ar-vr-3d-model-try-on')} {basicSettings.poster == 'upload' ? __('File', 'ar-vr-3d-model-try-on') : __('URL', 'ar-vr-3d-model-try-on')}</label>
                     <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                         <button
                             type="button"
@@ -156,7 +157,7 @@ const ContentSection = ({
                         </button>
                     </div>
 
-                    <label className="art-mt-2 art-block art-text-sm art-font-medium">POSTER</label>
+                    <label className="art-mt-2 art-block art-text-sm art-font-medium">{__('POSTER', 'ar-vr-3d-model-try-on')}</label>
                     <input
                         type="text"
                         id="poster"
@@ -164,9 +165,9 @@ const ContentSection = ({
                         value={productModel.poster}
                         onChange={handleChange}
                         className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                        placeholder="Enter poster image URL"
+                        placeholder={__('Enter poster image URL', 'ar-vr-3d-model-try-on')}
                     />
-                    <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the poster image.</p>
+                    <p className="art-text-sm art-text-gray-600 art-mt-1">{__('The URL of the poster image.', 'ar-vr-3d-model-try-on')}</p>
                 </div>
 
                 {/* Alt Text */}
@@ -177,10 +178,10 @@ const ContentSection = ({
                     >
                         <img
                             src={ar_try_on.plugin_url + "admin/images/icons8-web-accessibility-18.png"}
-                            alt="Accessibility Icon"
+                            alt={__('Accessibility Icon', 'ar-vr-3d-model-try-on')}
                             className="art-w-6 art-h-6 art-mt-4"
                         />
-                        Alt
+                        {__('Alt', 'ar-vr-3d-model-try-on')}
                     </label>
                     <input
                         type="text"
@@ -191,7 +192,7 @@ const ContentSection = ({
                         className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
                     />
                     <p className="art-text-sm art-text-gray-600 art-mt-2">
-                        Insert a text. If the text field is left empty, the name of the product is taken.
+                        {__('Insert a text. If the text field is left empty, the name of the product is taken.', 'ar-vr-3d-model-try-on')}
                     </p>
                 </div>
             </div>

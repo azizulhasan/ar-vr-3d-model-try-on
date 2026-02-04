@@ -1,5 +1,6 @@
 // components/ARSettings/CameraSection.js
 import React from "react";
+import { __ } from '@wordpress/i18n';
 import AccordionIcon from "../../icons/AccordionIcon";
 
 const CameraSection = ({
@@ -16,7 +17,7 @@ const CameraSection = ({
         className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
       >
         <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Camera
+          {__('Camera', 'ar-vr-3d-model-try-on')}
           <AccordionIcon status={activeAccordion.camera} />
         </span>
       </button>
@@ -33,13 +34,13 @@ const CameraSection = ({
                 onChange={handleChange}
               />
             </label>
-            <span className="art-text-sm art-font-medium">Auto Rotate</span>
+            <span className="art-text-sm art-font-medium">{__('Auto Rotate', 'ar-vr-3d-model-try-on')}</span>
           </div>
 
           {/* Shadow Intensity */}
           <div>
             <label className="art-block art-text-sm art-font-medium art-mb-2 art-uppercase art-tracking-wide">
-              Shadow Intensity
+              {__('Shadow Intensity', 'ar-vr-3d-model-try-on')}
             </label>
             <input
               type="number"
@@ -53,14 +54,14 @@ const CameraSection = ({
               className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
             />
             <p className="art-text-xs art-text-gray-500 art-mt-1">
-              Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely. Any value between 0 and 1
+              {__('Controls the opacity of the shadow. Set to 0 to turn off the shadow entirely. Any value between 0 and 1', 'ar-vr-3d-model-try-on')}
             </p>
           </div>
 
           {/* Camera Orbit */}
           <div>
             <label className="art-block art-text-sm art-font-medium art-mb-2 art-uppercase art-tracking-wide">
-              Camera Orbit
+              {__('Camera Orbit', 'ar-vr-3d-model-try-on')}
             </label>
             <input
               type="text"
@@ -71,7 +72,7 @@ const CameraSection = ({
               className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
             />
             <p className="art-text-xs art-text-gray-500 art-mt-1">
-              The camera orbit.
+              {__('The camera orbit.', 'ar-vr-3d-model-try-on')}
             </p>
           </div>
 
@@ -86,9 +87,9 @@ const CameraSection = ({
               />
             </label>
             <div>
-              <span className="art-text-sm art-font-medium art-block">Disable Zoom</span>
+              <span className="art-text-sm art-font-medium art-block">{__('Disable Zoom', 'ar-vr-3d-model-try-on')}</span>
               <p className="art-text-xs art-text-gray-500 art-mt-1">
-                Disable zooming in and out of the model.
+                {__('Disable zooming in and out of the model.', 'ar-vr-3d-model-try-on')}
               </p>
             </div>
           </div>
@@ -104,9 +105,9 @@ const CameraSection = ({
               />
             </label>
             <div>
-              <span className="art-text-sm art-font-medium art-block">Disable Tap</span>
+              <span className="art-text-sm art-font-medium art-block">{__('Disable Tap', 'ar-vr-3d-model-try-on')}</span>
               <p className="art-text-xs art-text-gray-500 art-mt-1">
-                Disable tap to rotate the model.
+                {__('Disable tap to rotate the model.', 'ar-vr-3d-model-try-on')}
               </p>
             </div>
           </div>

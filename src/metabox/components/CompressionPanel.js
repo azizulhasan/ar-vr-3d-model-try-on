@@ -82,7 +82,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
      */
     const handleCompress = async () => {
         if (!modelFile) {
-            toast.error('No model file selected');
+            toast.error(__('No model file selected', 'ar-vr-3d-model-try-on'));
             return;
         }
         console.log(modelFile)
@@ -91,7 +91,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
         // Check user limit
         if (!isProActive && userLimit?.at_limit) {
             toast.warning(
-                `⚠️ You've reached the free limit (${userLimit.limit} models). Delete a compressed model or upgrade to Pro.`,
+                __(`⚠️ You've reached the free limit (${userLimit.limit} models). Delete a compressed model or upgrade to Pro.`, 'ar-vr-3d-model-try-on'),
                 {
                     autoClose: 8000,
                     onClick: () => {
@@ -108,7 +108,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
         try {
             // Step 1: Prepare compression
-            setProgressMessage('Preparing compression...');
+            setProgressMessage(__('Preparing compression...', 'ar-vr-3d-model-try-on'));
             const prepareResponse = await fetch(getURL('compression/prepare'), {
                 method: 'POST',
                 headers: {
@@ -123,12 +123,12 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
             if (!prepareResponse.ok) {
                 const errorData = await prepareResponse.json();
-                throw new Error(errorData.message || 'Failed to prepare compression');
+                throw new Error(errorData.message || __('Failed to prepare compression', 'ar-vr-3d-model-try-on'));
             }
 
             const prepareData = await prepareResponse.json();
             if (!prepareData.success) {
-                throw new Error(prepareData.message || 'Failed to prepare compression');
+                throw new Error(prepareData.message || __('Failed to prepare compression', 'ar-vr-3d-model-try-on'));
             }
 
             const { log_id, method, paths, quality, file_size } = prepareData.data;
@@ -176,7 +176,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
         } catch (error) {
             console.error('Compression error:', error);
             setCompressionStatus('failed');
-            toast.error(`❌ Compression failed: ${error.message}`);
+            toast.error(__('❌ Compression failed: ', 'ar-vr-3d-model-try-on') + error.message);
         }
     };
 
@@ -213,7 +213,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             );
 
             // Upload compressed file
-            setProgressMessage('Uploading compressed file...');
+            setProgressMessage(__('Uploading compressed file...', 'ar-vr-3d-model-try-on'));
             const uploadedFile = await uploadCompressedFile(compressedBlob, file.name, paths.post_dir);
 
             // Complete compression
@@ -231,7 +231,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             });
 
             if (!completeResponse.ok) {
-                throw new Error('Failed to complete compression');
+                throw new Error(__('Failed to complete compression', 'ar-vr-3d-model-try-on'));
             }
 
             // Success!
@@ -254,12 +254,12 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                 );
             } else {
                 const strategyText = meta.strategy === 'full' ? '' :
-                    meta.strategy === 'aggressive' ? ' (aggressive mode)' :
-                    meta.strategy === 'basic' ? ' (basic optimization)' :
-                    meta.strategy === 'minimal' ? ' (minimal optimization)' : '';
+                    meta.strategy === 'aggressive' ? __(' (aggressive mode)', 'ar-vr-3d-model-try-on') :
+                    meta.strategy === 'basic' ? __(' (basic optimization)', 'ar-vr-3d-model-try-on') :
+                    meta.strategy === 'minimal' ? __(' (minimal optimization)', 'ar-vr-3d-model-try-on') : '';
 
                 toast.success(
-                    `✅ Compression complete${strategyText}! Saved ${meta.compressionRatio}% (${formatFileSize(meta.originalSize - meta.compressedSize)})`
+                    __('✅ Compression complete', 'ar-vr-3d-model-try-on') + strategyText + __('! Saved ', 'ar-vr-3d-model-try-on') + `${meta.compressionRatio}% (${formatFileSize(meta.originalSize - meta.compressedSize)})`
                 );
             }
 
@@ -293,11 +293,11 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
      */
     const compressServerSide = async (logId, paths, quality) => {
         try {
-            setProgressMessage('Starting server-side compression...');
+            setProgressMessage(__('Starting server-side compression...', 'ar-vr-3d-model-try-on'));
             setProgress(10);
             console.log(paths)
 
-            toast.info('🚀 Processing large file on server (Pro feature)...', { autoClose: 3000 });
+            toast.info(__('🚀 Processing large file on server (Pro feature)...', 'ar-vr-3d-model-try-on'), { autoClose: 3000 });
 
 
             // Call server-side compression API
@@ -315,20 +315,20 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             });
 
             setProgress(50);
-            setProgressMessage('Compressing model on server...');
+            setProgressMessage(__('Compressing model on server...', 'ar-vr-3d-model-try-on'));
 
             if (!compressResponse.ok) {
                 const errorData = await compressResponse.json();
-                throw new Error(errorData.message || 'Server-side compression failed');
+                throw new Error(errorData.message || __('Server-side compression failed', 'ar-vr-3d-model-try-on'));
             }
 
             const compressData = await compressResponse.json();
             if (!compressData.success) {
-                throw new Error(compressData.message || 'Server-side compression failed');
+                throw new Error(compressData.message || __('Server-side compression failed', 'ar-vr-3d-model-try-on'));
             }
 
             setProgress(80);
-            setProgressMessage('Finalizing compression...');
+            setProgressMessage(__('Finalizing compression...', 'ar-vr-3d-model-try-on'));
             console.log(compressData)
 
             const compressionResult = compressData.data;
@@ -357,7 +357,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             });
 
             if (!completeResponse.ok) {
-                throw new Error('Failed to complete compression');
+                throw new Error(__('Failed to complete compression', 'ar-vr-3d-model-try-on'));
             }
 
             setProgress(100);
@@ -376,7 +376,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             });
 
             toast.success(
-                `✅ Server compression complete! Saved ${compressionResult.compression_ratio}% (${formatFileSize(compressionResult.original_size - compressionResult.compressed_size)})`
+                __('✅ Server compression complete! Saved ', 'ar-vr-3d-model-try-on') + `${compressionResult.compression_ratio}% (${formatFileSize(compressionResult.original_size - compressionResult.compressed_size)})`
             );
 
             if (onCompressionComplete) {
@@ -422,7 +422,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
         });
 
         if (!response.ok) {
-            throw new Error('Failed to upload compressed file');
+            throw new Error(__('Failed to upload compressed file', 'ar-vr-3d-model-try-on'));
         }
 
         const data = await response.json();
@@ -457,7 +457,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
      * Handle delete compression
      */
     const handleDeleteCompression = async () => {
-        if (!confirm('Are you sure you want to delete the compressed version? The original file will remain.')) {
+        if (!confirm(__('Are you sure you want to delete the compressed version? The original file will remain.', 'ar-vr-3d-model-try-on'))) {
             return;
         }
 
@@ -470,17 +470,17 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             });
 
             if (!response.ok) {
-                throw new Error('Failed to delete compression');
+                throw new Error(__('Failed to delete compression', 'ar-vr-3d-model-try-on'));
             }
 
-            toast.success('✅ Compressed version deleted');
+            toast.success(__('✅ Compressed version deleted', 'ar-vr-3d-model-try-on'));
             setCompressionStatus(null);
             setCompressionData(null);
             await fetchUserLimit();
 
         } catch (error) {
             console.error('Error deleting compression:', error);
-            toast.error('❌ Failed to delete compression');
+            toast.error(__('❌ Failed to delete compression', 'ar-vr-3d-model-try-on'));
         }
     };
 
@@ -500,11 +500,11 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             <div className="art-flex art-items-center art-justify-between art-mb-3">
                 <h4 className="art-text-sm art-font-semibold art-text-gray-900 art-flex art-items-center">
                     <span className="art-mr-2">🗜️</span>
-                    Model Compression
+                    {__('Model Compression', 'ar-vr-3d-model-try-on')}
                 </h4>
                 {!isProActive && userLimit && (
                     <span className="art-text-xs art-text-gray-600">
-                        {userLimit.used}/{userLimit.limit} models
+                        {userLimit.used}/{userLimit.limit} {__('models', 'ar-vr-3d-model-try-on')}
                     </span>
                 )}
             </div>
@@ -513,11 +513,11 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             {!compressionStatus && (
                 <div>
                     <p className="art-text-sm art-text-gray-600 art-mb-3">
-                        Compress this model to reduce file size and improve loading speed.
+                        {__('Compress this model to reduce file size and improve loading speed.', 'ar-vr-3d-model-try-on')}
                     </p>
                     {!isProActive && userLimit?.at_limit && (
                         <div className="art-mb-3 art-p-2 art-bg-orange-50 art-border art-border-orange-200 art-rounded art-text-xs art-text-orange-700">
-                            ⚠️ You've reached the free limit. Delete a compressed model to compress this one.
+                            {__('⚠️ You\'ve reached the free limit. Delete a compressed model to compress this one.', 'ar-vr-3d-model-try-on')}
                         </div>
                     )}
                     <button
@@ -525,7 +525,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                         disabled={!canCompress || !modelFile}
                         className="art-w-full art-px-4 art-py-2 art-bg-blue-600 art-text-white art-text-sm art-font-medium art-rounded-md hover:art-bg-blue-700 disabled:art-bg-gray-400 disabled:art-cursor-not-allowed"
                     >
-                        {canCompress ? '🚀 Compress Model' : '🔒 Limit Reached'}
+                        {canCompress ? __('🚀 Compress Model', 'ar-vr-3d-model-try-on') : __('🔒 Limit Reached', 'ar-vr-3d-model-try-on')}
                     </button>
                 </div>
             )}
@@ -546,7 +546,7 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                         </div>
                     </div>
                     <p className="art-text-xs art-text-gray-500 art-text-center">
-                        Please wait, this may take a few moments...
+                        {__('Please wait, this may take a few moments...', 'ar-vr-3d-model-try-on')}
                     </p>
                 </div>
             )}
@@ -559,16 +559,16 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                         <div className="art-mb-3 art-p-3 art-bg-blue-50 art-border art-border-blue-200 art-rounded">
                             <div className="art-flex art-items-center art-mb-2">
                                 <span className="art-text-blue-600 art-mr-2">ℹ️</span>
-                                <span className="art-text-sm art-font-semibold art-text-blue-800">Already Optimized</span>
+                                <span className="art-text-sm art-font-semibold art-text-blue-800">{__('Already Optimized', 'ar-vr-3d-model-try-on')}</span>
                             </div>
                             <div className="art-space-y-1 art-text-xs art-text-gray-700">
                                 <p className="art-mb-2">{compressionData.reason}</p>
                                 <div className="art-flex art-justify-between">
-                                    <span>File Size:</span>
+                                    <span>{__('File Size:', 'ar-vr-3d-model-try-on')}</span>
                                     <span className="art-font-semibold">{compressionData.original_size_formatted}</span>
                                 </div>
                                 <p className="art-text-xs art-text-gray-500 art-mt-2">
-                                    Your model is already well-optimized and couldn't be compressed further without quality loss.
+                                    {__('Your model is already well-optimized and couldn\'t be compressed further without quality loss.', 'ar-vr-3d-model-try-on')}
                                 </p>
                             </div>
                         </div>
@@ -578,27 +578,27 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                             <div className="art-flex art-items-center art-mb-2">
                                 <span className="art-text-green-600 art-mr-2">✅</span>
                                 <span className="art-text-sm art-font-semibold art-text-green-800">
-                                    Compressed Successfully!
+                                    {__('Compressed Successfully!', 'ar-vr-3d-model-try-on')}
                                     {compressionData.strategy && compressionData.strategy !== 'full' && (
                                         <span className="art-text-xs art-font-normal art-text-gray-600 art-ml-1">
-                                            ({compressionData.strategy === 'aggressive' ? 'aggressive' :
-                                              compressionData.strategy === 'basic' ? 'basic' :
-                                              compressionData.strategy === 'minimal' ? 'minimal' : compressionData.strategy})
+                                            ({compressionData.strategy === 'aggressive' ? __('aggressive', 'ar-vr-3d-model-try-on') :
+                                              compressionData.strategy === 'basic' ? __('basic', 'ar-vr-3d-model-try-on') :
+                                              compressionData.strategy === 'minimal' ? __('minimal', 'ar-vr-3d-model-try-on') : compressionData.strategy})
                                         </span>
                                     )}
                                 </span>
                             </div>
                             <div className="art-space-y-1 art-text-xs art-text-gray-700">
                                 <div className="art-flex art-justify-between">
-                                    <span>Original:</span>
+                                    <span>{__('Original:', 'ar-vr-3d-model-try-on')}</span>
                                     <span className="art-font-semibold">{compressionData.original_size_formatted}</span>
                                 </div>
                                 <div className="art-flex art-justify-between">
-                                    <span>Compressed:</span>
+                                    <span>{__('Compressed:', 'ar-vr-3d-model-try-on')}</span>
                                     <span className="art-font-semibold">{compressionData.compressed_size_formatted}</span>
                                 </div>
                                 <div className="art-flex art-justify-between art-text-green-600">
-                                    <span>Saved:</span>
+                                    <span>{__('Saved:', 'ar-vr-3d-model-try-on')}</span>
                                     <span className="art-font-semibold">
                                         {compressionData.saved_space_formatted} ({compressionData.compressionRatio || compressionData.compression_ratio}%)
                                     </span>
@@ -611,13 +611,13 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                             onClick={handleCompress}
                             className="art-flex-1 art-px-3 art-py-1.5 art-bg-gray-200 art-text-gray-700 art-text-xs art-font-medium art-rounded hover:art-bg-gray-300"
                         >
-                            🔄 Re-compress
+                            {__('🔄 Re-compress', 'ar-vr-3d-model-try-on')}
                         </button>
                         <button
                             onClick={handleDeleteCompression}
                             className="art-flex-1 art-px-3 art-py-1.5 art-bg-red-100 art-text-red-700 art-text-xs art-font-medium art-rounded hover:art-bg-red-200"
                         >
-                            🗑️ Delete
+                            {__('🗑️ Delete', 'ar-vr-3d-model-try-on')}
                         </button>
                     </div>
                 </div>
@@ -629,17 +629,17 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                     <div className="art-mb-3 art-p-3 art-bg-red-50 art-border art-border-red-200 art-rounded">
                         <div className="art-flex art-items-center art-mb-1">
                             <span className="art-text-red-600 art-mr-2">❌</span>
-                            <span className="art-text-sm art-font-semibold art-text-red-800">Compression Failed</span>
+                            <span className="art-text-sm art-font-semibold art-text-red-800">{__('Compression Failed', 'ar-vr-3d-model-try-on')}</span>
                         </div>
                         <p className="art-text-xs art-text-gray-600">
-                            An error occurred during compression. Please try again.
+                            {__('An error occurred during compression. Please try again.', 'ar-vr-3d-model-try-on')}
                         </p>
                     </div>
                     <button
                         onClick={handleCompress}
                         className="art-w-full art-px-4 art-py-2 art-bg-blue-600 art-text-white art-text-sm art-font-medium art-rounded-md hover:art-bg-blue-700"
                     >
-                        🔄 Try Again
+                        {__('🔄 Try Again', 'ar-vr-3d-model-try-on')}
                     </button>
                 </div>
             )}

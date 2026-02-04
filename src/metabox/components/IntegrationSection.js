@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import { __ } from '@wordpress/i18n';
 import {getURL, postWithoutImage, getAPITypes, getPostID} from "../../context/utilities";
 import notify from "../../context/Notify";
 
@@ -49,17 +50,17 @@ export default function IntegrationSection({
         e.preventDefault();
         const postId = getPostID()
         if (!postId) {
-            notify('Please publish the post first. Then reload the page and save.', 'warn', {
+            notify(__('Please publish the post first. Then reload the page and save.', 'ar-vr-3d-model-try-on'), 'warn', {
                 autoClose: 5000,
             })
             return;
         }
 
         if (submitButton.getAttribute('data-id') === 'complete') {
-            if (!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
+            if (!confirm(__('Model is generated successfully. Are you sure you want to generate the model again?', 'ar-vr-3d-model-try-on'))) {
                 return;
             }
-            generateModelButtonStateChange('generate', 'Generating Model......', submitButton)
+              generateModelButtonStateChange('generate', __('Generating Model......', 'ar-vr-3d-model-try-on'), submitButton)
         }
 
         /**
@@ -68,7 +69,7 @@ export default function IntegrationSection({
          */
         let headers = {}
         if(!settings?.ar_try_on_exclude_integration_api_headers) {
-            notify('Please integrate first from Integration Tab of the plugin', 'error');
+            notify(__('Please integrate first from Integration Tab of the plugin', 'ar-vr-3d-model-try-on'), 'error');
             return;
         }
         settings.ar_try_on_exclude_integration_api_headers.map(header => {
@@ -86,13 +87,13 @@ export default function IntegrationSection({
         data_arr['body'] = body
         data_arr['post_id'] = postId
         if (data_arr?.url == '' || data_arr?.api_name == '') {
-            notify('Please integrate first from Integration Tab of the plugin', 'error');
+            notify(__('Please integrate first from Integration Tab of the plugin', 'ar-vr-3d-model-try-on'), 'error');
             return;
         }
 
         if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
             && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
-            notify('Please write a proper prompt', 'error');
+            notify(__('Please write a proper prompt', 'ar-vr-3d-model-try-on'), 'error');
             return;
         }
 
@@ -104,9 +105,9 @@ export default function IntegrationSection({
         if (submitButton.getAttribute('data-id') === 'generate') {
 
             if (data_arr?.body?.task_id) {
-                generateModelButtonStateChange('progress', 'Generating Model......', submitButton)
+                generateModelButtonStateChange('progress', __('Generating Model......', 'ar-vr-3d-model-try-on'), submitButton)
             } else {
-                generateModelButtonStateChange('progress', 'Generating Task......', submitButton)
+                generateModelButtonStateChange('progress', __('Generating Task......', 'ar-vr-3d-model-try-on'), submitButton)
             }
             console.log(data_arr)
             // return;
@@ -136,13 +137,13 @@ export default function IntegrationSection({
                         setProductModel(tempProductModel)
                         setTempModelData({...{temp: res.data.temp}, ...{post_id: data_arr.post_id}})
                         console.log({tempProductModel})
-                        generateModelButtonStateChange('save', 'Save This Model', submitButton)
+                        generateModelButtonStateChange('save', __('Save This Model', 'ar-vr-3d-model-try-on'), submitButton)
                         wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                         return;
                     }
 
                     if (res?.data?.task_id) {
-                        generateModelButtonStateChange('task', 'Task Created! Please Wait!', submitButton)
+                         generateModelButtonStateChange('task', __('Task Created! Please Wait!', 'ar-vr-3d-model-try-on'), submitButton)
                     }
                     /**
                      * TODO:: meke this a method. This code will be true when
@@ -172,16 +173,16 @@ export default function IntegrationSection({
 
                                 setTempModelData({...{temp: responseData.data.temp}, ...{post_id: data_arr.post_id}})
                                 setProductModel(tempProductModel)
-                                generateModelButtonStateChange('save', 'Save This Model', submitButton)
+                                generateModelButtonStateChange('save', __('Save This Model', 'ar-vr-3d-model-try-on'), submitButton)
                                 console.log({tempProductModel})
                                 wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                                 return;
                             }
 
                             if (responseData?.data?.temp?.poster?.url || responseData?.data?.output?.poster) {
-                                generateModelButtonStateChange('poster', 'Poster Created! Now Generating Model', submitButton)
+                                generateModelButtonStateChange('poster', __('Poster Created! Now Generating Model', 'ar-vr-3d-model-try-on'), submitButton)
                                 setTimeout(() => {
-                                    generateModelButtonStateChange('poster', 'Model .glb file is generating!', submitButton)
+                                   generateModelButtonStateChange('poster', __('Model .glb file is generating!', 'ar-vr-3d-model-try-on'), submitButton)
                                 }, 5000)
                             }
 
@@ -209,14 +210,14 @@ export default function IntegrationSection({
         } else if (submitButton.getAttribute('data-id') === 'save') {
             console.log(tempModelData)
             if (!tempModelData?.temp) {
-                generateModelButtonStateChange('error', 'Model data is not set!', submitButton)
+                   generateModelButtonStateChange('error', __('Model data is not set!', 'ar-vr-3d-model-try-on'), submitButton)
                 console.error('Model data is not set!')
                 return;
             }
             /**
              * Save model files from temporary folder to final folder.
              */
-            generateModelButtonStateChange('save_progress', 'Model files saving .......', submitButton)
+                     generateModelButtonStateChange('save_progress', __('Model files saving .......', 'ar-vr-3d-model-try-on'), submitButton)
             let formData2 = new FormData();
             data_arr['temporary_model_data'] = tempModelData
             formData2.append('data', JSON.stringify(data_arr));
@@ -230,7 +231,7 @@ export default function IntegrationSection({
             response = await response.json();
             let tempProductModel = structuredClone(productModel)
             if (!response?.data?.src?.url) {
-                generateModelButtonStateChange('error', 'Something went wrong! Try again.', submitButton)
+                  generateModelButtonStateChange('error', __('Something went wrong! Try again.', 'ar-vr-3d-model-try-on'), submitButton)
                 return;
             }
             // set model src
@@ -242,7 +243,7 @@ export default function IntegrationSection({
 
             setTempModelData({})
             setProductModel(tempProductModel)
-            generateModelButtonStateChange('file_saved', 'Model files saved successfully.', submitButton)
+            generateModelButtonStateChange('file_saved', __('Model files saved successfully.', 'ar-vr-3d-model-try-on'), submitButton)
 
             /**
              * Save product model data with updated poster ans src url to database.
@@ -254,19 +255,19 @@ export default function IntegrationSection({
             formData.append('method', 'POST');
 
             setTimeout(() => {
-                generateModelButtonStateChange('data_save', 'Model data is saving.......', submitButton)
+                generateModelButtonStateChange('data_save', __('Model data is saving.......', 'ar-vr-3d-model-try-on'), submitButton)
             }, 10)
             postWithoutImage(getURL('get_model_and_settings'), formData)
                 .then((res) => {
                     console.log(res)
                     let tempProductModel = {...productModel, ...res.data};
                     setProductModel(tempProductModel);
-                    notify('Successfully Saved All Data.', 'success', {
+                    notify(__('Successfully Saved All Data.', 'ar-vr-3d-model-try-on'), 'success', {
                         autoClose: 5000,
                     })
-                    generateModelButtonStateChange('complete', 'Successfully Saved All Data.', submitButton)
+                     generateModelButtonStateChange('complete', __('Successfully Saved All Data.', 'ar-vr-3d-model-try-on'), submitButton)
                     setTimeout(() => {
-                        generateModelButtonStateChange('complete', 'See model from frontend.', submitButton)
+                         generateModelButtonStateChange('complete', __('See model from frontend.', 'ar-vr-3d-model-try-on'), submitButton)
                     }, 2000)
                     wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
                 })
@@ -275,7 +276,7 @@ export default function IntegrationSection({
                 });
 
         } else {
-            generateModelButtonStateChange('double_click', 'Do not click multiple time!', submitButton)
+                 generateModelButtonStateChange('double_click', __('Do not click multiple time!', 'ar-vr-3d-model-try-on'), submitButton)
         }
     };
 
@@ -309,7 +310,7 @@ export default function IntegrationSection({
         <div className="art-bg-gray-100 ">
             <h3 className="art-font-medium art-mb-4">Integration</h3>
             {currentApi?.id && <div style={{marginBottom: "15px"}}>
-                <label>Supported Model Types:</label>
+                   <label>{__('Supported Model Types:', 'ar-vr-3d-model-try-on')}</label>
                 <select
                     value={productModel.exclude_integration_api_model_type}
                     name="exclude_integration_api_model_type"
@@ -337,7 +338,7 @@ export default function IntegrationSection({
                     onClick={addField}
                     className="art-mb-4 art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border-none art-hover:bg-blue-600"
                 >
-                    Add Body
+                     {__('Add Body', 'ar-vr-3d-model-try-on')}
                 </button>
 
                 {/* Tooltip Button */}
@@ -352,7 +353,7 @@ export default function IntegrationSection({
                     {/* Tooltip Text */}
                     <div
                         className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
-                        Model Documentation:
+                         {__('Model Documentation:', 'ar-vr-3d-model-try-on')}
                         <br/>
                         {currentApi?.body?.supported_types?.[productModel.exclude_integration_api_model_type]?.doc ? (
                             <p>
@@ -367,7 +368,7 @@ export default function IntegrationSection({
                                 </a>
                             </p>
                         ) : (
-                            <p>No documentation available for this model type.</p>
+                            <p>{__('No documentation available for this model type.', 'ar-vr-3d-model-try-on')}</p>
                         )}
                     </div>
                 </div>
@@ -379,7 +380,7 @@ export default function IntegrationSection({
                 <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
                     <input
                         type="text"
-                        placeholder="Key"
+                        placeholder={__('Key', 'ar-vr-3d-model-try-on')}
                         value={field.key}
                         onChange={(e) => handleIntegrationChange(index, "key", e.target.value)}
                         className="art-border art-rounded art-p-2 art-w-1/5"
@@ -390,15 +391,15 @@ export default function IntegrationSection({
                         onChange={(e) => handleIntegrationChange(index, "type", e.target.value)}
                         className="art-border art-rounded art-p-2 art-w-1/5"
                     >
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="textarea">Textarea</option>
-                        <option value="file">File</option>
+                       <option value="text">{__('Text', 'ar-vr-3d-model-try-on')}</option>
+                        <option value="number">{__('Number', 'ar-vr-3d-model-try-on')}</option>
+                        <option value="textarea">{__('Textarea', 'ar-vr-3d-model-try-on')}</option>
+                        <option value="file">{__('File', 'ar-vr-3d-model-try-on')}</option>
                     </select>
 
                     {field.type === "textarea" ? (
                         <textarea
-                            placeholder="Value"
+                            placeholder={__('Value', 'ar-vr-3d-model-try-on')}
                             value={field.value}
                             onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
                             className="art-border art-rounded art-p-2 art-w-1/2"
@@ -407,7 +408,7 @@ export default function IntegrationSection({
                     ) : (
                         <input
                             type={field.type}
-                            placeholder="Value"
+                            placeholder={__('Value', 'ar-vr-3d-model-try-on')}
                             value={field.value}
                             onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
                             className="art-border art-rounded art-p-2 art-w-1/2"
@@ -429,13 +430,13 @@ export default function IntegrationSection({
                             type="button"
                             onClick={() => removeField(index)}
                             className="art-bg-blue-500 art-text-white art-px-2 art-rounded art-border-none"
-                            title="Remove field"
+                            title={__('Remove field', 'ar-vr-3d-model-try-on')}
                         >
                             ✕
                         </button>
                     ) : (
                         <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center"
-                             title="Required field">
+                            title={__('Required field', 'ar-vr-3d-model-try-on')}>
                         </div>
                     )}
 
@@ -447,7 +448,7 @@ export default function IntegrationSection({
                     data-id={'generate'}
                     id={"atlas_ar_model_generate"}
                     className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
-                Generate Model
+                  {__('Generate Model', 'ar-vr-3d-model-try-on')}
             </button>
         </div>
     );

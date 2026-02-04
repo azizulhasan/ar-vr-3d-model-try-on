@@ -1,4 +1,5 @@
 import {useState, useEffect} from "react";
+import { __ } from '@wordpress/i18n';
 import Switch from "../../dashboard/components/dashboard/settings/Switch";
 import notify from "../../context/Notify";
 
@@ -83,7 +84,7 @@ const SliderSection = ({
     // Show warning when user interacts with slider in free version
     const showProWarning = () => {
         if (!ar_try_on.is_pro_active && !hasShownWarning) {
-            notify('Slider (Multiple Models) is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
+            notify(__('Slider (Multiple Models) is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'ar-vr-3d-model-try-on'), 'warn', {
                 autoClose: 5000,
             });
             setHasShownWarning(true);
@@ -319,7 +320,7 @@ const SliderSection = ({
         <div className="art-mb-4">
             <div className="art-mb-2">
                 <Switch
-                    label="Use Slider with multiple model?"
+                    label={__("Use Slider with multiple model?", "ar-vr-3d-model-try-on")}
                     defaultChecked={productModel.isMultiple || false}
                     onChange={(checked) => enableSlider(checked)}
                 />
@@ -354,7 +355,7 @@ const SliderSection = ({
                                               handleDragStart(index);
                                           }}
                                       ></span>
-                                      <span className="art-font-medium">Item {item.id}</span>
+                                      <span className="art-font-medium">{__('Item', 'ar-vr-3d-model-try-on')} {item.id}</span>
                                 </div>
                                 <div className="art-flex art-items-center art-gap-2">
                                     <button
@@ -364,7 +365,7 @@ const SliderSection = ({
                                             handleDuplicateItem(item.id);
                                         }}
                                         className="art-p-1 hover:art-bg-gray-200 art-rounded art-transition-colors"
-                                        title="Duplicate"
+                                        title={__('Duplicate', 'ar-vr-3d-model-try-on')}
                                     >
                                         <span className="dashicons dashicons-admin-page"></span>
                                     </button>
@@ -376,7 +377,7 @@ const SliderSection = ({
                                     {/*            handleDeleteItem(item.id);*/}
                                     {/*        }}*/}
                                     {/*        className="art-p-1 hover:art-bg-gray-200 art-rounded art-transition-colors"*/}
-                                    {/*        title="Delete"*/}
+                                    {/*        title={__('Delete', 'ar-vr-3d-model-try-on')}*/}
                                     {/*    >*/}
                                     {/*        <span className="dashicons dashicons-trash"></span>*/}
                                     {/*    </button>*/}
@@ -388,7 +389,7 @@ const SliderSection = ({
                                             handleDeleteItem(item.id);
                                         }}
                                         className="art-p-1 hover:art-bg-gray-200 art-rounded art-transition-colors"
-                                        title="Delete"
+                                        title={__('Delete', 'ar-vr-3d-model-try-on')}
                                     >
                                         <span className="dashicons dashicons-trash"></span>
                                     </button>
@@ -402,8 +403,8 @@ const SliderSection = ({
                                     <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1">
-                                            MODEL {basicSettings[item.id].src === "upload" ? "File" : "URL"}{" "}
-                                            FOR ANDROID
+                                            {__('MODEL', 'ar-vr-3d-model-try-on')} {basicSettings[item.id].src === "upload" ? __("File", "ar-vr-3d-model-try-on") : __("URL", "ar-vr-3d-model-try-on")}{" "}
+                                            {__('FOR ANDROID', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -432,7 +433,7 @@ const SliderSection = ({
                                             </button>
                                         </div>
                                         <label className="art-mt-2 art-block art-text-sm art-font-medium">
-                                            MODEL URL FOR ANDROID
+                                            {__('MODEL URL FOR ANDROID', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <input
                                             type="text"
@@ -443,10 +444,10 @@ const SliderSection = ({
                                                 handleItemChange(item.id, `src`, e.target.value)
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                            placeholder="Enter Android model URL"
+                                            placeholder={__('Enter Android model URL', 'ar-vr-3d-model-try-on')}
                                         />
                                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                            The URL of the Android model file.
+                                            {__('The URL of the Android model file.', 'ar-vr-3d-model-try-on')}
                                         </p>
                                     </div>
                                     <br/>
@@ -454,9 +455,8 @@ const SliderSection = ({
                                     <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-1 art-mt-4">
-                                            MODEL{" "}
-                                            {basicSettings[item.id].ios_src === "upload" ? "File" : "URL"} FOR
-                                            IOS
+                                            {__('MODEL', 'ar-vr-3d-model-try-on')}{" "}
+                                            {basicSettings[item.id].ios_src === "upload" ? __("File", "ar-vr-3d-model-try-on") : __("URL", "ar-vr-3d-model-try-on")} {__('FOR IOS', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -487,7 +487,7 @@ const SliderSection = ({
                                             </button>
                                         </div>
                                         <label className="art-mt-2 art-block art-text-sm art-font-medium">
-                                            MODEL URL FOR IOS
+                                            {__('MODEL URL FOR IOS', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <input
                                             type="text"
@@ -498,10 +498,10 @@ const SliderSection = ({
                                                 handleItemChange(item.id, "ios_src", e.target.value)
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                            placeholder="Enter iOS model URL"
+                                            placeholder={__('Enter iOS model URL', 'ar-vr-3d-model-try-on')}
                                         />
                                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                            The URL of the iOS model file.
+                                            {__('The URL of the iOS model file.', 'ar-vr-3d-model-try-on')}
                                         </p>
                                     </div>
                                     <br/>
@@ -509,8 +509,8 @@ const SliderSection = ({
                                     <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-mt-4 art-block">
-                                            POSTER SOURCE{" "}
-                                            {basicSettings[item.id].poster === "upload" ? "File" : "URL"}
+                                            {__('POSTER SOURCE', 'ar-vr-3d-model-try-on')}{" "}
+                                            {basicSettings[item.id].poster === "upload" ? __("File", "ar-vr-3d-model-try-on") : __("URL", "ar-vr-3d-model-try-on")}
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -541,7 +541,7 @@ const SliderSection = ({
                                             </button>
                                         </div>
                                         <label className="art-mt-2 art-block art-text-sm art-font-medium">
-                                            POSTER
+                                            {__('POSTER', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <input
                                             type="text"
@@ -552,10 +552,10 @@ const SliderSection = ({
                                                 handleItemChange(item.id, "poster", e.target.value)
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                            placeholder="Enter poster image URL"
+                                            placeholder={__('Enter poster image URL', 'ar-vr-3d-model-try-on')}
                                         />
                                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                            The URL of the poster image.
+                                            {__('The URL of the poster image.', 'ar-vr-3d-model-try-on')}
                                         </p>
                                     </div>
                                     <br/>
@@ -570,10 +570,10 @@ const SliderSection = ({
                                                     ar_try_on.plugin_url +
                                                     "admin/images/icons8-web-accessibility-18.png"
                                                 }
-                                                alt="Accessibility Icon"
+                                                alt={__('Accessibility Icon', 'ar-vr-3d-model-try-on')}
                                                 className="art-w-6 art-h-6"
                                             />
-                                            Alt
+                                            {__('Alt', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <input
                                             type="text"
@@ -586,8 +586,7 @@ const SliderSection = ({
                                             className="art-border art-w-full art-mt-2 art-p-2 art-rounded"
                                         />
                                         <p className="art-text-sm art-text-gray-600 art-mt-2">
-                                            Insert a text. If the text field is left empty, the name
-                                            of the product is taken.
+                                            {__('Insert a text. If the text field is left empty, the name of the product is taken.', 'ar-vr-3d-model-try-on')}
                                         </p>
                                     </div>
                                     <br/>
@@ -595,10 +594,10 @@ const SliderSection = ({
                                     <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-mt-4 art-block">
-                                            SKYBOX SOURCE{" "}
+                                            {__('SKYBOX SOURCE', 'ar-vr-3d-model-try-on')}{" "}
                                             {basicSettings[item.id].skybox_source_type == "upload"
-                                                ? "File"
-                                                : "URL"}
+                                                ? __("File", "ar-vr-3d-model-try-on")
+                                                : __("URL", "ar-vr-3d-model-try-on")}
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -633,7 +632,7 @@ const SliderSection = ({
                                             </button>
                                         </div>
                                         <label className="art-mt-2 art-block art-text-sm art-font-medium">
-                                            SKYBOX IMAGE
+                                            {__('SKYBOX IMAGE', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <input
                                             type="text"
@@ -648,10 +647,10 @@ const SliderSection = ({
                                                 )
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                            placeholder="Enter skybox image URL"
+                                            placeholder={__('Enter skybox image URL', 'ar-vr-3d-model-try-on')}
                                         />
                                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                            The URL of the skybox image for the AR environment.
+                                            {__('The URL of the skybox image for the AR environment.', 'ar-vr-3d-model-try-on')}
                                         </p>
                                     </div>
                                     <br/>
@@ -659,10 +658,10 @@ const SliderSection = ({
                                     <div className="art-border art-border-solid art-border-black art-p-4">
                                         <label
                                             className="art-text-xs art-font-semibold art-uppercase art-mt-4 art-block">
-                                            ENVIRONMENT IMAGE SOURCE{" "}
+                                            {__('ENVIRONMENT IMAGE SOURCE', 'ar-vr-3d-model-try-on')}{" "}
                                             {basicSettings[item.id].environment_source_type == "upload"
-                                                ? "File"
-                                                : "URL"}
+                                                ? __("File", "ar-vr-3d-model-try-on")
+                                                : __("URL", "ar-vr-3d-model-try-on")}
                                         </label>
                                         <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
                                             <button
@@ -697,7 +696,7 @@ const SliderSection = ({
                                             </button>
                                         </div>
                                         <label className="art-mt-2 art-block art-text-sm art-font-medium">
-                                            ENVIRONMENT IMAGE
+                                            {__('ENVIRONMENT IMAGE', 'ar-vr-3d-model-try-on')}
                                         </label>
                                         <input
                                             type="text"
@@ -712,10 +711,10 @@ const SliderSection = ({
                                                 )
                                             }
                                             className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-                                            placeholder="Enter environment image URL"
+                                            placeholder={__('Enter environment image URL', 'ar-vr-3d-model-try-on')}
                                         />
                                         <p className="art-text-sm art-text-gray-600 art-mt-1">
-                                            HDR image to use as the environment map.
+                                            {__('HDR image to use as the environment map.', 'ar-vr-3d-model-try-on')}
                                         </p>
                                     </div>
 
@@ -731,8 +730,7 @@ const SliderSection = ({
                             onClick={handleAddNewItem}
                             className="art-bg-blue-500 art-text-white art-w-full art-px-4 art-py-2 art-rounded hover:art-bg-blue-600 art-transition-colors art-border-none"
                         >
-                            <span className="dashicon dashicons dashicons-plus"></span> Add
-                            New Item
+                            <span className="dashicon dashicons dashicons-plus"></span> {__('Add New Item', 'ar-vr-3d-model-try-on')}
                         </button>
                     </div>
                 </div>

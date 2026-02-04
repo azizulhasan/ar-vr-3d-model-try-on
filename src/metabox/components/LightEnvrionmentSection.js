@@ -1,5 +1,6 @@
 // components/ARSettings/LightEnvironmentSection.js
 import React from "react";
+import { __ } from '@wordpress/i18n';
 import AccordionIcon from "../../icons/AccordionIcon";
 
 const LightEnvironmentSection = ({
@@ -19,7 +20,7 @@ const LightEnvironmentSection = ({
         className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
       >
         <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Light & Environment
+          {__('Light & Environment', 'ar-vr-3d-model-try-on')}
           <AccordionIcon status={activeAccordion.light} />
         </span>
       </button>
@@ -28,7 +29,7 @@ const LightEnvironmentSection = ({
         <div className="art-px-3 art-py-2 art-bg-white art-border-t">
           {/* Skybox Source */}
           <div className="art-border art-border-solid art-border-black art-p-4">
-            <label className="art-text-xs art-font-semibold art-uppercase"> SKYBOX SOURCE {basicSettings.skybox_source_type == 'upload' ? "File" : 'URL'}</label>
+            <label className="art-text-xs art-font-semibold art-uppercase">{__('SKYBOX SOURCE', 'ar-vr-3d-model-try-on')} {basicSettings.skybox_source_type == 'upload' ? __('File', 'ar-vr-3d-model-try-on') : __('URL', 'ar-vr-3d-model-try-on')}</label>
             <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
               <button
                 type="button"
@@ -47,7 +48,7 @@ const LightEnvironmentSection = ({
               </button>
             </div>
 
-            <label className="art-mt-2 art-block art-text-sm art-font-medium">SKYBOX IMAGE</label>
+            <label className="art-mt-2 art-block art-text-sm art-font-medium">{__('SKYBOX IMAGE', 'ar-vr-3d-model-try-on')}</label>
             <input
               type="text"
               id="skybox_image"
@@ -55,16 +56,16 @@ const LightEnvironmentSection = ({
               value={productModel.skybox_image}
               onChange={handleChange}
               className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-              placeholder="Enter skybox image URL"
+              placeholder={__('Enter skybox image URL', 'ar-vr-3d-model-try-on')}
             />
-            <p className="art-text-sm art-text-gray-600 art-mt-1">The URL of the skybox image for the AR environment.</p>
+            <p className="art-text-sm art-text-gray-600 art-mt-1">{__('The URL of the skybox image for the AR environment.', 'ar-vr-3d-model-try-on')}</p>
           </div>
 
           <br />
 
           {/* Environment Image Source */}
           <div className="art-border art-border-solid art-border-black art-p-4">
-            <label className="art-text-xs art-font-semibold art-uppercase"> ENVIRONMENT IMAGE SOURCE {basicSettings.environment_source_type == 'upload' ? "File" : 'URL'}</label>
+            <label className="art-text-xs art-font-semibold art-uppercase">{__('ENVIRONMENT IMAGE SOURCE', 'ar-vr-3d-model-try-on')} {basicSettings.environment_source_type == 'upload' ? __('File', 'ar-vr-3d-model-try-on') : __('URL', 'ar-vr-3d-model-try-on')}</label>
             <div className="art-flex art-mt-1 art-border art-rounded art-overflow-hidden">
               <button
                 type="button"
@@ -83,7 +84,7 @@ const LightEnvironmentSection = ({
               </button>
             </div>
 
-            <label className="art-mt-2 art-block art-text-sm art-font-medium">ENVIRONMENT IMAGE</label>
+            <label className="art-mt-2 art-block art-text-sm art-font-medium">{__('ENVIRONMENT IMAGE', 'ar-vr-3d-model-try-on')}</label>
             <input
               type="text"
               id="environment_image"
@@ -91,9 +92,9 @@ const LightEnvironmentSection = ({
               value={productModel.environment_image}
               onChange={handleChange}
               className="art-w-full art-mt-1 art-p-2 art-border art-rounded"
-              placeholder="Enter environment image URL"
+              placeholder={__('Enter environment image URL', 'ar-vr-3d-model-try-on')}
             />
-            <p className="art-text-sm art-text-gray-600 art-mt-1">HDR image to use as the environment map.</p>
+            <p className="art-text-sm art-text-gray-600 art-mt-1">{__('HDR image to use as the environment map.', 'ar-vr-3d-model-try-on')}</p>
           </div>
         </div>
       )}

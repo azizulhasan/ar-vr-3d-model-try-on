@@ -1,4 +1,5 @@
 import {useState, useEffect, useCallback} from "react";
+import { __ } from '@wordpress/i18n';
 import AccordionIcon from "../../icons/AccordionIcon";
 import {convertLength} from '../../context/utilities';
 import notify from "../../context/Notify";
@@ -19,7 +20,7 @@ export const DimensionsSection = ({
     // Show warning when user interacts with dimensions in free version
     const showProWarning = () => {
         if (!ar_try_on.is_pro_active && !hasShownWarning) {
-            notify('Dimensions is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
+            notify(__('Dimensions is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'ar-vr-3d-model-try-on'), 'warn', {
                 autoClose: 5000,
             });
             setHasShownWarning(true);
@@ -79,7 +80,7 @@ export const DimensionsSection = ({
             >
         <span
             className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
-          Dimensions
+          {__('Dimensions', 'ar-vr-3d-model-try-on')}
         </span>
                 <AccordionIcon status={activeAccordion.dimensions}/>
             </button>
@@ -88,10 +89,10 @@ export const DimensionsSection = ({
                 <div className="art-px-3 art-py-2 art-bg-white art-border-t">
                     <div className="art-flex art-items-center art-justify-between art-mb-4">
                         <h3 className="art-font-semibold art-text-lg art-text-slate-800">
-                            Dimensions
+                            {__('Dimensions', 'ar-vr-3d-model-try-on')}
                         </h3>
                         <div className="art-flex art-items-center art-gap-2 art-text-sm">
-                            <label htmlFor="unit">Unit:</label>
+                            <label htmlFor="unit">{__('Unit:', 'ar-vr-3d-model-try-on')}</label>
                             <select
                                 id="unit"
                                 name="unit"
@@ -102,9 +103,9 @@ export const DimensionsSection = ({
                                 }}
                                 className="art-border art-rounded art-px-2 art-py-1"
                             >
-                                <option value="inch">Inch</option>
-                                <option value="cm">Centimeter</option>
-                                <option value="m">Meter</option>
+                                <option value="inch">{__('Inch', 'ar-vr-3d-model-try-on')}</option>
+                                <option value="cm">{__('Centimeter', 'ar-vr-3d-model-try-on')}</option>
+                                <option value="m">{__('Meter', 'ar-vr-3d-model-try-on')}</option>
                             </select>
                         </div>
                     </div>
@@ -123,25 +124,25 @@ export const DimensionsSection = ({
                                     }}
                                     className="art-rounded"
                                 />
-                                Show Dimensions
+                                {__('Show Dimensions', 'ar-vr-3d-model-try-on')}
                             </label>
 
                             {productModel.dimensions.show && (
                                 <div className="art-space-y-2 art-text-sm art-text-slate-600">
                                     <div>
-                                        Width:{" "}
+                                        {__('Width:', 'ar-vr-3d-model-try-on')}{" "}
                                         {productModel.dimensions.width?.value?.toFixed(2) || 0}{" "}
                                         {productModel.dimensions.width?.unit ||
                                             productModel.dimensions.unit}
                                     </div>
                                     <div>
-                                        Height:{" "}
+                                        {__('Height:', 'ar-vr-3d-model-try-on')}{" "}
                                         {productModel.dimensions.height?.value?.toFixed(2) || 0}{" "}
                                         {productModel.dimensions.height?.unit ||
                                             productModel.dimensions.unit}
                                     </div>
                                     <div>
-                                        Length:{" "}
+                                        {__('Length:', 'ar-vr-3d-model-try-on')}{" "}
                                         {productModel.dimensions.length?.value?.toFixed(2) || 0}{" "}
                                         {productModel.dimensions.length?.unit ||
                                             productModel.dimensions.unit}

@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import { __ } from '@wordpress/i18n';
 import {
     getPostID,
     getURL,
@@ -223,7 +224,7 @@ const ARProductModelSettings = () => {
             value !== "floor" &&
             !ar_try_on.is_pro_active
         ) {
-            notify("This option is only available in the pro version", "warn", {
+            notify(__("This option is only available in the pro version", "ar-vr-3d-model-try-on"), "warn", {
                 autoClose: 5000,
             });
             return;
@@ -235,7 +236,7 @@ const ARProductModelSettings = () => {
             e.target.value === "image_to_model"
         ) {
             notify(
-                "Image to model generation is only available in pro version!",
+                __("Image to model generation is only available in pro version!", "ar-vr-3d-model-try-on"),
                 "warn",
                 {
                     autoClose: 5000,
@@ -392,7 +393,7 @@ const handleSubmit = (e) => {
     e.preventDefault();
     const postId = getPostID()
     if (!postId) {
-        notify('Please publish the post first. Then reload the page and save.', 'warn',{
+        notify(__('Please publish the post first. Then reload the page and save.', 'ar-vr-3d-model-try-on'), 'warn',{
             autoClose: 5000,
         })
         return; // This is fine - no setIsSaving was called yet
@@ -400,7 +401,7 @@ const handleSubmit = (e) => {
 
     let hasValueChanged = isDifferent(previousProductModel, productModel);
     if (!hasValueChanged) {
-        notify('No changes detected', 'info',{
+        notify(__('No changes detected', 'ar-vr-3d-model-try-on'), 'info',{
             autoClose: 5000,
         })
         return; // This is fine - no setIsSaving was called yet
@@ -420,7 +421,7 @@ const handleSubmit = (e) => {
 
         // Notify user that pro features won't be saved
         if (dataToSave.dimensions || dataToSave.hotspots?.length > 0 || dataToSave.isMultiple) {
-            notify('Pro features (dimensions, hotspots, slider) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
+            notify(__('Pro features (dimensions, hotspots, slider) will not be saved. Upgrade to Pro version to use these features.', 'ar-vr-3d-model-try-on'), 'warn', {
                 autoClose: 6000,
             });
         }
@@ -436,7 +437,7 @@ const handleSubmit = (e) => {
             console.log(res)
             setProductModel({...productModel, ...res.data});
             setPreviousProductModel({...productModel, ...res.data});
-            notify('Successfully Saved Data.', 'success',{
+            notify(__('Successfully Saved Data.', 'ar-vr-3d-model-try-on'), 'success',{
                 autoClose: 5000,
             })
         })
@@ -460,10 +461,10 @@ const SaveButton = ({classes = 'art-w-full'}) => (
         {isSaving ? (
             <div className="art-flex art-items-center art-justify-center art-gap-2">
                 <SpinnerModal />
-                <span>Saving...</span>
+                <span>{__('Saving...', 'ar-vr-3d-model-try-on')}</span>
             </div>
         ) : (
-            "Save"
+            __('Save', 'ar-vr-3d-model-try-on')
         )}
     </button>
 );
@@ -506,7 +507,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
                             }`}
                         >
-                            Settings
+                            {__('Settings', 'ar-vr-3d-model-try-on')}
                         </button>
                         <button
                             onClick={(e) => toggleSection(e, "style")}
@@ -516,7 +517,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
                             }`}
                         >
-                            Style
+                            {__('Style', 'ar-vr-3d-model-try-on')}
                         </button>
                         {/*//TODO:: release integration with next release.*/}
                         <button
@@ -527,7 +528,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
                             }`}
                         >
-                            Integration
+                            {__('Integration', 'ar-vr-3d-model-try-on')}
                         </button>
                         {/*/Slider Tab*/}
                         <button
@@ -538,7 +539,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     : "art-border-transparent art-text-gray-600 hover:art-text-gray-800"
                             }`}
                         >
-                            Slider
+                            {__('Slider', 'ar-vr-3d-model-try-on')}
                         </button>
                     </div>
                     <div>
@@ -565,7 +566,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                         setProductModel={setProductModel}
                                         onCompressionComplete={(meta) => {
                                             console.log('Compression complete:', meta);
-                                            notify('Model compressed successfully!', 'success');
+                                            notify(__('Model compressed successfully!', 'ar-vr-3d-model-try-on'), 'success');
                                         }}
                                     />
                                 )}
@@ -656,7 +657,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                             name="atlas_ar_shortcode_button"
                             id="atlas_ar_shortcode_button"
                             defaultValue="[atlas_ar]"
-                            title="Short code"
+                            title={__('Short code', 'ar-vr-3d-model-try-on')}
                             className="art-border art-w-1/2 art-rounded art-ml-4 art-mb-4 "
                         />
 
@@ -669,7 +670,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                             className="art-mt-2 art-mb-4 art-cursor-pointer art-px-2 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 art-w-80 "
                         >
                             <span className="dashicons dashicons-admin-page"></span>
-                            Copy ShortCode
+                            {__('Copy ShortCode', 'ar-vr-3d-model-try-on')}
                         </div>
                         <SaveButton/>
                     </div>

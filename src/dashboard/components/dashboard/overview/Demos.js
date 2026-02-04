@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Demos Component
@@ -13,97 +14,97 @@ export default function Demos() {
     const demos = [
         {
             id: 'woocommerce-product',
-            title: 'WooCommerce Product 3D view',
-            description: 'View 3D models inside WooCommerce products.',
-            category: 'WooCommerce',
+            title: __('WooCommerce Product 3D view', 'ar-vr-3d-model-try-on'),
+            description: __('View 3D models inside WooCommerce products.', 'ar-vr-3d-model-try-on'),
+            category: __('WooCommerce', 'ar-vr-3d-model-try-on'),
             icon: '🛒',
             url: 'https://wpaugmentedreality.com/product/relaxation-chair/'
         },
         {
             id: 'default',
-            title: 'Default',
-            description: 'Basic interactive 3D model viewer.',
-            category: 'General',
+            title: __('Default', 'ar-vr-3d-model-try-on'),
+            description: __('Basic interactive 3D model viewer.', 'ar-vr-3d-model-try-on'),
+            category: __('General', 'ar-vr-3d-model-try-on'),
             icon: '📦',
             url: 'https://wpaugmentedreality.com/default-3d-viewer-demo/'
         },
         {
             id: 'custom-width',
-            title: 'Custom Width',
-            description: 'Viewer with adjustable width option.',
-            category: 'General',
+            title: __('Custom Width', 'ar-vr-3d-model-try-on'),
+            description: __('Viewer with adjustable width option.', 'ar-vr-3d-model-try-on'),
+            category: __('General', 'ar-vr-3d-model-try-on'),
             icon: '↔️',
             url: 'https://wpaugmentedreality.com/custom-width-demo/'
         },
         {
             id: 'disable-zoom',
-            title: 'Disable Zoom',
-            description: 'Prevents zooming on the 3D model.',
-            category: 'Controls',
+            title: __('Disable Zoom', 'ar-vr-3d-model-try-on'),
+            description: __('Prevents zooming on the 3D model.', 'ar-vr-3d-model-try-on'),
+            category: __('Controls', 'ar-vr-3d-model-try-on'),
             icon: '🔍',
             url: 'https://wpaugmentedreality.com/disable-zoom-demo/'
         },
         {
             id: 'disable-auto-rotate',
-            title: 'Disable Auto Rotate',
-            description: 'Stops the model auto-rotation.',
-            category: 'Controls',
+            title: __('Disable Auto Rotate', 'ar-vr-3d-model-try-on'),
+            description: __('Stops the model auto-rotation.', 'ar-vr-3d-model-try-on'),
+            category: __('Controls', 'ar-vr-3d-model-try-on'),
             icon: '🔄',
             url: 'https://wpaugmentedreality.com/disable-auto-rotate-demo/'
         },
         {
             id: 'lazy-loading',
-            title: 'Lazy Loading',
-            description: 'Loads model only when visible.',
-            category: 'Performance',
+            title: __('Lazy Loading', 'ar-vr-3d-model-try-on'),
+            description: __('Loads model only when visible.', 'ar-vr-3d-model-try-on'),
+            category: __('Performance', 'ar-vr-3d-model-try-on'),
             icon: '⚡',
             url: 'https://wpaugmentedreality.com/lazy-loading-demo/'
         },
         {
             id: 'eager-loading',
-            title: 'Eager Loading',
-            description: 'Loads model immediately on page load.',
-            category: 'Performance',
+            title: __('Eager Loading', 'ar-vr-3d-model-try-on'),
+            description: __('Loads model immediately on page load.', 'ar-vr-3d-model-try-on'),
+            category: __('Performance', 'ar-vr-3d-model-try-on'),
             icon: '⏩',
             url: 'https://wpaugmentedreality.com/eager-loading-demo/'
         },
         {
             id: 'multiple',
-            title: 'Multiple',
-            description: 'Display multiple 3D models in gallery.',
-            category: 'Gallery',
+            title: __('Multiple', 'ar-vr-3d-model-try-on'),
+            description: __('Display multiple 3D models in gallery.', 'ar-vr-3d-model-try-on'),
+            category: __('Gallery', 'ar-vr-3d-model-try-on'),
             icon: '🖼️',
             url: 'https://wpaugmentedreality.com/multiple-models-demo/'
         },
         {
             id: 'woocommerce-top',
-            title: 'WooCommerce- Top of the image',
-            description: '3D viewer displayed above product image.',
-            category: 'WooCommerce',
+            title: __('WooCommerce- Top of the image', 'ar-vr-3d-model-try-on'),
+            description: __('3D viewer displayed above product image.', 'ar-vr-3d-model-try-on'),
+            category: __('WooCommerce', 'ar-vr-3d-model-try-on'),
             icon: '🔝',
             url: 'https://wpaugmentedreality.com/woocommerce-top-demo/'
         },
         {
             id: 'woocommerce-bottom',
-            title: 'WooCommerce- Bottom of the image',
-            description: '3D viewer displayed below product image.',
-            category: 'WooCommerce',
+            title: __('WooCommerce- Bottom of the image', 'ar-vr-3d-model-try-on'),
+            description: __('3D viewer displayed below product image.', 'ar-vr-3d-model-try-on'),
+            category: __('WooCommerce', 'ar-vr-3d-model-try-on'),
             icon: '⬇️',
             url: 'https://wpaugmentedreality.com/woocommerce-bottom-demo/'
         },
         {
             id: 'woocommerce-replace',
-            title: 'WooCommerce- Replace product image',
-            description: 'Replaces default image with 3D viewer.',
-            category: 'WooCommerce',
+            title: __('WooCommerce- Replace product image', 'ar-vr-3d-model-try-on'),
+            description: __('Replaces default image with 3D viewer.', 'ar-vr-3d-model-try-on'),
+            category: __('WooCommerce', 'ar-vr-3d-model-try-on'),
             icon: '🔁',
             url: 'https://wpaugmentedreality.com/woocommerce-replace-demo/'
         },
         {
             id: 'woocommerce-variants',
-            title: 'WooCommerce- Variants',
-            description: 'Switch 3D models by product variant.',
-            category: 'WooCommerce',
+            title: __('WooCommerce- Variants', 'ar-vr-3d-model-try-on'),
+            description: __('Switch 3D models by product variant.', 'ar-vr-3d-model-try-on'),
+            category: __('WooCommerce', 'ar-vr-3d-model-try-on'),
             icon: '🎨',
             url: 'https://wpaugmentedreality.com/woocommerce-variants-demo/'
         },
@@ -125,10 +126,10 @@ export default function Demos() {
                     {/* Header */}
                     <div className="art-mb-6">
                         <h2 className="art-text-2xl art-font-bold art-mb-2 art-text-white">
-                            Live Overview
+                             {__('Live Overview', 'ar-vr-3d-model-try-on')}
                         </h2>
                         <p className="art-text-sm art-text-gray-400">
-                            Click on any section to view it live
+                              {__('Click on any section to view it live', 'ar-vr-3d-model-try-on')}
                         </p>
                     </div>
 
@@ -199,7 +200,7 @@ export default function Demos() {
                             rel="noopener noreferrer"
                             className="art-px-6 art-py-3 art-rounded-md art-font-semibold art-text-white art-bg-blue-600 hover:art-bg-blue-700 art-transition-colors art-no-underline art-cursor-pointer"
                         >
-                            Buy Now
+                             {__('Buy Now', 'ar-vr-3d-model-try-on')}
                         </a>
                         <a
                             href="https://wpaugmentedreality.com/shop/"
@@ -207,7 +208,7 @@ export default function Demos() {
                             rel="noopener noreferrer"
                             className="art-px-6 art-py-3 art-rounded-md art-font-semibold art-text-white art-bg-orange-500 hover:art-bg-orange-600 art-transition-colors art-no-underline art-cursor-pointer"
                         >
-                            See All Demos
+                             {__('See All Demos', 'ar-vr-3d-model-try-on')}
                         </a>
                     </div>
                 </div>
@@ -229,7 +230,7 @@ export default function Demos() {
                         className="art-absolute art-bottom-0 art-left-0 art-right-0 art-p-4 art-bg-gray-900 art-bg-opacity-90 art-backdrop-blur"
                     >
                         <p className="art-text-sm art-text-white art-text-center">
-                            Preview of <span className="art-font-semibold">{activeData.title}</span>
+                              {__('Preview of', 'ar-vr-3d-model-try-on')} <span className="art-font-semibold">{activeData.title}</span>
                         </p>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import Settings from "../settings/Settings";
+import { __ } from '@wordpress/i18n';
 import {getAPITypes} from "../../../../context/utilities";
 
 export default function Integration({
@@ -82,13 +83,13 @@ export default function Integration({
 
     return (
         <div style={{ padding: "20px", border: "1px solid #ccc", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}  >
-            <h2 style={{ color: "var(--theme-text)" }}>Integration Settings</h2>
+            <h2 style={{ color: "var(--theme-text)" }}>{__('Integration Settings', 'ar-vr-3d-model-try-on')}</h2>
 
             {/* API Name */}
             {
                 currentApi?.id && <>
                     <div>
-                        <label>API Name:</label>
+                        <label>{__('API Name:', 'ar-vr-3d-model-try-on')}</label>
                         <select
                             value={settings.ar_try_on_exclude_integration_api_name}
                             name="ar_try_on_exclude_integration_api_name"
@@ -108,14 +109,14 @@ export default function Integration({
                     </div>
                     {/* URL Field */}
                     <div className="art-w-full art-flex art-items-center art-py-4  art-gap-4 art-flex-nowrap ">
-                        <label>URL:</label>
+                        <label>{__('URL:', 'ar-vr-3d-model-try-on')}</label>
                         <input
                             type="text"
                             name="ar_try_on_exclude_integration_api_url"
                             id="ar_try_on_exclude_integration_api_url"
                             value={settings.ar_try_on_exclude_integration_api_url || currentApi.url}
                             onChange={(e) => handleChange(e)}
-                            placeholder="Enter API URL"
+                            placeholder={__('Enter API URL', 'ar-vr-3d-model-try-on')}
                             style={{width: "100%", padding: "8px", marginTop: "5px"}}
                         />
                         {/* Tooltip Button */}
@@ -129,7 +130,7 @@ export default function Integration({
 
                             {/* Tooltip Text */}
                             <div className="art-absolute art-bottom-full art-right-full art-w-40 art-mr-2 art-mb-2 art-bg-black art-text-white art-text-sm art-rounded art-p-2 art-shadow-lg art-opacity-0 art-invisible art-transition-all art-duration-300 group-hover:art-opacity-100 group-hover:art-visible">
-                                Model Documentation:
+                                 {__('Model Documentation:', 'ar-vr-3d-model-try-on')}
                                 <br/>
                                 {currentApi?.api_key_url ? (
                                     <p>
@@ -140,11 +141,11 @@ export default function Integration({
                                             rel="noopener noreferrer"
                                             className="art-text-blue-400 hover:art-text-blue-300 art-underline art-ml-1"
                                         >
-                                            {currentApi.name} API Key Guide
+                                             {currentApi.name} {__('API Key Guide', 'ar-vr-3d-model-try-on')}
                                         </a>
                                     </p>
                                 ) : (
-                                    <p>No documentation available for this model type.</p>
+                                    <p>{__('No documentation available for this model type.', 'ar-vr-3d-model-try-on')}</p>
                                 )}
                             </div>
                         </div>
@@ -159,7 +160,7 @@ export default function Integration({
                             className="art-px-3 art-py-2 art-mb-2.5 art-bg-blue-500 art-text-white art-border-0 art-rounded art-cursor-pointer"
 
                         >
-                            Add Header
+                              {__('Add Header', 'ar-vr-3d-model-try-on')}
                         </button>
 
                         {settings?.ar_try_on_exclude_integration_api_headers && Object.keys(settings.ar_try_on_exclude_integration_api_headers).length && settings.ar_try_on_exclude_integration_api_headers.map((header, index) => {
@@ -169,7 +170,7 @@ export default function Integration({
                                     value={header.key}
                                     id={header.key}
                                     name={header.key}
-                                    placeholder={"Key"}
+                                    placeholder={__('Key', 'ar-vr-3d-model-try-on')}
                                     onChange={(e) => handleHeaderChange(index, "key", e.target.value)}
                                     style={{flex: 1, padding: "8px"}}
                                 />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { __ } from '@wordpress/i18n';
 
 const MultiSelect = ({
   id,
@@ -67,7 +68,7 @@ const MultiSelect = ({
           ))
         ) : (
           <span className="art-text-gray-500 dark:art-text-gray-400 text-sm">
-            Select option
+              {__('Select option', 'ar-vr-3d-model-try-on')}
           </span>
         )}
         <div className="art-ml-auto art-text-gray-600 dark:art-text-gray-400">
