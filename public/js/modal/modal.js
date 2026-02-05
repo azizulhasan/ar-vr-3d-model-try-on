@@ -1,6 +1,7 @@
 import React from "react";
+import { __ } from '@wordpress/i18n';
 
-const ArtModal = ({ title = "Modal Title", body = "Modal body content...", onClose, onExpand }) => {
+const ArtModal = ({ title = __("Modal Title", "ar-vr-3d-model-try-on"), body = __("Modal body content...", "ar-vr-3d-model-try-on"), onClose, onExpand })=> {
     return (
         <div className="art-fixed art-inset-0 art-bg-black/50 art-flex art-items-center art-justify-center art-z-50">
             <div className="art-hidden art-bg-white art-rounded-lg art-shadow-lg art-w-11/12 art-max-w-lg art-flex art-flex-col art-relative art-fixed art-inset-0 art-w-full art-h-full art-max-w-none art-rounded-none"></div>
@@ -62,7 +63,7 @@ const ArtModal = ({ title = "Modal Title", body = "Modal body content...", onClo
                         className="art-bg-gray-200 art-hover-bg-gray-300 art-text-gray-700 art-px-4 art-py-2 art-rounded"
                         onClick={onClose}
                     >
-                        Close
+                        {__("Close", "ar-vr-3d-model-try-on")}
                     </button>
                 </div>
             </div>

@@ -216,11 +216,11 @@ class AR_TRY_ON_Admin_Notice {
 
 				<div style="flex-grow: 1;">
 					<h2 style="margin: 0 0 10px 0; font-size: 18px; color: <?php echo esc_attr( $border_color ); ?>;">
-						<?php echo wp_kses_post( $notice['title'] ); ?>
+						<?php echo wp_kses_post( __( $notice['title'], 'ar-vr-3d-model-try-on' ) ); ?>
 					</h2>
 
 					<p style="margin: 0 0 10px 0; font-size: 14px; line-height: 1.6;">
-						<?php echo wp_kses_post( $notice['message'] ); ?>
+						<?php echo wp_kses_post( __( $notice['message'], 'ar-vr-3d-model-try-on' ) ); ?>
 					</p>
 
 					<?php if ( $notice['track_clicks'] && $notice['max_clicks'] > 0 ) : ?>
@@ -230,12 +230,22 @@ class AR_TRY_ON_Admin_Notice {
 						if ( $spots_left > 0 ) :
 							?>
 						<div style="background: #fff3cd; padding: 8px 15px; border-radius: 5px; border-left: 3px solid #ffc107;">
-							<strong style="color: #856404;">⏰ Only <?php echo esc_html( $spots_left ); ?> spot<?php echo $spots_left !== 1 ? 's' : ''; ?> left!</strong>
+							<strong style="color: #856404;">⏰ <?php 
+							echo sprintf(
+							_n( 'Only %d spot left!', 'Only %d spots left!', $spots_left, 'ar-vr-3d-model-try-on' ),
+							$spots_left
+						); 
+							?></strong>
 						</div>
 						<?php endif; ?>
 						<?php if ( $total_clicks > 0 ) : ?>
 						<div style="color: #666; font-size: 13px;">
-							✅ <?php echo esc_html( $total_clicks ); ?> user<?php echo $total_clicks !== 1 ? 's' : ''; ?> already claimed
+							✅ <?php 
+								echo sprintf(
+									_n( '%d user already claimed', '%d users already claimed', $total_clicks, 'ar-vr-3d-model-try-on' ),
+									$total_clicks
+								); 
+							?>
 						</div>
 						<?php endif; ?>
 					</div>
@@ -243,7 +253,7 @@ class AR_TRY_ON_Admin_Notice {
 
 					<?php if ( $user_clicked ) : ?>
 					<div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 10px 15px; margin-bottom: 10px;">
-						<strong style="color: #0c5460;">✓ You've already taken action on this!</strong>
+						<strong style="color: #0c5460;">✓ <?php _e( "You've already taken action on this!", 'ar-vr-3d-model-try-on' ); ?></strong>
 					</div>
 					<?php endif; ?>
 
@@ -252,7 +262,7 @@ class AR_TRY_ON_Admin_Notice {
 						<?php foreach ( $notice['buttons'] as $button ) : ?>
 							<?php
 							$btn_defaults = array(
-								'text'       => 'Click Here',
+								'text'       => __( 'Click Here', 'ar-vr-3d-model-try-on' ),
 								'url'        => '#',
 								'type'       => 'primary', // primary, secondary
 								'icon'       => '',
@@ -284,7 +294,7 @@ class AR_TRY_ON_Admin_Notice {
 									<?php if ( ! empty( $btn['icon'] ) ) : ?>
 									<span class="dashicons dashicons-<?php echo esc_attr( $btn['icon'] ); ?>" style="margin-top: 3px;"></span>
 									<?php endif; ?>
-									<?php echo esc_html( $btn['text'] ); ?>
+									<?php echo esc_html( __( $btn['text'], 'ar-vr-3d-model-try-on' ) ); ?>
 								</a>
 								<?php
 							} else {
@@ -294,7 +304,7 @@ class AR_TRY_ON_Admin_Notice {
 									<?php if ( ! empty( $btn['icon'] ) ) : ?>
 									<span class="dashicons dashicons-<?php echo esc_attr( $btn['icon'] ); ?>" style="margin-top: 3px;"></span>
 									<?php endif; ?>
-									<?php echo esc_html( $btn['text'] ); ?>
+									<?php echo esc_html( __( $btn['text'], 'ar-vr-3d-model-try-on' ) ); ?>
 								</a>
 								<?php
 							}
@@ -305,7 +315,7 @@ class AR_TRY_ON_Admin_Notice {
 
 					<?php if ( ! empty( $notice['footer_text'] ) ) : ?>
 					<p style="margin: 12px 0 0 0; font-size: 12px; color: #666; line-height: 1.5;">
-						<?php echo wp_kses_post( $notice['footer_text'] ); ?>
+						<?php echo wp_kses_post( __( $notice['footer_text'], 'ar-vr-3d-model-try-on' ) ); ?>
 					</p>
 					<?php endif; ?>
 				</div>
@@ -338,7 +348,7 @@ class AR_TRY_ON_Admin_Notice {
 		$notice_id = isset( $_POST['notice_id'] ) ? sanitize_text_field( wp_unslash( $_POST['notice_id'] ) ) : '';
 
 		if ( empty( $notice_id ) ) {
-			wp_send_json_error( array( 'message' => 'Invalid notice ID' ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid notice ID', 'ar-vr-3d-model-try-on' ) ) );
 		}
 
 		$user_id = get_current_user_id();
@@ -346,7 +356,7 @@ class AR_TRY_ON_Admin_Notice {
 		// Store dismissal in user meta
 		update_user_meta( $user_id, 'ar_try_on_dismiss_' . $notice_id, true );
 
-		wp_send_json_success( array( 'message' => 'Notice dismissed' ) );
+		wp_send_json_success( array( 'message' => __( 'Notice dismissed', 'ar-vr-3d-model-try-on' ) ) );
 	}
 
 	/**
@@ -359,7 +369,7 @@ class AR_TRY_ON_Admin_Notice {
 		$action    = isset( $_POST['action_name'] ) ? sanitize_text_field( wp_unslash( $_POST['action_name'] ) ) : '';
 
 		if ( empty( $notice_id ) || ! isset( $this->notices[ $notice_id ] ) ) {
-			wp_send_json_error( array( 'message' => 'Invalid notice ID' ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid notice ID', 'ar-vr-3d-model-try-on' ) ) );
 		}
 
 		$notice  = $this->notices[ $notice_id ];
@@ -371,7 +381,7 @@ class AR_TRY_ON_Admin_Notice {
 			$total_clicks = (int) get_option( 'ar_try_on_clicks_' . $notice_id, 0 );
 
 			if ( $notice['max_clicks'] > 0 && $total_clicks >= $notice['max_clicks'] ) {
-				wp_send_json_error( array( 'message' => 'Sorry, all spots have been claimed!' ) );
+				wp_send_json_error( array( 'message' => __( 'Sorry, all spots have been claimed!', 'ar-vr-3d-model-try-on' ) ) );
 			}
 
 			// Check if user already clicked
@@ -401,7 +411,7 @@ class AR_TRY_ON_Admin_Notice {
 
 		wp_send_json_success(
 			array(
-				'message' => 'Action tracked',
+				'message' => __( 'Action tracked', 'ar-vr-3d-model-try-on' ),
 				'email'   => $user->user_email,
 			)
 		);

@@ -267,7 +267,7 @@ class AR_TRY_ON_Helper
                 let current_product = document.getElementById('atlas_ar_shortcode_' + product_id);
                 let modelLoaded = false;
                 if (!modelLoaded) {
-                    current_product.innerHTML = '<h1>3D File Is Loading</h1>'
+                    $current_product->innerHTML = '<h1>' . esc_html__('3D File Is Loading', 'ar-vr-3d-model-try-on') . '</h1>';
                 }
                 current_product.innerHTML = htmlContent; // Insert model-viewer HTML
 
@@ -513,14 +513,14 @@ class AR_TRY_ON_Helper
                 $response = wp_remote_get($url, ['timeout' => 90]);
 
                 if (is_wp_error($response)) {
-                    error_log(print_r("Failed to download $file_key: " . $response->get_error_message(), true));
+                    error_log(print_r(sprintf(__('Failed to download %s: %s', 'ar-vr-3d-model-try-on'), $file_key, $response->get_error_message()), true));
                     continue;
                 }
 
                 $body = wp_remote_retrieve_body($response);
 
                 if (empty($body)) {
-                    error_log(print_r("Empty body for $file_key", true));
+                    error_log(print_r(sprintf(__('Empty body for %s', 'ar-vr-3d-model-try-on'), $file_key), true));
                     continue;
                 }
 

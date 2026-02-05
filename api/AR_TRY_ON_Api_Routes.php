@@ -263,7 +263,11 @@ class AR_TRY_ON_Api_Routes
             ));
 
             if (is_wp_error($response)) {
-                $result['data'] = $response->get_error_message();
+                $error_message = $response->get_error_message();
+                $result['data'] = sprintf(
+                    __('API request failed: %s', 'ar-vr-3d-model-try-on'),
+                    $error_message
+                );
                 return rest_ensure_response($result);
             }
 
@@ -310,7 +314,11 @@ class AR_TRY_ON_Api_Routes
             ));
 
             if (is_wp_error($task_response)) {
-                $task_result['data'] = $task_response->get_error_message();
+                $error_message = $task_response->get_error_message();
+                $task_result['data'] = sprintf(
+                    __('Task status check failed: %s', 'ar-vr-3d-model-try-on'),
+                    $error_message
+                );
                 $task_result['extra'] = [
                     'headers' => $headers,
                     'api_body' => $api_body,

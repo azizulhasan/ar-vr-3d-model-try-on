@@ -285,7 +285,7 @@ class AR_TRY_ON {
                         poster_data['alt'] =  parsed.models?.[productId]?.alt || '';
                         return  poster_data;
                     } catch (e) {
-                        console.error('Error parsing model data:', e);
+                        console.error(<?php echo wp_json_encode(__('Error parsing model data:', 'ar-vr-3d-model-try-on')); ?>, e);
                         return null;
                     }
                 }
@@ -321,7 +321,7 @@ class AR_TRY_ON {
                     }
 
                 } else {
-                    console.warn('Poster not found for this product.');
+                    console.warn(<?php echo wp_json_encode(__('Poster not found for this product.', 'ar-vr-3d-model-try-on')); ?>);
                 }
             })();
         </script>

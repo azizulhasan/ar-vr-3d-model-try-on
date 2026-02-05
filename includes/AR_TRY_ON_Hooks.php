@@ -59,7 +59,7 @@ class AR_TRY_ON_Hooks {
 	 * Register MetaBox to add PDF Download Button
 	 */
 	public function add_custom_meta_box() {
-		$plugin_name = 'AtlasAR';
+		$plugin_name = __('AtlasAR', 'ar-vr-3d-model-try-on');
 
 		global $post;
 		if ( $post && AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
