@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -332,6 +332,11 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 1.8.2 ( 6 February 2026 )   =
+fixed : file upload issue solved
+
+
+
 = 1.8.1 ( 2 February 2026 )   =
 Added : Overview section added
 
@@ -548,5 +553,5 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 1.8.1  =
-Added : Overview section added
+= 1.8.2  =
+fixed : file upload issue solved
