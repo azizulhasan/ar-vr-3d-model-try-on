@@ -288,12 +288,7 @@ class AR_TRY_ON_Admin {
 	 * @param array $mimes Key is the file extension with value as the mime type.
 	 */
 	public function allowed_file_and_ext( $types, $file, $filename, $mimes, $real_mime = null ) {
-        error_log(print_r( [
-            'file' => $file,
-            'types' => $types,
-            'filename' => $filename,
-            'mimes' => $mimes,
-        ], true ));
+
         $f_sp = explode(".", $filename);
         $f_exp_count  = count($f_sp);
 
