@@ -358,6 +358,7 @@ class AR_TRY_ON_Admin {
 	 * @param array $mimes Key is the file extension with value as the mime type.
 	 */
 	public function allowed_file_and_ext( $types, $file, $filename, $mimes, $real_mime = null ) {
+
         $f_sp = explode(".", $filename);
         $f_exp_count  = count($f_sp);
 
@@ -365,37 +366,34 @@ class AR_TRY_ON_Admin {
             return $types;
         } else {
             $f_name = $f_sp[0];
-            $ext  = $f_sp[$f_exp_count - 1];
+            $ext  = strtolower( $f_sp[$f_exp_count - 1] );
         }
 
-        $extendedMimes = $this->mime_types();
+        // Only handle 3D model file types, let WordPress handle standard files (png, jpg, etc.)
+        $extendedMimes = $this->get_3d_mime_types();
 
         if (isset($extendedMimes[$ext])) {
             $type = $extendedMimes[$ext];
             $proper_filename = '';
             return compact('ext', 'type', 'proper_filename');
         }
+
+        // Return original types for standard files (png, jpg, etc.)
         return $types;
-        
 	}
 
 	/**
-	 * Adds Android - .gbl and IOS - .usdz filetype to allowed mimes
-	 * @see https://codex.wordpress.org/Plugin_API/Filter_Reference/upload_mimes
-	 *
-	 * @param array $mimes Mime types keyed by the file extension regex corresponding tothose types. 'swf' and 'exe' removed from full list. 'htm|html' also removed depending on '$user' capabilities.
+	 * Get 3D model mime types
 	 *
 	 * @return array
 	 */
-	public function mime_types(  ) {
-
+	public function get_3d_mime_types() {
         $mimes = [
             'glb' => 'model/gltf-binary',
             'gltf' => 'model/gltf-binary',
             'usdz' => 'model/vnd.pixar.usd',
         ];
 
-        // TODO: apply this on in from version.
         if(AR_TRY_ON_Helper::is_pro_active()) {
             $mimes += [
                 'obj' => 'model/obj',
@@ -414,6 +412,17 @@ class AR_TRY_ON_Admin {
         }
 
         return $mimes;
+	}
+
+	/**
+	 * Adds 3D model filetypes to allowed WordPress mimes
+	 * @see https://codex.wordpress.org/Plugin_API/Filter_Reference/upload_mimes
+	 *
+	 * @param array $mimes Existing WordPress mime types
+	 * @return array
+	 */
+	public function mime_types( $mimes = array() ) {
+        return array_merge( $mimes, $this->get_3d_mime_types() );
 	}
 
 }
