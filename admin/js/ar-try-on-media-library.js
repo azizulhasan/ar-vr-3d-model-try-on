@@ -16,11 +16,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // });
 
-    const allowedFileTypes = wp.hooks.applyFilters('atlas_ar_allowedFileTypes', {
+    // Base 3D model file types (free version)
+    let allowedFileTypes = {
         glb: "model/gltf-binary",
         gltf: "model/gltf-binary",
         usdz: "model/vnd.pixar.usd",
-    });
+    };
+
+    // Add Pro version file types if Pro is active
+    if (ar_try_on && ar_try_on.is_pro_active) {
+        allowedFileTypes = {
+            ...allowedFileTypes,
+            obj: "model/obj",
+            "3ds": "application/x-3ds",
+            step: "application/step",
+            stl: "application/vnd.ms-pki.stl",
+            fbx: "application/octet-stream",
+            "3dml": "text/vnd.in3d.3dml",
+            dae: "application/collada+xml",
+            wrl: "model/vrml",
+            "3mf": "application/vnd.ms-3mfdocument",
+            mtl: "model/mtl",
+            bin: "application/octet-stream",
+            hdr: "image/vnd.radiance",
+        };
+    }
+
+    // Allow filtering via hooks
+    allowedFileTypes = wp.hooks.applyFilters('atlas_ar_allowedFileTypes', allowedFileTypes);
 
     function isAllowedFileTypes (attachment) {
         const mimeType = attachment.mime; // or file.mime_type depending on version
@@ -39,13 +62,22 @@ document.addEventListener('DOMContentLoaded', function () {
             mediaUploader = null;
         }
 
+        // Check if this is a 3D model field (src, ios_src, or variant model)
+        const isModelField = fieldName === 'src' || fieldName === 'ios_src' || fieldName.startsWith('variant_');
+
+        // Get allowed mime types for library filter
+        const allowedMimeTypes = Object.values(allowedFileTypes);
+
         // Create a new media uploader instance
         mediaUploader = wp.media({
-            title: 'Select or Upload Media',
+            title: isModelField ? 'Select or Upload 3D Model' : 'Select or Upload Media',
             button: {
                 text: 'Use this media',
             },
-            multiple: false, // Set to true if multiple selection is needed
+            multiple: false,
+            library: isModelField ? {
+                type: allowedMimeTypes,
+            } : {},
         });
 
         // When a media file is selected, this function runs
