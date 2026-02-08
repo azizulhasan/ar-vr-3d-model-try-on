@@ -593,47 +593,145 @@ function setupVariationHandling(modelViewer, model_settings) {
  * Switch 3D model variant based on WooCommerce variation selection
  * @param {HTMLElement} modelViewer - The model-viewer element
  * @param {string} variantName - The WooCommerce variant name (e.g., "Blue", "Large")
+ * @param {Object} modelSessionData - Model session data containing variationSettings
  * @returns {boolean} - Whether the variant was successfully switched
  */
 var switchModelVariant = function switchModelVariant(modelViewer, variantName) {
   var modelSessionData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
   if (!modelViewer || !variantName) return false;
+  console.log('switchModelVariant called with:', variantName);
   try {
     var _variationSettings$va, _variationSettings$va2;
-    // const variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
-    var variationSettings = modelSessionData.variationSettings || '{}';
-    // const modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
+    var variationSettings = modelSessionData.variationSettings || {};
     var modelVariants = Array.from(modelViewer.availableVariants || []);
     var originalSrc = modelViewer.dataset.originalSrc;
+
+    // Normalize variant name for comparison (case-insensitive, trim whitespace)
+    var normalizedVariantName = variantName.toLowerCase().trim();
+
     // Check if this variant is mapped to a model's built-in variant
+    // Try both original and normalized variant names
     var mappedVariant = (_variationSettings$va = variationSettings.variantMapping) === null || _variationSettings$va === void 0 ? void 0 : _variationSettings$va[variantName];
+    if (!mappedVariant) {
+      // Try case-insensitive lookup
+      var mappingKeys = Object.keys(variationSettings.variantMapping || {});
+      var matchingKey = mappingKeys.find(function (key) {
+        return key.toLowerCase().trim() === normalizedVariantName;
+      });
+      if (matchingKey) {
+        mappedVariant = variationSettings.variantMapping[matchingKey];
+      }
+    }
     if (mappedVariant && modelVariants.includes(mappedVariant)) {
       // Use the model's built-in variant
-      modelViewer.src = originalSrc;
+      if (originalSrc) {
+        modelViewer.src = originalSrc;
+      }
       modelViewer.variantName = mappedVariant;
+      console.log('Switched to mapped variant:', {
+        mappedVariant: mappedVariant,
+        modelVariants: modelVariants
+      });
+      preventWooCommerceImageSwap(modelViewer);
       return true;
     }
 
     // Check if there's a separate model for this variant
+    // Try both original and normalized variant names
     var separateModelUrl = (_variationSettings$va2 = variationSettings.variants) === null || _variationSettings$va2 === void 0 ? void 0 : _variationSettings$va2[variantName];
+    if (!separateModelUrl) {
+      // Try case-insensitive lookup
+      var variantKeys = Object.keys(variationSettings.variants || {});
+      var _matchingKey = variantKeys.find(function (key) {
+        return key.toLowerCase().trim() === normalizedVariantName;
+      });
+      if (_matchingKey) {
+        separateModelUrl = variationSettings.variants[_matchingKey];
+      }
+    }
     if (separateModelUrl) {
       // Load the separate model
       modelViewer.src = separateModelUrl;
       modelViewer.variantName = null; // Reset variant name
+      console.log('Switched to separate model:', {
+        separateModelUrl: separateModelUrl
+      });
+      preventWooCommerceImageSwap(modelViewer);
       return true;
     }
+    modelViewer.src = originalSrc;
+    modelViewer.variantName = variantName; // Reset variant name
 
-    // Fallback: Reset to original/default model
-    if (originalSrc) {
-      modelViewer.src = originalSrc;
-      modelViewer.variantName = mappedVariant;
-    }
-    return false;
+    // If no specific mapping found, keep the current 3D model visible
+    // Don't reset to original - just keep current state and prevent image swap
+    console.log('No mapping found for variant:', variantName, '- keeping current 3D model');
+    preventWooCommerceImageSwap(modelViewer);
+    return true; // Return true to indicate we handled it (prevent WooCommerce image swap)
   } catch (e) {
     console.error('Error switching model variant:', e);
     return false;
   }
 };
+var originalThumbnail = null;
+/**
+ * Prevent WooCommerce from swapping to product image when 3D viewer is active
+ * @param {HTMLElement} modelViewer - The model-viewer element
+ */
+function preventWooCommerceImageSwap(modelViewer) {
+  var _modelViewer$closest;
+  // Ensure the 3D viewer stays visible
+  var container = modelViewer.closest('.atlas-ar-model-wrapper') || modelViewer.parentElement;
+  if (container) {
+    container.style.display = 'block';
+  }
+  modelViewer.style.display = 'block';
+
+  // Hide the WooCommerce product image if 3D toggle mode is active
+  var productGallery = document.querySelector('.woocommerce-product-gallery__image');
+  var is3DActive = document.querySelector('.atlas-ar-3d-btn.active') || ((_modelViewer$closest = modelViewer.closest('.atlas-ar-model-wrapper')) === null || _modelViewer$closest === void 0 ? void 0 : _modelViewer$closest.style.display) !== 'none';
+  if (is3DActive && productGallery) {
+    var modelWrapper = document.querySelector('.woocommerce-product-gallery__wrapper');
+    var thumbnail = productGallery.getAttribute('data-thumb');
+    if (!originalThumbnail) {
+      originalThumbnail = thumbnail;
+    }
+    if (thumbnail !== originalThumbnail) {
+      productGallery.setAttribute('data-thumb', originalThumbnail);
+    }
+    var checkTransformInterval = setInterval(function () {
+      var currentTransform = modelWrapper.style.transform;
+      var is3DActive = currentTransform === 'translate3d(0px, 0px, 0px)';
+      if (is3DActive) {
+        // Stop interval after clearing
+        clearInterval(checkTransformInterval);
+      } else {
+        // Add the transform
+        modelWrapper.style.transform = 'translate3d(0px, 0px, 0px)';
+      }
+    }, 10); // Check every 500ms
+
+    // Find the main image container and keep it hidden if 3D is active
+    var mainImage = productGallery.querySelector('img.wp-post-image, img.attachment-woocommerce_single');
+    if (mainImage) {
+      // Add a small delay to override WooCommerce's image swap
+      setTimeout(function () {
+        var galleryImages = document.querySelectorAll('.woocommerce-product-gallery__image');
+        if (modelWrapper && is3DActive) {
+          var images = _toConsumableArray(galleryImages);
+          images.forEach(function (image, index) {
+            if (index === 0) {
+              image.classList.add('flex-active-slide');
+            } else {
+              image.classList.remove('flex-active-slide');
+            }
+          });
+          modelWrapper.style.display = 'block';
+          modelWrapper.style.transform = 'translate3d(0px, 0px, 0px);';
+        }
+      }, 1000);
+    }
+  }
+}
 
 // Make switchModelVariant available globally for frontend use
 window.atlasARSwitchVariant = switchModelVariant;

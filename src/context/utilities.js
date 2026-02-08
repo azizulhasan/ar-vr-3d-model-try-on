@@ -46,11 +46,11 @@ export const getURL = (endpoint = "") => {
 export const getProURL = (endpoint = "") => {
     return (
         ar_try_on.api_url +
-        ar_try_on.api_namespace + '_pro'+
-            "/" +
-            ar_try_on.api_version +
-            "/" +
-            endpoint
+        ar_try_on.api_namespace + '_pro' +
+        "/" +
+        ar_try_on.api_version +
+        "/" +
+        endpoint
     );
 };
 
@@ -236,43 +236,43 @@ function displayDimensions(modelViewer, model_settings) {
         inch: (v) => v * 39.3701,
     };
 
-    const unitLabel = { cm: "cm", m: "m", inch: "in" };
+    const unitLabel = {cm: "cm", m: "m", inch: "in"};
 
     const formatValue = (v) => `${conversion[unit](v).toFixed(1)} ${unitLabel[unit]}`;
 
     const hotspots = [
-        { dot: "hotspot-dot+X-Y+Z", pos: (c, s) => [c.x + s.x/2, c.y - s.y/2, c.z + s.z/2] },
-        { dot: "hotspot-dot+X-Y-Z", pos: (c, s) => [c.x + s.x/2, c.y - s.y/2, c.z - s.z/2] },
-        { dot: "hotspot-dot+X+Y-Z", pos: (c, s) => [c.x + s.x/2, c.y + s.y/2, c.z - s.z/2] },
-        { dot: "hotspot-dot-X+Y-Z", pos: (c, s) => [c.x - s.x/2, c.y + s.y/2, c.z - s.z/2] },
-        { dot: "hotspot-dot-X-Y-Z", pos: (c, s) => [c.x - s.x/2, c.y - s.y/2, c.z - s.z/2] },
-        { dot: "hotspot-dot-X-Y+Z", pos: (c, s) => [c.x - s.x/2, c.y - s.y/2, c.z + s.z/2] },
+        {dot: "hotspot-dot+X-Y+Z", pos: (c, s) => [c.x + s.x / 2, c.y - s.y / 2, c.z + s.z / 2]},
+        {dot: "hotspot-dot+X-Y-Z", pos: (c, s) => [c.x + s.x / 2, c.y - s.y / 2, c.z - s.z / 2]},
+        {dot: "hotspot-dot+X+Y-Z", pos: (c, s) => [c.x + s.x / 2, c.y + s.y / 2, c.z - s.z / 2]},
+        {dot: "hotspot-dot-X+Y-Z", pos: (c, s) => [c.x - s.x / 2, c.y + s.y / 2, c.z - s.z / 2]},
+        {dot: "hotspot-dot-X-Y-Z", pos: (c, s) => [c.x - s.x / 2, c.y - s.y / 2, c.z - s.z / 2]},
+        {dot: "hotspot-dot-X-Y+Z", pos: (c, s) => [c.x - s.x / 2, c.y - s.y / 2, c.z + s.z / 2]},
     ];
 
     const dimLabels = [
         {
             name: "hotspot-dim+X-Y",
-            pos: (c, s) => [c.x + s.x*0.6, c.y - s.y*0.55, c.z],
+            pos: (c, s) => [c.x + s.x * 0.6, c.y - s.y * 0.55, c.z],
             value: (s) => formatValue(s.z),
         },
         {
             name: "hotspot-dim+X-Z",
-            pos: (c, s) => [c.x + s.x*0.6, c.y, c.z - s.z*0.6],
+            pos: (c, s) => [c.x + s.x * 0.6, c.y, c.z - s.z * 0.6],
             value: (s) => formatValue(s.y),
         },
         {
             name: "hotspot-dim+Y-Z",
-            pos: (c, s) => [c.x, c.y + s.y*0.55, c.z - s.z*0.55],
+            pos: (c, s) => [c.x, c.y + s.y * 0.55, c.z - s.z * 0.55],
             value: (s) => formatValue(s.x),
         },
         {
             name: "hotspot-dim-X-Z",
-            pos: (c, s) => [c.x - s.x*0.6, c.y, c.z - s.z*0.6],
+            pos: (c, s) => [c.x - s.x * 0.6, c.y, c.z - s.z * 0.6],
             value: (s) => formatValue(s.y),
         },
         {
             name: "hotspot-dim-X-Y",
-            pos: (c, s) => [c.x - s.x*0.6, c.y - s.y*0.55, c.z],
+            pos: (c, s) => [c.x - s.x * 0.6, c.y - s.y * 0.55, c.z],
             value: (s) => formatValue(s.z),
         },
     ];
@@ -384,7 +384,7 @@ function displayDimensions(modelViewer, model_settings) {
     });
 }
 
-window.atlasARSwitchSrc = (event ,element, data ) => {
+window.atlasARSwitchSrc = (event, element, data) => {
     // 🔹 Stop form submit / page reload
     if (event && event.preventDefault) {
         event.preventDefault();
@@ -398,7 +398,9 @@ window.atlasARSwitchSrc = (event ,element, data ) => {
     modelViewer['environment-image'] = data.environment_image ?? '';
 
     const slides = document.querySelectorAll(".slide");
-    slides.forEach((element) => {element.classList.remove("selected");});
+    slides.forEach((element) => {
+        element.classList.remove("selected");
+    });
     element.classList.add("selected");
 };
 
@@ -435,14 +437,14 @@ function showMultipleItems(modelViewer, model_settings) {
     modelViewer.setAttribute("poster", model_settings.poster || "");
 
     const prevSlider = modelViewer.querySelector(".slider");
-    if(prevSlider) {
+    if (prevSlider) {
         prevSlider.remove();
     }
 
     sliderHTML += `<div class="slider">
                 <div class="slides">`;
-    model_settings.multipleItems.map((item, index)=>{
-        sliderHTML += `<button class="slide ${index < 1? 'selected': ''}" type="submit" onClick='atlasARSwitchSrc(event, this, ${JSON.stringify(item.data)})'
+    model_settings.multipleItems.map((item, index) => {
+        sliderHTML += `<button class="slide ${index < 1 ? 'selected' : ''}" type="submit" onClick='atlasARSwitchSrc(event, this, ${JSON.stringify(item.data)})'
                     style="background-image: url(${item.data.thumbnail || item.data.poster});">`
     });
 
@@ -564,12 +566,12 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         renderUserHotspots(modelViewer, model_settings.hotspots);
     }
 
-    if(model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
+    if (model_settings?.isMultiple && model_settings?.multipleItems?.length > 0) {
         showMultipleItems(modelViewer, model_settings);
     }
 
     // Handle variation settings
-    if(model_settings?.variationSettings) {
+    if (model_settings?.variationSettings) {
         setupVariationHandling(modelViewer, model_settings);
     }
 };
@@ -600,55 +602,150 @@ function setupVariationHandling(modelViewer, model_settings) {
         if (availableVariants && availableVariants.length > 0) {
             modelViewer.dataset.modelVariants = JSON.stringify(Array.from(availableVariants));
         }
-    }, { once: true });
+    }, {once: true});
 }
 
 /**
  * Switch 3D model variant based on WooCommerce variation selection
  * @param {HTMLElement} modelViewer - The model-viewer element
  * @param {string} variantName - The WooCommerce variant name (e.g., "Blue", "Large")
+ * @param {Object} modelSessionData - Model session data containing variationSettings
  * @returns {boolean} - Whether the variant was successfully switched
  */
-export const switchModelVariant = (modelViewer, variantName, modelSessionData={}) => {
+export const switchModelVariant = (modelViewer, variantName, modelSessionData = {}) => {
     if (!modelViewer || !variantName) return false;
+    console.log('switchModelVariant called with:', variantName);
 
     try {
-
-        // const variationSettings = JSON.parse(modelViewer.dataset.variationSettings || '{}');
-        const variationSettings = modelSessionData.variationSettings || '{}';
-        // const modelVariants = JSON.parse(modelViewer.dataset.modelVariants || '[]');
-        const modelVariants  = Array.from(modelViewer.availableVariants || []);
+        const variationSettings = modelSessionData.variationSettings || {};
+        const modelVariants = Array.from(modelViewer.availableVariants || []);
         const originalSrc = modelViewer.dataset.originalSrc;
+
+        // Normalize variant name for comparison (case-insensitive, trim whitespace)
+        const normalizedVariantName = variantName.toLowerCase().trim();
+
         // Check if this variant is mapped to a model's built-in variant
-        const mappedVariant = variationSettings.variantMapping?.[variantName];
+        // Try both original and normalized variant names
+        let mappedVariant = variationSettings.variantMapping?.[variantName];
+        if (!mappedVariant) {
+            // Try case-insensitive lookup
+            const mappingKeys = Object.keys(variationSettings.variantMapping || {});
+            const matchingKey = mappingKeys.find(key => key.toLowerCase().trim() === normalizedVariantName);
+            if (matchingKey) {
+                mappedVariant = variationSettings.variantMapping[matchingKey];
+            }
+        }
+
         if (mappedVariant && modelVariants.includes(mappedVariant)) {
             // Use the model's built-in variant
-            modelViewer.src = originalSrc;
+            if (originalSrc) {
+                modelViewer.src = originalSrc;
+            }
             modelViewer.variantName = mappedVariant;
+            console.log('Switched to mapped variant:', {mappedVariant, modelVariants});
+            preventWooCommerceImageSwap(modelViewer);
             return true;
         }
 
         // Check if there's a separate model for this variant
-        const separateModelUrl = variationSettings.variants?.[variantName];
+        // Try both original and normalized variant names
+        let separateModelUrl = variationSettings.variants?.[variantName];
+        if (!separateModelUrl) {
+            // Try case-insensitive lookup
+            const variantKeys = Object.keys(variationSettings.variants || {});
+            const matchingKey = variantKeys.find(key => key.toLowerCase().trim() === normalizedVariantName);
+            if (matchingKey) {
+                separateModelUrl = variationSettings.variants[matchingKey];
+            }
+        }
+
         if (separateModelUrl) {
             // Load the separate model
             modelViewer.src = separateModelUrl;
             modelViewer.variantName = null; // Reset variant name
+            console.log('Switched to separate model:', {separateModelUrl});
+            preventWooCommerceImageSwap(modelViewer);
             return true;
         }
 
-        // Fallback: Reset to original/default model
-        if (originalSrc) {
-            modelViewer.src = originalSrc;
-            modelViewer.variantName = mappedVariant;
-        }
+        modelViewer.src = originalSrc;
+        modelViewer.variantName = variantName; // Reset variant name
 
-        return false;
+        // If no specific mapping found, keep the current 3D model visible
+        // Don't reset to original - just keep current state and prevent image swap
+        console.log('No mapping found for variant:', variantName, '- keeping current 3D model');
+        preventWooCommerceImageSwap(modelViewer);
+        return true; // Return true to indicate we handled it (prevent WooCommerce image swap)
+
     } catch (e) {
         console.error('Error switching model variant:', e);
         return false;
     }
 };
+let originalThumbnail = null
+/**
+ * Prevent WooCommerce from swapping to product image when 3D viewer is active
+ * @param {HTMLElement} modelViewer - The model-viewer element
+ */
+function preventWooCommerceImageSwap(modelViewer) {
+    // Ensure the 3D viewer stays visible
+    const container = modelViewer.closest('.atlas-ar-model-wrapper') || modelViewer.parentElement;
+    if (container) {
+        container.style.display = 'block';
+    }
+    modelViewer.style.display = 'block';
+
+    // Hide the WooCommerce product image if 3D toggle mode is active
+    const productGallery = document.querySelector('.woocommerce-product-gallery__image');
+    const is3DActive = document.querySelector('.atlas-ar-3d-btn.active') ||
+        modelViewer.closest('.atlas-ar-model-wrapper')?.style.display !== 'none';
+
+    if (is3DActive && productGallery) {
+        const modelWrapper = document.querySelector('.woocommerce-product-gallery__wrapper');
+        const thumbnail = productGallery.getAttribute('data-thumb');
+        if(!originalThumbnail) {
+            originalThumbnail = thumbnail;
+        }
+        if(thumbnail !== originalThumbnail) {
+            productGallery.setAttribute('data-thumb', originalThumbnail)
+        }
+        const checkTransformInterval = setInterval(() => {
+            const currentTransform = modelWrapper.style.transform;
+            const is3DActive = currentTransform === 'translate3d(0px, 0px, 0px)';
+
+            if (is3DActive) {
+                // Stop interval after clearing
+                clearInterval(checkTransformInterval);
+            } else {
+                // Add the transform
+                modelWrapper.style.transform = 'translate3d(0px, 0px, 0px)';
+            }
+        }, 10); // Check every 500ms
+
+
+        // Find the main image container and keep it hidden if 3D is active
+        const mainImage = productGallery.querySelector('img.wp-post-image, img.attachment-woocommerce_single');
+        if (mainImage) {
+            // Add a small delay to override WooCommerce's image swap
+            setTimeout(() => {
+                const galleryImages = document.querySelectorAll('.woocommerce-product-gallery__image');
+                if (modelWrapper && is3DActive) {
+                    const images = [...galleryImages];
+                    images.forEach((image, index) => {
+                        if (index === 0) {
+                            image.classList.add('flex-active-slide');
+                        } else {
+                            image.classList.remove('flex-active-slide');
+                        }
+                    });
+
+                    modelWrapper.style.display = 'block';
+                    modelWrapper.style.transform = 'translate3d(0px, 0px, 0px);';
+                }
+            }, 1000);
+        }
+    }
+}
 
 // Make switchModelVariant available globally for frontend use
 window.atlasARSwitchVariant = switchModelVariant;
@@ -821,8 +918,7 @@ export const isDifferent = (obj1, obj2) => {
 }
 
 
-
-export const createModal = ( title = 'Modal Title', bodyContent = 'Modal body content...')  =>{
+export const createModal = (title = 'Modal Title', bodyContent = 'Modal body content...') => {
     // Create overlay
     const overlay = document.createElement('div');
     overlay.className = "art-fixed art-inset-0 art-bg-black/50 art-flex art-items-center art-justify-center art-z-[999999]";
