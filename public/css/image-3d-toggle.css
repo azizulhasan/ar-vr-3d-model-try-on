@@ -1,0 +1,608 @@
+/**
+ * Image/3D Toggle Styles
+ * Toggle button overlays on the featured product image
+ * Theme-compatible styles with CSS resets
+ *
+ * @since 1.8.2
+ */
+
+/* ==================== CSS Reset for Plugin Elements ==================== */
+/* Ensures consistent styling across all themes */
+
+.atlas-ar-toggle-container,
+.atlas-ar-toggle-container *,
+.atlas-ar-toggle-btn,
+.atlas-ar-toggle-btn *,
+.atlas-ar-3d-viewer-overlay,
+.atlas-ar-3d-viewer-overlay *,
+.atlas-ar-fullscreen-overlay,
+.atlas-ar-fullscreen-overlay *,
+.atlas-ar-fullscreen-close-btn,
+.atlas-ar-fullscreen-close-btn *,
+.atlas-ar-fullscreen-viewer,
+.atlas-ar-fullscreen-viewer * {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: normal !important;
+    text-decoration: none !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+    vertical-align: baseline !important;
+    background: transparent !important;
+    float: none !important;
+    clear: none !important;
+}
+
+/* ==================== Main Container Positioning ==================== */
+
+/* Main image container needs position relative for overlay */
+.woocommerce-product-gallery__image {
+    position: relative !important;
+}
+
+/* Toggle button container - positioned at bottom middle of featured image */
+.atlas-ar-toggle-container {
+    position: absolute !important;
+    bottom: 15px !important;
+    left: 50% !important;
+    top: auto !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 100 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* ==================== Toggle Button Styles ==================== */
+
+.atlas-ar-toggle-btn:not(.atlas-ar-fullscreen-btn) {
+    display: flex !important;
+}
+
+.atlas-ar-toggle-btn {
+    align-items: center !important;
+    justify-content: center !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    max-width: 48px !important;
+    max-height: 48px !important;
+    padding: 10px !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid #333 !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
+    outline: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    text-indent: 0 !important;
+    color: #333 !important;
+}
+
+.atlas-ar-toggle-btn:hover {
+    background-color: #333 !important;
+    color: #fff !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    border-color: #333 !important;
+}
+
+.atlas-ar-toggle-btn:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.3) !important;
+}
+
+.atlas-ar-toggle-btn:active {
+    transform: scale(1.05) !important;
+}
+
+.atlas-ar-toggle-btn svg {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    fill: currentColor !important;
+    transition: fill 0.3s ease !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+}
+
+.atlas-ar-toggle-btn:hover svg {
+    fill: #fff !important;
+}
+
+/* Fullscreen button specific styles */
+/* Note: display property is controlled by JavaScript */
+.atlas-ar-fullscreen-btn {
+    /* display is set via JS */
+}
+
+/* ==================== 3D Viewer Overlay ==================== */
+/* Note: display property is controlled by JavaScript, so we don't use !important on it */
+
+.atlas-ar-3d-viewer-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 5 !important;
+    background-color: #f5f5f5 !important;
+    overflow: hidden !important;
+}
+
+.atlas-ar-3d-viewer-overlay.atlas-ar-active {
+    animation: atlasArFadeIn 0.3s ease !important;
+}
+
+/* Model viewer inside overlay */
+.atlas-ar-3d-viewer-overlay model-viewer,
+.atlas-ar-3d-viewer-overlay .atlas_ar_model_viewer {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: block !important;
+}
+
+.atlas-ar-3d-viewer-overlay > div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ==================== Fullscreen Overlay Styles ==================== */
+/* Note: display property is controlled by JavaScript */
+
+.atlas-ar-fullscreen-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    z-index: 999999 !important;
+    justify-content: center !important;
+    align-items: center !important;
+    animation: atlasArFadeIn 0.3s ease !important;
+    overflow: hidden !important;
+}
+
+/* Close button for fullscreen */
+.atlas-ar-fullscreen-close-btn {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    bottom: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    min-height: 50px !important;
+    max-width: 50px !important;
+    max-height: 50px !important;
+    padding: 10px !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid #fff !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s ease !important;
+    z-index: 1000000 !important;
+    outline: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+}
+
+.atlas-ar-fullscreen-close-btn:hover {
+    background-color: #ff4444 !important;
+    border-color: #ff4444 !important;
+    transform: scale(1.1) !important;
+}
+
+.atlas-ar-fullscreen-close-btn:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5) !important;
+}
+
+.atlas-ar-fullscreen-close-btn svg {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    fill: #333 !important;
+    transition: fill 0.3s ease !important;
+    display: block !important;
+}
+
+.atlas-ar-fullscreen-close-btn:hover svg {
+    fill: #fff !important;
+}
+
+/* Fullscreen 3D viewer container */
+.atlas-ar-fullscreen-viewer {
+    width: 90vw !important;
+    height: 90vh !important;
+    max-width: 1400px !important;
+    max-height: 900px !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    background-color: #f5f5f5 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.atlas-ar-fullscreen-viewer model-viewer,
+.atlas-ar-fullscreen-viewer .atlas_ar_model_viewer {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
+    display: block !important;
+}
+
+.atlas-ar-fullscreen-viewer > div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ==================== Animation ==================== */
+
+@keyframes atlasArFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ==================== Responsive Styles ==================== */
+
+@media screen and (max-width: 768px) {
+    .atlas-ar-toggle-container {
+        bottom: 10px !important;
+        gap: 8px !important;
+    }
+
+    .atlas-ar-toggle-btn {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        max-width: 40px !important;
+        max-height: 40px !important;
+        padding: 8px !important;
+    }
+
+    .atlas-ar-toggle-btn svg {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        min-height: 20px !important;
+        max-width: 20px !important;
+        max-height: 20px !important;
+    }
+
+    .atlas-ar-fullscreen-close-btn {
+        top: 10px !important;
+        right: 10px !important;
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        max-width: 44px !important;
+        max-height: 44px !important;
+    }
+
+    .atlas-ar-fullscreen-close-btn svg {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        min-height: 20px !important;
+        max-width: 20px !important;
+        max-height: 20px !important;
+    }
+
+    .atlas-ar-fullscreen-viewer {
+        width: 95vw !important;
+        height: 85vh !important;
+        border-radius: 4px !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .atlas-ar-toggle-container {
+        bottom: 8px !important;
+        gap: 6px !important;
+    }
+
+    .atlas-ar-toggle-btn {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        max-width: 36px !important;
+        max-height: 36px !important;
+        padding: 6px !important;
+    }
+
+    .atlas-ar-toggle-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+        min-width: 18px !important;
+        min-height: 18px !important;
+        max-width: 18px !important;
+        max-height: 18px !important;
+    }
+
+    .atlas-ar-fullscreen-viewer {
+        width: 98vw !important;
+        height: 80vh !important;
+        border-radius: 2px !important;
+    }
+}
+
+/* ==================== Dark Mode Support ==================== */
+
+@media (prefers-color-scheme: dark) {
+    .atlas-ar-toggle-btn {
+        background-color: rgba(51, 51, 51, 0.95) !important;
+        color: #fff !important;
+        border-color: #fff !important;
+    }
+
+    .atlas-ar-toggle-btn:hover {
+        background-color: #fff !important;
+        color: #333 !important;
+        border-color: #fff !important;
+    }
+
+    .atlas-ar-toggle-btn svg {
+        fill: #fff !important;
+    }
+
+    .atlas-ar-toggle-btn:hover svg {
+        fill: #333 !important;
+    }
+
+    .atlas-ar-3d-viewer-overlay {
+        background-color: #2a2a2a !important;
+    }
+
+    .atlas-ar-fullscreen-viewer {
+        background-color: #2a2a2a !important;
+    }
+}
+
+/* ==================== WooCommerce Theme Compatibility ==================== */
+
+/* Base WooCommerce gallery fixes */
+.woocommerce-product-gallery {
+    position: relative !important;
+}
+
+/* Ensure toggle button appears above all WooCommerce gallery elements */
+.woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* Fix for flex slider viewport */
+.woocommerce-product-gallery .flex-viewport {
+    position: relative !important;
+}
+
+/* Ensure the 3D viewer overlay works with flexslider */
+.woocommerce-product-gallery .flex-viewport .atlas-ar-3d-viewer-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ==================== Popular Theme Compatibility ==================== */
+
+/* Storefront theme */
+.storefront .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.theme-storefront .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* Astra theme */
+.ast-woocommerce-container .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.theme-astra .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* OceanWP theme */
+.theme-flavor .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.theme-flavor-flavor .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.oceanwp-theme .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.theme-flavor-flavor .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor-woo-gallery .atlas-ar-toggle-container,
+.flavor-shop .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor-builder .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.fl-builder .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor-woocommerce .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.flavor-product .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor-product-gallery .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+.flavor .product .images .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor and flavor themes */
+.flavor-page .woocommerce-product-gallery__image .atlas-ar-toggle-container,
+.flavor-page .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* flavor theme */
+body .woocommerce-product-gallery__image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* WooCommerce Blocks compatibility */
+.wc-block-grid__product .atlas-ar-toggle-container,
+.wp-block-woocommerce-product-image .atlas-ar-toggle-container {
+    z-index: 100 !important;
+}
+
+/* ==================== Fix for Theme Button Resets ==================== */
+
+/* Override common theme button resets */
+button.atlas-ar-toggle-btn,
+button.atlas-ar-fullscreen-close-btn,
+.atlas-ar-toggle-btn[type="button"],
+.atlas-ar-fullscreen-close-btn[type="button"] {
+    background-image: none !important;
+    text-shadow: none !important;
+    -webkit-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+button.atlas-ar-toggle-btn:hover,
+.atlas-ar-toggle-btn[type="button"]:hover {
+    -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+button.atlas-ar-fullscreen-close-btn:hover,
+.atlas-ar-fullscreen-close-btn[type="button"]:hover {
+    -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ==================== RTL Support ==================== */
+
+[dir="rtl"] .atlas-ar-toggle-container,
+.rtl .atlas-ar-toggle-container {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+}
+
+[dir="rtl"] .atlas-ar-fullscreen-close-btn,
+.rtl .atlas-ar-fullscreen-close-btn {
+    right: auto !important;
+    left: 20px !important;
+}
+
+@media screen and (max-width: 768px) {
+    [dir="rtl"] .atlas-ar-fullscreen-close-btn,
+    .rtl .atlas-ar-fullscreen-close-btn {
+        left: 10px !important;
+    }
+}
+
+/* ==================== Accessibility ==================== */
+
+/* Focus visible for keyboard navigation */
+.atlas-ar-toggle-btn:focus-visible,
+.atlas-ar-fullscreen-close-btn:focus-visible {
+    outline: 2px solid #007cba !important;
+    outline-offset: 2px !important;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .atlas-ar-toggle-btn,
+    .atlas-ar-fullscreen-close-btn,
+    .atlas-ar-3d-viewer-overlay,
+    .atlas-ar-fullscreen-overlay {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .atlas-ar-toggle-btn {
+        border-width: 3px !important;
+    }
+
+    .atlas-ar-fullscreen-close-btn {
+        border-width: 3px !important;
+    }
+}
+
+/* ==================== Print Styles ==================== */
+
+@media print {
+    .atlas-ar-toggle-container,
+    .atlas-ar-3d-viewer-overlay,
+    .atlas-ar-fullscreen-overlay {
+        display: none !important;
+    }
+}

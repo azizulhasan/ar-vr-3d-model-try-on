@@ -333,7 +333,7 @@ class AR_TRY_ON_Helper
         return [
             'ar_try_on_display_button_automatically' => 'yes',
             'ar_try_on_allowed_post_types' => ['post'],
-            'ar_try_on_wc_hook_position' => "7",
+            'ar_try_on_wc_hook_position' => "product_image",
             'ar_try_on_single_product_tabs' => "yes",
             'ar_try_on_loading_type' => "auto",
             'ar_try_on_reveal_type' => "auto",
@@ -674,6 +674,58 @@ class AR_TRY_ON_Helper
 
 
         return $status;
+    }
+
+    /**
+     * Get the effective "Show Button In" setting for a product
+     * Priority: Product metabox setting > Global setting
+     *
+     * @since 1.8.2
+     * @param int $post_id Product/Post ID
+     * @return string The hook position value (1-7, 'product_image', '3d_viewer', or empty)
+     */
+    public static function get_effective_show_button_in($post_id) {
+        // Get product-specific settings
+        $product_settings = (array) get_post_meta($post_id, 'ar_try_on_product_settings', true);
+
+        // Check if product has a specific setting (not 'global')
+        if (isset($product_settings['show_button_in']) && $product_settings['show_button_in'] !== 'global') {
+            return $product_settings['show_button_in'];
+        }
+
+        // Fall back to global settings
+        $global_settings = self::get_settings();
+
+        if (isset($global_settings['ar_try_on_wc_hook_position'])) {
+            return $global_settings['ar_try_on_wc_hook_position'];
+        }
+
+        // Default to 'product_image'
+        return 'product_image';
+    }
+
+    /**
+     * Check if the display mode is toggle-based (product_image or 3d_viewer)
+     *
+     * @since 1.8.2
+     * @param string $mode The display mode value
+     * @return bool True if toggle mode
+     */
+    public static function is_toggle_display_mode($mode) {
+        return in_array($mode, ['product_image', '3d_viewer'], true);
+    }
+
+    /**
+     * Check if a product has a 3D model attached
+     *
+     * @since 1.8.2
+     * @param int $post_id Product/Post ID
+     * @return bool True if product has 3D model
+     */
+    public static function has_3d_model($post_id) {
+        $product_settings = (array) get_post_meta($post_id, 'ar_try_on_product_settings', true);
+
+        return isset($product_settings['src']) && !empty($product_settings['src']);
     }
 
     /**

@@ -136,7 +136,12 @@ class AR_TRY_ON_Admin {
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
-			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $this->localize_data );
+
+			// Add WooCommerce product variation data if on product edit page
+			$metabox_localize_data = $this->localize_data;
+			$metabox_localize_data['wc_product'] = $this->get_wc_product_data();
+
+			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $metabox_localize_data );
 
 			wp_enqueue_script(
 				'ar-try-on-media-library',
@@ -186,7 +191,7 @@ class AR_TRY_ON_Admin {
 			// TODO:: enqueue base on model setup/settings
 			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
 			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
-			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on', $this->localize_data );
+			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->localize_data );
 		}
 	}
 
@@ -205,6 +210,8 @@ class AR_TRY_ON_Admin {
 			20
 		);
 
+        $this->atlasaidev_plugins('atlas-ar-other-plugins');
+
         do_action( 'atlas_ar_menu', $this );
 
     }
@@ -216,6 +223,71 @@ class AR_TRY_ON_Admin {
 				'class' => array(),
 			)
 		) );
+	}
+
+	/**
+	 * Get WooCommerce product data for the metabox
+	 * Returns variation and attribute data for variable products
+	 *
+	 * @since 1.8.3
+	 * @return array WooCommerce product data
+	 */
+	public function get_wc_product_data() {
+		$product_data = array(
+			'is_variable' => false,
+			'variations'  => array(),
+			'attributes'  => array(),
+		);
+
+		// Check if WooCommerce is active
+		if ( ! class_exists( 'WooCommerce' ) ) {
+			return $product_data;
+		}
+
+		// Get current post ID
+		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+		if ( ! $post_id ) {
+			return $product_data;
+		}
+
+		// Get the product
+		$product = wc_get_product( $post_id );
+		if ( ! $product ) {
+			return $product_data;
+		}
+
+		// Check if variable product
+		if ( ! $product->is_type( 'variable' ) ) {
+			return $product_data;
+		}
+
+		$product_data['is_variable'] = true;
+
+		// Get variations
+		$variations = $product->get_available_variations();
+		$product_data['variations'] = array_map( function( $variation ) {
+			return array(
+				'variation_id' => $variation['variation_id'],
+				'attributes'   => $variation['attributes'],
+//				'image'        => isset( $variation['image'] ) ? $variation['image'] : array(),
+			);
+		}, $variations );
+
+		// Get product attributes that are used for variations
+		$attributes = $product->get_variation_attributes();
+		foreach ( $attributes as $attribute_name => $options ) {
+			// Clean up attribute name (remove 'pa_' prefix if present)
+			$clean_name = str_replace( 'pa_', '', $attribute_name );
+			$clean_name = wc_attribute_label( $attribute_name, $product );
+
+			$product_data['attributes'][] = array(
+				'name'    => $clean_name,
+				'slug'    => $attribute_name,
+				'options' => array_values( $options ),
+			);
+		}
+
+		return $product_data;
 	}
 
 	/**
@@ -354,5 +426,78 @@ class AR_TRY_ON_Admin {
 	public function mime_types( $mimes = array() ) {
         return array_merge( $mimes, $this->get_3d_mime_types() );
 	}
+
+    public function atlasaidev_plugins($menu_slug = 'atlasvoice-other-plugins') {
+        // Atlas Plugins submenu
+        if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
+            wp_enqueue_script(
+                'atlas-plugins',
+                plugin_dir_url(__FILE__) . 'js/atlas-plugins.js',
+                array('wp-i18n', 'updates'),
+                $this->version,
+                true
+            );
+            wp_set_script_translations(
+                'atlas-plugins',
+                'ar-vr-3d-model-try-on',
+                plugin_dir_path(dirname(__FILE__)) . 'languages'
+            );
+            // Determine installed and active plugin statuses.
+            $atlas_basenames = array(
+                'text-to-audio' => 'text-to-audio/text-to-audio.php',
+                'ar-vr-3d-model-try-on' => 'ar-vr-3d-model-try-on/ar-vr-3d-model-try-on.php',
+                'ai-workflow-automation-ai-agent-hub' => 'ai-workflow-automation-ai-agent-hub/ai-workflow-automation-ai-agent-hub.php',
+            );
+            if (!function_exists('get_plugins')) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+            $all_plugins = array_keys(get_plugins());
+            $active_plugins = (array)get_option('active_plugins', array());
+
+            $installed_slugs = array();
+            $active_slugs = array();
+            $activate_urls = array();
+            foreach ($atlas_basenames as $slug => $basename) {
+                if (in_array($basename, $all_plugins, true)) {
+                    $installed_slugs[] = $slug;
+                    // Build activate URL for installed-but-not-active plugins.
+                    if (!in_array($basename, $active_plugins, true)) {
+                        $activate_urls[$slug] = html_entity_decode(wp_nonce_url(
+                            admin_url('plugins.php?action=activate&plugin=' . urlencode($basename)),
+                            'activate-plugin_' . $basename
+                        ));
+                    }
+                }
+                if (in_array($basename, $active_plugins, true)) {
+                    $active_slugs[] = $slug;
+                }
+            }
+
+            wp_localize_script('atlas-plugins', 'atlasPluginsData', array(
+                'current_plugin_slug' => 'ar-vr-3d-model-try-on',
+                'installed_plugins' => $installed_slugs,
+                'active_plugins' => $active_slugs,
+                'activate_urls' => (object)$activate_urls,
+            ));
+        }
+        add_submenu_page(
+            'ar-vr-3d-model-try-on',
+            __('Plugins', 'text-to-audio'),
+            __('Plugins', 'text-to-audio'),
+            'manage_options',
+            $menu_slug,
+            array($this, 'atlas_plugins_page'),
+            34
+        );
+    }
+
+    /**
+     * Atlas Plugins page callback.
+     */
+    public function atlas_plugins_page()
+    {
+        echo '<div class="wrap"><div id="atlas_plugins_container"></div></div>';
+    }
+
 
 }

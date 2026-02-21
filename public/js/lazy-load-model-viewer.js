@@ -41,6 +41,8 @@
         '.ar_vr_3d_model_try_on',
         '#atlas_ar_preview',
         '[data-atlas-ar]',
+        '#atlas_ar-3d-viewer-overlay',
+        '.atlas-ar-toggle-container',
     ];
     if(shortcode_id) {
         AR_VIEWER_SELECTORS.push(shortcode_id);
