@@ -14,6 +14,7 @@ import StyleSection from "./components/StyleSection.js";
 import IntegrationSection from "./components/IntegrationSection.js";
 import DimensionsSection from "./components/DimensionsSection.js";
 import HotspotsSection from "./components/HotspotsSection.js";
+import SettingsSection from "./components/SettingsSection.js";
 import CompressionPanel from "./components/CompressionPanel.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
@@ -64,6 +65,12 @@ const ARProductModelSettings = () => {
         },
         hotspots: [],
         thumbnail_image: "",
+        show_button_in: "global",
+        variationSettings: {
+            variantAttribute: [],
+            variantMapping: {},
+            variants: {}
+        },
         isMultiple: false,
         multipleItems: [
             {
@@ -149,6 +156,7 @@ const ARProductModelSettings = () => {
         advance: false,
         dimensions: false,
         hotspots: false,
+        settings: false,
     });
     const [styleAccordion, setStyleAccordion] = useState({
         canvas: false,
@@ -203,6 +211,9 @@ const ARProductModelSettings = () => {
             content: false,
             camera: false,
             advance: false,
+            dimensions: false,
+            hotspots: false,
+            settings: false,
             [section]: !prev[section],
         }));
     };
@@ -417,10 +428,11 @@ const handleSubmit = (e) => {
         delete dataToSave.hotspots;
         delete dataToSave.isMultiple;
         delete dataToSave.multipleItems;
+        delete dataToSave.variationSettings;
 
         // Notify user that pro features won't be saved
-        if (dataToSave.dimensions || dataToSave.hotspots?.length > 0 || dataToSave.isMultiple) {
-            notify('Pro features (dimensions, hotspots, slider) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
+        if (dataToSave.dimensions || dataToSave.hotspots?.length > 0 || dataToSave.isMultiple || dataToSave.variationSettings) {
+            notify('Pro features (dimensions, hotspots, slider, variations) will not be saved. Upgrade to Pro version to use these features.', 'warn', {
                 autoClose: 6000,
             });
         }
@@ -554,6 +566,7 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     activeAccordion={activeAccordion}
                                     toggleAccordion={toggleAccordion}
                                     handleMediaButtonClick={handleMediaButtonClick}
+                                    setProductModel={setProductModel}
                                 />
 
                                 {/* Compression Panel - Show after model upload */}
@@ -599,6 +612,12 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                 <HotspotsSection
                                     productModel={productModel}
                                     setProductModel={setProductModel}
+                                    activeAccordion={activeAccordion}
+                                    toggleAccordion={toggleAccordion}
+                                />
+                                <SettingsSection
+                                    productModel={productModel}
+                                    handleChange={handleChange}
                                     activeAccordion={activeAccordion}
                                     toggleAccordion={toggleAccordion}
                                 />

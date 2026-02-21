@@ -17,7 +17,7 @@ export default function Settings({ settings, handleChange }) {
   // const [settings, setSettings] = useState({
   //     ar_try_on_display_button_automatically: 'yes',
   //     ar_try_on_allowed_post_types: ['post'],
-  //     ar_try_on_wc_hook_position: "3",
+  //     ar_try_on_wc_hook_position: "product_image",
   //     ar_try_on_single_product_tabs: "yes",
   //     ar_try_on_loading_type: "auto",
   //     ar_try_on_reveal_type: "auto",
@@ -217,10 +217,11 @@ export default function Settings({ settings, handleChange }) {
                   color: "var(--theme-text)",
                   borderColor: "var(--theme-border, rgba(100,116,139,0.4))",
                 }}
-                value={settings.ar_try_on_wc_hook_position}
+                value={settings.ar_try_on_wc_hook_position || 'product_image'}
                 onChange={handleSettingsChange}
               >
-                <option value="">None</option>
+                <option value="product_image">Product Image</option>
+                <option value="3d_viewer">3D Viewer</option>
                 <option value="1">
                   woocommerce_before_single_product_summary
                 </option>
@@ -237,6 +238,10 @@ export default function Settings({ settings, handleChange }) {
               <p className="art-text-sm art-text-gray-400 art-leading-snug">
                 Choose where the AR button will appear within WooCommerce
                 product pages.
+                <br />
+                <strong>Product Image</strong> - Shows the featured image first with a 3D icon to reveal the 3D viewer.
+                <br />
+                <strong>3D Viewer</strong> - Shows the 3D model first with an image icon to reveal the product image.
               </p>
             </BorderCard>
 
