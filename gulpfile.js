@@ -49,6 +49,7 @@ const productionSrc = [
 	'!admin/images/.DS_Store',
 	'!*.DS_Store',
 	'!public/js/single-product.js', // TODO:: this file is might be necessary in the near future.
+	'!public/js/variation-handler.js',
 	'!admin/js/ar-compression-client.js'
 ]
 
