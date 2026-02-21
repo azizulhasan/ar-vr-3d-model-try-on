@@ -130,11 +130,11 @@ export default function FeatureComparison() {
         //     free: false,
         //     pro: true,
         // },
-        // {
-        //     name: __('Per-Variation 3D Models (Coming Q1 2026)', 'ar-vr-3d-model-try-on'),
-        //     free: false,
-        //     pro: true,
-        // },
+        {
+            name: __('Per-Variation 3D Models', 'ar-vr-3d-model-try-on'),
+            free: false,
+            pro: true,
+        },
         // {
         //     name: __('Background Processing for Large Files (Coming Q2 2026)', 'ar-vr-3d-model-try-on'),
         //     free: false,
