@@ -1,565 +1,545 @@
-=== 3D Viewer – 3D Model Viewer – Augmented Reality  ===
+=== 3D Viewer – 3D Model Viewer – Augmented Reality ===
 Contributors: atlasaidev, hasanazizul, freemius
-Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
+Tags: 3d viewer, 3d model viewer, augmented reality, woocommerce, AR
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-3D Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
+Display 3D models on WordPress & WooCommerce with built-in AR for iOS & Android. Unlimited uploads, no app needed. Gutenberg block included.
 
 == Description ==
 
-Showcase your 3D Models with immersive AR experiences directly in the browser using advanced 3D Viewer WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
+**AtlasAR** is the most feature-rich free 3D viewer and augmented reality plugin for WordPress and WooCommerce. Upload unlimited 3D models, let visitors interact with products in full 360-degree 3D, and place them in real-world spaces using AR on both iOS and Android — directly in the browser, no app downloads needed.
 
-🚀 **NEW IN VERSION 1.8.0**: Pro version now available with **Dimensions, Hotspots, Slider Configurators, and Automatic Compression!**
-👉 [View Pro Pricing & Features](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+Whether you run a WooCommerce furniture store, a home decor shop, or any WordPress site that needs interactive 3D content, AtlasAR gives you everything you need — for free — with powerful Pro upgrades available when you are ready to scale.
 
-#### **Key AR features at a Glance:**
-* **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/).
-* **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/).
-* **Preview model** Preview model in the product editor page.
-* **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
-* **🔥 NEW: Automatic model compression** (Pro) - Reduce file sizes by up to 70%
-* **🔥 NEW: Product dimensions display** (Pro) - Show real-world sizes in AR
-* **🔥 NEW: Interactive hotspots** (Pro) - Educate customers with clickable info points
-* **🔥 NEW: Product configurators** (Pro) - Let customers customize colors, materials, options
+[Live AR Demos](https://wpaugmentedreality.com/shop/) | [Pro Pricing & Features](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/) | [Video Tutorials](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K) | [Documentation](https://wpaugmentedreality.com/)
 
+### Why Store Owners Choose AtlasAR
 
-### SOME USEFUL LINKS:
-* [Augmented Reality In Real World](https://wpaugmentedreality.com/shop/)
-* [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
-* [Video Tutorial](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
-* [Pro Version Pricing](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
-* [Download Now](https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip)
+* **Unlimited 3D model uploads** — No file count or size restrictions, even in the free version
+* **True cross-platform AR** — Native iOS (USDZ Quick Look) + Android (Scene Viewer) out of the box
+* **Native WooCommerce integration** — Automatic "View in AR" button on product pages, zero coding
+* **AI-powered 3D model generation** — Create 3D models from text prompts via Tripo3D API integration
+* **Works with any page builder** — Gutenberg block, Elementor, WPBakery, Divi, Beaver Builder, or `[atlas_ar]` shortcode
+* **Performance optimized** — Async loading, lazy loading on shop archives, fast mobile rendering
+* **Pro features available** — Dimensions, hotspots, product configurators, auto-compression
 
-== How To Install Augmented Reality ( AR VR Try On ) Plugin By AtlasAidev  ==
+== How to Set Up AtlasAR ==
 [youtube https://www.youtube.com/watch?v=1WgR-xUMHa0&ab_channel=AtlasAiDev]
 
-== Augmented Reality Plugin From Mobile Phone  ==
+== See Augmented Reality in Action on Mobile ==
 [youtube https://www.youtube.com/watch?v=NlYaGeYeS1w&t=81s&ab_channel=AtlasAiDev]
 
+### Supported 3D File Formats
 
-### **Why Choose Our 3d viewer WordPress Solution?**
+* **.GLB** (GL Binary) — 3D viewing on Android, desktop, and web browsers
+* **.GLTF** (GL Transmission Format) — 3D viewing on Android, desktop, and web browsers
+* **.USDZ** — Native iOS AR Quick Look for iPhone and iPad
 
-* ✅ **Unlimited 3D Uploads**: Free version supports unlimited .glb/.gltf/.usdz files.
-* ✅ **True Mobile AR**: Android (GLB) + iOS (USDZ) compatibility.
-* ✅ **WooCommerce Native**: Automatic integration with product pages.
-* ✅ **Zero Coding**: Automatic AR button placement on product pages – no coding required.
-* ✅ **ShortCode**: Easy shortcode setup `[atlas_ar]` .
-* ✅ **QR Code**: Display a QR code in desktop view .
-* ✅ **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
-* ✅ **Pro Features**: Dimensions, Hotspots, Sliders, Auto-Compression
+### Page Builder & Theme Compatibility
 
+AtlasAR works seamlessly with all major WordPress page builders and themes:
 
-### **Core Features:**
+* **Gutenberg** — Native block editor support with a dedicated AtlasAR block
+* **Elementor** — Use the `[atlas_ar]` shortcode in any Elementor widget
+* **WPBakery Page Builder** — Shortcode compatible
+* **Divi Builder** — Shortcode compatible
+* **Beaver Builder** — Shortcode compatible
+* **Popular WooCommerce themes** — Storefront, Flatsome, Astra, OceanWP, GeneratePress, and all standard WooCommerce themes
 
-#### **1. Complete 3D Model Control**
-* Upload .GLB/.GLTF files for Android AR and 3D view in desktop.
-* Add .USDZ files for iOS AR Quick Look.
-* Set custom posters/thumbnails for each 3D model viewer.
-* Automatic fallback to interactive 3D model viewer on desktop/mobile.
-* **🔥 NEW (Pro)**: Automatic model compression - Reduce file sizes by up to 70% for faster loading
+### Core Features (Free)
 
-#### **2. Mobile Augmented Reality Magic (AR Placement Options)**
-* **Floor 3d viewer **: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
-* **Wall 3d viewer **: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
-* **🔥 NEW (Pro): Dimensions Display** - Show product measurements in AR to reduce "will it fit?" questions
-* **Glass Mode (Pro Version - Coming Soon)**: Enable virtual try-ons for glasses, sunglasses, and jewelry.
+#### 1. Interactive 3D Model Viewer
+* Upload .GLB/.GLTF files for full 360-degree 3D product viewing on desktop and mobile
+* Upload .USDZ files for native iOS AR Quick Look
+* Set custom poster images (thumbnails) for each 3D model
+* Auto-rotate, zoom, and pan controls for an interactive 3D viewer experience
+* Skybox image and environment image customization
+* Shadow intensity, camera angle controls, and custom CSS support
+* [Dining Armchair 3D Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/)
 
-#### **3. WooCommerce Optimization**
-* Dedicated "AtlasAR" tab and settings within the WooCommerce product editor.
-* Automatic "View in AR " button placement on product pages.
-* Full support for simple and variable/configurable products.
-* Designed to work seamlessly with all standard WooCommerce themes.
-* **🔥 NEW (Pro)**: Interactive hotspots - Add clickable information points to educate customers
-* **🔥 NEW (Pro)**: Product configurators - Let customers customize colors, materials, and options
+#### 2. Mobile Augmented Reality (Floor & Wall Placement)
+* **Floor AR** — Customers visualize furniture, appliances, and large products in their rooms. [Office Chair AR Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
+* **Wall AR** — Preview wall art, mirrors, clocks, and decor on real walls. [Wall Art AR Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
+* Works on iOS 12+ (ARKit) and Android 9+ (ARCore) — no app downloads required
+* Automatic device detection and graceful fallback to interactive 3D on desktop
 
-#### **4. Enterprise-Ready Performance**
-* Host unlimited 3D models with no file size restrictions in the free version.
-* Optimized for fast and smooth mobile Augmented Reality experiences.
-* Asynchronous loading of models to ensure fast page speeds.
-* **🔥 NEW (Pro)**: Automatic GLB/GLTF compression using Draco and Basis Universal
-* **Coming Soon (Pro)**: Background compression processing for large files
-* **Coming Soon (Pro)**: Bulk compression for entire product catalog
+#### 3. WooCommerce 3D Product Viewer Integration
+* Dedicated **AtlasAR tab** in the WooCommerce product editor
+* Automatic **"View in AR"** button placement on single product pages
+* Full support for **simple and variable/configurable WooCommerce products**
+* **Per-variation 3D models** — Show different 3D models for each product variation
+* **Per-variation preview** — Preview each variation's model directly in the product editor
+* Works with all standard WooCommerce themes and custom themes
+* QR code on desktop so customers can scan and view products in AR on their phones
 
-#### **5. QR Code**
-Display a QR code in desktop view, allowing users to scan and switch to an AR capable device.
+#### 4. AI-Powered 3D Model Generation
+* Integrated with [Tripo3D API](https://www.tripo3d.ai/) — generate .GLB 3D models from text prompts
+* No 3D modeling skills required — describe your product and get a 3D model
+* Preview AI-generated models instantly in the WordPress editor
+* Save and publish generated models to your product pages
 
+#### 5. Performance & Speed
+* Asynchronous model loading — does not block page rendering
+* Lazy loading on shop/archive pages via Intersection Observer
+* Optimized mobile 3D rendering for smooth viewing experiences
+* Lightweight — does not add bloat to your WordPress site
 
-== 3D Model Generation ==
+#### 6. More Free Features
+* **QR Code** — Desktop visitors scan to view products in AR on their mobile device
+* **Gutenberg block** — Native `[atlas_ar]` block for the WordPress block editor
+* **Shortcode** — Place `[atlas_ar]` anywhere on your site for manual 3D viewer placement
+* **Custom post type support** — Enable 3D models and AR for any post type, not just WooCommerce products
+* **Dark mode & light mode** admin dashboard theme
+* **Live model preview** in the WordPress editor before publishing
 
-= How to Generate 3D Models with Tripo3D API =
+### Pro Features — Boost Conversions & Reduce Returns
 
-1. Generate your API key from the [Tripo3D API](https://www.tripo3d.ai/api).
-2. Copy the API key.
-3. Go to the **AtlasAR metabox** in the post edit screen.
-4. Click on the **Integration** tab.
-5. Paste your API key in the Integration settings and save.
-6. Now, go back to the **Edit Post** page.
-7. In the AtlasAR metabox, enter your prompt for the 3D model.
-8. Click on the **Generate Model** button.
-   - A `task_id` will be generated.
-   - Wait a few seconds while the model is being processed.
-9. Once the model is generated, a 3D preview will appear on the right side.
-10. Click on the **Save This Model** button to save the generated model and update the post data.
-11. After saving, you can view the generated 3D model on the front end of your site.
+Upgrade to AtlasAR Pro and unlock advanced WooCommerce features designed to increase sales, reduce returns, and create premium shopping experiences.
 
+[See Pro Pricing Plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
 
-== How It Works - 3 Simple Steps ==
+#### Product Dimensions Display (Pro)
+* Show real-world product measurements (length, width, height) directly in the 3D/AR view
+* Help customers answer "Will it fit?" before buying
+* Reduce returns caused by size mismatches — especially for furniture, appliances, and home decor
 
-1.  **Install & Activate**:
-    * In your WordPress admin panel, go to Plugins → Add New.
-    * Search for "AR VR 3D Model Try On".
-    * Click "Install Now" and then "Activate."
-    * Find the "AtlasAR" menu.
-    * Setup you basic settings.
-2.  **Upload Models**:
-    * Navigate to a WordPress post eiditing screen
-    * Find the "AtlasAR" Metabox.
-    * Select the place where you want to display the 3D Model like Floor/Wall etc.
-    * Upload your Android Model: `.glb/.gltf` file.
-    * Upload your iOS Model: `.usdz` file.
-    * Optionally, add a Poster Image (thumbnail) for the 3D model viewer.
-    * If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
-3.  **Display 3D Model Viewer**:
-    * The "View in AR " button is automatically placed on your WordPress Posts/WooCommerce product pages.
-    * For manual placement in other locations, you can use the shortcode: `[atlas_ar]`.
-    * **Pro Users**: Enable dimensions, hotspots, and sliders from the AtlasAR metabox settings.
+#### Interactive Hotspots (Pro)
+* Add clickable information points anywhere on your 3D models
+* Educate customers about product features, materials, and care instructions
+* Increase buyer confidence and reduce pre-sale support questions
+* Perfect for complex products: furniture, electronics, jewelry, machinery
 
-== Real-World 3D Viewer Applications ==
+#### Product Configurators / Sliders (Pro)
+* Let customers customize colors, materials, finishes, and options in real-time within the 3D viewer
+* Increase engagement and time spent on product pages
+* Drive higher average order values through personalization
+* Ideal for customizable furniture, fashion items, and made-to-order products
 
-* 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."  [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
-* 🖼️ **Home Decor**: "Preview wall art placement through phone camera." [Dining Armchair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
-* 🛋️ **Pro Feature - Dimensions**: Show exact measurements in AR to answer "will it fit?" questions
-* 🎨 **Pro Feature - Configurators**: Let customers customize furniture colors and materials before purchase
+#### Automatic 3D Model Compression (Pro)
+* Reduce .GLB/.GLTF file sizes by up to 70% automatically
+* Industry-standard Draco geometry compression + Basis Universal texture compression
+* Faster page loading = better user experience = higher conversions
+* Original files are preserved as backup
 
-== Competitive Advantages ==
+#### Coming Soon in Pro
+* **Advanced analytics** — Track AR engagement, device types, and conversion impact with Google Analytics integration
+* **Background & bulk compression** — Compress your entire product catalog with one click
+* **Glass mode virtual try-on** — AR try-on for eyewear and jewelry with face tracking
+* **Desktop WebAR** — AR experiences in desktop browsers without needing a phone
+* **Multi-model AR scenes** — Display multiple products together for room planning
 
-**Free Model Limits**
-- Our Plugin: **Unlimited** ⭐
-- Others: Often 1–10 models
+[Upgrade to Pro Now](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/) — Plans start at **$49.99/year** with a **14-day money-back guarantee**.
 
-**iOS AR Support**
-- Our Plugin: **Full native .USDZ compatibility** ⭐
-- Others: Android-only or limited iOS support
+### How It Works — 3 Simple Steps
+
+1. **Install & Activate** — Search "AtlasAR" in Plugins > Add New, install, and activate. Configure your settings from the AtlasAR dashboard menu.
+2. **Upload 3D Models** — Edit any post or WooCommerce product, find the AtlasAR metabox, and upload your .GLB and .USDZ files. Optionally set a poster image.
+3. **Go Live** — The 3D viewer and "View in AR" button appear automatically on your pages. Use the `[atlas_ar]` shortcode for custom placement anywhere.
+
+For WooCommerce stores: Go to AtlasAR Settings and set "Enable AR For Post Types" to `product`.
+
+### AI 3D Model Generation with Tripo3D
+
+No 3D models? No problem. AtlasAR integrates with the Tripo3D API so you can generate production-ready .GLB models from simple text descriptions — no Blender or 3D modeling software needed.
+
+1. Get your free API key from [Tripo3D](https://www.tripo3d.ai/api).
+2. Paste it in the AtlasAR Integration settings.
+3. Open any post or product, type a description (e.g., "modern office chair, gray fabric"), and click **Generate Model**.
+4. Preview the generated 3D model and click **Save This Model** to publish it.
+
+### Real-World Use Cases
+
+* **Furniture & Home Decor** — Let customers place sofas, tables, and chairs in their rooms before buying. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
+* **Wall Art & Mirrors** — Preview paintings, prints, and mirrors on real walls through the phone camera. [Wall Art Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
+* **Electronics & Appliances** — Show product dimensions and features in AR with hotspots (Pro)
+* **Jewelry & Accessories** — Interactive 3D viewing with detailed product annotations (Pro)
+* **Architecture & Real Estate** — Showcase 3D building models and floor plans
+* **Education & Museums** — Display interactive 3D artifacts and educational models
+* **Fashion & Custom Products** — Product configurators for color and material personalization (Pro)
+
+### AtlasAR vs Other 3D Viewer Plugins
+
+**Unlimited Free Uploads**
+AtlasAR: Unlimited models, no restrictions | Others: Often limited to 1–10 models in free versions
+
+**iOS AR Support (Free)**
+AtlasAR: Full native .USDZ Quick Look | Others: Android-only or locked behind Pro/premium
 
 **WooCommerce Integration**
-- Our Plugin: **Native, seamless implementation** ⭐
-- Others: May require add-ons or hacks
+AtlasAR: Native, automatic, zero-coding | Others: May require separate add-ons or manual setup
 
-**Model Compression**
-- Our Plugin: **Automatic compression up to 70% savings** ⭐
-- Others: Manual compression required
+**AI 3D Model Generation**
+AtlasAR: Free via Tripo3D API | Others: Premium-only or not available
 
-**Product Dimensions**
-- Our Plugin: **Real-world size display in AR (Pro)** ⭐
-- Others: No dimension features
+**Automatic Model Compression**
+AtlasAR: Up to 70% file size reduction (Pro) | Others: Manual compression or not available
 
+**Product Dimensions in AR**
+AtlasAR: Real-world size display (Pro) | Others: Not available
 
-== Pro Version Features ==
+**Product Configurators**
+AtlasAR: Colors, materials, finishes (Pro) | Others: Not available
 
-🎯 **Upgrade to Pro and unlock powerful features that boost conversions and reduce returns!**
-👉 [See Pro Pricing Plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+### Technical Specifications
 
-### **Available Now in Pro:**
+* **3D Formats**: .GLB, .GLTF (Android/Web/Desktop 3D viewer), .USDZ (iOS AR Quick Look)
+* **Mobile AR Requirements**: Android 9.0+ (ARCore), iOS 12+ (ARKit)
+* **WordPress**: Version 5.6 and above
+* **WooCommerce**: Version 3.0 and above
+* **PHP**: Version 7.4 and above
+* **Page Builders**: Gutenberg (native block), Elementor, WPBakery, Divi, Beaver Builder (via shortcode)
+* **Performance**: Async model loading, lazy loading on archives, optimized mobile rendering
+* **Pro Compression**: Draco geometry + Basis Universal texture compression (up to 70% reduction)
 
-⭐ **Dimensions Display**:
-* Show product measurements (length, width, height) directly in AR view
-* Help customers answer "will it fit?" before buying
-* Reduce returns caused by size mismatches
-* Perfect for furniture, appliances, home decor
+### Check Out Our Other Plugin
 
-⭐ **Interactive Hotspots**:
-* Add clickable information points on your 3D models
-* Educate customers about product features, materials, care instructions
-* Increase customer confidence and reduce support questions
-* Perfect for complex products like furniture, electronics, jewelry
-
-⭐ **Product Configurators (Sliders)**:
-* Let customers customize colors, materials, finishes, and options
-* Increase engagement and time spent viewing products
-* Higher average order value through personalization
-* Perfect for furniture, fashion, custom products
-
-⭐ **Automatic Model Compression**:
-* Reduce 3D file sizes by up to 70% automatically
-* Faster loading times = better user experience
-* Uses industry-standard Draco geometry compression
-* Basis Universal texture compression for optimal quality
-* Keeps original files for backup
-
-### **Coming Soon in Pro:**
-
-🚀 **Advanced Analytics Dashboard** (Q1 2026):
-* Track AR engagement, device types, placement attempts
-* See which products perform best in AR
-* Prove ROI with conversion tracking
-* Integration with Google Analytics
-
-🚀 **Per-Variation 3D Models** (Q1 2026):
-* Upload different 3D models for each product variation (color, size, style)
-* Critical for WooCommerce stores with variable products
-* Automatic model switching when customers select variations
-
-🚀 **Background Processing & Bulk Compression** (Q2 2026):
-* Compress large files in background (no upload delays)
-* Bulk compress your entire product catalog with one click
-* Queue system for processing multiple models
-
-🚀 **Glass Mode Virtual Try-On** (Q2 2026):
-* Enable realistic virtual try-ons for eyewear and jewelry
-* Face tracking for accurate placement
-* Unique feature - no other AR plugin has this!
-
-🚀 **Desktop WebAR** (Q3 2026):
-* AR experiences on desktop browsers (no phone needed)
-* Broader accessibility for all users
-
-🚀 **Multi-Model Scenes** (Q3 2026):
-* Display multiple products together in AR
-* Room planning and outfit builders
-* Advanced configurators
-
-### **Pro Support & Updates:**
-* Priority email support (24-hour response time)
-* Regular feature updates
-* Early access to beta features
-* Dedicated documentation
-
-👉 **[Upgrade to Pro Now](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)**
-💰 **Starter Plan: Only $49.99/year** - All Pro features for 1 site
-
-
-== Technical Specifications ==
-
-* **Supported 3D Formats**: `.glb`, `.gltf` (for Android/Web 3D), `.usdz` (for iOS AR Quick Look).
-* **Mobile Device Requirements**: Android 9.0+ with ARCore support, iOS 12+ with ARKit support.
-* **WooCommerce Compatibility**: Version 3.0 and above.
-* **WordPress Compatibility**: Version 5.0 and above.
-* **Performance**: Models load asynchronously. Lazy loading implemented for archive pages to minimize performance impact. Optimized for mobile 3D rendering.
-* **Pro Compression**: Draco geometry compression + Basis Universal texture compression for up to 70% file size reduction.
-
-
-== Start Your AR Journey Today ==
-
-1.  **Install the Free Version**: Get started with unlimited 3D model uploads, no credit card needed.
-2.  **Upload Your First Model**: Add a `.glb/.gltf` file for Android/Web and a `.usdz` file for iOS to a product.
-3.  **Watch Engagement Soar**: Provide interactive AR experiences.
-4.  **Upgrade to Pro**: Unlock dimensions, hotspots, compression, and configurators to maximize conversions.
-
-👉 **[See What Pro Can Do For You](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)**
-
-
-### CHECK OUT OUR OTHER ADDONS 👑:
-🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
-
-
+[Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) — The most user-friendly Text-to-Speech plugin for WordPress. Install and automatically add an audio player to your posts and pages.
 
 == Installation ==
 
-1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
-2. Install directly through the WordPress plugins screen: Go to 'Plugins' > 'Add New', search for "3D Model Viewer & AR for Wordpress & WooCommerce" by `Azizul Hasan` , and click 'Install Now'.
-3. Activate the plugin through the 'Plugins' menu in WordPress.
-4. Navigate to a WordPress Post, post metabox section, and find the "AtlasAR" metabox to upload your 3D models.
-5. Navigate to a WooCommerce product, go to the product metabox section, and find the "AtlasAR" metabox to upload your 3D models.
-6. The "View in AR " button will automatically appear on product pages. You can also use the shortcode `[atlas_ar]` for manual placement.
-7. If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
-8. **For Pro Features**: After upgrading to Pro, enable dimensions, hotspots, and compression from the AtlasAR metabox settings.
+= Automatic Installation (Recommended) =
+
+1. In your WordPress admin, go to **Plugins > Add New**.
+2. Search for **"AtlasAR"** or **"3D Viewer AR"**.
+3. Click **Install Now**, then **Activate**.
+4. Find the **AtlasAR** menu in your WordPress admin sidebar.
+5. Configure your settings (for WooCommerce stores: set "Enable AR For Post Types" to `product`).
+
+= Manual Installation =
+
+1. Download the plugin ZIP from [WordPress.org](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
+2. Upload the `ar-vr-3d-model-try-on` folder to `/wp-content/plugins/` via FTP.
+3. Activate the plugin from the **Plugins** menu in WordPress.
+
+= Adding 3D Models to Products or Posts =
+
+1. Edit any WordPress post or WooCommerce product.
+2. Scroll to the **AtlasAR** metabox in the editor.
+3. Select the AR placement type (Floor or Wall).
+4. Upload your **.GLB/.GLTF** file (for Android/Web 3D viewing).
+5. Upload your **.USDZ** file (for iOS AR Quick Look).
+6. Optionally add a **poster image** (thumbnail displayed while the 3D model loads).
+7. Publish or update your post/product.
+
+The "View in AR" button appears automatically on the frontend. For custom placement anywhere on your site, use the shortcode `[atlas_ar]` or the AtlasAR Gutenberg block.
+
+= Enabling Pro Features =
+
+After upgrading to AtlasAR Pro, open the AtlasAR metabox on any product and enable Dimensions, Hotspots, Configurators, or Compression from the respective tabs.
 
 == Frequently Asked Questions ==
 
-= Q: What's included in the Free version vs Pro version? =
-A: **Free version** includes unlimited 3D model uploads, full iOS + Android AR support, WooCommerce integration, QR codes, and Tripo3D AI generation. **Pro version** adds dimensions display, interactive hotspots, product configurators, automatic compression, and upcoming features like analytics and per-variation models. [Compare plans here](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/).
+= What 3D file formats does AtlasAR support? =
 
-= Q: How does the Pro compression feature work? =
-A: Pro version automatically compresses your .glb and .gltf files using industry-standard Draco geometry compression and Basis Universal texture compression. This reduces file sizes by up to 70% while maintaining visual quality, resulting in faster loading times and better user experience. The original files are kept as backup.
+AtlasAR supports **.GLB** and **.GLTF** files for 3D viewing on Android, desktop, and web browsers. For iOS AR (Apple Quick Look), upload **.USDZ** files. These are the industry-standard formats for web-based 3D and augmented reality experiences.
 
-= Q: Can I try Pro features before buying? =
-A: Yes! We offer a 14-day money-back guarantee on all Pro plans. If you're not satisfied with the Pro features, you can request a full refund within 14 days of purchase.
+= Do my customers need to install an app to use AR? =
 
-= Q: What are dimensions and how do they help? =
-A: The dimensions feature (Pro only) displays real-world measurements (length, width, height) directly in the AR view. This helps customers answer "will it fit?" questions before buying, significantly reducing returns caused by size mismatches. Perfect for furniture, appliances, and home decor products.
+No. AtlasAR uses browser-based AR. Android devices use Google Scene Viewer and iOS devices use Apple Quick Look. Customers tap "View in AR" and the experience launches instantly in their mobile browser — no app downloads required.
 
-= Q: What are hotspots and why should I use them? =
-A: Hotspots (Pro only) are clickable information points you can add to your 3D models. They let you educate customers about specific features, materials, care instructions, or benefits. This increases customer confidence, reduces support questions, and helps sell complex products.
+= Is there a limit on how many 3D models I can upload? =
 
-= Q: What is the product configurator (slider) feature? =
-A: The slider/configurator feature (Pro only) lets customers customize product options like colors, materials, finishes, and styles directly in the 3D viewer. This increases engagement, time on page, and often leads to higher average order values through personalization.
+No. The **free version** supports unlimited .GLB/.GLTF/.USDZ model uploads with no file size or quantity restrictions. This is a major advantage over competing plugins that limit free users to just 1–5 models.
 
-= Q: Can I display 3D Models with custom post types? =
-A: Yes, By default it enabled with post type post. If you want to enabled for any other post then go to settings page of the plugin. And Look "Enable AR For Post Types". Change it to `you_custom_post_type' and save.
+= Does AtlasAR work with WooCommerce? =
 
-= Q: Which 3D file formats are supported? =
-A: You can upload `.glb` and `.gltf` files for Android and desktop viewers, and `.usdz` files to enable native iOS AR Quick Look functionality.
+Yes. AtlasAR has deep, native WooCommerce integration. It adds a dedicated AtlasAR tab in the WooCommerce product editor, automatically places "View in AR" buttons on product pages, and supports both simple and variable products with per-variation 3D models. Compatible with WooCommerce 3.0 and above.
 
-= Q: Do my customers need to install an app to use AR? =
-A: No— AtlasAR launch directly in mobile browsers on both Android (via Scene Viewer) and iOS (via Quick Look), with no extra app downloads required.
+= Can I use AtlasAR with Elementor? =
 
-= Q: How do I display the 3D/AR viewer on my product pages? =
-A: Once the plugin is active, "View in AR " buttons are automatically added to all WooCommerce product pages where models are assigned. For Pro users, dimensions, hotspots, and configurators appear automatically when enabled.
+Yes. Use the `[atlas_ar]` shortcode inside any Elementor text widget, shortcode widget, or HTML widget. The 3D viewer renders wherever you place the shortcode. AtlasAR also works with WPBakery, Divi, Beaver Builder, and any page builder that supports WordPress shortcodes.
 
-= Q: Is there a limit on how many models I can upload with the free version? =
-A: No. The free version supports unlimited `.glb`/`.gltf` model uploads—no size or quantity caps. This is a major advantage over competitors who limit free users to 1-5 models.
+= Does AtlasAR have a Gutenberg block? =
 
-= Q: Will loading 3D models slow down my site? =
-A: We've optimized the plugin for performance. Models load asynchronously (typically taking 0.3–0.7 seconds on a stable 4G connection) and utilize lazy loading on archive/shop pages to minimize any impact on your site's speed. Pro compression makes files even smaller for faster loading.
+Yes. AtlasAR includes a native Gutenberg block. In the WordPress block editor, search for "AtlasAR" to insert the 3D viewer block directly into your page or post content.
 
-= Q: Which WooCommerce versions and themes are supported? =
-A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to work seamlessly with all standard WooCommerce themes and major page builders (like Elementor, WPBakery, Beaver Builder, etc.).
+= Can I display 3D models on custom post types? =
 
-= Q: How do I upgrade to Pro? =
-A: Visit our [pricing page](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/) to choose a plan. After purchase, you'll receive a license key to activate Pro features. We offer plans starting at $39/year for single sites.
+Yes. By default, AtlasAR is enabled for the `post` post type. Go to AtlasAR Settings > "Enable AR For Post Types" and change it to any custom post type such as `product`, `portfolio`, `project`, or your own custom post type.
 
-= Q: What happens when my Pro subscription expires? =
-A: If your Pro subscription expires, the Pro features (dimensions, hotspots, compression, configurators) will be disabled, but your site will continue to work with all the free features. Your existing compressed models will continue to work. You can renew anytime to regain Pro features.
+= How does the AI 3D model generation work? =
 
-= Q: Can I use Pro on multiple sites? =
-A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sites, and the Business plan ($199/year) covers 10 sites. [See all plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/).
+AtlasAR integrates with the [Tripo3D API](https://www.tripo3d.ai/) to generate 3D models from text descriptions. Get a free API key from Tripo3D, paste it in the AtlasAR Integration settings, then type a product description and click "Generate Model." The AI creates a .GLB file you can preview and save directly to your product or post.
+
+= Will loading 3D models slow down my website? =
+
+No. AtlasAR loads 3D models asynchronously and uses lazy loading (Intersection Observer) on archive and shop pages. Models typically load in 0.3–0.7 seconds on a stable connection without impacting your page speed scores. Pro users can compress models by up to 70% for even faster loading.
+
+= Is AtlasAR compatible with my WordPress theme? =
+
+Yes. AtlasAR works with all standard WordPress and WooCommerce themes including Storefront, Flatsome, Astra, OceanWP, and GeneratePress, among many others. If your theme supports WooCommerce, AtlasAR will integrate seamlessly with your product pages.
+
+= How does AR work on iPhone and iOS devices? =
+
+When a customer taps "View in AR" on an iPhone or iPad (iOS 12+), AtlasAR launches Apple Quick Look using the .USDZ file. The customer can place the product on a real surface (floor or wall) through their device camera and see it at real-world scale — all natively in Safari with no app needed.
+
+= How does AR work on Android devices? =
+
+On Android 9+ devices with ARCore support, tapping "View in AR" launches Google Scene Viewer. Customers point their camera at a surface and the 3D model appears at real-world scale. The experience runs directly in the Chrome browser with no app download required.
+
+= What is included in the Free version vs the Pro version? =
+
+**Free version** includes: unlimited 3D model uploads, full iOS + Android AR support, native WooCommerce integration, QR codes, Gutenberg block, shortcode, Tripo3D AI model generation, per-variation preview, auto-rotate, skybox and environment images, custom CSS, and dark/light mode dashboard.
+
+**Pro version** adds: product dimensions display in AR, interactive hotspots, product configurators/sliders, automatic GLB/GLTF compression (Draco + Basis Universal), per-variation 3D models for WooCommerce, and upcoming features including analytics, bulk compression, and virtual try-on.
+
+[Compare all plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+
+= How much does AtlasAR Pro cost? =
+
+Pro plans start at **$49.99/year** for a single site (Starter plan). The Professional plan covers 3 sites at $99/year, and the Business plan covers 10 sites at $199/year. All plans include a **14-day money-back guarantee** and priority email support.
+
+[View pricing plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+
+= Can I try Pro features before committing? =
+
+Yes. All Pro plans include a **14-day money-back guarantee**. If you are not satisfied with the Pro features, request a full refund within 14 days of purchase — no questions asked.
+
+= What happens if my Pro subscription expires? =
+
+Pro features (dimensions, hotspots, compression, configurators) will be disabled, but your site continues working with all the free features. Any previously compressed models will continue to work. You can renew anytime to restore Pro features.
+
+= Can I use AtlasAR Pro on multiple websites? =
+
+Yes. The Professional plan ($99/year) covers up to 3 sites, and the Business plan ($199/year) covers up to 10 sites. [See all plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/).
+
+= Does AtlasAR work with the Flatsome theme? =
+
+Yes. AtlasAR is fully compatible with the Flatsome WooCommerce theme. The 3D viewer integrates with the WooCommerce product gallery hook, so any theme that follows WooCommerce standards — including Flatsome, Astra, Storefront, OceanWP, and GeneratePress — will work correctly.
+
+= How does the QR code feature work? =
+
+Enable QR codes in AtlasAR settings. When desktop visitors view a product with a 3D model, a QR code is displayed that they can scan with their phone to instantly launch the AR experience on their mobile device.
+
+= Can I generate 3D models without 3D modeling software? =
+
+Yes. AtlasAR's Tripo3D integration lets you generate 3D models from simple text descriptions. No Blender, SketchUp, or other 3D software is needed. Describe the product, click generate, preview the result, and save the model — all within the WordPress editor.
+
+= Does AtlasAR support WooCommerce variable products? =
+
+Yes. AtlasAR fully supports WooCommerce variable products. You can upload different 3D models for each product variation (e.g., different colors or sizes) and the viewer automatically switches models when customers select a variation.
 
 == Screenshots ==
 
-1. Settings For Wordpress
-2. Settings For WooCommerce
-3. Upload 3D Model By Metabox
-4. Demo Product In Frontend
-5. Plugin Features
-6. Pro Features - Dimensions Display
-7. Pro Features - Hotspots
-8. Pro Features - Compression Settings
+1. AtlasAR Dashboard — Plugin settings overview and configuration
+2. WooCommerce Settings — Configure 3D viewer for your WooCommerce store
+3. Product Editor Metabox — Upload GLB, GLTF, and USDZ 3D model files
+4. Frontend 3D Viewer — Interactive 3D product display on a WooCommerce product page
+5. Plugin Features — Overview of all free and Pro capabilities
+6. Pro: Dimensions Display — Show real-world product measurements in the 3D/AR view
+7. Pro: Interactive Hotspots — Clickable information points on 3D models
+8. Pro: Compression Settings — Automatic 3D model compression dashboard
 
 == Changelog ==
 
-= 1.9.0 ( 21 February 2026 )   =
-Added : Per variation preview added.
-Added : Per variation added (Pro)
-Added : Plugins menu added.
+= 1.9.1 ( 05 Mar 2026) =
+* Updated: readme file updated
+
+
+
+= 1.9.0 (21 February 2026) =
+* Added: Per-variation 3D model preview in the product editor
+* Added: Per-variation 3D models for WooCommerce variable products (Pro)
+* Added: Plugin quick-access menu
+
+= 1.8.2 (6 February 2026) =
+* Fixed: File upload issue resolved
+
+= 1.8.1 (2 February 2026) =
+* Added: Overview section in the dashboard
+
+= 1.8.0 (25 January 2026) =
+* Added: GLB file compression feature (Pro)
+* Added: Dimensions display — show product measurements in AR (Pro)
+* Added: Interactive hotspots — clickable info points on 3D models (Pro)
+* Added: Product configurators/sliders for customization (Pro)
+* Added: Pro version released with professional features for WooCommerce stores
+* Improved: Plugin performance optimized
+* Improved: Documentation updated
 
+= 1.7.8 (28 December 2025) =
+* Updated: Documentation improvements
 
-= 1.8.2 ( 6 February 2026 )   =
-fixed : file upload issue solved
+= 1.7.6 (26 November 2025) =
+* Added: Gutenberg block for the `[atlas_ar]` shortcode
+* Fixed: 3D render issue on post pages when WooCommerce is not active
+
+= 1.7.5 (21 November 2025) =
+* Fixed: Fatal error resolved
+
+= 1.7.4 (21 November 2025) =
+* Improved: Loading spinner added during save operations
+* Improved: Modal UI enhanced
+* Fixed: Modal title special character display issue
+* Improved: Dashboard UI refined
 
+= 1.7.3 (19 November 2025) =
+* Improved: Settings and integration button color consistency
+* Fixed: 3D model hiding on scroll within the metabox
 
+= 1.7.2 (25 October 2025) =
+* Added: WooCommerce product thumbnail hook support for 3D model display
 
-= 1.8.1 ( 2 February 2026 )   =
-Added : Overview section added
+= 1.7.1 (17 October 2025) =
+* Improved: Dashboard UI enhancements
 
+= 1.7.0 (13 October 2025) =
+* Added: Dark mode and light mode admin theme
+* Improved: Overall UI improvements
 
+= 1.6.1 (26 September 2025) =
+* Added: New modal for 3D model display
+* Improved: 3D model loading time optimized
 
-= 1.8.0 ( 25 January 2026 )   =
-Added : `.glb` file compression feature added (Pro).
-Added : `Dimensions` feature added (Pro) - Display product measurements in AR.
-Added : `Hotspots` feature added (Pro) - Interactive information points on 3D models.
-Added : `Slider` feature added (Pro) - Product configurators for customization.
-Added : Pro version released - Professional features for WooCommerce stores.
-Improved : Plugin performance improved.
-Improved : README updated with comprehensive Pro feature documentation.
-Improved : FAQ expanded with Pro-specific questions.
+= 1.6.0 (4 September 2025) =
+* Added: AI 3D model generation UI
+* Added: Generate 3D models from the post editor via [Tripo3D API](https://www.tripo3d.ai/) integration
 
-= 1.7.8 ( 28 December 2025 )   =
-Updated : documentation updated
+= 1.5.4 (31 August 2025) =
+* Fixed: Model upload issue
+* Fixed: Multiple model loading issue
+* Fixed: Cache functionality issue
+* Fixed: QR code and post type settings issue
 
+= 1.5.3 (31 August 2025) =
+* Added: Documentation menu
+* Changed: Plugin menu, tab, and metabox naming updated
+* Fixed: Minor bug fixes
 
-= 1.7.6 ( 26 November 2025 )   =
-Introduced : gutenbarg block added for shortcode `[atlas_ar]`.
-Fixed :  normal post page 3d render issue fixed when woocommerce is not active.
+= 1.5.2 (14 August 2025) =
+* Fixed: Default model loading when the current post has a model assigned
 
-= 1.7.5 ( 21 November 2025 )   =
-Improved : Fatal error fixed
+= 1.5.1 (13 August 2025) =
+* Fixed: Page reload on tab click issue
 
+= 1.5.0 (13 August 2025) =
+* Added: Auto-rotate option
+* Added: Skybox image option
+* Added: Environment image option
+* Added: Disable tap option
+* Added: Disable zoom option
+* Added: Shadow intensity control
+* Added: Alignment, margin, padding, width, and height options
+* Added: Default model value setting
+* Added: Custom CSS option
+* Improved: Metabox UI redesigned
+* Improved: Model loading performance optimized
 
-= 1.7.4 ( 21 November 2025 )   =
-Improved : Spinner added during saving.
-Improved : Modal UI improved.
-Fixed : Modal title special character issue fixed.
-Fixed : Modal title special character issue fixed.
-Improved : Dashboard UI improved.
+= 1.4.8 (7 August 2025) =
+* Fixed: 3D view button not appearing on product pages
 
-= 1.7.3 ( 19 November 2025 )   =
-Improved : Settings buttons primary color set.
-Improved : Integration buttons color matched to settings page.
-Fixed :  3d model hide after scroll down in metabox,  issue fixed.
+= 1.4.7 (4 August 2025) =
+* Improved: QR code loads only on desktop devices
+* Changed: AR button label updated
+* Updated: Documentation
 
+= 1.4.6 (24 July 2025) =
+* Fixed: UI-related bug
 
-= 1.7.2 ( 25 October 2025 )   =
-Added: `woocommerce_product_thumbnails` woocommerce product thumbnail action hook added for Showing 3D file.
+= 1.4.5 (20 July 2025) =
+* Fixed: QR code display issue
 
+= 1.4.4 (20 July 2025) =
+* Fixed: Critical bug fix
 
-= 1.7.1 ( 17 October 2025 )   =
-Improved: Dashboard UI improved.
+= 1.4.3 (14 July 2025) =
+* Added: QR code feature for desktop-to-mobile AR handoff
 
-= 1.7.0 ( 13 October 2025 )  =
-Improved: UI improved.
-Introduced: Dark Mode and Light Mode feature added.
+= 1.4.2 (11 July 2025) =
+* Fixed: Plugin activation issue
 
+= 1.4.1 (3 July 2025) =
+* Minor improvements
 
-= 1.6.1 ( 26 September 2025 )  =
-Introduced: New modal added for 3d model display.
-Improved: 3d Model loading time improved.
+= 1.4.0 (19 June 2025) =
+* Added: Shortcode `[atlas_ar]` for manual 3D viewer placement
+* Added: Option for automatic AR button placement on product pages
+* Improved: Code structure refactored
 
-= 1.6.0 ( 04 September 2025 )  =
-Introduced: model generation UI.
-Introduced: User can generate model from post edit page.
-integrated with [Tripo3D API ](https://www.tripo3d.ai/)
+= 1.3.4 (17 June 2025) =
+* Added: 3D model preview in WooCommerce product tab on the frontend
 
+= 1.3.3 (15 June 2025) =
+* Changed: Contact page link updated
+* Added: Demo preview page link
+* Updated: Feature list
 
-= 1.5.4 ( 31 August 2025 )  =
-Fixed: model upload issue fixed.
-Fixed: multiple model load issue fixed.
-Fixed: Cache issue not working issue fixed.
-Fixed: QR code , post types settings not working issue fixed.
+= 1.3.2 (12 May 2025) =
+* Added: Documentation and YouTube tutorial links
+* Added: Real-world application demos
 
+= 1.3.1 (8 May 2025) =
+* Updated: README improvements
 
-= 1.5.3 ( 31 August 2025 )  =
-Introduced: Documentation menu added'
-Changed: Plugin menu and tab and metabox name changed.
-Fixed: minor bug fixed.
+= 1.3.0 (21 April 2025) =
+* Added: 3D model preview in the admin metabox
 
-= 1.5.2 ( 14 August 2025 )  =
-Fixed: Default model loading issue solved when current post have any model.
+= 1.2.0 (16 April 2025) =
+* Added: Usage tracking
 
-= 1.5.1 ( 13 August 2025 )  =
-Fixed: Reload issue onClick on tab fixed.
+= 1.1.2 (8 April 2025) =
+* Added: WordPress 6.8.0 compatibility verified
+* Added: Plugin screenshots
 
-= 1.5.0 ( 13 August 2025 )  =
-Added: auto retate option added.
-Added: skybox image option added.
-Added: environment image option added.
-Added: disable tap option added.
-Added: disable zoom option added.
-Added: shadow intesity option added.
-Added: alignment, margin, padding, width, height option added.
-Improved: Metabox UI improved.
-Added: Default model value added.
-Improved: performance of model loading improved.
-Added: Custom css option added.
+= 1.1.1 (25 March 2025) =
+* Added: Initial setup video tutorial
 
+= 1.1.0 (9 March 2025) =
+* Added: Freemius integration for licensing
 
+= 1.0.12 (10 February 2025) =
+* Changed: Plugin title updated
 
-= 1.4.8 ( 07 August 2025 )  =
-Fixed: 3D view button not showing up is fixed.
+= 1.0.11 (9 February 2025) =
+* Fixed: Helper file bug
 
-= 1.4.7 ( 04 August 2025 )  =
-Improved: QR code will only load for Desktop.
-Changed: AR button Name changed.
-Updated: Documentation updated.
+= 1.0.10 (9 February 2025) =
+* Fixed: Unnecessary button loading on non-product pages
+* Fixed: Unnecessary WooCommerce tab insertion
 
+= 1.0.9 (28 January 2025) =
+* Improved: Minor refinements
+* Improved: Documentation
 
-= 1.4.6 ( 24 July 2025 )  =
-Fixed: UI related bug fixed.
+= 1.0.8 (20 January 2025) =
+* Improved: UI enhancements
+* Added: Contact information
+* Added: Features section in dashboard
 
+= 1.0.7 (14 January 2025) =
+* Fixed: Settings save issue
+* Moved: AR placement options to model settings metabox
+* Improved: Dynamic model settings
+* Added: GLTF file format support
 
-= 1.4.5 ( 20 July 2025 )  =
-Fixed: QR Code issue fixed.
+= 1.0.6 (10 January 2025) =
+* Fixed: Demo preview error
 
-= 1.4.4 ( 20 July 2025 )  =
-Fixed: Major bug fixed.
+= 1.0.5 (9 January 2025) =
+* Fixed: Preview URL issue
 
-= 1.4.3 ( 14 July 2025 )  =
-Introduced: QR code feature added.
+= 1.0.4 (9 January 2025) =
+* Added: Demo preview system
 
-= 1.4.2 ( 11 July 2025 )  =
-Fixed: Activation issue fixed.
+= 1.0.3 (9 January 2025) =
+* Added: WooCommerce product tab
 
+= 1.0.2 (7 January 2025) =
+* Added: CSS class prefix to prevent style conflicts
 
-= 1.4.1 ( 03 July 2025 )  =
-Minor change.
+= 1.0.1 (5 January 2025) =
+* Fixed: Short description
+* Removed: Unnecessary code
 
-= 1.4. ( 19 June 2025 )  =
-Added: ShortCode "[atlas_ar]" introduced.
-Added: Option for adding AR button automatically.
-Improved: Code structure improved.
-Fixed: Minor bug fixed.
-
-= 1.3.4 ( 17 June 2025 )  =
-Added: Model preview added to woocommerce tab in front end.
-
-= 1.3.3 ( 15 June 2025 )  =
-Changed: Contact Us page link changed.
-Added: Link added to preview demo page.
-Updated: Feature list updated.
-
-
-= 1.3.2 ( 12 May 2025 )  =
-Added: Documentation, youtube video link added.
-Added: Real application of the plugin demo added
-
-= 1.3.1 ( 08 May 2025 )  =
-Added: Readme.txt updated.
-
-= 1.3.0 ( 21 April 2025 )  =
-Added: Preview added in admin metabox.
-
-
-= 1.2.0 ( 16 April 2025 )  =
-Added: tracker added.
-
-= 1.1.2 ( 08 April 2025 )  =
-Added: Compatible with wordpress 6.8.0
-Added: Screenshots added of the plugin.
-
-= 1.1.1 ( 25 Mar 2025 )  =
-Added: Initial setup video added.
-
-
-
-= 1.1.0 ( 09 Mar 2025 )  =
-Freemius integrated.
-
-= 1.0.12 ( 10 Feb 2025 )  =
-Title changed.
-
-= 1.0.11 ( 09 Feb 2025 )  =
-Fixed bug on helper file.
-
-= 1.0.10 ( 09 Feb 2025 )  =
-* Fixed: Unnecessary button load issue solved.
-* Fixed: Unnecessary tab adding in woocommerce solved.
-
-= 1.0.9 ( 28 Jan 2025 )  =
-* Improved: Minor changes.
-* Improved: Documentation improved.
-
-
-= 1.0.8 ( 20 Jan 2025 )  =
-* Improved: UI improved.
-* Contact information added.
-* Feature added to dashboard
-
-
-= 1.0.7 ( 14 Jan 2025 )  =
-* Fixed: Settings save issue fixed.
-* Moved: AR placement moved to model settings metabox.
-* improved: Model settings make dynamic.
-* GLTF file support added.
-
-= 1.0.6 ( 10 Jan 2025 )  =
-* Fixed: demo error fixed.
-
-= 1.0.5 ( 09 Jan 2025 )  =
-* Fixed: preview url issue fixed.
-
-= 1.0.4 ( 09 Jan 2025 )  =
-* added: Demo preview system added.
-
-= 1.0.3 ( 09 Jan 2025 )  =
-* added: Woocommerce tab added.
-
-= 1.0.2 ( 07 Jan 2025 )  =
-* added: prefix added to css class.
-
-= 1.0.1 ( 5 Jan 2025 )  =
-* Short description issue fixed.
-* Unnecessary code removed.
-
-= 1.0.0  =
+= 1.0.0 =
 * Initial release
 
 == Upgrade Notice ==
 
-= 1.9.0  =
-Added : Per variation preview added.
-Added : Per variation added (Pro)
-Added : Plugins menu added.
+= 1.9.0 =
+New: Per-variation 3D model preview and WooCommerce per-variation support (Pro). Plugin quick-access menu added for easier navigation.
