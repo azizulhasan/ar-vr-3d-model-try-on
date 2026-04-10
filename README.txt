@@ -2,9 +2,9 @@
 Contributors: atlasaidev, hasanazizul, freemius
 Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -332,6 +332,16 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 1.9.2 (10 Apr 2026) =
+* New: Plugins page now fetches data remotely with 24-hour caching
+* New: WP.org star ratings and active install counts on plugin cards
+* New: Plugin icons, NEW/PRO/RECOMMENDED/YOU'RE HERE badges
+* New: Go Pro button and Configure button for active plugins
+* New: Top banner showing current plugin context
+* New: Google Analytics UTM parameters on all outbound links
+* New: Priority-based card ordering with recommendations first
+* Improvement: Tested up to WordPress 7.0
+
 = 1.9.0 ( 21 February 2026 )   =
 Added : Per variation preview added.
 Added : Per variation added (Pro)
@@ -558,6 +568,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 1.9.2 =
+Enhanced Plugins page with remote data, WP.org ratings, plugin icons, Pro/NEW/Recommended badges, and UTM tracking. Tested up to WordPress 7.0.
 
 = 1.9.0  =
 Added : Per variation preview added.
