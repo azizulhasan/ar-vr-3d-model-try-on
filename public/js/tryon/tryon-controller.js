@@ -50,7 +50,6 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	ui.setStatus( 'Loading face model…' );
 
 	const overlaySprite = await captureProductSprite( productId, glbSrc );
-	console.log( '[AtlasAR Try-On] sprite:', overlaySprite, 'mode:', mode, 'accessory:', accessory );
 	if ( ! overlaySprite ) {
 		ui.setStatus( 'No 3D model found on page' );
 	} else {
@@ -84,7 +83,6 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	let workerReady = false;
 	worker.onmessage = ( ev ) => {
 		const msg = ev.data || {};
-		console.log( '[AtlasAR Try-On worker→main]', msg.type, msg );
 		if ( msg.type === 'boot' ) {
 			ui.setStatus( 'Worker booted, loading face model…' );
 		} else if ( msg.type === 'ready' ) {
@@ -93,6 +91,7 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		} else if ( msg.type === 'result' ) {
 			lastLandmarks = msg.landmarks;
 			detectInflight = false;
+			// Lightweight debug snapshot — no per-frame console spam.
 			window.__tryon_debug = window.__tryon_debug || {};
 			window.__tryon_debug.landmarks = msg.landmarks;
 			window.__tryon_debug.lastResultAt = Date.now();
@@ -120,7 +119,15 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		ctx.restore();
 
 		if ( lastLandmarks && overlaySprite ) {
-			const anchor = computeAnchor( lastLandmarks, mode, ui.canvas, accessory );
+			let anchor = computeAnchor( lastLandmarks, mode, ui.canvas, accessory );
+			// Pro pipeline hook: per-product calibration overrides.
+			if ( anchor && window.atlasArTryonPipeline && typeof window.atlasArTryonPipeline.adjustAnchor === 'function' ) {
+				try {
+					anchor = window.atlasArTryonPipeline.adjustAnchor( anchor, { productId, mode, accessory } ) || anchor;
+				} catch ( e ) {
+					/* keep default anchor on failure */
+				}
+			}
 			if ( anchor ) {
 				// Mirror anchor x because we drew video mirrored.
 				const ax = ui.canvas.width - anchor.x;
@@ -162,7 +169,7 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	requestAnimationFrame( tick );
 
 	ui.onSnapshot = async () => {
-		const dataUrl = ui.canvas.toDataURL( 'image/png' );
+		const dataUrl = buildSnapshotDataUrl( ui.canvas, !! config.watermark );
 		// Direct download.
 		const a = document.createElement( 'a' );
 		a.href = dataUrl;
@@ -197,6 +204,54 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	};
 
 	return ui;
+}
+
+/**
+ * Build a snapshot dataURL from the live canvas. When `watermark` is true
+ * (Free tier), draws a small "Powered by AtlasAR" badge at the bottom-right
+ * corner of a CLONED canvas — never mutates the live preview canvas.
+ */
+function buildSnapshotDataUrl( srcCanvas, watermark ) {
+	if ( ! watermark ) {
+		return srcCanvas.toDataURL( 'image/png' );
+	}
+	const out = document.createElement( 'canvas' );
+	out.width = srcCanvas.width;
+	out.height = srcCanvas.height;
+	const ctx = out.getContext( '2d' );
+	if ( ! ctx ) return srcCanvas.toDataURL( 'image/png' );
+	ctx.drawImage( srcCanvas, 0, 0 );
+
+	const text = 'Powered by AtlasAR';
+	const fontSize = Math.max( 11, Math.round( out.width * 0.022 ) );
+	ctx.font = `600 ${ fontSize }px system-ui, -apple-system, Segoe UI, sans-serif`;
+	const padX = 10, padY = 6;
+	const textWidth = ctx.measureText( text ).width;
+	const boxW = textWidth + padX * 2;
+	const boxH = fontSize + padY * 2;
+	const x = out.width - boxW - 10;
+	const y = out.height - boxH - 10;
+
+	ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+	ctx.beginPath();
+	const r = 8;
+	ctx.moveTo( x + r, y );
+	ctx.lineTo( x + boxW - r, y );
+	ctx.quadraticCurveTo( x + boxW, y, x + boxW, y + r );
+	ctx.lineTo( x + boxW, y + boxH - r );
+	ctx.quadraticCurveTo( x + boxW, y + boxH, x + boxW - r, y + boxH );
+	ctx.lineTo( x + r, y + boxH );
+	ctx.quadraticCurveTo( x, y + boxH, x, y + boxH - r );
+	ctx.lineTo( x, y + r );
+	ctx.quadraticCurveTo( x, y, x + r, y );
+	ctx.closePath();
+	ctx.fill();
+
+	ctx.fillStyle = '#fff';
+	ctx.textBaseline = 'middle';
+	ctx.fillText( text, x + padX, y + boxH / 2 );
+
+	return out.toDataURL( 'image/png' );
 }
 
 /**
