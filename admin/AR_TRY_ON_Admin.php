@@ -74,6 +74,8 @@ class AR_TRY_ON_Admin {
 			require_once ABSPATH . 'wp-includes/vars.php';
 		}
 
+		add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
+
 		$this->localize_data = [
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
@@ -427,12 +429,248 @@ class AR_TRY_ON_Admin {
         return array_merge( $mimes, $this->get_3d_mime_types() );
 	}
 
-    public function atlasaidev_plugins($menu_slug = 'atlasvoice-other-plugins') {
+    /**
+     * Remote URL for the plugins.json file.
+     */
+    const ATLAS_PLUGINS_REMOTE_URL = 'https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json';
+
+    /**
+     * Transient key for cached plugin data.
+     */
+    const ATLAS_PLUGINS_TRANSIENT = 'atlas_plugins_remote_data';
+
+    /**
+     * Transient key for WP.org plugin info cache.
+     */
+    const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info';
+
+    /**
+     * Cache duration in seconds (24 hours).
+     */
+    const ATLAS_PLUGINS_CACHE_TTL = 86400;
+
+    /**
+     * Fetch plugin data from GitHub with transient caching.
+     *
+     * @return array List of plugin objects.
+     */
+    public static function get_atlas_plugins() {
+        $cached = get_transient(self::ATLAS_PLUGINS_TRANSIENT);
+        if (false !== $cached && is_array($cached)) {
+            return $cached;
+        }
+
+        $response = wp_remote_get(self::ATLAS_PLUGINS_REMOTE_URL, array(
+            'timeout' => 10,
+            'headers' => array('Accept' => 'application/json'),
+        ));
+
+        if (!is_wp_error($response) && 200 === wp_remote_retrieve_response_code($response)) {
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+            if (is_array($data) && !empty($data)) {
+                set_transient(self::ATLAS_PLUGINS_TRANSIENT, $data, self::ATLAS_PLUGINS_CACHE_TTL);
+                return $data;
+            }
+        }
+
+        // Fallback: hardcoded plugin data.
+        return self::get_fallback_plugins();
+    }
+
+    /**
+     * Hardcoded fallback plugin data in case remote fetch fails.
+     *
+     * @return array
+     */
+    private static function get_fallback_plugins() {
+        return array(
+            array(
+                'name'          => 'Text To Speech TTS – AtlasVoice',
+                'slug'          => 'text-to-audio',
+                'basename'      => 'text-to-audio/text-to-audio.php',
+                'icon'          => 'https://ps.w.org/text-to-audio/assets/icon-256x256.gif',
+                'learnMoreUrl'  => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'proBasenames'  => array(
+                    'text-to-speech-pro/text-to-audio-pro.php',
+                    'text-to-speech-pro-premium/text-to-audio-pro.php',
+                    'text-to-audio-pro/text-to-audio-pro.php',
+                    'text-to-audio-pro-premium/text-to-audio-pro.php',
+                ),
+                'proUrl'        => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'configureSlug' => 'text-to-audio',
+                'isNew'         => false,
+                'complementary' => array('ai-workflow-automation-ai-agent-hub', 'smart-local-ai'),
+                'priority'      => 1,
+                'description'   => 'The most user-friendly Text-to-Speech accessibility plugin for WordPress. Automatically adds an audio player with no API required.',
+                'features'      => array(
+                    'Unlimited text-to-speech conversion',
+                    '80+ languages, 20-300+ voices',
+                    'Customizable player design',
+                    'Shortcode support with flexible attributes',
+                    'Custom Post Type & ACF compatibility',
+                    'No external API required (browser SpeechSynthesis)',
+                    'Multilingual support (WPML, GTranslate)',
+                    'Analytics & engagement tracking',
+                ),
+            ),
+            array(
+                'name'          => '3D Model Viewer – AtlasAR',
+                'slug'          => 'ar-vr-3d-model-try-on',
+                'basename'      => 'ar-vr-3d-model-try-on/ar-vr-3d-model-try-on.php',
+                'icon'          => 'https://ps.w.org/ar-vr-3d-model-try-on/assets/icon-256x256.gif',
+                'learnMoreUrl'  => 'https://wpaugmentedreality.com/pricing/',
+                'proBasenames'  => array(
+                    'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+                    'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+                ),
+                'proUrl'        => 'https://wpaugmentedreality.com/pricing/',
+                'configureSlug' => 'ar-vr-3d-model-try-on',
+                'isNew'         => false,
+                'complementary' => array('text-to-audio', 'smart-local-ai'),
+                'priority'      => 2,
+                'description'   => 'Display interactive 3D models and augmented reality on your WordPress & WooCommerce site for enhanced product visualization.',
+                'features'      => array(
+                    'Interactive 3D model display',
+                    'Augmented Reality (AR) support',
+                    'WordPress & WooCommerce integration',
+                    'Mobile-optimized viewing',
+                    'Customizable display options',
+                    'Reduces return rates with realistic visualization',
+                    'Easy product page embedding',
+                ),
+            ),
+            array(
+                'name'          => 'AI Workflow Automation – AtlasAgent',
+                'slug'          => 'ai-workflow-automation-ai-agent-hub',
+                'basename'      => 'ai-workflow-automation-ai-agent-hub/ai-workflow-automation-ai-agent-hub.php',
+                'icon'          => 'https://ps.w.org/ai-workflow-automation-ai-agent-hub/assets/icon-256x256.gif',
+                'learnMoreUrl'  => 'https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/',
+                'proBasenames'  => array(
+                    'ai-workflow-automation-ai-agent-hub-pro/ai-workflow-automation-ai-agent-hub-pro.php',
+                ),
+                'proUrl'        => 'https://atlasaidev.com/ai-agent-hub-pro/',
+                'configureSlug' => 'ai-workflow-automation-ai-agent-hub',
+                'isNew'         => false,
+                'complementary' => array('text-to-audio', 'smart-local-ai'),
+                'priority'      => 1,
+                'description'   => 'Transform WordPress into an AI-powered control center with 70+ abilities, MCP server support, and workflow builder.',
+                'features'      => array(
+                    '70+ abilities across 9 modules',
+                    'Built-in MCP Server (JSON-RPC 2.0)',
+                    'JWT authentication',
+                    'Drag-and-drop workflow builder',
+                    'Multi-provider AI support (OpenAI, Gemini, Claude)',
+                    'WooCommerce AI Store Manager',
+                    'Post editor AI integration',
+                ),
+            ),
+            array(
+                'name'          => 'Smart Local AI – AtlasAI',
+                'slug'          => 'smart-local-ai',
+                'basename'      => 'smart-local-ai/smart-local-ai.php',
+                'icon'          => 'https://ps.w.org/smart-local-ai/assets/icon-256x256.png',
+                'learnMoreUrl'  => 'https://atlasaidev.com/smart-local-ai-pro/',
+                'proBasenames'  => array(
+                    'smart-local-ai-pro/smart-local-ai-pro.php',
+                ),
+                'proUrl'        => 'https://atlasaidev.com/smart-local-ai-pro/',
+                'configureSlug' => 'smart-local-ai',
+                'isNew'         => true,
+                'complementary' => array('ai-workflow-automation-ai-agent-hub', 'text-to-audio'),
+                'priority'      => 1,
+                'description'   => 'Browser-based private AI tools for WordPress. Semantic related posts, personalized recommendations, and automatic alt text generation — all running on-device with zero cloud costs.',
+                'features'      => array(
+                    'RelevantFlow: Semantic content recommendations',
+                    'PersonaFlow: Personalized recommendations based on visitor behavior',
+                    'AltGenius: Automatic alt text generation for images',
+                    'Zero cost — no API keys or subscriptions needed',
+                    'Privacy by architecture — all AI runs in-browser',
+                    'WebGPU + WASM hardware-accelerated inference',
+                    'Works with any post type including WooCommerce products',
+                    'GDPR compliant — no external data transmission',
+                ),
+            ),
+        );
+    }
+
+    /**
+     * Fetch WP.org plugin info (rating, installs) for all atlas plugins.
+     *
+     * @param array $plugins List of plugin data from get_atlas_plugins().
+     * @return array Keyed by slug: { rating, num_ratings, active_installs }
+     */
+    public static function get_wporg_info($plugins) {
+        $cached = get_transient(self::ATLAS_PLUGINS_WPORG_TRANSIENT);
+        if (false !== $cached && is_array($cached)) {
+            return $cached;
+        }
+
+        $info = array();
+        foreach ($plugins as $plugin) {
+            $slug = $plugin['slug'];
+            $url  = 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request[slug]=' . urlencode($slug) . '&request[fields][active_installs]=1&request[fields][rating]=1&request[fields][num_ratings]=1&request[fields][sections]=0&request[fields][description]=0';
+            $response = wp_remote_get($url, array('timeout' => 5));
+            if (!is_wp_error($response) && 200 === wp_remote_retrieve_response_code($response)) {
+                $data = json_decode(wp_remote_retrieve_body($response), true);
+                if (is_array($data) && !empty($data['slug'])) {
+                    $info[$slug] = array(
+                        'rating'          => isset($data['rating']) ? (int) $data['rating'] : 0,
+                        'num_ratings'     => isset($data['num_ratings']) ? (int) $data['num_ratings'] : 0,
+                        'active_installs' => isset($data['active_installs']) ? (int) $data['active_installs'] : 0,
+                    );
+                }
+            }
+            if (!isset($info[$slug])) {
+                $info[$slug] = array('rating' => 0, 'num_ratings' => 0, 'active_installs' => 0);
+            }
+        }
+
+        set_transient(self::ATLAS_PLUGINS_WPORG_TRANSIENT, $info, self::ATLAS_PLUGINS_CACHE_TTL);
+        return $info;
+    }
+
+    /**
+     * Detect which plugins have their Pro version installed or active.
+     *
+     * @param array $plugins     List of plugin data from get_atlas_plugins().
+     * @param array $all_plugins All installed plugin basenames.
+     * @param array $active_plugins Active plugin basenames.
+     * @return array { pro_installed: string[], pro_active: string[] }
+     */
+    public static function detect_pro_status($plugins, $all_plugins, $active_plugins) {
+        $pro_installed = array();
+        $pro_active    = array();
+
+        foreach ($plugins as $plugin) {
+            $slug = $plugin['slug'];
+            if (empty($plugin['proBasenames']) || !is_array($plugin['proBasenames'])) {
+                continue;
+            }
+            foreach ($plugin['proBasenames'] as $pro_basename) {
+                if (in_array($pro_basename, $all_plugins, true)) {
+                    $pro_installed[] = $slug;
+                    if (in_array($pro_basename, $active_plugins, true)) {
+                        $pro_active[] = $slug;
+                    }
+                    break; // Found one match, no need to check other basenames.
+                }
+            }
+        }
+
+        return array(
+            'pro_installed' => array_unique($pro_installed),
+            'pro_active'    => array_unique($pro_active),
+        );
+    }
+
+    public function atlasaidev_plugins($menu_slug = 'atlas-ar-other-plugins', $plugin_slug = 'ar-vr-3d-model-try-on') {
         // Atlas Plugins submenu
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
+            $js  = plugin_dir_url(__FILE__) . 'js/atlas-plugins.js';
             wp_enqueue_script(
                 'atlas-plugins',
-                plugin_dir_url(__FILE__) . 'js/atlas-plugins.js',
+                $js,
                 array('wp-i18n', 'updates'),
                 $this->version,
                 true
@@ -442,25 +680,31 @@ class AR_TRY_ON_Admin {
                 'ar-vr-3d-model-try-on',
                 plugin_dir_path(dirname(__FILE__)) . 'languages'
             );
+
+            // Fetch plugin list from remote (cached).
+            $atlas_plugins = self::get_atlas_plugins();
+
+            // Build basenames map dynamically from remote data.
+            $atlas_basenames = array();
+            foreach ($atlas_plugins as $plugin) {
+                if (!empty($plugin['slug']) && !empty($plugin['basename'])) {
+                    $atlas_basenames[$plugin['slug']] = $plugin['basename'];
+                }
+            }
+
             // Determine installed and active plugin statuses.
-            $atlas_basenames = array(
-                'text-to-audio' => 'text-to-audio/text-to-audio.php',
-                'ar-vr-3d-model-try-on' => 'ar-vr-3d-model-try-on/ar-vr-3d-model-try-on.php',
-                'ai-workflow-automation-ai-agent-hub' => 'ai-workflow-automation-ai-agent-hub/ai-workflow-automation-ai-agent-hub.php',
-            );
             if (!function_exists('get_plugins')) {
                 require_once ABSPATH . 'wp-admin/includes/plugin.php';
             }
-            $all_plugins = array_keys(get_plugins());
-            $active_plugins = (array)get_option('active_plugins', array());
+            $all_plugins    = array_keys(get_plugins());
+            $active_plugins = (array) get_option('active_plugins', array());
 
             $installed_slugs = array();
-            $active_slugs = array();
-            $activate_urls = array();
+            $active_slugs    = array();
+            $activate_urls   = array();
             foreach ($atlas_basenames as $slug => $basename) {
                 if (in_array($basename, $all_plugins, true)) {
                     $installed_slugs[] = $slug;
-                    // Build activate URL for installed-but-not-active plugins.
                     if (!in_array($basename, $active_plugins, true)) {
                         $activate_urls[$slug] = html_entity_decode(wp_nonce_url(
                             admin_url('plugins.php?action=activate&plugin=' . urlencode($basename)),
@@ -473,22 +717,67 @@ class AR_TRY_ON_Admin {
                 }
             }
 
+            // Fetch WP.org info (ratings, installs) — cached.
+            $wporg_info = self::get_wporg_info($atlas_plugins);
+
+            // Detect Pro plugin install/active status.
+            $pro_status = self::detect_pro_status($atlas_plugins, $all_plugins, $active_plugins);
+
+            // Find the current plugin's display name for the banner.
+            $current_plugin_name = '';
+            foreach ($atlas_plugins as $p) {
+                if (!empty($p['slug']) && $p['slug'] === $plugin_slug) {
+                    $current_plugin_name = $p['name'];
+                    break;
+                }
+            }
+
             wp_localize_script('atlas-plugins', 'atlasPluginsData', array(
-                'current_plugin_slug' => 'ar-vr-3d-model-try-on',
-                'installed_plugins' => $installed_slugs,
-                'active_plugins' => $active_slugs,
-                'activate_urls' => (object)$activate_urls,
+                'current_plugin_slug' => $plugin_slug,
+                'current_plugin_name' => $current_plugin_name,
+                'plugins'             => $atlas_plugins,
+                'installed_plugins'   => $installed_slugs,
+                'active_plugins'      => $active_slugs,
+                'activate_urls'       => (object) $activate_urls,
+                'wporg_info'          => (object) $wporg_info,
+                'pro_installed'       => $pro_status['pro_installed'],
+                'pro_active'          => $pro_status['pro_active'],
+                'admin_url'           => admin_url(),
+                'ajax_url'            => admin_url('admin-ajax.php'),
+                'refresh_nonce'       => wp_create_nonce('atlas_plugins_refresh'),
             ));
         }
         add_submenu_page(
             'ar-vr-3d-model-try-on',
-            __('Plugins', 'text-to-audio'),
-            __('Plugins', 'text-to-audio'),
+            __('Plugins', 'ar-vr-3d-model-try-on'),
+            __('Plugins', 'ar-vr-3d-model-try-on'),
             'manage_options',
             $menu_slug,
             array($this, 'atlas_plugins_page'),
             34
         );
+    }
+
+    /**
+     * AJAX handler to refresh plugin data from remote.
+     */
+    public function ajax_refresh_plugins() {
+        check_ajax_referer('atlas_plugins_refresh', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized', 403);
+        }
+
+        // Delete cached data and re-fetch.
+        delete_transient(self::ATLAS_PLUGINS_TRANSIENT);
+        delete_transient(self::ATLAS_PLUGINS_WPORG_TRANSIENT);
+        $plugins    = self::get_atlas_plugins();
+        $wporg_info = self::get_wporg_info($plugins);
+
+        wp_send_json_success(array(
+            'plugins'    => $plugins,
+            'wporg_info' => $wporg_info,
+        ));
     }
 
     /**
