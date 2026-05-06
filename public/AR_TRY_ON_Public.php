@@ -83,7 +83,7 @@ class AR_TRY_ON_Public {
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
 			'plugin_url'       => ATLAS_AR_PLUGIN_URL,
-			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
+			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
             'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
             'img'    => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
 		];

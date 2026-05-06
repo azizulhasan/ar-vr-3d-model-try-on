@@ -180,7 +180,10 @@ class AR_TRY_ON_Tryon {
 	/* ---------- Free-tier product cap ---------- */
 
 	public static function is_pro_active() {
-		return is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' );
+		// Centralized check — handles both `-pro` and `-premium` folder
+		// layouts and lazy-loads wp-admin/includes/plugin.php when called
+		// from the front-end.
+		return (bool) AR_TRY_ON_Helper::is_pro_active();
 	}
 
 	public static function free_face_product_limit() {
@@ -503,7 +506,7 @@ class AR_TRY_ON_Tryon {
 
 		$settings = self::get_settings();
 
-		$pro_active = is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' );
+		$pro_active = self::is_pro_active();
 
 		wp_localize_script(
 			self::SCRIPT_HANDLE,
