@@ -1,2 +1,735 @@
-/*! For license information please see tryon-controller.js.LICENSE.txt */
-"use strict";(self.webpackChunkar_try_on=self.webpackChunkar_try_on||[]).push([[746],{457:(t,e,r)=>{function n(t){var e,r=t.config,n=t.productId,o=document.createElement("div");o.className="art-tryon-modal",o.setAttribute("role","dialog"),o.setAttribute("aria-modal","true"),o.innerHTML='\n\t\t<div class="art-tryon-backdrop" data-action="close"></div>\n\t\t<div class="art-tryon-panel">\n\t\t\t<button class="art-tryon-close" type="button" data-action="close" aria-label="Close try-on">&times;</button>\n\t\t\t<div class="art-tryon-stage">\n\t\t\t\t<video class="art-tryon-video" autoplay playsinline muted></video>\n\t\t\t\t<canvas class="art-tryon-canvas"></canvas>\n\t\t\t\t<div class="art-tryon-status" aria-live="polite">Loading…</div>\n\t\t\t</div>\n\t\t\t<div class="art-tryon-consent">\n\t\t\t\t<h3>Try it on yourself</h3>\n\t\t\t\t<p class="art-tryon-consent-text">'.concat((e=r.consent_text||"Allow camera access to try this on virtually. Video stays on your device.",String(e).replace(/[&<>"']/g,(function(t){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[t]}))),'</p>\n\t\t\t\t<button type="button" class="art-tryon-consent-allow button button-primary">Allow camera</button>\n\t\t\t\t<button type="button" class="art-tryon-consent-deny button" data-action="close">Cancel</button>\n\t\t\t</div>\n\t\t\t<div class="art-tryon-toolbar" hidden>\n\t\t\t\t<button type="button" class="art-tryon-snapshot button button-primary" ').concat(r.snapshot?"":"hidden",'>Snapshot</button>\n\t\t\t\t<span class="art-tryon-fps"></span>\n\t\t\t</div>\n\t\t\t<div class="art-tryon-error" hidden></div>\n\t\t</div>\n\t');var a=o.querySelector(".art-tryon-video"),i=o.querySelector(".art-tryon-canvas"),c=o.querySelector(".art-tryon-status"),s=o.querySelector(".art-tryon-consent"),u=o.querySelector(".art-tryon-toolbar"),l=o.querySelector(".art-tryon-error"),d=o.querySelector(".art-tryon-snapshot"),f=o.querySelector(".art-tryon-consent-allow"),p=o.querySelector(".art-tryon-fps"),h=!0,y=null,v=null,m=null;function w(t){"Escape"===t.key&&h&&g()}function g(){h&&(h=!1,document.removeEventListener("keydown",w),o.remove(),y&&y())}return o.addEventListener("click",(function(t){"close"===(t.target.dataset&&t.target.dataset.action)&&g()})),f.addEventListener("click",(function(){m&&m(!0)})),d.addEventListener("click",(function(){v&&v()})),document.addEventListener("keydown",w),{root:o,video:a,canvas:i,productId:n,get isOpen(){return h},setStatus:function(t){c.textContent=t||"",c.hidden=!t},showError:function(t){l.textContent=t,l.hidden=!1},showStage:function(){s.hidden=!0,u.hidden=!1},askConsent:function(){return new Promise((function(t){m=t}))},setFps:function(t){p.textContent=t?"".concat(t," fps"):""},close:g,set onClose(t){y=t},set onSnapshot(t){v=t}}}r.r(e),r.d(e,{startTryOn:()=>h});var o=168,a=33,i=263,c=10;function s(t,e,r){var n=arguments.length>3&&void 0!==arguments[3]?arguments[3]:"glasses";if(!t||t.length<200)return null;var s=t[a],u=t[i];if(!s||!u)return null;var l=s.x*r.width,d=s.y*r.height,f=u.x*r.width,p=u.y*r.height,h=Math.hypot(f-l,p-d),y=Math.atan2(p-d,f-l);if("hat"===n){var v=t[c];return v?{x:v.x*r.width,y:v.y*r.height-.7*h,width:2.4*h,rotation:y}:null}var m=t[o];return m?{x:m.x*r.width,y:m.y*r.height,width:2*h,rotation:y}:null}function u(t){return"face-hat"===t||"hat"===t?"hat":"glasses"}function l(){l=function(){return e};var t,e={},r=Object.prototype,n=r.hasOwnProperty,o=Object.defineProperty||function(t,e,r){t[e]=r.value},a="function"==typeof Symbol?Symbol:{},i=a.iterator||"@@iterator",c=a.asyncIterator||"@@asyncIterator",s=a.toStringTag||"@@toStringTag";function u(t,e,r){return Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}),t[e]}try{u({},"")}catch(t){u=function(t,e,r){return t[e]=r}}function f(t,e,r,n){var a=e&&e.prototype instanceof g?e:g,i=Object.create(a.prototype),c=new O(n||[]);return o(i,"_invoke",{value:T(t,r,c)}),i}function p(t,e,r){try{return{type:"normal",arg:t.call(e,r)}}catch(t){return{type:"throw",arg:t}}}e.wrap=f;var h="suspendedStart",y="suspendedYield",v="executing",m="completed",w={};function g(){}function b(){}function x(){}var _={};u(_,i,(function(){return this}));var k=Object.getPrototypeOf,A=k&&k(k(j([])));A&&A!==r&&n.call(A,i)&&(_=A);var E=x.prototype=g.prototype=Object.create(_);function S(t){["next","throw","return"].forEach((function(e){u(t,e,(function(t){return this._invoke(e,t)}))}))}function L(t,e){function r(o,a,i,c){var s=p(t[o],t,a);if("throw"!==s.type){var u=s.arg,l=u.value;return l&&"object"==d(l)&&n.call(l,"__await")?e.resolve(l.__await).then((function(t){r("next",t,i,c)}),(function(t){r("throw",t,i,c)})):e.resolve(l).then((function(t){u.value=t,i(u)}),(function(t){return r("throw",t,i,c)}))}c(s.arg)}var a;o(this,"_invoke",{value:function(t,n){function o(){return new e((function(e,o){r(t,n,e,o)}))}return a=a?a.then(o,o):o()}})}function T(e,r,n){var o=h;return function(a,i){if(o===v)throw Error("Generator is already running");if(o===m){if("throw"===a)throw i;return{value:t,done:!0}}for(n.method=a,n.arg=i;;){var c=n.delegate;if(c){var s=P(c,n);if(s){if(s===w)continue;return s}}if("next"===n.method)n.sent=n._sent=n.arg;else if("throw"===n.method){if(o===h)throw o=m,n.arg;n.dispatchException(n.arg)}else"return"===n.method&&n.abrupt("return",n.arg);o=v;var u=p(e,r,n);if("normal"===u.type){if(o=n.done?m:y,u.arg===w)continue;return{value:u.arg,done:n.done}}"throw"===u.type&&(o=m,n.method="throw",n.arg=u.arg)}}}function P(e,r){var n=r.method,o=e.iterator[n];if(o===t)return r.delegate=null,"throw"===n&&e.iterator.return&&(r.method="return",r.arg=t,P(e,r),"throw"===r.method)||"return"!==n&&(r.method="throw",r.arg=new TypeError("The iterator does not provide a '"+n+"' method")),w;var a=p(o,e.iterator,r.arg);if("throw"===a.type)return r.method="throw",r.arg=a.arg,r.delegate=null,w;var i=a.arg;return i?i.done?(r[e.resultName]=i.value,r.next=e.nextLoc,"return"!==r.method&&(r.method="next",r.arg=t),r.delegate=null,w):i:(r.method="throw",r.arg=new TypeError("iterator result is not an object"),r.delegate=null,w)}function C(t){var e={tryLoc:t[0]};1 in t&&(e.catchLoc=t[1]),2 in t&&(e.finallyLoc=t[2],e.afterLoc=t[3]),this.tryEntries.push(e)}function q(t){var e=t.completion||{};e.type="normal",delete e.arg,t.completion=e}function O(t){this.tryEntries=[{tryLoc:"root"}],t.forEach(C,this),this.reset(!0)}function j(e){if(e||""===e){var r=e[i];if(r)return r.call(e);if("function"==typeof e.next)return e;if(!isNaN(e.length)){var o=-1,a=function r(){for(;++o<e.length;)if(n.call(e,o))return r.value=e[o],r.done=!1,r;return r.value=t,r.done=!0,r};return a.next=a}}throw new TypeError(d(e)+" is not iterable")}return b.prototype=x,o(E,"constructor",{value:x,configurable:!0}),o(x,"constructor",{value:b,configurable:!0}),b.displayName=u(x,s,"GeneratorFunction"),e.isGeneratorFunction=function(t){var e="function"==typeof t&&t.constructor;return!!e&&(e===b||"GeneratorFunction"===(e.displayName||e.name))},e.mark=function(t){return Object.setPrototypeOf?Object.setPrototypeOf(t,x):(t.__proto__=x,u(t,s,"GeneratorFunction")),t.prototype=Object.create(E),t},e.awrap=function(t){return{__await:t}},S(L.prototype),u(L.prototype,c,(function(){return this})),e.AsyncIterator=L,e.async=function(t,r,n,o,a){void 0===a&&(a=Promise);var i=new L(f(t,r,n,o),a);return e.isGeneratorFunction(r)?i:i.next().then((function(t){return t.done?t.value:i.next()}))},S(E),u(E,s,"Generator"),u(E,i,(function(){return this})),u(E,"toString",(function(){return"[object Generator]"})),e.keys=function(t){var e=Object(t),r=[];for(var n in e)r.push(n);return r.reverse(),function t(){for(;r.length;){var n=r.pop();if(n in e)return t.value=n,t.done=!1,t}return t.done=!0,t}},e.values=j,O.prototype={constructor:O,reset:function(e){if(this.prev=0,this.next=0,this.sent=this._sent=t,this.done=!1,this.delegate=null,this.method="next",this.arg=t,this.tryEntries.forEach(q),!e)for(var r in this)"t"===r.charAt(0)&&n.call(this,r)&&!isNaN(+r.slice(1))&&(this[r]=t)},stop:function(){this.done=!0;var t=this.tryEntries[0].completion;if("throw"===t.type)throw t.arg;return this.rval},dispatchException:function(e){if(this.done)throw e;var r=this;function o(n,o){return c.type="throw",c.arg=e,r.next=n,o&&(r.method="next",r.arg=t),!!o}for(var a=this.tryEntries.length-1;a>=0;--a){var i=this.tryEntries[a],c=i.completion;if("root"===i.tryLoc)return o("end");if(i.tryLoc<=this.prev){var s=n.call(i,"catchLoc"),u=n.call(i,"finallyLoc");if(s&&u){if(this.prev<i.catchLoc)return o(i.catchLoc,!0);if(this.prev<i.finallyLoc)return o(i.finallyLoc)}else if(s){if(this.prev<i.catchLoc)return o(i.catchLoc,!0)}else{if(!u)throw Error("try statement without catch or finally");if(this.prev<i.finallyLoc)return o(i.finallyLoc)}}}},abrupt:function(t,e){for(var r=this.tryEntries.length-1;r>=0;--r){var o=this.tryEntries[r];if(o.tryLoc<=this.prev&&n.call(o,"finallyLoc")&&this.prev<o.finallyLoc){var a=o;break}}a&&("break"===t||"continue"===t)&&a.tryLoc<=e&&e<=a.finallyLoc&&(a=null);var i=a?a.completion:{};return i.type=t,i.arg=e,a?(this.method="next",this.next=a.finallyLoc,w):this.complete(i)},complete:function(t,e){if("throw"===t.type)throw t.arg;return"break"===t.type||"continue"===t.type?this.next=t.arg:"return"===t.type?(this.rval=this.arg=t.arg,this.method="return",this.next="end"):"normal"===t.type&&e&&(this.next=e),w},finish:function(t){for(var e=this.tryEntries.length-1;e>=0;--e){var r=this.tryEntries[e];if(r.finallyLoc===t)return this.complete(r.completion,r.afterLoc),q(r),w}},catch:function(t){for(var e=this.tryEntries.length-1;e>=0;--e){var r=this.tryEntries[e];if(r.tryLoc===t){var n=r.completion;if("throw"===n.type){var o=n.arg;q(r)}return o}}throw Error("illegal catch attempt")},delegateYield:function(e,r,n){return this.delegate={iterator:j(e),resultName:r,nextLoc:n},"next"===this.method&&(this.arg=t),w}},e}function d(t){return d="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},d(t)}function f(t,e,r,n,o,a,i){try{var c=t[a](i),s=c.value}catch(t){return void r(t)}c.done?e(s):Promise.resolve(s).then(n,o)}function p(t){return function(){var e=this,r=arguments;return new Promise((function(n,o){var a=t.apply(e,r);function i(t){f(a,n,o,i,c,"next",t)}function c(t){f(a,n,o,i,c,"throw",t)}i(void 0)}))}}function h(t){return y.apply(this,arguments)}function y(){return(y=p(l().mark((function t(e){var o,a,i,c,f,h,y,m,w,b,x,_,k,A,E,S,L,T,P;return l().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:return P=function(){if(S&&h.isOpen){if(T.save(),T.translate(h.canvas.width,0),T.scale(-1,1),T.drawImage(h.video,0,0,h.canvas.width,h.canvas.height),T.restore(),x){var t=w?s(x,a,h.canvas,y):null;if(t&&window.atlasArTryonPipeline&&"function"==typeof window.atlasArTryonPipeline.adjustAnchor)try{t=window.atlasArTryonPipeline.adjustAnchor(t,{productId:o,mode:a,accessory:y})||t}catch(t){}var e=!1;if(window.atlasArTryonPipeline&&"function"==typeof window.atlasArTryonPipeline.render)try{e=!1!==window.atlasArTryonPipeline.render({ctx:T,canvas:h.canvas,video:h.video,landmarks:x,facialMatrix:_,anchor:t,sprite:w,productId:o,mode:a,accessory:y,glbSrc:i})}catch(t){console.warn("[AtlasAR] Pro render hook failed; falling back to 2D.",t)}if(!e&&t&&w){var r=h.canvas.width-t.x,n=t.width,c=n*(w.height/w.width);T.save(),T.translate(r,t.y),T.rotate(-t.rotation),T.drawImage(w,-n/2,-c/2,n,c),T.restore()}}L&&!k&&h.video.readyState>=2&&(k=!0,createImageBitmap(h.video).then((function(t){b.postMessage({type:"detect",bitmap:t,ts:performance.now()},[t])})).catch((function(){k=!1}))),A+=1;var u=performance.now();u-E>=1e3&&(h.setFps(Math.round(1e3*A/(u-E))),A=0,E=u),requestAnimationFrame(P)}},o=e.productId,a=e.mode,i=e.glbSrc,c=e.config,f=e.onClose,h=n({config:c,productId:o}),document.body.appendChild(h.root),h.canvas.width=640,h.canvas.height=480,y=u(a),t.next=9,h.askConsent();case 9:if(t.sent){t.next=13;break}return h.close(),t.abrupt("return",null);case 13:return t.prev=13,t.next=16,navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:!1});case 16:m=t.sent,t.next=24;break;case 19:return t.prev=19,t.t0=t.catch(13),h.showError("Camera permission denied. Please grant access to use Try It On."),console.error("[AtlasAR] getUserMedia failed:",t.t0),t.abrupt("return",null);case 24:return h.video.srcObject=m,t.next=27,h.video.play();case 27:return h.showStage(),h.setStatus("Loading face model…"),t.next=31,g(o,i);case 31:return(w=t.sent)?(window.__tryon_debug=window.__tryon_debug||{},window.__tryon_debug.sprite=w,window.__tryon_debug.mode=a):h.setStatus("No 3D model found on page"),(b=new Worker(new URL(r.p+r.u(800),r.b),{type:void 0})).postMessage({type:"init",modelUrl:c.models&&c.models.face,wasmBase:c.models&&c.models.wasm_base,options:c.worker_options&&"object"===d(c.worker_options)?c.worker_options:{}}),x=null,_=null,k=!1,A=0,E=performance.now(),S=!0,L=!1,b.onmessage=function(t){var e=t.data||{};"boot"===e.type?h.setStatus("Worker booted, loading face model…"):"ready"===e.type?(L=!0,h.setStatus("")):"result"===e.type?(x=e.landmarks,_=e.facialMatrix||null,k=!1,window.__tryon_debug=window.__tryon_debug||{},window.__tryon_debug.landmarks=e.landmarks,window.__tryon_debug.facialMatrix=_,window.__tryon_debug.lastResultAt=Date.now()):"error"===e.type&&(h.showError(e.message||"Face tracker failed"),console.error("[AtlasAR Try-On worker error]",e.message),S=!1)},b.onerror=function(t){console.error("[AtlasAR Try-On worker.onerror]",t.message,t.filename,t.lineno),h.showError("Worker error: "+t.message)},T=h.canvas.getContext("2d"),requestAnimationFrame(P),h.onSnapshot=p(l().mark((function t(){var e,r;return l().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:if(e=v(h.canvas,!!c.watermark),(r=document.createElement("a")).href=e,r.download="tryon-".concat(o,"-").concat(Date.now(),".png"),document.body.appendChild(r),r.click(),r.remove(),!c.rest_url||!c.rest_nonce){t.next=16;break}return t.prev=8,t.next=11,fetch("".concat(c.rest_url,"/tryon/snapshot"),{method:"POST",headers:{"Content-Type":"application/json","X-WP-Nonce":c.rest_nonce},body:JSON.stringify({image:e,product_id:o})});case 11:t.next=16;break;case 13:t.prev=13,t.t0=t.catch(8),console.warn("[AtlasAR] Snapshot upload failed:",t.t0);case 16:case"end":return t.stop()}}),t,null,[[8,13]])}))),h.onClose=function(){S=!1,m.getTracks().forEach((function(t){return t.stop()})),b.postMessage({type:"dispose"}),b.terminate(),"function"==typeof f&&f()},t.abrupt("return",h);case 49:case"end":return t.stop()}}),t,null,[[13,19]])})))).apply(this,arguments)}function v(t,e){if(!e)return t.toDataURL("image/png");var r=document.createElement("canvas");r.width=t.width,r.height=t.height;var n=r.getContext("2d");if(!n)return t.toDataURL("image/png");n.drawImage(t,0,0);var o="Powered by AtlasAR",a=Math.max(11,Math.round(.022*r.width));n.font="600 ".concat(a,"px system-ui, -apple-system, Segoe UI, sans-serif");var i=n.measureText(o).width+20,c=a+12,s=r.width-i-10,u=r.height-c-10;n.fillStyle="rgba(0, 0, 0, 0.55)",n.beginPath();return n.moveTo(s+8,u),n.lineTo(s+i-8,u),n.quadraticCurveTo(s+i,u,s+i,u+8),n.lineTo(s+i,u+c-8),n.quadraticCurveTo(s+i,u+c,s+i-8,u+c),n.lineTo(s+8,u+c),n.quadraticCurveTo(s,u+c,s,u+c-8),n.lineTo(s,u+8),n.quadraticCurveTo(s,u,s+8,u),n.closePath(),n.fill(),n.fillStyle="#fff",n.textBaseline="middle",n.fillText(o,s+10,u+c/2),r.toDataURL("image/png")}function m(){return w.apply(this,arguments)}function w(){return(w=p(l().mark((function t(){var e,r,n;return l().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:if(!window.customElements||!window.customElements.get("model-viewer")){t.next=2;break}return t.abrupt("return",!0);case 2:return e=window.atlas_ar_tryon||{},r=e.plugin_url||"/",n="".concat(r,"public/js/google-model-viewer.js"),t.next=7,new Promise((function(t,e){var r=document.querySelector('script[src="'.concat(n,'"]'));if(r)return r.addEventListener("load",t,{once:!0}),void r.addEventListener("error",e,{once:!0});var o=document.createElement("script");o.type="module",o.src=n,o.onload=t,o.onerror=e,document.head.appendChild(o)}));case 7:if(!window.customElements){t.next=10;break}return t.next=10,window.customElements.whenDefined("model-viewer");case 10:return t.abrupt("return",!0);case 11:case"end":return t.stop()}}),t)})))).apply(this,arguments)}function g(t,e){return b.apply(this,arguments)}function b(){return(b=p(l().mark((function t(e,r){var n,o,a,i,c;return l().wrap((function(t){for(;;)switch(t.prev=t.next){case 0:if(n="",r&&"string"==typeof r&&(n=r),n||(o=[document.querySelector('model-viewer[data-product-id="'.concat(e,'"]')),document.querySelector('model-viewer[product-id="'.concat(e,'"]')),document.querySelector("model-viewer.atlas_ar_model_viewer"),document.querySelector("model-viewer")].filter(Boolean),(a=o[0])&&(n=a.getAttribute("src")||"")),n){t.next=5;break}return t.abrupt("return",null);case 5:return t.prev=5,t.next=8,m();case 8:t.next=14;break;case 10:return t.prev=10,t.t0=t.catch(5),console.warn("[AtlasAR] model-viewer module failed to load",t.t0),t.abrupt("return",null);case 14:return(i=document.createElement("model-viewer")).style.cssText=["position:fixed","top:0","right:0","width:512px","height:512px","clip-path:inset(0 0 100% 100%)","pointer-events:none","z-index:1"].join(";"),i.setAttribute("src",n),i.setAttribute("camera-orbit","0deg 90deg auto"),i.setAttribute("exposure","1"),i.setAttribute("shadow-intensity","0"),i.setAttribute("environment-image","neutral"),i.setAttribute("disable-zoom",""),i.setAttribute("loading","eager"),i.setAttribute("reveal","auto"),document.body.appendChild(i),t.next=27,new Promise((function(t){var e=!1,r=function(r){e||(e=!0,t(r))};i.addEventListener("load",(function(){return r(!0)}),{once:!0}),i.addEventListener("error",(function(){return r(!1)}),{once:!0}),setTimeout((function(){return r(!1)}),1e4)}));case 27:if(t.sent&&"function"==typeof i.toBlob){t.next=32;break}return i.remove(),console.warn("[AtlasAR] Snapshot model-viewer failed to load",n),t.abrupt("return",null);case 32:return t.next=34,new Promise((function(t){return requestAnimationFrame((function(){return requestAnimationFrame(t)}))}));case 34:return t.prev=34,t.next=37,i.toBlob({mimeType:"image/png",idealAspect:!1});case 37:if(c=t.sent,i.remove(),c){t.next=41;break}return t.abrupt("return",null);case 41:return t.next=43,createImageBitmap(c);case 43:return t.abrupt("return",t.sent);case 46:return t.prev=46,t.t1=t.catch(34),i.remove(),console.warn("[AtlasAR] Failed to snapshot model-viewer:",t.t1),t.abrupt("return",null);case 51:case"end":return t.stop()}}),t,null,[[5,10],[34,46]])})))).apply(this,arguments)}}}]);
+"use strict";
+(self["webpackChunkar_try_on"] = self["webpackChunkar_try_on"] || []).push([["tryon-controller"],{
+
+/***/ "./public/js/tryon/tryon-anchors.js":
+/*!******************************************!*\
+  !*** ./public/js/tryon/tryon-anchors.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   computeAnchor: () => (/* binding */ computeAnchor),
+/* harmony export */   detectAccessoryFromMode: () => (/* binding */ detectAccessoryFromMode)
+/* harmony export */ });
+/**
+ * Map MediaPipe Face Landmarker output to a 2D anchor (position, scale,
+ * rotation) on the preview canvas. Phase-1 anchors: glasses (nose-bridge,
+ * eye-line) and hats (forehead-top, head transform).
+ *
+ * Pro overrides this via the `atlas_ar_tryon_landmark_pipeline` filter (PHP)
+ * by injecting a JS hook before this module runs. For now Free implements
+ * static defaults.
+ *
+ * MediaPipe face mesh landmark index reference (subset):
+ *   168 — nose bridge (between eyebrows)
+ *   1   — nose tip
+ *   33  — right eye outer corner
+ *   263 — left eye outer corner
+ *   10  — forehead top center
+ *   152 — chin
+ */
+
+var IDX = {
+  noseBridge: 168,
+  noseTip: 1,
+  eyeRight: 33,
+  eyeLeft: 263,
+  foreheadTop: 10,
+  chin: 152
+};
+
+/**
+ * @param {Array<{x:number,y:number,z:number}>} landmarks Normalized 0..1.
+ * @param {string} mode 'face' (default), 'face-glasses', 'face-hat'.
+ * @param {{width:number,height:number}} canvas
+ * @returns {{x:number,y:number,width:number,rotation:number}|null}
+ */
+function computeAnchor(landmarks, mode, canvas) {
+  var accessory = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'glasses';
+  if (!landmarks || landmarks.length < 200) return null;
+  var eyeR = landmarks[IDX.eyeRight];
+  var eyeL = landmarks[IDX.eyeLeft];
+  if (!eyeR || !eyeL) return null;
+  var eyeRx = eyeR.x * canvas.width;
+  var eyeRy = eyeR.y * canvas.height;
+  var eyeLx = eyeL.x * canvas.width;
+  var eyeLy = eyeL.y * canvas.height;
+  var eyeDistance = Math.hypot(eyeLx - eyeRx, eyeLy - eyeRy);
+  var rotation = Math.atan2(eyeLy - eyeRy, eyeLx - eyeRx);
+  if (accessory === 'hat') {
+    var forehead = landmarks[IDX.foreheadTop];
+    if (!forehead) return null;
+    // Hat sits above forehead, centered on head, ~2.4x eye-distance wide.
+    return {
+      x: forehead.x * canvas.width,
+      y: forehead.y * canvas.height - eyeDistance * 0.7,
+      width: eyeDistance * 2.4,
+      rotation: rotation
+    };
+  }
+
+  // Default: glasses on nose-bridge, scaled to eye-distance.
+  var bridge = landmarks[IDX.noseBridge];
+  if (!bridge) return null;
+  return {
+    x: bridge.x * canvas.width,
+    y: bridge.y * canvas.height,
+    width: eyeDistance * 2.0,
+    rotation: rotation
+  };
+}
+function detectAccessoryFromMode(mode) {
+  if (mode === 'face-hat' || mode === 'hat') return 'hat';
+  // face, face-glasses, glasses, anything else → glasses (default)
+  return 'glasses';
+}
+
+/***/ }),
+
+/***/ "./public/js/tryon/tryon-controller.js":
+/*!*********************************************!*\
+  !*** ./public/js/tryon/tryon-controller.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   startTryOn: () => (/* binding */ startTryOn)
+/* harmony export */ });
+/* harmony import */ var _tryon_ui_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./tryon-ui.js */ "./public/js/tryon/tryon-ui.js");
+/* harmony import */ var _tryon_anchors_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tryon-anchors.js */ "./public/js/tryon/tryon-anchors.js");
+function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return e; }; var t, e = {}, r = Object.prototype, n = r.hasOwnProperty, o = Object.defineProperty || function (t, e, r) { t[e] = r.value; }, i = "function" == typeof Symbol ? Symbol : {}, a = i.iterator || "@@iterator", c = i.asyncIterator || "@@asyncIterator", u = i.toStringTag || "@@toStringTag"; function define(t, e, r) { return Object.defineProperty(t, e, { value: r, enumerable: !0, configurable: !0, writable: !0 }), t[e]; } try { define({}, ""); } catch (t) { define = function define(t, e, r) { return t[e] = r; }; } function wrap(t, e, r, n) { var i = e && e.prototype instanceof Generator ? e : Generator, a = Object.create(i.prototype), c = new Context(n || []); return o(a, "_invoke", { value: makeInvokeMethod(t, r, c) }), a; } function tryCatch(t, e, r) { try { return { type: "normal", arg: t.call(e, r) }; } catch (t) { return { type: "throw", arg: t }; } } e.wrap = wrap; var h = "suspendedStart", l = "suspendedYield", f = "executing", s = "completed", y = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var p = {}; define(p, a, function () { return this; }); var d = Object.getPrototypeOf, v = d && d(d(values([]))); v && v !== r && n.call(v, a) && (p = v); var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p); function defineIteratorMethods(t) { ["next", "throw", "return"].forEach(function (e) { define(t, e, function (t) { return this._invoke(e, t); }); }); } function AsyncIterator(t, e) { function invoke(r, o, i, a) { var c = tryCatch(t[r], t, o); if ("throw" !== c.type) { var u = c.arg, h = u.value; return h && "object" == _typeof(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) { invoke("next", t, i, a); }, function (t) { invoke("throw", t, i, a); }) : e.resolve(h).then(function (t) { u.value = t, i(u); }, function (t) { return invoke("throw", t, i, a); }); } a(c.arg); } var r; o(this, "_invoke", { value: function value(t, n) { function callInvokeWithMethodAndArg() { return new e(function (e, r) { invoke(t, n, e, r); }); } return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); } }); } function makeInvokeMethod(e, r, n) { var o = h; return function (i, a) { if (o === f) throw Error("Generator is already running"); if (o === s) { if ("throw" === i) throw a; return { value: t, done: !0 }; } for (n.method = i, n.arg = a;;) { var c = n.delegate; if (c) { var u = maybeInvokeDelegate(c, n); if (u) { if (u === y) continue; return u; } } if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) { if (o === h) throw o = s, n.arg; n.dispatchException(n.arg); } else "return" === n.method && n.abrupt("return", n.arg); o = f; var p = tryCatch(e, r, n); if ("normal" === p.type) { if (o = n.done ? s : l, p.arg === y) continue; return { value: p.arg, done: n.done }; } "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg); } }; } function maybeInvokeDelegate(e, r) { var n = r.method, o = e.iterator[n]; if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y; var i = tryCatch(o, e.iterator, r.arg); if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y; var a = i.arg; return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y); } function pushTryEntry(t) { var e = { tryLoc: t[0] }; 1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e); } function resetTryEntry(t) { var e = t.completion || {}; e.type = "normal", delete e.arg, t.completion = e; } function Context(t) { this.tryEntries = [{ tryLoc: "root" }], t.forEach(pushTryEntry, this), this.reset(!0); } function values(e) { if (e || "" === e) { var r = e[a]; if (r) return r.call(e); if ("function" == typeof e.next) return e; if (!isNaN(e.length)) { var o = -1, i = function next() { for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next; return next.value = t, next.done = !0, next; }; return i.next = i; } } throw new TypeError(_typeof(e) + " is not iterable"); } return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", { value: GeneratorFunctionPrototype, configurable: !0 }), o(GeneratorFunctionPrototype, "constructor", { value: GeneratorFunction, configurable: !0 }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) { var e = "function" == typeof t && t.constructor; return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name)); }, e.mark = function (t) { return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t; }, e.awrap = function (t) { return { __await: t }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () { return this; }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) { void 0 === i && (i = Promise); var a = new AsyncIterator(wrap(t, r, n, o), i); return e.isGeneratorFunction(r) ? a : a.next().then(function (t) { return t.done ? t.value : a.next(); }); }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () { return this; }), define(g, "toString", function () { return "[object Generator]"; }), e.keys = function (t) { var e = Object(t), r = []; for (var n in e) r.push(n); return r.reverse(), function next() { for (; r.length;) { var t = r.pop(); if (t in e) return next.value = t, next.done = !1, next; } return next.done = !0, next; }; }, e.values = values, Context.prototype = { constructor: Context, reset: function reset(e) { if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t); }, stop: function stop() { this.done = !0; var t = this.tryEntries[0].completion; if ("throw" === t.type) throw t.arg; return this.rval; }, dispatchException: function dispatchException(e) { if (this.done) throw e; var r = this; function handle(n, o) { return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o; } for (var o = this.tryEntries.length - 1; o >= 0; --o) { var i = this.tryEntries[o], a = i.completion; if ("root" === i.tryLoc) return handle("end"); if (i.tryLoc <= this.prev) { var c = n.call(i, "catchLoc"), u = n.call(i, "finallyLoc"); if (c && u) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } else if (c) { if (this.prev < i.catchLoc) return handle(i.catchLoc, !0); } else { if (!u) throw Error("try statement without catch or finally"); if (this.prev < i.finallyLoc) return handle(i.finallyLoc); } } } }, abrupt: function abrupt(t, e) { for (var r = this.tryEntries.length - 1; r >= 0; --r) { var o = this.tryEntries[r]; if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) { var i = o; break; } } i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null); var a = i ? i.completion : {}; return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a); }, complete: function complete(t, e) { if ("throw" === t.type) throw t.arg; return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y; }, finish: function finish(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y; } }, "catch": function _catch(t) { for (var e = this.tryEntries.length - 1; e >= 0; --e) { var r = this.tryEntries[e]; if (r.tryLoc === t) { var n = r.completion; if ("throw" === n.type) { var o = n.arg; resetTryEntry(r); } return o; } } throw Error("illegal catch attempt"); }, delegateYield: function delegateYield(e, r, n) { return this.delegate = { iterator: values(e), resultName: r, nextLoc: n }, "next" === this.method && (this.arg = t), y; } }, e; }
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/**
+ * Try-On controller. Coordinates webcam → worker (MediaPipe) → 2D canvas
+ * compositor. Implements Pattern 1.5 from the integration plan: render the
+ * 3D product GLB to a sprite via <model-viewer>.toBlob(), then draw that
+ * sprite on the live webcam canvas at landmark-derived anchor positions.
+ *
+ * Pattern 2 (parallel three.js overlay) is reserved for Pro phases that
+ * need depth ordering (clothing, occlusion).
+ */
+
+
+
+var VIDEO_WIDTH = 640;
+var VIDEO_HEIGHT = 480;
+function startTryOn(_x) {
+  return _startTryOn.apply(this, arguments);
+}
+
+/**
+ * Build a snapshot dataURL from the live canvas. When `watermark` is true
+ * (Free tier), draws a small "Powered by AtlasAR" badge at the bottom-right
+ * corner of a CLONED canvas — never mutates the live preview canvas.
+ */
+function _startTryOn() {
+  _startTryOn = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee2(_ref) {
+    var productId, mode, glbSrc, config, onClose, ui, accessory, granted, stream, overlaySprite, worker, lastLandmarks, lastFacialMatrix, detectInflight, frames, lastFpsAt, running, workerReady, ctx, tick;
+    return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+      while (1) switch (_context2.prev = _context2.next) {
+        case 0:
+          tick = function _tick() {
+            if (!running || !ui.isOpen) return;
+            ctx.save();
+            // Mirror so user feels natural ("selfie" view).
+            ctx.translate(ui.canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(ui.video, 0, 0, ui.canvas.width, ui.canvas.height);
+            ctx.restore();
+            if (lastLandmarks) {
+              var anchor = overlaySprite ? (0,_tryon_anchors_js__WEBPACK_IMPORTED_MODULE_1__.computeAnchor)(lastLandmarks, mode, ui.canvas, accessory) : null;
+              // Pro pipeline hook: per-product calibration overrides.
+              if (anchor && window.atlasArTryonPipeline && typeof window.atlasArTryonPipeline.adjustAnchor === 'function') {
+                try {
+                  anchor = window.atlasArTryonPipeline.adjustAnchor(anchor, {
+                    productId: productId,
+                    mode: mode,
+                    accessory: accessory
+                  }) || anchor;
+                } catch (e) {
+                  /* keep default anchor on failure */
+                }
+              }
+
+              // Pattern 2 — Pro three.js renderer hook. When defined, it
+              // owns the accessory render (depth-occluded GLB overlay) and
+              // the 2D `ctx.drawImage(sprite, ...)` path is skipped.
+              var renderedByPro = false;
+              if (window.atlasArTryonPipeline && typeof window.atlasArTryonPipeline.render === 'function') {
+                try {
+                  var ok = window.atlasArTryonPipeline.render({
+                    ctx: ctx,
+                    canvas: ui.canvas,
+                    video: ui.video,
+                    landmarks: lastLandmarks,
+                    facialMatrix: lastFacialMatrix,
+                    anchor: anchor,
+                    sprite: overlaySprite,
+                    productId: productId,
+                    mode: mode,
+                    accessory: accessory,
+                    glbSrc: glbSrc
+                  });
+                  renderedByPro = ok !== false;
+                } catch (e) {
+                  console.warn('[AtlasAR] Pro render hook failed; falling back to 2D.', e);
+                }
+              }
+              if (!renderedByPro && anchor && overlaySprite) {
+                // Mirror anchor x because we drew video mirrored.
+                var ax = ui.canvas.width - anchor.x;
+                var w = anchor.width;
+                var h = w * (overlaySprite.height / overlaySprite.width);
+                ctx.save();
+                ctx.translate(ax, anchor.y);
+                ctx.rotate(-anchor.rotation);
+                ctx.drawImage(overlaySprite, -w / 2, -h / 2, w, h);
+                ctx.restore();
+              }
+            }
+
+            // Send next frame to worker if it's idle and ready.
+            if (workerReady && !detectInflight && ui.video.readyState >= 2) {
+              detectInflight = true;
+              createImageBitmap(ui.video).then(function (bitmap) {
+                worker.postMessage({
+                  type: 'detect',
+                  bitmap: bitmap,
+                  ts: performance.now()
+                }, [bitmap]);
+              })["catch"](function () {
+                detectInflight = false;
+              });
+            }
+            frames += 1;
+            var now = performance.now();
+            if (now - lastFpsAt >= 1000) {
+              ui.setFps(Math.round(frames * 1000 / (now - lastFpsAt)));
+              frames = 0;
+              lastFpsAt = now;
+            }
+            requestAnimationFrame(tick);
+          };
+          productId = _ref.productId, mode = _ref.mode, glbSrc = _ref.glbSrc, config = _ref.config, onClose = _ref.onClose;
+          ui = (0,_tryon_ui_js__WEBPACK_IMPORTED_MODULE_0__.createUI)({
+            config: config,
+            productId: productId
+          });
+          document.body.appendChild(ui.root);
+          ui.canvas.width = VIDEO_WIDTH;
+          ui.canvas.height = VIDEO_HEIGHT;
+          accessory = (0,_tryon_anchors_js__WEBPACK_IMPORTED_MODULE_1__.detectAccessoryFromMode)(mode);
+          _context2.next = 9;
+          return ui.askConsent();
+        case 9:
+          granted = _context2.sent;
+          if (granted) {
+            _context2.next = 13;
+            break;
+          }
+          ui.close();
+          return _context2.abrupt("return", null);
+        case 13:
+          _context2.prev = 13;
+          _context2.next = 16;
+          return navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'user',
+              width: {
+                ideal: VIDEO_WIDTH
+              },
+              height: {
+                ideal: VIDEO_HEIGHT
+              }
+            },
+            audio: false
+          });
+        case 16:
+          stream = _context2.sent;
+          _context2.next = 24;
+          break;
+        case 19:
+          _context2.prev = 19;
+          _context2.t0 = _context2["catch"](13);
+          ui.showError('Camera permission denied. Please grant access to use Try It On.');
+          console.error('[AtlasAR] getUserMedia failed:', _context2.t0);
+          return _context2.abrupt("return", null);
+        case 24:
+          ui.video.srcObject = stream;
+          _context2.next = 27;
+          return ui.video.play();
+        case 27:
+          ui.showStage();
+          ui.setStatus('Loading face model…');
+          _context2.next = 31;
+          return captureProductSprite(productId, glbSrc);
+        case 31:
+          overlaySprite = _context2.sent;
+          if (!overlaySprite) {
+            ui.setStatus('No 3D model found on page');
+          } else {
+            // Expose for debugging.
+            window.__tryon_debug = window.__tryon_debug || {};
+            window.__tryon_debug.sprite = overlaySprite;
+            window.__tryon_debug.mode = mode;
+          }
+          worker = new Worker(new URL(/* webpackChunkName: "tryon-face-worker" */
+          /* worker import */ __webpack_require__.p + __webpack_require__.u("tryon-face-worker"), __webpack_require__.b), {
+            type: undefined
+          });
+          worker.postMessage({
+            type: 'init',
+            modelUrl: config.models && config.models.face,
+            wasmBase: config.models && config.models.wasm_base,
+            options: config.worker_options && _typeof(config.worker_options) === 'object' ? config.worker_options : {}
+          });
+          lastLandmarks = null;
+          lastFacialMatrix = null;
+          detectInflight = false;
+          frames = 0;
+          lastFpsAt = performance.now();
+          running = true;
+          workerReady = false;
+          worker.onmessage = function (ev) {
+            var msg = ev.data || {};
+            if (msg.type === 'boot') {
+              ui.setStatus('Worker booted, loading face model…');
+            } else if (msg.type === 'ready') {
+              workerReady = true;
+              ui.setStatus('');
+            } else if (msg.type === 'result') {
+              lastLandmarks = msg.landmarks;
+              lastFacialMatrix = msg.facialMatrix || null;
+              detectInflight = false;
+              // Lightweight debug snapshot — no per-frame console spam.
+              window.__tryon_debug = window.__tryon_debug || {};
+              window.__tryon_debug.landmarks = msg.landmarks;
+              window.__tryon_debug.facialMatrix = lastFacialMatrix;
+              window.__tryon_debug.lastResultAt = Date.now();
+            } else if (msg.type === 'error') {
+              ui.showError(msg.message || 'Face tracker failed');
+              console.error('[AtlasAR Try-On worker error]', msg.message);
+              running = false;
+            }
+          };
+          worker.onerror = function (e) {
+            console.error('[AtlasAR Try-On worker.onerror]', e.message, e.filename, e.lineno);
+            ui.showError('Worker error: ' + e.message);
+          };
+          ctx = ui.canvas.getContext('2d');
+          requestAnimationFrame(tick);
+          ui.onSnapshot = /*#__PURE__*/_asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+            var dataUrl, a;
+            return _regeneratorRuntime().wrap(function _callee$(_context) {
+              while (1) switch (_context.prev = _context.next) {
+                case 0:
+                  dataUrl = buildSnapshotDataUrl(ui.canvas, !!config.watermark); // Direct download.
+                  a = document.createElement('a');
+                  a.href = dataUrl;
+                  a.download = "tryon-".concat(productId, "-").concat(Date.now(), ".png");
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+
+                  // Optional: persist to media library if logged in.
+                  if (!(config.rest_url && config.rest_nonce)) {
+                    _context.next = 16;
+                    break;
+                  }
+                  _context.prev = 8;
+                  _context.next = 11;
+                  return fetch("".concat(config.rest_url, "/tryon/snapshot"), {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-WP-Nonce': config.rest_nonce
+                    },
+                    body: JSON.stringify({
+                      image: dataUrl,
+                      product_id: productId
+                    })
+                  });
+                case 11:
+                  _context.next = 16;
+                  break;
+                case 13:
+                  _context.prev = 13;
+                  _context.t0 = _context["catch"](8);
+                  console.warn('[AtlasAR] Snapshot upload failed:', _context.t0);
+                case 16:
+                case "end":
+                  return _context.stop();
+              }
+            }, _callee, null, [[8, 13]]);
+          }));
+          ui.onClose = function () {
+            running = false;
+            stream.getTracks().forEach(function (t) {
+              return t.stop();
+            });
+            worker.postMessage({
+              type: 'dispose'
+            });
+            worker.terminate();
+            if (typeof onClose === 'function') onClose();
+          };
+          return _context2.abrupt("return", ui);
+        case 49:
+        case "end":
+          return _context2.stop();
+      }
+    }, _callee2, null, [[13, 19]]);
+  }));
+  return _startTryOn.apply(this, arguments);
+}
+function buildSnapshotDataUrl(srcCanvas, watermark) {
+  if (!watermark) {
+    return srcCanvas.toDataURL('image/png');
+  }
+  var out = document.createElement('canvas');
+  out.width = srcCanvas.width;
+  out.height = srcCanvas.height;
+  var ctx = out.getContext('2d');
+  if (!ctx) return srcCanvas.toDataURL('image/png');
+  ctx.drawImage(srcCanvas, 0, 0);
+  var text = 'Powered by AtlasAR';
+  var fontSize = Math.max(11, Math.round(out.width * 0.022));
+  ctx.font = "600 ".concat(fontSize, "px system-ui, -apple-system, Segoe UI, sans-serif");
+  var padX = 10,
+    padY = 6;
+  var textWidth = ctx.measureText(text).width;
+  var boxW = textWidth + padX * 2;
+  var boxH = fontSize + padY * 2;
+  var x = out.width - boxW - 10;
+  var y = out.height - boxH - 10;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+  ctx.beginPath();
+  var r = 8;
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + boxW - r, y);
+  ctx.quadraticCurveTo(x + boxW, y, x + boxW, y + r);
+  ctx.lineTo(x + boxW, y + boxH - r);
+  ctx.quadraticCurveTo(x + boxW, y + boxH, x + boxW - r, y + boxH);
+  ctx.lineTo(x + r, y + boxH);
+  ctx.quadraticCurveTo(x, y + boxH, x, y + boxH - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x + padX, y + boxH / 2);
+  return out.toDataURL('image/png');
+}
+
+/**
+ * Ensure the <model-viewer> custom element is registered. The plugin lazy-
+ * loads google-model-viewer.js when an on-page mv enters viewport, but in
+ * the try-on flow the on-page viewer is often hidden behind a toggle so the
+ * lazy-loader never fires. We force-load the module ourselves.
+ */
+function ensureModelViewerLoaded() {
+  return _ensureModelViewerLoaded.apply(this, arguments);
+}
+/**
+ * Render the product GLB to a sprite via a transient off-screen <model-viewer>.
+ *
+ * The on-page model-viewer is often lazy-loaded, hidden behind a toggle, or
+ * angled to a non-front pose — none of which gives a usable try-on sprite.
+ * We read its `src`, build a temporary off-screen instance forced to a
+ * front-facing camera-orbit, await load, then snapshot.
+ */
+function _ensureModelViewerLoaded() {
+  _ensureModelViewerLoaded = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee3() {
+    var cfg, base, src;
+    return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+      while (1) switch (_context3.prev = _context3.next) {
+        case 0:
+          if (!(window.customElements && window.customElements.get('model-viewer'))) {
+            _context3.next = 2;
+            break;
+          }
+          return _context3.abrupt("return", true);
+        case 2:
+          cfg = window.atlas_ar_tryon || {};
+          base = cfg.plugin_url || '/';
+          src = "".concat(base, "public/js/google-model-viewer.js");
+          _context3.next = 7;
+          return new Promise(function (resolve, reject) {
+            var existing = document.querySelector("script[src=\"".concat(src, "\"]"));
+            if (existing) {
+              existing.addEventListener('load', resolve, {
+                once: true
+              });
+              existing.addEventListener('error', reject, {
+                once: true
+              });
+              return;
+            }
+            var s = document.createElement('script');
+            s.type = 'module';
+            s.src = src;
+            s.onload = resolve;
+            s.onerror = reject;
+            document.head.appendChild(s);
+          });
+        case 7:
+          if (!window.customElements) {
+            _context3.next = 10;
+            break;
+          }
+          _context3.next = 10;
+          return window.customElements.whenDefined('model-viewer');
+        case 10:
+          return _context3.abrupt("return", true);
+        case 11:
+        case "end":
+          return _context3.stop();
+      }
+    }, _callee3);
+  }));
+  return _ensureModelViewerLoaded.apply(this, arguments);
+}
+function captureProductSprite(_x2, _x3) {
+  return _captureProductSprite.apply(this, arguments);
+}
+function _captureProductSprite() {
+  _captureProductSprite = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee4(productId, explicitSrc) {
+    var src, candidates, source, off, loaded, blob;
+    return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+      while (1) switch (_context4.prev = _context4.next) {
+        case 0:
+          src = '';
+          if (explicitSrc && typeof explicitSrc === 'string') {
+            src = explicitSrc;
+          }
+          if (!src) {
+            candidates = [document.querySelector("model-viewer[data-product-id=\"".concat(productId, "\"]")), document.querySelector("model-viewer[product-id=\"".concat(productId, "\"]")), document.querySelector('model-viewer.atlas_ar_model_viewer'), document.querySelector('model-viewer')].filter(Boolean);
+            source = candidates[0];
+            if (source) src = source.getAttribute('src') || '';
+          }
+          if (src) {
+            _context4.next = 5;
+            break;
+          }
+          return _context4.abrupt("return", null);
+        case 5:
+          _context4.prev = 5;
+          _context4.next = 8;
+          return ensureModelViewerLoaded();
+        case 8:
+          _context4.next = 14;
+          break;
+        case 10:
+          _context4.prev = 10;
+          _context4.t0 = _context4["catch"](5);
+          console.warn('[AtlasAR] model-viewer module failed to load', _context4.t0);
+          return _context4.abrupt("return", null);
+        case 14:
+          off = document.createElement('model-viewer'); // MUST be in viewport AND non-transparent for model-viewer to render frames.
+          // clip-path hides visually while leaving the element paintable.
+          off.style.cssText = ['position:fixed', 'top:0', 'right:0', 'width:512px', 'height:512px', 'clip-path:inset(0 0 100% 100%)', 'pointer-events:none', 'z-index:1'].join(';');
+          off.setAttribute('src', src);
+          off.setAttribute('camera-orbit', '0deg 90deg auto');
+          off.setAttribute('exposure', '1');
+          off.setAttribute('shadow-intensity', '0');
+          off.setAttribute('environment-image', 'neutral');
+          off.setAttribute('disable-zoom', '');
+          off.setAttribute('loading', 'eager');
+          off.setAttribute('reveal', 'auto');
+          document.body.appendChild(off);
+          _context4.next = 27;
+          return new Promise(function (resolve) {
+            var settled = false;
+            var finish = function finish(ok) {
+              if (settled) return;
+              settled = true;
+              resolve(ok);
+            };
+            off.addEventListener('load', function () {
+              return finish(true);
+            }, {
+              once: true
+            });
+            off.addEventListener('error', function () {
+              return finish(false);
+            }, {
+              once: true
+            });
+            setTimeout(function () {
+              return finish(false);
+            }, 10000);
+          });
+        case 27:
+          loaded = _context4.sent;
+          if (!(!loaded || typeof off.toBlob !== 'function')) {
+            _context4.next = 32;
+            break;
+          }
+          off.remove();
+          console.warn('[AtlasAR] Snapshot model-viewer failed to load', src);
+          return _context4.abrupt("return", null);
+        case 32:
+          _context4.next = 34;
+          return new Promise(function (resolve) {
+            return requestAnimationFrame(function () {
+              return requestAnimationFrame(resolve);
+            });
+          });
+        case 34:
+          _context4.prev = 34;
+          _context4.next = 37;
+          return off.toBlob({
+            mimeType: 'image/png',
+            idealAspect: false
+          });
+        case 37:
+          blob = _context4.sent;
+          off.remove();
+          if (blob) {
+            _context4.next = 41;
+            break;
+          }
+          return _context4.abrupt("return", null);
+        case 41:
+          _context4.next = 43;
+          return createImageBitmap(blob);
+        case 43:
+          return _context4.abrupt("return", _context4.sent);
+        case 46:
+          _context4.prev = 46;
+          _context4.t1 = _context4["catch"](34);
+          off.remove();
+          console.warn('[AtlasAR] Failed to snapshot model-viewer:', _context4.t1);
+          return _context4.abrupt("return", null);
+        case 51:
+        case "end":
+          return _context4.stop();
+      }
+    }, _callee4, null, [[5, 10], [34, 46]]);
+  }));
+  return _captureProductSprite.apply(this, arguments);
+}
+
+/***/ }),
+
+/***/ "./public/js/tryon/tryon-ui.js":
+/*!*************************************!*\
+  !*** ./public/js/tryon/tryon-ui.js ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createUI: () => (/* binding */ createUI)
+/* harmony export */ });
+/**
+ * Try-On modal UI. Pure DOM, no React. Handles consent gate,
+ * webcam preview, snapshot, error states, close.
+ *
+ * Returns a controller-friendly handle that the controller wires up.
+ */
+
+function createUI(_ref) {
+  var config = _ref.config,
+    productId = _ref.productId;
+  var root = document.createElement('div');
+  root.className = 'art-tryon-modal';
+  root.setAttribute('role', 'dialog');
+  root.setAttribute('aria-modal', 'true');
+  root.innerHTML = "\n\t\t<div class=\"art-tryon-backdrop\" data-action=\"close\"></div>\n\t\t<div class=\"art-tryon-panel\">\n\t\t\t<button class=\"art-tryon-close\" type=\"button\" data-action=\"close\" aria-label=\"Close try-on\">&times;</button>\n\t\t\t<div class=\"art-tryon-stage\">\n\t\t\t\t<video class=\"art-tryon-video\" autoplay playsinline muted></video>\n\t\t\t\t<canvas class=\"art-tryon-canvas\"></canvas>\n\t\t\t\t<div class=\"art-tryon-status\" aria-live=\"polite\">Loading\u2026</div>\n\t\t\t</div>\n\t\t\t<div class=\"art-tryon-consent\">\n\t\t\t\t<h3>Try it on yourself</h3>\n\t\t\t\t<p class=\"art-tryon-consent-text\">".concat(escapeHtml(config.consent_text || 'Allow camera access to try this on virtually. Video stays on your device.'), "</p>\n\t\t\t\t<button type=\"button\" class=\"art-tryon-consent-allow button button-primary\">Allow camera</button>\n\t\t\t\t<button type=\"button\" class=\"art-tryon-consent-deny button\" data-action=\"close\">Cancel</button>\n\t\t\t</div>\n\t\t\t<div class=\"art-tryon-toolbar\" hidden>\n\t\t\t\t<button type=\"button\" class=\"art-tryon-snapshot button button-primary\" ").concat(config.snapshot ? '' : 'hidden', ">Snapshot</button>\n\t\t\t\t<span class=\"art-tryon-fps\"></span>\n\t\t\t</div>\n\t\t\t<div class=\"art-tryon-error\" hidden></div>\n\t\t</div>\n\t");
+  var video = root.querySelector('.art-tryon-video');
+  var canvas = root.querySelector('.art-tryon-canvas');
+  var statusEl = root.querySelector('.art-tryon-status');
+  var consentEl = root.querySelector('.art-tryon-consent');
+  var toolbar = root.querySelector('.art-tryon-toolbar');
+  var errorEl = root.querySelector('.art-tryon-error');
+  var snapshotBtn = root.querySelector('.art-tryon-snapshot');
+  var allowBtn = root.querySelector('.art-tryon-consent-allow');
+  var fpsEl = root.querySelector('.art-tryon-fps');
+  var isOpen = true;
+  var onCloseCb = null;
+  var onSnapshotCb = null;
+  var consentResolve = null;
+  root.addEventListener('click', function (e) {
+    var action = e.target.dataset && e.target.dataset.action;
+    if (action === 'close') close();
+  });
+  allowBtn.addEventListener('click', function () {
+    if (consentResolve) consentResolve(true);
+  });
+  snapshotBtn.addEventListener('click', function () {
+    if (onSnapshotCb) onSnapshotCb();
+  });
+  document.addEventListener('keydown', escHandler);
+  function escHandler(e) {
+    if (e.key === 'Escape' && isOpen) close();
+  }
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    document.removeEventListener('keydown', escHandler);
+    root.remove();
+    if (onCloseCb) onCloseCb();
+  }
+  function setStatus(text) {
+    statusEl.textContent = text || '';
+    statusEl.hidden = !text;
+  }
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+  }
+  function showStage() {
+    consentEl.hidden = true;
+    toolbar.hidden = false;
+  }
+  function askConsent() {
+    return new Promise(function (resolve) {
+      consentResolve = resolve;
+    });
+  }
+  function setFps(fps) {
+    fpsEl.textContent = fps ? "".concat(fps, " fps") : '';
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[c];
+    });
+  }
+  return {
+    root: root,
+    video: video,
+    canvas: canvas,
+    productId: productId,
+    get isOpen() {
+      return isOpen;
+    },
+    setStatus: setStatus,
+    showError: showError,
+    showStage: showStage,
+    askConsent: askConsent,
+    setFps: setFps,
+    close: close,
+    set onClose(fn) {
+      onCloseCb = fn;
+    },
+    set onSnapshot(fn) {
+      onSnapshotCb = fn;
+    }
+  };
+}
+
+/***/ })
+
+}]);
