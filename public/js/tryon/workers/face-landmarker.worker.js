@@ -31,15 +31,16 @@ self.onmessage = async ( evt ) => {
 	try {
 		if ( data.type === 'init' ) {
 			const vision = await FilesetResolver.forVisionTasks( data.wasmBase );
+			const opts = data.options || {};
 			landmarker = await FaceLandmarker.createFromOptions( vision, {
 				baseOptions: {
 					modelAssetPath: data.modelUrl,
 					delegate: 'GPU',
 				},
 				runningMode: 'VIDEO',
-				numFaces: 1,
-				outputFaceBlendshapes: false,
-				outputFacialTransformationMatrixes: false,
+				numFaces: opts.numFaces || 1,
+				outputFaceBlendshapes: !! opts.outputFaceBlendshapes,
+				outputFacialTransformationMatrixes: !! opts.outputFacialTransformationMatrixes,
 			} );
 			self.postMessage( { type: 'ready' } );
 			return;
@@ -57,8 +58,14 @@ self.onmessage = async ( evt ) => {
 			}
 			const result = landmarker.detectForVideo( data.bitmap, data.ts || performance.now() );
 			const landmarks = result && result.faceLandmarks && result.faceLandmarks[ 0 ] ? result.faceLandmarks[ 0 ] : null;
+			let facialMatrix = null;
+			if ( result && result.facialTransformationMatrixes && result.facialTransformationMatrixes[ 0 ] ) {
+				const m = result.facialTransformationMatrixes[ 0 ];
+				// Marshal to a plain Float32Array for structured-clone safety.
+				facialMatrix = m.data ? new Float32Array( m.data ) : null;
+			}
 			data.bitmap.close && data.bitmap.close();
-			self.postMessage( { type: 'result', landmarks, ts: data.ts } );
+			self.postMessage( { type: 'result', landmarks, facialMatrix, ts: data.ts } );
 			return;
 		}
 

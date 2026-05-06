@@ -508,21 +508,35 @@ class AR_TRY_ON_Tryon {
 
 		$pro_active = self::is_pro_active();
 
+		// Worker options forwarded into FaceLandmarker.createFromOptions.
+		// Pro flips on facial transformation matrices (used by the
+		// three.js depth-occluded overlay) via the filter.
+		$worker_options = apply_filters(
+			'atlas_ar_tryon_worker_options',
+			array(
+				'numFaces'                            => 1,
+				'outputFaceBlendshapes'               => false,
+				'outputFacialTransformationMatrixes'  => false,
+			),
+			$pro_active
+		);
+
 		wp_localize_script(
 			self::SCRIPT_HANDLE,
 			'atlas_ar_tryon',
 			array(
-				'rest_url'     => esc_url_raw( rest_url( 'ar_try_on/v1' ) ),
-				'rest_nonce'   => wp_create_nonce( 'wp_rest' ),
-				'modes'        => self::available_modes(),
-				'models'       => self::model_urls(),
-				'snapshot'     => (bool) $settings['tryon_snapshot'],
-				'button_label' => $settings['tryon_button_label'],
-				'consent_text' => $settings['tryon_consent_text'],
-				'plugin_url'   => ATLAS_AR_PLUGIN_URL,
-				'pro_active'   => $pro_active,
+				'rest_url'       => esc_url_raw( rest_url( 'ar_try_on/v1' ) ),
+				'rest_nonce'     => wp_create_nonce( 'wp_rest' ),
+				'modes'          => self::available_modes(),
+				'models'         => self::model_urls(),
+				'snapshot'       => (bool) $settings['tryon_snapshot'],
+				'button_label'   => $settings['tryon_button_label'],
+				'consent_text'   => $settings['tryon_consent_text'],
+				'plugin_url'     => ATLAS_AR_PLUGIN_URL,
+				'pro_active'     => $pro_active,
 				// Watermark only when Pro inactive. Pro filter can override.
-				'watermark'    => apply_filters( 'atlas_ar_tryon_snapshot_watermark', ! $pro_active ),
+				'watermark'      => apply_filters( 'atlas_ar_tryon_snapshot_watermark', ! $pro_active ),
+				'worker_options' => $worker_options,
 			)
 		);
 	}

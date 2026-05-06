@@ -72,9 +72,11 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		type: 'init',
 		modelUrl: config.models && config.models.face,
 		wasmBase: config.models && config.models.wasm_base,
+		options: ( config.worker_options && typeof config.worker_options === 'object' ) ? config.worker_options : {},
 	} );
 
 	let lastLandmarks = null;
+	let lastFacialMatrix = null;
 	let detectInflight = false;
 	let frames = 0;
 	let lastFpsAt = performance.now();
@@ -90,10 +92,12 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 			ui.setStatus( '' );
 		} else if ( msg.type === 'result' ) {
 			lastLandmarks = msg.landmarks;
+			lastFacialMatrix = msg.facialMatrix || null;
 			detectInflight = false;
 			// Lightweight debug snapshot — no per-frame console spam.
 			window.__tryon_debug = window.__tryon_debug || {};
 			window.__tryon_debug.landmarks = msg.landmarks;
+			window.__tryon_debug.facialMatrix = lastFacialMatrix;
 			window.__tryon_debug.lastResultAt = Date.now();
 		} else if ( msg.type === 'error' ) {
 			ui.showError( msg.message || 'Face tracker failed' );
@@ -118,8 +122,10 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		ctx.drawImage( ui.video, 0, 0, ui.canvas.width, ui.canvas.height );
 		ctx.restore();
 
-		if ( lastLandmarks && overlaySprite ) {
-			let anchor = computeAnchor( lastLandmarks, mode, ui.canvas, accessory );
+		if ( lastLandmarks ) {
+			let anchor = overlaySprite
+				? computeAnchor( lastLandmarks, mode, ui.canvas, accessory )
+				: null;
 			// Pro pipeline hook: per-product calibration overrides.
 			if ( anchor && window.atlasArTryonPipeline && typeof window.atlasArTryonPipeline.adjustAnchor === 'function' ) {
 				try {
@@ -128,7 +134,33 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 					/* keep default anchor on failure */
 				}
 			}
-			if ( anchor ) {
+
+			// Pattern 2 — Pro three.js renderer hook. When defined, it
+			// owns the accessory render (depth-occluded GLB overlay) and
+			// the 2D `ctx.drawImage(sprite, ...)` path is skipped.
+			let renderedByPro = false;
+			if ( window.atlasArTryonPipeline && typeof window.atlasArTryonPipeline.render === 'function' ) {
+				try {
+					const ok = window.atlasArTryonPipeline.render( {
+						ctx,
+						canvas: ui.canvas,
+						video: ui.video,
+						landmarks: lastLandmarks,
+						facialMatrix: lastFacialMatrix,
+						anchor,
+						sprite: overlaySprite,
+						productId,
+						mode,
+						accessory,
+						glbSrc,
+					} );
+					renderedByPro = ok !== false;
+				} catch ( e ) {
+					console.warn( '[AtlasAR] Pro render hook failed; falling back to 2D.', e );
+				}
+			}
+
+			if ( ! renderedByPro && anchor && overlaySprite ) {
 				// Mirror anchor x because we drew video mirrored.
 				const ax = ui.canvas.width - anchor.x;
 				const w = anchor.width;
