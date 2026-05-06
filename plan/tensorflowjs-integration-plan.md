@@ -279,27 +279,38 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 
 ### Phase 0 — Branches + scaffolding (week 1)
 - [x] `feature/tensorflowjs` on both plugins
-- [ ] Add npm deps to Free `package.json`: `@tensorflow/tfjs-core`, `@tensorflow/tfjs-backend-webgl`, `@mediapipe/tasks-vision`
-- [ ] Add npm deps to Pro `package.json`: same as Free + nothing extra (Pro reuses Free's runtime)
-- [ ] Webpack/Mix config for Web Worker entries
-- [ ] Decide self-host vs CDN for model weights (recommendation: bundle in Pro, opt-in Free)
+- [x] npm deps to Free `package.json`: `@tensorflow/tfjs-core`, `@tensorflow/tfjs-backend-webgl`, `@mediapipe/tasks-vision`
+- [x] Pro reuses Free's runtime (no separate deps)
+- [x] Webpack/Mix config for Web Worker entries (chunk path routed to `public/js/build/chunks/`)
+- [x] Self-host vs CDN — **CDN default** (jsdelivr WASM + storage.googleapis.com `face_landmarker.task`); self-host opt-in via `tryon_self_host` setting
 
-### Phase 1 — Free face try-on MVP (weeks 2–3)
-- [ ] `AR_TRY_ON_Tryon.php` class + REST routes
-- [ ] `face-landmarker.worker.js` + IndexedDB cache
-- [ ] `tryon-controller.js` driving `<model-viewer>` via Pattern 1 from research §3.1
-- [ ] Modal UI: consent → webcam grant → live preview → "Try It On" button on product page
-- [ ] WooCommerce integration: render button conditionally per atlas_ar_should_load_button filter
-- [ ] Snapshot capture
-- [ ] Settings tab in dashboard React app
-- [ ] readme.txt update
+### Phase 1 — Free face try-on MVP — **SHIPPED**
+- [x] `AR_TRY_ON_Tryon.php` class + `AR_TRY_ON_Tryon_Hooks.php` registry + `/tryon/snapshot` REST route (kept) — `/tryon/config` and `/tryon/settings` were dropped in favor of the existing shared `ar_try_on_settings` option and `wp_localize_script` config delivery
+- [x] `face-landmarker.worker.js` (lazy MediaPipe import, ~145 KB chunk on click)
+- [x] `tryon-controller.js` driving an off-screen `<model-viewer>` via **Pattern 1.5** (snapshot to sprite, draw on 2D canvas) — in-band Pattern 1 was insufficient because the on-page model-viewer is hidden behind the toggle UI
+- [x] Modal UI: consent → webcam grant → live preview → snapshot
+- [x] **No new button** — Try-On reuses the existing `.ar_vr_3d_model_try_on` button. Per-product opt-in via `ar_placement = face-glasses | face-hat`. Position respects `ar_try_on_wc_hook_position` ("Show Button In") setting; toggle-mode positions render the pill as an overlay next to the cube icon.
+- [x] Snapshot capture + optional media-library upload (logged-in users)
+- [x] Snapshot watermark for Free (filter-removable by Pro: `atlas_ar_tryon_snapshot_watermark`)
+- [x] Free product cap (default 3) — `updated_post_meta` hook downgrades 4th+ face product to `floor` and surfaces an admin notice. Filter: `atlas_ar_tryon_free_product_limit`
+- [x] Pipeline hook `window.atlasArTryonPipeline.adjustAnchor(anchor, ctx)` — Pro consumes for per-product calibration
+- [x] readme.txt — DEFERRED to Phase 6 polish
+- [ ] Settings tab in dashboard React app — DEFERRED (REST + localized config already work; UI sugar)
+- [ ] iOS Safari smoke test — DEFERRED
+- [ ] Mobile FPS benchmark — DEFERRED
 
-### Phase 2 — Pro face addon real tracking (weeks 4–5)
-- [ ] Rewrite `addons/atlasar-face-addon/addon.php` — replace placeholder hotspots with real landmark-driven anchors
-- [ ] Add `face-blendshapes`, `face-makeup`, `face-occlusion` to addon.json features
-- [ ] Per-product calibration UI in metabox
-- [ ] Snapshot watermark
-- [ ] Multi-face support (up to 2)
+### Phase 2 — Pro face addon real tracking — **PARTIALLY SHIPPED**
+- [x] `addons/atlasar-face-addon/addon.php` — wires Pro filters: watermark off (`atlas_ar_tryon_snapshot_watermark`), cap lift (`atlas_ar_tryon_free_product_limit` → `PHP_INT_MAX`), `num_faces=2` ready
+- [x] Per-product calibration metabox (PHP) — sliders for offsetX, offsetY, scale, rotationDeg → saved to `_atlas_ar_tryon_calibration` post meta
+- [x] `tryon-pro.js` — registers `window.atlasArTryonPipeline.adjustAnchor` so calibration is applied without forking Free
+- [ ] **Pattern 2 — three.js depth-occluded overlay (NOT YET IMPLEMENTED)**
+  - Render GLB on a parallel WebGL canvas overlaying the webcam canvas
+  - Face-mesh-driven depth/stencil mask so glasses temples / hat back are correctly hidden behind the head
+  - 3D head pose driven by MediaPipe `outputFacialTransformationMatrixes` (worker option to be flipped on for Pro)
+  - Free controller already has the hook `window.atlasArTryonPipeline.render` reserved for this — Pro must implement it
+- [ ] Multi-face support runtime — `num_faces=2` is announced; worker still hardcoded to 1, needs to read the value from config
+- [ ] Snapshot HD export, branded export, GIF — Pro Phase 6 scope
+- [ ] `face-blendshapes`, `face-makeup`, `face-occlusion` features in addon.json — Phase 5 scope (makeup) + this phase (occlusion)
 
 ### Phase 3 — Pro hand try-on (weeks 6–7)
 - [ ] Rewrite `addons/atlasar-hand-addon/addon.php`
@@ -357,6 +368,121 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 6. **Try-on entry point UX** — separate "Try It On" button, or merge with existing "View in AR" button via a dropdown ("View in your room" / "Try on yourself")?
 7. **Default to face-only or auto-detect mode based on WC category?** Auto-detect makes it more magical but introduces wrong-mode failure case.
 8. **Multi-language consent text** — does the existing i18n setup auto-cover new strings? Check `languages/` dir.
+
+---
+
+## 7a. Implementation status (as of 2026-05-06)
+
+### Free — shipped
+- TF.js + MediaPipe Face Landmarker pipeline (lazy-loaded chunks)
+- `face-glasses`, `face-hat` placements via existing `ar_placement` dropdown
+- Per-product opt-in toggle "Show static viewer alongside Try-On" → controls whether AtlasAR.js is enqueued and whether the cube toggle renders alongside the Try-On overlay
+- Conditional asset enqueue on product pages (face-* + viewer-OFF skips the AtlasAR bundle entirely)
+- Modal UI + webcam consent + snapshot
+- Watermark on Free snapshots (Pro filter strips it)
+- Free product cap = 3 face-* products (Pro filter lifts to unlimited)
+- 10 hook contracts (`atlas_ar_tryon_*`) live and consumed by Pro
+- Pipeline hook `window.atlasArTryonPipeline.adjustAnchor` for Pro calibration overrides
+
+### Free — known limits (acceptable for v1, see §7b)
+- 2D pipeline only: no depth occlusion (temples/hat back render on top of face)
+- Sprite is rendered from a neutral HDRI, lighting won't match the webcam scene
+- Default anchor scales (glasses 2.0× eye-distance, hat 2.4× eye-distance) are GLB-agnostic — fit accuracy depends on the source GLB; per-product calibration is Pro-only
+
+### Pro — shipped
+- Watermark removal filter
+- Free cap removal filter
+- Multi-face announce (`num_faces = 2`) — runtime worker still uses 1
+- Per-product calibration metabox (offset X/Y, scale, rotation) → applied via Free's `adjustAnchor` pipeline hook
+- `tryon-pro.js` enqueued on product pages
+
+### Pro — pending (next iteration)
+1. **Pattern 2 — three.js depth-occluded overlay**. The single largest remaining gap. Until this lands, glasses temple bars sit on top of the face instead of being correctly hidden behind it.
+2. Worker config: `outputFacialTransformationMatrixes: true` when Pro active, so the matrix can drive a 3D camera in the overlay
+3. Worker config: `numFaces` driven by localized config (currently hardcoded to 1)
+4. Snapshot HD / GIF / share-link
+5. Pro hand / pose / makeup / segmentation addons (Phases 3-5)
+
+---
+
+## 7b. Pattern 2 implementation plan (next)
+
+Single goal: replace the 2D `ctx.drawImage(sprite, ...)` path with a parallel WebGL canvas that renders the actual GLB and applies a face-mesh-driven depth mask.
+
+### New files (Pro)
+
+```
+ar-vr-3d-model-try-on-pro/
+  addons/atlasar-face-addon/
+    tryon-pro-renderer.js          # three.js renderer + GLB loader + depth mask
+    tryon-pro-render-glue.js       # Wires `window.atlasArTryonPipeline.render` →
+                                   # forwards landmarks + facial-transform-matrix
+                                   # to the renderer per frame
+```
+
+### Modified files
+
+- **Free** `public/js/tryon/tryon-controller.js`
+  - When `window.atlasArTryonPipeline.render` exists, **skip** the 2D `ctx.drawImage` path; controller still draws the mirrored video to ctx, then delegates to the render hook with `(ctx, video, landmarks, facialMatrix, anchor, sprite, productId, mode)`
+  - Pass `facialMatrix` from worker results to the hook (currently dropped after extraction)
+
+- **Free** `public/js/tryon/workers/face-landmarker.worker.js`
+  - Add `outputFacialTransformationMatrixes` flag, controlled by an init message option (default false in Free; Pro sets true)
+  - Forward `result.facialTransformationMatrixes[0]` alongside landmarks
+
+### Renderer behavior (Pattern 2)
+
+1. On first call, lazy-load three.js + GLTFLoader (already in npm deps)
+2. Create a transparent WebGL canvas overlaying the existing 2D canvas (same z-index family, sibling of `ui.canvas`)
+3. Load the product GLB once (cached by URL)
+4. Per frame:
+   - Build a face-mesh geometry (468 vertices via MediaPipe indices) and write it to depth/stencil only — NOT to color
+   - Pose the GLB via `facialTransformationMatrix` (4×4) so it follows head orientation
+   - Render the GLB with depth-test enabled — fragments behind the face mesh fail the depth test → temples correctly hidden
+5. Camera intrinsics approximated from MediaPipe (or fall-back to a unit perspective)
+
+### Hook contract (already shipped on Free)
+
+```
+window.atlasArTryonPipeline = {
+  adjustAnchor: (anchor, ctx) => anchor,   // already used by Pro for calibration
+  render:       (drawCtx) => boolean,      // NEW — when defined, controller skips 2D draw
+};
+```
+
+`drawCtx` shape:
+```
+{
+  ctx,            // 2D canvas context (video already drawn, mirrored)
+  canvas,         // canvas element (so renderer can size its WebGL sibling)
+  video,          // HTMLVideoElement
+  landmarks,      // Array<{x,y,z}>
+  facialMatrix,   // Float32Array(16) | null
+  anchor,         // 2D anchor {x,y,width,rotation} (post adjustAnchor)
+  sprite,         // ImageBitmap (kept as fallback)
+  productId,
+  mode,           // 'face-glasses' | 'face-hat'
+  glbSrc,         // direct GLB URL
+}
+```
+
+### Performance budget
+
+- Renderer setup: < 250 ms cold (GLB load + three.js init)
+- Per-frame: < 8 ms (60fps headroom on desktop, ~30fps mobile)
+- WASM SIMD already in MediaPipe path; three.js stays on main thread (acceptable at GLB ≤ 2 MB)
+
+### Risks
+
+- iOS Safari WebGL extension support — fall back to 2D pipeline if three.js init throws
+- GLB without proper origin/scale will pose wrong; per-product calibration (already shipped) covers this
+- Depth-mask seam at face silhouette — feather edge by 1-2 px to hide z-fighting
+
+### Acceptance test
+
+- Glasses product: rotate head ~45° each direction; temple bar correctly disappears behind ear region
+- Hat product: tilt head back; back-of-hat band correctly hidden behind head silhouette
+- Snapshot: WebGL composite captured into the same `ui.canvas` snapshot pipeline (read pixels from WebGL, draw to 2D, then `toBlob`)
 
 ---
 
