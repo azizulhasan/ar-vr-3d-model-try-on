@@ -299,18 +299,24 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 - [ ] iOS Safari smoke test — DEFERRED
 - [ ] Mobile FPS benchmark — DEFERRED
 
-### Phase 2 — Pro face addon real tracking — **PARTIALLY SHIPPED**
-- [x] `addons/atlasar-face-addon/addon.php` — wires Pro filters: watermark off (`atlas_ar_tryon_snapshot_watermark`), cap lift (`atlas_ar_tryon_free_product_limit` → `PHP_INT_MAX`), `num_faces=2` ready
-- [x] Per-product calibration metabox (PHP) — sliders for offsetX, offsetY, scale, rotationDeg → saved to `_atlas_ar_tryon_calibration` post meta
-- [x] `tryon-pro.js` — registers `window.atlasArTryonPipeline.adjustAnchor` so calibration is applied without forking Free
-- [ ] **Pattern 2 — three.js depth-occluded overlay (NOT YET IMPLEMENTED)**
-  - Render GLB on a parallel WebGL canvas overlaying the webcam canvas
-  - Face-mesh-driven depth/stencil mask so glasses temples / hat back are correctly hidden behind the head
-  - 3D head pose driven by MediaPipe `outputFacialTransformationMatrixes` (worker option to be flipped on for Pro)
-  - Free controller already has the hook `window.atlasArTryonPipeline.render` reserved for this — Pro must implement it
-- [ ] Multi-face support runtime — `num_faces=2` is announced; worker still hardcoded to 1, needs to read the value from config
+### Phase 2 — Pro face addon real tracking — **SHIPPED**
+- [x] `addons/atlasar-face-addon/addon.php` — wires Pro filters: watermark off (`atlas_ar_tryon_snapshot_watermark`), cap lift (`atlas_ar_tryon_free_product_limit` → `PHP_INT_MAX`), `num_faces=2` advertised, worker `outputFacialTransformationMatrixes=true`
+- [x] **Pattern 2 — three.js depth-occluded overlay** (`tryon-pro-renderer.js` + `tryon-pro-render-glue.js`):
+  - GLB rendered on a transient WebGL canvas, composited onto Free's 2D canvas (mirrored to match selfie view)
+  - **Hybrid pipeline** more robust than pure facialMatrix: position+scale from landmarks in pixel space (orthographic camera), rotation from `facialTransformationMatrix.decompose()`, fallback to eye-line roll
+  - **Face-oval depth mask** rebuilt per-frame from MediaPipe `FACE_LANDMARKS_FACE_OVAL` (~36 silhouette vertices, triangle fan from centroid, `colorWrite=false`, `depthWrite=true`, `renderOrder=-1`) — temple bars / hat back behind the head fail depth test and are hidden
+  - three.js + GLTFLoader loaded at runtime from **esm.sh** (rewrites bare `'three'` specifier; unpkg does not — earlier silent fallback bug)
+  - GLB bbox-centered on load so calibration offsets are visual, not modeled-origin
+  - Anchor on eye-corner midpoint (glasses) / forehead-top (hat) — more stable than nose-bridge
+- [x] **Per-product calibration**: 7 fields (offsetX/Y/Z px, scale, rotationX/Y/Z deg) stored inside `ar_try_on_product_settings.tryon_calibration` (sub-key — no new post meta). Renderer reads via `window.atlasArTryonProCalibration[productId]`.
+- [x] **Live front-end calibration panel** (`tryon-pro-calibrator.js` + `tryon-pro-calibrator.css`) — admin-only (`current_user_can('edit_posts')`), collapsable, pinned right edge. Drag sliders → renderer updates next frame, no save/reload cycle. Save → POST `/ar_try_on/v1/tryon/calibration/<product_id>` → writes calibration sub-key.
+- [x] `tryon-pro.js` — registers `window.atlasArTryonPipeline.adjustAnchor` (Pattern 1.5 fallback path; still active when render hook unavailable)
+- [x] `tryon-pro-render-glue.js` — registers `window.atlasArTryonPipeline.render`, lazy GLB load on first frame
+- [ ] **Real face-mesh depth mask** (full 468-vertex MediaPipe TESSELATION) — face-OVAL silhouette covers 90% of cases; full mesh needed for accurate cheekbone/jaw occlusion. Tracked as polish.
+- [ ] Multi-face support runtime — `num_faces=2` is advertised; worker still hardcoded to 1, needs to read the value from config
 - [ ] Snapshot HD export, branded export, GIF — Pro Phase 6 scope
 - [ ] `face-blendshapes`, `face-makeup`, `face-occlusion` features in addon.json — Phase 5 scope (makeup) + this phase (occlusion)
+- [x] **Old PHP calibration metabox dropped** — replaced by live front-end panel (single source of truth)
 
 ### Phase 3 — Pro hand try-on (weeks 6–7)
 - [ ] Rewrite `addons/atlasar-hand-addon/addon.php`
@@ -391,21 +397,43 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 
 ### Pro — shipped
 - Watermark removal filter
-- Free cap removal filter
+- Free cap removal filter (face-* product limit lifted)
+- `outputFacialTransformationMatrixes` enabled in worker (Pro filter)
+- **Pattern 2 — three.js depth-occluded overlay** (`tryon-pro-renderer.js` + `tryon-pro-render-glue.js`)
+  - Hybrid: position+scale from landmarks, rotation from facialMatrix
+  - Orthographic camera mapping 1 world unit == 1 canvas pixel (no webcam-intrinsic dependency)
+  - Face-oval depth mask (~36 silhouette vertices, triangle fan, `depthWrite=true / colorWrite=false`)
+  - three.js + GLTFLoader loaded from esm.sh (rewrites bare specifiers)
+  - GLB bbox-centered on load
+  - Anchor on eye-corner midpoint (glasses) / forehead (hat)
+- **Live front-end calibration panel** (admin only) — replaces the old PHP metabox. 7 sliders, drag → live update, Save → REST → post meta sub-key
+- Calibration storage: `ar_try_on_product_settings.tryon_calibration` sub-key (no new post meta)
+- REST `POST /ar_try_on/v1/tryon/calibration/<product_id>` (gated to `edit_post`)
 - Multi-face announce (`num_faces = 2`) — runtime worker still uses 1
-- Per-product calibration metabox (offset X/Y, scale, rotation) → applied via Free's `adjustAnchor` pipeline hook
-- `tryon-pro.js` enqueued on product pages
 
 ### Pro — pending (next iteration)
-1. **Pattern 2 — three.js depth-occluded overlay**. The single largest remaining gap. Until this lands, glasses temple bars sit on top of the face instead of being correctly hidden behind it.
-2. Worker config: `outputFacialTransformationMatrixes: true` when Pro active, so the matrix can drive a 3D camera in the overlay
-3. Worker config: `numFaces` driven by localized config (currently hardcoded to 1)
-4. Snapshot HD / GIF / share-link
-5. Pro hand / pose / makeup / segmentation addons (Phases 3-5)
+1. Real **468-vertex face-mesh** depth mask (current face-oval covers 90%; full mesh more accurate at cheek/jaw)
+2. Worker config: `numFaces` driven by localized config (currently hardcoded to 1)
+3. Snapshot HD / GIF / share-link
+4. Pro hand / pose / makeup / segmentation addons (Phases 3-5)
+5. Calibration panel — keyboard-shortcut to toggle, undo/redo, copy-to-other-products
+6. iOS Safari WebGL fallback path verification
 
 ---
 
-## 7b. Pattern 2 implementation plan (next)
+## 7b. Pattern 2 implementation — **SHIPPED**
+
+Status as of 2026-05-06: Pattern 2 is live in Pro. Notes on what
+landed vs the original plan:
+
+| Original plan | Actually shipped |
+|---|---|
+| GLB posed via 4×4 `facialTransformationMatrix` | **Hybrid**: position+scale from landmarks (in canvas pixel space), rotation only from `facialTransformationMatrix.decompose()`. Pure-matrix posing was unreliable across webcam intrinsics. |
+| Camera intrinsics from MediaPipe / unit perspective | **Orthographic camera** matching canvas pixels — no intrinsics needed |
+| 468-vertex face-mesh depth mask | **36-vertex face-oval** silhouette (triangle fan from centroid). Covers 90% of cases. Full mesh tracked as polish. |
+| three.js bundled via Pro webpack | **Loaded from esm.sh** at runtime (rewrites bare `'three'` specifier; no Pro build pipeline change). unpkg silently failed. |
+| GLB cached by URL | Same |
+| Hook `window.atlasArTryonPipeline.render` returns false to fallback | Same — used heavily during init / GLB load to gate rendering until ready |
 
 Single goal: replace the 2D `ctx.drawImage(sprite, ...)` path with a parallel WebGL canvas that renders the actual GLB and applies a face-mesh-driven depth mask.
 
