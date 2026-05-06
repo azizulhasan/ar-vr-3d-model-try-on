@@ -4,6 +4,7 @@ namespace AR_TRY_ON;
 
 use AR_TRY_ON_Admin\AR_TRY_ON_Admin;
 use AR_TRY_ON_Public\AR_TRY_ON_Public;
+use AR_TRY_ON\AR_TRY_ON_Tryon;
 
 /**
  * The file that defines the core plugin class
@@ -365,6 +366,19 @@ class AR_TRY_ON {
         // Check if product has 3D model
         if ( ! AR_TRY_ON_Helper::has_3d_model( $product_id ) ) {
             return;
+        }
+
+        // Try-On products: only block the image/3D toggle when the merchant
+        // has NOT opted into showing the static 3D viewer alongside Try-On.
+        // When `show_static_viewer_for_tryon` is enabled the cube toggle
+        // works exactly as it does for floor/wall products (swap product
+        // image with the inline <model-viewer>).
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $product_id );
+            if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+                && ! AR_TRY_ON_Tryon::should_show_static_viewer( $product_id ) ) {
+                return;
+            }
         }
 
         // Get the effective display mode for this product

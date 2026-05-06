@@ -254,6 +254,21 @@ class AR_TRY_ON_Helper
             }
         }
 
+        // Try-On products: when ar_placement is face-* and the merchant
+        // has NOT opted into showing the static viewer alongside Try-On,
+        // skip the inline <model-viewer> entirely. The Try-On modal loads
+        // the GLB on demand from the button's data-glb-src attribute.
+        if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+            $placement = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_placement($post_id);
+            if (\AR_TRY_ON\AR_TRY_ON_Tryon::is_face_placement($placement)
+                && !\AR_TRY_ON\AR_TRY_ON_Tryon::should_show_static_viewer($post_id)) {
+                if ($current_filter === 'the_content') {
+                    return $content;
+                }
+                return '';
+            }
+        }
+
         ob_start();
         ?>
         <div style="height: <?php echo esc_attr($attributes['height']) ?>;width: <?php echo esc_attr($attributes['width']) ?>;"

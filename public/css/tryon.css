@@ -1,0 +1,161 @@
+/**
+ * Try-On modal styles. Tailwind-compatible class names (art-* prefix) but
+ * authored as plain CSS for now — Phase 1 ships before we wire Tailwind
+ * to compile these. Future: move to src/tailwind.css with @apply.
+ */
+
+.art-tryon-trigger {
+	margin-left: 8px;
+}
+
+/* Try-On button rendered as overlay on featured image (toggle-mode position).
+ * Sits inside .atlas-ar-toggle-container next to the cube icon.
+ * Uses !important to override the broad CSS reset in image-3d-toggle.css
+ * that targets all descendants of `.atlas-ar-toggle-container *`. */
+.atlas-ar-toggle-container .art-tryon-image-overlay,
+button.art-tryon-image-overlay {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	height: 48px !important;
+	min-width: 48px !important;
+	padding: 0 16px !important;
+	margin-left: 8px !important;
+	border-radius: 24px !important;
+	border: 1px solid rgba(0, 0, 0, 0.15) !important;
+	background: #111 !important;
+	color: #fff !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	line-height: 1 !important;
+	cursor: pointer !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+	transition: transform 0.15s ease, background 0.15s ease !important;
+	white-space: nowrap !important;
+}
+
+.atlas-ar-toggle-container .art-tryon-image-overlay:hover,
+button.art-tryon-image-overlay:hover {
+	background: #000 !important;
+	transform: translateY(-1px);
+}
+
+.atlas-ar-toggle-container .art-tryon-image-overlay:disabled,
+button.art-tryon-image-overlay:disabled {
+	opacity: 0.6 !important;
+	cursor: progress !important;
+}
+
+.art-tryon-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.art-tryon-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.7);
+}
+
+.art-tryon-panel {
+	position: relative;
+	background: #fff;
+	border-radius: 12px;
+	width: min(720px, 92vw);
+	max-height: 92vh;
+	padding: 24px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+	overflow: auto;
+}
+
+.art-tryon-close {
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	background: transparent;
+	border: 0;
+	font-size: 28px;
+	line-height: 1;
+	cursor: pointer;
+	color: #444;
+}
+
+.art-tryon-stage {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	background: #000;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.art-tryon-video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	visibility: hidden;
+}
+
+.art-tryon-canvas {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.art-tryon-status {
+	position: absolute;
+	bottom: 12px;
+	left: 12px;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.55);
+	padding: 4px 10px;
+	border-radius: 6px;
+	font-size: 13px;
+}
+
+.art-tryon-consent {
+	padding: 24px 0 0;
+	text-align: center;
+}
+
+.art-tryon-consent h3 {
+	margin: 0 0 8px;
+}
+
+.art-tryon-consent-text {
+	color: #555;
+	margin-bottom: 16px;
+}
+
+.art-tryon-consent button {
+	margin: 0 6px;
+}
+
+.art-tryon-toolbar {
+	margin-top: 12px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.art-tryon-fps {
+	color: #888;
+	font-size: 12px;
+	margin-left: auto;
+}
+
+.art-tryon-error {
+	margin-top: 12px;
+	padding: 10px 12px;
+	background: #fde8e8;
+	color: #9b1c1c;
+	border-radius: 6px;
+}

@@ -42,8 +42,10 @@ use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON\AR_TRY_ON_Compression;
 use AR_TRY_ON\AR_TRY_ON_Compression_DB;
+use AR_TRY_ON\AR_TRY_ON_Tryon;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
+use ATLAS_AR_API\AR_TRY_ON_Tryon_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
@@ -232,6 +234,15 @@ function atlas_ar_run() {
 	add_action( 'rest_api_init', function() {
 		$compression_routes = new AR_TRY_ON_Compression_Routes();
 		$compression_routes->register_routes();
+	} );
+
+	// Initialize Try-On feature (v1.10.0+) — face try-on, lazy-loaded.
+	$atlas_ar_tryon = new AR_TRY_ON_Tryon( ATLAS_AR_VERSION );
+	$atlas_ar_tryon->register();
+
+	add_action( 'rest_api_init', function() {
+		$tryon_routes = new AR_TRY_ON_Tryon_Routes();
+		$tryon_routes->register_routes();
 	} );
 
 	// Initialize Admin Notice System (v1.8.0+)

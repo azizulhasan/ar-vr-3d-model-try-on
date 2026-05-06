@@ -10,30 +10,43 @@ mix.js('public/js/ar-vr-3d-model-try-on-public.js', 'public/js/ar-vr-3d-model-tr
 mix.js('admin/js/ar-vr-3d-model-try-on-preview.js', 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js');
 mix.js('public/js/AtlasAR.js', 'public/js/AtlasAR.dist.js');
 
+// Try-On (TensorFlow.js + MediaPipe) — lazy-loaded entry, never on initial render.
+// Worker uses native webpack 5 `new Worker(new URL(...), { type: 'module' })` syntax.
+mix.js('public/js/tryon/tryon-bootstrap.js', 'public/js/build/tryon-bootstrap.dist.js');
+
 
 mix.webpackConfig({
     output: {
-        chunkFilename: 'admin/js/build/chunks/[name].js', // Output chunks to dedicated folder (will be auto-deleted)
+        // Route chunks to a path based on chunk name. Try-on chunks (controller +
+        // worker bundle with MediaPipe) MUST live under public/ so they are
+        // accessible to the front-end and survive the cleanup hook below.
+        chunkFilename: (pathData) => {
+            const name = (pathData.chunk && pathData.chunk.name) || '';
+            if (/tryon|landmarker|mediapipe/i.test(name)) {
+                return 'public/js/build/chunks/[name].js';
+            }
+            return 'admin/js/build/chunks/[name].js';
+        },
     },
     optimization: {
-        splitChunks: false, // Disable code splitting to prevent chunks folder
-        runtimeChunk: false, // Disable runtime chunk
+        splitChunks: false, // Disable shared/vendor splitting; dynamic imports still chunk.
+        runtimeChunk: false,
     },
     plugins: [
-        // Auto-cleanup unwanted chunk files after compilation
+        // Auto-cleanup unwanted chunk files after compilation.
         {
             apply: (compiler) => {
                 compiler.hooks.done.tap('CleanupChunks', (stats) => {
                     const rootDir = __dirname;
                     const chunkPattern = /^_[a-f0-9]{4}\.js$/;
 
-                    // Locations to check for unwanted chunk files
+                    // Locations to check for unwanted chunk files.
                     const locationsToClean = [
                         rootDir, // Root directory
-                        path.join(rootDir, 'admin/js/build'), // Build directory
+                        path.join(rootDir, 'admin/js/build'), // Admin build directory
                     ];
 
-                    // Delete chunk files in all locations
+                    // Delete chunk files in all locations.
                     locationsToClean.forEach(location => {
                         if (fs.existsSync(location)) {
                             fs.readdirSync(location).forEach(file => {
@@ -46,7 +59,9 @@ mix.webpackConfig({
                         }
                     });
 
-                    // Delete unwanted folders
+                    // Delete unwanted folders. Note: public/js/build/chunks is
+                    // INTENTIONALLY kept — it holds the lazy-loaded try-on
+                    // controller and MediaPipe worker.
                     const unwantedFolders = [
                         'admin/js/build/ar-try-on-dashboard-ui.min',
                         'admin/js/build/ar-try-on-metabox-ui.min',

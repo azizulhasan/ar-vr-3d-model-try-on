@@ -5,5 +5,8 @@
     "/admin/js/build/ar-compression-client.min.js": "/admin/js/build/ar-compression-client.min.js",
     "/public/js/ar-vr-3d-model-try-on-public-dist.js": "/public/js/ar-vr-3d-model-try-on-public-dist.js",
     "/admin/js/build/ar-vr-3d-model-try-on-preview.min.js": "/admin/js/build/ar-vr-3d-model-try-on-preview.min.js",
-    "/public/js/AtlasAR.dist.js": "/public/js/AtlasAR.dist.js"
+    "/public/js/AtlasAR.dist.js": "/public/js/AtlasAR.dist.js",
+    "/public/js/build/tryon-bootstrap.dist.js": "/public/js/build/tryon-bootstrap.dist.js",
+    "/public/js/build/chunks/tryon-controller.js": "/public/js/build/chunks/tryon-controller.js",
+    "/public/js/build/chunks/tryon-face-worker.js": "/public/js/build/chunks/tryon-face-worker.js"
 }
