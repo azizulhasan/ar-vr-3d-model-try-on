@@ -416,7 +416,16 @@ is the work queue.
 | 29 | Orthographic camera (canvas pixel == world unit) | Pro | 2 | ✅ | |
 | 30 | Face-oval depth mask (36 silhouette vertices) | Pro | 2 | ✅ | |
 | 31 | Skull-ellipsoid occluder (hat back-half) | Pro | 2 | ✅ | |
-| 32 | Real 468-vertex face-mesh depth mask | Pro | 2 | ✅ | edge→triangle adjacency, swaps face-oval when available (uncommitted) |
+| 32 | Real 468-vertex face-mesh depth mask | Pro | 2 | ✅ | edge→triangle adjacency, swaps face-oval when available |
+| 32a | Hide face-mesh + face-oval masks for `face-hat` mode | Pro | 2 | ✅ | hat sits ABOVE face — face occlusion would clip the brim where it overlaps face on screen |
+| 32b | Skull-ellipsoid Z tracks hat localZ (always 40 px behind hat) | Pro | 2 | ✅ | so pushing offsetZ very negative no longer makes skull cut hat front |
+| 32c | Skull halfDepth halved (`halfW × 0.5`) | Pro | 2 | ✅ | thinner ellipsoid — less forward-protrude into hat space |
+| 32d | Calibration offsets applied in head-local space | Pro | 2 | ✅ | `glbRoot.translateX/Y/Z()` after rotation — offsets follow head yaw/pitch instead of staying screen-axis-locked |
+| 32e | filemtime cache-bust on Pro JS+CSS files | Pro | 2 | ✅ | `$ver_for()` helper in addon.php; renderer surfaces `atlasArTryonProRenderer.v` for the dynamic-imported renderer URL |
+| 32f | Glue uses dynamic `import('./tryon-pro-renderer.js?v=…')` | Pro | 2 | ✅ | static import couldn't carry a cache-bust query |
+| 32g | Runtime debug exposed via `window.__pro_renderer_debug` | Pro | 2 | ✅ | one-object-copy/frame; useful for diagnosing mask state |
+| 32h | WC tab "AtlasAR Product View" gated for face-* + viewer-OFF | Free | 1 | ✅ | fixed `AtlasAR is not a constructor` console error |
+| 32i | Bootstrap + chunk filenames `?ver=filemtime` + `[contenthash:8]` | Free | 1 | ✅ | fixed `ChunkLoadError` after rebuilds |
 | 33 | Per-product calibration storage (`ar_try_on_product_settings.tryon_calibration`) | Pro | 2 | ✅ | sub-key, no new post meta |
 | 34 | Live front-end calibration panel (admin only) | Pro | 2 | ✅ | 7 sliders + Reset/Save |
 | 35 | Calibration panel — undo/redo + keyboard shortcuts + copy-to-clipboard | Pro | 2 | ✅ | `Ctrl+K` toggle, `Ctrl+Z`/`Ctrl+Shift+Z`, `Ctrl+S` (uncommitted) |
