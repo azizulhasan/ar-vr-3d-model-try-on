@@ -159,3 +159,23 @@ button.art-tryon-image-overlay:disabled {
 	color: #9b1c1c;
 	border-radius: 6px;
 }
+
+.art-tryon-share {
+	margin-top: 10px;
+	padding: 8px 10px;
+	background: #f0fdf4;
+	border: 1px solid #bbf7d0;
+	border-radius: 6px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 13px;
+}
+
+.art-tryon-share a {
+	color: #15803d;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

@@ -11,6 +11,7 @@ import Checkbox from "./Checkbox";
 import Switch from "./Switch";
 import MultiSelect from "./MultiSelect";
 import BorderCard from "./BorderCard";
+import TryonSettings from "./TryonSettings";
 
 
 export default function Settings({ settings, handleChange }) {
@@ -810,6 +811,9 @@ export default function Settings({ settings, handleChange }) {
             color="blue"
           />
         </BorderCard>
+
+        {/* Virtual Try-On (Face Landmarker) */}
+        <TryonSettings settings={settings} handleChange={handleChange} />
       </div>
     </React.Fragment>
   ) : (

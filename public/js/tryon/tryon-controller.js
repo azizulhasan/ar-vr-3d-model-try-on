@@ -201,7 +201,7 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	requestAnimationFrame( tick );
 
 	ui.onSnapshot = async () => {
-		const dataUrl = buildSnapshotDataUrl( ui.canvas, !! config.watermark );
+		const dataUrl = buildSnapshotDataUrl( ui.canvas, !! config.watermark, !! config.snapshot_hd );
 		// Direct download.
 		const a = document.createElement( 'a' );
 		a.href = dataUrl;
@@ -210,10 +210,11 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		a.click();
 		a.remove();
 
-		// Optional: persist to media library if logged in.
+		// Optional: persist to media library if logged in. Surface the
+		// returned URL so the user can grab a shareable link.
 		if ( config.rest_url && config.rest_nonce ) {
 			try {
-				await fetch( `${ config.rest_url }/tryon/snapshot`, {
+				const resp = await fetch( `${ config.rest_url }/tryon/snapshot`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -221,6 +222,12 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 					},
 					body: JSON.stringify( { image: dataUrl, product_id: productId } ),
 				} );
+				if ( resp.ok ) {
+					const json = await resp.json();
+					if ( json && json.url && ui.showShareLink ) {
+						ui.showShareLink( json.url );
+					}
+				}
 			} catch ( err ) {
 				console.warn( '[AtlasAR] Snapshot upload failed:', err );
 			}
@@ -243,16 +250,22 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
  * (Free tier), draws a small "Powered by AtlasAR" badge at the bottom-right
  * corner of a CLONED canvas — never mutates the live preview canvas.
  */
-function buildSnapshotDataUrl( srcCanvas, watermark ) {
-	if ( ! watermark ) {
+function buildSnapshotDataUrl( srcCanvas, watermark, hd ) {
+	const scale = hd ? 2 : 1;
+	if ( ! watermark && scale === 1 ) {
 		return srcCanvas.toDataURL( 'image/png' );
 	}
 	const out = document.createElement( 'canvas' );
-	out.width = srcCanvas.width;
-	out.height = srcCanvas.height;
+	out.width = srcCanvas.width * scale;
+	out.height = srcCanvas.height * scale;
 	const ctx = out.getContext( '2d' );
 	if ( ! ctx ) return srcCanvas.toDataURL( 'image/png' );
-	ctx.drawImage( srcCanvas, 0, 0 );
+	ctx.imageSmoothingEnabled = true;
+	ctx.imageSmoothingQuality = 'high';
+	ctx.drawImage( srcCanvas, 0, 0, out.width, out.height );
+	if ( ! watermark ) {
+		return out.toDataURL( 'image/png' );
+	}
 
 	const text = 'Powered by AtlasAR';
 	const fontSize = Math.max( 11, Math.round( out.width * 0.022 ) );

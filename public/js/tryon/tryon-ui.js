@@ -97,6 +97,39 @@ export function createUI( { config, productId } ) {
 		fpsEl.textContent = fps ? `${ fps } fps` : '';
 	}
 
+	/**
+	 * Surface a shareable URL after a successful snapshot upload.
+	 * Adds a small "Copy share link" toast under the toolbar.
+	 */
+	function showShareLink( url ) {
+		if ( ! url ) return;
+		let bar = root.querySelector( '.art-tryon-share' );
+		if ( ! bar ) {
+			bar = document.createElement( 'div' );
+			bar.className = 'art-tryon-share';
+			toolbar.parentNode.insertBefore( bar, toolbar.nextSibling );
+		}
+		bar.innerHTML = '';
+		const link = document.createElement( 'a' );
+		link.href = url;
+		link.target = '_blank';
+		link.rel = 'noopener';
+		link.textContent = 'View saved snapshot';
+		const copy = document.createElement( 'button' );
+		copy.type = 'button';
+		copy.className = 'button';
+		copy.textContent = 'Copy link';
+		copy.addEventListener( 'click', async () => {
+			try {
+				await navigator.clipboard.writeText( url );
+				copy.textContent = 'Copied!';
+				setTimeout( () => { copy.textContent = 'Copy link'; }, 1800 );
+			} catch ( e ) { /* clipboard denied */ }
+		} );
+		bar.appendChild( link );
+		bar.appendChild( copy );
+	}
+
 	function escapeHtml( s ) {
 		return String( s ).replace( /[&<>"']/g, ( c ) => ( {
 			'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -114,6 +147,7 @@ export function createUI( { config, productId } ) {
 		showStage,
 		askConsent,
 		setFps,
+		showShareLink,
 		close,
 		set onClose( fn ) { onCloseCb = fn; },
 		set onSnapshot( fn ) { onSnapshotCb = fn; },

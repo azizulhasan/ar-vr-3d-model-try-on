@@ -284,6 +284,22 @@ class AR_TRY_ON_Public {
 		} else {
 			$post_id = $post->ID;
 		}
+
+        // Try-On (face-*) products: AtlasAR.js bundle is intentionally
+        // skipped when the merchant has the static viewer toggle OFF.
+        // Emitting `new window.AtlasAR()` in the WC tab here would
+        // throw "AtlasAR is not a constructor" on the front-end.
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+            if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+                && ! AR_TRY_ON_Tryon::should_show_static_viewer( $post_id ) ) {
+                if ( $current_filter === 'the_content' ) {
+                    return $content;
+                }
+                return;
+            }
+        }
+
         ob_start();
         ?>
         <div  id="atlas_ar_<?php echo esc_attr($post_id) ?>"></div>
@@ -335,6 +351,22 @@ class AR_TRY_ON_Public {
 
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return $tabs;
+		}
+
+		// Hide the static-AR product tab for Try-On (face-*) products
+		// when the merchant hasn't opted into the static viewer alongside.
+		// Otherwise the tab pane would emit `new window.AtlasAR()` even
+		// though we intentionally skipped enqueuing AtlasAR.dist.js.
+		if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+			global $product, $post;
+			$pid = $product ? $product->get_id() : ( $post ? $post->ID : 0 );
+			if ( $pid ) {
+				$placement = AR_TRY_ON_Tryon::get_product_placement( $pid );
+				if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+					&& ! AR_TRY_ON_Tryon::should_show_static_viewer( $pid ) ) {
+					return $tabs;
+				}
+			}
 		}
 
 		$tabs['atlas_ar_3d_view'] = array(

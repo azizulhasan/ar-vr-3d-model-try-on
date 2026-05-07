@@ -378,6 +378,82 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 
 ---
 
+## 7a-table. Task completion matrix (single source of truth)
+
+Updated each session. Phase ordering matches §5. Anything **NOT** ticked
+is the work queue.
+
+| # | Task | Plugin | Phase | Status | Commit / Notes |
+|---|---|---|---|---|---|
+| 1 | `feature/tensorflowjs` branch on both | both | 0 | ✅ | |
+| 2 | npm deps (`@tensorflow/tfjs-core`, `…/backend-webgl`, `@mediapipe/tasks-vision`) | Free | 0 | ✅ | |
+| 3 | Webpack/Mix Web Worker entry config | Free | 0 | ✅ | chunk path routed to `public/js/build/chunks/` |
+| 4 | Self-host vs CDN decision | both | 0 | ✅ | CDN default, self-host opt-in (`tryon_self_host`) |
+| 5 | `AR_TRY_ON_Tryon` class + `…_Hooks` registry | Free | 1 | ✅ | |
+| 6 | `face-landmarker.worker.js` lazy MediaPipe | Free | 1 | ✅ | |
+| 7 | `tryon-controller.js` Pattern 1.5 (sprite from `<model-viewer>`) | Free | 1 | ✅ | off-screen GLB snapshot, drawn to 2D canvas |
+| 8 | Modal UI (consent → webcam → preview) | Free | 1 | ✅ | |
+| 9 | Per-product opt-in via `ar_placement` (face-glasses / face-hat) | Free | 1 | ✅ | reuses existing dropdown |
+| 10 | "Show static viewer alongside Try-On" toggle | Free | 1 | ✅ | |
+| 11 | Conditional asset enqueue (face-* + viewer-OFF skips AtlasAR bundle) | Free | 1 | ✅ | |
+| 12 | Try-On reuses existing `.ar_vr_3d_model_try_on` button | Free | 1 | ✅ | no new button |
+| 13 | Position respects `ar_try_on_wc_hook_position` | Free | 1 | ✅ | toggle modes overlay next to cube |
+| 14 | `/tryon/snapshot` REST + media-library upload | Free | 1 | ✅ | |
+| 15 | Snapshot watermark (filter-removable) | Free | 1 | ✅ | `atlas_ar_tryon_snapshot_watermark` |
+| 16 | Free product cap (default 3) + admin notice | Free | 1 | ✅ | `atlas_ar_tryon_free_product_limit` |
+| 17 | Pipeline hook `window.atlasArTryonPipeline.adjustAnchor` | Free | 1 | ✅ | Pro consumes |
+| 18 | Pipeline hook `window.atlasArTryonPipeline.render` | Free | 1 | ✅ | Pro consumes for Pattern 2 |
+| 19 | `worker_options` localized + filterable | Free | 1 | ✅ | `atlas_ar_tryon_worker_options` |
+| 20 | facialMatrix forwarded from worker → controller → render hook | Free | 1 | ✅ | |
+| 21 | Settings tab in dashboard React app | Free | 1 | ✅ | `TryonSettings.js` card (uncommitted in latest build) |
+| 22 | readme.txt update | Free | 1 | ⏳ later | user deferred |
+| 23 | iOS Safari smoke test | both | 1 | ⏳ later | user deferred |
+| 24 | Mobile FPS benchmark | both | 1 | ⏳ later | user deferred |
+| 25 | Pro Addons Manager activation + init-hook timing fix | Pro | 2 | ✅ | was commented out + plugins_loaded never fired |
+| 26 | Pro filters: watermark off, cap lift, multi-face advertise | Pro | 2 | ✅ | |
+| 27 | Pro worker filter: `outputFacialTransformationMatrixes` on | Pro | 2 | ✅ | |
+| 28 | **Pattern 2 — three.js depth-occluded overlay** | Pro | 2 | ✅ | hybrid landmark+matrix posing |
+| 29 | Orthographic camera (canvas pixel == world unit) | Pro | 2 | ✅ | |
+| 30 | Face-oval depth mask (36 silhouette vertices) | Pro | 2 | ✅ | |
+| 31 | Skull-ellipsoid occluder (hat back-half) | Pro | 2 | ✅ | |
+| 32 | Real 468-vertex face-mesh depth mask | Pro | 2 | ✅ | edge→triangle adjacency, swaps face-oval when available (uncommitted) |
+| 33 | Per-product calibration storage (`ar_try_on_product_settings.tryon_calibration`) | Pro | 2 | ✅ | sub-key, no new post meta |
+| 34 | Live front-end calibration panel (admin only) | Pro | 2 | ✅ | 7 sliders + Reset/Save |
+| 35 | Calibration panel — undo/redo + keyboard shortcuts + copy-to-clipboard | Pro | 2 | ✅ | `Ctrl+K` toggle, `Ctrl+Z`/`Ctrl+Shift+Z`, `Ctrl+S` (uncommitted) |
+| 36 | REST `POST /tryon/calibration/<product_id>` (admin-only) | Pro | 2 | ✅ | |
+| 37 | Old PHP metabox dropped | Pro | 2 | ✅ | replaced by live panel |
+| 38 | Auto-orient GLB heuristic | Pro | 2 | ❌ removed | false-triggered on real glasses GLBs (X≈Z) |
+| 39 | rotationX / rotationY calibration sliders (3D pose tweak) | Pro | 2 | ✅ | |
+| 40 | Anchor on eye-corner midpoint (glasses) / forehead (hat) | Pro | 2 | ✅ | |
+| 41 | esm.sh CDN (rewrites bare `'three'` specifier) | Pro | 2 | ✅ | unpkg silently failed |
+| 42 | Top-hat (post 63) default calibration saved to DB | content | 2 | ✅ | `offsetX:-100, offsetY:130, offsetZ:-48, scale:0.5` |
+| 43 | Worker `numFaces` runtime config (currently hardcoded to 1) | Free / Pro | 2 | ✅ | filterable via `atlas_ar_tryon_pro_num_faces` (uncommitted) |
+| 44 | Snapshot HD (2× canvas, Pro-only) | Free / Pro | 6 | ✅ | filter `atlas_ar_tryon_snapshot_hd` (uncommitted) |
+| 45 | Share-link UI under modal (copy button, view link) | Free | 6 | ✅ | (uncommitted) |
+| 46 | Snapshot GIF | Pro | 6 | ⏳ later | user deferred (multi-frame encoding via gif.js) |
+| 47 | Branded snapshot (logo overlay) | Pro | 6 | ❌ pending | not yet started |
+| 48 | Multi-face render runtime (numFaces > 1) | Pro | 2/3 | ❌ pending | needs renderer to iterate over multiple landmark sets |
+| 49 | Test on more GLBs (baseball cap, beanie, varied glasses) | content | 1 | ⏳ later | user deferred |
+| 50 | `addons/atlasar-hand-addon/` — real hand tracking | Pro | 3 | ❌ pending | placeholder hotspot only |
+| 51 | `hand-landmarker.worker.js` | Pro | 3 | ❌ pending | |
+| 52 | WC category → hand-mode mapping | Pro | 3 | ❌ pending | |
+| 53 | `addons/atlasar-pose-addon/` — clothing/outfit | Pro | 4 | ❌ pending | |
+| 54 | `pose-landmarker.worker.js` | Pro | 4 | ❌ pending | |
+| 55 | three.js Pattern 2 for clothing depth ordering | Pro | 4 | ❌ pending | |
+| 56 | Mobile perf gating (auto-fall-back to lite Pose) | Pro | 4 | ❌ pending | |
+| 57 | `addons/atlasar-makeup-addon/` | Pro | 5 | ❌ pending | |
+| 58 | `addons/atlasar-segmentation-addon/` | Pro | 5 | ❌ pending | |
+| 59 | Image Segmenter worker | Pro | 5 | ❌ pending | |
+| 60 | Hair color / lipstick / eyeshadow / blush previews | Pro | 5 | ❌ pending | |
+| 61 | AtlasAiDev Insights integration (try-on session metrics) | Pro | 6 | ❌ pending | |
+| 62 | readme.txt + screenshots (WP.org refresh) | Free | 6 | ⏳ later | user deferred |
+| 63 | Pricing-page update (atlasaidev.com) | external | 6 | ❌ pending | |
+| 64 | Push to Freemius release channel | external | 6 | ❌ pending | |
+
+**Legend**: ✅ shipped • ⏳ later (user-deferred) • ❌ pending (queued, not started) • removed = scrapped
+
+---
+
 ## 7a. Implementation status (as of 2026-05-06)
 
 ### Free — shipped

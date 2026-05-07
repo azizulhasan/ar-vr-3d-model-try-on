@@ -488,11 +488,22 @@ class AR_TRY_ON_Tryon {
 			return;
 		}
 
+		// Use filemtime as cache-buster — every rebuild emits a fresh
+		// bootstrap whose webpack runtime references new chunk IDs. If
+		// browsers held on to the old bootstrap (because plugin VERSION
+		// didn't change) they hit ChunkLoadError when the chunk file
+		// content shifts under them. filemtime guarantees a unique
+		// version per build so the chunk ↔ runtime pair stays coherent.
+		$css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/tryon.css';
+		$js_path  = ATLAS_AR_PLUGIN_PATH . 'public/js/build/tryon-bootstrap.dist.js';
+		$css_ver  = file_exists( $css_path ) ? (string) filemtime( $css_path ) : $this->version;
+		$js_ver   = file_exists( $js_path )  ? (string) filemtime( $js_path )  : $this->version;
+
 		wp_enqueue_style(
 			self::STYLE_HANDLE,
 			ATLAS_AR_PLUGIN_URL . 'public/css/tryon.css',
 			array(),
-			$this->version,
+			$css_ver,
 			'all'
 		);
 
@@ -500,7 +511,7 @@ class AR_TRY_ON_Tryon {
 			self::SCRIPT_HANDLE,
 			ATLAS_AR_PLUGIN_URL . 'public/js/build/tryon-bootstrap.dist.js',
 			array(),
-			$this->version,
+			$js_ver,
 			true
 		);
 
@@ -536,6 +547,8 @@ class AR_TRY_ON_Tryon {
 				'pro_active'     => $pro_active,
 				// Watermark only when Pro inactive. Pro filter can override.
 				'watermark'      => apply_filters( 'atlas_ar_tryon_snapshot_watermark', ! $pro_active ),
+				// HD snapshot (2× canvas) — default Pro-on, Free-off. Filterable.
+				'snapshot_hd'    => apply_filters( 'atlas_ar_tryon_snapshot_hd', $pro_active ),
 				'worker_options' => $worker_options,
 			)
 		);

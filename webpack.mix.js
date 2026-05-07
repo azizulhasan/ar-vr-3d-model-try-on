@@ -17,13 +17,16 @@ mix.js('public/js/tryon/tryon-bootstrap.js', 'public/js/build/tryon-bootstrap.di
 
 mix.webpackConfig({
     output: {
-        // Route chunks to a path based on chunk name. Try-on chunks (controller +
-        // worker bundle with MediaPipe) MUST live under public/ so they are
-        // accessible to the front-end and survive the cleanup hook below.
+        // Route chunks to a path based on chunk name. Try-on chunks include
+        // a contenthash in the filename so every rebuild produces a unique
+        // URL — prevents browsers from holding on to a stale chunk file
+        // whose webpack runtime IDs no longer match the freshly-built
+        // bootstrap.dist.js. The cleanup hook below wipes orphaned files
+        // each build so the chunks dir doesn't grow forever.
         chunkFilename: (pathData) => {
             const name = (pathData.chunk && pathData.chunk.name) || '';
             if (/tryon|landmarker|mediapipe/i.test(name)) {
-                return 'public/js/build/chunks/[name].js';
+                return 'public/js/build/chunks/[name].[contenthash:8].js';
             }
             return 'admin/js/build/chunks/[name].js';
         },
@@ -33,6 +36,35 @@ mix.webpackConfig({
         runtimeChunk: false,
     },
     plugins: [
+        // BEFORE-build: wipe the try-on chunks dir so old hashed files
+        // don't pile up after repeated rebuilds.
+        {
+            apply: (compiler) => {
+                compiler.hooks.beforeRun.tapAsync('WipeTryonChunks', (_c, cb) => {
+                    const dir = path.join(__dirname, 'public/js/build/chunks');
+                    if (fs.existsSync(dir)) {
+                        for (const f of fs.readdirSync(dir)) {
+                            try {
+                                fs.unlinkSync(path.join(dir, f));
+                            } catch (e) { /* ignore */ }
+                        }
+                    }
+                    cb();
+                });
+                // Also wipe on `watch` runs.
+                compiler.hooks.watchRun.tapAsync('WipeTryonChunksWatch', (_c, cb) => {
+                    const dir = path.join(__dirname, 'public/js/build/chunks');
+                    if (fs.existsSync(dir)) {
+                        for (const f of fs.readdirSync(dir)) {
+                            try {
+                                fs.unlinkSync(path.join(dir, f));
+                            } catch (e) { /* ignore */ }
+                        }
+                    }
+                    cb();
+                });
+            }
+        },
         // Auto-cleanup unwanted chunk files after compilation.
         {
             apply: (compiler) => {
