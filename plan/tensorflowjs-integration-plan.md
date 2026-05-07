@@ -312,7 +312,8 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 - [x] **Live front-end calibration panel** (`tryon-pro-calibrator.js` + `tryon-pro-calibrator.css`) — admin-only (`current_user_can('edit_posts')`), collapsable, pinned right edge. Drag sliders → renderer updates next frame, no save/reload cycle. Save → POST `/ar_try_on/v1/tryon/calibration/<product_id>` → writes calibration sub-key.
 - [x] `tryon-pro.js` — registers `window.atlasArTryonPipeline.adjustAnchor` (Pattern 1.5 fallback path; still active when render hook unavailable)
 - [x] `tryon-pro-render-glue.js` — registers `window.atlasArTryonPipeline.render`, lazy GLB load on first frame
-- [ ] **Real face-mesh depth mask** (full 468-vertex MediaPipe TESSELATION) — face-OVAL silhouette covers 90% of cases; full mesh needed for accurate cheekbone/jaw occlusion. Tracked as polish.
+- [x] **Skull-ellipsoid occluder** for hat back-half — sphere scaled to head proportions, parented to head pose, sits behind face-oval mask in Z. Hat crown wrapping the skull is correctly hidden when the user turns their head. Glasses unaffected (live at face-Z, never reach skull-Z).
+- [ ] **Real face-mesh depth mask** (full 468-vertex MediaPipe TESSELATION) — face-oval + skull-ellipsoid covers ~95% of cases; full mesh helps at cheekbone/jaw edge transitions. Tracked as polish.
 - [ ] Multi-face support runtime — `num_faces=2` is advertised; worker still hardcoded to 1, needs to read the value from config
 - [ ] Snapshot HD export, branded export, GIF — Pro Phase 6 scope
 - [ ] `face-blendshapes`, `face-makeup`, `face-occlusion` features in addon.json — Phase 5 scope (makeup) + this phase (occlusion)
@@ -402,7 +403,9 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 - **Pattern 2 — three.js depth-occluded overlay** (`tryon-pro-renderer.js` + `tryon-pro-render-glue.js`)
   - Hybrid: position+scale from landmarks, rotation from facialMatrix
   - Orthographic camera mapping 1 world unit == 1 canvas pixel (no webcam-intrinsic dependency)
-  - Face-oval depth mask (~36 silhouette vertices, triangle fan, `depthWrite=true / colorWrite=false`)
+  - **Two-layer depth mask**:
+    - Face-oval (~36 silhouette vertices, triangle fan) — hides glasses temples behind face
+    - **Skull ellipsoid** (sphere scaled to head proportions, parented to head pose) — hides hat crown back-half behind skull volume
   - three.js + GLTFLoader loaded from esm.sh (rewrites bare specifiers)
   - GLB bbox-centered on load
   - Anchor on eye-corner midpoint (glasses) / forehead (hat)
@@ -412,7 +415,7 @@ In the existing product metabox (Pro extends Free's metabox via `atlas_ar_before
 - Multi-face announce (`num_faces = 2`) — runtime worker still uses 1
 
 ### Pro — pending (next iteration)
-1. Real **468-vertex face-mesh** depth mask (current face-oval covers 90%; full mesh more accurate at cheek/jaw)
+1. Real **468-vertex face-mesh** depth mask (face-oval + skull ellipsoid covers ~95%; full mesh helps at cheekbone/jaw edge cases)
 2. Worker config: `numFaces` driven by localized config (currently hardcoded to 1)
 3. Snapshot HD / GIF / share-link
 4. Pro hand / pose / makeup / segmentation addons (Phases 3-5)
