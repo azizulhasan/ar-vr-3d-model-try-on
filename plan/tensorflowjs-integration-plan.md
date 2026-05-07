@@ -405,7 +405,8 @@ is the work queue.
 | 18 | Pipeline hook `window.atlasArTryonPipeline.render` | Free | 1 | ✅ | Pro consumes for Pattern 2 |
 | 19 | `worker_options` localized + filterable | Free | 1 | ✅ | `atlas_ar_tryon_worker_options` |
 | 20 | facialMatrix forwarded from worker → controller → render hook | Free | 1 | ✅ | |
-| 21 | Settings tab in dashboard React app | Free | 1 | ✅ | `TryonSettings.js` card (uncommitted in latest build) |
+| 21 | Settings tab in dashboard React app | Free | 1 | ✅ | `TryonSettings.js` card under Settings tab — `tryon_self_host`, `tryon_snapshot`, `tryon_button_label`, `tryon_consent_text` — wired through existing `handleChange` / `/settings` REST |
+| 21a | Fix Switch wiring in TryonSettings.js | Free | 1 | ✅ | Switch component reads `defaultChecked` (not `checked`); onChange forwards `(checked)` boolean — matched the existing `ar_try_on_enable_qr_code` pattern |
 | 22 | readme.txt update | Free | 1 | ⏳ later | user deferred |
 | 23 | iOS Safari smoke test | both | 1 | ⏳ later | user deferred |
 | 24 | Mobile FPS benchmark | both | 1 | ⏳ later | user deferred |
@@ -435,7 +436,7 @@ is the work queue.
 | 39 | rotationX / rotationY calibration sliders (3D pose tweak) | Pro | 2 | ✅ | |
 | 40 | Anchor on eye-corner midpoint (glasses) / forehead (hat) | Pro | 2 | ✅ | |
 | 41 | esm.sh CDN (rewrites bare `'three'` specifier) | Pro | 2 | ✅ | unpkg silently failed |
-| 42 | Top-hat (post 63) default calibration saved to DB | content | 2 | ✅ | `offsetX:-100, offsetY:130, offsetZ:-48, scale:0.5` |
+| 42 | Top-hat (post 63) default calibration saved to DB | content | 2 | ✅ | current values `offsetX:-67, offsetY:160, offsetZ:0, scale:0.6, rotations:0` (re-tuned after head-local offsets + skull-Z-tracks-hat fixes) |
 | 43 | Worker `numFaces` runtime config (currently hardcoded to 1) | Free / Pro | 2 | ✅ | filterable via `atlas_ar_tryon_pro_num_faces` (uncommitted) |
 | 44 | Snapshot HD (2× canvas, Pro-only) | Free / Pro | 6 | ✅ | filter `atlas_ar_tryon_snapshot_hd` (uncommitted) |
 | 45 | Share-link UI under modal (copy button, view link) | Free | 6 | ✅ | (uncommitted) |
@@ -602,8 +603,20 @@ window.atlasArTryonPipeline = {
 
 ---
 
+## 7c. Auto-fit roadmap
+
+Separate file: [auto-fit-roadmap.md](./auto-fit-roadmap.md). Phased path
+from "manual calibration sliders" to "Snapchat-style click-and-fits"
+(A: bbox normalize, B: category presets, C: synthetic-head fit at
+upload time, D: authoring template, E: curated catalog). User chose
+to land **A + B together** as a single feature later. Plan in that
+file is review-ready, not yet started in code.
+
+---
+
 ## 8. Cross-references
 
+- Auto-fit roadmap: [auto-fit-roadmap.md](./auto-fit-roadmap.md)
 - Research dossier: [tensorflowjs-research.md](./tensorflowjs-research.md)
 - Existing v1.7.9+ feature analysis: [FEATURE-ANALYSIS.md](./FEATURE-ANALYSIS.md)
 - Pro features roadmap: [PRO-FEATURES-COMPLETE.md](./PRO-FEATURES-COMPLETE.md)

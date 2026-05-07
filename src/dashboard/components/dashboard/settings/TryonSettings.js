@@ -9,68 +9,93 @@ import Switch from "./Switch";
  * `ar_try_on_settings` option. Same `handleChange` pipeline used by
  * the rest of the dashboard so values persist via the existing
  * /settings REST endpoint.
+ *
+ * IMPORTANT: the Switch component reads `defaultChecked` (not
+ * `checked`) and emits the new boolean state via onChange(checked).
+ * We forward that to handleChange in the same shape Settings.js does
+ * for `ar_try_on_enable_qr_code` etc.
  */
 export default function TryonSettings({ settings, handleChange }) {
-  const onToggle = (key) => () => {
-    handleChange(
-      { target: { name: key, value: !settings[key] } },
-      key
-    );
-  };
+  const onToggle = (key) => (checked) =>
+    handleChange({ target: { name: key, value: checked } });
 
-  const onText = (key) => (e) => {
-    handleChange(
-      { target: { name: key, value: e.target.value } },
-      key
-    );
-  };
+  const onText = (key) => (e) =>
+    handleChange({ target: { name: key, value: e.target.value } });
 
   return (
-    <BorderCard
-      title="Virtual Try-On"
-      description="Face-glasses / face-hat AR via webcam (per-product opt-in via `ar_placement`)."
-    >
-      <div className="art-grid art-grid-cols-1 md:art-grid-cols-2 art-gap-4">
+    <BorderCard>
+      <div className="art-mb-3">
+        <strong className="art-block art-text-base">Virtual Try-On</strong>
+        <span className="art-block art-text-xs art-text-gray-500">
+          Face-glasses / face-hat AR via webcam (per-product opt-in via
+          <code> ar_placement</code>).
+        </span>
+      </div>
+
+      <div className="art-mb-4">
+        <label className="art-block art-font-medium art-text-base art-mb-1">
+          Self-host MediaPipe weights
+        </label>
         <Switch
-          label="Self-host MediaPipe weights"
-          description="Default OFF — load Face Landmarker model from CDN. Toggle ON if your store ships its own copy in `public/models/`."
-          checked={!!settings.tryon_self_host}
+          label={settings.tryon_self_host ? "Enabled" : "Disabled"}
+          defaultChecked={!!settings.tryon_self_host}
           onChange={onToggle("tryon_self_host")}
+          color="blue"
         />
+        <span className="art-block art-text-xs art-text-gray-500 art-mt-1">
+          Default OFF — load Face Landmarker model from CDN. Toggle ON if your
+          store ships its own copy in <code>public/models/</code>.
+        </span>
+      </div>
+
+      <div className="art-mb-4">
+        <label className="art-block art-font-medium art-text-base art-mb-1">
+          Allow Snapshot
+        </label>
         <Switch
-          label="Allow snapshots"
-          description="Snapshot button in the try-on modal. Adult / restricted stores may want OFF."
-          checked={!!settings.tryon_snapshot}
+          label={settings.tryon_snapshot ? "Enabled" : "Disabled"}
+          defaultChecked={!!settings.tryon_snapshot}
           onChange={onToggle("tryon_snapshot")}
+          color="blue"
+        />
+        <span className="art-block art-text-xs art-text-gray-500 art-mt-1">
+          Snapshot button in the Try-On modal. Adult / restricted stores may
+          want OFF.
+        </span>
+      </div>
+
+      <div className="art-mb-4">
+        <label
+          htmlFor="tryon_button_label"
+          className="art-block art-font-medium art-text-base art-mb-1"
+        >
+          Button label
+        </label>
+        <input
+          id="tryon_button_label"
+          type="text"
+          className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
+          value={settings.tryon_button_label || ""}
+          onChange={onText("tryon_button_label")}
+          placeholder="Try it on"
         />
       </div>
 
-      <div className="art-mt-4 art-grid art-grid-cols-1 md:art-grid-cols-2 art-gap-4">
-        <label className="art-block">
-          <span className="art-block art-text-sm art-font-medium art-mb-1">
-            Button label
-          </span>
-          <input
-            type="text"
-            className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
-            value={settings.tryon_button_label || ""}
-            onChange={onText("tryon_button_label")}
-            placeholder="Try it on"
-          />
+      <div className="art-mb-2">
+        <label
+          htmlFor="tryon_consent_text"
+          className="art-block art-font-medium art-text-base art-mb-1"
+        >
+          Consent text
         </label>
-
-        <label className="art-block">
-          <span className="art-block art-text-sm art-font-medium art-mb-1">
-            Consent text
-          </span>
-          <textarea
-            className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
-            rows={3}
-            value={settings.tryon_consent_text || ""}
-            onChange={onText("tryon_consent_text")}
-            placeholder="Allow camera access to try this product on virtually. Video stays on your device."
-          />
-        </label>
+        <textarea
+          id="tryon_consent_text"
+          className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
+          rows={3}
+          value={settings.tryon_consent_text || ""}
+          onChange={onText("tryon_consent_text")}
+          placeholder="Allow camera access to try this product on virtually. Video stays on your device."
+        />
       </div>
 
       <p className="art-text-xs art-text-gray-500 art-mt-3">
