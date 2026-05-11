@@ -75,7 +75,8 @@ function atlas_ar_is_pro_plugin_exists() {
 }
 
 
-if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
+if (  ! function_exists( 'av3mto_fs' ) ) {
+//if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function av3mto_fs() {
 		global $av3mto_fs;
@@ -98,6 +99,10 @@ if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
                 'has_paid_plans'      => true,
 				'has_addons'          => false,
                 'has_affiliation'     => 'all',
+                'trial'               => array(
+                    'days'               => 14,
+                    'is_require_payment' => false,
+                ),
 				'menu'                => array(
 					'slug'           => 'ar-vr-3d-model-try-on',
 					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',

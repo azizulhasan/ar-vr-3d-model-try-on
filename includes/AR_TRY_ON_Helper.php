@@ -667,28 +667,38 @@ class AR_TRY_ON_Helper
 
     public static function is_pro_active() {
 
-        if (!function_exists('is_plugin_active')) {
-            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        // Freemius gate — trial active OR paid license.
+        // The `__premium_only` suffix tells the Freemius deploy script
+        // to strip this entire block from the Free zip, so on Free
+        // builds this method always returns false after trial expiry.
+        if ( function_exists( 'av3mto_fs' ) && av3mto_fs()->can_use_premium_code__premium_only() ) {
+            return true;
         }
 
-        $pro_plugins = [
-            'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
-            'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
-        ];
+        return false;
 
-        $status = false;
-
-        foreach ($pro_plugins as $plugin) {
-            if (is_plugin_active($plugin)) {
-                $status = true;
-                break; // Exit loop as soon as one active plugin is found
-            }
-        }
-
-        $status = apply_filters('atlas_ar_is_pro_active', $status);
-
-
-        return $status;
+        // Legacy folder-based detection — superseded by the Freemius
+        // gate above. Kept commented for reference.
+        //
+        // if (!function_exists('is_plugin_active')) {
+        //     include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        // }
+        //
+        // $pro_plugins = [
+        //     'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+        //     'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+        // ];
+        //
+        // $status = false;
+        //
+        // foreach ($pro_plugins as $plugin) {
+        //     if (is_plugin_active($plugin)) {
+        //         $status = true;
+        //         break; // Exit loop as soon as one active plugin is found
+        //     }
+        // }
+        //
+        // return $status;
     }
 
     /**
