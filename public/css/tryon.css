@@ -139,6 +139,65 @@ button.art-tryon-image-overlay:disabled {
 	margin: 0 6px;
 }
 
+/*
+ * Themed buttons.
+ *
+ * Inherit the active WordPress theme's button styling so the modal
+ * blends with whatever palette the merchant ships — Storefront, Astra,
+ * Twenty Twenty-Five, Divi, etc. We use CSS custom properties with
+ * sensible fallbacks (--wp--preset--color--primary is the modern theme
+ * token; older themes fall back to the WooCommerce / WP admin blue).
+ *
+ * `cursor: pointer` is global across these buttons so the affordance
+ * is correct even on themes that override the default.
+ */
+.art-tryon-consent-allow,
+.art-tryon-consent-deny,
+.art-tryon-snapshot {
+	cursor: pointer;
+	border: 1px solid transparent;
+	padding: 8px 16px;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.2;
+	transition: filter 0.15s ease, transform 0.05s ease;
+}
+/*
+ * Filled buttons inherit `--art-tryon-primary`, which the UI JS samples
+ * at modal-open time from the live theme's primary action button
+ * (e.g. WooCommerce "Add to cart"). Falls through to the modern
+ * WordPress preset, then to the legacy WC blue, so themes that don't
+ * expose any of those still render a reasonable button.
+ */
+.art-tryon-consent-allow,
+.art-tryon-snapshot {
+	background: var( --art-tryon-primary, var( --wp--preset--color--primary, var( --wc-primary, #2271b1 ) ) );
+	color: var( --art-tryon-primary-contrast, var( --wp--preset--color--primary-contrast, #fff ) );
+	border-color: transparent;
+}
+.art-tryon-consent-deny {
+	background: transparent;
+	color: var( --art-tryon-primary, var( --wp--preset--color--primary, var( --wc-primary, #2271b1 ) ) );
+	border-color: currentColor;
+}
+.art-tryon-consent-allow:hover,
+.art-tryon-consent-deny:hover,
+.art-tryon-snapshot:hover {
+	filter: brightness( 0.95 );
+}
+.art-tryon-consent-allow:active,
+.art-tryon-consent-deny:active,
+.art-tryon-snapshot:active {
+	transform: translateY( 1px );
+}
+.art-tryon-consent-allow:focus-visible,
+.art-tryon-consent-deny:focus-visible,
+.art-tryon-snapshot:focus-visible {
+	outline: 2px solid var( --wp--preset--color--primary, #2271b1 );
+	outline-offset: 2px;
+}
+
 .art-tryon-toolbar {
 	margin-top: 12px;
 	display: flex;

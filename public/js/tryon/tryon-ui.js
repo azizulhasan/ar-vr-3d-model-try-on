@@ -20,11 +20,11 @@ export function createUI( { config, productId } ) {
 				<div class="art-tryon-status" aria-live="polite">Loading…</div>
 			</div>
 			<div class="art-tryon-consent">
-				<button type="button" class="art-tryon-consent-allow button button-primary">Allow camera access</button>
-				<button type="button" class="art-tryon-consent-deny button" data-action="close">Cancel</button>
+				<button type="button" class="art-tryon-consent-allow">Allow camera access</button>
+				<button type="button" class="art-tryon-consent-deny" data-action="close">Cancel</button>
 			</div>
 			<div class="art-tryon-toolbar" hidden>
-				<button type="button" class="art-tryon-snapshot button button-primary" ${ config.snapshot ? '' : 'hidden' }>Snapshot</button>
+				<button type="button" class="art-tryon-snapshot" ${ config.snapshot ? '' : 'hidden' }>Snapshot</button>
 				<span class="art-tryon-fps"></span>
 			</div>
 			<div class="art-tryon-error" hidden></div>
@@ -40,6 +40,39 @@ export function createUI( { config, productId } ) {
 	const snapshotBtn = root.querySelector( '.art-tryon-snapshot' );
 	const allowBtn = root.querySelector( '.art-tryon-consent-allow' );
 	const fpsEl = root.querySelector( '.art-tryon-fps' );
+
+	// Sample the active theme's actual primary-button color (e.g. the
+	// WooCommerce "Add to cart" button) so the modal buttons match the
+	// merchant's site instead of a guessed CSS variable. Reads the
+	// computed background-color of the most-likely "primary action"
+	// element on the page and exports it as a CSS custom property on
+	// the modal root.
+	(() => {
+		try {
+			const selectors = [
+				'.single_add_to_cart_button',
+				'.wc-block-components-button[disabled="false"]',
+				'.wp-block-button__link',
+				'button[type="submit"].button',
+				'.button.alt',
+				'.button',
+			];
+			let probe = null;
+			for ( const sel of selectors ) {
+				const el = document.querySelector( sel );
+				if ( el ) { probe = el; break; }
+			}
+			if ( ! probe ) return;
+			const cs = window.getComputedStyle( probe );
+			const bg = cs.backgroundColor;
+			const fg = cs.color;
+			// Skip if the probe is transparent / unstyled.
+			if ( bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent' ) {
+				root.style.setProperty( '--art-tryon-primary', bg );
+			}
+			if ( fg ) root.style.setProperty( '--art-tryon-primary-contrast', fg );
+		} catch ( e ) { /* best-effort */ }
+	})();
 
 	let isOpen = true;
 	let onCloseCb = null;
@@ -66,6 +99,16 @@ export function createUI( { config, productId } ) {
 		if ( ! isOpen ) return;
 		isOpen = false;
 		document.removeEventListener( 'keydown', escHandler );
+		// Resolve any pending consent promise as "denied" so the
+		// awaiting caller (startTryOn) can proceed to its early-return
+		// path. Without this the promise hangs forever, which leaves
+		// the Try-On button stuck in disabled/loading state from the
+		// bootstrap's `try { await startTryOn(...) } finally { ... }`.
+		if ( consentResolve ) {
+			const resolve = consentResolve;
+			consentResolve = null;
+			resolve( false );
+		}
 		root.remove();
 		if ( onCloseCb ) onCloseCb();
 	}

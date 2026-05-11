@@ -14,6 +14,15 @@ mix.js('public/js/AtlasAR.js', 'public/js/AtlasAR.dist.js');
 // Worker uses native webpack 5 `new Worker(new URL(...), { type: 'module' })` syntax.
 mix.js('public/js/tryon/tryon-bootstrap.js', 'public/js/build/tryon-bootstrap.dist.js');
 
+// `glb-anatomy.js` is dynamic-imported by the Pro renderer at runtime from
+// the Free plugin URL — it's NOT part of the webpack bundle, AND it must
+// remain a valid ES module so the dynamic import can read its named
+// exports (`computeGlbAnatomy`, `persistGlbAnatomy`). `mix.minify()`
+// preserves ES module syntax; `mix.js()` would wrap the output in a
+// webpack IIFE and break the import contract. The raw `.js` is still
+// shipped (SCRIPT_DEBUG fallback) — PHP picks at enqueue.
+mix.minify('public/js/tryon/glb-anatomy.js');
+
 
 mix.webpackConfig({
     output: {

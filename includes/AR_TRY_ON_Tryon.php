@@ -547,6 +547,19 @@ class AR_TRY_ON_Tryon {
 			}
 		}
 
+		// `glb-anatomy.js` is dynamic-imported by the Pro renderer at
+		// runtime. Serve the minified `.min.js` copy in production;
+		// fall back to the readable source when `SCRIPT_DEBUG` is on
+		// so developers can still set breakpoints on a live site.
+		// filemtime() is used as the cache-bust query so the import
+		// URL changes whenever the file is rebuilt.
+		$glb_anatomy_min  = ATLAS_AR_PLUGIN_PATH . 'public/js/tryon/glb-anatomy.min.js';
+		$glb_anatomy_src  = ATLAS_AR_PLUGIN_PATH . 'public/js/tryon/glb-anatomy.js';
+		$glb_anatomy_use_min = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? false : file_exists( $glb_anatomy_min );
+		$glb_anatomy_file = $glb_anatomy_use_min ? $glb_anatomy_min : $glb_anatomy_src;
+		$glb_anatomy_url  = ATLAS_AR_PLUGIN_URL . 'public/js/tryon/' . ( $glb_anatomy_use_min ? 'glb-anatomy.min.js' : 'glb-anatomy.js' );
+		$glb_anatomy_ver  = file_exists( $glb_anatomy_file ) ? filemtime( $glb_anatomy_file ) : $this->version;
+
 		wp_localize_script(
 			self::SCRIPT_HANDLE,
 			'atlas_ar_tryon',
@@ -568,6 +581,10 @@ class AR_TRY_ON_Tryon {
 				'glb_anatomy'    => $cached_anatomy,
 				'can_persist_anatomy' => ( $queried_id > 0 && current_user_can( 'edit_post', $queried_id ) ),
 				'product_id'     => $queried_id,
+				// Server-resolved URL for the analyzer module the Pro
+				// renderer dynamic-imports. Already includes the
+				// filemtime cache-bust, so the renderer can use it as-is.
+				'glb_anatomy_url' => $glb_anatomy_url . '?ver=' . rawurlencode( $glb_anatomy_ver ),
 			)
 		);
 	}
