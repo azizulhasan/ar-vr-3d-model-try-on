@@ -75,8 +75,8 @@ function atlas_ar_is_pro_plugin_exists() {
 }
 
 
-if (  ! function_exists( 'av3mto_fs' ) ) {
-//if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
+//if (  ! function_exists( 'av3mto_fs' ) ) {
+if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function av3mto_fs() {
 		global $av3mto_fs;

@@ -20,9 +20,7 @@ export function createUI( { config, productId } ) {
 				<div class="art-tryon-status" aria-live="polite">Loading…</div>
 			</div>
 			<div class="art-tryon-consent">
-				<h3>Try it on yourself</h3>
-				<p class="art-tryon-consent-text">${ escapeHtml( config.consent_text || 'Allow camera access to try this on virtually. Video stays on your device.' ) }</p>
-				<button type="button" class="art-tryon-consent-allow button button-primary">Allow camera</button>
+				<button type="button" class="art-tryon-consent-allow button button-primary">Allow camera access</button>
 				<button type="button" class="art-tryon-consent-deny button" data-action="close">Cancel</button>
 			</div>
 			<div class="art-tryon-toolbar" hidden>
