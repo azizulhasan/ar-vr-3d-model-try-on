@@ -49,7 +49,9 @@ export function computeAnchor( landmarks, mode, canvas, accessory = 'glasses' ) 
 	if ( accessory === 'hat' ) {
 		const forehead = landmarks[ IDX.foreheadTop ];
 		if ( ! forehead ) return null;
-		// Hat sits above forehead, centered on head, ~2.4x eye-distance wide.
+		// Hat sits above forehead, centered on head, ~2.4× eye-distance
+		// wide as a sensible default. Merchants tune per-product via
+		// the live calibration panel (Pro) — that's the canonical fix.
 		return {
 			x: forehead.x * canvas.width,
 			y: forehead.y * canvas.height - eyeDistance * 0.7,
@@ -58,7 +60,7 @@ export function computeAnchor( landmarks, mode, canvas, accessory = 'glasses' ) 
 		};
 	}
 
-	// Default: glasses on nose-bridge, scaled to eye-distance.
+	// Glasses sit on the nose-bridge, ~2.0× eye-distance wide.
 	const bridge = landmarks[ IDX.noseBridge ];
 	if ( ! bridge ) return null;
 	return {

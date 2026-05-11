@@ -414,10 +414,59 @@ async function captureProductSprite( productId, explicitSrc ) {
 		const blob = await off.toBlob( { mimeType: 'image/png', idealAspect: false } );
 		off.remove();
 		if ( ! blob ) return null;
-		return await createImageBitmap( blob );
+		const raw = await createImageBitmap( blob );
+		// Runtime auto-fit: the model-viewer snapshot is a 512×512 PNG
+		// with the product floating in the middle and ~30 % transparent
+		// padding around it. Drawing this raw sprite at "width = 2.4 ×
+		// eyeDistPx" makes the visible accessory cover only 60-70 % of
+		// the eye-line area on every face (cap looks too small for the
+		// head, glasses too narrow for the eyes). Alpha-trim the sprite
+		// to its visible silhouette so the same multiplier produces a
+		// correctly-sized accessory on every device and every face size.
+		return await trimSpriteAlpha( raw );
 	} catch ( err ) {
 		off.remove();
 		console.warn( '[AtlasAR] Failed to snapshot model-viewer:', err );
 		return null;
+	}
+}
+
+/**
+ * Crop an ImageBitmap down to the tightest rectangle of pixels with
+ * alpha > 8/255 (ignoring anti-alias halo). Returns the original
+ * bitmap if the canvas / 2D context is unavailable or if every pixel
+ * is already opaque.
+ */
+async function trimSpriteAlpha( bitmap ) {
+	try {
+		const w = bitmap.width, h = bitmap.height;
+		if ( ! w || ! h ) return bitmap;
+		const c = document.createElement( 'canvas' );
+		c.width = w; c.height = h;
+		const ctx = c.getContext( '2d', { willReadFrequently: true } );
+		if ( ! ctx ) return bitmap;
+		ctx.drawImage( bitmap, 0, 0 );
+		const data = ctx.getImageData( 0, 0, w, h ).data;
+
+		const A_MIN = 8; // ignore near-transparent anti-alias halo
+		let minX = w, minY = h, maxX = -1, maxY = -1;
+		for ( let y = 0; y < h; y++ ) {
+			const row = y * w * 4;
+			for ( let x = 0; x < w; x++ ) {
+				if ( data[ row + x * 4 + 3 ] > A_MIN ) {
+					if ( x < minX ) minX = x;
+					if ( y < minY ) minY = y;
+					if ( x > maxX ) maxX = x;
+					if ( y > maxY ) maxY = y;
+				}
+			}
+		}
+		if ( maxX < 0 || maxY < 0 ) return bitmap;
+		const tw = maxX - minX + 1;
+		const th = maxY - minY + 1;
+		if ( tw === w && th === h ) return bitmap; // already tight
+		return await createImageBitmap( bitmap, minX, minY, tw, th );
+	} catch ( e ) {
+		return bitmap;
 	}
 }

@@ -532,6 +532,21 @@ class AR_TRY_ON_Tryon {
 			$pro_active
 		);
 
+		// Cached GLB anatomy from previous browser computation, if any.
+		// Indexed by current queried product id so the JS module can use
+		// it directly without re-analyzing the GLB. Anatomy is the per-
+		// model geometric facts (crown opening, brim depth, lens center)
+		// used to place accessories anatomically correctly without
+		// merchant calibration. See plan/glb-anatomy-autofit-plan.md.
+		$queried_id      = (int) get_queried_object_id();
+		$cached_anatomy  = null;
+		if ( $queried_id > 0 ) {
+			$ps = get_post_meta( $queried_id, 'ar_try_on_product_settings', true );
+			if ( is_array( $ps ) && isset( $ps['glb_anatomy'] ) && is_array( $ps['glb_anatomy'] ) ) {
+				$cached_anatomy = $ps['glb_anatomy'];
+			}
+		}
+
 		wp_localize_script(
 			self::SCRIPT_HANDLE,
 			'atlas_ar_tryon',
@@ -550,6 +565,9 @@ class AR_TRY_ON_Tryon {
 				// HD snapshot (2× canvas) — default Pro-on, Free-off. Filterable.
 				'snapshot_hd'    => apply_filters( 'atlas_ar_tryon_snapshot_hd', $pro_active ),
 				'worker_options' => $worker_options,
+				'glb_anatomy'    => $cached_anatomy,
+				'can_persist_anatomy' => ( $queried_id > 0 && current_user_can( 'edit_post', $queried_id ) ),
+				'product_id'     => $queried_id,
 			)
 		);
 	}
