@@ -11,14 +11,17 @@
 import { createUI } from './tryon-ui.js';
 import { computeAnchor, detectAccessoryFromMode } from './tryon-anchors.js';
 
-const VIDEO_WIDTH = 640;
-const VIDEO_HEIGHT = 480;
+// Camera-resolution hint only — `ideal` not `exact`, so a mobile camera
+// in portrait orientation is free to deliver e.g. 480×640 or 720×1280.
+// The canvas pixel-buffer is then sized to match the live stream below,
+// so face landmarks and accessory placement never have to fight a
+// landscape canvas wrapping a portrait camera feed.
+const CAMERA_IDEAL_WIDTH  = 640;
+const CAMERA_IDEAL_HEIGHT = 480;
 
 export async function startTryOn( { productId, mode, glbSrc, config, onClose } ) {
 	const ui = createUI( { config, productId } );
 	document.body.appendChild( ui.root );
-	ui.canvas.width = VIDEO_WIDTH;
-	ui.canvas.height = VIDEO_HEIGHT;
 
 	const accessory = detectAccessoryFromMode( mode );
 
@@ -33,8 +36,8 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		stream = await navigator.mediaDevices.getUserMedia( {
 			video: {
 				facingMode: 'user',
-				width: { ideal: VIDEO_WIDTH },
-				height: { ideal: VIDEO_HEIGHT },
+				width:  { ideal: CAMERA_IDEAL_WIDTH },
+				height: { ideal: CAMERA_IDEAL_HEIGHT },
 			},
 			audio: false,
 		} );
@@ -48,6 +51,27 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	await ui.video.play();
 	ui.showStage();
 	ui.setStatus( 'Loading face model…' );
+
+	// Size the canvas pixel buffer to the ACTUAL video dimensions —
+	// portrait phones get a portrait canvas, landscape webcams get
+	// landscape. Eliminates the squash → re-stretch chain that was
+	// distorting the face (and any accessory anchored to landmarks)
+	// when the hardcoded 640×480 was used regardless of stream shape.
+	const syncCanvasToVideo = () => {
+		const vw = ui.video.videoWidth  || CAMERA_IDEAL_WIDTH;
+		const vh = ui.video.videoHeight || CAMERA_IDEAL_HEIGHT;
+		if ( ui.canvas.width !== vw || ui.canvas.height !== vh ) {
+			ui.canvas.width  = vw;
+			ui.canvas.height = vh;
+		}
+	};
+	syncCanvasToVideo();
+	ui.video.addEventListener( 'loadedmetadata', syncCanvasToVideo );
+	// Also resync on orientation change so rotating the phone mid-session
+	// gives MediaPipe an accurately-sized frame.
+	const onResize = () => syncCanvasToVideo();
+	window.addEventListener( 'orientationchange', onResize );
+	window.addEventListener( 'resize', onResize );
 
 	const overlaySprite = await captureProductSprite( productId, glbSrc );
 	if ( ! overlaySprite ) {
@@ -219,6 +243,8 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 		stream.getTracks().forEach( ( t ) => t.stop() );
 		worker.postMessage( { type: 'dispose' } );
 		worker.terminate();
+		window.removeEventListener( 'orientationchange', onResize );
+		window.removeEventListener( 'resize', onResize );
 		if ( typeof onClose === 'function' ) onClose();
 	};
 

@@ -79,6 +79,31 @@ export function createUI( { config, productId } ) {
 	let onSnapshotCb = null;
 	let consentResolve = null;
 
+	// --- Mobile chrome adjustments while the modal is open ---
+	// 1. `viewport-fit=cover` makes `env(safe-area-inset-top/bottom)` actually
+	//    return non-zero on Chrome / iOS Safari so the close button and
+	//    snapshot toolbar don't disappear behind the address bar / nav bar.
+	// 2. Body scroll lock prevents the page underneath from scrolling when
+	//    the user pans inside the modal on Android Chrome.
+	// Both are reverted in `close()` so the host page isn't permanently
+	// altered after the customer dismisses Try-On.
+	const previousBodyOverflow = document.body.style.overflow;
+	document.body.style.overflow = 'hidden';
+	let viewportMeta = document.querySelector( 'meta[name="viewport"]' );
+	let createdViewportMeta = false;
+	const previousViewportContent = viewportMeta ? viewportMeta.getAttribute( 'content' ) : null;
+	if ( ! viewportMeta ) {
+		viewportMeta = document.createElement( 'meta' );
+		viewportMeta.setAttribute( 'name', 'viewport' );
+		document.head.appendChild( viewportMeta );
+		createdViewportMeta = true;
+	}
+	const ensureViewportFitCover = ( prev ) => {
+		const base = prev || 'width=device-width, initial-scale=1';
+		return /viewport-fit\s*=/.test( base ) ? base : base + ', viewport-fit=cover';
+	};
+	viewportMeta.setAttribute( 'content', ensureViewportFitCover( previousViewportContent ) );
+
 	root.addEventListener( 'click', ( e ) => {
 		const action = e.target.dataset && e.target.dataset.action;
 		if ( action === 'close' ) close();
@@ -108,6 +133,15 @@ export function createUI( { config, productId } ) {
 			const resolve = consentResolve;
 			consentResolve = null;
 			resolve( false );
+		}
+		// Restore host-page viewport + scroll state. Idempotent — if
+		// another script changed the viewport meta while the modal was
+		// open we still revert to whatever we recorded on open.
+		document.body.style.overflow = previousBodyOverflow;
+		if ( createdViewportMeta ) {
+			viewportMeta.remove();
+		} else if ( previousViewportContent !== null ) {
+			viewportMeta.setAttribute( 'content', previousViewportContent );
 		}
 		root.remove();
 		if ( onCloseCb ) onCloseCb();

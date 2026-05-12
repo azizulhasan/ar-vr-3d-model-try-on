@@ -111,6 +111,13 @@ button.art-tryon-image-overlay:disabled {
 	width: 100%;
 	height: 100%;
 	display: block;
+	/*
+	 * The canvas pixel-buffer is sized to the camera's native
+	 * dimensions (varies per device / orientation), so we letterbox
+	 * inside the stage instead of stretching to fill — keeps faces
+	 * un-distorted whether the source is portrait or landscape.
+	 */
+	object-fit: contain;
 }
 
 .art-tryon-status {
@@ -252,10 +259,16 @@ button.art-tryon-image-overlay:disabled {
 		border-radius: 0;
 	}
 	.art-tryon-close {
-		top: env(safe-area-inset-top, 8px);
+		/*
+		 * `env(safe-area-inset-top)` returns 0 on Chrome / Android
+		 * unless the page sets `viewport-fit=cover` — which the modal
+		 * does on open. `max()` guarantees the button still clears
+		 * the URL bar (~12 px) even when the inset is 0.
+		 */
+		top: max(12px, env(safe-area-inset-top, 12px));
 		right: 12px;
-		width: 40px;
-		height: 40px;
+		width: 44px;
+		height: 44px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -266,13 +279,13 @@ button.art-tryon-image-overlay:disabled {
 		z-index: 5;
 	}
 	.art-tryon-toolbar {
-		padding: 12px 16px env(safe-area-inset-bottom, 16px);
+		padding: 12px 16px max(16px, env(safe-area-inset-bottom, 16px));
 		background: rgba(255, 255, 255, 0.96);
 		border-top: 1px solid rgba(0, 0, 0, 0.08);
 		gap: 16px;
 	}
 	.art-tryon-consent {
-		padding: 24px 16px env(safe-area-inset-bottom, 24px);
+		padding: 24px 16px max(24px, env(safe-area-inset-bottom, 24px));
 		background: rgba(255, 255, 255, 0.96);
 		border-top: 1px solid rgba(0, 0, 0, 0.08);
 	}
