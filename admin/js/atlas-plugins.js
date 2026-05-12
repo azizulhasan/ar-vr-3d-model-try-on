@@ -44,8 +44,14 @@
         if (typeof atlasPluginsData !== 'undefined' && atlasPluginsData.wporg_info && atlasPluginsData.wporg_info[slug]) {
             return atlasPluginsData.wporg_info[slug];
         }
-        return { rating: 0, num_ratings: 0, active_installs: 0 };
+        return { name: '', rating: 0, num_ratings: 0, active_installs: 0 };
     }
+
+    /**
+     * Slug for the only plugin that should keep the legacy "Go Pro" label
+     * on its upsell button. All other plugins surface "Start Trial" instead.
+     */
+    var TRYON_NO_TRIAL_SLUG = 'text-to-audio';
 
     function formatInstalls(num) {
         if (num >= 1000000) return Math.floor(num / 1000000) + 'M+';
@@ -256,10 +262,11 @@
         var infoDiv = document.createElement('div');
         infoDiv.className = 'atlas_plugins_card_header_info';
 
-        // Plugin name
+        // Plugin name — prefer WP.org canonical title when available,
+        // fall back to the locally-configured name from plugins.json.
         var name = document.createElement('h3');
         name.className = 'atlas_plugins_name';
-        name.textContent = plugin.name;
+        name.textContent = (wporg && wporg.name) ? wporg.name : plugin.name;
         infoDiv.appendChild(name);
 
         // Badges
@@ -494,7 +501,12 @@
     }
 
     function appendLearnMore(actions, plugin) {
-        if (plugin.learnMoreUrl) {
+        // TTS (AtlasVoice) keeps the plain-text "Learn More" link.
+        // Every other plugin gets a "Start Trial" CTA styled like the
+        // Go Pro button, pointing at the same proUrl (so UTM params from
+        // addUtm() are applied consistently).
+        if (plugin.slug === TRYON_NO_TRIAL_SLUG) {
+            if (!plugin.learnMoreUrl) return;
             var link = document.createElement('a');
             link.className = 'atlas_plugins_link';
             link.href = addUtm(plugin.learnMoreUrl);
@@ -502,7 +514,19 @@
             link.rel = 'noopener noreferrer';
             link.textContent = __('Learn More', 'ar-vr-3d-model-try-on');
             actions.appendChild(link);
+            return;
         }
+
+        var trialUrl = plugin.proUrl || plugin.learnMoreUrl;
+        if (!trialUrl) return;
+
+        var btn = document.createElement('a');
+        btn.className = 'atlas_plugins_btn atlas_plugins_pro_btn';
+        btn.href = addUtm(trialUrl);
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.innerHTML = '<span class="dashicons dashicons-star-filled"></span> ' + __('Start Trial', 'ar-vr-3d-model-try-on');
+        actions.appendChild(btn);
     }
 
     // ── Grid rendering ──────────────────────────────────────

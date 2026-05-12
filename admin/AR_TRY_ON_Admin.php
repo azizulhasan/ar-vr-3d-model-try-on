@@ -442,7 +442,7 @@ class AR_TRY_ON_Admin {
     /**
      * Transient key for WP.org plugin info cache.
      */
-    const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info';
+    const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info_v2';
 
     /**
      * Cache duration in seconds (24 hours).
@@ -615,6 +615,7 @@ class AR_TRY_ON_Admin {
                 $data = json_decode(wp_remote_retrieve_body($response), true);
                 if (is_array($data) && !empty($data['slug'])) {
                     $info[$slug] = array(
+                        'name'            => isset($data['name']) ? wp_strip_all_tags(html_entity_decode($data['name'], ENT_QUOTES, 'UTF-8')) : '',
                         'rating'          => isset($data['rating']) ? (int) $data['rating'] : 0,
                         'num_ratings'     => isset($data['num_ratings']) ? (int) $data['num_ratings'] : 0,
                         'active_installs' => isset($data['active_installs']) ? (int) $data['active_installs'] : 0,
@@ -622,7 +623,7 @@ class AR_TRY_ON_Admin {
                 }
             }
             if (!isset($info[$slug])) {
-                $info[$slug] = array('rating' => 0, 'num_ratings' => 0, 'active_installs' => 0);
+                $info[$slug] = array('name' => '', 'rating' => 0, 'num_ratings' => 0, 'active_installs' => 0);
             }
         }
 
@@ -724,10 +725,16 @@ class AR_TRY_ON_Admin {
             $pro_status = self::detect_pro_status($atlas_plugins, $all_plugins, $active_plugins);
 
             // Find the current plugin's display name for the banner.
+            // Prefer the canonical WP.org plugin title when available so the
+            // banner stays in sync with the directory listing.
             $current_plugin_name = '';
             foreach ($atlas_plugins as $p) {
                 if (!empty($p['slug']) && $p['slug'] === $plugin_slug) {
-                    $current_plugin_name = $p['name'];
+                    if (!empty($wporg_info[$plugin_slug]['name'])) {
+                        $current_plugin_name = $wporg_info[$plugin_slug]['name'];
+                    } else {
+                        $current_plugin_name = $p['name'];
+                    }
                     break;
                 }
             }
