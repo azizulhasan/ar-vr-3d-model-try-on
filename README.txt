@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.2
+Stable tag: 2.0.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -332,6 +332,15 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.0.0 ( 12 May 2026 ) =
+* New: AtlasTryOn — virtual try-on for glasses & caps using your webcam, no app required
+* New: Works on iOS, Android and desktop browsers
+* New: Snapshot button so shoppers can save and share their look
+* New: Faster, smoother mobile fullscreen experience
+* New: Free 14-day Pro trial banner on the dashboard
+* New: Plugins page now shows official WordPress.org plugin titles and a Start Trial button on every card
+* Improvement: Cleaner, more responsive plugin dashboard
+
 = 1.9.2 (10 Apr 2026) =
 * New: Plugins page now fetches data remotely with 24-hour caching
 * New: WP.org star ratings and active install counts on plugin cards
@@ -568,6 +577,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.0.0 =
+Major update: AtlasTryOn virtual try-on for glasses & caps is now built in — no extra setup needed. Please clear your site cache after updating.
 
 = 1.9.2 =
 Enhanced Plugins page with remote data, WP.org ratings, plugin icons, Pro/NEW/Recommended badges, and UTM tracking. Tested up to WordPress 7.0.
