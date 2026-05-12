@@ -95,6 +95,37 @@ export default function FeatureComparison() {
             free: true,
             pro: true,
         },
+        // --- AtlasTryOn (Glasses & Caps) ---
+        {
+            name: __('AtlasTryOn — Glasses & Caps (face try-on via webcam)', 'ar-vr-3d-model-try-on'),
+            free: true,
+            pro: true,
+        },
+        {
+            name: __('AtlasTryOn — Unlimited Try-On Products (Free is capped at 3)', 'ar-vr-3d-model-try-on'),
+            free: false,
+            pro: true,
+        },
+        {
+            name: __('AtlasTryOn — 3D Depth-Occluded Overlay (head-pose aware)', 'ar-vr-3d-model-try-on'),
+            free: false,
+            pro: true,
+        },
+        {
+            name: __('AtlasTryOn — HD Watermark-Free Snapshots', 'ar-vr-3d-model-try-on'),
+            free: false,
+            pro: true,
+        },
+        {
+            name: __('AtlasTryOn — Live Per-Product Calibration Panel', 'ar-vr-3d-model-try-on'),
+            free: false,
+            pro: true,
+        },
+        {
+            name: __('AtlasTryOn — Multi-Face Detection (up to 2 faces)', 'ar-vr-3d-model-try-on'),
+            free: false,
+            pro: true,
+        },
         {
             name: __('Dimensions Display (Length, Width, Height)', 'ar-vr-3d-model-try-on'),
             free: false,

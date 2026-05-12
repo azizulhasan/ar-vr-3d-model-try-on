@@ -408,71 +408,56 @@ class AR_TRY_ON_Admin_Notice {
 	}
 
 	/**
-	 * Register the default promo notice
+	 * Register the default promo notice — 14-day Pro free trial.
+	 *
+	 * Shown only when the merchant is on the Free plan (Pro not active)
+	 * and they haven't already used the trial. The CTA opens the
+	 * Freemius-managed trial activation page baked into the plugin so
+	 * the trial starts with one click — no payment, no credit card.
 	 */
 	private function register_promo_notice() {
 		$this->register_notice(
 			array(
 				'id'            => 'promo_notice',
-				'title'         => '🚀 AtlasAR Pro is Now Available - Limited Early Access Offer!',
-				'message'       => 'Get <strong style="color: #00a32a; font-size: 16px;">80% OFF</strong> AtlasAR Pro as an early adopter! Unlock <strong>Dimensions Display</strong>, <strong>Interactive Hotspots</strong>, <strong>Product Configurators</strong>, and <strong>Automatic Compression</strong>.',
+				'title'         => '🎁 Try AtlasAR Pro Free for 14 Days — No Card Required',
+				'message'       => 'Unlock the full Pro feature set for 2 weeks on us: <strong>unlimited AtlasTryOn products</strong> (glasses & caps), <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, and <strong>GLB compression</strong>. Cancel any time — no automatic charge after the trial.',
 				'type'          => 'info',
-				'icon'          => '🎉',
+				'icon'          => '🎁',
 				'dismissible'   => true,
 				'condition'     => function() {
-					// Only show if Pro is NOT active
-					return ! AR_TRY_ON_Helper::is_pro_active();
+					// Hide once Pro is active (trial running, or fully paid).
+					if ( AR_TRY_ON_Helper::is_pro_active() ) {
+						return false;
+					}
+					// Hide if the merchant has already burned their trial —
+					// Freemius tracks `is_trial_utilized` per-install.
+					if ( function_exists( 'av3mto_fs' ) ) {
+						try {
+							$fs = av3mto_fs();
+							if ( $fs && method_exists( $fs, 'is_trial_utilized' ) && $fs->is_trial_utilized() ) {
+								return false;
+							}
+						} catch ( \Throwable $e ) { /* no-op — fall through to show */ }
+					}
+					return true;
 				},
-				'track_clicks'  => true,
-				'max_clicks'    => 20,
+				'track_clicks'  => false,
 				'buttons'       => array(
 					array(
-						'text'   => 'Get 80% OFF Coupon Code',
-						'type'   => 'primary',
-						'icon'   => 'email',
-						'action' => 'get_coupon',
-						'track'  => true,
+						'text' => 'Start 14-day Free Trial',
+						'type' => 'primary',
+						'icon' => 'star-filled',
+						'url'  => 'https://wpaugmentedreality.com/pricing/',
 					),
 					array(
-						'text' => 'View Pricing & Features',
+						'text' => 'Read Try-On Docs',
 						'type' => 'secondary',
-						'icon' => 'cart',
-						'url'  => 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
+						'icon' => 'book',
+						'url'  => 'https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/',
 					),
 				),
-				'footer_text'   => '<strong>How it works:</strong> Click "Get 80% OFF Coupon Code" → Fill out contact form → Receive your <code style="background: #f0f0f1; padding: 2px 6px; border-radius: 3px;">EARLYACCESS80</code> coupon code via email! Early access limited to first 20 users only.',
-				'click_action'  => array( $this, 'handle_promo_click' ),
+				'footer_text'   => 'No credit card required. The trial ends after 14 days — your store automatically reverts to the Free plan unless you choose to subscribe.',
 			)
 		);
-	}
-
-	/**
-	 * Handle promo notice click
-	 *
-	 * @param string   $notice_id Notice ID
-	 * @param string   $action Action name
-	 * @param \WP_User $user Current user
-	 * @return array
-	 */
-	public function handle_promo_click( $notice_id, $action, $user ) {
-		if ( $action === 'get_coupon' ) {
-			// Store user data in transient for contact page
-			$transient_key = 'ar_promo_contact_' . $user->ID;
-			set_transient(
-				$transient_key,
-				array(
-					'email'   => $user->user_email,
-					'user_id' => $user->ID,
-				),
-				300 // 5 minutes
-			);
-
-			return array(
-				'redirect_url' => 'https://wpaugmentedreality.com/contact-us/',
-				'email'        => $user->user_email,
-			);
-		}
-
-		return array();
 	}
 }

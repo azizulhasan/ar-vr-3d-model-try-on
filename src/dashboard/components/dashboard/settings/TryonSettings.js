@@ -25,7 +25,7 @@ export default function TryonSettings({ settings, handleChange }) {
   return (
     <BorderCard>
       <div className="art-mb-3">
-        <strong className="art-block art-text-base">Virtual Try-On</strong>
+        <strong className="art-block art-text-base">AtlasTryOn</strong>
         <span className="art-block art-text-xs art-text-gray-500">
           Face-glasses / face-hat AR via webcam (per-product opt-in via
           <code> ar_placement</code>).

@@ -102,6 +102,10 @@ export default function Pricing() {
 
     const features = [
         __('All Pro Features', 'ar-vr-3d-model-try-on'),
+        __('AtlasTryOn — Unlimited Glasses & Caps products', 'ar-vr-3d-model-try-on'),
+        __('3D Depth-Occluded Try-On Overlay', 'ar-vr-3d-model-try-on'),
+        __('HD Watermark-Free Snapshots', 'ar-vr-3d-model-try-on'),
+        __('Live Per-Product Calibration Panel', 'ar-vr-3d-model-try-on'),
         __('Dimensions Display', 'ar-vr-3d-model-try-on'),
         __('Interactive Hotspots', 'ar-vr-3d-model-try-on'),
         __('Slider/Multiple Model Display', 'ar-vr-3d-model-try-on'),
