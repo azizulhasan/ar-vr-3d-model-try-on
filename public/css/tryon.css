@@ -70,6 +70,9 @@ button.art-tryon-image-overlay:disabled {
 	padding: 24px;
 	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
 	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
 .art-tryon-close {
@@ -219,22 +222,76 @@ button.art-tryon-image-overlay:disabled {
 	border-radius: 6px;
 }
 
-.art-tryon-share {
-	margin-top: 10px;
-	padding: 8px 10px;
-	background: #f0fdf4;
-	border: 1px solid #bbf7d0;
-	border-radius: 6px;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	font-size: 13px;
+/* ---------- Responsive: mobile fullscreen, tablet/desktop centered card ---------- */
+
+/*
+ * On phones (<= 640 px wide) the centered card layout wastes real
+ * estate — letterboxes the 4:3 video inside a 92 vw panel inside the
+ * viewport. Promote the panel to a true fullscreen modal so the
+ * camera feed fills the screen, controls dock at the bottom, and the
+ * close button floats over the live feed.
+ */
+@media (max-width: 640px) {
+	.art-tryon-panel {
+		width: 100vw;
+		height: 100vh;
+		max-height: 100vh;
+		max-width: 100vw;
+		border-radius: 0;
+		padding: 0;
+		gap: 0;
+		box-shadow: none;
+		justify-content: flex-start;
+	}
+	.art-tryon-stage {
+		flex: 1 1 auto;
+		width: 100%;
+		height: 100%;
+		max-height: none;
+		aspect-ratio: auto;
+		border-radius: 0;
+	}
+	.art-tryon-close {
+		top: env(safe-area-inset-top, 8px);
+		right: 12px;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28px;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		border-radius: 999px;
+		z-index: 5;
+	}
+	.art-tryon-toolbar {
+		padding: 12px 16px env(safe-area-inset-bottom, 16px);
+		background: rgba(255, 255, 255, 0.96);
+		border-top: 1px solid rgba(0, 0, 0, 0.08);
+		gap: 16px;
+	}
+	.art-tryon-consent {
+		padding: 24px 16px env(safe-area-inset-bottom, 24px);
+		background: rgba(255, 255, 255, 0.96);
+		border-top: 1px solid rgba(0, 0, 0, 0.08);
+	}
+	.art-tryon-status {
+		bottom: 80px; /* keep clear of the toolbar */
+	}
+	/* Calibration panel (Pro, admin-only) gets relegated to a small
+	 * pill at the right edge so it doesn't eat phone real estate. */
+	.atlasar-tryon-cal-panel {
+		max-width: 90vw !important;
+	}
 }
 
-.art-tryon-share a {
-	color: #15803d;
-	flex: 1;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+/* Reduce notch / dynamic-island encroachment on very small viewports. */
+@media (max-width: 380px) {
+	.art-tryon-toolbar {
+		flex-wrap: wrap;
+	}
+	.art-tryon-fps {
+		display: none;
+	}
 }

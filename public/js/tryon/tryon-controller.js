@@ -200,38 +200,18 @@ export async function startTryOn( { productId, mode, glbSrc, config, onClose } )
 	}
 	requestAnimationFrame( tick );
 
-	ui.onSnapshot = async () => {
+	ui.onSnapshot = () => {
+		// Build the snapshot dataURL entirely in the browser and trigger
+		// a direct file download — no server upload, no media-library
+		// write, no record of the customer's try-on frame on the
+		// merchant's site. Privacy by default.
 		const dataUrl = buildSnapshotDataUrl( ui.canvas, !! config.watermark, !! config.snapshot_hd );
-		// Direct download.
 		const a = document.createElement( 'a' );
 		a.href = dataUrl;
 		a.download = `tryon-${ productId }-${ Date.now() }.png`;
 		document.body.appendChild( a );
 		a.click();
 		a.remove();
-
-		// Optional: persist to media library if logged in. Surface the
-		// returned URL so the user can grab a shareable link.
-		if ( config.rest_url && config.rest_nonce ) {
-			try {
-				const resp = await fetch( `${ config.rest_url }/tryon/snapshot`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'X-WP-Nonce': config.rest_nonce,
-					},
-					body: JSON.stringify( { image: dataUrl, product_id: productId } ),
-				} );
-				if ( resp.ok ) {
-					const json = await resp.json();
-					if ( json && json.url && ui.showShareLink ) {
-						ui.showShareLink( json.url );
-					}
-				}
-			} catch ( err ) {
-				console.warn( '[AtlasAR] Snapshot upload failed:', err );
-			}
-		}
 	};
 
 	ui.onClose = () => {
