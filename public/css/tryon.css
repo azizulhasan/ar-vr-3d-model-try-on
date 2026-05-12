@@ -1,0 +1,352 @@
+/**
+ * Try-On modal styles. Tailwind-compatible class names (art-* prefix) but
+ * authored as plain CSS for now — Phase 1 ships before we wire Tailwind
+ * to compile these. Future: move to src/tailwind.css with @apply.
+ */
+
+.art-tryon-trigger {
+	margin-left: 8px;
+}
+
+/* Try-On button rendered as overlay on featured image (toggle-mode position).
+ * Sits inside .atlas-ar-toggle-container next to the cube icon.
+ * Uses !important to override the broad CSS reset in image-3d-toggle.css
+ * that targets all descendants of `.atlas-ar-toggle-container *`. */
+.atlas-ar-toggle-container .art-tryon-image-overlay,
+button.art-tryon-image-overlay {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	height: 48px !important;
+	min-width: 48px !important;
+	padding: 0 16px !important;
+	margin-left: 8px !important;
+	border-radius: 24px !important;
+	border: 1px solid rgba(0, 0, 0, 0.15) !important;
+	background: #111 !important;
+	color: #fff !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	line-height: 1 !important;
+	cursor: pointer !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+	transition: transform 0.15s ease, background 0.15s ease !important;
+	white-space: nowrap !important;
+}
+
+.atlas-ar-toggle-container .art-tryon-image-overlay:hover,
+button.art-tryon-image-overlay:hover {
+	background: #000 !important;
+	transform: translateY(-1px);
+}
+
+.atlas-ar-toggle-container .art-tryon-image-overlay:disabled,
+button.art-tryon-image-overlay:disabled {
+	opacity: 0.6 !important;
+	cursor: progress !important;
+}
+
+.art-tryon-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 999999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.art-tryon-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.7);
+}
+
+.art-tryon-panel {
+	position: relative;
+	background: #fff;
+	border-radius: 12px;
+	width: min(720px, 92vw);
+	max-height: 92vh;
+	padding: 24px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+	overflow: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.art-tryon-close {
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	background: transparent;
+	border: 0;
+	font-size: 28px;
+	line-height: 1;
+	cursor: pointer;
+	color: #444;
+}
+
+.art-tryon-stage {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	background: #000;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.art-tryon-video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	visibility: hidden;
+}
+
+.art-tryon-canvas {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	display: block;
+	/*
+	 * The canvas pixel-buffer is sized to the camera's native
+	 * dimensions (varies per device / orientation), so we letterbox
+	 * inside the stage instead of stretching to fill — keeps faces
+	 * un-distorted whether the source is portrait or landscape.
+	 */
+	object-fit: contain;
+}
+
+.art-tryon-status {
+	position: absolute;
+	bottom: 12px;
+	left: 12px;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.55);
+	padding: 4px 10px;
+	border-radius: 6px;
+	font-size: 13px;
+}
+
+.art-tryon-consent {
+	padding: 24px 0 0;
+	text-align: center;
+}
+
+.art-tryon-consent h3 {
+	margin: 0 0 8px;
+}
+
+.art-tryon-consent-text {
+	color: #555;
+	margin-bottom: 16px;
+}
+
+.art-tryon-consent button {
+	margin: 0 6px;
+}
+
+/*
+ * Themed buttons.
+ *
+ * Inherit the active WordPress theme's button styling so the modal
+ * blends with whatever palette the merchant ships — Storefront, Astra,
+ * Twenty Twenty-Five, Divi, etc. We use CSS custom properties with
+ * sensible fallbacks (--wp--preset--color--primary is the modern theme
+ * token; older themes fall back to the WooCommerce / WP admin blue).
+ *
+ * `cursor: pointer` is global across these buttons so the affordance
+ * is correct even on themes that override the default.
+ */
+.art-tryon-consent-allow,
+.art-tryon-consent-deny {
+	cursor: pointer;
+	border: 1px solid transparent;
+	padding: 8px 16px;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.2;
+	transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+/*
+ * Snapshot button — iOS-camera-style floating shutter overlay on
+ * the canvas, NOT a bar item that eats vertical space. The white
+ * outer ring + dark inner dot reads universally as "take a photo"
+ * on any device. Tap target is 64×64 (well above the 44 px iOS HIG
+ * minimum) and sits clear of the device's safe area at the bottom.
+ */
+.art-tryon-snapshot {
+	position: absolute;
+	left: 50%;
+	bottom: max(24px, env(safe-area-inset-bottom, 24px));
+	transform: translateX(-50%);
+	width: 64px;
+	height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: #fff;
+	border: 0;
+	cursor: pointer;
+	z-index: 4;
+	filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+	transition: transform 0.1s ease, filter 0.15s ease;
+}
+.art-tryon-snapshot:hover { filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.7)); }
+.art-tryon-snapshot:active { transform: translateX(-50%) scale(0.92); }
+.art-tryon-snapshot:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 4px;
+}
+.art-tryon-snapshot svg { display: block; }
+/*
+ * Filled buttons inherit `--art-tryon-primary`, which the UI JS samples
+ * at modal-open time from the live theme's primary action button
+ * (e.g. WooCommerce "Add to cart"). Falls through to the modern
+ * WordPress preset, then to the legacy WC blue, so themes that don't
+ * expose any of those still render a reasonable button.
+ */
+.art-tryon-consent-allow {
+	background: var( --art-tryon-primary, var( --wp--preset--color--primary, var( --wc-primary, #2271b1 ) ) );
+	color: var( --art-tryon-primary-contrast, var( --wp--preset--color--primary-contrast, #fff ) );
+	border-color: transparent;
+}
+.art-tryon-consent-deny {
+	background: transparent;
+	color: var( --art-tryon-primary, var( --wp--preset--color--primary, var( --wc-primary, #2271b1 ) ) );
+	border-color: currentColor;
+}
+.art-tryon-consent-allow:hover,
+.art-tryon-consent-deny:hover {
+	filter: brightness( 0.95 );
+}
+.art-tryon-consent-allow:active,
+.art-tryon-consent-deny:active {
+	transform: translateY( 1px );
+}
+.art-tryon-consent-allow:focus-visible,
+.art-tryon-consent-deny:focus-visible {
+	outline: 2px solid var( --wp--preset--color--primary, #2271b1 );
+	outline-offset: 2px;
+}
+
+.art-tryon-toolbar {
+	margin-top: 12px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.art-tryon-fps {
+	color: #888;
+	font-size: 12px;
+	margin-left: auto;
+}
+
+.art-tryon-error {
+	margin-top: 12px;
+	padding: 10px 12px;
+	background: #fde8e8;
+	color: #9b1c1c;
+	border-radius: 6px;
+}
+
+/* ---------- Responsive: mobile fullscreen, tablet/desktop centered card ---------- */
+
+/*
+ * On phones (<= 640 px wide) the centered card layout wastes real
+ * estate — letterboxes the 4:3 video inside a 92 vw panel inside the
+ * viewport. Promote the panel to a true fullscreen modal so the
+ * camera feed fills the screen, controls dock at the bottom, and the
+ * close button floats over the live feed.
+ */
+@media (max-width: 640px) {
+	.art-tryon-panel {
+		width: 100vw;
+		/*
+		 * `100vh` on Chrome Android extends BEHIND the URL bar — the
+		 * close button at top:12px ends up partially hidden. `100dvh`
+		 * (dynamic viewport height) tracks the visible viewport and
+		 * shrinks when the URL bar is showing, so the close button
+		 * sits below it cleanly. Falls back to 100vh on older
+		 * browsers that don't support dvh.
+		 */
+		height: 100vh;
+		height: 100dvh;
+		max-height: 100vh;
+		max-height: 100dvh;
+		max-width: 100vw;
+		border-radius: 0;
+		padding: 0;
+		gap: 0;
+		box-shadow: none;
+		justify-content: flex-start;
+	}
+	.art-tryon-stage {
+		flex: 1 1 auto;
+		width: 100%;
+		height: 100%;
+		max-height: none;
+		aspect-ratio: auto;
+		border-radius: 0;
+	}
+	.art-tryon-close {
+		/*
+		 * Pair belt-and-braces approach:
+		 *  1. Panel uses 100dvh so it doesn't extend behind Chrome's
+		 *     URL bar in the first place.
+		 *  2. Even if dvh isn't supported, this 16 px top + the safe-
+		 *     area-inset fallback keeps the button out of the notch
+		 *     and as far from the URL bar overlay as we can get.
+		 */
+		top: max(16px, env(safe-area-inset-top, 16px));
+		right: 12px;
+		width: 44px;
+		height: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 28px;
+		background: rgba(0, 0, 0, 0.55);
+		color: #fff;
+		border-radius: 999px;
+		z-index: 5;
+	}
+	.art-tryon-toolbar {
+		padding: 12px 16px max(16px, env(safe-area-inset-bottom, 16px));
+		background: rgba(255, 255, 255, 0.96);
+		border-top: 1px solid rgba(0, 0, 0, 0.08);
+		gap: 16px;
+	}
+	.art-tryon-consent {
+		padding: 24px 16px max(24px, env(safe-area-inset-bottom, 24px));
+		background: rgba(255, 255, 255, 0.96);
+		border-top: 1px solid rgba(0, 0, 0, 0.08);
+	}
+	.art-tryon-status {
+		bottom: 80px; /* keep clear of the toolbar */
+	}
+	/* Calibration panel (Pro, admin-only) gets relegated to a small
+	 * pill at the right edge so it doesn't eat phone real estate. */
+	.atlasar-tryon-cal-panel {
+		max-width: 90vw !important;
+	}
+}
+
+/* Reduce notch / dynamic-island encroachment on very small viewports. */
+@media (max-width: 380px) {
+	.art-tryon-toolbar {
+		flex-wrap: wrap;
+	}
+	.art-tryon-fps {
+		display: none;
+	}
+}

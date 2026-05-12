@@ -48,10 +48,13 @@ class ComposerStaticInit84dbd1765bc8075c6306831ae4ea4ff5
         'AR_TRY_ON\\AR_TRY_ON_Hooks' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Hooks.php',
         'AR_TRY_ON\\AR_TRY_ON_Lib_AtlasAiDev' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Lib_AtlasAiDev.php',
         'AR_TRY_ON\\AR_TRY_ON_Loader' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Loader.php',
+        'AR_TRY_ON\\AR_TRY_ON_Tryon' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Tryon.php',
+        'AR_TRY_ON\\AR_TRY_ON_Tryon_Hooks' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Tryon_Hooks.php',
         'AR_TRY_ON_Admin\\AR_TRY_ON_Admin' => __DIR__ . '/../..' . '/admin/AR_TRY_ON_Admin.php',
         'AR_TRY_ON_Public\\AR_TRY_ON_Public' => __DIR__ . '/../..' . '/public/AR_TRY_ON_Public.php',
         'ATLAS_AR_API\\AR_TRY_ON_Api_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Api_Routes.php',
         'ATLAS_AR_API\\AR_TRY_ON_Compression_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Compression_Routes.php',
+        'ATLAS_AR_API\\AR_TRY_ON_Tryon_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Tryon_Routes.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

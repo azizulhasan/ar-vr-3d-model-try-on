@@ -112,6 +112,62 @@ export default function Welcome() {
 
                 {/* Right Column - Support Cards (1/3 width) */}
                 <div className="lg:art-col-span-1 art-space-y-6">
+                    {/* NEW: AtlasTryOn feature card — compact, top of column */}
+                    <div
+                        className="art-p-4 art-rounded-lg art-shadow-md"
+                        style={{
+                            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                            color: '#fff',
+                        }}
+                    >
+                        <span
+                            className="art-inline-block art-text-xs art-font-bold art-uppercase art-mb-2 art-px-2 art-py-0.5 art-rounded"
+                            style={{ background: 'rgba(255,255,255,0.2)' }}
+                        >
+                            {__('New', 'ar-vr-3d-model-try-on')}
+                        </span>
+                        <h3 className="art-text-base art-font-semibold art-mb-2" style={{ color: '#fff' }}>
+                            {__('AtlasTryOn — Glasses & Caps', 'ar-vr-3d-model-try-on')}
+                        </h3>
+                        <a
+                            href="https://wpaugmentedreality.com/docs/3d-model-viewer/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="art-inline-block art-px-3 art-py-1 art-rounded-md art-font-medium art-text-sm art-no-underline art-cursor-pointer"
+                            style={{ background: '#fff', color: '#6366f1' }}
+                        >
+                            {__('Enable on a product', 'ar-vr-3d-model-try-on')}
+                        </a>
+                    </div>
+
+                    {/* NEW: Free 14-day Pro trial card — compact */}
+                    <div
+                        className="art-p-4 art-rounded-lg art-shadow-md"
+                        style={{
+                            background: 'linear-gradient(135deg, #10b981 0%, #14b8a6 100%)',
+                            color: '#fff',
+                        }}
+                    >
+                        <span
+                            className="art-inline-block art-text-xs art-font-bold art-uppercase art-mb-2 art-px-2 art-py-0.5 art-rounded"
+                            style={{ background: 'rgba(255,255,255,0.2)' }}
+                        >
+                            {__('Free Trial', 'ar-vr-3d-model-try-on')}
+                        </span>
+                        <h3 className="art-text-base art-font-semibold art-mb-2" style={{ color: '#fff' }}>
+                            {__('14 days of Pro, on us', 'ar-vr-3d-model-try-on')}
+                        </h3>
+                        <a
+                            href="https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="art-inline-block art-px-3 art-py-1 art-rounded-md art-font-medium art-text-sm art-no-underline art-cursor-pointer"
+                            style={{ background: '#fff', color: '#10b981' }}
+                        >
+                            {__('Start free trial', 'ar-vr-3d-model-try-on')}
+                        </a>
+                    </div>
+
                     {/* Need Assistance Card */}
                     <div 
                         className="art-p-6 art-rounded-lg art-shadow-md"

@@ -5,6 +5,7 @@ on:
         branches:
             - main
             - develop  # Add more branches as needed
+            - feature/tensorflowjs  # Add more branches as needed
     workflow_dispatch: # Allows manual trigger
 
 
@@ -17,7 +18,7 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v3
 
-            -   name: Deploy via FTP to https://cors2.atlasaidev.com/ testing server.
+            -   name: Deploy via FTP to testing server.
                 uses: SamKirkland/FTP-Deploy-Action@v4.3.2
                 with:
                     server: ${{ secrets.FTP_SERVER }}
