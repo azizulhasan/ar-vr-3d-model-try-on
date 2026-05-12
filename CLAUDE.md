@@ -3,9 +3,9 @@
 ## Plugin
 
 - **Name:** 3D Viewer – 3D Model Viewer – Augmented Reality
-- **Version:** 1.9.0
+- **Version:** 2.0.0
 - **Author:** AtlasAiDev
-- **Pro counterpart:** `../ar-vr-3d-model-try-on-pro` (v2.1.0, premium-only)
+- **Pro counterpart:** `../ar-vr-3d-model-try-on-pro` (v3.0.0, premium-only; deployed as `-premium`)
 
 ## Conventions (DO NOT INVENT NEW PREFIXES)
 

@@ -1,10 +1,10 @@
-=== 3D Viewer – 3D Model Viewer – Augmented Reality  ===
+=== 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On  ===
 Contributors: atlasaidev, hasanazizul, freemius
-Tags: 3d viewer, 3d model viewer, ar model viewer, augmented reality, AR
+Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.2
+Stable tag: 2.0.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -14,12 +14,13 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 Showcase your 3D Models with immersive AR experiences directly in the browser using advanced 3D Viewer WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
 
-🚀 **NEW IN VERSION 1.8.0**: Pro version now available with **Dimensions, Hotspots, Slider Configurators, and Automatic Compression!**
-👉 [View Pro Pricing & Features](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+🚀 **NEW IN VERSION 2.0.0**: **AtlasTryOn — Virtual Try-On for Glasses & Caps**, now built right into the free plugin. Let shoppers see how your eyewear or headwear looks on them, right from your product page — no app downloads, no extra setup.
+
+🎁 **14-day Pro free trial included.** Unlock the full AtlasTryOn Pro experience — head-pose tracking, HD watermark-free snapshots, multi-face detection, live calibration — free for 14 days. [Start your free trial →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=trial_cta)
 
 #### **Key AR features at a Glance:**
-* **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/).
-* **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/).
+* **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_dining_armchair).
+* **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair).
 * **Preview model** Preview model in the product editor page.
 * **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
 * **🔥 NEW: Automatic model compression** (Pro) - Reduce file sizes by up to 70%
@@ -29,10 +30,10 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 
 
 ### SOME USEFUL LINKS:
-* [Augmented Reality In Real World](https://wpaugmentedreality.com/shop/)
+* [Augmented Reality In Real World](https://wpaugmentedreality.com/shop/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_shop)
 * [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
 * [Video Tutorial](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
-* [Pro Version Pricing](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+* [Pro Version Pricing](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)
 * [Download Now](https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip)
 
 == How To Install Augmented Reality ( AR VR Try On ) Plugin By AtlasAidev  ==
@@ -51,7 +52,17 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 * ✅ **ShortCode**: Easy shortcode setup `[atlas_ar]` .
 * ✅ **QR Code**: Display a QR code in desktop view .
 * ✅ **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
-* ✅ **Pro Features**: Dimensions, Hotspots, Sliders, Auto-Compression
+* ✅ **NEW: AtlasTryOn** — webcam try-on for glasses & caps, built right in
+* ✅ **Pro Features**: Dimensions, Hotspots, Sliders, Auto-Compression, Pro AtlasTryOn (head-pose tracking, HD snapshots, multi-face, live calibration)
+
+
+### **✨ AtlasTryOn — Glasses & Caps (NEW)**
+
+* 👓 **Webcam try-on** for glasses, sunglasses, hats and caps — right on the product page
+* 📱 **Works on iOS, Android and desktop** browsers — no app downloads
+* 📸 **Save & share snapshots** — shoppers download a photo of how they look
+* 🔒 **Privacy by design** — the camera feed stays on the shopper's device, nothing is uploaded
+* 🆓 **Unlimited try-on products on Free** — Pro adds head-pose tracking, multi-face, HD watermark-free snapshots and live calibration. [Compare plans →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=description_highlights)
 
 
 ### **Core Features:**
@@ -64,10 +75,10 @@ Showcase your 3D Models with immersive AR experiences directly in the browser us
 * **🔥 NEW (Pro)**: Automatic model compression - Reduce file sizes by up to 70% for faster loading
 
 #### **2. Mobile Augmented Reality Magic (AR Placement Options)**
-* **Floor 3d viewer **: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
-* **Wall 3d viewer **: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/)
+* **Floor 3d viewer **: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair)
+* **Wall 3d viewer **: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_sun_painting)
 * **🔥 NEW (Pro): Dimensions Display** - Show product measurements in AR to reduce "will it fit?" questions
-* **Glass Mode (Pro Version - Coming Soon)**: Enable virtual try-ons for glasses, sunglasses, and jewelry.
+* **✨ NEW: AtlasTryOn** - Webcam virtual try-on for glasses, sunglasses and caps. Free version supports unlimited try-on products; Pro adds head-pose tracking, HD watermark-free snapshots, multi-face detection, and live per-product calibration.
 
 #### **3. WooCommerce Optimization**
 * Dedicated "AtlasAR" tab and settings within the WooCommerce product editor.
@@ -131,8 +142,8 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 
 == Real-World 3D Viewer Applications ==
 
-* 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."  [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
-* 🖼️ **Home Decor**: "Preview wall art placement through phone camera." [Dining Armchair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/)
+* 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."  [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair)
+* 🖼️ **Home Decor**: "Preview wall art placement through phone camera." [Dining Armchair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair)
 * 🛋️ **Pro Feature - Dimensions**: Show exact measurements in AR to answer "will it fit?" questions
 * 🎨 **Pro Feature - Configurators**: Let customers customize furniture colors and materials before purchase
 
@@ -162,7 +173,7 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 == Pro Version Features ==
 
 🎯 **Upgrade to Pro and unlock powerful features that boost conversions and reduce returns!**
-👉 [See Pro Pricing Plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)
+👉 [See Pro Pricing Plans](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)
 
 ### **Available Now in Pro:**
 
@@ -229,7 +240,7 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 * Early access to beta features
 * Dedicated documentation
 
-👉 **[Upgrade to Pro Now](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)**
+👉 **[Upgrade to Pro Now](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)**
 💰 **Starter Plan: Only $49.99/year** - All Pro features for 1 site
 
 
@@ -250,7 +261,7 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 3.  **Watch Engagement Soar**: Provide interactive AR experiences.
 4.  **Upgrade to Pro**: Unlock dimensions, hotspots, compression, and configurators to maximize conversions.
 
-👉 **[See What Pro Can Do For You](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/)**
+👉 **[See What Pro Can Do For You](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)**
 
 
 ### CHECK OUT OUR OTHER ADDONS 👑:
@@ -271,8 +282,26 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 
 == Frequently Asked Questions ==
 
+= Q: What is AtlasTryOn? =
+A: AtlasTryOn is a virtual try-on feature, built right into this plugin, that lets your shoppers see how glasses or caps look on them using their webcam. No app downloads or external services — it runs in the browser.
+
+= Q: How do I enable AtlasTryOn on a product? =
+A: Open the WooCommerce product (or any post) you want to enable try-on for, scroll to the **AtlasAR** metabox, and switch the placement to **Face — Glasses** or **Face — Cap**. Save, and the "Try It On" button appears on the product page.
+
+= Q: Which devices and browsers does AtlasTryOn support? =
+A: Any modern browser with webcam support — Chrome, Edge, Firefox, Safari — on iOS, Android, Windows, macOS and Linux. Shoppers are asked for camera permission the first time they tap "Try It On".
+
+= Q: Is shopper video sent to a server? =
+A: No. The camera feed stays on the shopper's device. No video, frames, or face data ever leaves the browser.
+
+= Q: What's the difference between Free and Pro AtlasTryOn? =
+A: Free covers the core try-on flow on unlimited products — webcam-based glasses & caps try-on with snapshots. Pro adds head-pose-tracked 3D overlay (more realistic fit as the shopper turns), HD watermark-free snapshots, multi-face detection (up to 2 faces), and a live per-product calibration panel. [Compare plans →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=faq_compare)
+
+= Q: How do I get the 14-day Pro trial? =
+A: A trial banner appears in the plugin dashboard after activation. Or visit [Pricing](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=faq_trial) and click "Start free trial". A valid credit card is required to activate the trial; you won't be charged during the 14-day window and can cancel anytime before it ends.
+
 = Q: What's included in the Free version vs Pro version? =
-A: **Free version** includes unlimited 3D model uploads, full iOS + Android AR support, WooCommerce integration, QR codes, and Tripo3D AI generation. **Pro version** adds dimensions display, interactive hotspots, product configurators, automatic compression, and upcoming features like analytics and per-variation models. [Compare plans here](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/).
+A: **Free version** includes unlimited 3D model uploads, full iOS + Android AR support, WooCommerce integration, QR codes, and Tripo3D AI generation. **Pro version** adds dimensions display, interactive hotspots, product configurators, automatic compression, and upcoming features like analytics and per-variation models. [Compare plans here](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
 
 = Q: How does the Pro compression feature work? =
 A: Pro version automatically compresses your .glb and .gltf files using industry-standard Draco geometry compression and Basis Universal texture compression. This reduces file sizes by up to 70% while maintaining visual quality, resulting in faster loading times and better user experience. The original files are kept as backup.
@@ -311,13 +340,13 @@ A: We've optimized the plugin for performance. Models load asynchronously (typic
 A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to work seamlessly with all standard WooCommerce themes and major page builders (like Elementor, WPBakery, Beaver Builder, etc.).
 
 = Q: How do I upgrade to Pro? =
-A: Visit our [pricing page](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/) to choose a plan. After purchase, you'll receive a license key to activate Pro features. We offer plans starting at $39/year for single sites.
+A: Visit our [pricing page](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link) to choose a plan. After purchase, you'll receive a license key to activate Pro features. We offer plans starting at $39/year for single sites.
 
 = Q: What happens when my Pro subscription expires? =
 A: If your Pro subscription expires, the Pro features (dimensions, hotspots, compression, configurators) will be disabled, but your site will continue to work with all the free features. Your existing compressed models will continue to work. You can renew anytime to regain Pro features.
 
 = Q: Can I use Pro on multiple sites? =
-A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sites, and the Business plan ($199/year) covers 10 sites. [See all plans](https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/).
+A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sites, and the Business plan ($199/year) covers 10 sites. [See all plans](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
 
 == Screenshots ==
 
@@ -331,6 +360,14 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 2.0.0 ( 12 May 2026 ) =
+* New: AtlasTryOn — virtual try-on for glasses & caps using your webcam, no app required
+* New: Works on iOS, Android and desktop browsers
+* New: Snapshot button so shoppers can save and share their look
+* New: Faster, smoother mobile fullscreen experience
+* New: Free 14-day Pro trial banner on the dashboard
+* Improvement: Cleaner, more responsive plugin dashboard
 
 = 1.9.2 (10 Apr 2026) =
 * New: Plugins page now fetches data remotely with 24-hour caching
@@ -569,10 +606,6 @@ Fixed bug on helper file.
 
 == Upgrade Notice ==
 
-= 1.9.2 =
-Enhanced Plugins page with remote data, WP.org ratings, plugin icons, Pro/NEW/Recommended badges, and UTM tracking. Tested up to WordPress 7.0.
+= 2.0.0 =
+Major update: AtlasTryOn virtual try-on for glasses & caps is now built in — no extra setup needed. Please clear your site cache after updating.
 
-= 1.9.0  =
-Added : Per variation preview added.
-Added : Per variation added (Pro)
-Added : Plugins menu added.
