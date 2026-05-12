@@ -18,15 +18,31 @@ export function createUI( { config, productId } ) {
 				<video class="art-tryon-video" autoplay playsinline muted></video>
 				<canvas class="art-tryon-canvas"></canvas>
 				<div class="art-tryon-status" aria-live="polite">Loading…</div>
+				<!--
+					Snapshot is rendered as a floating shutter button OVERLAY
+					on the canvas (iOS-camera-style) so it doesn't eat
+					vertical real estate from the live feed on mobile.
+					The SVG is a camera glyph + an outer ring; the inner
+					black dot is the "shutter" affordance.
+				-->
+				<button
+					type="button"
+					class="art-tryon-snapshot"
+					aria-label="Take snapshot"
+					hidden
+				>
+					<svg viewBox="0 0 64 64" width="32" height="32" aria-hidden="true" focusable="false">
+						<circle cx="32" cy="32" r="26" fill="none" stroke="currentColor" stroke-width="3"/>
+						<circle cx="32" cy="32" r="18" fill="currentColor"/>
+					</svg>
+				</button>
+				<span class="art-tryon-fps"></span>
 			</div>
 			<div class="art-tryon-consent">
 				<button type="button" class="art-tryon-consent-allow">Allow camera access</button>
 				<button type="button" class="art-tryon-consent-deny" data-action="close">Cancel</button>
 			</div>
-			<div class="art-tryon-toolbar" hidden>
-				<button type="button" class="art-tryon-snapshot" ${ config.snapshot ? '' : 'hidden' }>Snapshot</button>
-				<span class="art-tryon-fps"></span>
-			</div>
+			<div class="art-tryon-toolbar" hidden></div>
 			<div class="art-tryon-error" hidden></div>
 		</div>
 	`;
@@ -160,6 +176,12 @@ export function createUI( { config, productId } ) {
 	function showStage() {
 		consentEl.hidden = true;
 		toolbar.hidden = false;
+		// Reveal the floating shutter button now that the live camera
+		// feed is composited onto the canvas — only when the merchant
+		// allows snapshots site-wide (`config.snapshot`).
+		if ( snapshotBtn && config.snapshot ) {
+			snapshotBtn.hidden = false;
+		}
 	}
 
 	function askConsent() {

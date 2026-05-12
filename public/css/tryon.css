@@ -162,8 +162,7 @@ button.art-tryon-image-overlay:disabled {
  * is correct even on themes that override the default.
  */
 .art-tryon-consent-allow,
-.art-tryon-consent-deny,
-.art-tryon-snapshot {
+.art-tryon-consent-deny {
 	cursor: pointer;
 	border: 1px solid transparent;
 	padding: 8px 16px;
@@ -173,6 +172,41 @@ button.art-tryon-image-overlay:disabled {
 	line-height: 1.2;
 	transition: filter 0.15s ease, transform 0.05s ease;
 }
+
+/*
+ * Snapshot button — iOS-camera-style floating shutter overlay on
+ * the canvas, NOT a bar item that eats vertical space. The white
+ * outer ring + dark inner dot reads universally as "take a photo"
+ * on any device. Tap target is 64×64 (well above the 44 px iOS HIG
+ * minimum) and sits clear of the device's safe area at the bottom.
+ */
+.art-tryon-snapshot {
+	position: absolute;
+	left: 50%;
+	bottom: max(24px, env(safe-area-inset-bottom, 24px));
+	transform: translateX(-50%);
+	width: 64px;
+	height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: #fff;
+	border: 0;
+	cursor: pointer;
+	z-index: 4;
+	filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
+	transition: transform 0.1s ease, filter 0.15s ease;
+}
+.art-tryon-snapshot:hover { filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.7)); }
+.art-tryon-snapshot:active { transform: translateX(-50%) scale(0.92); }
+.art-tryon-snapshot:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 4px;
+}
+.art-tryon-snapshot svg { display: block; }
 /*
  * Filled buttons inherit `--art-tryon-primary`, which the UI JS samples
  * at modal-open time from the live theme's primary action button
@@ -180,8 +214,7 @@ button.art-tryon-image-overlay:disabled {
  * WordPress preset, then to the legacy WC blue, so themes that don't
  * expose any of those still render a reasonable button.
  */
-.art-tryon-consent-allow,
-.art-tryon-snapshot {
+.art-tryon-consent-allow {
 	background: var( --art-tryon-primary, var( --wp--preset--color--primary, var( --wc-primary, #2271b1 ) ) );
 	color: var( --art-tryon-primary-contrast, var( --wp--preset--color--primary-contrast, #fff ) );
 	border-color: transparent;
@@ -192,18 +225,15 @@ button.art-tryon-image-overlay:disabled {
 	border-color: currentColor;
 }
 .art-tryon-consent-allow:hover,
-.art-tryon-consent-deny:hover,
-.art-tryon-snapshot:hover {
+.art-tryon-consent-deny:hover {
 	filter: brightness( 0.95 );
 }
 .art-tryon-consent-allow:active,
-.art-tryon-consent-deny:active,
-.art-tryon-snapshot:active {
+.art-tryon-consent-deny:active {
 	transform: translateY( 1px );
 }
 .art-tryon-consent-allow:focus-visible,
-.art-tryon-consent-deny:focus-visible,
-.art-tryon-snapshot:focus-visible {
+.art-tryon-consent-deny:focus-visible {
 	outline: 2px solid var( --wp--preset--color--primary, #2271b1 );
 	outline-offset: 2px;
 }
