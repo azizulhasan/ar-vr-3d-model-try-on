@@ -51,6 +51,13 @@ export default function App() {
       },
       { key: "Content-Type", value: "application/json" },
     ],
+    // Virtual Try-On (face-glasses / face-hat) — same option, prefixed
+    // sub-keys. See Free's AR_TRY_ON_Tryon class.
+    tryon_self_host: false,
+    tryon_snapshot: true,
+    tryon_button_label: "Try it on",
+    tryon_consent_text:
+      "Allow camera access to try this product on virtually. Video stays on your device.",
   });
   const tabs = [
      { name: "Overview", href: "#", current: true, component: "Overview" },

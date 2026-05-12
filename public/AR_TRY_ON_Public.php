@@ -4,6 +4,7 @@ namespace AR_TRY_ON_Public;
 
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Cache;
+use AR_TRY_ON\AR_TRY_ON_Tryon;
 
 /**
  * The public-facing functionality of the plugin.
@@ -82,7 +83,7 @@ class AR_TRY_ON_Public {
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
 			'plugin_url'       => ATLAS_AR_PLUGIN_URL,
-			'is_pro_active' => is_plugin_active( 'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php' ),
+			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
             'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
             'img'    => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
 		];
@@ -130,31 +131,46 @@ class AR_TRY_ON_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-            // Performance Optimization: Lazy load model-viewer instead of loading immediately
-            // This saves ~956KB and improves initial page load by 100-200ms
-            // Model-viewer will load only when AR content becomes visible in viewport
-            wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
-            wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
-            wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			return;
+		}
 
-            if(AR_TRY_ON_Helper::is_qr_code_enabled()){
-				wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+		// Per-product loader split: on a single product page whose
+		// `ar_placement` is `face-*` AND the static viewer toggle is OFF,
+		// the AtlasAR + lazy-loader + QR scripts add nothing useful and
+		// just waste bytes. In that one case we ship only tryon-bootstrap
+		// (enqueued separately by AR_TRY_ON_Tryon::enqueue_assets). All
+		// other contexts keep the current bundle exactly as before.
+		$skip_static_ar_bundle = false;
+		if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+			$post_id = AR_TRY_ON_Tryon::current_product_id();
+			if ( $post_id ) {
+				$placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+				$show_viewer = AR_TRY_ON_Tryon::should_show_static_viewer( $post_id );
+				if ( AR_TRY_ON_Tryon::is_face_placement( $placement ) && ! $show_viewer ) {
+					$skip_static_ar_bundle = true;
+				}
 			}
+		}
 
-            wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
-            wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->localize_data );
+		if ( $skip_static_ar_bundle ) {
+			// Try-On only product page — bootstrap is enqueued by Tryon class.
+			return;
+		}
 
-//            if ( function_exists( 'is_product' ) || is_product() ) {
-//                wp_enqueue_script( 'atlas_ar-single-product', ATLAS_AR_PLUGIN_URL . 'public/js/single-product.js', array('jquery'), '1.0', true );
-//            }
+		// Performance Optimization: Lazy load model-viewer instead of loading immediately
+		// This saves ~956KB and improves initial page load by 100-200ms
+		// Model-viewer will load only when AR content becomes visible in viewport
+		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
+		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
 
+		if ( AR_TRY_ON_Helper::is_qr_code_enabled() ) {
+			wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+		}
 
-//            wp_localize_script( 'atlas_ar-single-product', 'ar_try_on', $this->localize_data );
-
-        }
-
-
+		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
+		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->localize_data );
 	}
 
 	/**
@@ -203,6 +219,20 @@ class AR_TRY_ON_Public {
             $post_id = $product->get_id();
         } else {
             $post_id = $post->ID;
+        }
+
+        // Try-On (face-*) products are rendered exclusively by
+        // {@see AR_TRY_ON_Tryon::render_button_for_face_product} at the
+        // hook the merchant chose in "Show Button In". Bail here so we
+        // don't double-render or apply the static-AR gating rules.
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) && $post_id ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+            if ( AR_TRY_ON_Tryon::is_face_placement( $placement ) ) {
+                if ( $current_filter === 'the_content' ) {
+                    return $content;
+                }
+                return;
+            }
         }
 		
         $ar_button_content = '';
@@ -254,6 +284,22 @@ class AR_TRY_ON_Public {
 		} else {
 			$post_id = $post->ID;
 		}
+
+        // Try-On (face-*) products: AtlasAR.js bundle is intentionally
+        // skipped when the merchant has the static viewer toggle OFF.
+        // Emitting `new window.AtlasAR()` in the WC tab here would
+        // throw "AtlasAR is not a constructor" on the front-end.
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+            if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+                && ! AR_TRY_ON_Tryon::should_show_static_viewer( $post_id ) ) {
+                if ( $current_filter === 'the_content' ) {
+                    return $content;
+                }
+                return;
+            }
+        }
+
         ob_start();
         ?>
         <div  id="atlas_ar_<?php echo esc_attr($post_id) ?>"></div>
@@ -305,6 +351,22 @@ class AR_TRY_ON_Public {
 
 		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return $tabs;
+		}
+
+		// Hide the static-AR product tab for Try-On (face-*) products
+		// when the merchant hasn't opted into the static viewer alongside.
+		// Otherwise the tab pane would emit `new window.AtlasAR()` even
+		// though we intentionally skipped enqueuing AtlasAR.dist.js.
+		if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+			global $product, $post;
+			$pid = $product ? $product->get_id() : ( $post ? $post->ID : 0 );
+			if ( $pid ) {
+				$placement = AR_TRY_ON_Tryon::get_product_placement( $pid );
+				if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+					&& ! AR_TRY_ON_Tryon::should_show_static_viewer( $pid ) ) {
+					return $tabs;
+				}
+			}
 		}
 
 		$tabs['atlas_ar_3d_view'] = array(

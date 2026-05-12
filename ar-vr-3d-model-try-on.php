@@ -11,10 +11,10 @@
  * @package           AR_TRY_ON
  *
  * @wordpress-plugin
- * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality
+ * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           1.9.2
+ * Version:           2.0.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -42,8 +42,10 @@ use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
 use AR_TRY_ON\AR_TRY_ON_Compression;
 use AR_TRY_ON\AR_TRY_ON_Compression_DB;
+use AR_TRY_ON\AR_TRY_ON_Tryon;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
+use ATLAS_AR_API\AR_TRY_ON_Tryon_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
@@ -73,6 +75,7 @@ function atlas_ar_is_pro_plugin_exists() {
 }
 
 
+//if (  ! function_exists( 'av3mto_fs' ) ) {
 if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function av3mto_fs() {
@@ -96,6 +99,10 @@ if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
                 'has_paid_plans'      => true,
 				'has_addons'          => false,
                 'has_affiliation'     => 'all',
+                'trial'               => array(
+                    'days'               => 14,
+                    'is_require_payment' => false,
+                ),
 				'menu'                => array(
 					'slug'           => 'ar-vr-3d-model-try-on',
 					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',
@@ -192,7 +199,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '1.9.2' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.0.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
@@ -232,6 +239,15 @@ function atlas_ar_run() {
 	add_action( 'rest_api_init', function() {
 		$compression_routes = new AR_TRY_ON_Compression_Routes();
 		$compression_routes->register_routes();
+	} );
+
+	// Initialize Try-On feature (v1.10.0+) — face try-on, lazy-loaded.
+	$atlas_ar_tryon = new AR_TRY_ON_Tryon( ATLAS_AR_VERSION );
+	$atlas_ar_tryon->register();
+
+	add_action( 'rest_api_init', function() {
+		$tryon_routes = new AR_TRY_ON_Tryon_Routes();
+		$tryon_routes->register_routes();
 	} );
 
 	// Initialize Admin Notice System (v1.8.0+)

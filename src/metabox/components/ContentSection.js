@@ -197,6 +197,8 @@ const ContentSection = ({
                         >
                             <option value="floor">Floor</option>
                             <option value="wall">Wall</option>
+                            <option value="face-glasses">Face — Glasses (Try-On)</option>
+                            <option value="face-hat">Face — Hat (Try-On)</option>
                             {/*TODO: this option will be enable when MIndar will be active*/}
                             {/*<option value="168">Glass Pro</option>*/}
                         </select>
@@ -205,6 +207,24 @@ const ContentSection = ({
                         </div>
                     </div>
                 </div>
+
+                {/* Try-On: optionally also render the inline static 3D viewer. Only meaningful for face-* placements. */}
+                {typeof productModel.ar_placement === 'string' && productModel.ar_placement.indexOf('face-') === 0 && (
+                    <div className="art-mb-3">
+                        <label className="art-flex art-items-center art-gap-2 art-font-medium">
+                            <input
+                                type="checkbox"
+                                name="show_static_viewer_for_tryon"
+                                checked={!!productModel.show_static_viewer_for_tryon}
+                                onChange={(e) => handleChange({ target: { name: 'show_static_viewer_for_tryon', value: e.target.checked } })}
+                            />
+                            Also show static 3D viewer on the product page
+                        </label>
+                        <p className="art-text-xs art-text-gray-600 art-mt-1">
+                            When unchecked (default for face try-on), the page is lighter — only the Try-On button is rendered.
+                        </p>
+                    </div>
+                )}
                 {/*//TODO: AR-40-6 will be implemented here.*/}
 
 

@@ -1,119 +1,71 @@
-# CLAUDE.md
+# CLAUDE.md — ar-vr-3d-model-try-on (Free)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Plugin
 
-## Project Overview
+- **Name:** 3D Viewer – 3D Model Viewer – Augmented Reality
+- **Version:** 2.0.0
+- **Author:** AtlasAiDev
+- **Pro counterpart:** `../ar-vr-3d-model-try-on-pro` (v3.0.0, premium-only; deployed as `-premium`)
 
-AtlasAR — a WordPress plugin for AR/VR 3D model viewing with WooCommerce integration. Uses Freemius for licensing (free + Pro). Built with PHP 7.4+ on the backend and React 18 on the frontend.
+## Conventions (DO NOT INVENT NEW PREFIXES)
 
-## Build Commands
-
-```bash
-npm run production        # Laravel Mix: compile all JS (main build command)
-npm run dev               # Laravel Mix: development build
-npm run watch             # Laravel Mix: watch mode for development
-npm run tailwind          # Build Tailwind CSS with watch
-npm run build             # Full build: production + tailwind + compile + gulp copyPro
-npm run block:build       # Build Gutenberg blocks via wp-scripts
-npm run block:start       # Dev server for Gutenberg blocks
-npm run makeZip           # Create distribution zip via Gulp
-```
-
-There are no automated tests (no Jest/PHPUnit configured).
+| Element | Value |
+|---|---|
+| Composer namespaces | `AR_TRY_ON\` (`includes/`), `AR_TRY_ON_Admin\` (`admin/`), `AR_TRY_ON_Public\` (`public/`), `ATLAS_AR_API\` (`api/`) |
+| Function prefix | `atlas_ar_` |
+| Constant prefix | `ATLAS_AR_` |
+| REST namespace | `ar_try_on/v1` |
+| Tailwind prefix | `art-` (config: `tailwind.config.js`) |
+| Freemius product ID | 18159 |
+| Freemius helper | `av3mto_fs()` |
+| Text domain | `ar-vr-3d-model-try-on` |
 
 ## Architecture
 
-### PHP — PSR-4 Autoloading
+- **3D renderer:** Google `<model-viewer>` web component (`public/js/google-model-viewer.js`, ~960 KB). NOT three.js / Babylon at runtime.
+- **`three.js@^0.182.0`** in deps = compression-only via `@gltf-transform/*` + `draco3dgltf`. Do not assume runtime three.js.
+- **Public client:** `public/js/AtlasAR.js` (queries `<model-viewer>` line ~563).
+- **Entry points:** shortcode `[atlas_ar]`, Gutenberg block `atlas/ar-shortcode`.
+- **WC integration:** configurable hook positions (before/after summary, gallery, tabs). Variation handler at `public/js/variation-handler.js`.
+- **Build:** Laravel Mix (`webpack.mix.js`) + Gulp (`gulpfile.js`). React only in `src/dashboard/` + `src/metabox/`. Public side vanilla JS.
+- **DB tables:** `wp_ar_compression_log` (free).
 
-| Namespace | Directory | Purpose |
-|---|---|---|
-| `AR_TRY_ON\` | `includes/` | Core plugin logic |
-| `AR_TRY_ON_Admin\` | `admin/` | Admin panel |
-| `AR_TRY_ON_Public\` | `public/` | Frontend rendering |
-| `ATLAS_AR_API\` | `api/` | REST API (namespace `ar_try_on/v1`) |
+## Hooks Free Exposes (for Pro)
 
-**Plugin boot sequence:** `ar-vr-3d-model-try-on.php` → Composer autoload → Freemius init → constants → `atlas_ar_run()` on `init` hook → `AR_TRY_ON` main class → `AR_TRY_ON_Loader` registers all hooks → admin/public classes initialized.
+`atlas_ar_get_post_types`, `atlas_ar_should_load_button`, `atlas_ar_model_dir`, `atlas_ar_model_dir_url`, `atlas_ar_current_model_dir`, `atlas_ar_is_pro_active`, `ATLAS_AR_rest_route_access`, `ATLAS_AR_version`, `ATLAS_AR_plugin_name`, `atlas_ar_enqueue_pro_dashboard_scripts`, `atlas_ar_menu`, `atlas_ar_before_metabox_content`, `ATLAS_AR_after_free_metabox_settings`, `atlas_ar_after_metabox_content`. Pro existing addons use: `atlasar_model_viewer_hotspots`, `atlasar_before_model_viewer`.
 
-**Hook registration pattern:** All hooks go through `AR_TRY_ON_Loader` (`add_action`/`add_filter` with component + callback), executed via `$this->loader->run()`.
+## Active Feature Work — TensorFlow.js + MediaPipe
 
-### Key PHP Classes
+**Branch:** `feature/tensorflowjs` (off `develop`).
 
-- `AR_TRY_ON` (`includes/AR_TRY_ON.php`) — Main plugin orchestrator
-- `AR_TRY_ON_Helper` (`includes/AR_TRY_ON_Helper.php`) — Utility functions
-- `AR_TRY_ON_Compression` (`includes/AR_TRY_ON_Compression.php`) — 3D model compression (Draco + Basis Universal)
-- `AR_TRY_ON_Admin` (`admin/AR_TRY_ON_Admin.php`) — Admin hooks, enqueue scripts, MIME types
-- `AR_TRY_ON_Public` (`public/AR_TRY_ON_Public.php`) — Frontend rendering, shortcode output
+**Goal:** add real-time virtual try-on via webcam — Face Landmarker (glasses, hats, earrings, makeup), Hand Landmarker (watches, rings, bracelets), Pose Landmarker (clothing). Extends existing `<model-viewer>` pipeline; does NOT replace it.
 
-### React Frontend (src/)
+**Key decision:** integrate into existing plugin pair (Free + Pro), NOT build a new sibling plugin. Reasons:
+- Pro already has Face / Hand addon scaffolds (`addons/atlasar-face-addon/`, `addons/atlasar-hand-addon/`) emitting placeholder hotspots — replace placeholders with real MediaPipe landmarks.
+- No runtime ML conflict (plugin uses zero ML today).
+- Existing addon hook system + `<model-viewer>` integration points fit cleanly.
 
-Two independent React 18 apps compiled via Laravel Mix (webpack.mix.js):
+**Free v1 scope:** Face Landmarker only — glasses + hats. Single face. WebGL backend, WebGPU upgrade when supported. Snapshot capture. Lazy-loaded behind explicit "Try It On" click.
 
-| Entry point | Compiled output | Mount target |
-|---|---|---|
-| `src/dashboard/index.js` | `admin/js/build/ar-try-on-dashboard-ui.min.js` | `#ar_try_on_dashboard_ui` |
-| `src/metabox/index.js` | `admin/js/build/ar-try-on-metabox-ui.min.js` | `#atlas_ar_product_model_settings` |
+**Pro phases:** real face addon (blendshapes/makeup/occlusion) → hand (rings/watches) → pose (clothing) → makeup + segmentation. Per-product anchor calibration UI in metabox.
 
-Both use React 18's `createRoot()` API. Shared utilities live in `src/context/`.
+**New filter/action hooks Free will expose:** `atlas_ar_tryon_modes`, `atlas_ar_tryon_models`, `atlas_ar_tryon_anchor_strategy`, `atlas_ar_tryon_pre_render`, `atlas_ar_tryon_post_render`, `atlas_ar_tryon_woocommerce_mode_for_product`, `atlas_ar_tryon_landmark_pipeline`, `atlas_ar_tryon_segmentation_enabled`, `atlas_ar_tryon_export_formats`, `atlas_ar_tryon_session_recorded`.
 
-**Dashboard app** (`src/dashboard/components/dashboard/`) — Plugin settings page with tabs: overview, settings, compression analytics, documentation, features, integration.
+**Bundle plan:** `@tensorflow/tfjs-core` + `@tensorflow/tfjs-backend-webgl` + `@mediapipe/tasks-vision` (~510 KB compressed JS). Face Landmarker model ~3 MB, cached IndexedDB. Self-host opt-in Free / default Pro. NEVER load on initial page render.
 
-**Metabox app** (`src/metabox/components/`) — Product editor sidebar with sections: content, settings, camera, style, light/environment, dimensions (Pro), hotspots (Pro), sliders (Pro), Tripo3D integration, compression.
+**Integration pattern:** drive `<model-viewer>` hotspots from landmark data (Pattern 1). Escalate to parallel three.js canvas overlay (Pattern 2) only for makeup / clothing in Pro.
 
-### Public-Facing JavaScript (public/js/)
+## Plan Documents (read these for full detail)
 
-- `AtlasAR.js` → `AtlasAR.dist.js` — Main 3D viewer module
-- `google-model-viewer.js` — Google's `<model-viewer>` web component (bundled)
-- `variation-handler.js` — WooCommerce variation ↔ 3D model switching
-- `lazy-load-model-viewer.js` — Intersection Observer lazy loading
-- `single-product.js` — WooCommerce single product page integration
+- [`plan/tensorflowjs-research.md`](plan/tensorflowjs-research.md) — model catalog, performance budgets, model→use-case mapping, free/pro split, risks
+- [`plan/tensorflowjs-integration-plan.md`](plan/tensorflowjs-integration-plan.md) — file lists, hook contracts, roadmap (6 phases), open questions
+- [`plan/FEATURE-ANALYSIS.md`](plan/FEATURE-ANALYSIS.md) — pre-existing v1.7.9+ feature analysis
+- [`plan/PRO-FEATURES-COMPLETE.md`](plan/PRO-FEATURES-COMPLETE.md) — pre-existing Pro feature roadmap
 
-### Webpack Build (webpack.mix.js)
+## Working Notes for Future Sessions
 
-Laravel Mix handles React JSX compilation. Key outputs:
-
-```
-src/dashboard/index.js          → admin/js/build/ar-try-on-dashboard-ui.min.js
-src/metabox/index.js            → admin/js/build/ar-try-on-metabox-ui.min.js
-admin/js/ar-try-on-media-library.js → admin/js/build/ar-try-on-media-library.min.js
-admin/js/ar-compression-client.js → admin/js/build/ar-compression-client.min.js
-public/js/ar-vr-3d-model-try-on-public.js → public/js/ar-vr-3d-model-try-on-public-dist.js
-public/js/AtlasAR.js            → public/js/AtlasAR.dist.js
-```
-
-The build auto-removes unwanted chunk files after compilation.
-
-### Tailwind CSS
-
-Prefix: `art-` (all utility classes are `art-*` to avoid conflicts with WordPress). Config in `tailwind.config.js`, with a separate `tailwind.config.modal.js` for modal styles.
-
-## Global Constants (PHP)
-
-```
-ATLAS_AR_NONCE, ATLAS_AR_TEXT_DOMAIN, ATLAS_AR_ROOT_FILE,
-ATLAS_AR_PLUGIN_URL, ATLAS_AR_PLUGIN_PATH, ATLAS_AR_VERSION,
-ATLAS_AR_PLUGIN_NAME, ATLAS_AR_DEBUG_MODE
-```
-
-## Frontend Data Bridge
-
-Both admin and public JS receive data via `wp_localize_script()` on the `ar_try_on` object:
-```javascript
-ar_try_on.api_url        // REST API base
-ar_try_on.rest_nonce     // WP nonce for authentication
-ar_try_on.is_pro_active  // Pro license status
-ar_try_on.VERSION        // Plugin version
-```
-
-## Known Pitfalls
-
-- **WooCommerce variation image swap:** WooCommerce fires `found_variation`/`show_variation` events that replace the product image, overriding the 3D viewer. The fix in `switchModelVariant()` and `preventWooCommerceImageSwap()` uses setTimeout to re-show the viewer after WooCommerce acts. Use case-insensitive matching for variant names (slugs vs display names).
-- **MIME types:** `mime_types()` in `AR_TRY_ON_Admin` must use `array_merge($mimes, ...)` to *add* 3D file types, not replace the entire mime array.
-- **Chunk cleanup:** The webpack build produces chunk files that aren't needed — `webpack.mix.js` has a `Mix.listen('afterCompile')` hook that deletes them automatically.
-
-## CI/CD
-
-GitHub Actions deploys to a testing server via FTP on push to `main` or `develop` (`.github/workflows/deploy.yml`).
-
-## Shortcode
-
-`[atlas_ar]` — Renders the 3D model viewer on the frontend. Also available as a Gutenberg block.
+- Existing untracked working-tree edit: `public/css/ar-try-on.css` (predates TF.js work). Carry across branch switches via stash.
+- `develop` ahead of `origin/develop` — push state needs review before next release.
+- Build zip pipeline uses Gulp; verify single-folder structure (avoid double-nesting bug previously seen on sibling plugins).
+- HPOS-compatible (declared in `ar-vr-3d-model-try-on.php`).
+- Webcam permission flow: always require explicit user gesture, secure context (HTTPS), graceful fallback to existing static AR mode.
