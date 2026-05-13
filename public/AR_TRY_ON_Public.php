@@ -114,7 +114,15 @@ class AR_TRY_ON_Public {
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 
-			wp_enqueue_style( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
+			// filemtime-based versioning forces browsers to grab a
+			// fresh copy whenever we tweak the CSS — the plugin
+			// `$this->version` is too coarse (it only changes on
+			// release), so iterative UI/UX tweaks would otherwise be
+			// served from cache.
+			$public_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-vr-3d-model-try-on-public.css';
+			$public_css_ver  = file_exists( $public_css_path ) ? (string) filemtime( $public_css_path ) : $this->version;
+
+			wp_enqueue_style( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $public_css_ver, 'all' );
 			wp_enqueue_style( 'atlas_ar_modal', ATLAS_AR_PLUGIN_URL . 'public/css/atlas_ar_modal.css', array(), $this->version, 'all' );
 
 			// Enqueue image/3D toggle styles
