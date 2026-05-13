@@ -53,6 +53,59 @@ button.art-tryon-image-overlay:disabled {
 	cursor: progress !important;
 }
 
+/* Shortcode reveal=true: TWO wrappers.
+ *
+ * `.atlas-ar-shortcode-outer` is the direct child of the post's
+ * layout container (`.is-layout-constrained`). It inherits the
+ * theme's constrained layout — max-width = content-size, auto-
+ * centred in the viewport. This is the same shape every other
+ * paragraph block on the page gets.
+ *
+ * `.atlas-ar-shortcode-wrap` is the merchant-sized model-viewer
+ * box, nested inside the outer wrapper. Because it's no longer a
+ * direct child of `.is-layout-constrained`, Gutenberg's auto-
+ * centring rule no longer touches it, so the wrap aligns to the
+ * outer's start edge (left edge of the post content column). The
+ * merchant can still centre it explicitly via the block's `margin`
+ * field (e.g. "0 auto"). */
+.atlas-ar-shortcode-outer {
+	/* No fixed sizing — inherits constrained max-width from parent. */
+}
+
+.atlas-ar-shortcode-wrap {
+	position: relative;
+}
+
+/* Force the inner `<model-viewer>` to fill the wrapper. Without this
+ * override, AtlasAR.js's `getModelSkeleton()` emits a `<model-viewer>`
+ * with a fixed 400px height — so a shortcode wrapper sized to e.g.
+ * 500×1000 (aspect_ratio="1/2") would only paint the bottom 400px and
+ * leave a 600px empty gap above. Forcing 100% × 100% lets model-viewer
+ * re-frame the 3D model inside whatever aspect_ratio the merchant
+ * chose. */
+.atlas-ar-shortcode-wrap > div[id^="atlas_ar_shortcode_"] {
+	display: block;
+	width: 100%;
+	height: 100%;
+	line-height: 0;
+}
+
+.atlas-ar-shortcode-wrap model-viewer {
+	width: 100% !important;
+	height: 100% !important;
+	display: block !important;
+}
+
+.atlas-ar-shortcode-wrap .atlas-ar-shortcode-overlay {
+	position: absolute !important;
+	left: 50% !important;
+	bottom: 16px !important;
+	right: auto !important;
+	transform: translateX(-50%) !important;
+	margin-left: 0 !important;
+	z-index: 5 !important;
+}
+
 .art-tryon-modal {
 	position: fixed;
 	inset: 0;

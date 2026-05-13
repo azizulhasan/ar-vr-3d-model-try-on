@@ -153,6 +153,16 @@ class AR_TRY_ON_Public {
 			}
 		}
 
+		// QR generator script is independent of the static AR bundle —
+		// the QR is rendered by `render_qr_code_footer()` at `wp_footer`
+		// for every supported singular post (face or not), so the
+		// generator JS needs to be on the page regardless of whether
+		// we're about to bail the static AR bundle for a face-only
+		// product. Enqueue BEFORE the bail.
+		if ( AR_TRY_ON_Helper::is_qr_code_enabled() ) {
+			wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+		}
+
 		if ( $skip_static_ar_bundle ) {
 			// Try-On only product page — bootstrap is enqueued by Tryon class.
 			return;
@@ -164,10 +174,6 @@ class AR_TRY_ON_Public {
 		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
 		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
 		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
-
-		if ( AR_TRY_ON_Helper::is_qr_code_enabled() ) {
-			wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
-		}
 
 		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
 		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->localize_data );
@@ -202,6 +208,57 @@ class AR_TRY_ON_Public {
 		return $tag;
 	}
 
+    /**
+     * Per-request guards so we emit at most one QR code and one
+     * View-in-AR buttons-block per post on a given page load, no
+     * matter how many WC hooks `atlas_ar_button` is wired into.
+     *
+     * @var array<int,bool>
+     */
+    protected static $qr_rendered_for_post = array();
+    protected static $btn_rendered_for_post = array();
+
+    /**
+     * Emit the QR code (when enabled in settings) once per supported
+     * singular post at `wp_footer`. Independent of `atlas_ar_button`'s
+     * content-filter / WC-hook firings — so the QR shows up even when
+     * `the_content` is bypassed (e.g., WC product page in toggle-mode
+     * where the description is rendered through a tab adapter that
+     * skips `the_content`).
+     *
+     * Guarded by `$qr_rendered_for_post` so we never emit twice if
+     * `atlas_ar_button` already produced one earlier in the request.
+     */
+    public function render_qr_code_footer() {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+            return;
+        }
+        if ( ! is_singular() ) {
+            return;
+        }
+        global $product, $post;
+        $post_id = $product ? (int) $product->get_id() : (int) ( $post->ID ?? 0 );
+        if ( $post_id <= 0 ) {
+            return;
+        }
+        if ( ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
+            return;
+        }
+        if ( ! empty( self::$qr_rendered_for_post[ $post_id ] ) ) {
+            return;
+        }
+        $settings = AR_TRY_ON_Helper::get_settings();
+        if ( ! AR_TRY_ON_Helper::is_qr_code_enabled( $settings ) ) {
+            return;
+        }
+        $qr_html = (string) AR_TRY_ON_Helper::get_qr_code( $settings );
+        if ( $qr_html === '' ) {
+            return;
+        }
+        self::$qr_rendered_for_post[ $post_id ] = true;
+        echo $qr_html;
+    }
+
     public function atlas_ar_button( $content ) {
         $current_filter = current_filter();
         if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
@@ -216,49 +273,78 @@ class AR_TRY_ON_Public {
         global $product;
         global $post;
         if ( $product ) {
-            $post_id = $product->get_id();
+            $post_id = (int) $product->get_id();
         } else {
-            $post_id = $post->ID;
+            $post_id = (int) ( $post->ID ?? 0 );
         }
 
-        // Try-On (face-*) products are rendered exclusively by
-        // {@see AR_TRY_ON_Tryon::render_button_for_face_product} at the
-        // hook the merchant chose in "Show Button In". Bail here so we
-        // don't double-render or apply the static-AR gating rules.
-        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) && $post_id ) {
-            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
-            if ( AR_TRY_ON_Tryon::is_face_placement( $placement ) ) {
-                if ( $current_filter === 'the_content' ) {
-                    return $content;
-                }
-                return;
+        $settings = AR_TRY_ON_Helper::get_settings();
+
+        // ── QR code ─────────────────────────────────────────────────
+        // QR is independent of placement — face products should also
+        // get one when the merchant has QR enabled. Emit it once per
+        // post per request via the static guard so repeat hook fires
+        // don't double up.
+        $qr_html = '';
+        if ( $post_id > 0 && empty( self::$qr_rendered_for_post[ $post_id ] ) ) {
+            $qr_html = (string) AR_TRY_ON_Helper::get_qr_code( $settings );
+            if ( $qr_html !== '' ) {
+                self::$qr_rendered_for_post[ $post_id ] = true;
             }
         }
-		
-        $ar_button_content = '';
-		/**
-		 * AR-27: Cache system is  giving empty value.
-		 * Updated: Now using cached settings to reduce database queries
-		 */
-		$settings   = AR_TRY_ON_Helper::get_settings();
-		$ar_button_content = AR_TRY_ON_Helper::get_qr_code($settings);
-		
 
-        $should_add_ar_button = false;
-        if ( isset( $settings['ar_try_on_display_button_automatically'] ) && $settings['ar_try_on_display_button_automatically'] == 'yes' ) {
-            $should_add_ar_button = true;
+        // ── Face-* products: buttons are rendered by AR_TRY_ON_Tryon ─
+        // (render_button_for_face_product / render_button_overlay /
+        // append_button_to_content). This method only contributes the
+        // QR for face products — the static-AR "View in AR" button
+        // doesn't apply because face products use the Try-On modal.
+        $is_face = false;
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) && $post_id ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+            $is_face   = AR_TRY_ON_Tryon::is_face_placement( $placement );
+        }
+        if ( $is_face ) {
+            if ( $current_filter === 'the_content' ) {
+                return $content . $qr_html;
+            }
+            echo $qr_html;
+            return;
         }
 
-        if( !has_shortcode($post->post_content, 'atlas_ar') && $should_add_ar_button ) {
-            ob_start();
-            ?>
-<!--                //TODO :: add an option to change button color-->
-            <button product-id="<?php echo esc_attr( $post_id ) ?>" class="ar_vr_3d_model_try_on button">View in AR</button>
-            <?php
-            $ar_button_content .= ob_get_clean();
+        // ── Non-face products: QR + dynamically-styled View-in-AR ────
+        // We replace the legacy raw `<button>` markup with the same
+        // dynamic-buttons block face products use (outer wrapper for
+        // content-column alignment + theme-button sampler). This makes
+        // the View-in-AR button on floor / wall posts pick up the
+        // active theme's primary button color instead of falling back
+        // to the browser's default gray.
+        $button_html = '';
+        $auto_button = isset( $settings['ar_try_on_display_button_automatically'] )
+            && $settings['ar_try_on_display_button_automatically'] == 'yes';
+
+        if ( $post_id > 0
+            && $auto_button
+            && empty( self::$btn_rendered_for_post[ $post_id ] )
+            && ! has_shortcode( (string) ( $post->post_content ?? '' ), 'atlas_ar' )
+            && class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+
+            $tryon = new AR_TRY_ON_Tryon( defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '0.0.0' );
+            $button_html = $tryon->build_dynamic_buttons_block(
+                $post_id,
+                isset( $placement ) ? $placement : '',
+                true, // $show_view_in_ar — emit the View-in-AR button
+                array(
+                    'show_tryon'        => false,        // no Try-On on non-face products
+                    'view_in_ar_style'  => 'primary',    // filled — sole CTA, primary
+                    'wrapper_id_suffix' => 'view-in-ar',
+                )
+            );
+            self::$btn_rendered_for_post[ $post_id ] = true;
         }
 
-        if ( $post->post_type != 'product' ) {
+        $ar_button_content = $qr_html . $button_html;
+
+        if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
             return $content . $ar_button_content;
         } else {
             echo $ar_button_content;

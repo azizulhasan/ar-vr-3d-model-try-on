@@ -79,9 +79,16 @@ class AR_TRY_ON_Tryon {
 	 * Single source of truth across:
 	 *  - {@see render_button_for_face_product} (WC numeric-position hook),
 	 *  - {@see render_button_overlay}          (WC toggle-mode footer),
-	 *  - {@see append_button_to_content}       (non-WC `the_content` filter).
+	 *  - {@see append_button_to_content}       (non-WC `the_content` filter),
+	 *  - {@see \AR_TRY_ON\AR_TRY_ON_Helper::create_shortcode}
+	 *    (`[atlas_ar]` shortcode reveal=true overlay path).
+	 *
+	 * Public so external callers (like the shortcode renderer in
+	 * `AR_TRY_ON_Helper`) can mark the post as rendered and prevent
+	 * downstream paths (e.g., `render_button_overlay` at `wp_footer`)
+	 * from double-emitting the Try-On button on the same page.
 	 */
-	protected function has_already_rendered( $post_id ) {
+	public function has_already_rendered( $post_id ) {
 		$post_id = (int) $post_id;
 		if ( $post_id <= 0 ) {
 			return true; // nothing sane to render against
@@ -656,8 +663,54 @@ class AR_TRY_ON_Tryon {
 		}
 
 		$placement = apply_filters( 'atlas_ar_tryon_woocommerce_mode_for_product', $placement, $post_id );
-		$glb_src   = self::get_product_glb_src( $post_id );
-		$settings  = self::get_settings();
+
+		$show_view_in_ar = self::should_show_static_viewer( $post_id );
+		$buttons_block   = $this->build_dynamic_buttons_block( $post_id, $placement, $show_view_in_ar );
+
+		return $content . $buttons_block;
+	}
+
+	/**
+	 * Build the dynamic-buttons HTML block (Try-On + optional View-in-AR
+	 * side-by-side, theme-button-sampled) and register the wrapper for
+	 * the wp_footer sampler.
+	 *
+	 * Shared by:
+	 *  - {@see append_button_to_content} (non-WC `the_content` filter)
+	 *  - {@see \AR_TRY_ON\AR_TRY_ON_Helper::create_shortcode} (shortcode
+	 *    + block, reveal=false branch)
+	 *
+	 * Returns the HTML string. The caller decides where to insert it.
+	 *
+	 * @param int     $post_id          Product / post ID.
+	 * @param string  $placement        Face placement value (face-glasses etc.).
+	 * @param bool    $show_view_in_ar  Render the View-in-AR outline button
+	 *                                  alongside Try-On (true when the
+	 *                                  merchant opted into the static viewer).
+	 * @param array   $args             Optional overrides:
+	 *                                  - glb_src (string) — defaults to
+	 *                                    `get_product_glb_src($post_id)`.
+	 *                                  - wrapper_id_suffix (string) —
+	 *                                    appended to the wrapper DOM id so
+	 *                                    multiple buttons-blocks on the
+	 *                                    same page never collide.
+	 * @return string Buttons block HTML (style + wrapper + buttons).
+	 */
+	public function build_dynamic_buttons_block( $post_id, $placement, $show_view_in_ar = false, $args = array() ) {
+		$post_id  = (int) $post_id;
+		$glb_src  = isset( $args['glb_src'] ) ? (string) $args['glb_src'] : self::get_product_glb_src( $post_id );
+		$suffix   = isset( $args['wrapper_id_suffix'] ) ? (string) $args['wrapper_id_suffix'] : '';
+		$settings = self::get_settings();
+
+		// New optional args (backwards-compatible — defaults preserve
+		// the existing behavior of every prior caller):
+		//   - `show_tryon` (bool, default true) — render the Try-On
+		//     button. Non-face placements pass false.
+		//   - `view_in_ar_style` (string, default "outline") — "outline"
+		//     (secondary) or "primary" (filled). Non-face placements
+		//     where View-in-AR is the sole CTA pass "primary".
+		$show_tryon       = ! isset( $args['show_tryon'] ) || (bool) $args['show_tryon'];
+		$view_in_ar_style = isset( $args['view_in_ar_style'] ) ? (string) $args['view_in_ar_style'] : 'outline';
 
 		// Inline SVG icons — currentColor so they pick up the button text
 		// color regardless of theme. ~200 bytes each, no extra request.
@@ -666,67 +719,76 @@ class AR_TRY_ON_Tryon {
 
 		// The `ar_vr_3d_model_try_on` class is preserved so the existing
 		// JS click handlers in `tryon-bootstrap.js` and `AtlasAR.dist.js`
-		// keep recognising clicks. The Gutenberg block classes provide
-		// a sensible default on block themes; the runtime sampler below
-		// then overrides via CSS custom properties so the styling
-		// matches *any* theme, classic or block.
-		$btn_base       = 'ar_vr_3d_model_try_on button wp-block-button__link wp-element-button atlas-ar-dyn-btn';
-		$btn_primary    = $btn_base . ' atlas-ar-dyn-btn--primary';
-		$btn_secondary  = $btn_base . ' atlas-ar-dyn-btn--secondary';
+		// keep recognising clicks.
+		$btn_base      = 'ar_vr_3d_model_try_on button wp-block-button__link wp-element-button atlas-ar-dyn-btn';
+		$btn_primary   = $btn_base . ' atlas-ar-dyn-btn--primary';
+		$btn_secondary = $btn_base . ' atlas-ar-dyn-btn--secondary';
 
-		// View in AR (secondary / outline) — rendered first when the
-		// merchant has opted into showing the static viewer alongside
-		// Try-On. No `data-mode` / `data-glb-src` — that's how the JS
-		// layer routes the click to the static-AR flow.
+		// View in AR — outline (secondary) by default; primary (filled)
+		// when it's the sole CTA on the page (non-face products).
 		$view_in_ar_button = '';
-		if ( self::should_show_static_viewer( $post_id ) ) {
+		if ( $show_view_in_ar ) {
+			$is_primary       = $view_in_ar_style === 'primary';
+			$view_btn_class   = $is_primary ? $btn_primary : $btn_secondary;
+			$view_block_class = $is_primary ? 'wp-block-button' : 'wp-block-button is-style-outline';
 			$view_in_ar_button = sprintf(
-				'<div class="wp-block-button is-style-outline"><button product-id="%1$d" class="%2$s" aria-label="%3$s">%4$s<span class="atlas-ar-btn-label">%5$s</span></button></div>',
-				(int) $post_id,
-				esc_attr( $btn_secondary ),
+				'<div class="%1$s"><button product-id="%2$d" class="%3$s" aria-label="%4$s">%5$s<span class="atlas-ar-btn-label">%6$s</span></button></div>',
+				esc_attr( $view_block_class ),
+				$post_id,
+				esc_attr( $view_btn_class ),
 				esc_attr__( 'View in augmented reality or 3D', 'ar-vr-3d-model-try-on' ),
 				$icon_3d,
 				esc_html__( 'View in AR', 'ar-vr-3d-model-try-on' )
 			);
 		}
 
-		// Try On (primary / filled) — second so View-in-AR sits on the
-		// left when both are present.
-		$tryon_button = sprintf(
-			'<div class="wp-block-button"><button type="button" product-id="%1$d" class="%2$s" data-mode="%3$s" data-glb-src="%4$s" aria-label="%5$s">%6$s<span class="atlas-ar-btn-label">%7$s</span></button></div>',
-			(int) $post_id,
-			esc_attr( $btn_primary ),
-			esc_attr( $placement ),
-			esc_url( $glb_src ),
-			esc_attr__( 'Try this on with your webcam', 'ar-vr-3d-model-try-on' ),
-			$icon_try,
-			esc_html( $settings['tryon_button_label'] )
-		);
+		// Try On (primary / filled). Suppressed for non-face placements.
+		$tryon_button = '';
+		if ( $show_tryon ) {
+			$tryon_button = sprintf(
+				'<div class="wp-block-button"><button type="button" product-id="%1$d" class="%2$s" data-mode="%3$s" data-glb-src="%4$s" aria-label="%5$s">%6$s<span class="atlas-ar-btn-label">%7$s</span></button></div>',
+				$post_id,
+				esc_attr( $btn_primary ),
+				esc_attr( $placement ),
+				esc_url( $glb_src ),
+				esc_attr__( 'Try this on with your webcam', 'ar-vr-3d-model-try-on' ),
+				$icon_try,
+				esc_html( $settings['tryon_button_label'] )
+			);
+		}
 
-		$wrapper_id = 'atlas-ar-dyn-buttons-' . (int) $post_id;
+		$wrapper_id = 'atlas-ar-dyn-buttons-' . $post_id . ( $suffix !== '' ? '-' . sanitize_key( $suffix ) : '' );
 
-		// Register this wrapper for the wp_footer sampler. The JS picks
-		// up the registered IDs and runs the theme-button sampling
-		// against each. Keeping the JS out of `the_content` shields it
-		// from wptexturize / wpautop / smart-quote conversion that was
-		// breaking the inline script.
 		if ( ! in_array( $wrapper_id, self::$pending_button_wrappers, true ) ) {
 			self::$pending_button_wrappers[] = $wrapper_id;
 		}
 
-		// Inline <style> is safe inside content — only the JS needed to
-		// move out. Style block sets defaults; sampler at wp_footer
-		// overrides via inline CSS custom properties on the wrapper.
 		$style = $this->build_button_style_block( $wrapper_id );
 
-		$buttons_block =
-			  $style
+		// Wrap in the `.atlas-ar-shortcode-outer` so the buttons block
+		// aligns with the post content column (constrained layout) the
+		// same way the revealed model viewer does — instead of getting
+		// auto-centered relative to the full-width container.
+		return $style
+			. '<div class="atlas-ar-shortcode-outer">'
 			. '<div id="' . esc_attr( $wrapper_id ) . '" class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex atlas-ar-dyn-buttons">'
 			. $view_in_ar_button
 			. $tryon_button
+			. '</div>'
 			. '</div>';
+	}
 
-		return $content . $buttons_block;
+	/**
+	 * Register the sentinel so the wp_footer sampler runs and sets
+	 * theme-button CSS variables on `document.documentElement`. Used by
+	 * the shortcode in reveal=true mode (so the Try-On button overlaid
+	 * on the model viewer inherits theme colors) and by the WC overlay
+	 * path.
+	 */
+	public function register_doc_root_sampler() {
+		if ( ! in_array( self::DOC_ROOT_SENTINEL, self::$pending_button_wrappers, true ) ) {
+			self::$pending_button_wrappers[] = self::DOC_ROOT_SENTINEL;
+		}
 	}
 
 	/**
