@@ -79,6 +79,23 @@
 	color: #000;
 }
 
+/* AtlasAR brand label below the QR image. Hidden automatically on Pro
+ * because the `atlas_ar_qr_brand_label` filter returns '' there and
+ * the JS renderer skips the <div> entirely. Free installs always show
+ * the brand. */
+#atlas_ar_qr_code .atlas_ar_qr_brand {
+	text-align: center;
+	font-size: 10px;
+	line-height: 1.2;
+	font-weight: 600;
+	letter-spacing: 0.4px;
+	color: #555;
+	padding: 2px 0 1px;
+	margin-top: 2px;
+	user-select: none;
+	pointer-events: none;
+}
+
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
 	#atlas_ar_qr_code {

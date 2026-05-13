@@ -439,6 +439,13 @@ class AR_TRY_ON_Helper
         }
 
         $url = \get_permalink();
+
+        // Brand label rendered below the QR image. Filterable so Pro
+        // can short-circuit it to an empty string ("watermark-free" on
+        // paid sites). Default value carries the AtlasAR brand on
+        // Free installs.
+        $brand_label = (string) apply_filters( 'atlas_ar_qr_brand_label', 'AtlasAR' );
+
         ob_start();
         ?>
         <div id="atlas_ar_qr_code">
@@ -458,6 +465,12 @@ class AR_TRY_ON_Helper
                 var errorCorrectionLevel = 'L';
                 var tries = 0;
                 var maxTries = 50;
+                // Brand label HTML — empty when Pro hooks
+                // `atlas_ar_qr_brand_label` to return ''.
+                var brandLabel = <?php echo wp_json_encode( $brand_label ); ?>;
+                var brandHtml = brandLabel
+                    ? '<div class="atlas_ar_qr_brand">' + brandLabel + '</div>'
+                    : '';
                 var qrcodeInterval = setInterval(function () {
                     tries++;
                     if (window.qrcode) {
@@ -467,7 +480,7 @@ class AR_TRY_ON_Helper
                         qr.make();
                         var target = document.getElementById("atlas_ar_qr_code");
                         if (!target) return;
-                        target.innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag();
+                        target.innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag() + brandHtml;
                         var closeBtn = document.getElementById("ar_close_btn");
                         if (closeBtn) {
                             closeBtn.addEventListener("click", function () {
