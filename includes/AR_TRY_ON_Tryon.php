@@ -35,8 +35,53 @@ class AR_TRY_ON_Tryon {
 	/** @var string */
 	protected $version;
 
+	/**
+	 * Per-request render guard, keyed by post ID. Prevents the Try-On
+	 * button from being emitted twice on the same page — for example when
+	 * the WC hook path AND the `the_content` fallback both run on a WC
+	 * product whose theme also calls `apply_filters('the_content', ...)`
+	 * inside the gallery summary. First emit wins; later calls bail.
+	 *
+	 * @var array<int,bool>
+	 */
+	protected static $rendered_for_post = array();
+
+	/**
+	 * Wrapper element IDs that need the runtime theme-button sampler
+	 * to run against them. Populated by {@see append_button_to_content}
+	 * and emitted by {@see print_dynamic_button_sampler_script} at
+	 * `wp_footer` — keeping the inline JS out of `the_content`'s filter
+	 * chain so `wptexturize` / `wpautop` / smart-quote conversion can
+	 * never mangle it.
+	 *
+	 * @var array<int,string>
+	 */
+	protected static $pending_button_wrappers = array();
+
 	public function __construct( $version ) {
 		$this->version = $version;
+	}
+
+	/**
+	 * Mark a post as already-rendered for this request, returning true if
+	 * it was rendered earlier (caller should bail) and false if this call
+	 * is the first one (caller should proceed).
+	 *
+	 * Single source of truth across:
+	 *  - {@see render_button_for_face_product} (WC numeric-position hook),
+	 *  - {@see render_button_overlay}          (WC toggle-mode footer),
+	 *  - {@see append_button_to_content}       (non-WC `the_content` filter).
+	 */
+	protected function has_already_rendered( $post_id ) {
+		$post_id = (int) $post_id;
+		if ( $post_id <= 0 ) {
+			return true; // nothing sane to render against
+		}
+		if ( ! empty( self::$rendered_for_post[ $post_id ] ) ) {
+			return true;
+		}
+		self::$rendered_for_post[ $post_id ] = true;
+		return false;
 	}
 
 	/**
@@ -70,6 +115,21 @@ class AR_TRY_ON_Tryon {
 				add_action( $hook, array( $this, 'render_button_for_face_product' ), 25 );
 			}
 		}
+
+		// Non-WC fallback: on a single post / supported CPT with a face-*
+		// placement, the WC numeric hooks above never fire and the gallery
+		// overlay JS has no `.woocommerce-product-gallery__image` to attach
+		// to. Without this filter the button is invisible on the front-end
+		// even though the merchant configured the product for face try-on.
+		// Gated on WC-product so existing WC behavior is untouched.
+		add_filter( 'the_content', array( $this, 'append_button_to_content' ), 25 );
+
+		// The theme-button style sampler is emitted at `wp_footer` instead
+		// of inside `the_content` to avoid wptexturize / wpautop mangling
+		// inline JS (smart-quote conversion, autop wrapping, etc.). By the
+		// time `wp_footer` fires the wrapper `<div>` is already in the DOM,
+		// so the script can locate it by ID and apply the sampled styles.
+		add_action( 'wp_footer', array( $this, 'print_dynamic_button_sampler_script' ), 100 );
 	}
 
 	public static function is_toggle_mode_position( $position ) {
@@ -394,6 +454,11 @@ class AR_TRY_ON_Tryon {
 		if ( ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
 			return;
 		}
+		// Per-request guard — first emitter wins. Subsequent calls (e.g.,
+		// from `the_content` after the WC hook has already fired) bail.
+		if ( $this->has_already_rendered( $post_id ) ) {
+			return;
+		}
 
 		$placement = self::get_product_placement( $post_id );
 		$placement = apply_filters( 'atlas_ar_tryon_woocommerce_mode_for_product', $placement, $post_id );
@@ -427,6 +492,12 @@ class AR_TRY_ON_Tryon {
 
 		$post_id = self::current_product_id();
 		if ( ! $post_id || ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
+			return;
+		}
+		// Per-request guard — the overlay path is only used on WC product
+		// pages (it targets `.woocommerce-product-gallery__image`), but
+		// guard anyway so the non-WC `the_content` fallback never collides.
+		if ( $this->has_already_rendered( $post_id ) ) {
 			return;
 		}
 
@@ -475,6 +546,387 @@ class AR_TRY_ON_Tryon {
 				setTimeout(place, 1000);
 			})();
 		</script>
+		<?php
+	}
+
+	/**
+	 * `the_content` filter fallback — append the Try-On button to non-WC
+	 * posts that have a face-* placement.
+	 *
+	 * The WC numeric-position hooks ({@see resolve_button_hook}) and the
+	 * toggle-mode overlay ({@see render_button_overlay}) both assume a
+	 * WooCommerce product context. On a regular post / supported CPT
+	 * neither path renders, so without this filter the merchant ends up
+	 * with no Try-On button on the front-end even though the product is
+	 * configured for face try-on.
+	 *
+	 * Safeguards (see register() comment):
+	 *  1. WC-product gate — bail on `is_product()` so existing WC paths
+	 *     remain the single renderer for products.
+	 *  2. Singular-only — the filter runs on archive excerpts too; skip
+	 *     those.
+	 *  3. Per-request render guard — never emit a second button for the
+	 *     same post on the same request.
+	 *  4. Shortcode-presence — if the content already contains an
+	 *     `[atlas_ar]` shortcode the merchant placed manually, don't add
+	 *     a sibling button.
+	 *  5. Existing markup check — if the content already includes a
+	 *     `.ar_vr_3d_model_try_on` button from any other source (e.g.,
+	 *     a theme that emits one), don't duplicate.
+	 *  6. All the same gates the other render paths use
+	 *     ({@see should_enqueue_for_current_request},
+	 *     {@see is_ar_supported_post_type},
+	 *     {@see has_3d_model}, {@see is_face_placement}).
+	 *
+	 * Must return `$content` — this is a filter, never an echo path.
+	 */
+	public function append_button_to_content( $content ) {
+		// Filter must always return a string; default to unchanged content.
+		if ( ! is_string( $content ) ) {
+			return $content;
+		}
+
+		// Safeguard 1 — leave WC products to the WC hook / overlay path.
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			return $content;
+		}
+
+		// Safeguard 2 — only on a singular view (skips archives / search /
+		// loops / blocks rendered out-of-context).
+		if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
+			return $content;
+		}
+
+		// Asset-gate parity with the other render paths.
+		if ( ! self::should_enqueue_for_current_request() ) {
+			return $content;
+		}
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+			return $content;
+		}
+
+		$post_id = self::current_product_id();
+		if ( ! $post_id ) {
+			return $content;
+		}
+		if ( ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
+			return $content;
+		}
+
+		$placement = self::get_product_placement( $post_id );
+		if ( ! self::is_face_placement( $placement ) ) {
+			return $content;
+		}
+
+		// Safeguard 4 — the merchant has placed `[atlas_ar]` in the body,
+		// which already injects the viewer + button. Don't add another.
+		if ( has_shortcode( $content, 'atlas_ar' ) ) {
+			return $content;
+		}
+
+		// Safeguard 5 — content already contains a Try-On button from any
+		// other source.
+		if ( false !== strpos( $content, 'ar_vr_3d_model_try_on' ) ) {
+			return $content;
+		}
+
+		// Safeguard 3 — per-request guard. Set *after* the cheaper checks
+		// so we don't burn the slot on a request that wouldn't have
+		// rendered anyway.
+		if ( $this->has_already_rendered( $post_id ) ) {
+			return $content;
+		}
+
+		$placement = apply_filters( 'atlas_ar_tryon_woocommerce_mode_for_product', $placement, $post_id );
+		$glb_src   = self::get_product_glb_src( $post_id );
+		$settings  = self::get_settings();
+
+		// Inline SVG icons — currentColor so they pick up the button text
+		// color regardless of theme. ~200 bytes each, no extra request.
+		$icon_3d  = '<svg class="atlas-ar-btn-icon" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/><path d="M2 7l10 5 10-5"/><path d="M12 22V12"/></svg>';
+		$icon_try = '<svg class="atlas-ar-btn-icon" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0113 0"/><rect x="3" y="4" width="18" height="16" rx="2" ry="2"/></svg>';
+
+		// The `ar_vr_3d_model_try_on` class is preserved so the existing
+		// JS click handlers in `tryon-bootstrap.js` and `AtlasAR.dist.js`
+		// keep recognising clicks. The Gutenberg block classes provide
+		// a sensible default on block themes; the runtime sampler below
+		// then overrides via CSS custom properties so the styling
+		// matches *any* theme, classic or block.
+		$btn_base       = 'ar_vr_3d_model_try_on button wp-block-button__link wp-element-button atlas-ar-dyn-btn';
+		$btn_primary    = $btn_base . ' atlas-ar-dyn-btn--primary';
+		$btn_secondary  = $btn_base . ' atlas-ar-dyn-btn--secondary';
+
+		// View in AR (secondary / outline) — rendered first when the
+		// merchant has opted into showing the static viewer alongside
+		// Try-On. No `data-mode` / `data-glb-src` — that's how the JS
+		// layer routes the click to the static-AR flow.
+		$view_in_ar_button = '';
+		if ( self::should_show_static_viewer( $post_id ) ) {
+			$view_in_ar_button = sprintf(
+				'<div class="wp-block-button is-style-outline"><button product-id="%1$d" class="%2$s" aria-label="%3$s">%4$s<span class="atlas-ar-btn-label">%5$s</span></button></div>',
+				(int) $post_id,
+				esc_attr( $btn_secondary ),
+				esc_attr__( 'View in augmented reality or 3D', 'ar-vr-3d-model-try-on' ),
+				$icon_3d,
+				esc_html__( 'View in AR', 'ar-vr-3d-model-try-on' )
+			);
+		}
+
+		// Try On (primary / filled) — second so View-in-AR sits on the
+		// left when both are present.
+		$tryon_button = sprintf(
+			'<div class="wp-block-button"><button type="button" product-id="%1$d" class="%2$s" data-mode="%3$s" data-glb-src="%4$s" aria-label="%5$s">%6$s<span class="atlas-ar-btn-label">%7$s</span></button></div>',
+			(int) $post_id,
+			esc_attr( $btn_primary ),
+			esc_attr( $placement ),
+			esc_url( $glb_src ),
+			esc_attr__( 'Try this on with your webcam', 'ar-vr-3d-model-try-on' ),
+			$icon_try,
+			esc_html( $settings['tryon_button_label'] )
+		);
+
+		$wrapper_id = 'atlas-ar-dyn-buttons-' . (int) $post_id;
+
+		// Register this wrapper for the wp_footer sampler. The JS picks
+		// up the registered IDs and runs the theme-button sampling
+		// against each. Keeping the JS out of `the_content` shields it
+		// from wptexturize / wpautop / smart-quote conversion that was
+		// breaking the inline script.
+		if ( ! in_array( $wrapper_id, self::$pending_button_wrappers, true ) ) {
+			self::$pending_button_wrappers[] = $wrapper_id;
+		}
+
+		// Inline <style> is safe inside content — only the JS needed to
+		// move out. Style block sets defaults; sampler at wp_footer
+		// overrides via inline CSS custom properties on the wrapper.
+		$style = $this->build_button_style_block( $wrapper_id );
+
+		$buttons_block =
+			  $style
+			. '<div id="' . esc_attr( $wrapper_id ) . '" class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex atlas-ar-dyn-buttons">'
+			. $view_in_ar_button
+			. $tryon_button
+			. '</div>';
+
+		return $content . $buttons_block;
+	}
+
+	/**
+	 * Build only the inline `<style>` block scoped to the wrapper.
+	 * The companion JS sampler lives at {@see print_dynamic_button_sampler_script}
+	 * and runs at `wp_footer` to dodge `the_content` filter mangling.
+	 *
+	 * The CSS sets sensible defaults using block-theme CSS variables
+	 * (`--wp--preset--color--*`) so block themes look reasonable even
+	 * before the JS runs. Once the sampler does run it overrides via
+	 * inline custom properties on the wrapper element.
+	 */
+	protected function build_button_style_block( $wrapper_id ) {
+		// CSS: defaults come from theme CSS variables when available, then
+		// hardcoded final fallback. Anything the JS sampler can derive
+		// overrides these by setting the custom properties inline on the
+		// wrapper element.
+		$style = '<style id="atlas-ar-dyn-buttons-style-' . esc_attr( $wrapper_id ) . '">'
+			. '#' . esc_attr( $wrapper_id ) . '{'
+				. 'margin-block-start:var(--wp--style--block-gap,1.5rem);'
+				. 'gap:0.75rem;'
+				. 'border:none !important;'
+				. 'padding:0 !important;'
+				. 'background:transparent !important;'
+				. 'box-shadow:none !important;'
+				. '--atlas-ar-btn-bg:var(--wp--preset--color--primary,var(--wp-admin-theme-color,#111));'
+				. '--atlas-ar-btn-bg-image:none;'
+				. '--atlas-ar-btn-color:var(--wp--preset--color--background,#fff);'
+				. '--atlas-ar-btn-border-width:0;'
+				. '--atlas-ar-btn-border-style:solid;'
+				. '--atlas-ar-btn-border-color:transparent;'
+				. '--atlas-ar-btn-radius:9999px;'
+				. '--atlas-ar-btn-padding:0.7em 1.4em;'
+				. '--atlas-ar-btn-font-family:inherit;'
+				. '--atlas-ar-btn-font-size:1rem;'
+				. '--atlas-ar-btn-font-weight:600;'
+				. '--atlas-ar-btn-line-height:1.2;'
+				. '--atlas-ar-btn-letter-spacing:normal;'
+				. '--atlas-ar-btn-text-transform:none;'
+				. '--atlas-ar-btn-text-decoration:none;'
+				. '--atlas-ar-btn-shadow:none;'
+				. '--atlas-ar-btn-transition:filter .15s ease, background-color .15s ease, color .15s ease;'
+				. '--atlas-ar-btn-cursor:pointer;'
+				. '--atlas-ar-btn-min-height:auto;'
+			. '}'
+			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn{'
+				. 'display:inline-flex;align-items:center;gap:0.5em;'
+				. 'background-color:var(--atlas-ar-btn-bg);'
+				. 'background-image:var(--atlas-ar-btn-bg-image);'
+				. 'color:var(--atlas-ar-btn-color);'
+				. 'border:var(--atlas-ar-btn-border-width) var(--atlas-ar-btn-border-style) var(--atlas-ar-btn-border-color);'
+				. 'border-radius:var(--atlas-ar-btn-radius);'
+				. 'padding:var(--atlas-ar-btn-padding);'
+				. 'font-family:var(--atlas-ar-btn-font-family);'
+				. 'font-size:var(--atlas-ar-btn-font-size);'
+				. 'font-weight:var(--atlas-ar-btn-font-weight);'
+				. 'line-height:var(--atlas-ar-btn-line-height);'
+				. 'letter-spacing:var(--atlas-ar-btn-letter-spacing);'
+				. 'text-transform:var(--atlas-ar-btn-text-transform);'
+				. 'text-decoration:var(--atlas-ar-btn-text-decoration);'
+				. 'box-shadow:var(--atlas-ar-btn-shadow);'
+				. 'transition:var(--atlas-ar-btn-transition);'
+				. 'cursor:var(--atlas-ar-btn-cursor);'
+				. 'min-height:var(--atlas-ar-btn-min-height);'
+			. '}'
+			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn--primary:hover{filter:brightness(0.92);}'
+			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn--secondary{'
+				. 'background-color:transparent;'
+				. 'background-image:none;'
+				. 'color:var(--atlas-ar-btn-bg);'
+				. 'border-width:max(2px,var(--atlas-ar-btn-border-width));'
+				. 'border-style:solid;'
+				. 'border-color:var(--atlas-ar-btn-bg);'
+			. '}'
+			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn--secondary:hover{'
+				. 'background-color:var(--atlas-ar-btn-bg);'
+				. 'color:var(--atlas-ar-btn-color);'
+			. '}'
+			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-btn-icon{flex:0 0 auto;}'
+			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-btn-label{display:inline-block;}'
+			. '</style>';
+
+		return $style;
+	}
+
+	/**
+	 * Emit the theme-button sampler JS at `wp_footer`. Runs against
+	 * every wrapper ID registered by {@see append_button_to_content}.
+	 *
+	 * Why this is at wp_footer and not inline in the_content output:
+	 * the_content runs `wptexturize` (smart-quote conversion), `wpautop`
+	 * (paragraph wrapping), and other filters that can mangle inline JS
+	 * — string quotes become curly quotes, newlines become `<br>`, etc.
+	 * At wp_footer the script bypasses all of that and is emitted as-is.
+	 *
+	 * The wrapper `<div>` was inserted earlier (inside the_content) so
+	 * by the time wp_footer fires it's safely in the DOM ready to be
+	 * located by ID.
+	 *
+	 * Sampling strategy:
+	 *   1. PROBE — inject a hidden `<a>` carrying the canonical theme
+	 *      button classes (block + WC variants), read computed style,
+	 *      remove. Captures the theme's *intended* primary button even
+	 *      when no actual button is on the current page (which is why
+	 *      the earlier live-element scan was picking WP-blue from a
+	 *      hidden search-submit on the /glass/ post).
+	 *   2. LIVE FALLBACK — if no probe yields a styled bg (old classic
+	 *      theme with no WP 6+ hooks), fall back to scanning visible
+	 *      page buttons in priority order.
+	 */
+	public function print_dynamic_button_sampler_script() {
+		if ( empty( self::$pending_button_wrappers ) ) {
+			return;
+		}
+
+		$ids_json = wp_json_encode( array_values( self::$pending_button_wrappers ) );
+		?>
+<script id="atlas-ar-dyn-buttons-sampler">
+(function(){
+	"use strict";
+	var ids = <?php echo $ids_json; ?>;
+	function isTransparent(c){return !c||c==="transparent"||/^rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(c);}
+	function makeProbe(classes){
+		var p=document.createElement("a");
+		p.className=classes;
+		p.setAttribute("aria-hidden","true");
+		p.setAttribute("tabindex","-1");
+		p.style.cssText="position:absolute;left:-9999px;top:-9999px;visibility:hidden;pointer-events:none;";
+		p.textContent="probe";
+		document.body.appendChild(p);
+		return p;
+	}
+	function findLive(w){
+		var selectors=[
+			".single_add_to_cart_button",
+			".woocommerce a.button.alt",
+			".woocommerce-Button",
+			".btn-primary",
+			"a.button",
+			"button.button",
+			".btn"
+		];
+		for(var i=0;i<selectors.length;i++){
+			var nodes=document.querySelectorAll(selectors[i]);
+			for(var j=0;j<nodes.length;j++){
+				var n=nodes[j];
+				if(w.contains(n))continue;
+				if(n.offsetParent===null&&n.getClientRects().length===0)continue;
+				return n;
+			}
+		}
+		return null;
+	}
+	function apply(w){
+		if(!w)return;
+		// Priority: LIVE rendered theme button first. Classic themes
+		// (Beaver Builder, Astra, GeneratePress, Storefront, etc.)
+		// style `.button` / `.add_to_cart_button` natively but may
+		// style `.wp-element-button` *differently* (or not at all), so
+		// probing Gutenberg classes finds the wrong color on those
+		// themes. A live, actually-rendered theme button is the most
+		// reliable representation of "the theme's primary CTA."
+		var sample=findLive(w);
+		var probes=[];
+		if(!sample){
+			// No live button on this page — fall back to probes.
+			// Order: classic theme conventions first (most prevalent),
+			// then Gutenberg / WC block-button classes last.
+			probes=[
+				makeProbe("button add_to_cart_button product_type_simple"),
+				makeProbe("button"),
+				makeProbe("btn btn-primary"),
+				makeProbe("wp-block-button__link wp-element-button wc-block-components-product-button__button button add_to_cart_button"),
+				makeProbe("wp-block-button__link wp-element-button button")
+			];
+			for(var pi=0;pi<probes.length;pi++){
+				var pcs=window.getComputedStyle(probes[pi]);
+				if(!isTransparent(pcs.backgroundColor)||(pcs.backgroundImage&&pcs.backgroundImage!=="none")){
+					sample=probes[pi];break;
+				}
+			}
+		}
+		if(!sample){probes.forEach(function(p){if(p.parentNode)p.parentNode.removeChild(p);});return;}
+		var cs=window.getComputedStyle(sample);
+		function set(name,value){if(value)w.style.setProperty(name,value);}
+		set("--atlas-ar-btn-bg",cs.backgroundColor);
+		set("--atlas-ar-btn-bg-image",cs.backgroundImage&&cs.backgroundImage!=="none"?cs.backgroundImage:null);
+		set("--atlas-ar-btn-color",cs.color);
+		set("--atlas-ar-btn-border-width",cs.borderTopWidth);
+		set("--atlas-ar-btn-border-style",cs.borderTopStyle);
+		set("--atlas-ar-btn-border-color",cs.borderTopColor);
+		set("--atlas-ar-btn-radius",cs.borderRadius);
+		set("--atlas-ar-btn-padding",cs.paddingTop+" "+cs.paddingRight+" "+cs.paddingBottom+" "+cs.paddingLeft);
+		set("--atlas-ar-btn-font-family",cs.fontFamily);
+		set("--atlas-ar-btn-font-size",cs.fontSize);
+		set("--atlas-ar-btn-font-weight",cs.fontWeight);
+		set("--atlas-ar-btn-line-height",cs.lineHeight);
+		set("--atlas-ar-btn-letter-spacing",cs.letterSpacing);
+		set("--atlas-ar-btn-text-transform",cs.textTransform);
+		set("--atlas-ar-btn-text-decoration",cs.textDecorationLine||cs.textDecoration);
+		set("--atlas-ar-btn-shadow",cs.boxShadow);
+		set("--atlas-ar-btn-transition",cs.transition);
+		set("--atlas-ar-btn-cursor",cs.cursor);
+		set("--atlas-ar-btn-min-height",cs.minHeight);
+		probes.forEach(function(p){if(p.parentNode)p.parentNode.removeChild(p);});
+	}
+	function run(){
+		for(var i=0;i<ids.length;i++){
+			apply(document.getElementById(ids[i]));
+		}
+	}
+	if(document.readyState==="loading"){
+		document.addEventListener("DOMContentLoaded",run);
+	}else{
+		run();
+	}
+})();
+</script>
 		<?php
 	}
 
