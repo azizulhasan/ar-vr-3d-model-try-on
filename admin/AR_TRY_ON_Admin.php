@@ -162,11 +162,12 @@ class AR_TRY_ON_Admin {
 				true
 			);
 		}
-        // JS
+        // JS — wp-components is required for PanelBody / ToggleControl /
+        // TextControl in the block's InspectorControls sidebar.
         wp_enqueue_script(
             'atlas-ar-block',
             ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block.js',
-            array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-editor', 'wp-block-editor' ),
+            array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-editor', 'wp-block-editor', 'wp-components' ),
             $this->version,
             true
         );

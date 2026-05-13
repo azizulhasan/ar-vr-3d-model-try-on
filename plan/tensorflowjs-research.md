@@ -225,3 +225,5 @@ Open questions to resolve before Phase 1:
 - Implementation plan (sibling doc): [tensorflowjs-integration-plan.md](./tensorflowjs-integration-plan.md)
 - Existing feature analysis: [FEATURE-ANALYSIS.md](./FEATURE-ANALYSIS.md)
 - Pro feature roadmap: [PRO-FEATURES-COMPLETE.md](./PRO-FEATURES-COMPLETE.md)
+- **Successor / Phase 2 — fit measurement:** [prescription-fit-research.md](./prescription-fit-research.md) — adds the metric-scale layer (ISO 7810 card calibration, ARKit/ARCore paths) so the same Face Landmarker output can answer *"will it fit?"* in addition to *"how does it look?"*.
+- **Successor / Phase 2 — implementation:** [prescription-fit-integration-plan.md](./prescription-fit-integration-plan.md).

@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -361,6 +361,16 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.0.1 ( 13 May 2026 ) =
+* New: AtlasAR block now has a "Reveal model by default" toggle plus width, height, aspect ratio, padding and margin controls — choose between an inline 3D viewer or a clean Try-On / View in AR button pair
+* New: AtlasTryOn and the 3D viewer now work on regular WordPress posts and pages, not just WooCommerce products
+* Improvement: Try-On, View in AR, and 3D viewer buttons now automatically match the colors and style of your active theme — works with any block theme or classic theme
+* Improvement: QR code now appears on every page where you've enabled the 3D viewer
+* Improvement: Cleaner, more polished QR card with a tidier close button and a discreet AtlasAR brand stamp
+* Improvement: Buttons and the 3D viewer now line up with the rest of your post content instead of floating to the side
+* Fix: Tapping the 3D toggle on a product image no longer shows two Try-On buttons
+* Fix: View in AR button colour and alignment now look right on all themes
+
 = 2.0.0 ( 12 May 2026 ) =
 * New: AtlasTryOn — virtual try-on for glasses & caps using your webcam, no app required
 * New: Works on iOS, Android and desktop browsers
@@ -605,6 +615,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+Minor polish update: AtlasTryOn / 3D viewer now work on regular posts (not just WooCommerce products), buttons auto-match any theme, plus a smarter AtlasAR block with width / height / aspect ratio / spacing controls. Safe to update.
 
 = 2.0.0 =
 Major update: AtlasTryOn virtual try-on for glasses & caps is now built in — no extra setup needed. Please clear your site cache after updating.

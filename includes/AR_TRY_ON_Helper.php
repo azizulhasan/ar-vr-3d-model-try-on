@@ -221,12 +221,44 @@ class AR_TRY_ON_Helper
         return $result;
     }
 
+    /**
+     * `[atlas_ar]` shortcode renderer and Gutenberg-block render path.
+     *
+     * Attributes (all have safe defaults so the shortcode never breaks
+     * if the merchant omits them):
+     *  - `reveal`       — "true" | "false". Default "true" (preserves
+     *                     existing site behavior). When "false", the
+     *                     `<model-viewer>` is NOT rendered inline and
+     *                     only the Try-On / View-in-AR buttons appear.
+     *  - `height`       — viewer height (any CSS length). Default 400px.
+     *  - `width`        — viewer width (any CSS length). Default 500px.
+     *  - `padding`      — wrapper padding (any CSS value). Default 0.
+     *  - `margin`       — wrapper margin (any CSS value). Default 0.
+     *  - `aspect_ratio` — optional CSS aspect-ratio (e.g. "1/1", "16/9").
+     *                     When set, `height` is ignored and the viewer
+     *                     sizes itself from `width` + `aspect_ratio`.
+     *  - `position`     — legacy attribute, kept for backwards-compat.
+     *
+     * The Gutenberg block (`atlas/ar-shortcode`) emits this shortcode
+     * with attributes set from the block's inspector controls. When
+     * users type the shortcode manually they can pass any subset of
+     * attributes; the defaults fill the rest.
+     */
     public static function create_shortcode($attr, $content = '')
     {
         $attributes = shortcode_atts(array(
-            'height' => '400px',
-            'width' => '500px',
-            'position' => 'after',
+            'reveal'                 => 'true',
+            'height'                 => '400px',
+            'width'                  => '500px',
+            'padding'                => '0',
+            'margin'                 => '0',
+            'aspect_ratio'           => '',
+            'position'               => 'after',
+            // Private: suppresses the Try-On overlay on face products.
+            // Used internally by the WC gallery cube-toggle wrapper to
+            // avoid emitting a duplicate Try-On button alongside the
+            // gallery's own floating pill.
+            'suppress_tryon_overlay' => '',
         ), $attr);
 
         $current_filter = current_filter();
@@ -234,65 +266,157 @@ class AR_TRY_ON_Helper
             if ($current_filter === 'the_content') {
                 return $content;
             }
-
-            return;
+            return '';
         }
 
-
-        // Global product variable
-        global $product;
-        global $post;
-        if ($product) {
-            $post_id = $product->get_id();
-            if (!$content) {
-                $content = $post->post_content;
-            }
-        } else {
-            $post_id = $post->ID;
-            if (!$content) {
-                $content = $post->post_content;
-            }
+        global $product, $post;
+        $post_id = $product ? (int) $product->get_id() : (int) ($post->ID ?? 0);
+        if (!$post_id) {
+            return $current_filter === 'the_content' ? $content : '';
         }
 
-        // Try-On products: when ar_placement is face-* and the merchant
-        // has NOT opted into showing the static viewer alongside Try-On,
-        // skip the inline <model-viewer> entirely. The Try-On modal loads
-        // the GLB on demand from the button's data-glb-src attribute.
+        // Normalize `reveal` to a strict boolean. Any explicit "false" /
+        // "0" / "no" / "off" / `false` boolean wins; everything else
+        // (including the default empty case) falls back to reveal=true
+        // so we never break an existing post.
+        $reveal = filter_var($attributes['reveal'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        if ($reveal === null) {
+            $reveal = true;
+        }
+
+        // Detect face placement once so both branches can switch on it.
+        $is_face   = false;
+        $placement = '';
         if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
             $placement = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_placement($post_id);
-            if (\AR_TRY_ON\AR_TRY_ON_Tryon::is_face_placement($placement)
-                && !\AR_TRY_ON\AR_TRY_ON_Tryon::should_show_static_viewer($post_id)) {
-                if ($current_filter === 'the_content') {
-                    return $content;
-                }
-                return '';
+            $is_face   = \AR_TRY_ON\AR_TRY_ON_Tryon::is_face_placement($placement);
+            $placement = apply_filters('atlas_ar_tryon_woocommerce_mode_for_product', $placement, $post_id);
+        }
+
+        // ── Branch 1: reveal=false → buttons-only ────────────────────
+        if (!$reveal) {
+            if ($is_face && class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+                // Face product: dynamic-buttons block (Try-On + optional
+                // View-in-AR). View-in-AR appears whenever the merchant
+                // has show_static_viewer_for_tryon on OR the shortcode is
+                // explicitly suppressed (reveal=false makes the AR
+                // button the only secondary action).
+                $tryon   = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+                return $tryon->build_dynamic_buttons_block(
+                    $post_id,
+                    $placement,
+                    true, // always show View-in-AR alongside Try-On when reveal=false
+                    array('wrapper_id_suffix' => 'shortcode')
+                );
             }
+            // Non-face product: skip the inline viewer, let the existing
+            // `atlas_ar_button` filter render the QR + View-in-AR button
+            // wherever it normally runs. Returning empty here keeps the
+            // shortcode location empty without disturbing other paths.
+            return '';
+        }
+
+        // ── Branch 2: reveal=true → inline `<model-viewer>` ───────────
+        // Build wrapper CSS from layout attributes. All values have
+        // defaults so the wrapper always has a valid sizing strategy.
+        $wrapper_style_parts = array();
+        if ($attributes['padding'] !== '' && $attributes['padding'] !== null) {
+            $wrapper_style_parts[] = 'padding:' . self::sanitize_css_value($attributes['padding']);
+        }
+        if ($attributes['margin'] !== '' && $attributes['margin'] !== null) {
+            $wrapper_style_parts[] = 'margin:' . self::sanitize_css_value($attributes['margin']);
+        }
+        // `aspect_ratio` (if present) wins over `height`.
+        if ($attributes['aspect_ratio'] !== '' && $attributes['aspect_ratio'] !== null) {
+            $wrapper_style_parts[] = 'width:' . self::sanitize_css_value($attributes['width']);
+            $wrapper_style_parts[] = 'aspect-ratio:' . self::sanitize_css_value($attributes['aspect_ratio']);
+        } else {
+            $wrapper_style_parts[] = 'height:' . self::sanitize_css_value($attributes['height']);
+            $wrapper_style_parts[] = 'width:' . self::sanitize_css_value($attributes['width']);
+        }
+        $wrapper_style = implode(';', $wrapper_style_parts);
+
+        // Try-On overlay button — rendered ABSOLUTELY positioned inside
+        // the viewer wrapper for face products. Uses the same CSS-var
+        // cascade as the WC gallery overlay, so the wp_footer sampler
+        // gives it the active theme's primary button color.
+        //
+        // Suppressed when the shortcode is called from within the WC
+        // gallery toggle wrapper ({@see \AR_TRY_ON\AR_TRY_ON::add_image_3d_toggle_to_gallery}) —
+        // in that path the gallery's own floating pill (rendered by
+        // {@see \AR_TRY_ON\AR_TRY_ON_Tryon::render_button_overlay}) is
+        // the canonical Try-On entry-point, and emitting our shortcode
+        // overlay too would produce a visible duplicate the moment the
+        // shopper clicks the cube toggle. The flag is opt-in via the
+        // `suppress_tryon_overlay` shortcode attribute (private —
+        // merchants never type it).
+        $tryon_overlay_html = '';
+        $suppress_tryon_overlay = filter_var($attributes['suppress_tryon_overlay'] ?? '', FILTER_VALIDATE_BOOLEAN);
+        if ($is_face
+            && ! $suppress_tryon_overlay
+            && class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+            $tryon  = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+            $tryon->register_doc_root_sampler();
+
+            $glb_src  = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_glb_src($post_id);
+            $settings = \AR_TRY_ON\AR_TRY_ON_Tryon::get_settings();
+            $tryon_overlay_html = sprintf(
+                '<button type="button" product-id="%1$d" class="ar_vr_3d_model_try_on art-tryon-image-overlay atlas-ar-shortcode-overlay" data-mode="%2$s" data-glb-src="%3$s" aria-label="%4$s">%5$s</button>',
+                $post_id,
+                esc_attr($placement),
+                esc_url($glb_src),
+                esc_attr__('Try this on with your webcam', 'ar-vr-3d-model-try-on'),
+                esc_html($settings['tryon_button_label'])
+            );
         }
 
         ob_start();
         ?>
-        <div style="height: <?php echo esc_attr($attributes['height']) ?>;width: <?php echo esc_attr($attributes['width']) ?>;"
-             id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
-        <script type="module">
-            document.addEventListener("DOMContentLoaded", async function () {
-                let atlasAR = new window.AtlasAR()
-                let product_id = "<?php echo esc_attr($post_id) ?>";
-                const htmlContent = atlasAR.getModelSkeleton(`model_viewer_shortcode_${product_id}`)
+        <div class="atlas-ar-shortcode-outer">
+            <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
+                <div style="height:100%;width:100%;"
+                     id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
+                <?php echo $tryon_overlay_html; ?>
+                <script type="module">
+                    document.addEventListener("DOMContentLoaded", async function () {
+                        let atlasAR = new window.AtlasAR()
+                        let product_id = "<?php echo esc_attr($post_id) ?>";
+                        const htmlContent = atlasAR.getModelSkeleton(`model_viewer_shortcode_${product_id}`)
 
-                let current_product = document.getElementById('atlas_ar_shortcode_' + product_id);
-                let modelLoaded = false;
-                if (!modelLoaded) {
-                    current_product.innerHTML = '<h1>3D File Is Loading</h1>'
-                }
-                current_product.innerHTML = htmlContent; // Insert model-viewer HTML
+                        let current_product = document.getElementById('atlas_ar_shortcode_' + product_id);
+                        let modelLoaded = false;
+                        if (!modelLoaded) {
+                            current_product.innerHTML = '<h1>3D File Is Loading</h1>'
+                        }
+                        current_product.innerHTML = htmlContent; // Insert model-viewer HTML
 
-                atlasAR.fetchModelData(product_id, "#model_viewer_shortcode_" + product_id)
-            });
-        </script>
+                        atlasAR.fetchModelData(product_id, "#model_viewer_shortcode_" + product_id)
+                    });
+                </script>
+            </div>
+        </div>
         <?php
-        $ar_button_content = ob_get_clean();
+        return ob_get_clean();
+    }
 
-        return $ar_button_content;
+    /**
+     * Minimal CSS-value sanitiser for shortcode attributes. Strips
+     * angle brackets and JavaScript-protocol sneaks; allows any
+     * alphanumeric / dot / dash / percent / parens / space / slash /
+     * comma / hash combination (which covers every legitimate CSS
+     * length, color, calc(), and aspect-ratio value).
+     */
+    private static function sanitize_css_value($value)
+    {
+        $value = (string) $value;
+        if ($value === '') {
+            return '';
+        }
+        // Disallow obvious injection vectors.
+        $value = preg_replace('/javascript\s*:/i', '', $value);
+        $value = preg_replace('/expression\s*\(/i', '', $value);
+        $value = str_replace(array('<', '>', '"', "'", ';'), '', $value);
+        return trim($value);
     }
 
     public static function is_qr_code_enabled($settings = [])
@@ -315,27 +439,59 @@ class AR_TRY_ON_Helper
         }
 
         $url = \get_permalink();
+
+        // Brand label rendered below the QR image. Filterable so Pro
+        // can short-circuit it to an empty string ("watermark-free" on
+        // paid sites). Default value carries the AtlasAR brand on
+        // Free installs.
+        $brand_label = (string) apply_filters( 'atlas_ar_qr_brand_label', 'AtlasAR' );
+
         ob_start();
         ?>
         <div id="atlas_ar_qr_code">
 
         </div>
         <script>
-            var typeNumber = 0;
-            var errorCorrectionLevel = 'L';
-            let qrcodeInterval = setTimeout(function () {
-                if(window.qrcode){
-                    clearInterval(qrcodeInterval);
-                    qrcodeInterval = null;
-                    var qr = qrcode(typeNumber, errorCorrectionLevel);
-                    qr.addData("<?php echo esc_url($url) ?>");
-                    qr.make();
-                    document.getElementById("atlas_ar_qr_code").innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag();
-                    document.getElementById("ar_close_btn").addEventListener("click", function () {
-                        document.getElementById("atlas_ar_qr_code").style.display = "none";
-                    });
-                }
-            },100)
+            // The qrcode lib (`ar-try-on-qr-generator.min.js`) is
+            // deferred, so it may not be available the first time this
+            // inline script runs. Poll up to ~5 s on a 100 ms interval
+            // and bail cleanly once we either render or run out of
+            // tries. Single-fire `setTimeout` was missing the QR on
+            // pages that emit this inline script late in the body
+            // (e.g., WC product pages where the div lives in
+            // `wp_footer`, after the head-deferred lib promise).
+            (function () {
+                var typeNumber = 0;
+                var errorCorrectionLevel = 'L';
+                var tries = 0;
+                var maxTries = 50;
+                // Brand label HTML — empty when Pro hooks
+                // `atlas_ar_qr_brand_label` to return ''.
+                var brandLabel = <?php echo wp_json_encode( $brand_label ); ?>;
+                var brandHtml = brandLabel
+                    ? '<div class="atlas_ar_qr_brand">' + brandLabel + '</div>'
+                    : '';
+                var qrcodeInterval = setInterval(function () {
+                    tries++;
+                    if (window.qrcode) {
+                        clearInterval(qrcodeInterval);
+                        var qr = qrcode(typeNumber, errorCorrectionLevel);
+                        qr.addData("<?php echo esc_url($url) ?>");
+                        qr.make();
+                        var target = document.getElementById("atlas_ar_qr_code");
+                        if (!target) return;
+                        target.innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag() + brandHtml;
+                        var closeBtn = document.getElementById("ar_close_btn");
+                        if (closeBtn) {
+                            closeBtn.addEventListener("click", function () {
+                                target.style.display = "none";
+                            });
+                        }
+                    } else if (tries >= maxTries) {
+                        clearInterval(qrcodeInterval);
+                    }
+                }, 100);
+            })();
         </script>
         <?php
         $ar_button_content = ob_get_clean();

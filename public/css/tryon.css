@@ -11,7 +11,14 @@
 /* Try-On button rendered as overlay on featured image (toggle-mode position).
  * Sits inside .atlas-ar-toggle-container next to the cube icon.
  * Uses !important to override the broad CSS reset in image-3d-toggle.css
- * that targets all descendants of `.atlas-ar-toggle-container *`. */
+ * that targets all descendants of `.atlas-ar-toggle-container *`.
+ *
+ * Colors come from the dynamic theme-button sampler — see
+ * AR_TRY_ON_Tryon::print_dynamic_button_sampler_script(). The sampler
+ * sets `--atlas-ar-btn-bg` / `--atlas-ar-btn-color` on the document
+ * root after detecting the active theme's primary button styling.
+ * If the sampler hasn't run (or found nothing useful) we fall back to
+ * the original black-on-white look. */
 .atlas-ar-toggle-container .art-tryon-image-overlay,
 button.art-tryon-image-overlay {
 	display: inline-flex !important;
@@ -23,20 +30,20 @@ button.art-tryon-image-overlay {
 	margin-left: 8px !important;
 	border-radius: 24px !important;
 	border: 1px solid rgba(0, 0, 0, 0.15) !important;
-	background: #111 !important;
-	color: #fff !important;
+	background: var(--atlas-ar-btn-bg, #111) !important;
+	color: var(--atlas-ar-btn-color, #fff) !important;
 	font-weight: 600 !important;
 	font-size: 14px !important;
 	line-height: 1 !important;
 	cursor: pointer !important;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
-	transition: transform 0.15s ease, background 0.15s ease !important;
+	transition: transform 0.15s ease, filter 0.15s ease !important;
 	white-space: nowrap !important;
 }
 
 .atlas-ar-toggle-container .art-tryon-image-overlay:hover,
 button.art-tryon-image-overlay:hover {
-	background: #000 !important;
+	filter: brightness(0.92);
 	transform: translateY(-1px);
 }
 
@@ -46,13 +53,83 @@ button.art-tryon-image-overlay:disabled {
 	cursor: progress !important;
 }
 
+/* Shortcode reveal=true: TWO wrappers.
+ *
+ * `.atlas-ar-shortcode-outer` is the direct child of the post's
+ * layout container (`.is-layout-constrained`). It inherits the
+ * theme's constrained layout — max-width = content-size, auto-
+ * centred in the viewport. This is the same shape every other
+ * paragraph block on the page gets.
+ *
+ * `.atlas-ar-shortcode-wrap` is the merchant-sized model-viewer
+ * box, nested inside the outer wrapper. Because it's no longer a
+ * direct child of `.is-layout-constrained`, Gutenberg's auto-
+ * centring rule no longer touches it, so the wrap aligns to the
+ * outer's start edge (left edge of the post content column). The
+ * merchant can still centre it explicitly via the block's `margin`
+ * field (e.g. "0 auto"). */
+.atlas-ar-shortcode-outer {
+	/* No fixed sizing — inherits constrained max-width from parent. */
+}
+
+.atlas-ar-shortcode-wrap {
+	position: relative;
+	/* Mobile-safe: never exceed the available content column even when
+	 * the merchant set a fixed pixel `width` larger than the viewport
+	 * (default block width is 500px which overflows on phones < 500px
+	 * wide). `max-width: 100%` keeps the wrap inside its container and
+	 * scales the model viewer down responsively. `box-sizing` is needed
+	 * because the user may also set padding via the block. */
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+}
+
+/* Force the inner `<model-viewer>` to fill the wrapper. Without this
+ * override, AtlasAR.js's `getModelSkeleton()` emits a `<model-viewer>`
+ * with a fixed 400px height — so a shortcode wrapper sized to e.g.
+ * 500×1000 (aspect_ratio="1/2") would only paint the bottom 400px and
+ * leave a 600px empty gap above. Forcing 100% × 100% lets model-viewer
+ * re-frame the 3D model inside whatever aspect_ratio the merchant
+ * chose. */
+.atlas-ar-shortcode-wrap > div[id^="atlas_ar_shortcode_"] {
+	display: block;
+	width: 100%;
+	height: 100%;
+	line-height: 0;
+}
+
+.atlas-ar-shortcode-wrap model-viewer {
+	width: 100% !important;
+	height: 100% !important;
+	display: block !important;
+}
+
+.atlas-ar-shortcode-wrap .atlas-ar-shortcode-overlay {
+	position: absolute !important;
+	left: 50% !important;
+	bottom: 16px !important;
+	right: auto !important;
+	transform: translateX(-50%) !important;
+	margin-left: 0 !important;
+	z-index: 5 !important;
+}
+
 .art-tryon-modal {
-	position: fixed;
-	inset: 0;
-	z-index: 999999;
-	display: flex;
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	bottom: 0 !important;
+	inset: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;  /* fallback for old browsers */
+	height: 100dvh !important; /* dynamic viewport — survives mobile URL bar */
+	z-index: 999999 !important;
+	display: flex !important;
 	align-items: center;
 	justify-content: center;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 .art-tryon-backdrop {
@@ -67,6 +144,7 @@ button.art-tryon-image-overlay:disabled {
 	border-radius: 12px;
 	width: min(720px, 92vw);
 	max-height: 92vh;
+	max-height: 92dvh;
 	padding: 24px;
 	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
 	overflow: auto;
@@ -262,15 +340,22 @@ button.art-tryon-image-overlay:disabled {
 /* ---------- Responsive: mobile fullscreen, tablet/desktop centered card ---------- */
 
 /*
- * On phones (<= 640 px wide) the centered card layout wastes real
- * estate — letterboxes the 4:3 video inside a 92 vw panel inside the
- * viewport. Promote the panel to a true fullscreen modal so the
- * camera feed fills the screen, controls dock at the bottom, and the
- * close button floats over the live feed.
+ * On phones and tablets (<= 900 px wide OR pointer:coarse touch
+ * device) the centered card layout wastes real estate — letterboxes
+ * the 4:3 video inside a 92 vw panel inside the viewport. Promote the
+ * panel to a true fullscreen modal so the camera feed fills the
+ * screen, controls dock at the bottom, and the close button floats
+ * over the live feed.
+ *
+ * Bumped the breakpoint from 640 to 900 because some themes ship
+ * without a `<meta name="viewport">` and render mobile at the default
+ * 980 px CSS width — at which point the 640 query would never match.
+ * `pointer: coarse` is a belt-and-braces fallback so touch devices
+ * always hit the fullscreen path regardless of CSS pixel width.
  */
-@media (max-width: 640px) {
+@media (max-width: 900px), (pointer: coarse) {
 	.art-tryon-panel {
-		width: 100vw;
+		width: 100vw !important;
 		/*
 		 * `100vh` on Chrome Android extends BEHIND the URL bar — the
 		 * close button at top:12px ends up partially hidden. `100dvh`
@@ -279,16 +364,19 @@ button.art-tryon-image-overlay:disabled {
 		 * sits below it cleanly. Falls back to 100vh on older
 		 * browsers that don't support dvh.
 		 */
-		height: 100vh;
-		height: 100dvh;
-		max-height: 100vh;
-		max-height: 100dvh;
-		max-width: 100vw;
-		border-radius: 0;
-		padding: 0;
-		gap: 0;
-		box-shadow: none;
-		justify-content: flex-start;
+		height: 100vh !important;
+		height: 100dvh !important;
+		max-height: 100vh !important;
+		max-height: 100dvh !important;
+		max-width: 100vw !important;
+		min-height: 100vh !important;
+		min-height: 100dvh !important;
+		border-radius: 0 !important;
+		padding: 0 !important;
+		gap: 0 !important;
+		box-shadow: none !important;
+		justify-content: flex-start !important;
+		margin: 0 !important;
 	}
 	.art-tryon-stage {
 		flex: 1 1 auto;

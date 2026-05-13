@@ -240,6 +240,15 @@ class AR_TRY_ON {
 
 		$this->loader->add_filter( 'the_content', $this->plugin_public, 'atlas_ar_button', 20 );
 
+		// QR code rendering is hoisted out of `atlas_ar_button` and into
+		// its own `wp_footer` hook so it always emits exactly once per
+		// supported singular post — independent of whether `the_content`
+		// or a WC numeric-position hook fired. Without this, WC product
+		// pages in toggle mode (where atlas_ar_button only runs on
+		// `the_content`) wouldn't get a QR on pages where WC's tab
+		// system bypasses the_content filter for the description.
+		$this->loader->add_action( 'wp_footer', $this->plugin_public, 'render_qr_code_footer', 5 );
+
 
 		if ( isset( $settings['ar_try_on_single_product_tabs'] ) ) {
 			if ( $settings['ar_try_on_single_product_tabs'] == 'yes' ) {
@@ -393,7 +402,24 @@ class AR_TRY_ON {
         ?>
         <!-- 3D Viewer Container for Toggle (hidden initially, inserted via JS) -->
         <div id="atlas_ar-toggle-3d-container" style="display: none;">
-            <?php echo AR_TRY_ON_Helper::create_shortcode( ['height' => '100%', 'width' => '100%'], '' ); ?>
+            <?php
+            // `suppress_tryon_overlay` tells the shortcode NOT to emit
+            // its own Try-On overlay button — the gallery's floating
+            // pill (rendered separately by
+            // `AR_TRY_ON_Tryon::render_button_overlay` at wp_footer)
+            // is the canonical Try-On entry-point in toggle mode.
+            // Without this flag both buttons end up in the gallery
+            // image container and both become visible when the cube
+            // toggle activates the 3D viewer overlay.
+            echo AR_TRY_ON_Helper::create_shortcode(
+                array(
+                    'height'                 => '100%',
+                    'width'                  => '100%',
+                    'suppress_tryon_overlay' => 'true',
+                ),
+                ''
+            );
+            ?>
         </div>
 
         <script>

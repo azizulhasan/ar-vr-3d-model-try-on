@@ -621,3 +621,4 @@ file is review-ready, not yet started in code.
 - Existing v1.7.9+ feature analysis: [FEATURE-ANALYSIS.md](./FEATURE-ANALYSIS.md)
 - Pro features roadmap: [PRO-FEATURES-COMPLETE.md](./PRO-FEATURES-COMPLETE.md)
 - Existing free plugin readme: [../README.md](../README.md)
+- **Successor (AtlasTryOn Phase 2 — fit measurement):** [prescription-fit-research.md](./prescription-fit-research.md) + [prescription-fit-integration-plan.md](./prescription-fit-integration-plan.md). Adds a metric-scale layer (ISO 7810 card calibration, optional ARKit/ARCore) on top of this v1 pipeline so the plugin can answer *"will it fit?"* — Warby Parker / Zenni-class measurement accuracy. Target releases: Free 2.1.0, Pro 3.1.0.
