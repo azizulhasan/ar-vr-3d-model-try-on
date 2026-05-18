@@ -132,6 +132,65 @@ export default function Settings({ settings, handleChange }) {
           </button>
         </div>
 
+        {/* AR-61: Global "View in AR" button label override.
+            Empty falls back to the translated default. Per-product
+            metabox `view_in_ar_label` and shortcode `button_label="…"`
+            both override this on a finer-grained scope. */}
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_view_in_ar_label"
+            className="art-font-medium art-text-base"
+          >
+            "View in AR" Button Label
+          </label>
+
+          <input
+            type="text"
+            id="ar_try_on_view_in_ar_label"
+            name="ar_try_on_view_in_ar_label"
+            placeholder="View in AR"
+            value={settings.ar_try_on_view_in_ar_label || ""}
+            onChange={handleSettingsChange}
+            className="art-block art-w-full art-px-3 art-py-2 art-border art-rounded-md art-bg-transparent focus:art-ring-1 focus:art-ring-[var(--theme-accent)] focus:art-border-[var(--theme-accent)]"
+          />
+
+          <p className="art-text-sm art-text-gray-400 art-leading-snug">
+            Override the default <strong>"View in AR"</strong> button text store-wide. Leave blank to use the default. Individual products can override this via the AtlasAR metabox, and shortcode insertions can override per emit with <code>[atlas_ar button_label="…"]</code>.
+          </p>
+        </BorderCard>
+
+        {/* AR-61: Global rotation hint behaviour. `auto` shows the
+            wiggle gesture after 2 seconds of inactivity; `none`
+            disables it. Per-product metabox can opt in/out individually. */}
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_interaction_prompt"
+            className="art-font-medium art-text-base"
+          >
+            360° Rotation Hint
+          </label>
+
+          <select
+            id="ar_try_on_interaction_prompt"
+            name="ar_try_on_interaction_prompt"
+            value={settings.ar_try_on_interaction_prompt || "auto"}
+            onChange={handleSettingsChange}
+            className="art-block art-w-full art-p-2 art-rounded-lg art-border art-text-sm art-transition-all focus:art-ring-2 focus:art-ring-blue-400 focus:art-border-blue-400"
+            style={{
+              backgroundColor: "var(--theme-bg)",
+              color: "var(--theme-text)",
+              borderColor: "var(--theme-border, rgba(100,116,139,0.4))",
+            }}
+          >
+            <option value="auto">Auto — show wiggle hint after 2s idle</option>
+            <option value="none">None — no rotation hint</option>
+          </select>
+
+          <p className="art-text-sm art-text-gray-400 art-leading-snug">
+            Shoppers who don't know the 3D model is rotatable get a visible drag-to-rotate hint after a couple of seconds. Disable here if it conflicts with your storefront UX. Individual products can override this via the AtlasAR metabox.
+          </p>
+        </BorderCard>
+
         {/* Display AR Button Automatically */}
         <BorderCard>
           {/* Label */}

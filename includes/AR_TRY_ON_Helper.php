@@ -553,6 +553,19 @@ class AR_TRY_ON_Helper
             'ar_try_on_ar_button_background_color' => "#3a3a3a",
             'ar_try_on_ar_button_text_color' => "#ffffff",
             'ar_try_on_enable_qr_code' => 'yes',
+            // AR-61: store-wide override for the "View in AR" CTA text.
+            // Empty falls back to the translated default. The per-product
+            // metabox `view_in_ar_label` and the `button_label="..."`
+            // shortcode attribute both override this on a finer-grained
+            // scope. Resolution order in `build_dynamic_buttons_block`:
+            // shortcode → product meta → this setting → translated default.
+            'ar_try_on_view_in_ar_label' => '',
+            // AR-61: store-wide default for the model-viewer
+            // `interaction-prompt` attribute. `auto` shows a 360-degree
+            // drag-to-rotate hint after `interaction-prompt-threshold` ms
+            // of idle time. `none` suppresses the hint entirely. The
+            // per-product `interaction_prompt` meta key overrides this.
+            'ar_try_on_interaction_prompt' => 'auto',
         ];
     }
 
@@ -583,11 +596,14 @@ class AR_TRY_ON_Helper
             'disable_zoom' => false,
             'disable_tap' => false,
             // AR-61: rotation hint that says "drag to rotate" on first
-            // visit. `auto` shows the wiggle gesture once after
-            // `interaction_prompt_threshold` ms of inactivity. Shoppers
-            // who don't know the model is interactive now get a visible
-            // cue. Merchant can set to `none` per product to suppress.
-            'interaction_prompt' => 'auto',
+            // visit. Default left EMPTY at the product level so the
+            // global `ar_try_on_interaction_prompt` setting drives the
+            // behavior. Merchant can override per-product to `auto` /
+            // `none` to opt in/out independently. The wiggle style +
+            // 2-second threshold stay as fallback defaults for both
+            // layers — model-viewer reads them only when the prompt is
+            // active.
+            'interaction_prompt' => '',
             'interaction_prompt_style' => 'wiggle',
             'interaction_prompt_threshold' => '2000',
             // Canvas settings

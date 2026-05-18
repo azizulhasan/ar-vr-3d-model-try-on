@@ -486,10 +486,14 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     }
 
     // AR-61: rotation prompt — gives shoppers a visible "drag to rotate"
-    // hint when they don't interact for a few seconds. Defaults to
-    // `auto` + `wiggle` (k-tools.de feedback, 13 May 2026). Set
-    // `interaction_prompt` to `none` per product to suppress.
-    const interactionPrompt = model_settings.interaction_prompt || "auto";
+    // hint when they don't interact for a few seconds. Resolution chain
+    // (most specific wins): per-product `interaction_prompt` →
+    // global `ar_try_on_interaction_prompt` setting → "auto".
+    // Set the product or global value to `none` to suppress entirely.
+    const interactionPrompt =
+        (model_settings.interaction_prompt && model_settings.interaction_prompt !== "")
+            ? model_settings.interaction_prompt
+            : (model_settings.ar_try_on_interaction_prompt || "auto");
     modelViewer.setAttribute("interaction-prompt", interactionPrompt);
     if (interactionPrompt !== "none") {
         modelViewer.setAttribute(

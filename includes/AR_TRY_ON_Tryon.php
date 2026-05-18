@@ -727,10 +727,11 @@ class AR_TRY_ON_Tryon {
 		// View in AR — outline (secondary) by default; primary (filled)
 		// when it's the sole CTA on the page (non-face products).
 		//
-		// AR-61: label can now be overridden in three layers (most
-		// specific wins): caller-supplied `args['button_label']`
-		// (shortcode `button_label="…"`), per-product metabox
-		// `view_in_ar_label`, or the translated default.
+		// AR-61: label resolution chain (most specific wins):
+		//   1. caller arg `args['button_label']` (shortcode attribute)
+		//   2. per-product metabox `view_in_ar_label`
+		//   3. global setting `ar_try_on_view_in_ar_label`
+		//   4. translated default ("View in AR")
 		$view_in_ar_button = '';
 		if ( $show_view_in_ar ) {
 			$view_in_ar_label = '';
@@ -741,6 +742,9 @@ class AR_TRY_ON_Tryon {
 				if ( ! empty( $product_settings['view_in_ar_label'] ) ) {
 					$view_in_ar_label = (string) $product_settings['view_in_ar_label'];
 				}
+			}
+			if ( $view_in_ar_label === '' && ! empty( $settings['ar_try_on_view_in_ar_label'] ) ) {
+				$view_in_ar_label = (string) $settings['ar_try_on_view_in_ar_label'];
 			}
 			if ( $view_in_ar_label === '' ) {
 				$view_in_ar_label = __( 'View in AR', 'ar-vr-3d-model-try-on' );
