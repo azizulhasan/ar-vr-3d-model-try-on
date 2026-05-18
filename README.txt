@@ -627,9 +627,3 @@ Fixed bug on helper file.
 = 2.0.2 =
 Polish + bugfix release: rename the "View in AR" button without code, add a built-in 360° rotation hint, fix the pink/orange tint on reflective white 3D models, and resolve the empty-modal issue when navigating between products. Safe to update.
 
-= 2.0.1 =
-Minor polish update: AtlasTryOn / 3D viewer now work on regular posts (not just WooCommerce products), buttons auto-match any theme, plus a smarter AtlasAR block with width / height / aspect ratio / spacing controls. Safe to update.
-
-= 2.0.0 =
-Major update: AtlasTryOn virtual try-on for glasses & caps is now built in — no extra setup needed. Please clear your site cache after updating.
-
