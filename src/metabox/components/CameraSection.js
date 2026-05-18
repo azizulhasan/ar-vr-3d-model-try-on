@@ -110,6 +110,83 @@ const CameraSection = ({
               </p>
             </div>
           </div>
+
+          {/* AR-61: 360° Rotation Hint (per-product override).
+              Empty `interaction_prompt` → falls back to the global
+              setting in `Settings > General > 360° Rotation Hint`.
+              `auto` / `none` / `when-focused` map directly to
+              model-viewer's `interaction-prompt` attribute. */}
+          <div className="art-border-t art-pt-3 art-mt-3">
+            <label className="art-block art-text-sm art-font-medium art-mb-2 art-uppercase art-tracking-wide">
+              360° Rotation Hint
+            </label>
+            <p className="art-text-xs art-text-gray-500 art-mb-3">
+              Shows a visible drag-to-rotate cue so shoppers discover
+              that this model is rotatable. Leave any field blank to
+              inherit the global setting.
+            </p>
+
+            <div className="art-grid art-grid-cols-1 art-gap-3">
+              <div>
+                <label className="art-block art-text-xs art-font-medium art-mb-1">
+                  Mode
+                </label>
+                <select
+                  name="interaction_prompt"
+                  value={productModel.interaction_prompt || ""}
+                  onChange={handleChange}
+                  className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
+                >
+                  <option value="">Use global setting</option>
+                  <option value="auto">Auto — show after idle</option>
+                  <option value="when-focused">When focused</option>
+                  <option value="none">Off — no hint</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="art-block art-text-xs art-font-medium art-mb-1">
+                  Style
+                </label>
+                <select
+                  name="interaction_prompt_style"
+                  value={productModel.interaction_prompt_style || ""}
+                  onChange={handleChange}
+                  disabled={productModel.interaction_prompt === "none"}
+                  className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded disabled:art-opacity-50"
+                >
+                  <option value="">Use global setting</option>
+                  <option value="wiggle">Wiggle — model rotates back-and-forth</option>
+                  <option value="basic">Basic — hand-pointer icon</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="art-block art-text-xs art-font-medium art-mb-1">
+                  Idle Delay
+                </label>
+                <select
+                  name="interaction_prompt_threshold"
+                  value={
+                    productModel.interaction_prompt_threshold !== undefined
+                      ? String(productModel.interaction_prompt_threshold)
+                      : ""
+                  }
+                  onChange={handleChange}
+                  disabled={productModel.interaction_prompt === "none"}
+                  className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded disabled:art-opacity-50"
+                >
+                  <option value="">Use global setting</option>
+                  <option value="0">Immediate</option>
+                  <option value="1000">1 second</option>
+                  <option value="2000">2 seconds</option>
+                  <option value="3000">3 seconds</option>
+                  <option value="5000">5 seconds</option>
+                  <option value="8000">8 seconds</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

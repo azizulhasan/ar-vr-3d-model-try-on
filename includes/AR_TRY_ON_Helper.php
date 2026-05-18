@@ -254,6 +254,11 @@ class AR_TRY_ON_Helper
             'margin'                 => '0',
             'aspect_ratio'           => '',
             'position'               => 'after',
+            // AR-61: override the "View in AR" button text on a per-emit
+            // basis. Empty → falls back to product metabox
+            // `view_in_ar_label`, then the global translated default.
+            // Example: `[atlas_ar button_label="See it in 3D"]`.
+            'button_label'           => '',
             // Private: suppresses the Try-On overlay on face products.
             // Used internally by the WC gallery cube-toggle wrapper to
             // avoid emitting a duplicate Try-On button alongside the
@@ -302,17 +307,47 @@ class AR_TRY_ON_Helper
                 // explicitly suppressed (reveal=false makes the AR
                 // button the only secondary action).
                 $tryon   = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+                $args    = array('wrapper_id_suffix' => 'shortcode');
+                if (!empty($attributes['button_label'])) {
+                    $args['button_label'] = (string) $attributes['button_label'];
+                }
                 return $tryon->build_dynamic_buttons_block(
                     $post_id,
                     $placement,
                     true, // always show View-in-AR alongside Try-On when reveal=false
-                    array('wrapper_id_suffix' => 'shortcode')
+                    $args
                 );
             }
-            // Non-face product: skip the inline viewer, let the existing
-            // `atlas_ar_button` filter render the QR + View-in-AR button
-            // wherever it normally runs. Returning empty here keeps the
-            // shortcode location empty without disturbing other paths.
+            // Non-face product: render the View-in-AR button right here,
+            // at the shortcode location, instead of relying on the
+            // ambient `atlas_ar_button` filter. Returning empty was a
+            // dead-end whenever the merchant placed `[atlas_ar
+            // reveal="false"]` on a floor/wall post — they saw nothing.
+            // AR-61 also adds `button_label="..."` support which only
+            // works if this branch actually emits a button.
+            if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+                $tryon = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+                $args  = array(
+                    'wrapper_id_suffix' => 'shortcode',
+                    'show_tryon'        => false,
+                    'view_in_ar_style'  => 'primary',
+                );
+                if (!empty($attributes['button_label'])) {
+                    $args['button_label'] = (string) $attributes['button_label'];
+                }
+                // Mark this post so AR_TRY_ON_Public::atlas_ar_button
+                // doesn't emit a second View-in-AR via the auto-display
+                // path below the content.
+                if (class_exists('\\AR_TRY_ON_Public\\AR_TRY_ON_Public')) {
+                    \AR_TRY_ON_Public\AR_TRY_ON_Public::mark_button_rendered($post_id);
+                }
+                return $tryon->build_dynamic_buttons_block(
+                    $post_id,
+                    $placement,
+                    true,
+                    $args
+                );
+            }
             return '';
         }
 
@@ -518,6 +553,22 @@ class AR_TRY_ON_Helper
             'ar_try_on_ar_button_background_color' => "#3a3a3a",
             'ar_try_on_ar_button_text_color' => "#ffffff",
             'ar_try_on_enable_qr_code' => 'yes',
+            // AR-61: store-wide default for the "View in AR" CTA text.
+            // The per-product metabox `view_in_ar_label` and the
+            // `button_label="..."` shortcode attribute both override
+            // this on a finer-grained scope. Resolution order in
+            // `build_dynamic_buttons_block`: shortcode → product meta →
+            // this setting → "View in AR" hard fallback.
+            'ar_try_on_view_in_ar_label' => 'View in AR',
+            // AR-61: store-wide defaults for the model-viewer
+            // `interaction-prompt*` attributes — the wiggle / basic
+            // gesture cue that tells shoppers the model is rotatable.
+            // Per-product meta keys (`interaction_prompt`,
+            // `interaction_prompt_style`, `interaction_prompt_threshold`)
+            // override these.
+            'ar_try_on_interaction_prompt'           => 'auto',
+            'ar_try_on_interaction_prompt_style'     => 'wiggle',
+            'ar_try_on_interaction_prompt_threshold' => '2000',
         ];
     }
 
@@ -530,14 +581,32 @@ class AR_TRY_ON_Helper
             'alt' => 'NeilArmstrong',
             'ar_placement' => 'floor',
             // light & environment settings
-            'skybox_image' => 'https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg',
-            'environment_image' => '',
+            // AR-61: skybox emptied by default — the legacy spruit_sunrise
+            // HDR was tinting reflective whites pink/orange on customer
+            // products (k-tools.de feedback, 13 May 2026). `environment_image`
+            // now defaults to model-viewer's built-in `neutral` preset, a
+            // pure grey IBL that preserves the GLB's true material colors.
+            'skybox_image' => '',
+            'environment_image' => 'neutral',
+            // model-viewer tone-mapping: `neutral` keeps colors close to the
+            // source PBR materials. Was previously implicit (filmic default).
+            'tone_mapping' => 'neutral',
+            'exposure' => '1',
             // Camera settings
             'auto_rotate' => false,
             'shadow_intensity' => '1',
             'camera_orbit' => '45deg 55deg 4m',
             'disable_zoom' => false,
             'disable_tap' => false,
+            // AR-61: rotation hint that says "drag to rotate" on first
+            // visit. All three per-product fields default to EMPTY so
+            // the global settings (`ar_try_on_interaction_prompt`,
+            // `ar_try_on_interaction_prompt_style`,
+            // `ar_try_on_interaction_prompt_threshold`) drive the
+            // behavior. Per-product values override individually.
+            'interaction_prompt'           => '',
+            'interaction_prompt_style'     => '',
+            'interaction_prompt_threshold' => '',
             // Canvas settings
             'canvas_alignment' => 'left',
             'canvas_width' => '100%',
@@ -545,6 +614,12 @@ class AR_TRY_ON_Helper
             'canvas_margin' => '0',
             'canvas_padding' => '2px 0',
             'custom_css' => '',
+            // AR-61: per-product "View in AR" button label override.
+            // Empty → falls back to translated default. Merchants can
+            // localize the CTA without editing theme files. The shortcode
+            // attribute `button_label="..."` overrides this on a single
+            // emit.
+            'view_in_ar_label' => '',
         ];
     }
 
