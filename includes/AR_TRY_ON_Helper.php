@@ -318,10 +318,36 @@ class AR_TRY_ON_Helper
                     $args
                 );
             }
-            // Non-face product: skip the inline viewer, let the existing
-            // `atlas_ar_button` filter render the QR + View-in-AR button
-            // wherever it normally runs. Returning empty here keeps the
-            // shortcode location empty without disturbing other paths.
+            // Non-face product: render the View-in-AR button right here,
+            // at the shortcode location, instead of relying on the
+            // ambient `atlas_ar_button` filter. Returning empty was a
+            // dead-end whenever the merchant placed `[atlas_ar
+            // reveal="false"]` on a floor/wall post — they saw nothing.
+            // AR-61 also adds `button_label="..."` support which only
+            // works if this branch actually emits a button.
+            if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+                $tryon = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+                $args  = array(
+                    'wrapper_id_suffix' => 'shortcode',
+                    'show_tryon'        => false,
+                    'view_in_ar_style'  => 'primary',
+                );
+                if (!empty($attributes['button_label'])) {
+                    $args['button_label'] = (string) $attributes['button_label'];
+                }
+                // Mark this post so AR_TRY_ON_Public::atlas_ar_button
+                // doesn't emit a second View-in-AR via the auto-display
+                // path below the content.
+                if (class_exists('\\AR_TRY_ON_Public\\AR_TRY_ON_Public')) {
+                    \AR_TRY_ON_Public\AR_TRY_ON_Public::mark_button_rendered($post_id);
+                }
+                return $tryon->build_dynamic_buttons_block(
+                    $post_id,
+                    $placement,
+                    true,
+                    $args
+                );
+            }
             return '';
         }
 
