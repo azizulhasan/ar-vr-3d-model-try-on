@@ -37,6 +37,13 @@
             if (a.margin && a.margin !== '0') parts.push('margin="' + a.margin + '"');
             if (a.aspectRatio) parts.push('aspect_ratio="' + a.aspectRatio + '"');
         }
+        // AR-61: custom CTA label. Emit only when set so the saved
+        // shortcode stays terse for stores using the default copy.
+        // Strip double quotes so the attribute can never break the
+        // shortcode parser.
+        if (a.buttonLabel) {
+            parts.push('button_label="' + String(a.buttonLabel).replace(/"/g, '') + '"');
+        }
         return '[' + parts.join(' ') + ']';
     }
 
@@ -60,6 +67,10 @@
             padding:     { type: 'string',  default: '0' },
             margin:      { type: 'string',  default: '0' },
             aspectRatio: { type: 'string',  default: '' },
+            // AR-61: custom label override for the "View in AR" / "Try
+            // On" CTA. Empty falls back to product metabox →
+            // translated default.
+            buttonLabel: { type: 'string',  default: '' },
         },
 
         edit: function (props) {
@@ -110,6 +121,17 @@
                             help: __('Any CSS value, e.g. 0, 20px auto, 1rem 0.', 'ar-vr-3d-model-try-on'),
                             value: attributes.margin || '',
                             onChange: function (v) { setAttributes({ margin: v || '0' }); },
+                        }),
+                        // AR-61: AtlasAR plugin user request — let
+                        // merchants override the "View in AR" CTA copy
+                        // per shortcode without editing translation files.
+                        // Empty value falls back to the product metabox
+                        // setting → global default.
+                        el(TextControl, {
+                            label: __('Button label', 'ar-vr-3d-model-try-on'),
+                            help: __('Optional. Replaces "View in AR" on this insertion (e.g. "See it in 3D"). Leave empty to use the default.', 'ar-vr-3d-model-try-on'),
+                            value: attributes.buttonLabel || '',
+                            onChange: function (v) { setAttributes({ buttonLabel: v || '' }); },
                         })
                     )
                 )
@@ -154,6 +176,25 @@
         // moment the merchant reopens the post. Each entry's `save`
         // must match the exact output its version produced.
         deprecated: [
+            // v4: pre-AR-61 — same attribute shape minus `buttonLabel`.
+            // No <p> wrapper. Migrate path adds the new default empty
+            // string so the latest `save` matches.
+            {
+                attributes: {
+                    reveal:      { type: 'boolean', default: false },
+                    height:      { type: 'string',  default: '400px' },
+                    width:       { type: 'string',  default: '500px' },
+                    padding:     { type: 'string',  default: '0' },
+                    margin:      { type: 'string',  default: '0' },
+                    aspectRatio: { type: 'string',  default: '' },
+                },
+                save: function (props) {
+                    return el(Fragment, null, buildShortcode(props.attributes));
+                },
+                migrate: function (attributes) {
+                    return Object.assign({}, attributes, { buttonLabel: '' });
+                },
+            },
             // v3: previous version that wrapped the shortcode in <p>.
             {
                 attributes: {
@@ -167,7 +208,9 @@
                 save: function (props) {
                     return el('p', null, buildShortcode(props.attributes));
                 },
-                migrate: function (attributes) { return attributes; },
+                migrate: function (attributes) {
+                    return Object.assign({}, attributes, { buttonLabel: '' });
+                },
             },
             // v1: original block — bare `[atlas_ar]` with no attributes.
             {
@@ -183,6 +226,7 @@
                         padding:     '0',
                         margin:      '0',
                         aspectRatio: '',
+                        buttonLabel: '',
                     };
                 },
             },

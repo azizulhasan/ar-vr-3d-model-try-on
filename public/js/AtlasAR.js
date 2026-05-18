@@ -55,13 +55,18 @@ class AtlasAR {
   };
 
   getModelSkeleton(model_id = "atlas_ar_model_viewer") {
-    // TODO: user should add custom class for there own sake.
+    // AR-61 (May 2026): skeleton ships with the same safe defaults that
+    // `setModelAttributes` will overlay once REST returns the per-product
+    // settings. The pre-overlay attribute values are what shows during
+    // the first paint, so getting them right here removes the flash of
+    // pink-tinted reflective whites the previous build had — and gives
+    // shoppers an immediate "drag to rotate" cue.
     return `
                 <style id="model-viewer-style"></style>
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <model-viewer
                             id="${model_id}"
-                            class="atlas_ar_model_viewer" 
+                            class="atlas_ar_model_viewer"
                             src=""
                             alt=""
                             poster=""
@@ -72,6 +77,12 @@ class AtlasAR {
                             camera-controls
                             ar-scale="auto"
                             xr-environment
+                            environment-image="neutral"
+                            tone-mapping="neutral"
+                            exposure="1"
+                            interaction-prompt="auto"
+                            interaction-prompt-style="wiggle"
+                            interaction-prompt-threshold="2000"
                             style="width: 100%; height: 400px;"
                         ></model-viewer>
                     </div>`;
@@ -140,13 +151,30 @@ class AtlasAR {
     let isSettingsChanged = this.getModelSessionData("isSettingsChanged");
     const whichExists = this.whichExists(ar_try_on.cached_ids, product_id);
     console.log({ whichExists, isSettingsChanged, product_id });
+
+    // AR-61 fix: a cache hit must mean we actually have model data for
+    // THIS product. Previously the `whichExists` branch fired whenever
+    // `cached_ids` contained "all" — even if `modelSessionData` was
+    // empty/undefined for the requested product_id (e.g. when the
+    // shopper navigates to a product they haven't visited yet in this
+    // session). That caused `setModelAttributes` to be called with
+    // `{}`, which wrote `src=""` and produced a blank model-viewer
+    // (visible as an empty 3D modal on /server-api/ after visiting
+    // /glass/). Both cache branches now require a non-empty `src` in
+    // the session entry before they short-circuit the REST fetch.
+    const hasUsableSessionData =
+      modelSessionData &&
+      typeof modelSessionData === "object" &&
+      typeof modelSessionData.src === "string" &&
+      modelSessionData.src !== "";
+
     if (whichExists) {
-      if (isSettingsChanged === whichExists) {
+      if (isSettingsChanged === whichExists && hasUsableSessionData) {
         this.setModelData(modelSessionData, model_id, type);
         return;
       }
     } else {
-      if (modelSessionData && !ar_try_on?.cached_ids?.includes(product_id)) {
+      if (hasUsableSessionData && !ar_try_on?.cached_ids?.includes(product_id)) {
         this.setModelData(modelSessionData, model_id, type);
         return;
       }

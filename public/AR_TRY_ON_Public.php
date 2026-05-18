@@ -227,6 +227,20 @@ class AR_TRY_ON_Public {
     protected static $btn_rendered_for_post = array();
 
     /**
+     * AR-61: lets sibling renderers (e.g. the `[atlas_ar reveal="false"]`
+     * branch in {@see AR_TRY_ON_Helper::create_shortcode}) tell us they
+     * already emitted a View-in-AR button for `$post_id` from inside the
+     * post body, so the auto-display path in {@see atlas_ar_button}
+     * doesn't add a second one below the content.
+     */
+    public static function mark_button_rendered( $post_id ) {
+        $post_id = (int) $post_id;
+        if ( $post_id > 0 ) {
+            self::$btn_rendered_for_post[ $post_id ] = true;
+        }
+    }
+
+    /**
      * Emit the QR code (when enabled in settings) once per supported
      * singular post at `wp_footer`. Independent of `atlas_ar_button`'s
      * content-filter / WC-hook firings — so the QR shows up even when
