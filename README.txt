@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -361,6 +361,14 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.0.2 ( 18 May 2026 ) =
+* New: Rename the "View in AR" button store-wide, per product, or per shortcode — "See it in 3D", "Try a 360° view" or any text that fits your store
+* New: Built-in 360° rotation hint — a gentle wiggle (or simple hand-pointer) prompts shoppers to drag the model after a few seconds of inactivity, configurable globally and per product (Mode / Style / Idle Delay)
+* New: AtlasAR Gutenberg block adds a "Button label" field and the shortcode now accepts `button_label="…"` for one-off CTA overrides
+* Improvement: Neutral studio lighting for 3D models by default — fixes the pink/orange sheen that previously appeared on reflective white surfaces and keeps product colours true to the source file
+* Fix: 3D modal no longer opens empty when shoppers navigate between products in the same session — model now loads correctly on every product
+* Fix: `[atlas_ar reveal="false"]` shortcode on non-WooCommerce posts now renders the View in AR button at the shortcode location instead of falling silent
+
 = 2.0.1 ( 13 May 2026 ) =
 * New: AtlasAR block now has a "Reveal model by default" toggle plus width, height, aspect ratio, padding and margin controls — choose between an inline 3D viewer or a clean Try-On / View in AR button pair
 * New: AtlasTryOn and the 3D viewer now work on regular WordPress posts and pages, not just WooCommerce products
@@ -615,6 +623,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.0.2 =
+Polish + bugfix release: rename the "View in AR" button without code, add a built-in 360° rotation hint, fix the pink/orange tint on reflective white 3D models, and resolve the empty-modal issue when navigating between products. Safe to update.
 
 = 2.0.1 =
 Minor polish update: AtlasTryOn / 3D viewer now work on regular posts (not just WooCommerce products), buttons auto-match any theme, plus a smarter AtlasAR block with width / height / aspect ratio / spacing controls. Safe to update.

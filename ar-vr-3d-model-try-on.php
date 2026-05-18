@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           2.0.1
+ * Version:           2.0.2
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -199,7 +199,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.0.1' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.0.2' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
