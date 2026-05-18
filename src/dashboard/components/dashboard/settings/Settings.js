@@ -132,65 +132,6 @@ export default function Settings({ settings, handleChange }) {
           </button>
         </div>
 
-        {/* AR-61: Global "View in AR" button label override.
-            Empty falls back to the translated default. Per-product
-            metabox `view_in_ar_label` and shortcode `button_label="…"`
-            both override this on a finer-grained scope. */}
-        <BorderCard>
-          <label
-            htmlFor="ar_try_on_view_in_ar_label"
-            className="art-font-medium art-text-base"
-          >
-            "View in AR" Button Label
-          </label>
-
-          <input
-            type="text"
-            id="ar_try_on_view_in_ar_label"
-            name="ar_try_on_view_in_ar_label"
-            placeholder="View in AR"
-            value={settings.ar_try_on_view_in_ar_label || ""}
-            onChange={handleSettingsChange}
-            className="art-block art-w-full art-px-3 art-py-2 art-border art-rounded-md art-bg-transparent focus:art-ring-1 focus:art-ring-[var(--theme-accent)] focus:art-border-[var(--theme-accent)]"
-          />
-
-          <p className="art-text-sm art-text-gray-400 art-leading-snug">
-            Override the default <strong>"View in AR"</strong> button text store-wide. Leave blank to use the default. Individual products can override this via the AtlasAR metabox, and shortcode insertions can override per emit with <code>[atlas_ar button_label="…"]</code>.
-          </p>
-        </BorderCard>
-
-        {/* AR-61: Global rotation hint behaviour. `auto` shows the
-            wiggle gesture after 2 seconds of inactivity; `none`
-            disables it. Per-product metabox can opt in/out individually. */}
-        <BorderCard>
-          <label
-            htmlFor="ar_try_on_interaction_prompt"
-            className="art-font-medium art-text-base"
-          >
-            360° Rotation Hint
-          </label>
-
-          <select
-            id="ar_try_on_interaction_prompt"
-            name="ar_try_on_interaction_prompt"
-            value={settings.ar_try_on_interaction_prompt || "auto"}
-            onChange={handleSettingsChange}
-            className="art-block art-w-full art-p-2 art-rounded-lg art-border art-text-sm art-transition-all focus:art-ring-2 focus:art-ring-blue-400 focus:art-border-blue-400"
-            style={{
-              backgroundColor: "var(--theme-bg)",
-              color: "var(--theme-text)",
-              borderColor: "var(--theme-border, rgba(100,116,139,0.4))",
-            }}
-          >
-            <option value="auto">Auto — show wiggle hint after 2s idle</option>
-            <option value="none">None — no rotation hint</option>
-          </select>
-
-          <p className="art-text-sm art-text-gray-400 art-leading-snug">
-            Shoppers who don't know the 3D model is rotatable get a visible drag-to-rotate hint after a couple of seconds. Disable here if it conflicts with your storefront UX. Individual products can override this via the AtlasAR metabox.
-          </p>
-        </BorderCard>
-
         {/* Display AR Button Automatically */}
         <BorderCard>
           {/* Label */}
@@ -691,6 +632,153 @@ export default function Settings({ settings, handleChange }) {
             Known issues: sometimes too dark, sudden updates, shiny materials
             look matte. environment-image
           </p>
+        </BorderCard>
+
+        {/* AR-61: Global "View in AR" button label override.
+            Defaults to "View in AR". Per-product metabox
+            `view_in_ar_label` and shortcode `button_label="…"`
+            both override this on a finer-grained scope. */}
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_view_in_ar_label"
+            className="art-font-medium art-text-base"
+          >
+            "View in AR" Button Label
+          </label>
+
+          <input
+            type="text"
+            id="ar_try_on_view_in_ar_label"
+            name="ar_try_on_view_in_ar_label"
+            placeholder="View in AR"
+            value={
+              settings.ar_try_on_view_in_ar_label !== undefined
+                ? settings.ar_try_on_view_in_ar_label
+                : "View in AR"
+            }
+            onChange={handleSettingsChange}
+            className="art-block art-w-full art-px-3 art-py-2 art-border art-rounded-md art-bg-transparent focus:art-ring-1 focus:art-ring-[var(--theme-accent)] focus:art-border-[var(--theme-accent)]"
+          />
+
+          <p className="art-text-sm art-text-gray-400 art-leading-snug">
+            Override the default <strong>"View in AR"</strong> button text store-wide. Individual products can override this via the AtlasAR metabox, and shortcode insertions can override per emit with <code>[atlas_ar button_label="…"]</code>.
+          </p>
+        </BorderCard>
+
+        {/* AR-61: Global rotation hint — model-viewer's
+            `interaction-prompt`, `interaction-prompt-style` and
+            `interaction-prompt-threshold` attributes, exposed as
+            three dropdowns / one numeric slider. Per-product metabox
+            can opt in/out and adjust style/timing individually. */}
+        <BorderCard>
+          <label
+            htmlFor="ar_try_on_interaction_prompt"
+            className="art-font-medium art-text-base"
+          >
+            360° Rotation Hint
+          </label>
+
+          <p className="art-text-sm art-text-gray-500 art-leading-snug art-mt-1">
+            Shows a visible drag-to-rotate cue so shoppers discover that
+            the 3D model can be rotated. Individual products can override
+            this via the AtlasAR metabox.
+          </p>
+
+          <div className="art-grid art-grid-cols-1 sm:art-grid-cols-3 art-gap-3 art-mt-3">
+            {/* Mode */}
+            <div>
+              <label
+                htmlFor="ar_try_on_interaction_prompt"
+                className="art-block art-text-sm art-font-medium art-mb-1"
+              >
+                Mode
+              </label>
+              <select
+                id="ar_try_on_interaction_prompt"
+                name="ar_try_on_interaction_prompt"
+                value={settings.ar_try_on_interaction_prompt || "auto"}
+                onChange={handleSettingsChange}
+                className="art-block art-w-full art-p-2 art-rounded-lg art-border art-text-sm focus:art-ring-2 focus:art-ring-blue-400 focus:art-border-blue-400"
+                style={{
+                  backgroundColor: "var(--theme-bg)",
+                  color: "var(--theme-text)",
+                  borderColor: "var(--theme-border, rgba(100,116,139,0.4))",
+                }}
+              >
+                <option value="auto">Auto — show after idle</option>
+                <option value="when-focused">
+                  When focused — only after keyboard focus
+                </option>
+                <option value="none">Off — no hint</option>
+              </select>
+            </div>
+
+            {/* Style */}
+            <div>
+              <label
+                htmlFor="ar_try_on_interaction_prompt_style"
+                className="art-block art-text-sm art-font-medium art-mb-1"
+              >
+                Style
+              </label>
+              <select
+                id="ar_try_on_interaction_prompt_style"
+                name="ar_try_on_interaction_prompt_style"
+                value={
+                  settings.ar_try_on_interaction_prompt_style || "wiggle"
+                }
+                onChange={handleSettingsChange}
+                disabled={settings.ar_try_on_interaction_prompt === "none"}
+                className="art-block art-w-full art-p-2 art-rounded-lg art-border art-text-sm focus:art-ring-2 focus:art-ring-blue-400 focus:art-border-blue-400 disabled:art-opacity-50"
+                style={{
+                  backgroundColor: "var(--theme-bg)",
+                  color: "var(--theme-text)",
+                  borderColor: "var(--theme-border, rgba(100,116,139,0.4))",
+                }}
+              >
+                <option value="wiggle">
+                  Wiggle — model rotates back-and-forth
+                </option>
+                <option value="basic">
+                  Basic — hand-pointer icon
+                </option>
+              </select>
+            </div>
+
+            {/* Threshold */}
+            <div>
+              <label
+                htmlFor="ar_try_on_interaction_prompt_threshold"
+                className="art-block art-text-sm art-font-medium art-mb-1"
+              >
+                Idle Delay
+              </label>
+              <select
+                id="ar_try_on_interaction_prompt_threshold"
+                name="ar_try_on_interaction_prompt_threshold"
+                value={
+                  String(
+                    settings.ar_try_on_interaction_prompt_threshold || "2000"
+                  )
+                }
+                onChange={handleSettingsChange}
+                disabled={settings.ar_try_on_interaction_prompt === "none"}
+                className="art-block art-w-full art-p-2 art-rounded-lg art-border art-text-sm focus:art-ring-2 focus:art-ring-blue-400 focus:art-border-blue-400 disabled:art-opacity-50"
+                style={{
+                  backgroundColor: "var(--theme-bg)",
+                  color: "var(--theme-text)",
+                  borderColor: "var(--theme-border, rgba(100,116,139,0.4))",
+                }}
+              >
+                <option value="0">Immediate</option>
+                <option value="1000">1 second</option>
+                <option value="2000">2 seconds (default)</option>
+                <option value="3000">3 seconds</option>
+                <option value="5000">5 seconds</option>
+                <option value="8000">8 seconds</option>
+              </select>
+            </div>
+          </div>
         </BorderCard>
 
         {/* Custom AR Button */}

@@ -486,23 +486,41 @@ export const setModelAttributes = (modelViewer, model_settings) => {
     }
 
     // AR-61: rotation prompt — gives shoppers a visible "drag to rotate"
-    // hint when they don't interact for a few seconds. Resolution chain
-    // (most specific wins): per-product `interaction_prompt` →
-    // global `ar_try_on_interaction_prompt` setting → "auto".
-    // Set the product or global value to `none` to suppress entirely.
-    const interactionPrompt =
-        (model_settings.interaction_prompt && model_settings.interaction_prompt !== "")
-            ? model_settings.interaction_prompt
-            : (model_settings.ar_try_on_interaction_prompt || "auto");
+    // hint. Each of the three model-viewer attributes resolves
+    // independently with the same chain: per-product field →
+    // global setting → built-in default. Empty strings on the
+    // per-product side mean "inherit from the global setting".
+    const pickPrompt = (productKey, globalKey, fallback) => {
+        const p = model_settings[productKey];
+        if (p !== undefined && p !== null && p !== "") return p;
+        const g = model_settings[globalKey];
+        if (g !== undefined && g !== null && g !== "") return g;
+        return fallback;
+    };
+    const interactionPrompt = pickPrompt(
+        "interaction_prompt",
+        "ar_try_on_interaction_prompt",
+        "auto"
+    );
     modelViewer.setAttribute("interaction-prompt", interactionPrompt);
     if (interactionPrompt !== "none") {
         modelViewer.setAttribute(
             "interaction-prompt-style",
-            model_settings.interaction_prompt_style || "wiggle"
+            pickPrompt(
+                "interaction_prompt_style",
+                "ar_try_on_interaction_prompt_style",
+                "wiggle"
+            )
         );
         modelViewer.setAttribute(
             "interaction-prompt-threshold",
-            String(model_settings.interaction_prompt_threshold || "2000")
+            String(
+                pickPrompt(
+                    "interaction_prompt_threshold",
+                    "ar_try_on_interaction_prompt_threshold",
+                    "2000"
+                )
+            )
         );
     }
 
