@@ -466,10 +466,41 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         model_settings.ar_placement || "floor"
     );
     modelViewer.setAttribute("skybox-image", model_settings.skybox_image || "");
+    // AR-61: default to model-viewer's built-in `neutral` IBL when no
+    // env image is set. The legacy fallback was an empty string, which
+    // made model-viewer reuse the skybox image (warm sunrise HDR) as the
+    // environment map — tinting reflective whites pink/orange.
     modelViewer.setAttribute(
         "environment-image",
-        model_settings.environment_image || ""
+        model_settings.environment_image || "neutral"
     );
+    // AR-61: tone-mapping + exposure. `neutral` keeps colors close to
+    // the source PBR materials; `commerce` is also reasonable for
+    // product shots. Filterable per product via the metabox.
+    modelViewer.setAttribute(
+        "tone-mapping",
+        model_settings.tone_mapping || "neutral"
+    );
+    if (model_settings.exposure !== undefined && model_settings.exposure !== null && model_settings.exposure !== "") {
+        modelViewer.setAttribute("exposure", String(model_settings.exposure));
+    }
+
+    // AR-61: rotation prompt — gives shoppers a visible "drag to rotate"
+    // hint when they don't interact for a few seconds. Defaults to
+    // `auto` + `wiggle` (k-tools.de feedback, 13 May 2026). Set
+    // `interaction_prompt` to `none` per product to suppress.
+    const interactionPrompt = model_settings.interaction_prompt || "auto";
+    modelViewer.setAttribute("interaction-prompt", interactionPrompt);
+    if (interactionPrompt !== "none") {
+        modelViewer.setAttribute(
+            "interaction-prompt-style",
+            model_settings.interaction_prompt_style || "wiggle"
+        );
+        modelViewer.setAttribute(
+            "interaction-prompt-threshold",
+            String(model_settings.interaction_prompt_threshold || "2000")
+        );
+    }
 
     if (model_settings.auto_rotate) {
         modelViewer.setAttribute("auto-rotate", "");

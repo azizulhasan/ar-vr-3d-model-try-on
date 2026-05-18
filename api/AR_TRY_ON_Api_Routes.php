@@ -167,6 +167,16 @@ class AR_TRY_ON_Api_Routes
             // Get Default value.
             if (empty($product_settings) || !array_key_exists('src', $product_settings)) {
                 $product_settings = AR_TRY_ON_Helper::default_model_settings();
+            } else {
+                // AR-61: products saved before this release have no
+                // `tone_mapping`, `interaction_prompt`, etc. fields. Fill
+                // them in from the defaults without overwriting anything
+                // the merchant explicitly set — `wp_parse_args` keeps
+                // existing keys untouched and only adds the new ones.
+                $product_settings = wp_parse_args(
+                    $product_settings,
+                    AR_TRY_ON_Helper::default_model_settings()
+                );
             }
 
 

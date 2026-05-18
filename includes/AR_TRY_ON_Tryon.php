@@ -726,8 +726,26 @@ class AR_TRY_ON_Tryon {
 
 		// View in AR — outline (secondary) by default; primary (filled)
 		// when it's the sole CTA on the page (non-face products).
+		//
+		// AR-61: label can now be overridden in three layers (most
+		// specific wins): caller-supplied `args['button_label']`
+		// (shortcode `button_label="…"`), per-product metabox
+		// `view_in_ar_label`, or the translated default.
 		$view_in_ar_button = '';
 		if ( $show_view_in_ar ) {
+			$view_in_ar_label = '';
+			if ( isset( $args['button_label'] ) && $args['button_label'] !== '' ) {
+				$view_in_ar_label = (string) $args['button_label'];
+			} else {
+				$product_settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
+				if ( ! empty( $product_settings['view_in_ar_label'] ) ) {
+					$view_in_ar_label = (string) $product_settings['view_in_ar_label'];
+				}
+			}
+			if ( $view_in_ar_label === '' ) {
+				$view_in_ar_label = __( 'View in AR', 'ar-vr-3d-model-try-on' );
+			}
+
 			$is_primary       = $view_in_ar_style === 'primary';
 			$view_btn_class   = $is_primary ? $btn_primary : $btn_secondary;
 			$view_block_class = $is_primary ? 'wp-block-button' : 'wp-block-button is-style-outline';
@@ -738,7 +756,7 @@ class AR_TRY_ON_Tryon {
 				esc_attr( $view_btn_class ),
 				esc_attr__( 'View in augmented reality or 3D', 'ar-vr-3d-model-try-on' ),
 				$icon_3d,
-				esc_html__( 'View in AR', 'ar-vr-3d-model-try-on' )
+				esc_html( $view_in_ar_label )
 			);
 		}
 

@@ -63,6 +63,28 @@ const SettingsSection = ({
                             <strong>3D Viewer</strong> - Shows the 3D model first with an image icon to reveal the product image.
                         </p>
                     </div>
+
+                    {/* AR-61: per-product "View in AR" CTA label override.
+                        Empty falls back to translated default. Lets a
+                        merchant call the button "See it in 3D" or any
+                        localized phrase without editing translation
+                        files or theme code. */}
+                    <div className="art-mb-3">
+                        <label className="art-font-medium art-block art-mb-2">
+                            View-in-AR Button Label
+                        </label>
+                        <input
+                            type="text"
+                            name="view_in_ar_label"
+                            value={productModel.view_in_ar_label || ""}
+                            onChange={handleChange}
+                            placeholder="View in AR"
+                            className="art-w-full art-p-2 art-border art-border-gray-300 art-rounded"
+                        />
+                        <p className="art-text-sm art-text-gray-600 art-mt-2">
+                            Optional. Replaces the default <strong>"View in AR"</strong> text on this product's button. Leave blank to use the default. The shortcode attribute <code>button_label="…"</code> overrides this on a single insertion.
+                        </p>
+                    </div>
                 </div>
             )}
         </div>

@@ -55,13 +55,18 @@ class AtlasAR {
   };
 
   getModelSkeleton(model_id = "atlas_ar_model_viewer") {
-    // TODO: user should add custom class for there own sake.
+    // AR-61 (May 2026): skeleton ships with the same safe defaults that
+    // `setModelAttributes` will overlay once REST returns the per-product
+    // settings. The pre-overlay attribute values are what shows during
+    // the first paint, so getting them right here removes the flash of
+    // pink-tinted reflective whites the previous build had — and gives
+    // shoppers an immediate "drag to rotate" cue.
     return `
                 <style id="model-viewer-style"></style>
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
                         <model-viewer
                             id="${model_id}"
-                            class="atlas_ar_model_viewer" 
+                            class="atlas_ar_model_viewer"
                             src=""
                             alt=""
                             poster=""
@@ -72,6 +77,12 @@ class AtlasAR {
                             camera-controls
                             ar-scale="auto"
                             xr-environment
+                            environment-image="neutral"
+                            tone-mapping="neutral"
+                            exposure="1"
+                            interaction-prompt="auto"
+                            interaction-prompt-style="wiggle"
+                            interaction-prompt-threshold="2000"
                             style="width: 100%; height: 400px;"
                         ></model-viewer>
                     </div>`;

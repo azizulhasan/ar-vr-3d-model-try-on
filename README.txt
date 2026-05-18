@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -361,6 +361,12 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.0.2 ( 18 May 2026 ) =
+* New: Rename the "View in AR" button per product or per shortcode — set "See it in 3D", "Try a 360° view" or any text that fits your store
+* New: Built-in 360° rotation hint — a gentle wiggle prompts shoppers to drag the model after a couple of seconds of inactivity, so they discover the rotation interaction
+* Improvement: Neutral studio lighting for 3D models by default — fixes the pink/orange sheen that previously appeared on reflective white surfaces and keeps product colours true to the source file
+* Improvement: New AtlasAR block "Button label" field and shortcode attribute `button_label="…"` for one-off CTA overrides
+
 = 2.0.1 ( 13 May 2026 ) =
 * New: AtlasAR block now has a "Reveal model by default" toggle plus width, height, aspect ratio, padding and margin controls — choose between an inline 3D viewer or a clean Try-On / View in AR button pair
 * New: AtlasTryOn and the 3D viewer now work on regular WordPress posts and pages, not just WooCommerce products
@@ -615,6 +621,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.0.2 =
+Small but visible polish: rename the "View in AR" button without code, add a built-in rotation hint that nudges shoppers to drag, and fix the pink/orange tint that used to show up on reflective white 3D models. Safe to update.
 
 = 2.0.1 =
 Minor polish update: AtlasTryOn / 3D viewer now work on regular posts (not just WooCommerce products), buttons auto-match any theme, plus a smarter AtlasAR block with width / height / aspect ratio / spacing controls. Safe to update.

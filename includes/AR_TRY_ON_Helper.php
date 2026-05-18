@@ -254,6 +254,11 @@ class AR_TRY_ON_Helper
             'margin'                 => '0',
             'aspect_ratio'           => '',
             'position'               => 'after',
+            // AR-61: override the "View in AR" button text on a per-emit
+            // basis. Empty → falls back to product metabox
+            // `view_in_ar_label`, then the global translated default.
+            // Example: `[atlas_ar button_label="See it in 3D"]`.
+            'button_label'           => '',
             // Private: suppresses the Try-On overlay on face products.
             // Used internally by the WC gallery cube-toggle wrapper to
             // avoid emitting a duplicate Try-On button alongside the
@@ -302,11 +307,15 @@ class AR_TRY_ON_Helper
                 // explicitly suppressed (reveal=false makes the AR
                 // button the only secondary action).
                 $tryon   = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+                $args    = array('wrapper_id_suffix' => 'shortcode');
+                if (!empty($attributes['button_label'])) {
+                    $args['button_label'] = (string) $attributes['button_label'];
+                }
                 return $tryon->build_dynamic_buttons_block(
                     $post_id,
                     $placement,
                     true, // always show View-in-AR alongside Try-On when reveal=false
-                    array('wrapper_id_suffix' => 'shortcode')
+                    $args
                 );
             }
             // Non-face product: skip the inline viewer, let the existing
@@ -530,14 +539,31 @@ class AR_TRY_ON_Helper
             'alt' => 'NeilArmstrong',
             'ar_placement' => 'floor',
             // light & environment settings
-            'skybox_image' => 'https://modelviewer.dev/shared-assets/environments/spruit_sunrise_1k_HDR.jpg',
-            'environment_image' => '',
+            // AR-61: skybox emptied by default — the legacy spruit_sunrise
+            // HDR was tinting reflective whites pink/orange on customer
+            // products (k-tools.de feedback, 13 May 2026). `environment_image`
+            // now defaults to model-viewer's built-in `neutral` preset, a
+            // pure grey IBL that preserves the GLB's true material colors.
+            'skybox_image' => '',
+            'environment_image' => 'neutral',
+            // model-viewer tone-mapping: `neutral` keeps colors close to the
+            // source PBR materials. Was previously implicit (filmic default).
+            'tone_mapping' => 'neutral',
+            'exposure' => '1',
             // Camera settings
             'auto_rotate' => false,
             'shadow_intensity' => '1',
             'camera_orbit' => '45deg 55deg 4m',
             'disable_zoom' => false,
             'disable_tap' => false,
+            // AR-61: rotation hint that says "drag to rotate" on first
+            // visit. `auto` shows the wiggle gesture once after
+            // `interaction_prompt_threshold` ms of inactivity. Shoppers
+            // who don't know the model is interactive now get a visible
+            // cue. Merchant can set to `none` per product to suppress.
+            'interaction_prompt' => 'auto',
+            'interaction_prompt_style' => 'wiggle',
+            'interaction_prompt_threshold' => '2000',
             // Canvas settings
             'canvas_alignment' => 'left',
             'canvas_width' => '100%',
@@ -545,6 +571,12 @@ class AR_TRY_ON_Helper
             'canvas_margin' => '0',
             'canvas_padding' => '2px 0',
             'custom_css' => '',
+            // AR-61: per-product "View in AR" button label override.
+            // Empty → falls back to translated default. Merchants can
+            // localize the CTA without editing theme files. The shortcode
+            // attribute `button_label="..."` overrides this on a single
+            // emit.
+            'view_in_ar_label' => '',
         ];
     }
 
