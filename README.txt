@@ -330,6 +330,26 @@ This plugin connects to the following third-party services. Each service is cont
 * Terms of service: [https://atlasaidev.com/terms-and-conditions/](https://atlasaidev.com/terms-and-conditions/)
 * Privacy policy: [https://atlasaidev.com/privacy-policy/](https://atlasaidev.com/privacy-policy/)
 
+**7. AtlasAiDev usage-statistics IP lookup (icanhazip.com, opt-in only)**
+
+* What it is: `icanhazip.com` is a simple text-only echo service that returns the caller's public IP. The plugin uses it to attach a rough geolocation IP to the AtlasAiDev usage-statistics payload (service 6 above).
+* When it is contacted: ONLY when an administrator has opted in to the AtlasAiDev usage statistics. If the tracker is OFF — which is the default — no request is ever made to `icanhazip.com`.
+* What is sent: a standard HTTPS GET request. No user, site, or product data is transmitted in the request itself; the response (the public IP) is then included in the next tracker payload to AtlasAiDev.
+* Where requests go: `https://icanhazip.com/`.
+* Provider: Cloudflare (operates icanhazip.com).
+* Terms of service: [https://www.cloudflare.com/website-terms/](https://www.cloudflare.com/website-terms/)
+* Privacy policy: [https://www.cloudflare.com/privacypolicy/](https://www.cloudflare.com/privacypolicy/)
+
+**8. AtlasAiDev plugin recommendations manifest (raw.githubusercontent.com)**
+
+* What it is: a publicly-readable JSON file hosted on GitHub that lists the current set of AtlasAiDev plugins shown on the "Other plugins" admin submenu. Keeping it on GitHub lets the recommendations stay accurate without forcing a plugin release every time a new sibling plugin ships.
+* When it is contacted: only when an administrator opens the "AtlasAR → Other plugins" admin submenu page. The page itself displays a visible notice describing this fetch. The result is cached for 24 hours via a WordPress transient, so the request fires at most once per day per site. Visiting any other page does not trigger this call.
+* What is sent: a standard HTTPS GET request for the static JSON file. No site, user, or product data is transmitted.
+* Where requests go: `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`.
+* Provider: GitHub (Microsoft).
+* Terms of service: [https://docs.github.com/en/site-policy/github-terms/github-terms-of-service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)
+* Privacy policy: [https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
+
 
 == Installation ==
 

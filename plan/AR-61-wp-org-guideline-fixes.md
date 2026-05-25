@@ -35,9 +35,9 @@
 
 | # | Issue | File(s) / Line | Fix | Status | Owner | Notes |
 |---|---|---|---|---|---|---|
-| 2.1 | Unconsented marketing fetch on admin Plugins page | `admin/AR_TRY_ON_Admin.php` (`get_atlas_plugins()` / `ajax_refresh_plugins()`) | Removed. `get_atlas_plugins()` now returns the hardcoded `get_fallback_plugins()` list directly; the remote-URL constant + transient are deleted. AJAX refresh still works — it now only refreshes the api.wordpress.org info cache (a core service). | ✅ | |
-| 2.2 | `icanhazip.com` IP lookup without disclosure | `libs/AtlasAiDev/Insights.php` (`__get_user_ip_address()`) | Method now returns `''` unconditionally in Free. The tracker payload still carries an `ip_address` key for backend schema compatibility, but Free no longer makes the external call. Pro keeps its own copy. | ✅ | |
-| 2.3 | GitHub gist promotions fetch | `includes/AR_TRY_ON_Lib_AtlasAiDev.php` `init()` | Removed both `$this->promotion->set_source(<gist URL>)` and `$this->promotion->init()`. The promotion object is still instantiated so no consumer breaks, but no remote fetch happens. | ✅ | |
+| 2.1 | Unconsented marketing fetch on admin Plugins page | `admin/AR_TRY_ON_Admin.php` (`get_atlas_plugins()` + `atlas_plugins_page()`) | **Kept** — the fetch only fires when an admin opens the "Other plugins" submenu page. The submenu page itself now displays a prominent `notice notice-info` block disclosing the fetch ("Heads up: this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see External services in the readme for details") with a link to the readme. Mirrors the pattern WP.org accepted in the sibling `text-to-audio` plugin. Disclosed in `README.txt` §8. | ✅ | |
+| 2.2 | `icanhazip.com` IP lookup without disclosure | `libs/AtlasAiDev/Insights.php` (`__get_user_ip_address()`) | **Kept** — now gated explicitly on `$this->is_tracking_allowed()` so the call only ever fires when the administrator has opted in to the AtlasAiDev usage statistics (default OFF). Disclosed in `README.txt` §7. | ✅ | |
+| 2.3 | GitHub gist promotions fetch | `includes/AR_TRY_ON_Lib_AtlasAiDev.php` `init()` | **Removed.** Both `$this->promotion->set_source(<gist URL>)` and `$this->promotion->init()` were stripped. The Promotions object is still instantiated so no consumer breaks, but no remote fetch occurs. The URL also pointed at a stale TTS file (`text-to-speech-pro.json`) so the feature wasn't doing anything useful anyway. | ✅ | |
 
 ---
 
@@ -56,14 +56,14 @@
 | # | Service | Used by | Status | Notes |
 |---|---|---|---|---|
 | 4.1 | `track.atlasaidev.com` | `libs/AtlasAiDev/Client.php` | ✅ | Disclosed in `README.txt` §6. Opt-in only, default OFF. |
-| 4.2 | `icanhazip.com` | (removed in §2.2) | ✅ | No longer called; nothing to disclose. |
+| 4.2 | `icanhazip.com` | `libs/AtlasAiDev/Insights.php` | ✅ | Disclosed in `README.txt` §7. Gated on tracker opt-in (default OFF). |
 | 4.3 | `gist.githubusercontent.com/.../text-to-speech-pro.json` | (removed in §2.3) | ✅ | No longer called; nothing to disclose. |
 | 4.4 | `storage.googleapis.com/mediapipe-models/...` | `includes/AR_TRY_ON_Tryon.php` | ✅ | Disclosed in `README.txt` §2. Triggered only by visitor clicking "Try It On". |
 | 4.5 | `cdn.jsdelivr.net/npm/@mediapipe/tasks-vision` | `includes/AR_TRY_ON_Tryon.php` | ✅ | Disclosed in `README.txt` §1. Same trigger as §4.4. |
 | 4.6 | `gstatic.com` (DRACO/KTX2) + `cdn.jsdelivr.net/three` (Lottie) | `public/js/google-model-viewer.js` | ✅ | Disclosed in `README.txt` §3. Only fires when an uploaded GLB uses Draco/KTX2/Lottie. |
 | 4.7 | `api.tripo3d.ai` | `generate_3d_model` REST + admin dashboard | ✅ | Disclosed in `README.txt` §4. Admin-only, requires user-supplied API key, requires explicit "Generate" click. |
 | 4.8 | `api.meshy.ai` | Same as 4.7 | ✅ | Disclosed in `README.txt` §5. Same trigger as §4.7. |
-| 4.9 | `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` | (removed in §2.1) | ✅ | No longer called; nothing to disclose. |
+| 4.9 | `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` | `admin/AR_TRY_ON_Admin.php` | ✅ | Disclosed in `README.txt` §8 AND on the admin submenu page itself via a visible `notice notice-info` block. Triggered only by an admin opening the submenu page. |
 | 4.10 | MediaPipe `holistic_landmarker.proto` identifier in bundled worker | `public/js/build/chunks/tryon-face-worker.*.js` | ✅ | False positive (see §10.1). Dead code inside `@mediapipe/tasks-vision`. Will be raised with the reviewer if mentioned. |
 
 Goal: a single readme block like:

@@ -435,6 +435,16 @@ class AR_TRY_ON_Admin {
 	}
 
     /**
+     * Remote URL for the plugins.json file.
+     */
+    const ATLAS_PLUGINS_REMOTE_URL = 'https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json';
+
+    /**
+     * Transient key for cached remote plugin manifest.
+     */
+    const ATLAS_PLUGINS_TRANSIENT = 'atlas_plugins_remote_data';
+
+    /**
      * Transient key for WP.org plugin info cache.
      */
     const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info_v2';
@@ -445,22 +455,40 @@ class AR_TRY_ON_Admin {
     const ATLAS_PLUGINS_CACHE_TTL = 86400;
 
     /**
-     * Get the static list of AtlasAiDev plugins shown on the
-     * "Other plugins" admin submenu.
+     * Fetch the AtlasAiDev plugin manifest with a 24-hour transient
+     * cache, falling back to a local hardcoded list when the network
+     * call fails or returns invalid data.
      *
-     * Historically this method fetched a JSON manifest from
-     * raw.githubusercontent.com so the cross-promo list could be
-     * updated without a plugin release. The WordPress.org Plugins
-     * Team flagged that fetch as unconsented "phoning home" in the
-     * AR-61 closure (Guideline 7), so the network call has been
-     * removed and the local hardcoded list returned by
-     * get_fallback_plugins() is now the sole source of truth in the
-     * free plugin.
+     * This call only fires when an administrator opens the
+     * "Other plugins" admin submenu — never on a normal page load.
+     * The submenu page itself shows a visible notice describing what
+     * is fetched and what is not sent; the call is also disclosed in
+     * the plugin's readme under `== External services ==`
+     * (AR-61 §2.1 + §4.9).
      *
      * @since 1.0.0
      * @return array List of plugin objects.
      */
     public static function get_atlas_plugins() {
+        $cached = get_transient( self::ATLAS_PLUGINS_TRANSIENT );
+        if ( false !== $cached && is_array( $cached ) ) {
+            return $cached;
+        }
+
+        $response = wp_remote_get( self::ATLAS_PLUGINS_REMOTE_URL, array(
+            'timeout' => 10,
+            'headers' => array( 'Accept' => 'application/json' ),
+        ) );
+
+        if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+            $body = wp_remote_retrieve_body( $response );
+            $data = json_decode( $body, true );
+            if ( is_array( $data ) && ! empty( $data ) ) {
+                set_transient( self::ATLAS_PLUGINS_TRANSIENT, $data, self::ATLAS_PLUGINS_CACHE_TTL );
+                return $data;
+            }
+        }
+
         return self::get_fallback_plugins();
     }
 
@@ -754,10 +782,9 @@ class AR_TRY_ON_Admin {
     /**
      * AJAX handler to refresh plugin metadata.
      *
-     * Since AR-61 the local plugin list is hardcoded and never expires,
-     * so this handler only refreshes the WP.org info cache (ratings /
-     * install counts), which is fetched from api.wordpress.org — a
-     * documented WordPress core service.
+     * Clears both transients and re-fetches:
+     *   - the AtlasAiDev plugin manifest (raw.githubusercontent.com),
+     *   - the WP.org info cache (api.wordpress.org).
      */
     public function ajax_refresh_plugins() {
         check_ajax_referer('atlas_plugins_refresh', 'nonce');
@@ -766,6 +793,7 @@ class AR_TRY_ON_Admin {
             wp_send_json_error('Unauthorized', 403);
         }
 
+        delete_transient(self::ATLAS_PLUGINS_TRANSIENT);
         delete_transient(self::ATLAS_PLUGINS_WPORG_TRANSIENT);
         $plugins    = self::get_atlas_plugins();
         $wporg_info = self::get_wporg_info($plugins);
@@ -778,10 +806,31 @@ class AR_TRY_ON_Admin {
 
     /**
      * Atlas Plugins page callback.
+     *
+     * Renders the React mount point for the cross-promo "Other plugins"
+     * page, preceded by a visible disclosure notice (AR-61 §2.1 / §4.9).
+     * Visiting this page triggers the cached fetch in
+     * {@see self::get_atlas_plugins()} which contacts
+     * raw.githubusercontent.com for the AtlasAiDev plugin manifest;
+     * no site or user data is sent in that request.
      */
     public function atlas_plugins_page()
     {
-        echo '<div class="wrap"><div id="atlas_plugins_container"></div></div>';
+        $readme_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=ar-vr-3d-model-try-on&section=external_services' );
+
+        $notice  = '<div class="notice notice-info" style="margin-top:1em;">';
+        $notice .= '<p>';
+        $notice .= esc_html__( 'Heads up: this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see "External services" in the readme for details.', 'ar-vr-3d-model-try-on' );
+        $notice .= ' <a href="' . esc_url( $readme_url ) . '" target="_blank" rel="noopener noreferrer">';
+        $notice .= esc_html__( 'View readme', 'ar-vr-3d-model-try-on' );
+        $notice .= '</a>';
+        $notice .= '</p>';
+        $notice .= '</div>';
+
+        echo '<div class="wrap">';
+        echo wp_kses_post( $notice );
+        echo '<div id="atlas_plugins_container"></div>';
+        echo '</div>';
     }
 
 

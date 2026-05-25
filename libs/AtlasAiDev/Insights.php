@@ -1378,23 +1378,44 @@ class Insights {
 	/**
 	 * Get user IP Address.
 	 *
-	 * Historically this method called icanhazip.com to discover the
-	 * site's public IP so the AtlasAiDev tracker could geolocate it.
-	 * The WordPress.org Plugins Team flagged that as undisclosed
-	 * external service usage in the AR-61 closure (Guideline 6 / 9),
-	 * so the call has been removed from the free plugin. The tracker
-	 * payload now omits the IP entirely; the AtlasAiDev backend
-	 * tolerates a blank/missing value.
+	 * Uses `icanhazip.com` (a simple text-only echo service) to
+	 * discover the site's public IP so the AtlasAiDev tracker can
+	 * include rough geolocation in its payload.
 	 *
-	 * Pro keeps its own copy of this library and may continue to
-	 * resolve the IP if the site owner has opted in.
+	 * The WordPress.org Plugins Team flagged this in the AR-61
+	 * closure for being undisclosed (Guideline 6 / 9). The remediation
+	 * is twofold:
+	 *
+	 *   1. The lookup is now gated on `$this->is_tracking_allowed()`
+	 *      — the same opt-in flag that controls the tracker itself.
+	 *      If the site owner has not opted in to telemetry, no
+	 *      request is made and the method returns an empty string.
+	 *      This was already the de-facto state because the three
+	 *      callsites only run inside opt-in branches, but enforcing
+	 *      it inside the method makes the gating reviewer-obvious.
+	 *
+	 *   2. `icanhazip.com` is now disclosed in the plugin's readme
+	 *      under `== External services ==` alongside the tracker
+	 *      itself.
 	 *
 	 * @since   1.0.0
-	 * @updated AR-61 §2.2 — disabled in free.
-	 * @return  string Always empty in the free plugin.
+	 * @updated AR-61 §2.2 — gated on tracker opt-in + disclosed.
+	 * @return  string Public IP, or empty string if not opted in /
+	 *                 the lookup fails / the response isn't a valid IP.
 	 */
 	private function __get_user_ip_address() {
-		return '';
+		if ( ! $this->is_tracking_allowed() ) {
+			return '';
+		}
+		$response = wp_safe_remote_get( 'https://icanhazip.com/', array( 'timeout' => 5 ) );
+		if ( is_wp_error( $response ) ) {
+			return '';
+		}
+		$ip = trim( wp_remote_retrieve_body( $response ) );
+		if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			return '';
+		}
+		return $ip;
 	}
 	
 	/**
