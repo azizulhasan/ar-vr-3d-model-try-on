@@ -31,6 +31,18 @@ class AR_TRY_ON_Compression_Routes {
 	private $namespace = 'ar_try_on/v1';
 
 	/**
+	 * Target directory for the next wp_handle_upload() call.
+	 *
+	 * Set by upload_compressed_file() before add_filter()/remove_filter()
+	 * so the named callback filter_upload_dir_target() can read it without
+	 * needing a closure (closures bound to add_filter cannot be removed
+	 * with remove_filter — they are distinct callable instances).
+	 *
+	 * @var string|null
+	 */
+	private $upload_target_path = null;
+
+	/**
 	 * Register routes
 	 *
 	 * @since 1.8.0
@@ -565,28 +577,18 @@ class AR_TRY_ON_Compression_Routes {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
 
-        add_filter( 'upload_dir',  function ( $dirs ) use ( $target_path ) {
-            $custom_subdir = str_replace( $dirs['basedir'], '', $target_path );
-
-            $dirs['subdir'] = $custom_subdir;
-            $dirs['path']   = $dirs['basedir'] . $custom_subdir;
-            $dirs['url']    = $dirs['baseurl'] . $custom_subdir;
-
-            return $dirs;
-        } );
+        // Use a named instance method so remove_filter() can actually find
+        // and remove the registered callback (AR-61 §7.1). Closures created
+        // at add_filter time and re-created at remove_filter time are
+        // distinct callables and remove_filter would silently no-op.
+        $this->upload_target_path = $target_path;
+        add_filter( 'upload_dir', array( $this, 'filter_upload_dir_target' ) );
 
 		$upload_overrides = array( 'test_form' => false );
 		$uploaded_file    = wp_handle_upload( $file, $upload_overrides );
 
-        remove_filter( 'upload_dir',  function ( $dirs ) use ( $target_path ) {
-            $custom_subdir = str_replace( $dirs['basedir'], '', $target_path );
-
-            $dirs['subdir'] = $custom_subdir;
-            $dirs['path']   = $dirs['basedir'] . $custom_subdir;
-            $dirs['url']    = $dirs['baseurl'] . $custom_subdir;
-
-            return $dirs;
-        } );
+        remove_filter( 'upload_dir', array( $this, 'filter_upload_dir_target' ) );
+        $this->upload_target_path = null;
 
         if ( isset( $uploaded_file['error'] ) ) {
 			return new \WP_REST_Response(
@@ -656,5 +658,27 @@ class AR_TRY_ON_Compression_Routes {
 	 */
 	public function check_pro_permission() {
 		return current_user_can( 'manage_options' ) && AR_TRY_ON_Compression::is_pro_active();
+	}
+
+	/**
+	 * Named callback for the `upload_dir` filter used during compressed-file uploads.
+	 *
+	 * Reads the desired target path from $this->upload_target_path so that the
+	 * same callable reference can be passed to both add_filter() and
+	 * remove_filter(). See upload_compressed_file().
+	 *
+	 * @since 2.0.x (AR-61 §7.1)
+	 * @param array $dirs The default upload directory array from wp_upload_dir().
+	 * @return array Modified upload directory pointing at the per-request target path.
+	 */
+	public function filter_upload_dir_target( $dirs ) {
+		if ( null === $this->upload_target_path ) {
+			return $dirs;
+		}
+		$custom_subdir  = str_replace( $dirs['basedir'], '', $this->upload_target_path );
+		$dirs['subdir'] = $custom_subdir;
+		$dirs['path']   = $dirs['basedir'] . $custom_subdir;
+		$dirs['url']    = $dirs['baseurl'] . $custom_subdir;
+		return $dirs;
 	}
 }

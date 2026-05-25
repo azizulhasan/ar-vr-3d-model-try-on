@@ -202,6 +202,11 @@ class AR_TRY_ON_Admin {
 	 */
 
 	public function atlas_ar_menu() {
+		// Position '58.5' (float string) places the menu between Comments (25)
+		// and Appearance (60), in the secondary band most plugins occupy. The
+		// previous value 20 collided with WordPress core's Pages slot and was
+		// flagged by wp.org (AR-61 §7.3). A non-integer string also reduces
+		// the chance of collision with other plugins.
 		add_menu_page(
 			'AtlasAR',
 			'AtlasAR',
@@ -209,7 +214,7 @@ class AR_TRY_ON_Admin {
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
 			ATLAS_AR_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
-			20
+			'58.5'
 		);
 
         $this->atlasaidev_plugins('atlas-ar-other-plugins');

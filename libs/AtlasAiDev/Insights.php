@@ -340,7 +340,7 @@ class Insights {
 	 */
 	protected function data_we_collect() {
 		$data = [
-			esc_html__( 'Server environment details (php, mysql, server, WordPress versions).', 'atlasaidev' ),
+			esc_html__( 'Server environment details (php, mysql, server, WordPress versions).', 'ar-vr-3d-model-try-on' ),
 		];
 		$data = apply_filters( $this->client->getSlug() . '_what_tracked', $data );
 		
@@ -466,7 +466,7 @@ class Insights {
 					apply_filters(
 						$this->client->getSlug() . '_tracking_default_notice_message',
 						/* translators: 1: plugin name */
-						esc_html__( 'Want to help make %1$s even more awesome? Allow %1$s to collect non-sensitive diagnostic data and usage information.', 'atlasaidev' )
+						esc_html__( 'Want to help make %1$s even more awesome? Allow %1$s to collect non-sensitive diagnostic data and usage information.', 'ar-vr-3d-model-try-on' )
 					),
 					'<strong>' . esc_html( $this->client->getName() ) . '</strong>'
 				);
@@ -474,13 +474,13 @@ class Insights {
 				$notice = $this->notice;
 			}
 			
-			$notice .= ' (<a class="' . $this->client->getSlug() . '-insights-data-we-collect" href="#">' . esc_html__( 'what we collect', 'atlasaidev' ) . '</a>)';
-			$notice .= '<p class="description" style="display:none;">' . implode( ', ', $this->data_we_collect() ) . '. ' . esc_html__( 'No sensitive data is tracked.', 'atlasaidev' ) . '</p>';
+			$notice .= ' (<a class="' . $this->client->getSlug() . '-insights-data-we-collect" href="#">' . esc_html__( 'what we collect', 'ar-vr-3d-model-try-on' ) . '</a>)';
+			$notice .= '<p class="description" style="display:none;">' . implode( ', ', $this->data_we_collect() ) . '. ' . esc_html__( 'No sensitive data is tracked.', 'ar-vr-3d-model-try-on' ) . '</p>';
 			echo '<div class="updated"><p>';
 			echo $notice; // phpcs:ignore xss ok
 			echo '</p><p class="submit">';
-			echo '&nbsp;<a href="' . esc_url( $this->get_opt_out_url() ) . '" class="button button-secondary">' . esc_html__( 'No thanks', 'atlasaidev' ) . '</a>';
-			echo '&nbsp;<a href="' . esc_url( $this->get_opt_in_url() ) . '" class="button button-primary">' . esc_html__( 'Allow', 'atlasaidev' ) . '</a>';
+			echo '&nbsp;<a href="' . esc_url( $this->get_opt_out_url() ) . '" class="button button-secondary">' . esc_html__( 'No thanks', 'ar-vr-3d-model-try-on' ) . '</a>';
+			echo '&nbsp;<a href="' . esc_url( $this->get_opt_in_url() ) . '" class="button button-primary">' . esc_html__( 'Allow', 'ar-vr-3d-model-try-on' ) . '</a>';
 			echo '</p></div>';
 			echo "<script type='text/javascript'>jQuery('." . esc_attr( $this->client->getSlug() ) . "-insights-data-we-collect').on('click', function(e) {
                     e.preventDefault();
@@ -681,7 +681,7 @@ class Insights {
 	public function add_weekly_schedule( $schedules ) {
 		$schedules['weekly'] = [
 			'interval' => DAY_IN_SECONDS * 7,
-			'display'  => __( 'Once Weekly', 'atlasaidev' ),
+			'display'  => __( 'Once Weekly', 'ar-vr-3d-model-try-on' ),
 		];
 		
 		return $schedules;
@@ -743,51 +743,51 @@ class Insights {
 		$reasons = [
 			[
 				'id'          => 'could-not-understand',
-				'text'        => esc_html__( 'I couldn\'t understand how to make it work', 'atlasaidev' ),
+				'text'        => esc_html__( 'I couldn\'t understand how to make it work', 'ar-vr-3d-model-try-on' ),
 				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Would you like us to assist you?', 'atlasaidev' ),
+				'placeholder' => esc_html__( 'Would you like us to assist you?', 'ar-vr-3d-model-try-on' ),
 			],
 			[
 				'id'          => 'found-better-plugin',
-				'text'        => esc_html__( 'I found a better plugin', 'atlasaidev' ),
+				'text'        => esc_html__( 'I found a better plugin', 'ar-vr-3d-model-try-on' ),
 				'type'        => 'text',
-				'placeholder' => esc_html__( 'Which plugin?', 'atlasaidev' ),
+				'placeholder' => esc_html__( 'Which plugin?', 'ar-vr-3d-model-try-on' ),
 			],
 			[
 				'id'          => 'not-have-that-feature',
-				'text'        => esc_html__( 'The plugin is great, but I need specific feature that you don\'t support', 'atlasaidev' ),
+				'text'        => esc_html__( 'The plugin is great, but I need specific feature that you don\'t support', 'ar-vr-3d-model-try-on' ),
 				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Could you tell us more about that feature?', 'atlasaidev' ),
+				'placeholder' => esc_html__( 'Could you tell us more about that feature?', 'ar-vr-3d-model-try-on' ),
 			],
 			[
 				'id'          => 'is-not-working',
-				'text'        => esc_html__( 'The plugin is not working', 'atlasaidev' ),
+				'text'        => esc_html__( 'The plugin is not working', 'ar-vr-3d-model-try-on' ),
 				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Could you tell us a bit more whats not working?', 'atlasaidev' ),
+				'placeholder' => esc_html__( 'Could you tell us a bit more whats not working?', 'ar-vr-3d-model-try-on' ),
 			],
 			[
 				'id'          => 'looking-for-other',
-				'text'        => esc_html__( 'It\'s not what I was looking for', 'atlasaidev' ),
+				'text'        => esc_html__( 'It\'s not what I was looking for', 'ar-vr-3d-model-try-on' ),
 				'type'        => '',
 				'placeholder' => '',
 			],
 			[
 				'id'          => 'did-not-work-as-expected',
-				'text'        => esc_html__( 'The plugin didn\'t work as expected', 'atlasaidev' ),
+				'text'        => esc_html__( 'The plugin didn\'t work as expected', 'ar-vr-3d-model-try-on' ),
 				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'What did you expect?', 'atlasaidev' ),
+				'placeholder' => esc_html__( 'What did you expect?', 'ar-vr-3d-model-try-on' ),
 			],
 			[
 				'id'          => 'debugging',
-				'text'        => esc_html__( 'Temporary deactivation for debugging', 'atlasaidev' ),
+				'text'        => esc_html__( 'Temporary deactivation for debugging', 'ar-vr-3d-model-try-on' ),
 				'type'        => '',
 				'placeholder' => '',
 			],
 			[
 				'id'          => 'other',
-				'text'        => esc_html__( 'Other', 'atlasaidev' ),
+				'text'        => esc_html__( 'Other', 'ar-vr-3d-model-try-on' ),
 				'type'        => 'textarea',
-				'placeholder' => esc_html__( 'Could you tell us a bit more?', 'atlasaidev' ),
+				'placeholder' => esc_html__( 'Could you tell us a bit more?', 'ar-vr-3d-model-try-on' ),
 			],
 		];
 		$extra = apply_filters( $this->client->getSlug() . '_extra_uninstall_reasons', [], $reasons );
@@ -807,7 +807,7 @@ class Insights {
 	public function uninstall_reason_submission() {
 		check_ajax_referer( $this->client->getSlug() . '_insight_action' );
 		if ( ! isset( $_POST['reason_id'] ) ) {
-			wp_send_json_error( esc_html__( 'Invalid Request', 'atlasaidev' ) );
+			wp_send_json_error( esc_html__( 'Invalid Request', 'ar-vr-3d-model-try-on' ) );
 			wp_die();
 		}
 		$current_user = wp_get_current_user();
@@ -857,8 +857,8 @@ class Insights {
 			wp_send_json_error(
 				sprintf(
 					'<p class="mui-error">%s<br>%s</p>',
-					esc_html__( 'Something Went Wrong.', 'atlasaidev' ),
-					esc_html__( 'Please try again after sometime.', 'atlasaidev' )
+					esc_html__( 'Something Went Wrong.', 'ar-vr-3d-model-try-on' ),
+					esc_html__( 'Please try again after sometime.', 'ar-vr-3d-model-try-on' )
 				)
 			);
 			wp_die();
@@ -914,7 +914,7 @@ class Insights {
 				} else {
 					$this->supportResponse = sprintf(
 						'<h3>%s</h3>',
-						esc_html__( 'Thank you -- Support Ticket Submitted.', 'atlasaidev' )
+						esc_html__( 'Thank you -- Support Ticket Submitted.', 'ar-vr-3d-model-try-on' )
 					);
 				}
 				wp_send_json_success( $this->supportResponse );
@@ -931,13 +931,13 @@ class Insights {
 				} else {
 					$this->supportErrorResponse = sprintf(
 						'<div class="mui-error"><p>%s</p></div>',
-						esc_html__( 'Something Went Wrong. Please Try Again After Sometime.', 'atlasaidev' )
+						esc_html__( 'Something Went Wrong. Please Try Again After Sometime.', 'ar-vr-3d-model-try-on' )
 					);
 				}
 				wp_send_json_error( $this->supportErrorResponse );
 			}
 		} else {
-			wp_send_json_error( sprintf( '<p class="mui-error">%s</p>', esc_html__( 'Missing Required Fields.', 'atlasaidev' ) ) );
+			wp_send_json_error( sprintf( '<p class="mui-error">%s</p>', esc_html__( 'Missing Required Fields.', 'ar-vr-3d-model-try-on' ) ) );
 		}
 		wp_die();
 	}
@@ -957,12 +957,12 @@ class Insights {
 		$displayName = ( ! empty( $admin_user->first_name ) && ! empty( $admin_user->last_name ) ) ? $admin_user->first_name . ' ' . $admin_user->last_name : $admin_user->display_name;
 		$showSupportTicket = ( ! empty( $this->ticketTemplate ) && ! empty( $this->ticketRecipient ) && ! empty( $this->supportURL ) );
 		?>
-		<div class="atlasaidev-dr-modal" id="<?php echo esc_attr( $this->client->getSlug() ); ?>-atlasaidev-dr-modal" aria-label="<?php /* translators: 1: Plugin Name */ printf( esc_attr__( '&ldquo;%s&rdquo; Uninstall Confirmation', 'atlasaidev' ), esc_attr( $this->client->getName() ) ); ?>" role="dialog" aria-modal="true">
+		<div class="atlasaidev-dr-modal" id="<?php echo esc_attr( $this->client->getSlug() ); ?>-atlasaidev-dr-modal" aria-label="<?php /* translators: 1: Plugin Name */ printf( esc_attr__( '&ldquo;%s&rdquo; Uninstall Confirmation', 'ar-vr-3d-model-try-on' ), esc_attr( $this->client->getName() ) ); ?>" role="dialog" aria-modal="true">
 			<?php if ( $showSupportTicket ) { ?>
 			<div class="atlasaidev-dr-modal-wrap support" style="display: none;">
 				<div class="atlasaidev-dr-modal-header">
-					<h3><?php esc_html_e( 'Submit Support Ticket.', 'atlasaidev' ); ?></h3>
-					<a href="javascript:void 0;" class="atlasaidev-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'atlasaidev' ); ?>">
+					<h3><?php esc_html_e( 'Submit Support Ticket.', 'ar-vr-3d-model-try-on' ); ?></h3>
+					<a href="javascript:void 0;" class="atlasaidev-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'ar-vr-3d-model-try-on' ); ?>">
 						<!--suppress HtmlUnknownAttribute -->
 						<svg class="" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="presentation">
 							<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
@@ -971,33 +971,33 @@ class Insights {
 				</div>
 				<div class="atlasaidev-dr-modal-body">
 					<div class="atlasaidev-row mui col-2 col-left">
-						<label for="atlasaidev-support-name" class="<?php echo ! empty( $displayName ) ? 'shrink' : ''; ?>"><?php esc_html_e( 'Name', 'atlasaidev' ); ?></label>
+						<label for="atlasaidev-support-name" class="<?php echo ! empty( $displayName ) ? 'shrink' : ''; ?>"><?php esc_html_e( 'Name', 'ar-vr-3d-model-try-on' ); ?></label>
 						<div class="atlasaidev-form-control">
 							<input type="text" name="name" id="atlasaidev-support-name" value="<?php echo esc_attr( $displayName ); ?>" required>
 						</div>
 					</div>
 					<div class="atlasaidev-row mui col-2 col-right">
-						<label for="atlasaidev-support-email" class="shrink"><?php esc_html_e( 'Email', 'atlasaidev' ); ?></label>
+						<label for="atlasaidev-support-email" class="shrink"><?php esc_html_e( 'Email', 'ar-vr-3d-model-try-on' ); ?></label>
 						<div class="atlasaidev-form-control">
 							<input type="email" name="email" id="atlasaidev-support-email" value="<?php echo esc_attr( $admin_user->user_email ); ?>" required>
 						</div>
 					</div>
 					<div class="clear"></div>
 					<div class="atlasaidev-row mui col-2 col-left">
-						<label for="atlasaidev-support-subject"><?php esc_html_e( 'Subject', 'atlasaidev' ); ?></label>
+						<label for="atlasaidev-support-subject"><?php esc_html_e( 'Subject', 'ar-vr-3d-model-try-on' ); ?></label>
 						<div class="atlasaidev-form-control">
 							<input type="text" name="subject" id="atlasaidev-support-subject" required>
 						</div>
 					</div>
 					<div class="atlasaidev-row mui col-2 col-right">
-						<label for="atlasaidev-support-website" class="shrink"><?php esc_html_e( 'Website', 'atlasaidev' ); ?></label>
+						<label for="atlasaidev-support-website" class="shrink"><?php esc_html_e( 'Website', 'ar-vr-3d-model-try-on' ); ?></label>
 						<div class="atlasaidev-form-control">
 							<input type="url" name="website" id="atlasaidev-support-website" value="<?php echo esc_url( site_url() ); ?>" required>
 						</div>
 					</div>
 					<div class="clear"></div>
 					<div class="atlasaidev-row mui">
-						<label for="atlasaidev-support-message"><?php esc_html_e( 'Message', 'atlasaidev' ); ?></label>
+						<label for="atlasaidev-support-message"><?php esc_html_e( 'Message', 'ar-vr-3d-model-try-on' ); ?></label>
 						<div class="atlasaidev-form-control">
 							<textarea id="atlasaidev-support-message" name='message' rows="11" required></textarea>
 						</div>
@@ -1007,15 +1007,15 @@ class Insights {
 					</div>
 				</div>
 				<div class="atlasaidev-dr-modal-footer">
-					<button class="button button-primary send-ticket"><?php esc_html_e( 'Send Message', 'atlasaidev' ); ?></button>
-					<button class="button button-secondary close-ticket"><?php esc_html_e( 'Cancel', 'atlasaidev' ); ?></button>
+					<button class="button button-primary send-ticket"><?php esc_html_e( 'Send Message', 'ar-vr-3d-model-try-on' ); ?></button>
+					<button class="button button-secondary close-ticket"><?php esc_html_e( 'Cancel', 'ar-vr-3d-model-try-on' ); ?></button>
 				</div>
 			</div>
 			<?php } ?>
 			<div class="atlasaidev-dr-modal-wrap reason">
 				<div class="atlasaidev-dr-modal-header">
-					<h3><?php esc_html_e( 'If you have a moment, please let us know why you are deactivating:', 'atlasaidev' ); ?></h3>
-					<a href="javascript:void 0;" class="atlasaidev-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'atlasaidev' ); ?>">
+					<h3><?php esc_html_e( 'If you have a moment, please let us know why you are deactivating:', 'ar-vr-3d-model-try-on' ); ?></h3>
+					<a href="javascript:void 0;" class="atlasaidev-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'ar-vr-3d-model-try-on' ); ?>">
 						<!--suppress HtmlUnknownAttribute -->
 						<svg class="" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="presentation">
 							<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
@@ -1033,19 +1033,19 @@ class Insights {
 					<div class="response" style="<?php echo ( $showSupportTicket ) ? 'display: block;' : ''; ?>">
 						<div class="wrapper">
 						<?php if ( $showSupportTicket ) { ?>
-							<p><?php esc_html_e( 'In trouble? Please submit a support request.', 'atlasaidev' ); ?></p>
+							<p><?php esc_html_e( 'In trouble? Please submit a support request.', 'ar-vr-3d-model-try-on' ); ?></p>
 							<p>
-								<a href="#" class="button button-secondary not-interested"><?php esc_html_e( 'Not Interested', 'atlasaidev' ); ?></a>
-								<button class="button button-primary open-ticket-form"><?php esc_html_e( 'Open Support Ticket', 'atlasaidev' ); ?></button>
+								<a href="#" class="button button-secondary not-interested"><?php esc_html_e( 'Not Interested', 'ar-vr-3d-model-try-on' ); ?></a>
+								<button class="button button-primary open-ticket-form"><?php esc_html_e( 'Open Support Ticket', 'ar-vr-3d-model-try-on' ); ?></button>
 							</p>
 						<?php } ?>
 						</div>
 					</div>
 				</div>
 				<div class="atlasaidev-dr-modal-footer">
-					<a href="#" class="button button-link dont-bother-me disabled"><?php esc_html_e( 'I rather wouldn\'t say', 'atlasaidev' ); ?></a>
-					<button class="button button-secondary deactivate disabled"><?php esc_html_e( 'Submit & Deactivate', 'atlasaidev' ); ?></button>
-					<button class="button button-primary modal-close disabled"><?php esc_html_e( 'Cancel', 'atlasaidev' ); ?></button>
+					<a href="#" class="button button-link dont-bother-me disabled"><?php esc_html_e( 'I rather wouldn\'t say', 'ar-vr-3d-model-try-on' ); ?></a>
+					<button class="button button-secondary deactivate disabled"><?php esc_html_e( 'Submit & Deactivate', 'ar-vr-3d-model-try-on' ); ?></button>
+					<button class="button button-primary modal-close disabled"><?php esc_html_e( 'Cancel', 'ar-vr-3d-model-try-on' ); ?></button>
 				</div>
 			</div>
 		</div>
@@ -1144,7 +1144,7 @@ class Insights {
                             }, data ), // add default action if action is empty.
                             beforeSend: function () {
                                 buttonElem.addClass("disabled");
-                                buttonElem.text('<?php esc_html_e( 'Processing...', 'atlasaidev' ); ?>');
+                                buttonElem.text('<?php esc_html_e( 'Processing...', 'ar-vr-3d-model-try-on' ); ?>');
                             },
                             complete: function (event, xhr, options) {
                                 if ('string' === typeof cb) {

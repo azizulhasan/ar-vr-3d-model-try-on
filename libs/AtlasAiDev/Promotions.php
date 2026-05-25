@@ -123,7 +123,7 @@ class Promotions {
 	 */
 	public function init() {
 		if ( is_null( $this->promotionSrc ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Promotion Source URL Not Set. see Promotions::set_source( $URL )', 'atlasaidev' ), '1.0.0' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Promotion Source URL Not Set. see Promotions::set_source( $URL )', 'ar-vr-3d-model-try-on' ), '1.0.0' );
 		}
 		add_action( 'admin_init', [ $this, '__init_internal' ], 10 );
 	}
@@ -357,9 +357,9 @@ class Promotions {
 		) {
 			$this->hiddenPromotions = array_merge( $this->hiddenPromotions, [ sanitize_text_field( $_REQUEST['hash'] ) ] );
 			update_user_option( $this->currentUser, $this->client->getSlug() . '_hidden_promos', $this->hiddenPromotions );
-			wp_send_json_success( esc_html__( 'Promo hidden', 'atlasaidev' ) );
+			wp_send_json_success( esc_html__( 'Promo hidden', 'ar-vr-3d-model-try-on' ) );
 		}
-		wp_send_json_error( esc_html__( 'Invalid Request', 'atlasaidev' ) );
+		wp_send_json_error( esc_html__( 'Invalid Request', 'ar-vr-3d-model-try-on' ) );
 		die();
 	}
 	
@@ -370,7 +370,7 @@ class Promotions {
 	 */
 	public function clear_hidden_promos() {
 		if ( ! did_action( 'admin_init' ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Method must be invoked inside admin_init action', 'atlasaidev' ), '1.0.0' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Method must be invoked inside admin_init action', 'ar-vr-3d-model-try-on' ), '1.0.0' );
 		}
 		$this->currentUser = get_current_user_id();
 		return delete_user_option( $this->currentUser, $this->client->getSlug() . '_hidden_promos' );

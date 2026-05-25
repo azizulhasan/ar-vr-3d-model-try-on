@@ -103,9 +103,9 @@ All four use `get_route_access` which has bypassable nonce + no capability check
 
 | # | Issue | File / Line | Fix | Status | Notes |
 |---|---|---|---|---|---|
-| 7.1 | Anonymous closure passed to `remove_filter('upload_dir', ...)` — cannot remove | `api/AR_TRY_ON_Compression_Routes.php:581` | Convert to named function, pair `add_filter` / `remove_filter` by name | ⬜ | |
-| 7.2 | Text domain mismatch — 50 strings use `'atlasaidev'`, slug is `'ar-vr-3d-model-try-on'` | repo-wide | Find & replace `'atlasaidev'` → `'ar-vr-3d-model-try-on'` in all i18n functions. Re-generate `.pot`. | ⬜ | Use `grep -rn "'atlasaidev'"` and audit each — some may be legit non-i18n usages. |
-| 7.3 | Admin menu position 20 collides with core | `admin/AR_TRY_ON_Admin.php:206` | Move under Settings (`add_options_page`) OR set a higher numeric position like `58.5` | ⬜ | If keeping top-level, pick a slot away from core items. |
+| 7.1 | Anonymous closure passed to `remove_filter('upload_dir', ...)` — cannot remove | `api/AR_TRY_ON_Compression_Routes.php` `upload_compressed_file()` | Replaced both closures with the new named instance method `filter_upload_dir_target()`. Target path now lives in `$this->upload_target_path`, set before `add_filter` and cleared after `remove_filter`. | ✅ | |
+| 7.2 | Text domain mismatch — 50 strings use `'atlasaidev'`, slug is `'ar-vr-3d-model-try-on'` | `libs/AtlasAiDev/Insights.php` (46), `libs/AtlasAiDev/Promotions.php` (4) | Replaced all 50 `'atlasaidev'` text-domain literals with `'ar-vr-3d-model-try-on'`. No non-i18n usages of the literal were found. `.pot` regeneration is part of the §8 release step. | ✅ | Library is duplicated from `text-to-speech`'s copy — TTS keeps its own slug. |
+| 7.3 | Admin menu position 20 collides with core | `admin/AR_TRY_ON_Admin.php` `atlas_ar_menu()` | Changed position from `20` (collides with WP core Pages) to the string float `'58.5'` — places AtlasAR in the secondary-band slot used by plugins like Yoast, between Comments (25) and Appearance (60). | ✅ | |
 
 ---
 
