@@ -66,12 +66,10 @@ class AR_TRY_ON_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 
+		// wp-admin/includes/plugin.php is required because is_plugin_active() is used
+		// immediately below in the localize_data array.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		if ( ! function_exists( 'wp_is_mobile' ) ) {
-			require_once ABSPATH . 'wp-includes/vars.php';
 		}
 
 		add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
@@ -119,12 +117,13 @@ class AR_TRY_ON_Admin {
 	public function enqueue_scripts() {
 
 		/**
-		 * Looad script
+		 * Load scripts.
+		 *
+		 * Note: wp-admin/includes/plugin.php is already conditionally loaded by the
+		 * constructor (which runs before this enqueue callback) and is normally already
+		 * loaded by WordPress core during admin requests. Re-loading it here without
+		 * an immediate use violates the wp.org guideline on core file loading (AR-61 §5.1).
 		 */
-
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
 
 		do_action( 'atlas_ar_enqueue_pro_dashboard_scripts' );
 

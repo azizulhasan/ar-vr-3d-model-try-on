@@ -222,9 +222,14 @@ class Client {
 	 * @return void
 	 */
 	protected function set_basename_and_slug() {
-		
-		if ( false === strpos( $this->file, WP_CONTENT_DIR . '/themes/' ) ) {
-			
+
+		// Use get_theme_root() + wp_normalize_path() instead of hardcoded
+		// WP_CONTENT_DIR . '/themes/' so we honor custom theme roots (AR-61 §5.4).
+		$normalized_file        = wp_normalize_path( $this->file );
+		$normalized_themes_root = trailingslashit( wp_normalize_path( get_theme_root() ) );
+
+		if ( false === strpos( $normalized_file, $normalized_themes_root ) ) {
+
 			$this->basename = plugin_basename( $this->file );
 			/** @noinspection SpellCheckingInspection, PhpUnusedLocalVariableInspection */
 			list( $this->slug, $mainfile ) = explode( '/', $this->basename );
@@ -233,8 +238,8 @@ class Client {
 			$this->project_version = $plugin_data['Version'];
 			$this->type = 'plugin';
 		} else {
-			$this->basename = str_replace( WP_CONTENT_DIR . '/themes/', '', $this->file );
-			
+			$this->basename = str_replace( $normalized_themes_root, '', $normalized_file );
+
 			list( $this->slug, $main_file ) = explode( '/', $this->basename );
 			$theme = wp_get_theme( $this->slug );
 			$this->project_version = $theme->version;
