@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -361,6 +361,16 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.0.3 ( 25 May 2026 ) =
+* Security: Fix CVE-2026-8682 — `POST /wp-json/ar_try_on/v1/settings` no longer accepts requests from non-administrators. The shared `get_route_access()` permission callback never enforced a capability check, so any authenticated user (Subscriber and above) could overwrite the `ar_try_on_settings` option. Replaced with per-route `current_user_can( 'manage_options' )` checks on `/settings`, `/demo_preview`, and `/generate_3d_model`, and a per-post `current_user_can( 'edit_post', $post_id )` check on `/get_model_and_settings` writes. Credit to Legion Hunter via Wordfence.
+* Security: Tightened `/get_model_and_settings` so non-admin POSTs can no longer write to arbitrary post meta — the same authorization bypass applied to this endpoint and is now closed.
+* Security: Tightened `/generate_3d_model` so only administrators can trigger Tripo3D / Meshy AI API calls and upload model files.
+* Maintenance: Plugin no longer mis-loads WordPress core files (`wp-admin/includes/plugin.php`, `wp-includes/vars.php`) — every remaining `require_once` now uses a function from the included file immediately afterward.
+* Maintenance: `libs/AtlasAiDev/Client.php` now uses `get_theme_root()` + `wp_normalize_path()` instead of a hardcoded `WP_CONTENT_DIR . '/themes/'`, so the theme/plugin detection honours custom theme roots.
+* Maintenance: Replaced anonymous closures passed to `remove_filter( 'upload_dir', … )` with a named instance callback so the filter actually unregisters after a compressed-file upload.
+* Maintenance: All 50 i18n strings inside `libs/AtlasAiDev/` now use the `ar-vr-3d-model-try-on` text domain (was `atlasaidev`), so translations served by WordPress.org reach them.
+* Maintenance: Admin top-level menu moved from position `20` (which collided with WordPress core's Pages slot) to `'58.5'`, placing AtlasAR alongside other plugin menus.
+
 = 2.0.2 ( 18 May 2026 ) =
 * New: Rename the "View in AR" button store-wide, per product, or per shortcode — "See it in 3D", "Try a 360° view" or any text that fits your store
 * New: Built-in 360° rotation hint — a gentle wiggle (or simple hand-pointer) prompts shoppers to drag the model after a few seconds of inactivity, configurable globally and per product (Mode / Style / Idle Delay)
@@ -623,6 +633,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.0.3 =
+Security release. Fixes CVE-2026-8682 (Missing Authorization on the `/settings` REST endpoint that allowed Subscriber-level users to overwrite plugin settings) and closes the same authorization-bypass class on `/demo_preview`, `/get_model_and_settings`, and `/generate_3d_model`. All sites should update immediately.
 
 = 2.0.2 =
 Polish + bugfix release: rename the "View in AR" button without code, add a built-in 360° rotation hint, fix the pink/orange tint on reflective white 3D models, and resolve the empty-modal issue when navigating between products. Safe to update.
