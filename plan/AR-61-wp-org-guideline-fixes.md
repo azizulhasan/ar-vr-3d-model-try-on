@@ -47,7 +47,7 @@
 |---|---|---|---|---|---|---|
 | 3.1 | MediaPipe WASM from jsDelivr | `includes/AR_TRY_ON_Tryon.php:35` (`CDN_WASM_BASE`) | Bundle WASM locally under `public/js/vendor/mediapipe/` OR add full `== External services ==` disclosure | ⬜ | | Bundling adds ~3 MB; disclosure is easier. |
 | 3.2 | MediaPipe Face model from `storage.googleapis.com` | `includes/AR_TRY_ON_Tryon.php:36` (`CDN_FACE_MODEL`) | Same — local or disclose with Google ToS link | ⬜ | | Model ~3 MB; cache to IndexedDB is fine but first fetch is remote. |
-| 3.3 | DRACO + KTX2 + Lottie loaders from gstatic / jsDelivr | `public/js/google-model-viewer.js:1092` | These come from Google's `<model-viewer>` web component. Self-host the decoders under `public/js/vendor/` and set `*DecoderLocation` overrides | ⬜ | | Plugin already enqueues `<model-viewer>`; just point decoders at local copies. |
+| 3.3 | DRACO + KTX2 + Lottie loaders from gstatic / jsDelivr | `public/js/google-model-viewer.js` | **Bundled locally.** Downloaded DRACO v1.5.6 (~1.1 MB), Basis Universal 2021-04-15-ba1c3e4 (~550 KB), and three.js 0.149.0 LottieLoader.js (~1.4 KB) into `public/js/vendor/decoders/{draco,basis,lottie}/`. Both enqueue paths now override `window.ModelViewerElement.{dracoDecoderLocation, ktx2TranscoderLocation, lottieLoaderLocation}` to those local URLs *before* the model-viewer script runs (`public/js/lazy-load-model-viewer.js` for the public path, `wp_add_inline_script(..., 'before')` for the admin preview path). Total zip impact: ~1.65 MB. | ✅ | | Promotes §3 from "disclosed" to "self-hosted" — wp.org Path A. |
 
 ---
 
@@ -60,7 +60,7 @@
 | 4.3 | `gist.githubusercontent.com/.../text-to-speech-pro.json` | (removed in §2.3) | ✅ | No longer called; nothing to disclose. |
 | 4.4 | `storage.googleapis.com/mediapipe-models/...` | `includes/AR_TRY_ON_Tryon.php` | ✅ | Disclosed in `README.txt` §2. Triggered only by visitor clicking "Try It On". |
 | 4.5 | `cdn.jsdelivr.net/npm/@mediapipe/tasks-vision` | `includes/AR_TRY_ON_Tryon.php` | ✅ | Disclosed in `README.txt` §1. Same trigger as §4.4. |
-| 4.6 | `gstatic.com` (DRACO/KTX2) + `cdn.jsdelivr.net/three` (Lottie) | `public/js/google-model-viewer.js` | ✅ | Disclosed in `README.txt` §3. Only fires when an uploaded GLB uses Draco/KTX2/Lottie. |
+| 4.6 | `gstatic.com` (DRACO/KTX2) + `cdn.jsdelivr.net/three` (Lottie) | (bundled locally in §3.3) | ✅ | No external service contacted anymore — the decoders ship inside the plugin under `public/js/vendor/decoders/`. README.txt §3 now reflects this. |
 | 4.7 | `api.tripo3d.ai` | `generate_3d_model` REST + admin dashboard | ✅ | Disclosed in `README.txt` §4. Admin-only, requires user-supplied API key, requires explicit "Generate" click. |
 | 4.8 | `api.meshy.ai` | Same as 4.7 | ✅ | Disclosed in `README.txt` §5. Same trigger as §4.7. |
 | 4.9 | `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` | `admin/AR_TRY_ON_Admin.php` | ✅ | Disclosed in `README.txt` §8 AND on the admin submenu page itself via a visible `notice notice-info` block. Triggered only by an admin opening the submenu page. |

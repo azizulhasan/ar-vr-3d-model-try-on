@@ -192,6 +192,25 @@ class AR_TRY_ON_Admin {
 
 			// TODO:: enqueue base on model setup/settings
 			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
+
+			// AR-61 §3.3: point Google's <model-viewer> at the
+			// locally-bundled DRACO / KTX2 (Basis) / Lottie decoders
+			// before the component initializes, so admin previews
+			// don't fall back to the gstatic.com / cdn.jsdelivr.net
+			// defaults baked into google-model-viewer.js (~L1092).
+			$decoder_base = ATLAS_AR_PLUGIN_URL . 'public/js/vendor/decoders/';
+			$inline_decoder_config = sprintf(
+				'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
+				'dracoDecoderLocation: %s,' .
+				'ktx2TranscoderLocation: %s,' .
+				'lottieLoaderLocation: %s' .
+				'});',
+				wp_json_encode( $decoder_base . 'draco/' ),
+				wp_json_encode( $decoder_base . 'basis/' ),
+				wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
+			);
+			wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );
+
 			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
 			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->localize_data );
 		}

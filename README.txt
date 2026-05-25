@@ -291,15 +291,18 @@ This plugin connects to the following third-party services. Each service is cont
 * Terms of use: [https://policies.google.com/terms](https://policies.google.com/terms)
 * Privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy)
 
-**3. Google `<model-viewer>` decoders (Google + jsDelivr)**
+**3. Google `<model-viewer>` decoders — bundled locally, not an external service**
 
-* What it is: the DRACO geometry decoder, the KTX2 / Basis texture transcoder, and the three.js Lottie loader. These are defaults inside the bundled `<model-viewer>` web component and only fetch when a 3D model that you upload requires them.
-* When it is contacted: only when a visitor opens a 3D model that uses Draco compression, KTX2 textures, or Lottie animation. Most uploaded GLB files do not use these formats and therefore never trigger a fetch.
-* What is sent: a standard HTTPS GET request for the decoder file. No site, user, or product data is transmitted.
-* URLs: `https://www.gstatic.com/draco/versioned/decoders/1.5.6/`, `https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/`, `https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/LottieLoader.js`.
-* Providers: Google (gstatic.com) and jsDelivr.
-* Terms of use: [https://policies.google.com/terms](https://policies.google.com/terms) · [https://www.jsdelivr.com/terms](https://www.jsdelivr.com/terms)
-* Privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy) · [https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net](https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net)
+The DRACO geometry decoder, the KTX2 / Basis Universal texture transcoder, and the three.js Lottie loader are required by Google's `<model-viewer>` web component when an uploaded GLB uses Draco compression, KTX2 textures, or Lottie animation. By default `<model-viewer>` would fetch these from `gstatic.com` and `cdn.jsdelivr.net`.
+
+To avoid every site having to disclose those CDNs, this plugin ships its own copy of all three decoders under `public/js/vendor/decoders/` and overrides `<model-viewer>`'s default URLs at load time (`window.ModelViewerElement.dracoDecoderLocation`, `ktx2TranscoderLocation`, `lottieLoaderLocation`). No external request is made for any of these files — they are served from the plugin folder on the same host as the site.
+
+Versions bundled:
+* DRACO v1.5.6 (from `gstatic.com`)
+* Basis Universal `2021-04-15-ba1c3e4` (from `gstatic.com`)
+* three.js Lottie loader from `three@0.149.0`
+
+The original upstream URLs are documented here purely so anyone reviewing the bundled copies can verify they match the upstream releases.
 
 **4. Tripo3D API**
 
