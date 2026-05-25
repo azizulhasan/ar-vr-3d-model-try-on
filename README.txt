@@ -351,6 +351,30 @@ This plugin connects to the following third-party services. Each service is cont
 * Privacy policy: [https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
 
 
+== Source code ==
+
+The full, un-minified source for every JavaScript and CSS bundle shipped with this plugin is published in a public GitHub repository:
+
+[https://github.com/azizulhasan/ar-vr-3d-model-try-on](https://github.com/azizulhasan/ar-vr-3d-model-try-on)
+
+That repository contains:
+
+* All PHP source files (also present in the plugin zip).
+* The React dashboard sources under `src/dashboard/` and metabox sources under `src/metabox/`.
+* The vanilla-JS public-side sources (try-on controller, MediaPipe face worker, etc.) under `src/context/`.
+* The Tailwind CSS source at `src/tailwind.css`.
+* The webpack-mix and Gulp build configurations (`webpack.mix.js`, `gulpfile.js`).
+* The exact `package.json` and `composer.json` manifests used to produce the bundled assets.
+
+To rebuild the production assets locally from a clean clone:
+
+`composer install`
+`npm install`
+`npm run production`
+
+This regenerates every minified file shipped under `admin/js/build/` and `public/js/build/`, including the `tryon-face-worker.*.js`, `tryon-controller.*.js`, and `ar-compression-client.min.js` chunks. Each chunk's source files live in the `src/` directory described above.
+
+
 == Installation ==
 
 1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR

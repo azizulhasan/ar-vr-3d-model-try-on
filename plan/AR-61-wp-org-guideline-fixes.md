@@ -27,7 +27,7 @@
 | # | Issue | File(s) | Fix | Status | Owner | Notes |
 |---|---|---|---|---|---|---|
 | 1.1 | Guideline 5 — Trialware: 5-model compression cap | `includes/` (`can_user_compress()`, `prepare_compression()`); REST in `api/AR_TRY_ON_Compression_Routes.php` | Pick one: (a) remove cap entirely from free, or (b) strip the compression flow + REST endpoints out of free and host only in Pro | ⬜ | | Decide a/b before coding. Option (b) is cleaner — matches CLAUDE.md "pro-only" boundary. |
-| 1.2 | Guideline 4 — No public source for minified JS | `public/js/build/chunks/tryon-face-worker.*.js`, `admin/js/build/ar-compression-client.min.js`, `public/js/build/chunks/tryon-controller.*.js` | Add public GitHub repo URL to `readme.txt`, AND/OR ship un-minified `src/` for these chunks. Document build steps. | ⬜ | | Repo link in readme is the lowest-friction path. |
+| 1.2 | Guideline 4 — No public source for minified JS | `public/js/build/chunks/tryon-face-worker.*.js`, `admin/js/build/ar-compression-client.min.js`, `public/js/build/chunks/tryon-controller.*.js` | Added a new `== Source code ==` section to `README.txt` (right after `== External services ==`) pointing at `https://github.com/azizulhasan/ar-vr-3d-model-try-on`. Documents the `src/` layout (dashboard, metabox, context, tailwind.css), the build configs (`webpack.mix.js`, `gulpfile.js`), and the three-command rebuild path (`composer install` → `npm install` → `npm run production`). All three flagged chunk names are explicitly called out. | ✅ | | |
 
 ---
 
