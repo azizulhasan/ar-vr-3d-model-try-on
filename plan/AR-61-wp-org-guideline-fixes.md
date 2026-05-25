@@ -88,14 +88,16 @@ This plugin connects to the following third-party services...
 
 ## 6. REST API security
 
-All four use `get_route_access` which has bypassable nonce + no capability check. Goal: real `current_user_can()` per route + correct `wp_verify_nonce()`.
+All four used the bypassable `get_route_access`. That helper had two bugs: (1) its outer `!isset($_SERVER['HTTP_X_WP_NONCE'])` was inverted, so the actual `wp_verify_nonce()` was unreachable — any nonce header value passed; (2) no `current_user_can()` gate at all. Replaced with two purpose-built callbacks; the legacy `ATLAS_AR_rest_route_access` filter is preserved as a final override (with `WP_REST_Request` added as a 2nd arg).
 
-| # | Route | File / Line | Required cap | Status | Notes |
-|---|---|---|---|---|---|
-| 6.1 | `POST/GET /settings` | `api/AR_TRY_ON_Api_Routes.php:40` | `manage_options` | ⬜ | Reads & updates plugin options |
-| 6.2 | `POST/GET /demo_preview` | `api/AR_TRY_ON_Api_Routes.php:67` | `manage_options` | ⬜ | Returns settings |
-| 6.3 | `POST/GET /get_model_and_settings` | `api/AR_TRY_ON_Api_Routes.php:53` | `edit_post` (per `post_id`) for write, `read` for read | ⬜ | Also writes post meta — split read vs write |
-| 6.4 | `POST/GET /generate_3d_model` | `api/AR_TRY_ON_Api_Routes.php:82` | `upload_files` or `manage_options` | ⬜ | File + network side effects |
+| # | Route | Callback | Required cap | Status |
+|---|---|---|---|---|
+| 6.1 | `/settings` | `check_admin_access()` | `manage_options` | ✅ |
+| 6.2 | `/demo_preview` | `check_admin_access()` | `manage_options` | ✅ |
+| 6.3 | `/get_model_and_settings` | `check_model_settings_access()` | POST → `edit_post` (per `post_id`); admin GET → `manage_options`; frontend GET → public (callback already strips sensitive props via `exclude_sensitive_properties`) | ✅ |
+| 6.4 | `/generate_3d_model` | `check_admin_access()` | `manage_options` (fires Tripo3D / Meshy AI API calls + writes uploads) | ✅ |
+
+Old broken `get_route_access()` deleted. Failing checks now return `WP_Error( 'rest_forbidden', ... )` with `401` for anonymous and `403` for logged-in-but-unauthorized.
 
 ---
 
