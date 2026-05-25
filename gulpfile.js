@@ -31,7 +31,6 @@ const productionSrc = [
 	'!gulpfile.js',
 	'!package.json',
 	'!composer.lock',
-	'!composer.json',
 	'!phpcs.xml',
 	'!.cpanel.yml',
 	'!README.md',
@@ -125,6 +124,18 @@ const config = {
 		src: productionSrc,
 		output:
 			'D://mamp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/'
+	},
+	testArtest: {
+		// `production/ar-vr-3d-model-try-on/**` is populated by the
+		// `copy` task. `testArtest` reads from there (not from the raw
+		// project root) so we ship exactly what would land in the
+		// release zip — no node_modules, no src/, no plan/, etc.
+		// `artest` is a parallel MAMP install used for smoke-testing
+		// the plugin without disturbing the dev source tree.
+		src: 'production/ar-vr-3d-model-try-on/**',
+		base: 'production/ar-vr-3d-model-try-on',
+		output:
+			'D:/mamp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/'
 	},
 	release: {
 		src: productionSrc,
@@ -297,6 +308,41 @@ gulp.task('test', () => {
 			})
 		);
 });
+
+// ---------------------- TEST: ARTEST ----------------------
+//
+// Push the freshly-built production tree to the parallel MAMP "artest"
+// site so we can smoke-test it against a real WordPress install
+// without touching the source tree.
+//
+// Run via `npm run test:artest` — that script chains:
+//   gulp clean:production → gulp copy → gulp clean:testArtest → gulp copyToArtest
+// so the destination is always a clean reflection of what would ship
+// in the release zip (no node_modules, no src/, no plan/, etc.).
+
+gulp.task('clean:testArtest', function () {
+	// del v7+: `force` is required because the target lives outside cwd.
+	return del.deleteAsync([config.testArtest.output + '**'], { force: true });
+});
+
+gulp.task('copyToArtest', () => {
+	return gulp
+		.src(config.testArtest.src, { base: config.testArtest.base })
+		.pipe(gulp.dest(config.testArtest.output))
+		.pipe(
+			notify({
+				message: 'Copied to MAMP "artest" site! 💯',
+				onLast: true
+			})
+		);
+});
+
+// Composite task: clean local production → copy into production/ → wipe the
+// artest plugin folder → push the production tree into it.
+gulp.task(
+	'testArtest',
+	gulp.series('clean:production', 'copy', 'clean:testArtest', 'copyToArtest')
+);
 
 // ---------------------- WATCH ----------------------
 
