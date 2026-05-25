@@ -269,6 +269,68 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 
 
 
+== External services ==
+
+This plugin connects to the following third-party services. Each service is contacted only when the corresponding feature is used. No service receives personal data unless explicitly noted below.
+
+**1. MediaPipe Tasks Vision WASM bundle (Google / jsDelivr)**
+
+* What it is: Google's MediaPipe machine-learning runtime that powers the face-tracking try-on feature.
+* When it is contacted: only after the visitor explicitly clicks the "Try It On" button on a product page. The WASM bundle is then downloaded from `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm` and cached by the browser.
+* What is sent: a standard HTTPS GET request for the static asset. No site, user, or product data is transmitted.
+* Provider: jsDelivr CDN (delivers the file published by Google).
+* Terms of use: [https://www.jsdelivr.com/terms](https://www.jsdelivr.com/terms)
+* Privacy policy: [https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net](https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net)
+
+**2. MediaPipe Face Landmarker model (Google Cloud Storage)**
+
+* What it is: the trained face-landmark model file MediaPipe needs in order to detect faces.
+* When it is contacted: same trigger as the WASM bundle above — only after the visitor clicks "Try It On". The model is then downloaded from `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task` and cached by the browser (and, on supported browsers, in IndexedDB).
+* What is sent: a standard HTTPS GET request for the static asset. No site, user, or product data is transmitted.
+* Provider: Google.
+* Terms of use: [https://policies.google.com/terms](https://policies.google.com/terms)
+* Privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy)
+
+**3. Google `<model-viewer>` decoders (Google + jsDelivr)**
+
+* What it is: the DRACO geometry decoder, the KTX2 / Basis texture transcoder, and the three.js Lottie loader. These are defaults inside the bundled `<model-viewer>` web component and only fetch when a 3D model that you upload requires them.
+* When it is contacted: only when a visitor opens a 3D model that uses Draco compression, KTX2 textures, or Lottie animation. Most uploaded GLB files do not use these formats and therefore never trigger a fetch.
+* What is sent: a standard HTTPS GET request for the decoder file. No site, user, or product data is transmitted.
+* URLs: `https://www.gstatic.com/draco/versioned/decoders/1.5.6/`, `https://www.gstatic.com/basis-universal/versioned/2021-04-15-ba1c3e4/`, `https://cdn.jsdelivr.net/npm/three@0.149.0/examples/jsm/loaders/LottieLoader.js`.
+* Providers: Google (gstatic.com) and jsDelivr.
+* Terms of use: [https://policies.google.com/terms](https://policies.google.com/terms) · [https://www.jsdelivr.com/terms](https://www.jsdelivr.com/terms)
+* Privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy) · [https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net](https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net)
+
+**4. Tripo3D API**
+
+* What it is: a third-party 3D-model generation service.
+* When it is contacted: only after an administrator opens the AtlasAR dashboard, enters a personal Tripo3D API key, and clicks "Generate 3D Model". No call is made until both the key and the explicit user action are in place.
+* What is sent: the text prompt or image the administrator submits, plus the administrator's own Tripo3D API key in the `Authorization` header. No site visitor data, post content, or visitor IP is transmitted.
+* Where requests go: `https://api.tripo3d.ai/v2/openapi/task`.
+* API key sign-up: [https://platform.tripo3d.ai/api-keys](https://platform.tripo3d.ai/api-keys)
+* Terms of service: [https://www.tripo3d.ai/terms-of-service](https://www.tripo3d.ai/terms-of-service)
+* Privacy policy: [https://www.tripo3d.ai/privacy-policy](https://www.tripo3d.ai/privacy-policy)
+
+**5. Meshy AI API**
+
+* What it is: a third-party text/image-to-3D generation service, used as an alternative provider to Tripo3D.
+* When it is contacted: only after an administrator opens the AtlasAR dashboard, enters a personal Meshy AI API key, and clicks "Generate 3D Model" with Meshy selected as the provider. No call is made until both the key and the explicit user action are in place.
+* What is sent: the text prompt or image the administrator submits, plus the administrator's own Meshy AI API key in the `Authorization` header. No site visitor data is transmitted.
+* Where requests go: `https://api.meshy.ai/openapi/v2/text-to-3d`.
+* API key sign-up: [https://www.meshy.ai/settings/api](https://www.meshy.ai/settings/api)
+* Terms of service: [https://www.meshy.ai/terms](https://www.meshy.ai/terms)
+* Privacy policy: [https://www.meshy.ai/privacy](https://www.meshy.ai/privacy)
+
+**6. AtlasAiDev usage statistics (opt-in only)**
+
+* What it is: AtlasAiDev's own anonymous usage-statistics endpoint, used to count active installs and broad WordPress / PHP version distribution.
+* When it is contacted: ONLY if the administrator explicitly opts in from the plugin's admin notice. Default is OFF; nothing is sent if the administrator dismisses the notice or never sees it.
+* What is sent (when opted in): plugin name and version, WordPress version, PHP version, site URL, site name, site language, count of active and inactive plugins, and the administrator's name and email address (for support follow-up). No visitor data, post content, or product data is transmitted.
+* Where requests go: `https://track.atlasaidev.com/wp-json/atlasaidev_tracker/`.
+* Terms of service: [https://atlasaidev.com/terms-and-conditions/](https://atlasaidev.com/terms-and-conditions/)
+* Privacy policy: [https://atlasaidev.com/privacy-policy/](https://atlasaidev.com/privacy-policy/)
+
+
 == Installation ==
 
 1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR

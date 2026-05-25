@@ -435,16 +435,6 @@ class AR_TRY_ON_Admin {
 	}
 
     /**
-     * Remote URL for the plugins.json file.
-     */
-    const ATLAS_PLUGINS_REMOTE_URL = 'https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json';
-
-    /**
-     * Transient key for cached plugin data.
-     */
-    const ATLAS_PLUGINS_TRANSIENT = 'atlas_plugins_remote_data';
-
-    /**
      * Transient key for WP.org plugin info cache.
      */
     const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info_v2';
@@ -455,31 +445,22 @@ class AR_TRY_ON_Admin {
     const ATLAS_PLUGINS_CACHE_TTL = 86400;
 
     /**
-     * Fetch plugin data from GitHub with transient caching.
+     * Get the static list of AtlasAiDev plugins shown on the
+     * "Other plugins" admin submenu.
      *
+     * Historically this method fetched a JSON manifest from
+     * raw.githubusercontent.com so the cross-promo list could be
+     * updated without a plugin release. The WordPress.org Plugins
+     * Team flagged that fetch as unconsented "phoning home" in the
+     * AR-61 closure (Guideline 7), so the network call has been
+     * removed and the local hardcoded list returned by
+     * get_fallback_plugins() is now the sole source of truth in the
+     * free plugin.
+     *
+     * @since 1.0.0
      * @return array List of plugin objects.
      */
     public static function get_atlas_plugins() {
-        $cached = get_transient(self::ATLAS_PLUGINS_TRANSIENT);
-        if (false !== $cached && is_array($cached)) {
-            return $cached;
-        }
-
-        $response = wp_remote_get(self::ATLAS_PLUGINS_REMOTE_URL, array(
-            'timeout' => 10,
-            'headers' => array('Accept' => 'application/json'),
-        ));
-
-        if (!is_wp_error($response) && 200 === wp_remote_retrieve_response_code($response)) {
-            $body = wp_remote_retrieve_body($response);
-            $data = json_decode($body, true);
-            if (is_array($data) && !empty($data)) {
-                set_transient(self::ATLAS_PLUGINS_TRANSIENT, $data, self::ATLAS_PLUGINS_CACHE_TTL);
-                return $data;
-            }
-        }
-
-        // Fallback: hardcoded plugin data.
         return self::get_fallback_plugins();
     }
 
@@ -771,7 +752,12 @@ class AR_TRY_ON_Admin {
     }
 
     /**
-     * AJAX handler to refresh plugin data from remote.
+     * AJAX handler to refresh plugin metadata.
+     *
+     * Since AR-61 the local plugin list is hardcoded and never expires,
+     * so this handler only refreshes the WP.org info cache (ratings /
+     * install counts), which is fetched from api.wordpress.org — a
+     * documented WordPress core service.
      */
     public function ajax_refresh_plugins() {
         check_ajax_referer('atlas_plugins_refresh', 'nonce');
@@ -780,8 +766,6 @@ class AR_TRY_ON_Admin {
             wp_send_json_error('Unauthorized', 403);
         }
 
-        // Delete cached data and re-fetch.
-        delete_transient(self::ATLAS_PLUGINS_TRANSIENT);
         delete_transient(self::ATLAS_PLUGINS_WPORG_TRANSIENT);
         $plugins    = self::get_atlas_plugins();
         $wporg_info = self::get_wporg_info($plugins);

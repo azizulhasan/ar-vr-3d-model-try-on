@@ -62,11 +62,16 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         $this->insights  = $this->client->insights(); // Plugin Insights
         $this->promotion = $this->client->promotions(); // Promo offers
 
-        $this->promotion->set_source( 'https://gist.githubusercontent.com/azizulhasan/afcc74f398b290e586f3a4578341b699/raw/text-to-speech-pro.json' );
+        // AR-61 §2.3: the free plugin no longer fetches the
+        // promotional manifest from gist.githubusercontent.com — that
+        // call was flagged by the WordPress.org Plugins Team as an
+        // undisclosed external service (Guideline 6). The promotion
+        // object is kept instantiated so any add-on that reads it
+        // doesn't break, but no source URL is set and init() is not
+        // called, so no remote fetch occurs.
 
         // Initialize
         $this->insightInit();
-        $this->promotion->init();
 
 
         // Filter updater api data

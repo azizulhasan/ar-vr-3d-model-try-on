@@ -35,9 +35,9 @@
 
 | # | Issue | File(s) / Line | Fix | Status | Owner | Notes |
 |---|---|---|---|---|---|---|
-| 2.1 | Unconsented marketing fetch on admin Plugins page | `admin/AR_TRY_ON_Admin.php:436` (`ATLAS_PLUGINS_REMOTE_URL`) | Remove the call, OR gate it behind explicit opt-in toggle (default OFF) | ⬜ | | Easiest: just delete the cross-promo feature for free. |
-| 2.2 | `icanhazip.com` IP lookup without disclosure | `libs/AtlasAiDev/Insights.php:1383` | Remove call, or disclose in readme + tie to existing opt-in tracker | ⬜ | | Part of the AtlasAiDev library — affects multiple plugins. |
-| 2.3 | GitHub gist promotions fetch | `includes/AR_TRY_ON_Lib_AtlasAiDev.php:65` | Remove, or disclose in readme | ⬜ | | The gist URL is also stale (`text-to-speech-pro.json`). |
+| 2.1 | Unconsented marketing fetch on admin Plugins page | `admin/AR_TRY_ON_Admin.php` (`get_atlas_plugins()` / `ajax_refresh_plugins()`) | Removed. `get_atlas_plugins()` now returns the hardcoded `get_fallback_plugins()` list directly; the remote-URL constant + transient are deleted. AJAX refresh still works — it now only refreshes the api.wordpress.org info cache (a core service). | ✅ | |
+| 2.2 | `icanhazip.com` IP lookup without disclosure | `libs/AtlasAiDev/Insights.php` (`__get_user_ip_address()`) | Method now returns `''` unconditionally in Free. The tracker payload still carries an `ip_address` key for backend schema compatibility, but Free no longer makes the external call. Pro keeps its own copy. | ✅ | |
+| 2.3 | GitHub gist promotions fetch | `includes/AR_TRY_ON_Lib_AtlasAiDev.php` `init()` | Removed both `$this->promotion->set_source(<gist URL>)` and `$this->promotion->init()`. The promotion object is still instantiated so no consumer breaks, but no remote fetch happens. | ✅ | |
 
 ---
 
@@ -55,16 +55,16 @@
 
 | # | Service | Used by | Status | Notes |
 |---|---|---|---|---|
-| 4.1 | `track.atlasaidev.com` | `libs/AtlasAiDev/Client.php:37` | ⬜ | Already opt-in, but needs `== External services ==` entry + ToS/Privacy links |
-| 4.2 | `icanhazip.com` | `libs/AtlasAiDev/Insights.php:1383` | ⬜ | See 2.2 — prefer removal |
-| 4.3 | `gist.githubusercontent.com/.../text-to-speech-pro.json` | `includes/AR_TRY_ON_Lib_AtlasAiDev.php:65` | ⬜ | See 2.3 — prefer removal |
-| 4.4 | `storage.googleapis.com/mediapipe-models/...` | `includes/AR_TRY_ON_Tryon.php:36` | ⬜ | See 3.2 |
-| 4.5 | `cdn.jsdelivr.net/npm/@mediapipe/tasks-vision` | `includes/AR_TRY_ON_Tryon.php:35` | ⬜ | See 3.1 |
-| 4.6 | `gstatic.com` (DRACO/KTX2) + `cdn.jsdelivr.net/three` (Lottie) | `public/js/google-model-viewer.js:1092` | ⬜ | See 3.3 |
-| 4.7 | `api.tripo3d.ai` | `admin/js/build/ar-try-on-dashboard-ui.min.js`, `ar-try-on-metabox-ui.min.js`, `generate_3d_model` REST | ⬜ | Add full disclosure + link to Tripo3D ToS/Privacy. User supplies their own API key, so service-style disclosure applies. |
-| 4.8 | `api.meshy.ai` | Same as 4.7 | ⬜ | Same as Tripo3D. |
-| 4.9 | `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` | `admin/AR_TRY_ON_Admin.php:436` | ⬜ | See 2.1 — prefer removal |
-| 4.10 | MediaPipe `holistic_landmarker.proto` identifier in bundled worker | `public/js/build/chunks/tryon-face-worker.809aa404.js:2` | ⬜ | Likely false positive (see §10.1). We use `face_landmarker`, not holistic — the proto string is dead code inside `@mediapipe/tasks-vision`. Resolved automatically once 3.1 / 4.5 are done. |
+| 4.1 | `track.atlasaidev.com` | `libs/AtlasAiDev/Client.php` | ✅ | Disclosed in `README.txt` §6. Opt-in only, default OFF. |
+| 4.2 | `icanhazip.com` | (removed in §2.2) | ✅ | No longer called; nothing to disclose. |
+| 4.3 | `gist.githubusercontent.com/.../text-to-speech-pro.json` | (removed in §2.3) | ✅ | No longer called; nothing to disclose. |
+| 4.4 | `storage.googleapis.com/mediapipe-models/...` | `includes/AR_TRY_ON_Tryon.php` | ✅ | Disclosed in `README.txt` §2. Triggered only by visitor clicking "Try It On". |
+| 4.5 | `cdn.jsdelivr.net/npm/@mediapipe/tasks-vision` | `includes/AR_TRY_ON_Tryon.php` | ✅ | Disclosed in `README.txt` §1. Same trigger as §4.4. |
+| 4.6 | `gstatic.com` (DRACO/KTX2) + `cdn.jsdelivr.net/three` (Lottie) | `public/js/google-model-viewer.js` | ✅ | Disclosed in `README.txt` §3. Only fires when an uploaded GLB uses Draco/KTX2/Lottie. |
+| 4.7 | `api.tripo3d.ai` | `generate_3d_model` REST + admin dashboard | ✅ | Disclosed in `README.txt` §4. Admin-only, requires user-supplied API key, requires explicit "Generate" click. |
+| 4.8 | `api.meshy.ai` | Same as 4.7 | ✅ | Disclosed in `README.txt` §5. Same trigger as §4.7. |
+| 4.9 | `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` | (removed in §2.1) | ✅ | No longer called; nothing to disclose. |
+| 4.10 | MediaPipe `holistic_landmarker.proto` identifier in bundled worker | `public/js/build/chunks/tryon-face-worker.*.js` | ✅ | False positive (see §10.1). Dead code inside `@mediapipe/tasks-vision`. Will be raised with the reviewer if mentioned. |
 
 Goal: a single readme block like:
 

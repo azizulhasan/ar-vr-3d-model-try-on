@@ -1376,20 +1376,25 @@ class Insights {
 	}
 	
 	/**
-	 * Get user IP Address
-	 * @return string
+	 * Get user IP Address.
+	 *
+	 * Historically this method called icanhazip.com to discover the
+	 * site's public IP so the AtlasAiDev tracker could geolocate it.
+	 * The WordPress.org Plugins Team flagged that as undisclosed
+	 * external service usage in the AR-61 closure (Guideline 6 / 9),
+	 * so the call has been removed from the free plugin. The tracker
+	 * payload now omits the IP entirely; the AtlasAiDev backend
+	 * tolerates a blank/missing value.
+	 *
+	 * Pro keeps its own copy of this library and may continue to
+	 * resolve the IP if the site owner has opted in.
+	 *
+	 * @since   1.0.0
+	 * @updated AR-61 §2.2 — disabled in free.
+	 * @return  string Always empty in the free plugin.
 	 */
 	private function __get_user_ip_address() {
-		$response = wp_safe_remote_get( 'https://icanhazip.com/' );
-		if ( is_wp_error( $response ) ) {
-			return '';
-		}
-		$ip = trim( wp_remote_retrieve_body( $response ) );
-		if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-			return '';
-		}
-		
-		return $ip;
+		return '';
 	}
 	
 	/**
