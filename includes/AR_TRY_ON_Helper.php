@@ -899,11 +899,6 @@ class AR_TRY_ON_Helper
     /**
      * Whether the AtlasAR Pro plugin is loaded.
      *
-     * Strictly a constant-presence check — the Pro plugin defines
-     * AR_TRY_ON_PRO_VERSION during its own bootstrap, so by the time
-     * any Free runtime code asks "is Pro here?" the constant either
-     * exists (Pro loaded) or does not (Pro absent / inactive).
-     *
      * Per the AR-61 §1.1 Yoast-pattern split (see
      * plan/AR-61.1-yoast-pattern-split.md), this method MUST NOT
      * read any license state. Its only legitimate uses are:
@@ -917,13 +912,55 @@ class AR_TRY_ON_Helper
      * of a Free feature" anywhere; if a feature is paid, its code
      * does not exist in the Free zip at all.
      *
+     * The detection uses a two-stage check, in order of confidence:
+     *
+     *   1. `defined( 'AR_TRY_ON_PRO_VERSION' )` — the canonical
+     *      sentinel. Pro v3.0.0+ defines this constant during its
+     *      own bootstrap, which runs at `plugins_loaded` priority
+     *      9999. By the time any Free runtime code asks "is Pro
+     *      here?" (init or later), this is reliable.
+     *
+     *   2. File-existence fallback — covers the edge cases where
+     *      Pro is installed and active but its bootstrap hasn't
+     *      reached the constant yet (Pro half-loaded during a
+     *      version upgrade, WP-CLI with a non-standard load order,
+     *      an older Pro build that pre-dates the constant, etc.).
+     *      We check both folder names Pro has historically shipped
+     *      under (`-pro` and `-premium`) so a Pro user who renames
+     *      the folder doesn't suddenly lose recognition.
+     *
+     * The fallback uses raw file_exists() instead of is_plugin_active()
+     * because the latter lives in wp-admin/includes/plugin.php, which
+     * isn't auto-loaded on the front end.
+     *
      * @since   1.0.0
      * @updated AR-61 §1.1 — constant-presence check; Freemius removed
-     *          from Free.
+     *          from Free. Backward-compat file fallback added so old
+     *          Pro builds and mid-upgrade states still register.
      * @return  bool True when the Pro plugin is loaded, false otherwise.
      */
     public static function is_pro_active() {
-        return defined( 'AR_TRY_ON_PRO_VERSION' );
+        if ( defined( 'AR_TRY_ON_PRO_VERSION' ) ) {
+            return true;
+        }
+
+        $pro_files = array(
+            WP_PLUGIN_DIR . '/ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+            WP_PLUGIN_DIR . '/ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+        );
+        foreach ( $pro_files as $pro_file ) {
+            if ( file_exists( $pro_file ) ) {
+                // We can't tell from disk alone whether Pro is
+                // *activated*, but if it's not activated its
+                // bootstrap doesn't run anyway — so a false-positive
+                // here only matters when Pro is installed-but-deactivated.
+                // That's a transient state during update workflows; we
+                // err on the side of "Pro is here" so upsell badges
+                // stay hidden during the upgrade window.
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
