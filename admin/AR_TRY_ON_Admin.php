@@ -807,28 +807,34 @@ class AR_TRY_ON_Admin {
     /**
      * Atlas Plugins page callback.
      *
-     * Renders the React mount point for the cross-promo "Other plugins"
-     * page, preceded by a visible disclosure notice (AR-61 §2.1 / §4.9).
-     * Visiting this page triggers the cached fetch in
-     * {@see self::get_atlas_plugins()} which contacts
+     * Renders a visible disclosure block at the top of the page
+     * (AR-61 §2.1 / §4.9), followed by the React mount point that the
+     * cross-promo JS hydrates with the "You're using …" header and
+     * the plugin grid. Visiting this page triggers the cached fetch
+     * in {@see self::get_atlas_plugins()} which contacts
      * raw.githubusercontent.com for the AtlasAiDev plugin manifest;
      * no site or user data is sent in that request.
+     *
+     * Important: the disclosure deliberately does NOT use the
+     * `.notice` admin class. WordPress hoists `.notice` elements to
+     * sit right after the first H1/H2 on the page, which would push
+     * the disclosure underneath the JS-rendered "You're using …"
+     * header. Using a plain styled div keeps it where it belongs —
+     * above the header.
      */
     public function atlas_plugins_page()
     {
         $readme_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=ar-vr-3d-model-try-on&section=external_services' );
 
-        $notice  = '<div class="notice notice-info" style="margin-top:1em;">';
-        $notice .= '<p>';
-        $notice .= esc_html__( 'Heads up: this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see "External services" in the readme for details.', 'ar-vr-3d-model-try-on' );
-        $notice .= ' <a href="' . esc_url( $readme_url ) . '" target="_blank" rel="noopener noreferrer">';
-        $notice .= esc_html__( 'View readme', 'ar-vr-3d-model-try-on' );
-        $notice .= '</a>';
-        $notice .= '</p>';
-        $notice .= '</div>';
-
         echo '<div class="wrap">';
-        echo wp_kses_post( $notice );
+        echo '<div class="atlas-cross-promo-disclosure" style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #2271b1;padding:12px 16px;margin:16px 20px 16px 0;max-width:1200px;border-radius:4px;">';
+        echo '<p style="margin:0;font-size:13px;line-height:1.5;color:#1d2327;">';
+        echo esc_html__( 'Heads up: this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see "External services" in the readme for details.', 'ar-vr-3d-model-try-on' );
+        echo ' <a href="' . esc_url( $readme_url ) . '" target="_blank" rel="noopener noreferrer">';
+        echo esc_html__( 'View readme', 'ar-vr-3d-model-try-on' );
+        echo '</a>';
+        echo '</p>';
+        echo '</div>';
         echo '<div id="atlas_plugins_container"></div>';
         echo '</div>';
     }
