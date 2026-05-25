@@ -474,19 +474,23 @@ class AR_TRY_ON_Compression_Routes {
 	}
 
 	/**
-	 * Check if user can compress
+	 * REST handler: report whether the user can still compress models.
 	 *
-	 * @since 1.8.0
-	 * @param WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response Response object.
+	 * AR-61 §1.1 removed the Free count cap; the helper now always
+	 * returns "unlimited / not at limit". The route stays in place
+	 * because the React UI still calls it on mount — they get the
+	 * permissive payload and never render the "limit reached" branch.
+	 *
+	 * @since   1.8.0
+	 * @updated AR-61 §1.1 — count cap removed.
+	 * @param   WP_REST_Request $request Request object.
+	 * @return  \WP_REST_Response Response object.
 	 */
 	public function can_compress( $request ) {
-		$result = AR_TRY_ON_Compression::can_user_compress();
-
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
-				'data'    => $result,
+				'data'    => AR_TRY_ON_Compression::can_user_compress(),
 			),
 			200
 		);

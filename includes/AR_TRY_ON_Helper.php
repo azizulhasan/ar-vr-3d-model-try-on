@@ -896,40 +896,34 @@ class AR_TRY_ON_Helper
         return $post_cache_data;
     }
 
+    /**
+     * Whether the AtlasAR Pro plugin is loaded.
+     *
+     * Strictly a constant-presence check — the Pro plugin defines
+     * AR_TRY_ON_PRO_VERSION during its own bootstrap, so by the time
+     * any Free runtime code asks "is Pro here?" the constant either
+     * exists (Pro loaded) or does not (Pro absent / inactive).
+     *
+     * Per the AR-61 §1.1 Yoast-pattern split (see
+     * plan/AR-61.1-yoast-pattern-split.md), this method MUST NOT
+     * read any license state. Its only legitimate uses are:
+     *
+     *   - hiding upsell badges and notices when Pro is installed, and
+     *   - delegating optional add-on behaviour to Pro classes when
+     *     those classes exist.
+     *
+     * It MUST NOT be used to gate any feature that ships in Free.
+     * Free is fully functional standalone — there is no "Pro version
+     * of a Free feature" anywhere; if a feature is paid, its code
+     * does not exist in the Free zip at all.
+     *
+     * @since   1.0.0
+     * @updated AR-61 §1.1 — constant-presence check; Freemius removed
+     *          from Free.
+     * @return  bool True when the Pro plugin is loaded, false otherwise.
+     */
     public static function is_pro_active() {
-
-        // Freemius gate — trial active OR paid license.
-        // The `__premium_only` suffix tells the Freemius deploy script
-        // to strip this entire block from the Free zip, so on Free
-        // builds this method always returns false after trial expiry.
-        if ( function_exists( 'av3mto_fs' ) && av3mto_fs()->can_use_premium_code__premium_only() ) {
-            return true;
-        }
-
-        return false;
-
-        // Legacy folder-based detection — superseded by the Freemius
-        // gate above. Kept commented for reference.
-        //
-        // if (!function_exists('is_plugin_active')) {
-        //     include_once ABSPATH . 'wp-admin/includes/plugin.php';
-        // }
-        //
-        // $pro_plugins = [
-        //     'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
-        //     'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
-        // ];
-        //
-        // $status = false;
-        //
-        // foreach ($pro_plugins as $plugin) {
-        //     if (is_plugin_active($plugin)) {
-        //         $status = true;
-        //         break; // Exit loop as soon as one active plugin is found
-        //     }
-        // }
-        //
-        // return $status;
+        return defined( 'AR_TRY_ON_PRO_VERSION' );
     }
 
     /**

@@ -35,11 +35,16 @@ class AR_TRY_ON_Tryon {
 	const CDN_WASM_BASE  = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm';
 	const CDN_FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
 
-	/**
-	 * Free-tier limit on the number of face-* (Try-On) products. Pro
-	 * removes the cap entirely. Tunable via filter.
+	/*
+	 * AR-61 §1.1 removed the FREE_FACE_PRODUCT_LIMIT cap (3 face-*
+	 * products), the silent placement downgrade in
+	 * enforce_free_cap_after_save() and the admin notice in
+	 * render_cap_notice(). Face Try-On is now an unlimited Free
+	 * feature; Pro still adds advanced face features (head-pose
+	 * tracking, multi-face, HD watermark-free snapshots, live
+	 * calibration) but those are separate, additive code paths in
+	 * the Pro plugin — they no longer manifest as caps on Free.
 	 */
-	const FREE_FACE_PRODUCT_LIMIT = 3;
 
 	/** @var string */
 	protected $version;
@@ -110,10 +115,8 @@ class AR_TRY_ON_Tryon {
 	public function register() {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ), 20 );
 
-		// Cap enforcement — Free tier is limited to N face-* products.
-		add_action( 'updated_post_meta', array( $this, 'enforce_free_cap_after_save' ), 10, 4 );
-		add_action( 'added_post_meta',   array( $this, 'enforce_free_cap_after_save' ), 10, 4 );
-		add_action( 'admin_notices',     array( $this, 'render_cap_notice' ) );
+		// Face-product cap enforcement and the related admin notice were
+		// removed in AR-61 §1.1 — Face Try-On is unlimited in Free now.
 
 		// "Show Button In" controls where the Try-On button appears.
 		// Numeric values 1-7 map to WC action hooks. Toggle-mode values
@@ -253,159 +256,43 @@ class AR_TRY_ON_Tryon {
 		return isset( $ps['src'] ) ? (string) $ps['src'] : '';
 	}
 
-	/* ---------- Free-tier product cap ---------- */
-
+	/**
+	 * Whether the AtlasAR Pro plugin is loaded.
+	 *
+	 * Thin wrapper around {@see AR_TRY_ON_Helper::is_pro_active()} —
+	 * kept on this class because several call-sites elsewhere in the
+	 * codebase reach for `AR_TRY_ON_Tryon::is_pro_active()`. The
+	 * underlying check is a constant-presence check (see Helper); it
+	 * is allowed to hide upsell badges and conditionally delegate
+	 * optional behaviour to Pro classes, never to gate a Free feature.
+	 *
+	 * @since   2.0.0
+	 * @updated AR-61 §1.1
+	 * @return  bool True when the Pro plugin is loaded, false otherwise.
+	 */
 	public static function is_pro_active() {
-		// Centralized check — handles both `-pro` and `-premium` folder
-		// layouts and lazy-loads wp-admin/includes/plugin.php when called
-		// from the front-end.
 		return (bool) AR_TRY_ON_Helper::is_pro_active();
 	}
 
-	public static function free_face_product_limit() {
-		return (int) apply_filters( 'atlas_ar_tryon_free_product_limit', self::FREE_FACE_PRODUCT_LIMIT );
-	}
-
-	/**
-	 * Count published products whose `ar_placement` starts with `face-`.
-	 * Excludes a specific post id so the metabox save-time check can
-	 * report "post-save count if I save this one".
-	 */
-	public static function count_face_products( $exclude_id = 0 ) {
-		$cache_key = 'atlas_ar_tryon_face_count_' . (int) $exclude_id;
-		$cached    = wp_cache_get( $cache_key, 'atlas_ar' );
-		if ( false !== $cached ) {
-			return (int) $cached;
-		}
-
-		global $wpdb;
-		$exclude_id = (int) $exclude_id;
-		$sql = "
-			SELECT COUNT(DISTINCT p.ID)
-			FROM {$wpdb->posts} p
-			INNER JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID
-			WHERE p.post_type = 'product'
-			AND p.post_status IN ('publish','draft','pending','future','private')
-			AND pm.meta_key = 'ar_try_on_product_settings'
-			AND pm.meta_value LIKE %s
-		";
-		$params = array( '%s:12:"ar_placement";s:%face-%' );
-
-		// LIKE pattern needs to match serialized array containing
-		// `s:12:"ar_placement";s:N:"face-...";`. We use a coarse LIKE
-		// against the substring `"ar_placement";s:` followed by `"face-`.
-		$pattern = '%"ar_placement";s:%"face-%';
-		$prepared = $wpdb->prepare( $sql, $pattern );
-
-		if ( $exclude_id > 0 ) {
-			$prepared = preg_replace(
-				'/WHERE/',
-				"WHERE p.ID != " . $exclude_id . " AND",
-				$prepared,
-				1
-			);
-		}
-
-		$count = (int) $wpdb->get_var( $prepared );
-		wp_cache_set( $cache_key, $count, 'atlas_ar', 30 );
-		return $count;
-	}
-
-	/**
-	 * Returns true when adding/keeping a face-* placement on `$post_id`
-	 * would exceed the Free-tier product cap. Pro is always allowed.
-	 */
-	public static function would_exceed_free_cap( $post_id ) {
-		if ( self::is_pro_active() ) {
-			return false;
-		}
-		$current = self::count_face_products( $post_id );
-		return $current >= self::free_face_product_limit();
-	}
-
-	/**
-	 * Hook handler for `updated_post_meta` / `added_post_meta`.
+	/*
+	 * Free-tier face-product cap helpers REMOVED in AR-61 §1.1 —
+	 * Face Try-On is now an unlimited Free feature. The previous
+	 * implementation silently downgraded the 4th face product's
+	 * placement to `floor` and rendered a "Upgrade to Pro for
+	 * unlimited Try-On products" admin notice, which is the textbook
+	 * wp.org Guideline 5 (Trialware) violation pattern.
 	 *
-	 * When a product is saved with `ar_placement = face-*` and the Free
-	 * cap is already at limit (excluding this product), silently downgrade
-	 * the placement to `floor` and stash a notice for the admin.
-	 *
-	 * Pro is always allowed past the cap. The recursion guard prevents
-	 * the rewrite from re-triggering this handler.
+	 * Removed methods:
+	 *   - free_face_product_limit()
+	 *   - count_face_products( $exclude_id = 0 )
+	 *   - would_exceed_free_cap( $post_id )
+	 *   - enforce_free_cap_after_save( ... )  — `updated_post_meta` / `added_post_meta` handler
+	 *   - render_cap_notice()                 — `admin_notices` handler
+	 * Removed filter:
+	 *   - atlas_ar_tryon_free_product_limit
+	 * Removed transient key:
+	 *   - atlas_ar_tryon_cap_notice_<user_id>
 	 */
-	public function enforce_free_cap_after_save( $meta_id, $post_id, $meta_key, $meta_value ) {
-		if ( $meta_key !== 'ar_try_on_product_settings' ) {
-			return;
-		}
-		if ( self::is_pro_active() ) {
-			return;
-		}
-		static $reentry = false;
-		if ( $reentry ) {
-			return;
-		}
-
-		$ps = is_array( $meta_value ) ? $meta_value : maybe_unserialize( $meta_value );
-		if ( ! is_array( $ps ) || empty( $ps['ar_placement'] ) ) {
-			return;
-		}
-		if ( ! self::is_face_placement( $ps['ar_placement'] ) ) {
-			return;
-		}
-
-		$limit   = self::free_face_product_limit();
-		$current = self::count_face_products( $post_id );
-		if ( $current < $limit ) {
-			return;
-		}
-
-		// Downgrade placement to floor.
-		$ps['ar_placement'] = 'floor';
-		$reentry = true;
-		update_post_meta( $post_id, 'ar_try_on_product_settings', $ps );
-		$reentry = false;
-
-		set_transient(
-			'atlas_ar_tryon_cap_notice_' . get_current_user_id(),
-			array(
-				'product_id' => (int) $post_id,
-				'limit'      => $limit,
-				'time'       => time(),
-			),
-			60
-		);
-	}
-
-	/**
-	 * Surface the cap-hit notice in admin when the merchant lands on the
-	 * next page after a save that got downgraded.
-	 */
-	public function render_cap_notice() {
-		$key  = 'atlas_ar_tryon_cap_notice_' . get_current_user_id();
-		$data = get_transient( $key );
-		if ( ! $data || empty( $data['product_id'] ) ) {
-			return;
-		}
-		delete_transient( $key );
-		$pid   = (int) $data['product_id'];
-		$limit = (int) $data['limit'];
-		$title = get_the_title( $pid );
-		?>
-		<div class="notice notice-warning is-dismissible">
-			<p>
-				<strong>AtlasAR Try-On limit reached.</strong>
-				<?php
-				printf(
-					/* translators: %1$s product title, %2$d cap */
-					esc_html__( 'The Free version supports up to %2$d face Try-On products. "%1$s" was saved with the standard Floor placement instead. Upgrade to Pro for unlimited Try-On products.', 'ar-vr-3d-model-try-on' ),
-					esc_html( $title ),
-					$limit
-				);
-				?>
-			</p>
-		</div>
-		<?php
-	}
 
 	/**
 	 * Returns the post ID we should treat as "the current product" on a

@@ -55,6 +55,12 @@ const productionSrc = [
 	'!admin/js/ar-compression-client.js',
 	// Internal docs that should never reach customer installs.
 	'!plan/**',
+	// Freemius SDK is no longer used by the free plugin (AR-61 §1.1
+	// removed all license logic from Free; the Pro plugin keeps its
+	// own copy of the SDK). The vendor directory may still exist in
+	// the dev working tree for historical reference, but it must NOT
+	// land in the production zip.
+	'!vendor/freemius/**',
 	// Try-On JS sources — webpack bundles these into
 	// `public/js/build/tryon-bootstrap.dist.js` + chunks at build
 	// time. The raw sources are never loaded by customers, only by

@@ -55,73 +55,21 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/AR_TRY_ON_Admin_Notice.php'
 
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
-/**
- * Is plugin active
+/*
+ * Freemius SDK and the Free-side license bootstrap were removed in
+ * AR-61 §1.1 (the Yoast-pattern split). The free plugin has no license
+ * check, no premium-version handshake, and no trial counter — it is
+ * fully functional standalone for every user.
+ *
+ * The Pro plugin (ar-vr-3d-model-try-on-pro) keeps its own copy of the
+ * Freemius SDK and handles all license / subscription state there. No
+ * Pro upgrade ever requires this Free plugin to "talk to" Freemius.
+ *
+ * Historical implementations of av3mto_fs() / fs_dynamic_init() that
+ * used to live in this block are preserved in git history; recover
+ * with `git show 7d7848a^:ar-vr-3d-model-try-on.php` (the commit just
+ * before AR-61 §1.1 work began) if ever needed.
  */
-function atlas_ar_is_pro_plugin_exists() {
-    $plugin_path = \WP_PLUGIN_DIR;
-    $pro_plugins = [
-        '/ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
-        '/ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
-    ];
-
-    foreach ( $pro_plugins as $pro_plugin ) {
-        if ( file_exists( $plugin_path . $pro_plugin ) ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-//if (  ! function_exists( 'av3mto_fs' ) ) {
-if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
-	// Create a helper function for easy SDK access.
-	function av3mto_fs() {
-		global $av3mto_fs;
-
-		if ( ! isset( $av3mto_fs ) ) {
-			// Activate multisite network integration.
-			if ( ! defined( 'WP_FS__PRODUCT_18159_MULTISITE' ) ) {
-				define( 'WP_FS__PRODUCT_18159_MULTISITE', true );
-			}
-
-			// Include Freemius SDK.
-			require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
-			$av3mto_fs = fs_dynamic_init( array(
-				'id'                  => '18159',
-				'slug'                => 'ar-vr-3d-model-try-on',
-				'type'                => 'plugin',
-				'public_key'          => 'pk_28cf95aad28914518f7065b97bbe4',
-				'is_premium'          => false,
-                'has_premium_version' => true,
-                'has_paid_plans'      => true,
-				'has_addons'          => false,
-                'has_affiliation'     => 'all',
-                'trial'               => array(
-                    'days'               => 14,
-                    'is_require_payment' => false,
-                ),
-				'menu'                => array(
-					'slug'           => 'ar-vr-3d-model-try-on',
-					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',
-                    'support' => 1,
-                    'pricing' => 1,
-					'contact' => true,
-					'account' => true,
-				),
-			) );
-		}
-
-		return $av3mto_fs;
-	}
-
-	// Init Freemius.
-	av3mto_fs();
-	// Signal that SDK was initiated.
-	do_action( 'av3mto_fs_loaded' );
-}
 
 /**
  * Currently plugin version.

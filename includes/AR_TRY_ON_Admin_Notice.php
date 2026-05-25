@@ -425,19 +425,13 @@ class AR_TRY_ON_Admin_Notice {
 				'icon'          => '🎁',
 				'dismissible'   => true,
 				'condition'     => function() {
-					// Hide once Pro is active (trial running, or fully paid).
+					// Hide once Pro is active. The trial-utilized check that
+					// used to live here was driven by Free's Freemius SDK,
+					// which AR-61 §1.1 removed — the trial workflow now lives
+					// entirely in the Pro plugin, so Free can only know
+					// "Pro is here or not" via the constant check below.
 					if ( AR_TRY_ON_Helper::is_pro_active() ) {
 						return false;
-					}
-					// Hide if the merchant has already burned their trial —
-					// Freemius tracks `is_trial_utilized` per-install.
-					if ( function_exists( 'av3mto_fs' ) ) {
-						try {
-							$fs = av3mto_fs();
-							if ( $fs && method_exists( $fs, 'is_trial_utilized' ) && $fs->is_trial_utilized() ) {
-								return false;
-							}
-						} catch ( \Throwable $e ) { /* no-op — fall through to show */ }
 					}
 					return true;
 				},
