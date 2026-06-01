@@ -251,10 +251,18 @@ gulp.task('makePot', () => {
 
 // ---------------------- COPY / ZIP ----------------------
 
-// Copy plugin files to production folder
+// Copy plugin files to production folder.
+//
+// `encoding: false` is REQUIRED — without it Vinyl v3 (shipped with
+// gulp v5) reads file contents as UTF-8 text and corrupts every
+// binary file in the tree: PNGs, WebPs, fonts, .wasm decoder blobs,
+// .pot translation binaries, etc. Symptom is files that look ~2×
+// their original size in the destination and don't display. AR-61
+// §1.1 Phase 3 smoke-test caught this on artest where every image
+// under admin/images/ was twice the source size and unreadable.
 gulp.task('copy', () => {
 	return gulp
-		.src(config.copy.src, { base: '.' })
+		.src(config.copy.src, { base: '.', encoding: false })
 		.pipe(gulp.dest(config.copy.output))
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }));
 });
@@ -263,7 +271,7 @@ gulp.task('copy', () => {
 // This avoids re-reading from a potentially broken production folder.
 gulp.task('zip', () => {
 	return gulp
-		.src(config.zip.src, { base: '.', allowEmpty: true })
+		.src(config.zip.src, { base: '.', allowEmpty: true, encoding: false })
 		.pipe(zip(config.zip.file_name + '.zip', config.zip.options))
 		.pipe(gulp.dest(config.zip.dist))
 		.pipe(
@@ -293,7 +301,7 @@ gulp.task('copyProButton', () => {
 
 gulp.task('release', () => {
 	return gulp
-		.src(config.release.src, { base: '.' })
+		.src(config.release.src, { base: '.', encoding: false })
 		.pipe(gulp.dest(config.release.output))
 		.pipe(
 			notify({
@@ -305,7 +313,7 @@ gulp.task('release', () => {
 
 gulp.task('test', () => {
 	return gulp
-		.src(config.test.src, { base: '.' })
+		.src(config.test.src, { base: '.', encoding: false })
 		.pipe(gulp.dest(config.test.output))
 		.pipe(
 			notify({
@@ -333,7 +341,7 @@ gulp.task('clean:testArtest', function () {
 
 gulp.task('copyToArtest', () => {
 	return gulp
-		.src(config.testArtest.src, { base: config.testArtest.base })
+		.src(config.testArtest.src, { base: config.testArtest.base, encoding: false })
 		.pipe(gulp.dest(config.testArtest.output))
 		.pipe(
 			notify({
