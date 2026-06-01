@@ -56,7 +56,15 @@ class AR_TRY_ON_Public {
 	 */
 	private $version;
 
-	private $localize_data = [];
+	/**
+	 * Backing cache for {@see self::get_localize_data()}. Built once
+	 * per request on the first enqueue call so Pro's filter listeners
+	 * (registered via the `atlas_ar_loaded` action — AR-61 §1.1 Phase 4)
+	 * have had a chance to hook in before Free reads the filter values.
+	 *
+	 * @var array|null
+	 */
+	private $localize_data = null;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -74,29 +82,10 @@ class AR_TRY_ON_Public {
 		$this->version       = $version;
 
 
-		$this->localize_data = [
-			'api_url'       => esc_url_raw( rest_url() ),
-			'api_namespace' => 'ar_try_on',
-			'api_version'   => 'v1',
-			'nonce'         => wp_create_nonce( ATLAS_AR_NONCE ),
-			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
-			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
-			'VERSION'       => ATLAS_AR_VERSION,
-			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
-			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
-            'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
-            'img'           => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
-
-			/*
-			 * Phase 3 extension-surface payload — kept symmetric with
-			 * the admin-side localize_data so public-bundle code
-			 * (current and future) can read the same Pro-extension
-			 * data without a second REST round-trip.
-			 */
-			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
-			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
-			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
-		];
+		// `localize_data` is built lazily by get_localize_data()
+		// rather than here in the constructor — see the long comment
+		// in AR_TRY_ON_Admin's constructor for why. AR-61 §1.1 Phase 4.
+		$this->localize_data = null;
 
 
 		// Add "type=module" attribute
@@ -108,6 +97,50 @@ class AR_TRY_ON_Public {
 			return $tag;
 		}, 10, 3 );
 
+	}
+
+	/**
+	 * Build (or return the cached copy of) the wp_localize_script
+	 * payload for the public bundle.
+	 *
+	 * Mirrors {@see AR_TRY_ON_Admin::get_localize_data()} on the
+	 * public side. Lazy by design — the Phase 3 filter-driven keys
+	 * (supported_formats, dashboard_tabs, metabox_sections) are read
+	 * here at enqueue time, by which point Pro has had a chance to
+	 * register its filter listeners via the `atlas_ar_loaded` action.
+	 *
+	 * @since   1.0.0
+	 * @updated AR-61 §1.1 Phase 4
+	 * @return  array
+	 */
+	private function get_localize_data() {
+		if ( null !== $this->localize_data ) {
+			return $this->localize_data;
+		}
+		$this->localize_data = [
+			'api_url'       => esc_url_raw( rest_url() ),
+			'api_namespace' => 'ar_try_on',
+			'api_version'   => 'v1',
+			'nonce'         => wp_create_nonce( ATLAS_AR_NONCE ),
+			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
+			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
+			'VERSION'       => ATLAS_AR_VERSION,
+			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
+			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
+			'cached_ids'    => AR_TRY_ON_Helper::update_cache_data( false ),
+			'img'           => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
+
+			/*
+			 * Phase 3 extension-surface payload — kept symmetric with
+			 * the admin-side localize_data so public-bundle code
+			 * (current and future) can read the same Pro-extension
+			 * data without a second REST round-trip.
+			 */
+			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
+			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
+		];
+		return $this->localize_data;
 	}
 
 	/**
@@ -191,10 +224,10 @@ class AR_TRY_ON_Public {
 		// Model-viewer will load only when AR content becomes visible in viewport
 		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
 		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
-		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
+		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->get_localize_data() );
 
 		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
-		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->localize_data );
+		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->get_localize_data() );
 	}
 
 	/**

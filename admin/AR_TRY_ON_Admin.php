@@ -67,13 +67,49 @@ class AR_TRY_ON_Admin {
 		$this->version     = $version;
 
 		// wp-admin/includes/plugin.php is required because is_plugin_active() is used
-		// immediately below in the localize_data array.
+		// in get_localize_data() below.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
 		add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
 
+		// `localize_data` is intentionally NOT built here in the
+		// constructor. It is built lazily by get_localize_data() on
+		// the first enqueue call.
+		//
+		// Why: the Phase 3 extension-surface keys (supported_formats,
+		// dashboard_tabs, metabox_sections) are produced by
+		// apply_filters() calls. The Pro plugin registers those filter
+		// listeners on Free's `atlas_ar_loaded` action — which fires
+		// LATE in the `init` hook chain. The constructor runs during
+		// `init` priority 10, BEFORE Pro's listener has had a chance
+		// to register. Building localize_data here would freeze the
+		// Free-default values into the JS payload and silently break
+		// Phase 4. Building it on `admin_enqueue_scripts` (the actual
+		// localize-script trigger) reads the filters AFTER Pro has
+		// hooked them. AR-61 §1.1 Phase 4.
+		$this->localize_data = null;
+	}
+
+	/**
+	 * Build (or return the cached copy of) the wp_localize_script
+	 * payload for the Admin bundles.
+	 *
+	 * Cached for the duration of a single request — `localize_data`
+	 * is set to null in the constructor; the first enqueue call
+	 * populates it; subsequent enqueue calls reuse the value so each
+	 * bundle gets a consistent payload.
+	 *
+	 * @since   1.0.0
+	 * @updated AR-61 §1.1 Phase 4 — deferred from __construct() so
+	 *          Pro's filter listeners can extend the payload.
+	 * @return  array
+	 */
+	private function get_localize_data() {
+		if ( null !== $this->localize_data ) {
+			return $this->localize_data;
+		}
 		$this->localize_data = [
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
@@ -88,16 +124,21 @@ class AR_TRY_ON_Admin {
 			'is_admin'      => is_admin(),
 
 			/*
-			 * Phase 3 extension-surface payload — React reads these and
-			 * lets Pro extend the UI without importing Pro code.
+			 * Phase 3 extension-surface payload — React reads these
+			 * and lets Pro extend the UI without importing Pro code.
 			 *
-			 * Forward-stable per backward-compat rule 8: new keys may be
-			 * added, existing key shape is frozen.
+			 * Forward-stable per backward-compat rule 8: new keys may
+			 * be added, existing key shape is frozen.
+			 *
+			 * These three keys ARE the reason this builder is lazy.
+			 * Pro's filter listeners must be in place before these
+			 * calls run; see the deferral note in __construct().
 			 */
 			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
 			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
 			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
 		];
+		return $this->localize_data;
 	}
 
 
@@ -141,7 +182,7 @@ class AR_TRY_ON_Admin {
 		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
 			/* Load react js */
 			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
-			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
+			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->get_localize_data() );
 		}
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
@@ -149,7 +190,7 @@ class AR_TRY_ON_Admin {
 			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 
 			// Add WooCommerce product variation data if on product edit page
-			$metabox_localize_data = $this->localize_data;
+			$metabox_localize_data = $this->get_localize_data();
 			$metabox_localize_data['wc_product'] = $this->get_wc_product_data();
 
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $metabox_localize_data );
@@ -222,7 +263,7 @@ class AR_TRY_ON_Admin {
 			wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );
 
 			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
-			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->localize_data );
+			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->get_localize_data() );
 		}
 	}
 
