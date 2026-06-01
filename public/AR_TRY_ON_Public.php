@@ -82,10 +82,20 @@ class AR_TRY_ON_Public {
 			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
-			'plugin_url'       => ATLAS_AR_PLUGIN_URL,
+			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
             'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
-            'img'    => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
+            'img'           => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
+
+			/*
+			 * Phase 3 extension-surface payload — kept symmetric with
+			 * the admin-side localize_data so public-bundle code
+			 * (current and future) can read the same Pro-extension
+			 * data without a second REST round-trip.
+			 */
+			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
+			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
 		];
 
 

@@ -1077,5 +1077,167 @@ class AR_TRY_ON_Helper
         return file_exists( $file_path ) ? $file_url : false;
     }
 
+    /**
+     * Default descriptors for the dashboard's top-level navigation.
+     *
+     * Each entry is `{ id, label, icon? }`. Order in the array is the
+     * order shown in the dashboard sidebar. React reads this from
+     * `ar_try_on.dashboard_tabs` (localized).
+     *
+     * Pro appends its own entries (e.g. "Bulk Compression", "Analytics")
+     * via the `atlas_ar_dashboard_settings_tabs` filter. The React
+     * dashboard maps unknown `id`s to either a Pro-provided component
+     * (when Pro localizes one alongside) or to a graceful "feature is
+     * available in Pro" badge slot.
+     *
+     * @since AR-61 §1.1 Phase 3
+     * @return array<int,array{id:string,label:string,icon?:string}>
+     */
+    public static function dashboard_settings_tabs() {
+        $free_tabs = array(
+            array( 'id' => 'overview',      'label' => 'Overview' ),
+            array( 'id' => 'settings',      'label' => 'Settings' ),
+            array( 'id' => 'integration',   'label' => 'Integration' ),
+            array( 'id' => 'features',      'label' => 'Features' ),
+            array( 'id' => 'documentation', 'label' => 'Documentation' ),
+            array( 'id' => 'contact',       'label' => 'Contact Us' ),
+        );
+
+        /**
+         * Filter: atlas_ar_dashboard_settings_tabs
+         *
+         * Lets Pro and add-ons append tabs to the React dashboard.
+         * Returning an entry whose `id` matches an existing one
+         * replaces that entry (last-write-wins). Returning new ids
+         * appends them after the Free defaults.
+         *
+         * @param array<int,array{id:string,label:string,icon?:string}> $tabs
+         */
+        $tabs = apply_filters( 'atlas_ar_dashboard_settings_tabs', $free_tabs );
+
+        // Defensive: shape-check each entry; drop anything malformed.
+        if ( ! is_array( $tabs ) ) {
+            $tabs = $free_tabs;
+        }
+        $clean = array();
+        foreach ( $tabs as $tab ) {
+            if ( ! is_array( $tab ) || empty( $tab['id'] ) || empty( $tab['label'] ) ) {
+                continue;
+            }
+            $clean[] = array(
+                'id'    => (string) $tab['id'],
+                'label' => (string) $tab['label'],
+                'icon'  => isset( $tab['icon'] ) ? (string) $tab['icon'] : '',
+            );
+        }
+        return $clean;
+    }
+
+    /**
+     * Default descriptors for the per-product metabox section list.
+     *
+     * Each entry is `{ id, label, kind }` where `kind` is one of:
+     *   - 'editor' — Free ships a real editor for this section. The
+     *                React metabox renders the matching component.
+     *   - 'pro'    — the feature is Pro-only. Free's React component
+     *                renders a <PremiumBadge>; Pro replaces it with
+     *                the real editor either by adding its own React
+     *                runtime or by adjusting the entry to 'editor'.
+     *
+     * @since AR-61 §1.1 Phase 3
+     * @return array<int,array{id:string,label:string,kind:string}>
+     */
+    public static function metabox_sections() {
+        $free_sections = array(
+            array( 'id' => 'content',     'label' => 'Content',          'kind' => 'editor' ),
+            array( 'id' => 'style',       'label' => 'Style',            'kind' => 'editor' ),
+            array( 'id' => 'camera',      'label' => 'Camera',           'kind' => 'editor' ),
+            array( 'id' => 'light',       'label' => 'Light & Environment', 'kind' => 'editor' ),
+            array( 'id' => 'integration', 'label' => 'Integration',      'kind' => 'editor' ),
+            array( 'id' => 'compression', 'label' => 'Model Compression', 'kind' => 'editor' ),
+            // Pro-only sections: Free ships the section file as a
+            // PremiumBadge slot; Pro registers an 'editor' override.
+            array( 'id' => 'dimensions',  'label' => 'Dimensions', 'kind' => 'pro' ),
+            array( 'id' => 'hotspots',    'label' => 'Hotspots',   'kind' => 'pro' ),
+            array( 'id' => 'slider',      'label' => 'Slider',     'kind' => 'pro' ),
+        );
+
+        /**
+         * Filter: atlas_ar_metabox_sections
+         *
+         * Lets Pro upgrade Pro-only sections to 'editor' kind (by
+         * returning the same `id` with `kind = 'editor'`) and append
+         * new sections (e.g. variation-models editor in Pro).
+         *
+         * @param array<int,array{id:string,label:string,kind:string}> $sections
+         */
+        $sections = apply_filters( 'atlas_ar_metabox_sections', $free_sections );
+
+        if ( ! is_array( $sections ) ) {
+            $sections = $free_sections;
+        }
+        $clean = array();
+        foreach ( $sections as $section ) {
+            if ( ! is_array( $section ) || empty( $section['id'] ) || empty( $section['label'] ) ) {
+                continue;
+            }
+            $kind = isset( $section['kind'] ) ? (string) $section['kind'] : 'editor';
+            if ( ! in_array( $kind, array( 'editor', 'pro' ), true ) ) {
+                $kind = 'editor';
+            }
+            $clean[] = array(
+                'id'    => (string) $section['id'],
+                'label' => (string) $section['label'],
+                'kind'  => $kind,
+            );
+        }
+        return $clean;
+    }
+
+    /**
+     * The list of 3D-model file formats this site can compress.
+     *
+     * Free returns the formats it natively supports — `glb` and `gltf`,
+     * which are what `admin/js/ar-compression-client.js` can run through
+     * the browser-side gltf-transform pipeline.
+     *
+     * Pro adds its own formats (FBX, OBJ, USDZ) by hooking the
+     * `atlas_ar_supported_formats` filter and pushing extra entries.
+     * The filter shape is intentionally simple — a flat array of lower-
+     * case file-extension strings, no leading dot — so anyone hooking it
+     * can do array_merge without thinking about associative-vs-numeric
+     * keys.
+     *
+     * @since AR-61 §1.1 Phase 3
+     * @return array<int,string> Lower-case file extensions, no leading dot.
+     *                           Order is "Free formats first, hooked
+     *                           formats appended" but consumers should
+     *                           not depend on order.
+     */
+    public static function supported_formats() {
+        $free_formats = array( 'glb', 'gltf' );
+
+        /**
+         * Filter: atlas_ar_supported_formats
+         *
+         * Lets Pro and third-party add-ons register additional 3D-model
+         * file formats. Pro v3.x adds FBX, OBJ, USDZ via its format
+         * converter.
+         *
+         * @param array<int,string> $formats Lower-case extensions, no dot.
+         */
+        $formats = apply_filters( 'atlas_ar_supported_formats', $free_formats );
+
+        // Defensive guards — a misbehaving filter must not crash the
+        // dashboard. Cast to array, force-lowercase strings, dedupe.
+        if ( ! is_array( $formats ) ) {
+            $formats = $free_formats;
+        }
+        $formats = array_values( array_unique( array_filter( array_map( static function ( $ext ) {
+            return is_string( $ext ) ? strtolower( ltrim( $ext, '.' ) ) : '';
+        }, $formats ) ) ) );
+
+        return $formats;
+    }
 
 }

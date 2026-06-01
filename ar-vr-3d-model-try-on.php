@@ -209,6 +209,27 @@ function atlas_ar_run() {
 			exit;
 		}
 	} );
+
+	/**
+	 * Action: atlas_ar_loaded
+	 *
+	 * Fires at the end of Free's `init`-priority bootstrap, after every
+	 * Free subsystem (main class, AtlasAiDev lib, REST routes, Tryon
+	 * runtime, Admin Notice system) has been wired up. This is the
+	 * documented hook Pro should use to plug itself into Free —
+	 * preferred over class_exists() / is_pro_active() polling because
+	 * it gives Pro a predictable timing point that arrives after every
+	 * Free hook is in place.
+	 *
+	 * Pro listens with:
+	 *
+	 *   add_action( 'atlas_ar_loaded', array( $this, 'init' ) );
+	 *
+	 * The action fires unconditionally (Free always emits it), so Pro's
+	 * presence is not required for the action to exist — third-party
+	 * add-ons can listen too. AR-61 §1.1 Phase 3.
+	 */
+	do_action( 'atlas_ar_loaded' );
 }
 
 // Add custom cron schedule for compression queue processing

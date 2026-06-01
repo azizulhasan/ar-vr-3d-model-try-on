@@ -85,8 +85,18 @@ class AR_TRY_ON_Admin {
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
-			'is_admin' => is_admin(),
+			'is_admin'      => is_admin(),
 
+			/*
+			 * Phase 3 extension-surface payload — React reads these and
+			 * lets Pro extend the UI without importing Pro code.
+			 *
+			 * Forward-stable per backward-compat rule 8: new keys may be
+			 * added, existing key shape is frozen.
+			 */
+			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
+			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
 		];
 	}
 
