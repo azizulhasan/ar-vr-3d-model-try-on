@@ -7,6 +7,8 @@
 **Branch (pro):** `feature/AR-61` off `develop`
 **Deadline:** 60 days from 2026-05-20 (≈ 2026-07-19) before public guideline-violation tag goes live.
 
+**Current status (2026-06-01):** every section in this tracker is ✅. The remediation work is complete on `feature/AR-61` in both Free and Pro repos; the only thing standing between the branch and a wp.org re-review is the §8 release workflow (version bump → Plugin Check → SVN → reply email). See `plan/AR-61.1-yoast-pattern-split.md` for the Yoast-pattern split that drove §1.1, and the [AR-61 commit log](https://github.com/azizulhasan/ar-vr-3d-model-try-on/commits/feature/AR-61) for the chronological landing record.
+
 ---
 
 ## Status legend
@@ -26,7 +28,7 @@
 
 | # | Issue | File(s) | Fix | Status | Owner | Notes |
 |---|---|---|---|---|---|---|
-| 1.1 | Guideline 5 — Trialware: 5-model compression cap | `includes/` (`can_user_compress()`, `prepare_compression()`); REST in `api/AR_TRY_ON_Compression_Routes.php` | Pick one: (a) remove cap entirely from free, or (b) strip the compression flow + REST endpoints out of free and host only in Pro | ⬜ | | Decide a/b before coding. Option (b) is cleaner — matches CLAUDE.md "pro-only" boundary. |
+| 1.1 | Guideline 5 — Trialware: 5-model compression cap + 3-face-product cap + multiple Pro-only PHP stubs + Freemius in Free | repo-wide PHP and React (`includes/`, `admin/`, `src/`) | Resolved by the Yoast-pattern split in `plan/AR-61.1-yoast-pattern-split.md` (Phases 1–4). The 5-model cap, the 3-face-product cap, the `compress_server_side/convert_format/add_to_queue/process_queue` Pro-only stubs, and the entire Freemius bootstrap were stripped from Free (Phase 1 — commits `5d6bde4` + `9034eaf`). Every locked React control became a passive `<PremiumBadge>` link (Phase 2 — `179ef8f`). Free now emits `atlas_ar_loaded` + four extension filters (Phase 3 — `cc713f8`). Pro hooks all four filters via `AR_TRY_ON_Pro_Bridge` on the Pro repo (Phase 4 — Free side `d5dee8a`, Pro side `5621474`). End-to-end verified on artest with Pro both active and inactive (task #29 / #34). | ✅ | | Done. |
 | 1.2 | Guideline 4 — No public source for minified JS | `public/js/build/chunks/tryon-face-worker.*.js`, `admin/js/build/ar-compression-client.min.js`, `public/js/build/chunks/tryon-controller.*.js` | Added a new `== Source code ==` section to `README.txt` (right after `== External services ==`) pointing at `https://github.com/azizulhasan/ar-vr-3d-model-try-on`. Documents the `src/` layout (dashboard, metabox, context, tailwind.css), the build configs (`webpack.mix.js`, `gulpfile.js`), and the three-command rebuild path (`composer install` → `npm install` → `npm run production`). All three flagged chunk names are explicitly called out. | ✅ | | |
 
 ---

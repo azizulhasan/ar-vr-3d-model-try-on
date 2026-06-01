@@ -420,7 +420,7 @@ class AR_TRY_ON_Admin_Notice {
 			array(
 				'id'            => 'promo_notice',
 				'title'         => '🎁 Try AtlasAR Pro Free for 14 Days — No Card Required',
-				'message'       => 'Unlock the full Pro feature set for 2 weeks on us: <strong>unlimited AtlasTryOn products</strong> (glasses & caps), <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, and <strong>GLB compression</strong>. Cancel any time — no automatic charge after the trial.',
+				'message'       => 'Unlock the full Pro feature set for 2 weeks on us: <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, <strong>server-side compression for large GLBs</strong>, <strong>FBX / OBJ / USDZ format conversion</strong>, <strong>interactive hotspots editor</strong>, <strong>real-world dimensions in AR</strong>, and <strong>per-variation model swap</strong>. Cancel any time — no automatic charge after the trial.',
 				'type'          => 'info',
 				'icon'          => '🎁',
 				'dismissible'   => true,
