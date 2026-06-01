@@ -920,23 +920,31 @@ class AR_TRY_ON_Helper
      *      9999. By the time any Free runtime code asks "is Pro
      *      here?" (init or later), this is reliable.
      *
-     *   2. File-existence fallback — covers the edge cases where
-     *      Pro is installed and active but its bootstrap hasn't
-     *      reached the constant yet (Pro half-loaded during a
-     *      version upgrade, WP-CLI with a non-standard load order,
-     *      an older Pro build that pre-dates the constant, etc.).
-     *      We check both folder names Pro has historically shipped
-     *      under (`-pro` and `-premium`) so a Pro user who renames
-     *      the folder doesn't suddenly lose recognition.
+     *   2. `active_plugins` option fallback — covers the rare case
+     *      where Pro is registered as active but its bootstrap
+     *      hasn't yet defined the constant (mid-upgrade, WP-CLI
+     *      with a non-standard load order, an older Pro build
+     *      that pre-dates the constant). We check the option
+     *      directly instead of calling `is_plugin_active()` so
+     *      the method is safe on the front end (where
+     *      wp-admin/includes/plugin.php isn't auto-loaded).
      *
-     * The fallback uses raw file_exists() instead of is_plugin_active()
-     * because the latter lives in wp-admin/includes/plugin.php, which
-     * isn't auto-loaded on the front end.
+     * Important: the previous file_exists() fallback was REPLACED
+     * with the active_plugins check during AR-61 §1.1 Phase 2
+     * smoke-testing. file_exists() returned true for any site that
+     * had Pro on disk but deactivated (for example after a trial)
+     * — which silently hid every upsell badge in Free's UI, the
+     * exact opposite of what should happen. active_plugins
+     * correctly distinguishes "installed but deactivated" from
+     * "active and running".
      *
      * @since   1.0.0
      * @updated AR-61 §1.1 — constant-presence check; Freemius removed
-     *          from Free. Backward-compat file fallback added so old
-     *          Pro builds and mid-upgrade states still register.
+     *          from Free.
+     * @updated AR-61 §1.1 Phase 2 smoke-test — fallback switched
+     *          from file_exists() to active_plugins lookup so
+     *          deactivated-but-installed Pro doesn't masquerade
+     *          as active.
      * @return  bool True when the Pro plugin is loaded, false otherwise.
      */
     public static function is_pro_active() {
@@ -944,19 +952,13 @@ class AR_TRY_ON_Helper
             return true;
         }
 
-        $pro_files = array(
-            WP_PLUGIN_DIR . '/ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
-            WP_PLUGIN_DIR . '/ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+        $active   = (array) get_option( 'active_plugins', array() );
+        $pro_keys = array(
+            'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+            'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
         );
-        foreach ( $pro_files as $pro_file ) {
-            if ( file_exists( $pro_file ) ) {
-                // We can't tell from disk alone whether Pro is
-                // *activated*, but if it's not activated its
-                // bootstrap doesn't run anyway — so a false-positive
-                // here only matters when Pro is installed-but-deactivated.
-                // That's a transient state during update workflows; we
-                // err on the side of "Pro is here" so upsell badges
-                // stay hidden during the upgrade window.
+        foreach ( $pro_keys as $pro_key ) {
+            if ( in_array( $pro_key, $active, true ) ) {
                 return true;
             }
         }
