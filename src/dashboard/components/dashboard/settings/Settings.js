@@ -12,6 +12,7 @@ import Switch from "./Switch";
 import MultiSelect from "./MultiSelect";
 import BorderCard from "./BorderCard";
 import TryonSettings from "./TryonSettings";
+import PremiumBadge, { isProActive } from "../../../../context/PremiumBadge";
 
 
 export default function Settings({ settings, handleChange }) {
@@ -194,7 +195,29 @@ export default function Settings({ settings, handleChange }) {
           {/* Description */}
           <p className="art-text-sm art-text-gray-400 art-leading-snug">
             Choose which post types will support AR Try-On functionality.
+            {!isProActive() && (
+              <>
+                {' '}AtlasAR Free supports one post type at a time;
+                AtlasAR Pro lets you enable AR on any combination.
+              </>
+            )}
           </p>
+
+          {/*
+           * AR-61 §1.1 Phase 2 — when Pro is absent, render a single
+           * upfront upsell badge so the merchant knows the multi-select
+           * caps at one entry BEFORE they try to pick two and hit the
+           * App.js rejection toast. The cap itself stays enforced in
+           * App.js (defense-in-depth); this badge just makes the limit
+           * visible up-front instead of silent-then-failing.
+           */}
+          {!isProActive() && (
+            <PremiumBadge feature="multi-post-type">
+              <strong>Enable AR on multiple post types</strong> — products,
+              posts, pages, and any custom post type at once. Available in
+              AtlasAR Pro.
+            </PremiumBadge>
+          )}
         </BorderCard>
 
         {/* Dropdown Section */}

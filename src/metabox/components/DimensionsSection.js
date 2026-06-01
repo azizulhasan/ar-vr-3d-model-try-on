@@ -2,6 +2,7 @@ import {useState, useEffect, useCallback} from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
 import {convertLength} from '../../context/utilities';
 import notify from "../../context/Notify";
+import PremiumBadge, { isProActive } from "../../context/PremiumBadge";
 
 
 export const DimensionsSection = ({
@@ -13,18 +14,44 @@ export const DimensionsSection = ({
                                       handleChange,
                                       isProductModelLoaded,
                                   }) => {
-    const [showEditor] = useState(true);
-    const [hasShownWarning, setHasShownWarning] = useState(false);
+    // AR-61 §1.1 Phase 2 — when Pro is absent, the entire section
+    // collapses to a single upsell badge that links to the pricing
+    // page. The dimension editor body below only renders when Pro
+    // is loaded. The previous "changes will appear in preview but
+    // won't be saved" toast was the Yoast-pattern anti-pattern (a
+    // selectable control that silently fails); it is gone.
+    if (!isProActive()) {
+        return (
+            <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
+                <button
+                    type="button"
+                    onClick={() => toggleAccordion("dimensions")}
+                    className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+                >
+          <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
+            Dimensions
+          </span>
+                    <AccordionIcon status={activeAccordion.dimensions}/>
+                </button>
+                {activeAccordion.dimensions && (
+                    <div className="art-px-3 art-py-2 art-bg-white art-border-t">
+                        <PremiumBadge feature="dimensions">
+                            <strong>Real-world dimensions</strong> render the model at its
+                            true size in AR — customers can hold their phone up and
+                            instantly see "will this fit?". Available in AtlasAR Pro.
+                        </PremiumBadge>
+                    </div>
+                )}
+            </div>
+        );
+    }
 
-    // Show warning when user interacts with dimensions in free version
-    const showProWarning = () => {
-        if (!ar_try_on.is_pro_active && !hasShownWarning) {
-            notify('Dimensions is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
-                autoClose: 5000,
-            });
-            setHasShownWarning(true);
-        }
-    };
+    const [showEditor] = useState(true);
+
+    // Kept as a no-op so the existing call sites below still type-check.
+    // With the Pro gate at the top of the component this code path is
+    // only ever reached when Pro IS active, so no warning ever needed.
+    const showProWarning = () => {};
 
     useEffect(() => {
         function updateHeightWithPreview() {
