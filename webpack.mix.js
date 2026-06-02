@@ -26,12 +26,24 @@ mix.minify('public/js/tryon/glb-anatomy.js');
 
 mix.webpackConfig({
     output: {
-        // Route chunks to a path based on chunk name. Try-on chunks include
-        // a contenthash in the filename so every rebuild produces a unique
-        // URL — prevents browsers from holding on to a stale chunk file
-        // whose webpack runtime IDs no longer match the freshly-built
-        // bootstrap.dist.js. The cleanup hook below wipes orphaned files
-        // each build so the chunks dir doesn't grow forever.
+        // `publicPath: 'auto'` lets webpack resolve dynamic-import
+        // chunk URLs against the location of the entry script at
+        // runtime (via `document.currentScript.src`). Without this,
+        // chunks like the Draco encoder lazy-loaded by
+        // `ar-compression-client.js` would be requested from
+        // `/admin/js/build/chunks/...` relative to the site root
+        // instead of relative to the plugin URL — which 404s on any
+        // WordPress install that isn't at the root of its domain.
+        // Caught during Pro-active compression smoke-test 2026-06.
+        publicPath: 'auto',
+
+        // Route chunks to a path based on chunk name. Try-on chunks
+        // include a contenthash in the filename so every rebuild
+        // produces a unique URL — prevents browsers from holding on
+        // to a stale chunk file whose webpack runtime IDs no longer
+        // match the freshly-built bootstrap.dist.js. The cleanup
+        // hook below wipes orphaned files each build so the chunks
+        // dir doesn't grow forever.
         chunkFilename: (pathData) => {
             const name = (pathData.chunk && pathData.chunk.name) || '';
             if (/tryon|landmarker|mediapipe/i.test(name)) {
@@ -100,13 +112,20 @@ mix.webpackConfig({
                         }
                     });
 
-                    // Delete unwanted folders. Note: public/js/build/chunks is
-                    // INTENTIONALLY kept — it holds the lazy-loaded try-on
-                    // controller and MediaPipe worker.
+                    // Delete unwanted folders. Note: public/js/build/chunks
+                    // AND admin/js/build/chunks are BOTH intentionally kept
+                    // — public hosts the lazy-loaded try-on controller and
+                    // MediaPipe worker; admin hosts the Draco-encoder chunk
+                    // that `ar-compression-client.js` dynamic-imports at
+                    // compression time. Deleting either folder breaks the
+                    // matching feature with a `ChunkLoadError: Loading
+                    // chunk N failed`. Caught during Pro-active compression
+                    // smoke-test 2026-06 — used to include
+                    // 'admin/js/build/chunks' in this list, which silently
+                    // broke Draco compression for every Pro user.
                     const unwantedFolders = [
                         'admin/js/build/ar-try-on-dashboard-ui.min',
                         'admin/js/build/ar-try-on-metabox-ui.min',
-                        'admin/js/build/chunks'
                     ];
 
                     unwantedFolders.forEach(folder => {

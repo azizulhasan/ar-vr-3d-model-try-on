@@ -382,18 +382,27 @@ class AR_TRY_ON_Compression {
 	public static function delete_compressed_files( $post_id ) {
 		$paths = self::get_upload_paths( $post_id );
 
-		// Delete files
+		// Delete files (use wp_delete_file() per WordPress.org guidelines).
 		$deleted = true;
 		if ( file_exists( $paths['original'] ) ) {
-			$deleted = $deleted && unlink( $paths['original'] );
+			wp_delete_file( $paths['original'] );
+			$deleted = $deleted && ! file_exists( $paths['original'] );
 		}
 		if ( file_exists( $paths['compressed'] ) ) {
-			$deleted = $deleted && unlink( $paths['compressed'] );
+			wp_delete_file( $paths['compressed'] );
+			$deleted = $deleted && ! file_exists( $paths['compressed'] );
 		}
 
-		// Delete directory if empty
+		// Delete directory if empty (WP_Filesystem handles rmdir under the hood).
 		if ( is_dir( $paths['post_dir'] ) && count( scandir( $paths['post_dir'] ) ) === 2 ) {
-			rmdir( $paths['post_dir'] );
+			global $wp_filesystem;
+			if ( empty( $wp_filesystem ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				WP_Filesystem();
+			}
+			if ( ! empty( $wp_filesystem ) ) {
+				$wp_filesystem->rmdir( $paths['post_dir'] );
+			}
 		}
 
 		// Delete from database

@@ -411,7 +411,7 @@ class AR_TRY_ON_Helper
             <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
                 <div style="height:100%;width:100%;"
                      id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
-                <?php echo $tryon_overlay_html; ?>
+                <?php echo wp_kses_post( $tryon_overlay_html ); ?>
                 <script type="module">
                     document.addEventListener("DOMContentLoaded", async function () {
                         let atlasAR = new window.AtlasAR()
@@ -759,19 +759,18 @@ class AR_TRY_ON_Helper
                 $response = wp_remote_get($url, ['timeout' => 90]);
 
                 if (is_wp_error($response)) {
-                    error_log(print_r("Failed to download $file_key: " . $response->get_error_message(), true));
+                    // Skip on error — no debug logging in production.
                     continue;
                 }
 
                 $body = wp_remote_retrieve_body($response);
 
                 if (empty($body)) {
-                    error_log(print_r("Empty body for $file_key", true));
                     continue;
                 }
 
                 // Extract filename from URL
-                $filename = basename(parse_url($url, PHP_URL_PATH));
+                $filename = basename(wp_parse_url($url, PHP_URL_PATH));
 
                 // Save file
                 $file_full_path = trailingslashit($file_path) . $file_key . '__' . $filename;
@@ -826,8 +825,19 @@ class AR_TRY_ON_Helper
                 wp_mkdir_p($target_dir);
             }
 
-            // move file
-            rename($file_path, $target_path);
+            // move file via WP_Filesystem (or fallback to copy+delete).
+            global $wp_filesystem;
+            if ( empty( $wp_filesystem ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                WP_Filesystem();
+            }
+            if ( ! empty( $wp_filesystem ) && method_exists( $wp_filesystem, 'move' ) ) {
+                $wp_filesystem->move( $file_path, $target_path, true );
+            } else {
+                if ( copy( $file_path, $target_path ) ) {
+                    wp_delete_file( $file_path );
+                }
+            }
 
             $final_files[$file_key]['path'] = $target_path;
             $final_files[$file_key]['url'] = $target_url;
@@ -839,7 +849,7 @@ class AR_TRY_ON_Helper
     public static function get_post_date($post_id)
     {
         $post_date = get_post_field('post_date', $post_id);
-        $date = date('Y/m/d', strtotime($post_date));
+        $date = gmdate('Y/m/d', strtotime($post_date));
 
         return $date;
     }

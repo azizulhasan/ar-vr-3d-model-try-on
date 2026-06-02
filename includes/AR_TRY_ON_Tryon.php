@@ -819,13 +819,13 @@ class AR_TRY_ON_Tryon {
 <script id="atlas-ar-dyn-buttons-sampler">
 (function(){
 	"use strict";
-	var ids = <?php echo $ids_json; ?>;
+	var ids = <?php echo $ids_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() output, safe for inline JS literal. ?>;
 	// When this sentinel ID is in the list, the sampler treats
 	// document.documentElement as the wrapper — so CSS vars
 	// cascade to overlay buttons that live outside any
 	// `.atlas-ar-dyn-buttons` element (see `tryon.css` for the
 	// `.art-tryon-image-overlay` rule that uses these vars).
-	var DOC_ROOT = <?php echo $sentinel_json; ?>;
+	var DOC_ROOT = <?php echo $sentinel_json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() output, safe for inline JS literal. ?>;
 	function isTransparent(c){return !c||c==="transparent"||/^rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(c);}
 	function makeProbe(classes){
 		var p=document.createElement("a");

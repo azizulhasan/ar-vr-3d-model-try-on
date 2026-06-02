@@ -1,6 +1,9 @@
 <?php
 
 namespace AR_TRY_ON;
+
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Fired during plugin activation
  *

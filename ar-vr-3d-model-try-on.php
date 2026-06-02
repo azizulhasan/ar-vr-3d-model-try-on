@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           2.0.3
+ * Version:           2.1.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -93,9 +93,10 @@ if ( ! defined( 'ATLAS_AR_ROOT_FILE' ) ) {
 }
 
 if ( ! defined( 'ATLAS_AR_ROOT_FILE_NAME' ) ) {
-	$path = explode( DIRECTORY_SEPARATOR, ATLAS_AR_ROOT_FILE );
-	$file = end( $path );
-	define( 'ATLAS_AR_ROOT_FILE_NAME', $file );
+	$atlas_ar_path = explode( DIRECTORY_SEPARATOR, ATLAS_AR_ROOT_FILE );
+	$atlas_ar_file = end( $atlas_ar_path );
+	define( 'ATLAS_AR_ROOT_FILE_NAME', $atlas_ar_file );
+	unset( $atlas_ar_path, $atlas_ar_file );
 }
 
 if ( ! defined( 'ATLAS_AR_ADMIN_PATH' ) ) {
@@ -110,18 +111,19 @@ if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 
 
 if ( ! defined( 'ATLAS_AR_PLUGIN_URL' ) ) {
-	$url         = 'https://playground.wordpress.net';
-	$url_preview = 'http://playground.wordpress.net';
+	$atlas_ar_https        = 'https://playground.wordpress.net';
+	$atlas_ar_http_preview = 'http://playground.wordpress.net';
 
-	$site_url = plugin_dir_url( ATLAS_AR_ROOT_FILE );
-	$site_url = str_replace( $url_preview, $url, $site_url );
+	$atlas_ar_site_url = plugin_dir_url( ATLAS_AR_ROOT_FILE );
+	$atlas_ar_site_url = str_replace( $atlas_ar_http_preview, $atlas_ar_https, $atlas_ar_site_url );
 	/**
 	 * Plugin Directory URL
 	 *
 	 * @var string
 	 * @since 1.2.2
 	 */
-	define( 'ATLAS_AR_PLUGIN_URL', trailingslashit( $site_url ) );
+	define( 'ATLAS_AR_PLUGIN_URL', trailingslashit( $atlas_ar_site_url ) );
+	unset( $atlas_ar_https, $atlas_ar_http_preview, $atlas_ar_site_url );
 }
 
 if ( ! defined( 'ATLAS_AR_PLUGIN_PATH' ) ) {
@@ -147,7 +149,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.0.3' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.1.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
@@ -201,13 +203,25 @@ function atlas_ar_run() {
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();
 
-	// Admin action to manually create compression database tables
+	// Admin action to manually create compression database tables.
 	add_action( 'admin_init', function() {
-		if ( isset( $_GET['ar_create_compression_tables'] ) && current_user_can( 'manage_options' ) ) {
-			AR_TRY_ON_Compression_DB::init();
-			wp_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
-			exit;
+		// Read-only superglobal access guarded by capability + nonce checks below;
+		// the GET flag itself carries no untrusted payload — just toggles the action.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified on the next line.
+		if ( ! isset( $_GET['ar_create_compression_tables'] ) ) {
+			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified explicitly below.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'ar_create_compression_tables' ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		AR_TRY_ON_Compression_DB::init();
+		wp_safe_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
+		exit;
 	} );
 
 	/**

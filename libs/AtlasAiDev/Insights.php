@@ -477,7 +477,7 @@ class Insights {
 			$notice .= ' (<a class="' . $this->client->getSlug() . '-insights-data-we-collect" href="#">' . esc_html__( 'what we collect', 'ar-vr-3d-model-try-on' ) . '</a>)';
 			$notice .= '<p class="description" style="display:none;">' . implode( ', ', $this->data_we_collect() ) . '. ' . esc_html__( 'No sensitive data is tracked.', 'ar-vr-3d-model-try-on' ) . '</p>';
 			echo '<div class="updated"><p>';
-			echo $notice; // phpcs:ignore xss ok
+			echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $notice is composed from esc_html__/esc_html with controlled HTML wrappers.
 			echo '</p><p class="submit">';
 			echo '&nbsp;<a href="' . esc_url( $this->get_opt_out_url() ) . '" class="button button-secondary">' . esc_html__( 'No thanks', 'ar-vr-3d-model-try-on' ) . '</a>';
 			echo '&nbsp;<a href="' . esc_url( $this->get_opt_in_url() ) . '" class="button button-primary">' . esc_html__( 'Allow', 'ar-vr-3d-model-try-on' ) . '</a>';
@@ -587,7 +587,7 @@ class Insights {
 	private function __get_server_info() {
 		global $wpdb;
 		$server_data = [
-			'software'             => ( isset( $_SERVER['SERVER_SOFTWARE'] ) && ! empty( $_SERVER['SERVER_SOFTWARE'] ) ) ? sanitize_text_field( $_SERVER['SERVER_SOFTWARE'] ) : 'N/A',
+			'software'             => ( isset( $_SERVER['SERVER_SOFTWARE'] ) && ! empty( $_SERVER['SERVER_SOFTWARE'] ) ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : 'N/A',
 			'php_version'          => ( function_exists( 'phpversion' ) ) ? phpversion() : 'N/A',
 			'mysql_version'        => $wpdb->db_version(),
 			'php_execution_time'   => @ini_get( 'max_execution_time' ), // phpcs:ignore
@@ -815,8 +815,8 @@ class Insights {
 		// @TODO remove deprecated data after server update
 		$data = [
 			'hash'          => $this->client->getHash(), // TODO need to check what is the output of this
-			'reason_id'     => isset( $_REQUEST['reason_id'] ) && ! empty( $_REQUEST['reason_id'] ) ? sanitize_text_field( $_REQUEST['reason_id'] ) : '',
-			'reason_info'   => isset( $_REQUEST['reason_info'] ) ? trim( sanitize_textarea_field( $_REQUEST['reason_info'] ) ) : '',
+			'reason_id'     => isset( $_REQUEST['reason_id'] ) && ! empty( $_REQUEST['reason_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['reason_id'] ) ) : '',
+			'reason_info'   => isset( $_REQUEST['reason_info'] ) ? trim( sanitize_textarea_field( wp_unslash( $_REQUEST['reason_info'] ) ) ) : '',
 			'plugin'        => $this->client->getName(),
 			'site'          => $this->__get_site_name(),
 			'url'           => esc_url( home_url() ),
@@ -827,7 +827,7 @@ class Insights {
 			'first_name'    => ( ! empty( $current_user->first_name ) ) ? $current_user->first_name : $current_user->display_name,
 			'last_name'     => $current_user->last_name,
 			'server'        => $this->__get_server_info(),
-			'software'      => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( $_SERVER['SERVER_SOFTWARE'] ) : 'Generic', // deprecated, using $data['server'] for wp info.
+			'software'      => isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : 'Generic', // deprecated, using $data['server'] for wp info.
 			'php_version'   => phpversion(), // deprecated, using $data['server'] for wp info.
 			'mysql_version' => $wpdb->db_version(), // deprecated, using $data['server'] for wp info.
 			'wp'            => $this->__get_wp_info(),
@@ -866,24 +866,24 @@ class Insights {
 		if (
 			isset( $_REQUEST['name'], $_REQUEST['email'], $_REQUEST['subject'], $_REQUEST['website'], $_REQUEST['message'] ) &&
 			(
-				! empty( sanitize_text_field( $_REQUEST['name'] ) ) &&
-				! empty( sanitize_email( $_REQUEST['email'] ) ) &&
-				! empty( sanitize_text_field( $_REQUEST['subject'] ) ) &&
-				! empty( sanitize_text_field( $_REQUEST['website'] ) ) &&
-				! empty( sanitize_text_field( $_REQUEST['message'] ) )
+				! empty( sanitize_text_field( wp_unslash( $_REQUEST['name'] ) ) ) &&
+				! empty( sanitize_email( wp_unslash( $_REQUEST['email'] ) ) ) &&
+				! empty( sanitize_text_field( wp_unslash( $_REQUEST['subject'] ) ) ) &&
+				! empty( sanitize_text_field( wp_unslash( $_REQUEST['website'] ) ) ) &&
+				! empty( sanitize_text_field( wp_unslash( $_REQUEST['message'] ) ) )
 			)
 		) {
 			$headers = [
 				'Content-Type: text/html; charset=UTF-8',
 				sprintf(
 				    'From: %s <%s>',
-					sanitize_text_field( $_REQUEST['name'] ),
-					sanitize_email( $_REQUEST['email'] )
+					sanitize_text_field( wp_unslash( $_REQUEST['name'] ) ),
+					sanitize_email( wp_unslash( $_REQUEST['email'] ) )
 				),
 				sprintf(
     				'Reply-To: %s <%s>',
-					sanitize_text_field( $_REQUEST['name'] ),
-					sanitize_text_field( $_REQUEST['email'] )
+					sanitize_text_field( wp_unslash( $_REQUEST['name'] ) ),
+					sanitize_text_field( wp_unslash( $_REQUEST['email'] ) )
 				),
 			];
 			
@@ -901,7 +901,7 @@ class Insights {
 				$this->ticketTemplate = str_replace( [ $k ], [ $v ], $this->ticketTemplate );
 			}
 			$projectSlug = $this->client->getSlug();
-			$isSent = wp_mail( $this->ticketRecipient, sanitize_text_field( $_REQUEST['subject'] ), sprintf( '<div>%s</div>', $this->ticketTemplate ), $headers );// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
+			$isSent = wp_mail( $this->ticketRecipient, sanitize_text_field( wp_unslash( $_REQUEST['subject'] ) ), sprintf( '<div>%s</div>', $this->ticketTemplate ), $headers );// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
 			if ( $isSent ) {
 				/**
 				 * Set Ajax Success Response for Support Ticket Submission
@@ -1454,7 +1454,7 @@ class Insights {
 	 */
 	public function get_current_admin_url()
 	{
-		return admin_url(basename($_SERVER['REQUEST_URI']));
+		return admin_url( basename( isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '' ) );
 	}
 }
 // End of file Insights.php.

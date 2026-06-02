@@ -281,13 +281,13 @@ class AR_TRY_ON {
              class="woocommerce-product-gallery__image"
              style="width: 500px; margin-right: 0; float: left; display: block;"
              data-thumb-srcset=""
-             data-thumb-sizes="<?php echo $thumbnail_sizes ?>"
+             data-thumb-sizes="<?php echo esc_attr( $thumbnail_sizes ); ?>"
         >
-            <?php echo  AR_TRY_ON_Helper::create_shortcode( [], '' ); ?>
+            <?php echo wp_kses_post( AR_TRY_ON_Helper::create_shortcode( [], '' ) ); ?>
         </div>
         <script>
             (function() {
-                let atlas_ar_product_id = "<?php echo $product_id; ?>";
+                let atlas_ar_product_id = "<?php echo esc_js( $product_id ); ?>";
 
                 function getPosterByProductId(productId) {
                     const data = sessionStorage.getItem('atlas_ar_model_data');
@@ -330,9 +330,9 @@ class AR_TRY_ON {
                     }
 
                     if(!srcset){
-                        var default_images = "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp 100w, ' ?>"
-                            default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp 150w, ' ?>"
-                            default_images += "<?php  echo  ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp 300w' ?>"
+                        var default_images = "<?php echo esc_url( ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp' ); ?> 100w, "
+                            default_images += "<?php echo esc_url( ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp' ); ?> 150w, "
+                            default_images += "<?php echo esc_url( ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp' ); ?> 300w"
                         div.setAttribute('data-thumb-srcset', default_images);
                     }
 
@@ -345,7 +345,18 @@ class AR_TRY_ON {
         <?php
         $image  = ob_get_clean();
 
-        echo $image;
+        // Output buffer contains server-generated markup (gallery item div + script block).
+        // wp_kses_post leaves script tags out — for the script block to remain functional,
+        // we run the safer combination: ob already produced controlled markup, so output via
+        // wp_kses with a custom allow-list that includes <script>.
+        $allowed = wp_kses_allowed_html( 'post' );
+        $allowed['script'] = array();
+        $allowed['div']    = isset( $allowed['div'] ) ? $allowed['div'] : array();
+        $allowed['div']['data-thumb']        = true;
+        $allowed['div']['data-thumb-alt']    = true;
+        $allowed['div']['data-thumb-srcset'] = true;
+        $allowed['div']['data-thumb-sizes']  = true;
+        echo wp_kses( $image, $allowed );
     }
 
     /**
@@ -411,14 +422,14 @@ class AR_TRY_ON {
             // Without this flag both buttons end up in the gallery
             // image container and both become visible when the cube
             // toggle activates the 3D viewer overlay.
-            echo AR_TRY_ON_Helper::create_shortcode(
+            echo wp_kses_post( AR_TRY_ON_Helper::create_shortcode(
                 array(
                     'height'                 => '100%',
                     'width'                  => '100%',
                     'suppress_tryon_overlay' => 'true',
                 ),
                 ''
-            );
+            ) );
             ?>
         </div>
 
@@ -640,7 +651,11 @@ class AR_TRY_ON {
             })();
         </script>
         <?php
-        echo ob_get_clean();
+        // Toggle markup buffer includes our own <script> block; allow it explicitly.
+        $toggle_html    = ob_get_clean();
+        $allowed_toggle = wp_kses_allowed_html( 'post' );
+        $allowed_toggle['script'] = array();
+        echo wp_kses( $toggle_html, $allowed_toggle );
     }
 
 	/**

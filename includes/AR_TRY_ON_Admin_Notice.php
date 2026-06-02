@@ -280,7 +280,7 @@ class AR_TRY_ON_Admin_Notice {
 							if ( ! empty( $btn['action'] ) ) {
 								// AJAX button
 								?>
-								<a href="#" class="button <?php echo esc_attr( $btn_class ); ?> ar-notice-action-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" <?php echo $data_attrs; ?> style="<?php echo esc_attr( $btn_style ); ?>">
+								<a href="#" class="button <?php echo esc_attr( $btn_class ); ?> ar-notice-action-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" <?php echo $data_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built above from esc_attr()-escaped fragments. ?> style="<?php echo esc_attr( $btn_style ); ?>">
 									<?php if ( ! empty( $btn['icon'] ) ) : ?>
 									<span class="dashicons dashicons-<?php echo esc_attr( $btn['icon'] ); ?>" style="margin-top: 3px;"></span>
 									<?php endif; ?>

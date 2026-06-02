@@ -88,14 +88,20 @@ class AR_TRY_ON_Public {
 		$this->localize_data = null;
 
 
-		// Add "type=module" attribute
-		add_filter( 'script_loader_tag', function ( $tag, $handle, $src ) {
+		// Add `type="module"` to specific script handles by mutating the
+		// existing <script> tag instead of rebuilding it. The handles are
+		// already registered/enqueued via wp_enqueue_script() elsewhere;
+		// this filter only edits the opening tag WordPress generates for
+		// them. Plugin Check (PluginCheck) flags any literal `<script>`
+		// in a string as a non-enqueued script — using str_replace on
+		// the existing tag avoids that false positive.
+		add_filter( 'script_loader_tag', function ( $tag, $handle ) {
 			if ( 'ar-try-on-google-model-viewer' === $handle || 'AtlasAR' === $handle ) {
-				$tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
+				$tag = str_replace( ' src=', ' type="module" src=', $tag );
 			}
 
 			return $tag;
-		}, 10, 3 );
+		}, 10, 2 );
 
 	}
 
@@ -128,7 +134,6 @@ class AR_TRY_ON_Public {
 			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
 			'cached_ids'    => AR_TRY_ON_Helper::update_cache_data( false ),
-			'img'           => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
 
 			/*
 			 * Phase 3 extension-surface payload — kept symmetric with
@@ -321,7 +326,8 @@ class AR_TRY_ON_Public {
             return;
         }
         self::$qr_rendered_for_post[ $post_id ] = true;
-        echo $qr_html;
+        // QR HTML is built server-side from internal templates; restrict to safe post HTML.
+        echo wp_kses_post( $qr_html );
     }
 
     public function atlas_ar_button( $content ) {
@@ -370,9 +376,9 @@ class AR_TRY_ON_Public {
         }
         if ( $is_face ) {
             if ( $current_filter === 'the_content' ) {
-                return $content . $qr_html;
+                return $content . wp_kses_post( $qr_html );
             }
-            echo $qr_html;
+            echo wp_kses_post( $qr_html );
             return;
         }
 
@@ -410,9 +416,10 @@ class AR_TRY_ON_Public {
         $ar_button_content = $qr_html . $button_html;
 
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
-            return $content . $ar_button_content;
+            return $content . wp_kses_post( $ar_button_content );
         } else {
-            echo $ar_button_content;
+            // Server-generated HTML — wp_kses_post permits typical post markup.
+            echo wp_kses_post( $ar_button_content );
         }
     }
 
@@ -482,9 +489,9 @@ class AR_TRY_ON_Public {
 
 
 		if ( $post->post_type != 'product' ) {
-			return $content . $ar_button_content;
+			return $content . wp_kses_post( $ar_button_content );
 		} else {
-			echo $ar_button_content;
+			echo wp_kses_post( $ar_button_content );
 		}
 	}
 
@@ -521,7 +528,7 @@ class AR_TRY_ON_Public {
 		}
 
 		$tabs['atlas_ar_3d_view'] = array(
-			'title'    => __( 'AtlasAR Product View', 'woocommerce' ),
+			'title'    => __( 'AtlasAR Product View', 'ar-vr-3d-model-try-on' ),
 			'priority' => 50,
 			'callback' => array( $this, 'atlas_ar_button_tab' ),
 		);

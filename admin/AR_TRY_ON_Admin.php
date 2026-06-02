@@ -325,8 +325,10 @@ class AR_TRY_ON_Admin {
 			return $product_data;
 		}
 
-		// Get current post ID
-		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+		// Get current post ID. Read-only — `absint()` sanitises and the post-edit
+		// screen URL is the canonical source; nonce verification belongs to the
+		// edit-form POST, not this read.
+		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only context: identifies which product to localize React state for; mutations happen via separate, nonce-protected REST routes.
 		if ( ! $post_id ) {
 			return $product_data;
 		}
@@ -754,7 +756,8 @@ class AR_TRY_ON_Admin {
     }
 
     public function atlasaidev_plugins($menu_slug = 'atlas-ar-other-plugins', $plugin_slug = 'ar-vr-3d-model-try-on') {
-        // Atlas Plugins submenu
+        // Atlas Plugins submenu — pure read of the admin page slug for enqueue routing.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only: identifies which admin screen to enqueue assets for; no data mutation.
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
             $js  = plugin_dir_url(__FILE__) . 'js/atlas-plugins.js';
             wp_enqueue_script(

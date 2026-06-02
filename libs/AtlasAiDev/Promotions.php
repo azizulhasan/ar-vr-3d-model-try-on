@@ -353,9 +353,9 @@ class Promotions {
 		if (
 				isset( $_REQUEST['dismissed'], $_REQUEST['hash'], $_REQUEST['_wpnonce'] ) &&
 				'true' == $_REQUEST['dismissed'] && ! empty( $_REQUEST['hash'] ) &&
-				wp_verify_nonce( sanitize_text_field( $_REQUEST['_wpnonce'] ), 'atlasaidev-dismiss-promo' )
+				wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'atlasaidev-dismiss-promo' )
 		) {
-			$this->hiddenPromotions = array_merge( $this->hiddenPromotions, [ sanitize_text_field( $_REQUEST['hash'] ) ] );
+			$this->hiddenPromotions = array_merge( $this->hiddenPromotions, [ sanitize_text_field( wp_unslash( $_REQUEST['hash'] ) ) ] );
 			update_user_option( $this->currentUser, $this->client->getSlug() . '_hidden_promos', $this->hiddenPromotions );
 			wp_send_json_success( esc_html__( 'Promo hidden', 'ar-vr-3d-model-try-on' ) );
 		}
