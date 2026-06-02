@@ -283,7 +283,7 @@ class AR_TRY_ON {
              data-thumb-srcset=""
              data-thumb-sizes="<?php echo esc_attr( $thumbnail_sizes ); ?>"
         >
-            <?php echo wp_kses_post( AR_TRY_ON_Helper::create_shortcode( [], '' ) ); ?>
+            <?php echo AR_TRY_ON_Helper::create_shortcode( [], '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled shortcode markup (model-viewer + inline <script>) built from internal templates. ?>
         </div>
         <script>
             (function() {
@@ -422,14 +422,15 @@ class AR_TRY_ON {
             // Without this flag both buttons end up in the gallery
             // image container and both become visible when the cube
             // toggle activates the 3D viewer overlay.
-            echo wp_kses_post( AR_TRY_ON_Helper::create_shortcode(
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled shortcode markup (model-viewer + inline <script>) built from internal templates.
+            echo AR_TRY_ON_Helper::create_shortcode(
                 array(
                     'height'                 => '100%',
                     'width'                  => '100%',
                     'suppress_tryon_overlay' => 'true',
                 ),
                 ''
-            ) );
+            );
             ?>
         </div>
 

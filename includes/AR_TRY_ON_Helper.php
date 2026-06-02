@@ -411,7 +411,7 @@ class AR_TRY_ON_Helper
             <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
                 <div style="height:100%;width:100%;"
                      id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
-                <?php echo wp_kses_post( $tryon_overlay_html ); ?>
+                <?php echo $tryon_overlay_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled try-on overlay markup built from internal templates. ?>
                 <script type="module">
                     document.addEventListener("DOMContentLoaded", async function () {
                         let atlasAR = new window.AtlasAR()

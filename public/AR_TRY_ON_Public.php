@@ -326,8 +326,13 @@ class AR_TRY_ON_Public {
             return;
         }
         self::$qr_rendered_for_post[ $post_id ] = true;
-        // QR HTML is built server-side from internal templates; restrict to safe post HTML.
-        echo wp_kses_post( $qr_html );
+        // QR HTML is built server-side from internal templates and contains an
+        // inline <script> that bootstraps the QR generator. wp_kses cannot be
+        // used here because it HTML-encodes special characters (e.g. `>` → `&gt;`)
+        // inside <script> content, which produces invalid JavaScript and a
+        // browser SyntaxError. The content is entirely under plugin control —
+        // see AR_TRY_ON_Helper::get_qr_code() — and never includes user input.
+        echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled markup with inline <script>; see comment above.
     }
 
     public function atlas_ar_button( $content ) {
@@ -376,9 +381,9 @@ class AR_TRY_ON_Public {
         }
         if ( $is_face ) {
             if ( $current_filter === 'the_content' ) {
-                return $content . wp_kses_post( $qr_html );
+                return $content . $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
             }
-            echo wp_kses_post( $qr_html );
+            echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
             return;
         }
 
@@ -416,10 +421,9 @@ class AR_TRY_ON_Public {
         $ar_button_content = $qr_html . $button_html;
 
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
-            return $content . wp_kses_post( $ar_button_content );
+            return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
         } else {
-            // Server-generated HTML — wp_kses_post permits typical post markup.
-            echo wp_kses_post( $ar_button_content );
+            echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
         }
     }
 
@@ -489,9 +493,9 @@ class AR_TRY_ON_Public {
 
 
 		if ( $post->post_type != 'product' ) {
-			return $content . wp_kses_post( $ar_button_content );
+			return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
 		} else {
-			echo wp_kses_post( $ar_button_content );
+			echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
 		}
 	}
 
