@@ -652,11 +652,15 @@ class AR_TRY_ON {
             })();
         </script>
         <?php
-        // Toggle markup buffer includes our own <script> block; allow it explicitly.
-        $toggle_html    = ob_get_clean();
-        $allowed_toggle = wp_kses_allowed_html( 'post' );
-        $allowed_toggle['script'] = array();
-        echo wp_kses( $toggle_html, $allowed_toggle );
+        // Toggle markup buffer includes our own <script> block built from
+        // internal templates (SVG icons, click handlers, no user input).
+        // wp_kses cannot be used here because it HTML-encodes special
+        // characters (e.g. `&&` → `&amp;&amp;`, `>` → `&gt;`) inside
+        // <script> content, producing invalid JavaScript and a browser
+        // SyntaxError. Same reasoning as the four other inline-<script>
+        // emission sites cleaned up by commit 90a4d89.
+        $toggle_html = ob_get_clean();
+        echo $toggle_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled toggle markup with inline <script>; see comment above.
     }
 
 	/**
