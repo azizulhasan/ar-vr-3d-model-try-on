@@ -649,9 +649,15 @@ class AR_TRY_ON_Helper
     public static function get_structured_model_response($request_decoded_data, $api_response_data = [])
     {
         $response_body = [];
+        // Tripo3D's `text_to_model` and `image_to_model` task responses
+        // share the same `data.output` shape (pbr_model, generated_image,
+        // rendered_image). Prior to AR-62 only text_to_model was handled
+        // — image_to_model responses returned an empty body and the
+        // metabox polling loop never exited (Joachim Rodriguez,
+        // 2026-06-07).
         if (isset($request_decoded_data['api_name'], $request_decoded_data['body']['type'])
             && $request_decoded_data['api_name'] == "tripo3d"
-            && $request_decoded_data['body']['type'] == "text_to_model"
+            && in_array($request_decoded_data['body']['type'], array('text_to_model', 'image_to_model'), true)
         ) {
             if (!empty($api_response_data)) {
 

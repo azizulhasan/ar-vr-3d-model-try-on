@@ -1,6 +1,34 @@
 import {useState} from "react";
 
 /**
+ * Assign `value` into `obj` at the dot-separated path `dotKey`,
+ * creating intermediate objects as needed.
+ *
+ * Used at REST submission time to convert the flat key/value
+ * editor schema (e.g. `{"file.url": "...", "file.type": "png"}`)
+ * into the nested body Tripo3D / Meshy AI expect
+ * (e.g. `{"file": {"url": "...", "type": "png"}}`).
+ *
+ * @param {object} obj    Target object (mutated).
+ * @param {string} dotKey Path like "file.url" or "a.b.c".
+ * @param {*}      value
+ * @returns {object} obj
+ */
+export const setNestedKey = (obj, dotKey, value) => {
+    const parts = String(dotKey).split(".");
+    let cur = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+        const k = parts[i];
+        if (typeof cur[k] !== "object" || cur[k] === null) {
+            cur[k] = {};
+        }
+        cur = cur[k];
+    }
+    cur[parts[parts.length - 1]] = value;
+    return obj;
+};
+
+/**
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type

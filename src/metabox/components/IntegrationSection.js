@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {getURL, postWithoutImage, getAPITypes, getPostID} from "../../context/utilities";
+import {getURL, postWithoutImage, getAPITypes, getPostID, setNestedKey} from "../../context/utilities";
 import notify from "../../context/Notify";
 
 export default function IntegrationSection({
@@ -75,10 +75,33 @@ export default function IntegrationSection({
             headers[header.key] = header.value;
         });
 
+        /**
+         * Build the request body. The editor schema is FLAT
+         * (e.g. `{key: "file.url", value: "..."}`) so dot-paths
+         * have to be re-nested into the shape Tripo3D / Meshy AI
+         * actually expect on the wire (`{file: {url: "..."}}`).
+         * Without this, image_to_model never receives the image
+         * and the task polls forever (Joachim Rodriguez, 2026-06-07).
+         */
         let body = {}
-        productModel.exclude_integration_api_body.map(item => {
-            body[item.key] = item.value;
+        productModel.exclude_integration_api_body.forEach(item => {
+            setNestedKey(body, item.key, item.value);
         });
+
+        /**
+         * For image_to_model, Tripo3D requires exactly one of
+         * file.file_token / file.url / file.object — they are
+         * mutually exclusive. Empty strings still occupy a slot
+         * and cause the request to be rejected, so drop them.
+         */
+        if (body?.file && typeof body.file === 'object' && body.file !== null) {
+            ['file_token', 'url', 'object'].forEach(k => {
+                if (body.file[k] === '' || body.file[k] == null) {
+                    delete body.file[k];
+                }
+            });
+        }
+
         let data_arr = {};
         data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
         data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
@@ -90,10 +113,27 @@ export default function IntegrationSection({
             return;
         }
 
+        const taskType = data_arr?.body?.type;
+
+        // text_to_model needs a real prompt.
         if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
+            && taskType === 'text_to_model'
             && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
             notify('Please write a proper prompt', 'error');
             return;
+        }
+
+        // image_to_model needs at least one image input.
+        if (data_arr?.api_name == 'tripo3d' && taskType === 'image_to_model') {
+            const hasImage = !!(
+                data_arr?.body?.file?.url ||
+                data_arr?.body?.file?.file_token ||
+                data_arr?.body?.file?.object
+            );
+            if (!hasImage) {
+                notify('Please provide an image URL or upload an image before generating.', 'error');
+                return;
+            }
         }
 
         /**
