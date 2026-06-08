@@ -79,27 +79,17 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
 
     /**
      * Start compression process
+     *
+     * The AR-61 §1.1 Phase 1 work removed the Free 5-model cap, so
+     * the `at_limit` branch that used to live here is gone. Files
+     * over 10 MB are refused later (inside the client compression
+     * pipeline) with a technical "file too big" message — that's a
+     * real browser-performance limit, not a Free-tier gate, and no
+     * Pro upgrade-pitch lives at point-of-failure.
      */
     const handleCompress = async () => {
         if (!modelFile) {
             toast.error('No model file selected');
-            return;
-        }
-        console.log(modelFile)
-        // return;
-
-        // Check user limit
-        if (!isProActive && userLimit?.at_limit) {
-            toast.warning(
-                `⚠️ You've reached the free limit (${userLimit.limit} models). Delete a compressed model or upgrade to Pro.`,
-                {
-                    autoClose: 8000,
-                    onClick: () => {
-                        // Open manage models in settings
-                        window.location.href = '/wp-admin/admin.php?page=ar-vr-3d-model-try-on';
-                    }
-                }
-            );
             return;
         }
 
@@ -145,12 +135,23 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
             console.log(prepareData)
             let file = await urlToFile(paths?.url )
             console.log({file})
-            // Step 2: Compress the model
+            // Step 2: Compress the model.
+            //
+            // Free supports client-side compression for files up to
+            // 10 MB. Above that the gltf-transform pipeline would lock
+            // up the browser tab, so we refuse with a plain technical
+            // message — NO Pro upgrade pitch at point-of-failure (per
+            // AR-61 §1.1 Phase 2; the "compress huge files server-side"
+            // feature is advertised separately in the Pro features
+            // sidebar, not inline here).
             if (method === 'client') {
 
-                if(file_size > wp.hooks.applyFilters('ar_try_on_client_compress_file_size_limit',  10485760)) {
+                if (file_size > wp.hooks.applyFilters('ar_try_on_client_compress_file_size_limit', 10485760)) {
                     setCompressionStatus('failed');
-                    let error_message = __('Compression size exceeded: In free version you can compress less than 10MB. Buy Pro', 'ar-vr-3d-model-try-on');
+                    const error_message = __(
+                        "File size is too big — can't be compressed.",
+                        'ar-vr-3d-model-try-on'
+                    );
                     toast.error(error_message);
                     await fetch(getURL('compression/fail'), {
                         method: 'POST',
@@ -164,12 +165,16 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                         }),
                     });
 
-                }else{
+                } else {
                     await compressClientSide(log_id, file, paths, quality);
                 }
 
             } else {
-                // Server-side compression (Pro only)
+                // Pro registers the 'server' method via the
+                // `atlas_ar_compression_method` filter; the Pro plugin
+                // handles the dispatch from here. Free never sees this
+                // branch because Free's get_compression_method() only
+                // returns 'client'.
                 await compressServerSide(log_id, paths, quality);
             }
 
@@ -502,11 +507,11 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                     <span className="art-mr-2">🗜️</span>
                     Model Compression
                 </h4>
-                {!isProActive && userLimit && (
-                    <span className="art-text-xs art-text-gray-600">
-                        {userLimit.used}/{userLimit.limit} models
-                    </span>
-                )}
+                {/*
+                 * The "x / 5 models" cap counter was removed in
+                 * AR-61 §1.1 Phase 2 along with the 5-model cap
+                 * itself. Free has unlimited compressions now.
+                 */}
             </div>
 
             {/* Not compressed yet */}
@@ -515,11 +520,13 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
                     <p className="art-text-sm art-text-gray-600 art-mb-3">
                         Compress this model to reduce file size and improve loading speed.
                     </p>
-                    {!isProActive && userLimit?.at_limit && (
-                        <div className="art-mb-3 art-p-2 art-bg-orange-50 art-border art-border-orange-200 art-rounded art-text-xs art-text-orange-700">
-                            ⚠️ You've reached the free limit. Delete a compressed model to compress this one.
-                        </div>
-                    )}
+                    {/*
+                     * The "you've reached the free limit" warning was
+                     * removed in AR-61 §1.1 Phase 2 (no cap to reach).
+                     * Files over 10 MB are refused later with the
+                     * "file too big" technical message inside
+                     * handleCompress().
+                     */}
                     <button
                         onClick={handleCompress}
                         disabled={!canCompress || !modelFile}

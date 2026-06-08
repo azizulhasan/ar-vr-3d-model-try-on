@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
 import notify from "../../context/Notify";
+import PremiumBadge, { isProActive } from "../../context/PremiumBadge";
 
 const ContentSection = ({
                             basicSettings,
@@ -52,15 +53,14 @@ const ContentSection = ({
         }
     }, [productModel.variationSettings?.variantAttribute]);
 
-    // Show warning when user interacts with variations in free version
-    const showVariationProWarning = () => {
-        if (!ar_try_on.is_pro_active && !hasShownVariationWarning) {
-            notify('Variations is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
-                autoClose: 5000,
-            });
-            setHasShownVariationWarning(true);
-        }
-    };
+    // AR-61 §1.1 Phase 2 — the previous "Variations is a Pro feature.
+    // Changes will appear in preview but won't be saved" toast is gone.
+    // It was the Yoast-pattern anti-pattern (a selectable control that
+    // silently fails). The Variations editor below is now hidden
+    // entirely when Pro is absent and replaced with a single
+    // <PremiumBadge> upsell link. This stub is kept as a no-op so the
+    // call sites below still type-check.
+    const showVariationProWarning = () => {};
 
     // Load model variants from the 3D model file
     const loadModelVariants = () => {
@@ -269,24 +269,37 @@ const ContentSection = ({
                 </div>
                 <br />
 
-                {/* Variations Section - Only for variable products */}
-                {isVariableProduct && (
+                {/* Variations Section - Only for variable products. */}
+                {/*
+                  * AR-61 §1.1 Phase 2 — per-variation model assignment is
+                  * a Pro feature. Free still ships the base WC variation
+                  * handler (public/js/variation-handler.js) that swaps the
+                  * single product model when a variation changes — but
+                  * assigning DIFFERENT GLBs to each variation requires Pro.
+                  * When Pro is absent, the whole variations editor below
+                  * collapses to a single upsell badge. The previous
+                  * "changes won't be saved" silent-fail toast is gone.
+                  */}
+                {isVariableProduct && !isProActive() && (
                     <div className="art-border art-border-solid art-border-black art-p-4">
                         <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-2">
                             PRODUCT VARIATIONS
-                            {!ar_try_on.is_pro_active && (
-                                <span className="art-bg-orange-100 art-text-orange-800 art-text-xs art-px-2 art-py-0.5 art-rounded">
-                                    Pro
-                                </span>
-                            )}
                         </label>
-
-                        {/* Pro Feature Notice */}
-                        {!ar_try_on.is_pro_active && (
-                            <div className="art-mt-2 art-p-2 art-bg-orange-50 art-border art-border-orange-200 art-rounded art-text-xs art-text-orange-800">
-                                <strong>Pro Feature:</strong> Variation models are available in the Pro version.
-                            </div>
-                        )}
+                        <div className="art-mt-3">
+                            <PremiumBadge feature="variation-models">
+                                <strong>Per-variation 3D models</strong> — assign a
+                                different GLB to each WooCommerce variation, so the
+                                viewer swaps to the right model when shoppers pick a
+                                colour / size. Available in AtlasAR Pro.
+                            </PremiumBadge>
+                        </div>
+                    </div>
+                )}
+                {isVariableProduct && isProActive() && (
+                    <div className="art-border art-border-solid art-border-black art-p-4">
+                        <label className="art-text-xs art-font-semibold art-uppercase art-flex art-items-center art-gap-2">
+                            PRODUCT VARIATIONS
+                        </label>
 
                         {/* Load Model Variants Button */}
                         <div className="art-mt-3 art-flex art-items-center art-gap-2">

@@ -49,12 +49,46 @@
     }
 
     /**
+     * Point Google's <model-viewer> at the locally-bundled DRACO, KTX2
+     * (Basis Universal) and Lottie decoders before the component is
+     * loaded, instead of letting it fall back to the gstatic.com /
+     * cdn.jsdelivr.net defaults baked into google-model-viewer.js.
+     *
+     * The component reads window.ModelViewerElement on initialization
+     * (see google-model-viewer.js ~L1092), so we just have to set it
+     * before the <script type="module"> tag below.
+     *
+     * Only fires when an uploaded GLB actually requires the matching
+     * format (Draco compression, KTX2 textures, or Lottie animation).
+     * AR-61 §3.3 — bundled locally for wp.org Guideline 6 compliance.
+     */
+    function configureLocalDecoders() {
+        var pluginUrl = (typeof ar_try_on !== 'undefined' && ar_try_on.plugin_url)
+            ? ar_try_on.plugin_url
+            : '';
+        if (!pluginUrl) {
+            return;
+        }
+        var base = pluginUrl + 'public/js/vendor/decoders/';
+        window.ModelViewerElement = Object.assign(
+            window.ModelViewerElement || {},
+            {
+                dracoDecoderLocation: base + 'draco/',
+                ktx2TranscoderLocation: base + 'basis/',
+                lottieLoaderLocation: base + 'lottie/LottieLoader.js'
+            }
+        );
+    }
+
+    /**
      * Load the model-viewer script dynamically
      */
     function loadModelViewerScript() {
         if (window.atlasARModelViewerLoaded) {
             return Promise.resolve();
         }
+
+        configureLocalDecoders();
 
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');

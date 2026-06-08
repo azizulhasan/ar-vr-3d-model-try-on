@@ -31,7 +31,6 @@ const productionSrc = [
 	'!gulpfile.js',
 	'!package.json',
 	'!composer.lock',
-	'!composer.json',
 	'!phpcs.xml',
 	'!.cpanel.yml',
 	'!README.md',
@@ -56,6 +55,12 @@ const productionSrc = [
 	'!admin/js/ar-compression-client.js',
 	// Internal docs that should never reach customer installs.
 	'!plan/**',
+	// Freemius SDK is no longer used by the free plugin (AR-61 §1.1
+	// removed all license logic from Free; the Pro plugin keeps its
+	// own copy of the SDK). The vendor directory may still exist in
+	// the dev working tree for historical reference, but it must NOT
+	// land in the production zip.
+	'!vendor/freemius/**',
 	// Try-On JS sources — webpack bundles these into
 	// `public/js/build/tryon-bootstrap.dist.js` + chunks at build
 	// time. The raw sources are never loaded by customers, only by
@@ -125,6 +130,18 @@ const config = {
 		src: productionSrc,
 		output:
 			'D://mamp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/'
+	},
+	testArtest: {
+		// `production/ar-vr-3d-model-try-on/**` is populated by the
+		// `copy` task. `testArtest` reads from there (not from the raw
+		// project root) so we ship exactly what would land in the
+		// release zip — no node_modules, no src/, no plan/, etc.
+		// `artest` is a parallel MAMP install used for smoke-testing
+		// the plugin without disturbing the dev source tree.
+		src: 'production/ar-vr-3d-model-try-on/**',
+		base: 'production/ar-vr-3d-model-try-on',
+		output:
+			'D:/mamp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/'
 	},
 	release: {
 		src: productionSrc,
@@ -234,10 +251,18 @@ gulp.task('makePot', () => {
 
 // ---------------------- COPY / ZIP ----------------------
 
-// Copy plugin files to production folder
+// Copy plugin files to production folder.
+//
+// `encoding: false` is REQUIRED — without it Vinyl v3 (shipped with
+// gulp v5) reads file contents as UTF-8 text and corrupts every
+// binary file in the tree: PNGs, WebPs, fonts, .wasm decoder blobs,
+// .pot translation binaries, etc. Symptom is files that look ~2×
+// their original size in the destination and don't display. AR-61
+// §1.1 Phase 3 smoke-test caught this on artest where every image
+// under admin/images/ was twice the source size and unreadable.
 gulp.task('copy', () => {
 	return gulp
-		.src(config.copy.src, { base: '.' })
+		.src(config.copy.src, { base: '.', encoding: false })
 		.pipe(gulp.dest(config.copy.output))
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }));
 });
@@ -246,7 +271,7 @@ gulp.task('copy', () => {
 // This avoids re-reading from a potentially broken production folder.
 gulp.task('zip', () => {
 	return gulp
-		.src(config.zip.src, { base: '.', allowEmpty: true })
+		.src(config.zip.src, { base: '.', allowEmpty: true, encoding: false })
 		.pipe(zip(config.zip.file_name + '.zip', config.zip.options))
 		.pipe(gulp.dest(config.zip.dist))
 		.pipe(
@@ -276,7 +301,7 @@ gulp.task('copyProButton', () => {
 
 gulp.task('release', () => {
 	return gulp
-		.src(config.release.src, { base: '.' })
+		.src(config.release.src, { base: '.', encoding: false })
 		.pipe(gulp.dest(config.release.output))
 		.pipe(
 			notify({
@@ -288,7 +313,7 @@ gulp.task('release', () => {
 
 gulp.task('test', () => {
 	return gulp
-		.src(config.test.src, { base: '.' })
+		.src(config.test.src, { base: '.', encoding: false })
 		.pipe(gulp.dest(config.test.output))
 		.pipe(
 			notify({
@@ -297,6 +322,41 @@ gulp.task('test', () => {
 			})
 		);
 });
+
+// ---------------------- TEST: ARTEST ----------------------
+//
+// Push the freshly-built production tree to the parallel MAMP "artest"
+// site so we can smoke-test it against a real WordPress install
+// without touching the source tree.
+//
+// Run via `npm run test:artest` — that script chains:
+//   gulp clean:production → gulp copy → gulp clean:testArtest → gulp copyToArtest
+// so the destination is always a clean reflection of what would ship
+// in the release zip (no node_modules, no src/, no plan/, etc.).
+
+gulp.task('clean:testArtest', function () {
+	// del v7+: `force` is required because the target lives outside cwd.
+	return del.deleteAsync([config.testArtest.output + '**'], { force: true });
+});
+
+gulp.task('copyToArtest', () => {
+	return gulp
+		.src(config.testArtest.src, { base: config.testArtest.base, encoding: false })
+		.pipe(gulp.dest(config.testArtest.output))
+		.pipe(
+			notify({
+				message: 'Copied to MAMP "artest" site! 💯',
+				onLast: true
+			})
+		);
+});
+
+// Composite task: clean local production → copy into production/ → wipe the
+// artest plugin folder → push the production tree into it.
+gulp.task(
+	'testArtest',
+	gulp.series('clean:production', 'copy', 'clean:testArtest', 'copyToArtest')
+);
 
 // ---------------------- WATCH ----------------------
 
