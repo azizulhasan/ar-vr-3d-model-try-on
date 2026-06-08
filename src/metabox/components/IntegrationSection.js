@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {getURL, postWithoutImage, getAPITypes, getPostID, setNestedKey} from "../../context/utilities";
 import notify from "../../context/Notify";
+import ImageSourcePicker from "./ImageSourcePicker";
 
 export default function IntegrationSection({
                                                productModel,
@@ -345,6 +346,15 @@ export default function IntegrationSection({
     }, [productModel])
 
 
+    // Pro-gated image picker takes over the body editor for
+    // Tripo3D/Meshy AI image_to_model — hide the raw key/value rows
+    // and the Add Body button while it's active.
+    const _proActive = (window.ar_try_on?.is_pro_active === '1'
+        || window.ar_try_on?.is_pro_active === 1
+        || window.ar_try_on?.is_pro_active === true);
+    const pickerActive = _proActive
+        && productModel?.exclude_integration_api_model_type === 'image_to_model';
+
     return (
         <div className="art-bg-gray-100 ">
             <h3 className="art-font-medium art-mb-4">Integration</h3>
@@ -369,6 +379,25 @@ export default function IntegrationSection({
 
             }
 
+            {/*
+              * Pro-gated image-source picker for Tripo3D / Meshy AI
+              * image_to_model. Renders ONLY when:
+              *   - Pro is active (is_pro_active === '1'), AND
+              *   - the selected supported model type is image_to_model
+              * Replaces the dynamic key/value rows below with a guided
+              * 4-source picker (featured / gallery / library / upload).
+              * The picker writes back into exclude_integration_api_body
+              * so the existing Generate Model submit path works
+              * unchanged.
+              */}
+            {pickerActive && (
+                <ImageSourcePicker
+                    productModel={productModel}
+                    setProductModel={setProductModel}
+                />
+            )}
+
+            {!pickerActive && (<>
             {/* Add new field button */}
             <div className="art-flex art-items-center art-justify-between">
                 {/* Add Body Button */}
@@ -482,6 +511,7 @@ export default function IntegrationSection({
                 </div>
 
             ))}
+            </>)}
             <button type="button"
                     onClick={handleSubmit}
                     data-id={'generate'}
