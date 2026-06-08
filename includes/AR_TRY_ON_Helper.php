@@ -710,6 +710,35 @@ class AR_TRY_ON_Helper
                 if (!isset($response_body['output']['src']) && isset($api_response_data['data']['result']['pbr_model']['url'])) {
                     $response_body['output']['src'] = $api_response_data['data']['result']['pbr_model']['url'];
                 }
+
+                /**
+                 * Poster fallback for image_to_model. Tripo3D's
+                 * image_to_model response does NOT include
+                 * `generated_image` — that field is text_to_model-only.
+                 * The natural preview for an image_to_model run is the
+                 * input image itself; download_model_files_files_and_store
+                 * will fetch it into the post's uploads folder so the
+                 * stored URL is stable and self-hosted. Without this
+                 * fallback the post's model-viewer poster stays empty
+                 * after save (customer report 2026-06-08).
+                 *
+                 * Tripo3D's `rendered_image` is a textured 3D preview
+                 * (WebP) — second-best fallback if Tripo ever omits the
+                 * input echo.
+                 */
+                if (!isset($response_body['output']['poster'])
+                    && $request_decoded_data['body']['type'] === 'image_to_model'
+                ) {
+                    if (isset($request_decoded_data['body']['file']['url'])
+                        && ! empty($request_decoded_data['body']['file']['url'])
+                    ) {
+                        $response_body['output']['poster'] = $request_decoded_data['body']['file']['url'];
+                    } elseif (isset($api_response_data['data']['output']['rendered_image'])) {
+                        $response_body['output']['poster'] = $api_response_data['data']['output']['rendered_image'];
+                    } elseif (isset($api_response_data['data']['result']['rendered_image']['url'])) {
+                        $response_body['output']['poster'] = $api_response_data['data']['result']['rendered_image']['url'];
+                    }
+                }
                 /**
                  * If thumbnail is not set yet, then look into result.
                  */

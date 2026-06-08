@@ -223,8 +223,52 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
         </div>
     );
 
+    /**
+     * Detect localhost / private-network development hosts. Tripo3D
+     * fetches the image server-side from its own infrastructure, so
+     * any URL Featured / Gallery / Media library / Upload produces on
+     * a localhost install resolves to "connection refused" on the
+     * Tripo3D side and the task fails silently. Only the Paste URL
+     * tab — pointed at a publicly hosted image — works under those
+     * conditions, so we warn explicitly instead of leaving the user
+     * to wait for a doomed generation.
+     */
+    const isLocalHost = (() => {
+        const h = (window.location && window.location.hostname || '').toLowerCase();
+        if (!h) return false;
+        if (h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0' || h === '::1') return true;
+        if (/\.local$/.test(h) || /\.test$/.test(h) || /\.localhost$/.test(h)) return true;
+        // Common private LAN ranges
+        if (/^10\./.test(h)) return true;
+        if (/^192\.168\./.test(h)) return true;
+        if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+        return false;
+    })();
+
     return (
         <div className="art-bg-white art-p-4 art-rounded art-border art-border-gray-200 art-mb-4">
+            {isLocalHost && (
+                <div
+                    style={{
+                        background: '#fef3c7',
+                        border: '1px solid #f59e0b',
+                        borderRadius: 6,
+                        padding: '10px 12px',
+                        marginBottom: 12,
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                        color: '#78350f',
+                    }}
+                >
+                    <strong>Heads up — this site is on <code>{window.location.hostname}</code>.</strong>
+                    {' '}Tripo3D pulls images server-side from the public internet, so the
+                    {' '}<em>Featured image</em>, <em>Gallery image</em>, <em>Media library</em>, and
+                    {' '}<em>Upload from computer</em> tabs all produce <code>http://{window.location.hostname}/…</code>
+                    {' '}URLs that Tripo3D can't reach — generation will fail silently.
+                    {' '}On localhost, use the <strong>Paste URL</strong> tab with a publicly hosted
+                    {' '}image (or expose your site via a tunnel like ngrok / Cloudflare Tunnel).
+                </div>
+            )}
             <div className="art-flex art-items-center art-justify-between art-mb-3">
                 <h4 className="art-font-medium" style={{margin: 0}}>Image source</h4>
                 {selectedUrl ? (

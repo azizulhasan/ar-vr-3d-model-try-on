@@ -57,6 +57,29 @@ export default function IntegrationSection({
         }
 
         if (submitButton.getAttribute('data-id') === 'complete') {
+            /**
+             * After a successful save the button label flips to
+             * "See model from frontend." but it's the same DOM
+             * element — clicking it used to fall through to the
+             * regenerate confirmation, which is the opposite of
+             * what the label promises. When the button is in
+             * "see model from frontend" mode, treat it as a link
+             * to the post permalink instead.
+             */
+            const btnText = (submitButton.innerText || submitButton.textContent || '').toLowerCase();
+            const looksLikeFrontendCta = btnText.includes('frontend') || btnText.includes('see model');
+            if (looksLikeFrontendCta) {
+                const permalink =
+                    document.querySelector('#sample-permalink a')?.href
+                    || document.querySelector('#wp-admin-bar-view a')?.href
+                    || (window.ar_try_on?.permalink || '');
+                if (permalink) {
+                    window.open(permalink, '_blank', 'noopener,noreferrer');
+                    return;
+                }
+                notify('Could not detect the post permalink — use the "View product" link in the admin bar.', 'warn', { autoClose: 4000 });
+                return;
+            }
             if (!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
                 return;
             }
@@ -279,6 +302,25 @@ export default function IntegrationSection({
             // set model poster.
             if (response?.data?.poster?.url) {
                 tempProductModel.poster = response.data.poster.url
+            }
+            /**
+             * Default the model-viewer alt to the post title when the
+             * user hasn't customised it. "Title" is the productModel
+             * default in ARProductModelSettings.js — treat that as
+             * "still placeholder". For an image_to_model save, the
+             * product name is the most accurate accessibility label
+             * (screen readers read it as "3D model of <product>").
+             */
+            const currentAlt = (tempProductModel.alt || '').trim();
+            if (currentAlt === '' || currentAlt.toLowerCase() === 'title') {
+                const postTitle = (
+                    document.querySelector('#title')?.value
+                    || document.querySelector('.editor-post-title__input')?.value
+                    || ''
+                ).trim();
+                if (postTitle) {
+                    tempProductModel.alt = postTitle;
+                }
             }
 
             setTempModelData({})
