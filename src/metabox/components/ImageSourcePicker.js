@@ -27,6 +27,8 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
     const [galleryImages, setGalleryImages] = useState([]);
     const [featuredImage, setFeaturedImage] = useState(null);
     const [loadingTab, setLoadingTab] = useState(null);
+    const [customUrlInput, setCustomUrlInput] = useState('');
+    const [customPreviewState, setCustomPreviewState] = useState('idle'); // idle | loading | ok | error
 
     const selectedUrl = useMemo(() => {
         const row = (productModel.exclude_integration_api_body || []).find(r => r.key === 'file.url');
@@ -168,6 +170,28 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
         frame.open();
     };
 
+    /**
+     * Tab 5 — paste a URL manually. Lightweight validation: scheme +
+     * image extension. We still let the user click "Use this URL" to
+     * commit, so a non-`.jpg` URL that actually serves JPEG content
+     * (CDN re-write, signed URL, etc.) is still allowed — the warning
+     * is just a hint, not a block.
+     */
+    const isLikelyImageUrl = (s) => {
+        const url = String(s || '').trim();
+        if (!/^https?:\/\//i.test(url)) return false;
+        return /\.(jpe?g|png|webp)(?:\?|#|$)/i.test(url);
+    };
+
+    const commitCustomUrl = () => {
+        const url = String(customUrlInput || '').trim();
+        if (!/^https?:\/\//i.test(url)) {
+            notify('Please paste a full http(s):// image URL.', 'error');
+            return;
+        }
+        pickUrl(url);
+    };
+
     const tabBtn = (id, label) => (
         <button
             type="button"
@@ -217,6 +241,7 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                 {tabBtn('gallery',  'Gallery image')}
                 {tabBtn('library',  'Media library')}
                 {tabBtn('upload',   'Upload from computer')}
+                {tabBtn('custom',   'Paste URL')}
             </div>
 
             {activeTab === 'featured' && (
@@ -271,6 +296,62 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                     <div className="art-text-xs art-text-gray-500 art-mt-2">
                         The image is added to your WordPress media library and used as the Tripo3D source.
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'custom' && (
+                <div>
+                    <div className="art-flex art-gap-2 art-items-start">
+                        <input
+                            type="url"
+                            inputMode="url"
+                            placeholder="https://example.com/path/to/image.jpg"
+                            value={customUrlInput}
+                            onChange={(e) => { setCustomUrlInput(e.target.value); setCustomPreviewState('idle'); }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitCustomUrl(); } }}
+                            className="art-border art-rounded art-p-2"
+                            style={{flex: 1, minWidth: 0}}
+                        />
+                        <button
+                            type="button"
+                            onClick={commitCustomUrl}
+                            className="art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border-none art-cursor-pointer"
+                        >
+                            Use this URL
+                        </button>
+                    </div>
+                    <div className="art-text-xs art-text-gray-500 art-mt-2">
+                        Direct link to a JPEG, PNG, or WebP image. Tripo3D fetches the URL server-side, so the image must be publicly reachable. Max 20 MB.
+                    </div>
+
+                    {/* Preview — we attempt to load the URL as an image.
+                        Helps the user catch typos before burning Tripo3D
+                        credits on an unreachable URL. */}
+                    {customUrlInput && /^https?:\/\//i.test(customUrlInput) && (
+                        <div className="art-mt-3" style={{maxWidth: 220}}>
+                            <img
+                                src={customUrlInput}
+                                alt="Preview"
+                                onLoad={() => setCustomPreviewState('ok')}
+                                onError={() => setCustomPreviewState('error')}
+                                style={{
+                                    maxWidth: '100%', maxHeight: 220,
+                                    border: '2px solid ' + (customPreviewState === 'error' ? '#dc2626' : '#e5e7eb'),
+                                    borderRadius: 6, display: 'block',
+                                }}
+                            />
+                            {customPreviewState === 'error' && (
+                                <div className="art-text-xs art-text-red-600 art-mt-1">
+                                    Could not load the URL as an image. Check the link and try again.
+                                </div>
+                            )}
+                            {!isLikelyImageUrl(customUrlInput) && customPreviewState !== 'error' && (
+                                <div className="art-text-xs art-text-amber-600 art-mt-1">
+                                    URL does not end in .jpg / .png / .webp — Tripo3D may still accept it if the server returns image bytes.
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
