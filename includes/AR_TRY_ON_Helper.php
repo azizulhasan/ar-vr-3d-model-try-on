@@ -1285,4 +1285,60 @@ class AR_TRY_ON_Helper
         return $formats;
     }
 
+    /**
+     * The list of Tripo3D / Meshy AI generation modes this site can
+     * actually submit.
+     *
+     * Free natively supports `text_to_model` only. `image_to_model`
+     * (and future `multiview_to_model`) require the picker UI plus
+     * server-side helpers that ship in Pro — adding them in Free
+     * without Pro present would expose a feature the user can't run,
+     * which is the Yoast-pattern trap AR-61 §1.1 closed.
+     *
+     * Pro extends the list by hooking
+     * `atlas_ar_generation_supported_modes` from
+     * `AR_TRY_ON_Pro_Bridge::register()`. The filter shape is a flat
+     * array of Tripo3D body `type` strings so anyone hooking it can
+     * just array_merge / array_push without thinking about
+     * associative keys.
+     *
+     * The React metabox reads the result from `ar_try_on.generation_supported_modes`
+     * and filters the "Supported Model Types" dropdown to it.
+     *
+     * @since AR-62
+     * @return array<int,string> Tripo3D / Meshy AI body type strings
+     *                            (e.g. `text_to_model`, `image_to_model`).
+     */
+    public static function generation_supported_modes() {
+        $free_modes = array( 'text_to_model' );
+
+        /**
+         * Filter: atlas_ar_generation_supported_modes
+         *
+         * Lets Pro and third-party add-ons register additional 3D-model
+         * generation modes. Pro v3.x+ adds `image_to_model` via the
+         * `AR_TRY_ON_Pro_Bridge`.
+         *
+         * @param array<int,string> $modes Tripo3D body type strings.
+         */
+        $modes = apply_filters( 'atlas_ar_generation_supported_modes', $free_modes );
+
+        // Defensive guards — a misbehaving filter must not crash the
+        // metabox. Cast to array, force-lowercase strings, dedupe.
+        if ( ! is_array( $modes ) ) {
+            $modes = $free_modes;
+        }
+        $modes = array_values( array_unique( array_filter( array_map( static function ( $m ) {
+            return is_string( $m ) ? strtolower( trim( $m ) ) : '';
+        }, $modes ) ) ) );
+
+        // text_to_model is always present — it's Free's baseline and
+        // dropping it would leave the dropdown empty.
+        if ( ! in_array( 'text_to_model', $modes, true ) ) {
+            array_unshift( $modes, 'text_to_model' );
+        }
+
+        return $modes;
+    }
+
 }

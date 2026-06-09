@@ -397,6 +397,25 @@ export default function IntegrationSection({
     const pickerActive = _proActive
         && productModel?.exclude_integration_api_model_type === 'image_to_model';
 
+    /**
+     * Generation modes the host site is licensed to actually run.
+     * Filled by Free's `atlas_ar_generation_supported_modes` filter:
+     *   - Free alone returns `['text_to_model']`.
+     *   - Pro extends with `image_to_model` via
+     *     `AR_TRY_ON_Pro_Bridge::add_pro_generation_modes()`.
+     *
+     * The dropdown intersects what the API exposes (text_to_model,
+     * image_to_model, ...) with what the SITE supports — so a
+     * Free-only install hides image_to_model entirely instead of
+     * letting the user pick a feature that can't run.
+     */
+    const _allowedModes = Array.isArray(window.ar_try_on?.generation_supported_modes)
+        ? window.ar_try_on.generation_supported_modes
+        : ['text_to_model'];
+    const _apiSupportedTypes = currentApi?.body?.supported_types || {};
+    const _visibleModes = Object.keys(_apiSupportedTypes).filter(t => _allowedModes.includes(t));
+    const _imageModeUnlocked = _allowedModes.includes('image_to_model');
+
     return (
         <div className="art-bg-gray-100 ">
             <h3 className="art-font-medium art-mb-4">Integration</h3>
@@ -410,13 +429,50 @@ export default function IntegrationSection({
                     style={{width: "100%", padding: "8px", marginTop: "5px"}}
                 >
                     {
-                        Object.keys(currentApi?.body?.supported_types).map(model_type => (
+                        _visibleModes.map(model_type => (
                             <option key={model_type} value={model_type}>
                                 {model_type}
                             </option>
                         ))
                     }
                 </select>
+                {/*
+                  * Upsell notice for Free users: when image_to_model is
+                  * NOT in the host site's allowed list AND the Tripo3D
+                  * schema actually exposes it, surface a small inline
+                  * pitch with a link to atlasaidev.com. This is the
+                  * Yoast-pattern shape — informational link, no locked
+                  * control, no "fake" image_to_model option that the
+                  * user can click to discover it's gated.
+                  */}
+                {!_imageModeUnlocked && _apiSupportedTypes.image_to_model && (
+                    <div
+                        style={{
+                            background: '#eff6ff',
+                            border: '1px solid #93c5fd',
+                            borderRadius: 6,
+                            padding: '10px 12px',
+                            marginTop: 8,
+                            fontSize: 13,
+                            lineHeight: 1.45,
+                            color: '#1e3a8a',
+                        }}
+                    >
+                        <strong>Want image-to-3D generation?</strong>
+                        {' '}Upload a product photo (featured image, gallery, media library,
+                        {' '}or your own URL) and turn it directly into a 3D model — no prompt
+                        {' '}writing needed. <em>Image-to-3D is part of AtlasAR Pro.</em>
+                        {' '}
+                        <a
+                            href="https://atlasaidev.com/plugins/3d-model-viewer-wordpress-plugin/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
+                        >
+                            Learn more →
+                        </a>
+                    </div>
+                )}
             </div>
 
             }

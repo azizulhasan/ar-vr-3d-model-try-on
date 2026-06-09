@@ -137,6 +137,11 @@ class AR_TRY_ON_Admin {
 			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
 			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
 			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
+			// AR-62 — generation modes. Free baseline is text_to_model
+			// only; Pro extends via `atlas_ar_generation_supported_modes`
+			// in AR_TRY_ON_Pro_Bridge. The metabox React filters its
+			// "Supported Model Types" dropdown to this list.
+			'generation_supported_modes' => AR_TRY_ON_Helper::generation_supported_modes(),
 		];
 		return $this->localize_data;
 	}
