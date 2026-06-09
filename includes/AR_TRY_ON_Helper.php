@@ -673,6 +673,29 @@ class AR_TRY_ON_Helper
                     $response_body['input'] = $api_response_data['data']['input'];
                 }
 
+                // AR-62 §3: surface Tripo3D's live task state to JS so
+                // the polling loop can exit on `failed` / `banned` /
+                // `expired` and render a real progress percentage / ETA
+                // in the button label instead of guessing.
+                if (isset($api_response_data['data']['status'])) {
+                    $response_body['status'] = (string) $api_response_data['data']['status'];
+                }
+                if (isset($api_response_data['data']['progress'])) {
+                    $response_body['progress'] = (int) $api_response_data['data']['progress'];
+                }
+                if (isset($api_response_data['data']['running_left_time'])) {
+                    $response_body['running_left_time'] = (int) $api_response_data['data']['running_left_time'];
+                }
+                if (isset($api_response_data['data']['queuing_num'])) {
+                    $response_body['queuing_num'] = (int) $api_response_data['data']['queuing_num'];
+                }
+                if (isset($api_response_data['data']['error_code']) && $api_response_data['data']['error_code']) {
+                    $response_body['error_code'] = (int) $api_response_data['data']['error_code'];
+                }
+                if (isset($api_response_data['data']['error_msg']) && $api_response_data['data']['error_msg']) {
+                    $response_body['error_msg'] = (string) $api_response_data['data']['error_msg'];
+                }
+
                 $response_body['output'] = [];
                 if (isset($api_response_data['data']['output'])) {
                     /**
@@ -1283,6 +1306,60 @@ class AR_TRY_ON_Helper
         }, $formats ) ) ) );
 
         return $formats;
+    }
+
+    /**
+     * AR-62 §3h: WP-Cron callback that deletes temp generation files
+     * older than 24h.
+     *
+     * When a user abandons a generation between the initial Tripo3D
+     * fetch and the "Save This Model" click, the downloaded GLB and
+     * poster sit in `uploads/ar-try-on/<date>/temp/` forever. Over
+     * time they pile up. This sweep runs daily, walks every file
+     * under `ATLAS_AR_CURRENT_MODEL_TEMP_DIR`, and removes anything
+     * whose mtime is older than 24h. Empty directories are also
+     * removed.
+     *
+     * Scheduled by `ar-vr-3d-model-try-on.php` on `init` (via
+     * `wp_schedule_event` if not already scheduled). Unscheduled on
+     * deactivation via `AR_TRY_ON_Deactivate::deactivate()`.
+     *
+     * @since AR-62
+     * @return void
+     */
+    public static function sweep_orphan_temp_files() {
+        if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_TEMP_DIR' ) ) {
+            return;
+        }
+        $root = ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
+        if ( ! is_string( $root ) || ! is_dir( $root ) ) {
+            return;
+        }
+        $cutoff = time() - DAY_IN_SECONDS;
+
+        // Recursive directory iterator — files first, then dirs.
+        try {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator( $root, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+        } catch ( \Exception $e ) {
+            return;
+        }
+        foreach ( $it as $node ) {
+            $path = $node->getPathname();
+            if ( $node->isFile() ) {
+                $mtime = @filemtime( $path );
+                if ( $mtime !== false && $mtime < $cutoff ) {
+                    @unlink( $path );
+                }
+            } elseif ( $node->isDir() ) {
+                // Best-effort rmdir — only succeeds when empty,
+                // which after the file pass means every file inside
+                // was older than the cutoff.
+                @rmdir( $path );
+            }
+        }
     }
 
     /**

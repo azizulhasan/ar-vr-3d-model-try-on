@@ -35,6 +35,11 @@ class AR_TRY_ON_Deactivate {
 		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, 'ar_try_on_process_compression_queue' );
 		}
+		// AR-62 §3h: orphan-temp sweeper.
+		$temp_sweep = wp_next_scheduled( 'atlas_ar_sweep_orphan_temp_files' );
+		if ( $temp_sweep ) {
+			wp_unschedule_event( $temp_sweep, 'atlas_ar_sweep_orphan_temp_files' );
+		}
     }
 
 }

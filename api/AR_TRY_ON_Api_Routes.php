@@ -268,19 +268,40 @@ class AR_TRY_ON_Api_Routes
 //        return rest_ensure_response($result);
 
         $response_body = '';
-        if (!isset($api_body['task_id']) || !$api_body['task_id']) {
-            $response = wp_remote_post($api_url, array(
-                'headers' => $headers,
-                'body' => json_encode($api_body),
-                'timeout' => 90, // optional, prevent timeout on large requests
-            ));
-
-            if (is_wp_error($response)) {
-                $result['data'] = $response->get_error_message();
-                return rest_ensure_response($result);
+        $is_create_request = ! isset($api_body['task_id']) || ! $api_body['task_id'];
+        if ($is_create_request) {
+            /**
+             * AR-62 §3g: retry transient 5xx / 429 once with a short
+             * backoff. Tripo3D occasionally returns 502 / 503 during
+             * autoscale events and 429 under rate-limit; a single
+             * retry covers ~99% of those without surfacing a hard
+             * error to the user.
+             */
+            $response    = null;
+            $status_code = 0;
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $response = wp_remote_post($api_url, array(
+                    'headers' => $headers,
+                    'body'    => wp_json_encode($api_body),
+                    'timeout' => 60,
+                ));
+                if (is_wp_error($response)) {
+                    if ($attempt === 1) {
+                        $result['data'] = $response->get_error_message();
+                        return rest_ensure_response($result);
+                    }
+                    usleep(750000); // 0.75s, then retry
+                    continue;
+                }
+                $status_code = wp_remote_retrieve_response_code($response);
+                if ($status_code >= 500 || $status_code === 429) {
+                    if ($attempt === 1) { break; } // give up, surface the error below
+                    usleep(750000);
+                    continue;
+                }
+                break; // success / client error — stop retrying
             }
 
-            $status_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
             $response_body = json_decode($response_body, true);
 
@@ -294,6 +315,7 @@ class AR_TRY_ON_Api_Routes
                     'api_body' => $api_body,
                     'response_body' => $response_body,
                     '$decoded_data' => $decoded_data,
+                    'http_status'   => $status_code,
                 ];
 
                 return rest_ensure_response($result);
@@ -313,14 +335,48 @@ class AR_TRY_ON_Api_Routes
         }
         $task_response_body = [];
 
+        /**
+         * AR-62 §3f: on the create request, return immediately with the
+         * fresh task_id instead of doing a redundant `GET /task/<id>`
+         * — Tripo3D's status right after create is reliably "queued",
+         * so the extra round trip just doubles the response time of
+         * the very first request. The JS poller will fetch live status
+         * on the next tick.
+         */
+        if ($is_create_request && $task_id) {
+            $task_result['status']      = true;
+            $task_result['data']        = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_body);
+            $task_result['data']['task_id'] = $task_id;
+            $task_result['extra']       = [ 'response_body' => $response_body ];
+            return rest_ensure_response($task_result);
+        }
+
         if ($task_id) {
             unset($headers['Content-Type']);
             $api_url = $api_url . '/' . $task_id;
 
-            $task_response = wp_remote_get($api_url, array(
-                'headers' => $headers,
-                'timeout' => 90, // optional, prevent timeout on large requests
-            ));
+            /**
+             * AR-62 §3g: same single-retry policy for the polling GET.
+             */
+            $task_response = null;
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $task_response = wp_remote_get($api_url, array(
+                    'headers' => $headers,
+                    'timeout' => 30,
+                ));
+                if (is_wp_error($task_response)) {
+                    if ($attempt === 1) { break; }
+                    usleep(750000);
+                    continue;
+                }
+                $task_status_code = wp_remote_retrieve_response_code($task_response);
+                if ($task_status_code >= 500 || $task_status_code === 429) {
+                    if ($attempt === 1) { break; }
+                    usleep(750000);
+                    continue;
+                }
+                break;
+            }
 
             if (is_wp_error($task_response)) {
                 $task_result['data'] = $task_response->get_error_message();

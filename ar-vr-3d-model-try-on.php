@@ -260,7 +260,12 @@ add_filter( 'cron_schedules', function( $schedules ) {
 
 add_action( 'init', function () {
     atlas_ar_run();
+    // AR-62 §3h: daily sweep for orphan temp generation files.
+    if ( ! wp_next_scheduled( 'atlas_ar_sweep_orphan_temp_files' ) ) {
+        wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'atlas_ar_sweep_orphan_temp_files' );
+    }
 } );
+add_action( 'atlas_ar_sweep_orphan_temp_files', array( 'AR_TRY_ON\\AR_TRY_ON_Helper', 'sweep_orphan_temp_files' ) );
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/AR_TRY_ON_Activator.php

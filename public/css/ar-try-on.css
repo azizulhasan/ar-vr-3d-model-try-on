@@ -10,6 +10,24 @@
   border-width: 0
 }
 
+/* AR-62 §2: spinner for the Generate Model button while a task is in
+   flight. Replaces the old "Generating Model......" trailing-dots
+   indicator. Sized to sit inline with the button label. */
+.atlas-ar-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: atlas-ar-spin 0.8s linear infinite;
+  vertical-align: -2px;
+}
+@keyframes atlas-ar-spin {
+  to { transform: rotate(360deg); }
+}
+
 .art-pointer-events-none {
   pointer-events: none
 }

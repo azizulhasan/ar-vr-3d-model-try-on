@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {getURL, postWithoutImage, getAPITypes, getPostID, setNestedKey} from "../../context/utilities";
 import notify from "../../context/Notify";
 import ImageSourcePicker from "./ImageSourcePicker";
@@ -17,6 +17,182 @@ export default function IntegrationSection({
     const [previousBody, setPreviousBody] = useState(null)
     const [previousModelType, setPreviousModelType] = useState(null)
     const [tempModelData, setTempModelData] = useState(null)
+
+    /**
+     * AR-62 §3 — generation polling state.
+     *
+     * The poll loop is a recursive setTimeout (so we can vary the delay
+     * each tick) instead of setInterval. Refs hold the controls so a
+     * Cancel-button click can stop the loop from outside the closure
+     * and an unmount cleans up any in-flight schedule.
+     */
+    const pollTimeoutRef = useRef(null);
+    const pollAttemptsRef = useRef(0);
+    const pollAbortedRef = useRef(false);
+    const [pollingActive, setPollingActive] = useState(false);
+
+    /** Exponential backoff schedule: 5s, 10s, 15s, 30s (then 30s cap). */
+    const POLL_DELAYS_MS = [5000, 10000, 15000, 30000];
+    /** Hard cap on polls — ≈ 5 min including backoff growth. */
+    const POLL_MAX_ATTEMPTS = 20;
+
+    // Spinner-state set: in-progress states get an animated spinner
+    // glyph alongside the label; idle / success / error states do not.
+    const SPINNER_STATES = new Set(['progress', 'task', 'poster', 'save_progress', 'data_save']);
+
+    /** Tiny HTML escape for the label substituted into innerHTML. */
+    const escapeLabel = (s) => String(s).replace(/[&<>"]/g, c => (
+        {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]
+    ));
+
+    useEffect(() => {
+        return () => {
+            if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+            pollAbortedRef.current = true;
+        };
+    }, []);
+
+    const stopPolling = () => {
+        if (pollTimeoutRef.current) {
+            clearTimeout(pollTimeoutRef.current);
+            pollTimeoutRef.current = null;
+        }
+        pollAbortedRef.current = true;
+        pollAttemptsRef.current = 0;
+        setPollingActive(false);
+    };
+
+    const cancelGeneration = () => {
+        stopPolling();
+        const btn = document.getElementById('atlas_ar_model_generate');
+        if (btn) {
+            generateModelButtonStateChange('generate', 'Generate Model', btn);
+        }
+        notify('Generation cancelled.', 'warn', {autoClose: 3000});
+    };
+
+    /**
+     * Recursive poller for Tripo3D / Meshy AI task status.
+     *
+     * Behaviours covered:
+     *  - exponential backoff (5s → 10s → 15s → 30s cap)
+     *  - hard cap at POLL_MAX_ATTEMPTS polls
+     *  - exits cleanly on Tripo3D status `failed` / `banned` /
+     *    `expired` / `cancelled` (surfaces error_msg / error_code)
+     *  - surfaces live progress percent / ETA / queue position in the
+     *    button label
+     *  - sends only the task_id to PHP, not the original body
+     *  - cancellable from outside via pollAbortedRef
+     */
+    const startPolling = (taskId, baseDataArr, submitButton) => {
+        pollAbortedRef.current = false;
+        pollAttemptsRef.current = 0;
+        setPollingActive(true);
+
+        const poll = async () => {
+            if (pollAbortedRef.current) return;
+
+            if (pollAttemptsRef.current >= POLL_MAX_ATTEMPTS) {
+                stopPolling();
+                submitButton.setAttribute('data-id', 'generate');
+                generateModelButtonStateChange('error', 'Generation timed out — click to try again', submitButton);
+                notify('Generation took too long. Try again with a simpler prompt or image.', 'error', {autoClose: 6000});
+                return;
+            }
+            pollAttemptsRef.current++;
+
+            // AR-62 §3e: minimal polling payload.
+            const pollData = {
+                url:      baseDataArr.url,
+                api_name: baseDataArr.api_name,
+                headers:  baseDataArr.headers,
+                post_id:  baseDataArr.post_id,
+                body:     { task_id: taskId, type: baseDataArr.body?.type || '' },
+            };
+
+            let responseData;
+            try {
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(pollData));
+                const response = await fetch(getURL('generate_3d_model'), {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-WP-Nonce': ar_try_on.rest_nonce },
+                });
+                responseData = await response.json();
+            } catch (err) {
+                if (pollAbortedRef.current) return;
+                console.warn('[AR-62 poll] network error, will retry:', err?.message || err);
+                const delay = POLL_DELAYS_MS[Math.min(pollAttemptsRef.current - 1, POLL_DELAYS_MS.length - 1)];
+                pollTimeoutRef.current = setTimeout(poll, delay);
+                return;
+            }
+            if (pollAbortedRef.current) return;
+
+            // Success — files downloaded to temp.
+            if (responseData?.data?.temp?.src?.url) {
+                stopPolling();
+                let tempProductModel = structuredClone(productModel);
+                tempProductModel.src = responseData.data.temp.src.url;
+                if (responseData?.data?.temp?.poster?.url) {
+                    tempProductModel.poster = responseData.data.temp.poster.url;
+                }
+                if (responseData?.data?.task_id) {
+                    tempProductModel.exclude_integration_api_body = insertUnique(
+                        tempProductModel.exclude_integration_api_body,
+                        {key: 'task_id', type: 'textarea', value: responseData.data.task_id}
+                    );
+                }
+                setTempModelData({...{temp: responseData.data.temp}, ...{post_id: baseDataArr.post_id}});
+                setProductModel(tempProductModel);
+                generateModelButtonStateChange('save', 'Save This Model', submitButton);
+                if (typeof wp !== 'undefined' && wp?.hooks?.doAction) {
+                    wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
+                }
+                return;
+            }
+
+            // AR-62 §3a: terminal failure from Tripo3D.
+            const tripoStatus = (responseData?.data?.status || '').toLowerCase();
+            const failureStates = ['failed', 'banned', 'expired', 'cancelled', 'unknown'];
+            if (failureStates.includes(tripoStatus)) {
+                stopPolling();
+                const errorCode = responseData?.data?.error_code;
+                const errMsg    = responseData?.data?.error_msg;
+                const msg = errMsg || (errorCode
+                    ? `Generation failed (Tripo3D error ${errorCode}). Try a different input.`
+                    : 'Generation failed on Tripo3D. Try a different input.');
+                submitButton.setAttribute('data-id', 'generate');
+                generateModelButtonStateChange('error', 'Generation failed — click to try again', submitButton);
+                notify(msg, 'error', {autoClose: 8000});
+                return;
+            }
+
+            // AR-62 §3d: live progress / ETA / queue surface.
+            const progress = responseData?.data?.progress;
+            const eta      = responseData?.data?.running_left_time;
+            const queueing = responseData?.data?.queuing_num;
+            let label;
+            if (tripoStatus === 'queued' && typeof queueing === 'number' && queueing > 0) {
+                label = `Queued at Tripo3D — position ${queueing}`;
+            } else if (typeof progress === 'number' && progress > 0 && progress < 100) {
+                label = `Generating model — ${progress}%`;
+            } else if (typeof eta === 'number' && eta > 0) {
+                label = `Generating model — ~${eta}s left`;
+            } else {
+                label = 'Generating model';
+            }
+            generateModelButtonStateChange('poster', label, submitButton);
+
+            // Schedule next poll with exponential backoff.
+            const delay = POLL_DELAYS_MS[Math.min(pollAttemptsRef.current - 1, POLL_DELAYS_MS.length - 1)];
+            pollTimeoutRef.current = setTimeout(poll, delay);
+        };
+
+        // First poll fires after the short initial delay (Tripo3D is
+        // usually still "queued" for the first ~5s).
+        pollTimeoutRef.current = setTimeout(poll, POLL_DELAYS_MS[0]);
+    };
 
     function insertUnique(array, newItem, shouldReplace = false) {
         const index = array.findIndex(item => item.key === newItem.key);
@@ -42,7 +218,13 @@ export default function IntegrationSection({
         }
 
         if (innerText) {
-            submitButton.innerHTML = innerText;
+            // AR-62 §2: strip the legacy trailing-dots progress hint
+            // and inject a real spinner for in-progress states.
+            const cleaned = String(innerText).replace(/\.{2,}/g, '').replace(/\s+$/, '').trim();
+            const safe = escapeLabel(cleaned);
+            submitButton.innerHTML = SPINNER_STATES.has(state)
+                ? '<span class="atlas-ar-spinner" aria-hidden="true"></span><span>' + safe + '</span>'
+                : safe;
         }
     }
     const handleSubmit = async (e) => {
@@ -83,7 +265,7 @@ export default function IntegrationSection({
             if (!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
                 return;
             }
-            generateModelButtonStateChange('generate', 'Generating Model......', submitButton)
+            generateModelButtonStateChange('generate', 'Generating Model', submitButton)
         }
 
         /**
@@ -168,9 +350,9 @@ export default function IntegrationSection({
         if (submitButton.getAttribute('data-id') === 'generate') {
 
             if (data_arr?.body?.task_id) {
-                generateModelButtonStateChange('progress', 'Generating Model......', submitButton)
+                generateModelButtonStateChange('progress', 'Generating Model', submitButton)
             } else {
-                generateModelButtonStateChange('progress', 'Generating Task......', submitButton)
+                generateModelButtonStateChange('progress', 'Generating Task', submitButton)
             }
             console.log(data_arr)
             // return;
@@ -206,64 +388,16 @@ export default function IntegrationSection({
                     }
 
                     if (res?.data?.task_id) {
-                        generateModelButtonStateChange('task', 'Task Created! Please Wait!', submitButton)
+                        generateModelButtonStateChange('task', 'Task created — waiting for Tripo3D', submitButton)
                     }
                     /**
-                     * TODO:: meke this a method. This code will be true when
-                     * request is being created without any task_id
+                     * AR-62 §3: hand off to the controlled poller.
+                     * It owns exponential backoff, the hard cap, the
+                     * Tripo3D status-failed bail-out, the live progress
+                     * label, and the trimmed payload.
                      */
                     if (!res?.data?.temp?.src?.url && res?.data?.task_id) {
-                        let responseData = {};
-                        let taskInterval = setInterval(async () => {
-                            if (responseData?.data?.temp?.src?.url) {
-                                clearInterval(taskInterval)
-                                taskInterval = null;
-                                let tempProductModel = structuredClone(productModel)
-                                // set product model file
-                                tempProductModel.src = responseData.data.temp.src.url
-                                // set product poster image
-                                if (responseData?.data?.temp?.poster?.url) {
-                                    tempProductModel.poster = responseData.data.temp.poster.url
-                                }
-
-                                // set product body with task_id
-                                if (responseData?.data?.task_id) {
-                                    tempProductModel.exclude_integration_api_body.push({key: 'task_id', type: 'text', value: responseData.data.task_id})
-                                }
-                                if (responseData?.data?.task_id) {
-                                    tempProductModel.exclude_integration_api_body  = insertUnique(tempProductModel.exclude_integration_api_body,{key: 'task_id', type: 'textarea', value: responseData.data.task_id})
-                                }
-
-                                setTempModelData({...{temp: responseData.data.temp}, ...{post_id: data_arr.post_id}})
-                                setProductModel(tempProductModel)
-                                generateModelButtonStateChange('save', 'Save This Model', submitButton)
-                                console.log({tempProductModel})
-                                wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
-                                return;
-                            }
-
-                            if (responseData?.data?.temp?.poster?.url || responseData?.data?.output?.poster) {
-                                generateModelButtonStateChange('poster', 'Poster Created! Now Generating Model', submitButton)
-                                setTimeout(() => {
-                                    generateModelButtonStateChange('poster', 'Model .glb file is generating!', submitButton)
-                                }, 5000)
-                            }
-
-                            let formData2 = new FormData();
-                            data_arr.body.task_id = res?.data?.task_id;
-
-                            formData2.append('data', JSON.stringify(data_arr));
-                            // Default options are marked with *
-                            const response = await fetch(getURL('generate_3d_model'), {
-                                method: "POST", // *GET, POST, PUT, DELETE, etc.
-                                body: formData2, // body data type must match "Content-Type" header
-                                headers: {
-                                    'X-WP-Nonce': ar_try_on.rest_nonce
-                                },
-                            });
-                            responseData = await response.json();
-                            console.log(responseData)
-                        }, 30000)
+                        startPolling(res.data.task_id, data_arr, submitButton);
                     }
                 });
             /**
@@ -280,7 +414,7 @@ export default function IntegrationSection({
             /**
              * Save model files from temporary folder to final folder.
              */
-            generateModelButtonStateChange('save_progress', 'Model files saving .......', submitButton)
+            generateModelButtonStateChange('save_progress', 'Saving model files', submitButton)
             let formData2 = new FormData();
             data_arr['temporary_model_data'] = tempModelData
             formData2.append('data', JSON.stringify(data_arr));
@@ -337,7 +471,7 @@ export default function IntegrationSection({
             formData.append('method', 'POST');
 
             setTimeout(() => {
-                generateModelButtonStateChange('data_save', 'Model data is saving.......', submitButton)
+                generateModelButtonStateChange('data_save', 'Saving model data', submitButton)
             }, 10)
             postWithoutImage(getURL('get_model_and_settings'), formData)
                 .then((res) => {
@@ -464,12 +598,12 @@ export default function IntegrationSection({
                         {' '}writing needed. <em>Image-to-3D is part of AtlasAR Pro.</em>
                         {' '}
                         <a
-                            href="https://atlasaidev.com/plugins/3d-model-viewer-wordpress-plugin/"
+                            href="https://wpaugmentedreality.com/pricing/"
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
                         >
-                            Learn more →
+                            See Pro pricing →
                         </a>
                     </div>
                 )}
@@ -617,6 +751,24 @@ export default function IntegrationSection({
                     className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
                 Generate Model
             </button>
+            {/*
+              * AR-62 §3c: Cancel button — visible only while a poll
+              * loop is in flight. Clears the next-poll timeout, sets
+              * the abort flag (so any in-flight fetch resolves into a
+              * no-op), resets the button label, and notifies the
+              * user. Without this the user had no way to stop a
+              * mistaken or runaway generation short of a hard reload.
+              */}
+            {pollingActive && (
+                <button
+                    type="button"
+                    onClick={cancelGeneration}
+                    className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-white art-text-gray-700 art-rounded art-border art-border-gray-300"
+                    style={{fontSize: 13}}
+                >
+                    Cancel generation
+                </button>
+            )}
         </div>
     );
 }
