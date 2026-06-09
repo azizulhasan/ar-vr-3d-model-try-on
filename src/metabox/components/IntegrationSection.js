@@ -31,10 +31,31 @@ export default function IntegrationSection({
     const pollAbortedRef = useRef(false);
     const [pollingActive, setPollingActive] = useState(false);
 
+    /**
+     * AR-62 §4 — count of consecutive polls where Tripo3D reported
+     * `progress >= 99`. Once we cross that threshold, the mesh is
+     * done but the GLB/texture encoder is still running on Tripo's
+     * side. The label flips to "Finalizing model" and we override
+     * the backoff to a tight 5 s. After 3 ticks we also surface a
+     * caption under the button so the user knows the slowdown is
+     * expected.
+     */
+    const [finalizeCount, setFinalizeCount] = useState(0);
+
+    /**
+     * AR-62 §4 — one-shot guard for the mount-time "you have an
+     * unfinished task_id in this post's body — resume?" detection.
+     * Without the gate, every change to the body rows would re-run
+     * the resume conversion and clobber the user mid-edit.
+     */
+    const hasCheckedResumeRef = useRef(false);
+
     /** Exponential backoff schedule: 5s, 10s, 15s, 30s (then 30s cap). */
     const POLL_DELAYS_MS = [5000, 10000, 15000, 30000];
     /** Hard cap on polls — ≈ 5 min including backoff growth. */
     const POLL_MAX_ATTEMPTS = 20;
+    /** Tight poll cadence once Tripo3D reports >=99% (encoder tail). */
+    const FINALIZE_POLL_MS = 5000;
 
     // Spinner-state set: in-progress states get an animated spinner
     // glyph alongside the label; idle / success / error states do not.
@@ -52,6 +73,32 @@ export default function IntegrationSection({
         };
     }, []);
 
+    /**
+     * AR-62 §4 — on the first render after the body rows arrive from
+     * REST, look for a stored `task_id` that has NOT yet resulted in
+     * a saved model (`productModel.src` is still empty). That's the
+     * exact shape of "user kicked off a generation, got bored or
+     * closed the tab, came back later". Convert the Generate Model
+     * button into a one-click "Resume waiting for Tripo3D task"
+     * affordance instead of forcing them to paste the task_id back
+     * in by hand. Gated by hasCheckedResumeRef so future body edits
+     * don't keep flipping the button.
+     */
+    useEffect(() => {
+        if (hasCheckedResumeRef.current) return;
+        const body = productModel?.exclude_integration_api_body;
+        if (!Array.isArray(body) || body.length === 0) return;
+
+        hasCheckedResumeRef.current = true;
+        const taskIdRow = body.find(r => r && r.key === 'task_id');
+        if (taskIdRow?.value && !productModel?.src) {
+            const btn = document.getElementById('atlas_ar_model_generate');
+            if (btn && btn.getAttribute('data-id') === 'generate') {
+                generateModelButtonStateChange('resume', 'Resume waiting for Tripo3D task', btn);
+            }
+        }
+    }, [productModel?.exclude_integration_api_body, productModel?.src]);
+
     const stopPolling = () => {
         if (pollTimeoutRef.current) {
             clearTimeout(pollTimeoutRef.current);
@@ -60,15 +107,30 @@ export default function IntegrationSection({
         pollAbortedRef.current = true;
         pollAttemptsRef.current = 0;
         setPollingActive(false);
+        setFinalizeCount(0);
     };
 
+    /**
+     * AR-62 §4 — Cancel is the user explicitly abandoning the task.
+     * Clear the task_id row alongside the polling state so the next
+     * Generate Model click starts a fresh task instead of resuming
+     * the abandoned one. Timeout is handled separately and keeps
+     * the row in place.
+     */
     const cancelGeneration = () => {
         stopPolling();
+        const updated = structuredClone(productModel);
+        if (Array.isArray(updated.exclude_integration_api_body)) {
+            updated.exclude_integration_api_body = updated.exclude_integration_api_body.filter(
+                r => r && r.key !== 'task_id'
+            );
+        }
+        setProductModel(updated);
         const btn = document.getElementById('atlas_ar_model_generate');
         if (btn) {
             generateModelButtonStateChange('generate', 'Generate Model', btn);
         }
-        notify('Generation cancelled.', 'warn', {autoClose: 3000});
+        notify('Generation cancelled. Task ID cleared.', 'warn', {autoClose: 3000});
     };
 
     /**
@@ -88,15 +150,29 @@ export default function IntegrationSection({
         pollAbortedRef.current = false;
         pollAttemptsRef.current = 0;
         setPollingActive(true);
+        setFinalizeCount(0);
 
         const poll = async () => {
             if (pollAbortedRef.current) return;
 
             if (pollAttemptsRef.current >= POLL_MAX_ATTEMPTS) {
+                /**
+                 * AR-62 §4 — local hard cap reached. The Tripo3D
+                 * task is almost certainly still running on their
+                 * side; we just stopped asking. Flip the button to
+                 * a `resume` state instead of `generate` so the
+                 * next click picks up polling without a new create
+                 * (no extra credits) and without making the user
+                 * paste the task_id back in.
+                 */
                 stopPolling();
-                submitButton.setAttribute('data-id', 'generate');
-                generateModelButtonStateChange('error', 'Generation timed out — click to try again', submitButton);
-                notify('Generation took too long. Try again with a simpler prompt or image.', 'error', {autoClose: 6000});
+                submitButton.setAttribute('data-id', 'resume');
+                generateModelButtonStateChange('resume', 'Click to resume waiting', submitButton);
+                notify(
+                    'Generation is taking longer than expected. Your Tripo3D task is still running — click "Click to resume waiting" to keep polling (no extra credits will be charged).',
+                    'warn',
+                    {autoClose: 12000}
+                );
                 return;
             }
             pollAttemptsRef.current++;
@@ -168,24 +244,42 @@ export default function IntegrationSection({
                 return;
             }
 
-            // AR-62 §3d: live progress / ETA / queue surface.
+            // AR-62 §3d + §4: live progress / ETA / queue surface,
+            // with smarter end-game handling.
             const progress = responseData?.data?.progress;
             const eta      = responseData?.data?.running_left_time;
             const queueing = responseData?.data?.queuing_num;
+
+            // Tripo3D jumps to 99% as soon as the mesh is done but
+            // the GLB/texture encoder runs for another 20-60s. Show
+            // "Finalizing model" so the user sees a phase change
+            // instead of staring at a static 99%, AND tighten the
+            // poll cadence so we catch completion sooner.
+            const isFinalizing = typeof progress === 'number' && progress >= 99;
             let label;
-            if (tripoStatus === 'queued' && typeof queueing === 'number' && queueing > 0) {
-                label = `Queued at Tripo3D — position ${queueing}`;
-            } else if (typeof progress === 'number' && progress > 0 && progress < 100) {
-                label = `Generating model — ${progress}%`;
-            } else if (typeof eta === 'number' && eta > 0) {
-                label = `Generating model — ~${eta}s left`;
+            if (isFinalizing) {
+                label = 'Finalizing model';
+                setFinalizeCount(c => c + 1);
             } else {
-                label = 'Generating model';
+                if (finalizeCount !== 0) setFinalizeCount(0);
+                if (tripoStatus === 'queued' && typeof queueing === 'number' && queueing > 0) {
+                    label = `Queued at Tripo3D — position ${queueing}`;
+                } else if (typeof progress === 'number' && progress > 0 && progress < 100) {
+                    label = `Generating model — ${progress}%`;
+                } else if (typeof eta === 'number' && eta > 0) {
+                    label = `Generating model — ~${eta}s left`;
+                } else {
+                    label = 'Generating model';
+                }
             }
             generateModelButtonStateChange('poster', label, submitButton);
 
-            // Schedule next poll with exponential backoff.
-            const delay = POLL_DELAYS_MS[Math.min(pollAttemptsRef.current - 1, POLL_DELAYS_MS.length - 1)];
+            // Schedule next poll. Finalizing phase uses a tight 5s
+            // cadence; otherwise fall back to the exponential
+            // backoff schedule.
+            const delay = isFinalizing
+                ? FINALIZE_POLL_MS
+                : POLL_DELAYS_MS[Math.min(pollAttemptsRef.current - 1, POLL_DELAYS_MS.length - 1)];
             pollTimeoutRef.current = setTimeout(poll, delay);
         };
 
@@ -320,9 +414,18 @@ export default function IntegrationSection({
         }
 
         const taskType = data_arr?.body?.type;
+        /**
+         * AR-62 §4 — when the user is resuming an existing Tripo3D
+         * task (button data-id === 'resume'), we already have a
+         * task_id and skip the create call entirely. The prompt /
+         * image-input checks below would only ever block the user
+         * from picking up where they left off; bypass them.
+         */
+        const isResume = submitButton.getAttribute('data-id') === 'resume';
 
         // text_to_model needs a real prompt.
-        if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
+        if (!isResume
+            && (data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
             && taskType === 'text_to_model'
             && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
             notify('Please write a proper prompt', 'error');
@@ -330,7 +433,7 @@ export default function IntegrationSection({
         }
 
         // image_to_model needs at least one image input.
-        if (data_arr?.api_name == 'tripo3d' && taskType === 'image_to_model') {
+        if (!isResume && data_arr?.api_name == 'tripo3d' && taskType === 'image_to_model') {
             const hasImage = !!(
                 data_arr?.body?.file?.url ||
                 data_arr?.body?.file?.file_token ||
@@ -347,6 +450,22 @@ export default function IntegrationSection({
          * and temporary poster url and preview it. at that time button state will be "save"
          * If user is satisfied then click button again. To save it on permanent folder
          */
+        /**
+         * AR-62 §4 — Resume: we already have a task_id and just need
+         * to keep polling. Skip the create POST entirely, go straight
+         * to the poller. No extra Tripo3D create charge, no fresh
+         * task — purely a status read.
+         */
+        if (submitButton.getAttribute('data-id') === 'resume') {
+            if (!data_arr?.body?.task_id) {
+                notify('No task ID found to resume. Generate a fresh task instead.', 'error');
+                return;
+            }
+            generateModelButtonStateChange('task', 'Resuming — waiting for Tripo3D', submitButton);
+            startPolling(data_arr.body.task_id, data_arr, submitButton);
+            return;
+        }
+
         if (submitButton.getAttribute('data-id') === 'generate') {
 
             if (data_arr?.body?.task_id) {
@@ -388,6 +507,25 @@ export default function IntegrationSection({
                     }
 
                     if (res?.data?.task_id) {
+                        /**
+                         * AR-62 §4 — auto-write the task_id into the
+                         * body as a visible row the second it lands.
+                         * If the polling loop times out, browser
+                         * crashes, or the user closes the tab and
+                         * comes back, the task_id is right there in
+                         * the form (and persists to DB on save) —
+                         * Generate Model can resume on the same task
+                         * with no manual paste and no extra Tripo3D
+                         * create charge.
+                         */
+                        const updated = structuredClone(productModel);
+                        updated.exclude_integration_api_body = insertUnique(
+                            updated.exclude_integration_api_body || [],
+                            {key: 'task_id', type: 'text', value: res.data.task_id},
+                            true
+                        );
+                        setProductModel(updated);
+
                         generateModelButtonStateChange('task', 'Task created — waiting for Tripo3D', submitButton)
                     }
                     /**
@@ -768,6 +906,21 @@ export default function IntegrationSection({
                 >
                     Cancel generation
                 </button>
+            )}
+            {/*
+              * AR-62 §4 — once we've sat at "Finalizing model" for 3+
+              * polls, Tripo3D's mesh encoder is doing slow tail work.
+              * Surface a small caption so the user doesn't think the
+              * process is stuck (no behavioural change — the poller
+              * keeps the tight 5 s cadence in this phase already).
+              */}
+            {pollingActive && finalizeCount >= 3 && (
+                <div
+                    className="art-text-xs art-text-gray-500 art-mt-2"
+                    style={{textAlign: 'center', lineHeight: 1.4}}
+                >
+                    Tripo3D's mesh encoder finishes after the progress bar — usually 20–40 s more.
+                </div>
             )}
         </div>
     );
