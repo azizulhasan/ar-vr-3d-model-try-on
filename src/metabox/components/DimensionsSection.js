@@ -38,7 +38,10 @@ export const DimensionsSection = ({
                         <PremiumBadge feature="dimensions">
                             <strong>Real-world dimensions</strong> render the model at its
                             true size in AR — customers can hold their phone up and
-                            instantly see "will this fit?". Available in AtlasAR Pro.
+                            instantly see "will this fit?". Pick a unit from{" "}
+                            <em>mm, cm, inch, ft, or m</em>, or switch to{" "}
+                            <em>Manual</em> mode and type your own width, height, and
+                            length (with any custom unit string). Available in AtlasAR Pro.
                         </PremiumBadge>
                     </div>
                 )}
