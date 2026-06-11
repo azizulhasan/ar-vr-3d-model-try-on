@@ -1,5 +1,5 @@
 === 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On  ===
-Contributors: atlasaidev, hasanazizul, freemius
+Contributors: atlasaidev, hasanazizul
 Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
