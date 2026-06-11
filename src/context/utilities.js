@@ -191,14 +191,31 @@ export const renderUserHotspots = (modelViewer, hotspots = []) => {
     });
 };
 
+/**
+ * Convert a length in metres (the unit model-viewer's
+ * getDimensions returns) into the merchant-selected unit.
+ *
+ * Supported units:
+ *   - mm    millimetres
+ *   - cm    centimetres
+ *   - m     metres (default / no-op)
+ *   - inch  inches      (1 m ≈ 39.37008 in)
+ *   - ft    feet        (1 m ≈ 3.28084  ft)
+ *
+ * Unknown unit → returns the value unchanged (metres).
+ */
 export const convertLength = (valueInMeters, unit) => {
     switch (unit) {
         case "m":
             return valueInMeters;
         case "cm":
             return valueInMeters * 100;
+        case "mm":
+            return valueInMeters * 1000;
         case "inch":
-            return valueInMeters * 39.3701;
+            return valueInMeters * 39.3700787;
+        case "ft":
+            return valueInMeters * 3.2808399;
         default:
             return valueInMeters;
     }
@@ -208,12 +225,14 @@ function getDimensionLabel(value, model_settings) {
     const unit = model_settings.dimensions?.unit || "cm"; // Default: cm
 
     const unitLabel = {
+        mm: "mm",
         cm: "cm",
         m: "m",
         inch: "in",
+        ft: "ft",
     };
     const converted = convertLength(value, unit);
-    return `${converted.toFixed(1)} ${unitLabel[unit]}`;
+    return `${converted.toFixed(1)} ${unitLabel[unit] || unit}`;
 }
 
 function displayDimensions(modelViewer, model_settings) {
@@ -258,15 +277,57 @@ function displayDimensions(modelViewer, model_settings) {
 
     const unit = model_settings.dimensions?.unit || "cm";
 
+    /**
+     * AR-63 — supported unit table for Auto-detect mode. Adding a
+     * new unit only requires touching this object plus the matching
+     * case in `convertLength`. The dropdown in
+     * `DimensionsSection.js` lists them in size order
+     * (mm → cm → inch → ft → m).
+     */
     const conversion = {
-        cm: (v) => v * 100,
-        m: (v) => v,
-        inch: (v) => v * 39.3701,
+        mm:   (v) => v * 1000,
+        cm:   (v) => v * 100,
+        m:    (v) => v,
+        inch: (v) => v * 39.3700787,
+        ft:   (v) => v * 3.2808399,
     };
 
-    const unitLabel = {cm: "cm", m: "m", inch: "in"};
+    const unitLabel = {mm: "mm", cm: "cm", m: "m", inch: "in", ft: "ft"};
 
-    const formatValue = (v) => `${conversion[unit](v).toFixed(1)} ${unitLabel[unit]}`;
+    /**
+     * AR-63 — manual mode paints the labels directly from the
+     * merchant-entered values + their free-text unit. No unit
+     * conversion: they already typed what they want shown. Hotspot
+     * POSITIONS still use the live bounding box (so the labels sit
+     * at the right corners around the GLB) — only the rendered text
+     * differs between modes.
+     *
+     * Axis convention: x = width, y = height, z = length.
+     */
+    const isManual = model_settings.dimensions?.mode === "manual";
+
+    const formatValue = (v) => {
+        // Defensive: an unknown unit (saved before this release added
+        // mm/ft, or hand-edited DB) would otherwise crash with
+        // `conversion[undefined] is not a function`. Fall back to
+        // metres + the raw unit string.
+        const conv = conversion[unit] || ((x) => x);
+        const label = unitLabel[unit] || unit;
+        return `${conv(v).toFixed(1)} ${label}`;
+    };
+
+    const formatManual = (axis) => {
+        const raw = model_settings.dimensions?.[axis]?.value;
+        const u   = model_settings.dimensions?.unit || "cm";
+        if (raw === undefined || raw === null || raw === "" || Number.isNaN(Number(raw))) {
+            return `— ${u}`;
+        }
+        return `${Number(raw).toFixed(1)} ${u}`;
+    };
+
+    const labelFor = (axis, fallbackSize) => (
+        isManual ? formatManual(axis) : formatValue(fallbackSize)
+    );
 
     const hotspots = [
         {dot: "hotspot-dot+X-Y+Z", pos: (c, s) => [c.x + s.x / 2, c.y - s.y / 2, c.z + s.z / 2]},
@@ -281,27 +342,27 @@ function displayDimensions(modelViewer, model_settings) {
         {
             name: "hotspot-dim+X-Y",
             pos: (c, s) => [c.x + s.x * 0.6, c.y - s.y * 0.55, c.z],
-            value: (s) => formatValue(s.z),
+            value: (s) => labelFor("length", s.z),
         },
         {
             name: "hotspot-dim+X-Z",
             pos: (c, s) => [c.x + s.x * 0.6, c.y, c.z - s.z * 0.6],
-            value: (s) => formatValue(s.y),
+            value: (s) => labelFor("height", s.y),
         },
         {
             name: "hotspot-dim+Y-Z",
             pos: (c, s) => [c.x, c.y + s.y * 0.55, c.z - s.z * 0.55],
-            value: (s) => formatValue(s.x),
+            value: (s) => labelFor("width", s.x),
         },
         {
             name: "hotspot-dim-X-Z",
             pos: (c, s) => [c.x - s.x * 0.6, c.y, c.z - s.z * 0.6],
-            value: (s) => formatValue(s.y),
+            value: (s) => labelFor("height", s.y),
         },
         {
             name: "hotspot-dim-X-Y",
             pos: (c, s) => [c.x - s.x * 0.6, c.y - s.y * 0.55, c.z],
-            value: (s) => formatValue(s.z),
+            value: (s) => labelFor("length", s.z),
         },
     ];
 

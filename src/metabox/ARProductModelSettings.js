@@ -58,6 +58,14 @@ const ARProductModelSettings = () => {
         exclude_integration_api_model_type: "text_to_model",
         dimensions: {
             show: !!ar_try_on.is_pro_active,
+            // AR-63 — dimension authoring mode. "auto" (default) keeps
+            // the historic behaviour where width / height / length are
+            // re-computed from the loaded GLB's bounding box every time
+            // the section mounts. "manual" hands the merchant editable
+            // number inputs + a free-text unit field so they can type
+            // shipping dimensions directly. The stored shape under
+            // `dimensions.{w|h|l}.value` is reused for both modes.
+            mode: "auto",
             unit: "cm",
             width: {value: 4, unit: "cm"},
             height: {value: 10, unit: "cm"},
