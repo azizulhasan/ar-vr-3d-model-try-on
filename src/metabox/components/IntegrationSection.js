@@ -660,14 +660,33 @@ export default function IntegrationSection({
     }, [productModel])
 
 
-    // Pro-gated image picker takes over the body editor for
-    // Tripo3D/Meshy AI image_to_model — hide the raw key/value rows
-    // and the Add Body button while it's active.
+    // Pro-gated image picker takes over the image-source rows for
+    // Tripo3D/Meshy AI image_to_model. The body editor below
+    // (Add Body + dynamic rows) is still rendered — we just filter
+    // out the keys the picker / model-version field own, so the
+    // merchant never sees the same value editable in two places.
     const _proActive = (window.ar_try_on?.is_pro_active === '1'
         || window.ar_try_on?.is_pro_active === 1
         || window.ar_try_on?.is_pro_active === true);
     const pickerActive = _proActive
         && productModel?.exclude_integration_api_model_type === 'image_to_model';
+
+    /**
+     * Keys the image picker + Tripo model-version field own when
+     * the picker is active. Body editor rows with these keys are
+     * hidden so the merchant only edits each value in one place.
+     * Custom rows added via Add Body that *happen* to use one of
+     * these keys still get sent — picker-managed values just sit
+     * earlier in the array and win on submit.
+     */
+    const PICKER_MANAGED_KEYS = new Set([
+        'type',
+        'file.url',
+        'file.file_token',
+        'file.object',
+        'file.type',
+        'model_version',
+    ]);
 
     /**
      * Generation modes the host site is licensed to actually run.
@@ -767,7 +786,7 @@ export default function IntegrationSection({
                 />
             )}
 
-            {!pickerActive && (<>
+            <>
             {/* Add new field button */}
             <div className="art-flex art-items-center art-justify-between">
                 {/* Add Body Button */}
@@ -813,8 +832,20 @@ export default function IntegrationSection({
             </div>
 
 
-            {/* Dynamic rows */}
-            {productModel.exclude_integration_api_body.map((field, index) => (
+            {/*
+              * Dynamic rows. When the picker is active the source +
+              * model-version fields it owns are hidden — the merchant
+              * only sees rows it doesn't already control above
+              * (texture, pbr, texture_alignment, geometry_quality,
+              * plus anything added via Add Body). Iteration still uses
+              * the ORIGINAL index so handleIntegrationChange /
+              * removeField stay correct against the real array.
+              */}
+            {productModel.exclude_integration_api_body.map((field, index) => {
+                if (pickerActive && field && PICKER_MANAGED_KEYS.has(field.key)) {
+                    return null;
+                }
+                return (
                 <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
                     <input
                         type="text"
@@ -879,9 +910,9 @@ export default function IntegrationSection({
                     )}
 
                 </div>
-
-            ))}
-            </>)}
+                );
+            })}
+            </>
             <button type="button"
                     onClick={handleSubmit}
                     data-id={'generate'}
