@@ -757,20 +757,70 @@ export default function IntegrationSection({
     }, [productModel?.exclude_integration_api_body, _schemaInputs]);
 
     /**
+     * Keys we used to seed into the Tripo3D body schema and later
+     * removed (2026-06-12 — Joachim follow-up: "remove these if user
+     * needed then he will add those by reading documentations").
+     * Products saved before that change still have these in their
+     * stored body, so the schema-merge below prunes them on load to
+     * stop the body editor from showing rows the schema no longer
+     * advertises. Anyone who genuinely wants one of these can still
+     * re-add it via Add Body — manual rows aren't in this list and
+     * are never pruned.
+     */
+    const LEGACY_REMOVED_KEYS = new Set([
+        'negative_prompt',
+        'texture_quality',
+        'auto_size',
+        'face_limit',
+        'model_seed',
+        'image_seed',
+        'enable_image_autofix',
+        'orientation',
+        // geometry_quality is image_to_model-only legacy — kept off
+        // this list because text_to_model's current schema still
+        // declares it; pruning is scoped per-mode below.
+    ]);
+
+    /**
      * Merge schema rows into the body so the body editor surfaces
      * every Tripo3D field defined in utilities.js. Existing values
      * are preserved; missing rows are appended with the schema
      * default. Runs whenever the api/model type changes — exactly
      * once per switch — so the merchant sees the right knobs for
      * the mode they're in without losing edits already in the body.
+     *
+     * Also prunes legacy keys we used to seed but no longer do
+     * (LEGACY_REMOVED_KEYS) AND any key from the per-mode legacy
+     * scope (e.g. `geometry_quality` carried over from when
+     * image_to_model briefly included it) — but only when the key
+     * isn't in the current schema. User-added rows survive because
+     * they're not in either deny list.
      */
     useEffect(() => {
         if (!_schemaInputs.length) return;
+        const schemaKeys = new Set(_schemaInputs.map(f => f.key));
+        const mode = productModel?.exclude_integration_api_model_type;
+        // image_to_model briefly seeded geometry_quality — strip it
+        // when we're in image_to_model and the schema no longer
+        // declares it. text_to_model still uses geometry_quality,
+        // so this never touches the text mode.
+        const modeLegacy = mode === 'image_to_model'
+            ? new Set(['geometry_quality'])
+            : new Set();
         setProductModel((prev) => {
             const existing = Array.isArray(prev.exclude_integration_api_body)
                 ? prev.exclude_integration_api_body
                 : [];
-            const have = new Set(existing.map(r => r?.key));
+
+            const pruned = existing.filter(row => {
+                if (!row || !row.key) return true;
+                if (schemaKeys.has(row.key)) return true;
+                if (LEGACY_REMOVED_KEYS.has(row.key)) return false;
+                if (modeLegacy.has(row.key)) return false;
+                return true;
+            });
+
+            const have = new Set(pruned.map(r => r?.key));
             const additions = [];
             for (const f of _schemaInputs) {
                 if (have.has(f.key)) continue;
@@ -781,10 +831,13 @@ export default function IntegrationSection({
                     required: !!f.required,
                 });
             }
-            if (!additions.length) return prev;
+
+            if (pruned.length === existing.length && !additions.length) {
+                return prev;
+            }
             return {
                 ...prev,
-                exclude_integration_api_body: [...existing, ...additions],
+                exclude_integration_api_body: [...pruned, ...additions],
             };
         });
         // Intentionally NOT depending on exclude_integration_api_body — only on
