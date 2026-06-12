@@ -389,10 +389,51 @@ export default function IntegrationSection({
          * actually expect on the wire (`{file: {url: "..."}}`).
          * Without this, image_to_model never receives the image
          * and the task polls forever (Joachim Rodriguez, 2026-06-07).
+         *
+         * Values also get type-coerced against the schema before
+         * write — HTML <select> always stores strings, but Tripo3D
+         * returns 1003 "malformed body" if `texture` / `pbr` arrive
+         * as `"true"` instead of JSON `true`. Same risk for
+         * `face_limit` etc. arriving as `"3000"` instead of `3000`.
+         * Coercion uses the per-field schema we already have:
+         *   - enum ['true','false']  → boolean
+         *   - schema.type === 'number' → Number (empty stays empty,
+         *     so optional numeric rows aren't sent as NaN)
          */
+        const coerceValueForSchema = (rawValue, fieldKey) => {
+            const schema = lookupFieldSchema(fieldKey);
+            if (!schema) return rawValue;
+            const s = String(rawValue ?? '');
+            const isBoolEnum = Array.isArray(schema.enum)
+                && schema.enum.length === 2
+                && schema.enum.every(v => v === 'true' || v === 'false');
+            if (isBoolEnum) {
+                if (s === 'true')  return true;
+                if (s === 'false') return false;
+                return rawValue;
+            }
+            if (schema.type === 'number') {
+                if (s.trim() === '') return '';
+                const n = Number(s);
+                return Number.isFinite(n) ? n : rawValue;
+            }
+            return rawValue;
+        };
+
         let body = {}
         productModel.exclude_integration_api_body.forEach(item => {
-            setNestedKey(body, item.key, item.value);
+            const coerced = coerceValueForSchema(item.value, item.key);
+            setNestedKey(body, item.key, coerced);
+        });
+
+        /**
+         * Drop empty-string rows so Tripo3D doesn't see an empty
+         * optional like `face_limit: ""` and reject the whole
+         * request. Top-level keys only — nested `file.*` handled
+         * separately below.
+         */
+        Object.keys(body).forEach(k => {
+            if (body[k] === '') delete body[k];
         });
 
         /**
