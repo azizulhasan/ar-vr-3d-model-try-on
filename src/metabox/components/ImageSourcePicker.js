@@ -288,14 +288,33 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
             )}
             <div className="art-flex art-items-center art-justify-between art-mb-3">
                 <h4 className="art-font-medium" style={{margin: 0}}>Image source</h4>
-                {selectedUrl ? (
+                {selectedUrl && (
                     <span className="art-text-xs art-text-green-700" style={{maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
                         Selected: {selectedUrl}
                     </span>
-                ) : (
-                    <span className="art-text-xs art-text-gray-500">Pick an image, then click Generate Model.</span>
                 )}
             </div>
+
+            {!selectedUrl && (
+                <div
+                    style={{
+                        background: '#eff6ff',
+                        border: '1px solid #3b82f6',
+                        borderRadius: 6,
+                        padding: '10px 12px',
+                        marginBottom: 12,
+                        fontSize: 13,
+                        lineHeight: 1.45,
+                        color: '#1e3a8a',
+                    }}
+                >
+                    <strong>Step 1 — select an image.</strong>
+                    {' '}Tripo3D needs a source image to turn into a 3D model. Pick one from
+                    {' '}<em>Featured image</em>, <em>Gallery image</em>, <em>Media library</em>,
+                    {' '}<em>Upload from computer</em>, or <em>Paste URL</em> below. Once selected,
+                    {' '}the <em>Generate Model</em> button activates.
+                </div>
+            )}
 
             <div className="art-flex art-flex-wrap art-mb-3">
                 {tabBtn('featured', 'Featured image')}
