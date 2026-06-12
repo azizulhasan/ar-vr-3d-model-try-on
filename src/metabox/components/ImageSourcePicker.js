@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {getPostID} from "../../context/utilities";
+import {getPostID, TRIPO_DEFAULT_MODEL_VERSION} from "../../context/utilities";
 import notify from "../../context/Notify";
 
 /**
@@ -22,30 +22,6 @@ import notify from "../../context/Notify";
  * `ar_try_on.is_pro_active === '1'` so the picker never renders on
  * a Free-only install.
  */
-/**
- * Tripo3D generation model versions exposed in the picker.
- * Ordered with the recommended modern release first, then v2.5
- * as the historical default (also the API server default), then
- * the rest. Add new versions here when Tripo3D publishes them —
- * the schema in `getAPITypes('tripo3d').body.supported_types`
- * does not need an update because the picker writes
- * `model_version` directly into the body row.
- *
- * Joachim Rodriguez (2026-06-09) — preferred v3.1 over v2.5 and
- * lost the choice when AR-62 took over the body editor. The
- * model-version row used to be visible / editable in the raw
- * key/value editor; this select restores parity inside the
- * picker UI.
- */
-const TRIPO_MODEL_VERSIONS = [
-    {value: 'v3.1-20260211',       label: 'v3.1 (latest)'},
-    {value: 'v3.0-20250812',       label: 'v3.0'},
-    {value: 'P1-20260311',         label: 'P1 (low-poly)'},
-    {value: 'Turbo-v1.0-20250506', label: 'Turbo (fastest)'},
-    {value: 'v2.5-20250123',       label: 'v2.5 (legacy default)'},
-];
-const TRIPO_DEFAULT_MODEL_VERSION = 'v2.5-20250123';
-
 export default function ImageSourcePicker({productModel, setProductModel}) {
     const [activeTab, setActiveTab] = useState('featured');
     const [galleryImages, setGalleryImages] = useState([]);
@@ -59,29 +35,6 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
         return row?.value || '';
     }, [productModel.exclude_integration_api_body]);
 
-    /**
-     * Read the merchant-selected Tripo model version from the
-     * current body. Falls back to the historical default when
-     * the row is missing — covers products saved before AR-62.
-     */
-    const modelVersion = useMemo(() => {
-        const row = (productModel.exclude_integration_api_body || []).find(r => r.key === 'model_version');
-        return row?.value || TRIPO_DEFAULT_MODEL_VERSION;
-    }, [productModel.exclude_integration_api_body]);
-
-    /**
-     * Tripo3D body for image_to_model with a known URL.
-     */
-    const buildBodyForUrl = (url, ext, mv) => ([
-        {key: 'type',              type: 'text', value: 'image_to_model'},
-        {key: 'file.url',          type: 'url',  value: url},
-        {key: 'file.type',         type: 'text', value: ext || guessExt(url)},
-        {key: 'model_version',     type: 'text', value: mv || TRIPO_DEFAULT_MODEL_VERSION},
-        {key: 'texture',           type: 'boolean', value: true},
-        {key: 'pbr',               type: 'boolean', value: true},
-        {key: 'texture_alignment', type: 'text', value: 'original_image'},
-    ]);
-
     const guessExt = (url) => {
         const m = String(url || '').match(/\.(jpe?g|png|webp)(?:\?|$)/i);
         if (!m) return 'jpg';
@@ -89,35 +42,43 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
         return e === 'jpeg' ? 'jpg' : e;
     };
 
-    const pickUrl = (url, ext) => {
-        if (!url) return;
-        setProductModel({
-            ...productModel,
-            exclude_integration_api_body: buildBodyForUrl(url, ext, modelVersion),
-        });
-        notify('Image selected. Click Generate Model to start.', 'success', {autoClose: 2500});
+    /**
+     * Upsert helper — find a body row by key, update it in place
+     * when present, push it when absent. Preserves the row's
+     * other properties (type / required / etc.) and the array
+     * position of every other row. Used by pickUrl so picking
+     * an image only touches the file source rows, leaving the
+     * merchant's texture / pbr / model_version edits intact.
+     */
+    const upsertRow = (body, key, value, defaults = {}) => {
+        const idx = body.findIndex(r => r && r.key === key);
+        if (idx >= 0) {
+            body[idx] = {...body[idx], value};
+        } else {
+            body.push({key, type: 'text', value, ...defaults});
+        }
     };
 
-    /**
-     * Update the model_version row when the merchant flips the
-     * dropdown. If the body is empty (no image selected yet) we
-     * still want the choice to stick so the next pickUrl() reads
-     * it. Reuses the existing row when present; appends otherwise.
-     */
-    const handleModelVersionChange = (e) => {
-        const newVersion = e.target.value;
+    const pickUrl = (url, ext) => {
+        if (!url) return;
+        const ext_ = ext || guessExt(url);
         setProductModel((prev) => {
             const body = Array.isArray(prev.exclude_integration_api_body)
                 ? [...prev.exclude_integration_api_body]
                 : [];
-            const idx = body.findIndex(r => r && r.key === 'model_version');
-            if (idx >= 0) {
-                body[idx] = {...body[idx], value: newVersion};
-            } else {
-                body.push({key: 'model_version', type: 'text', value: newVersion});
-            }
+            // Update only the rows the picker actually owns. file.url
+            // wins; clear file.file_token and file.object so the body
+            // can't carry two mutually-exclusive sources at once.
+            upsertRow(body, 'type', 'image_to_model');
+            upsertRow(body, 'file.url', url, {type: 'url'});
+            upsertRow(body, 'file.type', ext_);
+            const ftIdx = body.findIndex(r => r && r.key === 'file.file_token');
+            if (ftIdx >= 0) body[ftIdx] = {...body[ftIdx], value: ''};
+            const foIdx = body.findIndex(r => r && r.key === 'file.object');
+            if (foIdx >= 0) body[foIdx] = {...body[foIdx], value: ''};
             return {...prev, exclude_integration_api_body: body};
         });
+        notify('Image selected. Click Generate Model to start.', 'success', {autoClose: 2500});
     };
 
     /**
@@ -345,51 +306,12 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
             </div>
 
             {/*
-              * AR-62 follow-up — Tripo3D model-version field.
-              *
-              * Joachim Rodriguez (2026-06-09) lost the ability to choose
-              * v3.1 when the picker took over the body editor. A plain
-              * `<select>` would mean a code release every time Tripo3D
-              * ships a new version, so this is a free-text `<input>`
-              * backed by a `<datalist>` of today's known versions —
-              * merchants get discoverable autocomplete out of the box
-              * but can also type a brand-new Tripo version (e.g. the
-              * day it appears in the docs) without waiting for us.
+              * Tripo `model_version` is no longer a picker affordance —
+              * it lives in the body editor below as a schema-driven
+              * row with the same datalist autocomplete. Keeps all
+              * field metadata sourced from utilities.js and lets the
+              * Tripo3D-mandatory-field gate include it uniformly.
               */}
-            <div
-                className="art-flex art-items-center art-gap-2 art-text-sm art-mb-3 art-flex-wrap"
-                style={{lineHeight: 1.5}}
-            >
-                <label htmlFor="atlas-ar-tripo-model-version" style={{fontWeight: 500}}>
-                    Tripo model version:
-                </label>
-                <input
-                    id="atlas-ar-tripo-model-version"
-                    type="text"
-                    list="atlas-ar-tripo-model-version-list"
-                    value={modelVersion}
-                    onChange={handleModelVersionChange}
-                    placeholder={TRIPO_DEFAULT_MODEL_VERSION}
-                    className="art-border art-rounded art-px-2 art-py-1"
-                    style={{minWidth: 220}}
-                    autoComplete="off"
-                    spellCheck="false"
-                />
-                <datalist id="atlas-ar-tripo-model-version-list">
-                    {TRIPO_MODEL_VERSIONS.map(v => (
-                        <option key={v.value} value={v.value}>{v.label}</option>
-                    ))}
-                </datalist>
-                <a
-                    href="https://platform.tripo3d.ai/docs/generation#image-to-model"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="art-text-xs art-text-gray-500"
-                    style={{textDecoration: 'underline'}}
-                >
-                    docs
-                </a>
-            </div>
 
             {activeTab === 'featured' && (
                 <div style={{display: 'flex', flexWrap: 'wrap'}}>

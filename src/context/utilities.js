@@ -892,6 +892,57 @@ function preventWooCommerceImageSwap(modelViewer) {
 // Make switchModelVariant available globally for frontend use
 window.atlasARSwitchVariant = switchModelVariant;
 
+/**
+ * Tripo3D task-history URL. Surfaced under the body editor so a
+ * merchant whose Generate Model button is disabled (because the
+ * mandatory fields are empty) knows where to grab an existing
+ * task_id to resume from.
+ */
+export const TRIPO_TASK_HISTORY_URL = "https://platform.tripo3d.ai/usage/history";
+
+/**
+ * Tripo3D generation-model version list — same source for both
+ * text_to_model and image_to_model. Renders as the datalist
+ * suggestions on the `model_version` body row. Ordered with the
+ * recommended modern release first, v2.5 last (also the API's
+ * own historical default). Add new entries here when Tripo3D
+ * ships a new version — the body editor picks them up
+ * automatically.
+ */
+export const TRIPO_MODEL_VERSIONS = [
+    {value: "v3.1-20260211",       label: "v3.1 (latest)"},
+    {value: "v3.0-20250812",       label: "v3.0"},
+    {value: "P1-20260311",         label: "P1 (low-poly)"},
+    {value: "Turbo-v1.0-20250506", label: "Turbo (fastest)"},
+    {value: "v2.5-20250123",       label: "v2.5 (legacy default)"},
+];
+export const TRIPO_DEFAULT_MODEL_VERSION = "v2.5-20250123";
+
+/**
+ * Shared Tripo3D body-field schema fragments. Each carries the
+ * data the row renderer needs:
+ *   - required:      hides the row's × delete button AND gates
+ *                    the Generate Model button on having a value.
+ *   - description:   shown as a hover/focus tooltip via the
+ *                    `ⓘ` icon next to the row.
+ *   - enum:          renders the value field as a strict <select>.
+ *   - suggestions:   renders the value field as <input list>
+ *                    (open enum — merchant can type anything else).
+ *   - maxLength:     HTML maxLength attribute on text inputs.
+ *
+ * IntegrationSection.js reads these — NO field metadata is
+ * hardcoded in JSX. Adding a future Tripo3D field is a one-line
+ * schema change here.
+ */
+const tripoField = (key, overrides = {}) => ({
+    key,
+    type: "text",
+    value: "",
+    required: false,
+    description: "",
+    ...overrides,
+});
+
 export const getAPITypes = (api_type = "tripo3d") => {
     let api_types = {
         tripo3d: {
@@ -899,6 +950,7 @@ export const getAPITypes = (api_type = "tripo3d") => {
             name: "Tripo 3D",
             url: "https://api.tripo3d.ai/v2/openapi/task",
             api_key_url: "https://platform.tripo3d.ai/api-keys",
+            task_history_url: TRIPO_TASK_HISTORY_URL,
             headers: [
                 {key: "Authorization", value: ""},
                 {key: "Content-Type", value: "application/json"},
@@ -907,31 +959,145 @@ export const getAPITypes = (api_type = "tripo3d") => {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            {key: "prompt", type: "textarea", value: ""},
-                            {key: "type", type: "text", value: "text_to_model"},
-                            {key: "model_version", type: "text", value: "v2.5-20250123"},
-                            {key: "texture", type: "boolean", value: true},
-                            {key: "pbr", type: "boolean", value: true},
-                            {key: "texture_alignment", type: "text", value: "geometry"},
-                            {key: "geometry_quality", type: "text", value: "original"},
+                            tripoField("type", {
+                                value: "text_to_model",
+                                required: true,
+                                description: "Must be set to text_to_model. Managed automatically — do not change.",
+                            }),
+                            tripoField("prompt", {
+                                type: "textarea",
+                                required: true,
+                                description: "Text input that directs the model generation. Max 1024 characters. Supports multiple languages.",
+                                maxLength: 1024,
+                            }),
+                            tripoField("model_version", {
+                                value: TRIPO_DEFAULT_MODEL_VERSION,
+                                description: "Tripo3D generation model version. Newer versions = higher mesh quality, slightly more credits. v3.1 is the latest; v2.5 is the historical default. Type any other version Tripo3D releases later.",
+                                suggestions: TRIPO_MODEL_VERSIONS,
+                            }),
+                            tripoField("negative_prompt", {
+                                type: "textarea",
+                                description: "Reverse-direction prompt to push generation away from things. Max 255 characters.",
+                                maxLength: 255,
+                            }),
+                            tripoField("texture", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable texturing. Default true. Set false to get a base mesh without textures.",
+                            }),
+                            tripoField("pbr", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable PBR (physically based rendering). Default true. When true, texture is forced on regardless of its setting.",
+                            }),
+                            tripoField("texture_quality", {
+                                value: "standard",
+                                enum: ["standard", "detailed", "extreme"],
+                                description: "Texture resolution. standard (+10 credits), detailed (+20), extreme (+30).",
+                            }),
+                            tripoField("auto_size", {
+                                value: "false",
+                                enum: ["true", "false"],
+                                description: "Automatically scale the model to real-world dimensions in metres.",
+                            }),
+                            tripoField("face_limit", {
+                                type: "number",
+                                description: "Cap on output mesh face count. Adaptive when blank. For model_version >= v2.0 only.",
+                            }),
+                            tripoField("model_seed", {
+                                type: "number",
+                                description: "Random seed for geometry. Same seed + same prompt = identical mesh. Random when blank.",
+                            }),
+                            tripoField("image_seed", {
+                                type: "number",
+                                description: "Random seed for the image-generation step that feeds the geometry. Random when blank.",
+                            }),
+                            tripoField("geometry_quality", {
+                                value: "standard",
+                                enum: ["standard", "detailed"],
+                                description: "Ultra-mode detail. Only for model_version >= v3.0. detailed = maximum detail (more credits).",
+                            }),
                         ],
                         doc: "https://platform.tripo3d.ai/docs/generation#text-to-model",
                     },
                     image_to_model: {
                         input: [
-                            {key: "type", type: "text", value: "image_to_model"},
-                            {key: "file.type", type: "text", value: "png"},
-                            {key: "file.file_token", type: "file", value: ""},
-                            {key: "file.object", type: "text", value: ""},
-                            {key: "file.url", type: "url", value: ""},
-                            {key: "model_version", type: "text", value: "v2.5-20250123"},
-                            {key: "texture", type: "boolean", value: true},
-                            {key: "pbr", type: "boolean", value: true},
-                            {
-                                key: "texture_alignment",
-                                type: "text",
+                            tripoField("type", {
+                                value: "image_to_model",
+                                required: true,
+                                description: "Must be set to image_to_model. Managed automatically — do not change.",
+                            }),
+                            tripoField("file.url", {
+                                type: "url",
+                                requiredGroup: "fileSource",
+                                description: "Direct URL to the image. JPEG/PNG, max 20 MB. Picked via the Image source tabs — mutually exclusive with file_token and object.",
+                            }),
+                            tripoField("file.file_token", {
+                                type: "file",
+                                requiredGroup: "fileSource",
+                                description: "Identifier returned from a Tripo3D /upload call. Mutually exclusive with url and object.",
+                            }),
+                            tripoField("file.object", {
+                                requiredGroup: "fileSource",
+                                description: "STS-upload bucket+key reference. Mutually exclusive with url and file_token.",
+                            }),
+                            tripoField("file.type", {
+                                value: "jpg",
+                                description: "Image file extension hint (jpg / png / webp). Not strictly validated by Tripo3D.",
+                            }),
+                            tripoField("model_version", {
+                                value: TRIPO_DEFAULT_MODEL_VERSION,
+                                description: "Tripo3D generation model version. Newer versions = higher mesh quality, slightly more credits. v3.1 is the latest. Type any other version Tripo3D releases later.",
+                                suggestions: TRIPO_MODEL_VERSIONS,
+                            }),
+                            tripoField("enable_image_autofix", {
+                                value: "false",
+                                enum: ["true", "false"],
+                                description: "Tripo3D pre-processes the input image for better generation. Default false.",
+                            }),
+                            tripoField("texture", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable texturing. Default true. Set false for a base mesh without textures.",
+                            }),
+                            tripoField("pbr", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable PBR (physically based rendering). Default true. When true, texture is forced on regardless of its setting.",
+                            }),
+                            tripoField("texture_quality", {
+                                value: "standard",
+                                enum: ["standard", "detailed", "extreme"],
+                                description: "Texture resolution. standard (+10 credits), detailed (+20), extreme (+30).",
+                            }),
+                            tripoField("texture_alignment", {
                                 value: "original_image",
-                            },
+                                enum: ["original_image", "geometry"],
+                                description: "Texture alignment priority. original_image favours visual fidelity to the source; geometry favours 3D structural accuracy.",
+                            }),
+                            tripoField("orientation", {
+                                value: "default",
+                                enum: ["default", "align_image"],
+                                description: "Set align_image to auto-rotate the model to match the input image. Only effective when texture=true.",
+                            }),
+                            tripoField("auto_size", {
+                                value: "false",
+                                enum: ["true", "false"],
+                                description: "Automatically scale the model to real-world dimensions in metres.",
+                            }),
+                            tripoField("face_limit", {
+                                type: "number",
+                                description: "Cap on output mesh face count. Adaptive when blank. For model_version >= v2.0 only.",
+                            }),
+                            tripoField("model_seed", {
+                                type: "number",
+                                description: "Random seed for geometry. Same seed + same input = identical mesh. Random when blank.",
+                            }),
+                            tripoField("geometry_quality", {
+                                value: "standard",
+                                enum: ["standard", "detailed"],
+                                description: "Ultra-mode detail. Only for model_version >= v3.0. detailed = maximum detail (more credits).",
+                            }),
                         ],
                         doc: "https://platform.tripo3d.ai/docs/generation#image-to-model",
                     },

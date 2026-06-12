@@ -1,5 +1,12 @@
-import React, {useState, useEffect, useRef} from "react";
-import {getURL, postWithoutImage, getAPITypes, getPostID, setNestedKey} from "../../context/utilities";
+import React, {useState, useEffect, useRef, useMemo} from "react";
+import {
+    getURL,
+    postWithoutImage,
+    getAPITypes,
+    getPostID,
+    setNestedKey,
+    TRIPO_TASK_HISTORY_URL,
+} from "../../context/utilities";
 import notify from "../../context/Notify";
 import ImageSourcePicker from "./ImageSourcePicker";
 
@@ -672,21 +679,119 @@ export default function IntegrationSection({
         && productModel?.exclude_integration_api_model_type === 'image_to_model';
 
     /**
-     * Keys the image picker + Tripo model-version field own when
-     * the picker is active. Body editor rows with these keys are
-     * hidden so the merchant only edits each value in one place.
-     * Custom rows added via Add Body that *happen* to use one of
-     * these keys still get sent — picker-managed values just sit
-     * earlier in the array and win on submit.
+     * Keys hidden from the body editor per mode.
+     *
+     * text_to_model — `type` is automatic and always renders
+     * "text_to_model"; hiding it removes the only row that would
+     * otherwise tempt the merchant into breaking the request.
+     *
+     * image_to_model — `type` plus every `file.*` row are owned
+     * by the picker above the editor. `model_version` is NOT in
+     * this set any more — it lives inside the body editor as a
+     * schema-driven row with the datalist autocomplete, per the
+     * 2026-06-11 follow-up to Joachim's image_to_model parity
+     * request.
      */
-    const PICKER_MANAGED_KEYS = new Set([
-        'type',
-        'file.url',
-        'file.file_token',
-        'file.object',
-        'file.type',
-        'model_version',
-    ]);
+    const HIDDEN_KEYS_BY_MODE = {
+        text_to_model: new Set(['type']),
+        image_to_model: new Set(['type', 'file.url', 'file.file_token', 'file.object', 'file.type']),
+    };
+    const _hiddenKeys = HIDDEN_KEYS_BY_MODE[productModel?.exclude_integration_api_model_type] || new Set();
+
+    /**
+     * Schema lookup. Returns the field descriptor (with required /
+     * description / enum / suggestions metadata) that utilities.js
+     * defined for the merchant-selected API + model type, or
+     * `undefined` for rows the merchant added via Add Body that
+     * don't match any known schema field.
+     */
+    const _schemaInputs = currentApi?.body?.supported_types?.[productModel?.exclude_integration_api_model_type]?.input || [];
+    const lookupFieldSchema = (key) => _schemaInputs.find(f => f && f.key === key);
+
+    /**
+     * Generate-Model button gate. The button is disabled when:
+     *
+     *   - Any schema row with `required: true` is missing from the
+     *     body or has an empty/whitespace value.
+     *   - Every row in a `requiredGroup` is empty (image_to_model
+     *     needs ONE of `file.url` / `file.file_token` / `file.object`).
+     *
+     * Override — if the body has a `task_id` row with a non-empty
+     * value, the gate opens regardless of the required fields. That
+     * route just polls the existing Tripo3D task instead of
+     * creating a new one, so no extra credits are spent and the
+     * mandatory fields don't apply.
+     */
+    const isGenerateDisabled = useMemo(() => {
+        const body = Array.isArray(productModel?.exclude_integration_api_body)
+            ? productModel.exclude_integration_api_body
+            : [];
+
+        // Task-id override.
+        const taskRow = body.find(r => r && r.key === 'task_id');
+        const taskValue = String(taskRow?.value ?? '').trim();
+        if (taskValue) return false;
+
+        const valueOf = (key) => {
+            const r = body.find(x => x && x.key === key);
+            return String(r?.value ?? '').trim();
+        };
+
+        // Plain `required: true` fields.
+        for (const f of _schemaInputs) {
+            if (!f?.required) continue;
+            if (!valueOf(f.key)) return true;
+        }
+
+        // requiredGroup — at least one row in the group must have value.
+        const groups = {};
+        for (const f of _schemaInputs) {
+            if (!f?.requiredGroup) continue;
+            (groups[f.requiredGroup] = groups[f.requiredGroup] || []).push(f.key);
+        }
+        for (const keys of Object.values(groups)) {
+            if (!keys.some(k => valueOf(k))) return true;
+        }
+
+        return false;
+    }, [productModel?.exclude_integration_api_body, _schemaInputs]);
+
+    /**
+     * Merge schema rows into the body so the body editor surfaces
+     * every Tripo3D field defined in utilities.js. Existing values
+     * are preserved; missing rows are appended with the schema
+     * default. Runs whenever the api/model type changes — exactly
+     * once per switch — so the merchant sees the right knobs for
+     * the mode they're in without losing edits already in the body.
+     */
+    useEffect(() => {
+        if (!_schemaInputs.length) return;
+        setProductModel((prev) => {
+            const existing = Array.isArray(prev.exclude_integration_api_body)
+                ? prev.exclude_integration_api_body
+                : [];
+            const have = new Set(existing.map(r => r?.key));
+            const additions = [];
+            for (const f of _schemaInputs) {
+                if (have.has(f.key)) continue;
+                additions.push({
+                    key: f.key,
+                    type: f.type || 'text',
+                    value: f.value ?? '',
+                    required: !!f.required,
+                });
+            }
+            if (!additions.length) return prev;
+            return {
+                ...prev,
+                exclude_integration_api_body: [...existing, ...additions],
+            };
+        });
+        // Intentionally NOT depending on exclude_integration_api_body — only on
+        // schema identity (modelType + currentApi). Adding the body to the
+        // deps would cause the merge to re-run on every keystroke.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentApi?.id, productModel?.exclude_integration_api_model_type]);
 
     /**
      * Generation modes the host site is licensed to actually run.
@@ -833,56 +938,124 @@ export default function IntegrationSection({
 
 
             {/*
-              * Dynamic rows. When the picker is active the source +
-              * model-version fields it owns are hidden — the merchant
-              * only sees rows it doesn't already control above
-              * (texture, pbr, texture_alignment, geometry_quality,
-              * plus anything added via Add Body). Iteration still uses
-              * the ORIGINAL index so handleIntegrationChange /
-              * removeField stay correct against the real array.
+              * Dynamic rows. Mode-specific hidden keys (managed by
+              * the picker or automatic) are skipped. For rows the
+              * schema knows about (utilities.js), we surface:
+              *   - description as a `title` tooltip on a ⓘ icon,
+              *   - <select> when the schema declares a strict enum,
+              *   - <input list> when the schema declares an open
+              *     suggestion list (model_version uses this),
+              *   - required=true hides the × delete button.
+              * Iteration still uses the ORIGINAL array index so
+              * handleIntegrationChange / removeField are unchanged.
               */}
             {productModel.exclude_integration_api_body.map((field, index) => {
-                if (pickerActive && field && PICKER_MANAGED_KEYS.has(field.key)) {
+                if (field && _hiddenKeys.has(field.key)) {
                     return null;
                 }
+                const schema = lookupFieldSchema(field?.key);
+                const isRequired = !!(field?.required || schema?.required);
+                const hasReqGroup = !!schema?.requiredGroup;
+                const description = schema?.description || '';
+                const enumValues = Array.isArray(schema?.enum) ? schema.enum : null;
+                const suggestions = Array.isArray(schema?.suggestions) ? schema.suggestions : null;
+                const datalistId = suggestions ? `atlas-ar-suggest-${(field?.key || '').replace(/[^a-zA-Z0-9_-]/g, '_')}` : null;
+                const fieldType = field?.type === 'boolean' ? 'text' : (field?.type || 'text');
+                const showRemove = !isRequired && !hasReqGroup;
                 return (
-                <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
+                <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap art-items-start">
                     <input
                         type="text"
                         placeholder="Key"
                         value={field.key}
                         onChange={(e) => handleIntegrationChange(index, "key", e.target.value)}
                         className="art-border art-rounded art-p-2 art-w-1/5"
+                        readOnly={!!schema}
+                        title={schema ? "Defined by Tripo3D — key not editable" : "Custom key"}
                     />
 
                     <select
-                        value={field.type}
+                        value={fieldType}
                         onChange={(e) => handleIntegrationChange(index, "type", e.target.value)}
                         className="art-border art-rounded art-p-2 art-w-1/5"
+                        disabled={!!schema}
+                        title={schema ? "Defined by Tripo3D" : ""}
                     >
                         <option value="text">Text</option>
                         <option value="number">Number</option>
                         <option value="textarea">Textarea</option>
                         <option value="file">File</option>
+                        <option value="url">URL</option>
                     </select>
 
-                    {field.type === "textarea" ? (
+                    {enumValues ? (
+                        <select
+                            value={String(field.value ?? '')}
+                            onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
+                            className="art-border art-rounded art-p-2 art-w-1/2"
+                        >
+                            {enumValues.map(opt => (
+                                <option key={String(opt)} value={String(opt)}>{String(opt)}</option>
+                            ))}
+                        </select>
+                    ) : suggestions ? (
+                        <>
+                            <input
+                                type="text"
+                                value={String(field.value ?? '')}
+                                onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
+                                className="art-border art-rounded art-p-2 art-w-1/2"
+                                list={datalistId}
+                                autoComplete="off"
+                                spellCheck="false"
+                                placeholder={String(schema?.value ?? '')}
+                            />
+                            <datalist id={datalistId}>
+                                {suggestions.map(s => (
+                                    <option
+                                        key={s.value}
+                                        value={s.value}
+                                    >{s.label}</option>
+                                ))}
+                            </datalist>
+                        </>
+                    ) : fieldType === "textarea" ? (
                         <textarea
-                            placeholder="Value"
+                            placeholder={String(schema?.value ?? 'Value')}
                             value={field.value}
                             onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
                             className="art-border art-rounded art-p-2 art-w-1/2"
                             style={{height: '100px'}}
+                            maxLength={schema?.maxLength || undefined}
                         />
                     ) : (
                         <input
-                            type={field.type}
-                            placeholder="Value"
+                            type={fieldType}
+                            placeholder={String(schema?.value ?? 'Value')}
                             value={field.value}
                             onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
                             className="art-border art-rounded art-p-2 art-w-1/2"
+                            maxLength={schema?.maxLength || undefined}
                         />
                     )}
+
+                    {/*
+                      * Schema info icon — surfaces the field's Tripo3D
+                      * docs description as a native browser tooltip on
+                      * hover / focus / touch long-press. Only rendered
+                      * when utilities.js gave us a description.
+                      */}
+                    {description ? (
+                        <span
+                            title={description}
+                            aria-label={description}
+                            tabIndex={0}
+                            className="art-text-gray-500 art-cursor-help"
+                            style={{padding: '8px 6px', fontSize: 16, lineHeight: 1, userSelect: 'none'}}
+                        >
+                            ⓘ
+                        </span>
+                    ) : null}
 
                     {/* <button
                         type="button"
@@ -894,7 +1067,7 @@ export default function IntegrationSection({
                     </button> */}
 
 
-                    {!field.required ? (
+                    {showRemove ? (
                         <button
                             type="button"
                             onClick={() => removeField(index)}
@@ -905,7 +1078,12 @@ export default function IntegrationSection({
                         </button>
                     ) : (
                         <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center"
-                             title="Required field">
+                             title={isRequired
+                                 ? 'Required by Tripo3D — cannot be removed'
+                                 : (hasReqGroup ? 'Part of a required group — managed by the picker above' : '')}
+                             style={{fontSize: 13, userSelect: 'none'}}
+                        >
+                            🔒
                         </div>
                     )}
 
@@ -913,11 +1091,56 @@ export default function IntegrationSection({
                 );
             })}
             </>
+            {/*
+              * Generate-Model-gate notice. Tells the merchant why
+              * the button might be disabled and how to unblock it:
+              * fill the mandatory fields, OR paste an existing
+              * task_id from Tripo3D's task history. Both signals
+              * read from utilities.js so this stays in sync with
+              * the schema.
+              */}
+            {isGenerateDisabled && (
+                <div
+                    style={{
+                        background: '#fef3c7',
+                        border: '1px solid #f59e0b',
+                        borderRadius: 6,
+                        padding: '10px 12px',
+                        marginBottom: 10,
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        color: '#78350f',
+                    }}
+                >
+                    Fill every required (🔒) field to enable <strong>Generate Model</strong>,
+                    {' '}or paste an existing Tripo3D <code>task_id</code> below (via{' '}
+                    <em>Add Body</em> with key <code>task_id</code>) to resume that task
+                    instead — no new credits will be charged.
+                    {' '}
+                    <a
+                        href={TRIPO_TASK_HISTORY_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
+                    >
+                        Open Tripo3D task history →
+                    </a>
+                </div>
+            )}
             <button type="button"
                     onClick={handleSubmit}
                     data-id={'generate'}
                     id={"atlas_ar_model_generate"}
-                    className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
+                    disabled={isGenerateDisabled}
+                    title={isGenerateDisabled
+                        ? 'Fill the required fields, or set a task_id row to resume an existing Tripo3D task'
+                        : ''}
+                    className={
+                        'art-w-full art-mt-2 art-px-4 art-py-2 art-rounded art-border art-border-sky-500 '
+                        + (isGenerateDisabled
+                            ? 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
+                            : 'art-bg-blue-500 art-text-white art-cursor-pointer')
+                    }>
                 Generate Model
             </button>
             {/*
