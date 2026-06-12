@@ -1270,6 +1270,31 @@ export default function IntegrationSection({
                     Tripo3D's mesh encoder finishes after the progress bar — usually 20–40 s more.
                 </div>
             )}
+            {/*
+              * "Powered by <provider>" attribution + affiliate signup
+              * link. Lowest-weight surface on the metabox so it never
+              * competes with the active task above; passive disclosure
+              * for merchants who don't have a provider account yet.
+              * Only renders when the current API advertises a
+              * signup_url (Tripo3D does; Meshy AI does not).
+              */}
+            {currentApi?.signup_url && (
+                <div
+                    className="art-text-xs art-text-gray-500 art-mt-3"
+                    style={{textAlign: 'center', lineHeight: 1.4}}
+                >
+                    Powered by {currentApi.name} —{' '}
+                    <a
+                        href={currentApi.signup_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="art-text-gray-500 hover:art-text-blue-600"
+                        style={{textDecoration: 'underline'}}
+                    >
+                        Need an account? Sign up →
+                    </a>
+                </div>
+            )}
         </div>
     );
 }
