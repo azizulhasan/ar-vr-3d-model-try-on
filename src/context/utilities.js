@@ -975,11 +975,6 @@ export const getAPITypes = (api_type = "tripo3d") => {
                                 description: "Tripo3D generation model version. Newer versions = higher mesh quality, slightly more credits. v3.1 is the latest; v2.5 is the historical default. Type any other version Tripo3D releases later.",
                                 suggestions: TRIPO_MODEL_VERSIONS,
                             }),
-                            tripoField("negative_prompt", {
-                                type: "textarea",
-                                description: "Reverse-direction prompt to push generation away from things. Max 255 characters.",
-                                maxLength: 255,
-                            }),
                             tripoField("texture", {
                                 value: "true",
                                 enum: ["true", "false"],
@@ -990,27 +985,10 @@ export const getAPITypes = (api_type = "tripo3d") => {
                                 enum: ["true", "false"],
                                 description: "Enable PBR (physically based rendering). Default true. When true, texture is forced on regardless of its setting.",
                             }),
-                            tripoField("texture_quality", {
-                                value: "standard",
-                                enum: ["standard", "detailed", "extreme"],
-                                description: "Texture resolution. standard (+10 credits), detailed (+20), extreme (+30).",
-                            }),
-                            tripoField("auto_size", {
-                                value: "false",
-                                enum: ["true", "false"],
-                                description: "Automatically scale the model to real-world dimensions in metres.",
-                            }),
-                            tripoField("face_limit", {
-                                type: "number",
-                                description: "Cap on output mesh face count. Adaptive when blank. For model_version >= v2.0 only.",
-                            }),
-                            tripoField("model_seed", {
-                                type: "number",
-                                description: "Random seed for geometry. Same seed + same prompt = identical mesh. Random when blank.",
-                            }),
-                            tripoField("image_seed", {
-                                type: "number",
-                                description: "Random seed for the image-generation step that feeds the geometry. Random when blank.",
+                            tripoField("texture_alignment", {
+                                value: "geometry",
+                                enum: ["original_image", "geometry"],
+                                description: "Texture alignment priority. original_image favours visual fidelity to the source; geometry favours 3D structural accuracy.",
                             }),
                             tripoField("geometry_quality", {
                                 value: "standard",
@@ -1050,11 +1028,6 @@ export const getAPITypes = (api_type = "tripo3d") => {
                                 description: "Tripo3D generation model version. Newer versions = higher mesh quality, slightly more credits. v3.1 is the latest. Type any other version Tripo3D releases later.",
                                 suggestions: TRIPO_MODEL_VERSIONS,
                             }),
-                            tripoField("enable_image_autofix", {
-                                value: "false",
-                                enum: ["true", "false"],
-                                description: "Tripo3D pre-processes the input image for better generation. Default false.",
-                            }),
                             tripoField("texture", {
                                 value: "true",
                                 enum: ["true", "false"],
@@ -1065,38 +1038,10 @@ export const getAPITypes = (api_type = "tripo3d") => {
                                 enum: ["true", "false"],
                                 description: "Enable PBR (physically based rendering). Default true. When true, texture is forced on regardless of its setting.",
                             }),
-                            tripoField("texture_quality", {
-                                value: "standard",
-                                enum: ["standard", "detailed", "extreme"],
-                                description: "Texture resolution. standard (+10 credits), detailed (+20), extreme (+30).",
-                            }),
                             tripoField("texture_alignment", {
                                 value: "original_image",
                                 enum: ["original_image", "geometry"],
                                 description: "Texture alignment priority. original_image favours visual fidelity to the source; geometry favours 3D structural accuracy.",
-                            }),
-                            tripoField("orientation", {
-                                value: "default",
-                                enum: ["default", "align_image"],
-                                description: "Set align_image to auto-rotate the model to match the input image. Only effective when texture=true.",
-                            }),
-                            tripoField("auto_size", {
-                                value: "false",
-                                enum: ["true", "false"],
-                                description: "Automatically scale the model to real-world dimensions in metres.",
-                            }),
-                            tripoField("face_limit", {
-                                type: "number",
-                                description: "Cap on output mesh face count. Adaptive when blank. For model_version >= v2.0 only.",
-                            }),
-                            tripoField("model_seed", {
-                                type: "number",
-                                description: "Random seed for geometry. Same seed + same input = identical mesh. Random when blank.",
-                            }),
-                            tripoField("geometry_quality", {
-                                value: "standard",
-                                enum: ["standard", "detailed"],
-                                description: "Ultra-mode detail. Only for model_version >= v3.0. detailed = maximum detail (more credits).",
                             }),
                         ],
                         doc: "https://platform.tripo3d.ai/docs/generation#image-to-model",
