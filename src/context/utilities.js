@@ -950,6 +950,7 @@ export const getAPITypes = (api_type = "tripo3d") => {
             name: "Tripo 3D",
             url: "https://api.tripo3d.ai/v2/openapi/task",
             api_key_url: "https://platform.tripo3d.ai/api-keys",
+            signup_url: "https://studio.tripo3d.ai?via=atlasaidev",
             task_history_url: TRIPO_TASK_HISTORY_URL,
             headers: [
                 {key: "Authorization", value: ""},
