@@ -485,7 +485,22 @@ class AR_TRY_ON_Api_Routes
     public function check_model_settings_access($request)
     {
         $params  = (array) $request->get_params();
-        $method  = strtoupper(isset($params['method']) ? (string) $params['method'] : $request->get_method());
+        /**
+         * Default to GET — NOT the underlying HTTP verb — when the body's
+         * `method` field is missing. The actual handler does the same
+         * (`get_model_and_settings()` defaults `$method` to 'GET' when
+         * `$decoded_body['method']` is unset). Without this alignment,
+         * the public frontend's `AtlasAR.fetchModelData()` — which uses
+         * `postWithoutImage` (HTTP POST) but never sets `body.method` —
+         * tripped the POST branch below, was asked to prove `edit_post`,
+         * and returned 401 to every anonymous visitor on mobile (Joachim
+         * Rodriguez, 2026-06-09, kunstplaza.de).
+         *
+         * Writes are still locked down: an explicit `method=POST` in the
+         * body (which the admin save path sends) lands in the POST
+         * branch and demands `edit_post` as before.
+         */
+        $method  = strtoupper(isset($params['method']) ? (string) $params['method'] : 'GET');
         $post_id = 0;
         if (isset($params['post_id'])) {
             $post_id = intval($params['post_id']);
