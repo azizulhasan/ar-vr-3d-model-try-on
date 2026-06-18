@@ -62,9 +62,16 @@ includes/AR_TRY_ON.php:272   "woocommerce_gallery_thumbnail_size"
 **False positive** — this is `apply_filters('woocommerce_gallery_thumbnail_size', …)`,
 i.e. applying WooCommerce's OWN documented filter, not declaring a plugin hook.
 
-### C. Dynamic hook names in the bundled AtlasAiDev tracker lib — 13 warnings (`PrefixAllGlobals.DynamicHooknameFound`)
-The opt-in telemetry library builds hook names from `$this->slug` / `getSlug()`,
-which PCP can't statically verify. Pre-existing, third-party-style lib code.
+### C. Dynamic hook names in the bundled AtlasAiDev tracker lib — SUPPRESSED ✅
+The opt-in telemetry library builds hook names from `$this->slug` / `getSlug()`
+(the plugin slug), so they ARE prefixed at runtime — PCP just can't verify it
+statically. All 13 sites annotated with
+`// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.`
+(Client.php ×8, Insights.php ×5 incl. one multi-line). Re-run confirms 0 of
+these remain.
+
+**Final artest re-run: 0 ERROR, 17 WARNING** (16 NonPrefixedNamespaceFound +
+1 woocommerce false positive — both expected/accepted; see A and B).
 ```
 libs/AtlasAiDev/Client.php:193   $this->slug . '_request_route'
 libs/AtlasAiDev/Client.php:200   $this->slug . '_AtlasAiDev_API_EndPoint'
