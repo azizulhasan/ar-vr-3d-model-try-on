@@ -229,20 +229,26 @@ Likely already OK — confirm with a `grep -rn "plugin_dir_path\|__DIR__\|ATLAS_
       dyn-buttons icons all render + function).
 - [x] Reviewer item 4 — sanitize the filter payload in `Insights.php:911` (sanitized per-field array)
 - [x] Reviewer item 5 — refresh Tripo3D / Meshy AI Terms + Privacy URLs in `readme.txt`
-- [ ] Reviewer item 6 — short prefix rename (namespace/class rename DECLINED).
-      DECISION: do NOT rename the PHP namespace / class prefix. `AR_TRY_ON`
-      (8 chars) and `AR_TRY_ON_Pro` already satisfy the reviewer's ">4 chars"
-      rule, and renaming class/namespace is the one change that can fatal a
-      live site during the Free/Pro update window. A trial `AR_TRY_ON→ATLAS_AR`
-      / `AR_TRY_ON_Pro→ATLAS_AR_PRO` rebrand (Free fe8e3b1, Pro 6dd995b) was
-      built + tested working with compat shims, then REVERTED by choice.
-      STILL TODO — the reviewer's actual flag: the short `ar_`-prefixed globals
-      (prefix "ar", 13 elements): `wp_ajax_ar_dismiss_notice`,
-      `wp_ajax_ar_track_notice_action`, `ar_notice_nonce`,
-      `ar_create_compression_tables` → `atlas_ar_*` (per-request, no migration);
-      and the data keys `wp_ar_compression_log` table, `ar_compression_settings`
-      option, `ar_placement` meta → `atlas_ar_*` with a one-time activation
-      migration so existing installs keep their data.
+- [x] Reviewer item 6 — short `ar_` prefix. DONE (commit 6690cab).
+      DECISION 1: namespace/class rename DECLINED — `AR_TRY_ON` (8 chars) and
+      `AR_TRY_ON_Pro` already pass the ">4 chars" rule, and renaming
+      class/namespace is the one change that can fatal a live site during the
+      Free/Pro update window. A trial rebrand was built/tested with compat
+      shims (Free fe8e3b1, Pro 6dd995b) then REVERTED (Free 3a85013, Pro 8bd92da).
+      DONE: the only PCP-flaggable short-`ar` globals are the two `wp_ajax_ar_*`
+      actions — renamed to `atlas_ar_*` (+ the related `ar_notice_nonce` and
+      `ar_create_compression_tables` nonce/flag for consistency). Free-only,
+      no migration. Swept all other PCP-flaggable categories (custom hooks,
+      functions, constants, register_meta/register_setting) — NONE have a short
+      `ar_` prefix.
+      DECISION 2: data keys NOT renamed. `ar_placement` (meta),
+      `ar_compression_settings` (option) and `wp_ar_compression_log` (table)
+      are reached via get_post_meta/update_option/$wpdb — which
+      `WordPress.NamingConventions.PrefixAllGlobals` does NOT inspect, so they
+      are not flagged. Renaming them would be an unnecessary, high-risk
+      cross-repo migration. Skipped on purpose.
+      VERIFY AT RELEASE: re-run Plugin Check on the built 2.2.0 zip at artest;
+      the "prefix ar" warnings should be 0.
 - [x] Reviewer item 7 — confirm no writes inside the plugin folder.
       DONE (audit, no code change). Every filesystem write targets
       `wp_upload_dir()['basedir']`:
