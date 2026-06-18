@@ -1,6 +1,34 @@
 import {useState} from "react";
 
 /**
+ * Assign `value` into `obj` at the dot-separated path `dotKey`,
+ * creating intermediate objects as needed.
+ *
+ * Used at REST submission time to convert the flat key/value
+ * editor schema (e.g. `{"file.url": "...", "file.type": "png"}`)
+ * into the nested body Tripo3D / Meshy AI expect
+ * (e.g. `{"file": {"url": "...", "type": "png"}}`).
+ *
+ * @param {object} obj    Target object (mutated).
+ * @param {string} dotKey Path like "file.url" or "a.b.c".
+ * @param {*}      value
+ * @returns {object} obj
+ */
+export const setNestedKey = (obj, dotKey, value) => {
+    const parts = String(dotKey).split(".");
+    let cur = obj;
+    for (let i = 0; i < parts.length - 1; i++) {
+        const k = parts[i];
+        if (typeof cur[k] !== "object" || cur[k] === null) {
+            cur[k] = {};
+        }
+        cur = cur[k];
+    }
+    cur[parts[parts.length - 1]] = value;
+    return obj;
+};
+
+/**
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type
@@ -163,14 +191,31 @@ export const renderUserHotspots = (modelViewer, hotspots = []) => {
     });
 };
 
+/**
+ * Convert a length in metres (the unit model-viewer's
+ * getDimensions returns) into the merchant-selected unit.
+ *
+ * Supported units:
+ *   - mm    millimetres
+ *   - cm    centimetres
+ *   - m     metres (default / no-op)
+ *   - inch  inches      (1 m ≈ 39.37008 in)
+ *   - ft    feet        (1 m ≈ 3.28084  ft)
+ *
+ * Unknown unit → returns the value unchanged (metres).
+ */
 export const convertLength = (valueInMeters, unit) => {
     switch (unit) {
         case "m":
             return valueInMeters;
         case "cm":
             return valueInMeters * 100;
+        case "mm":
+            return valueInMeters * 1000;
         case "inch":
-            return valueInMeters * 39.3701;
+            return valueInMeters * 39.3700787;
+        case "ft":
+            return valueInMeters * 3.2808399;
         default:
             return valueInMeters;
     }
@@ -180,12 +225,14 @@ function getDimensionLabel(value, model_settings) {
     const unit = model_settings.dimensions?.unit || "cm"; // Default: cm
 
     const unitLabel = {
+        mm: "mm",
         cm: "cm",
         m: "m",
         inch: "in",
+        ft: "ft",
     };
     const converted = convertLength(value, unit);
-    return `${converted.toFixed(1)} ${unitLabel[unit]}`;
+    return `${converted.toFixed(1)} ${unitLabel[unit] || unit}`;
 }
 
 function displayDimensions(modelViewer, model_settings) {
@@ -230,15 +277,57 @@ function displayDimensions(modelViewer, model_settings) {
 
     const unit = model_settings.dimensions?.unit || "cm";
 
+    /**
+     * AR-63 — supported unit table for Auto-detect mode. Adding a
+     * new unit only requires touching this object plus the matching
+     * case in `convertLength`. The dropdown in
+     * `DimensionsSection.js` lists them in size order
+     * (mm → cm → inch → ft → m).
+     */
     const conversion = {
-        cm: (v) => v * 100,
-        m: (v) => v,
-        inch: (v) => v * 39.3701,
+        mm:   (v) => v * 1000,
+        cm:   (v) => v * 100,
+        m:    (v) => v,
+        inch: (v) => v * 39.3700787,
+        ft:   (v) => v * 3.2808399,
     };
 
-    const unitLabel = {cm: "cm", m: "m", inch: "in"};
+    const unitLabel = {mm: "mm", cm: "cm", m: "m", inch: "in", ft: "ft"};
 
-    const formatValue = (v) => `${conversion[unit](v).toFixed(1)} ${unitLabel[unit]}`;
+    /**
+     * AR-63 — manual mode paints the labels directly from the
+     * merchant-entered values + their free-text unit. No unit
+     * conversion: they already typed what they want shown. Hotspot
+     * POSITIONS still use the live bounding box (so the labels sit
+     * at the right corners around the GLB) — only the rendered text
+     * differs between modes.
+     *
+     * Axis convention: x = width, y = height, z = length.
+     */
+    const isManual = model_settings.dimensions?.mode === "manual";
+
+    const formatValue = (v) => {
+        // Defensive: an unknown unit (saved before this release added
+        // mm/ft, or hand-edited DB) would otherwise crash with
+        // `conversion[undefined] is not a function`. Fall back to
+        // metres + the raw unit string.
+        const conv = conversion[unit] || ((x) => x);
+        const label = unitLabel[unit] || unit;
+        return `${conv(v).toFixed(1)} ${label}`;
+    };
+
+    const formatManual = (axis) => {
+        const raw = model_settings.dimensions?.[axis]?.value;
+        const u   = model_settings.dimensions?.unit || "cm";
+        if (raw === undefined || raw === null || raw === "" || Number.isNaN(Number(raw))) {
+            return `— ${u}`;
+        }
+        return `${Number(raw).toFixed(1)} ${u}`;
+    };
+
+    const labelFor = (axis, fallbackSize) => (
+        isManual ? formatManual(axis) : formatValue(fallbackSize)
+    );
 
     const hotspots = [
         {dot: "hotspot-dot+X-Y+Z", pos: (c, s) => [c.x + s.x / 2, c.y - s.y / 2, c.z + s.z / 2]},
@@ -253,27 +342,27 @@ function displayDimensions(modelViewer, model_settings) {
         {
             name: "hotspot-dim+X-Y",
             pos: (c, s) => [c.x + s.x * 0.6, c.y - s.y * 0.55, c.z],
-            value: (s) => formatValue(s.z),
+            value: (s) => labelFor("length", s.z),
         },
         {
             name: "hotspot-dim+X-Z",
             pos: (c, s) => [c.x + s.x * 0.6, c.y, c.z - s.z * 0.6],
-            value: (s) => formatValue(s.y),
+            value: (s) => labelFor("height", s.y),
         },
         {
             name: "hotspot-dim+Y-Z",
             pos: (c, s) => [c.x, c.y + s.y * 0.55, c.z - s.z * 0.55],
-            value: (s) => formatValue(s.x),
+            value: (s) => labelFor("width", s.x),
         },
         {
             name: "hotspot-dim-X-Z",
             pos: (c, s) => [c.x - s.x * 0.6, c.y, c.z - s.z * 0.6],
-            value: (s) => formatValue(s.y),
+            value: (s) => labelFor("height", s.y),
         },
         {
             name: "hotspot-dim-X-Y",
             pos: (c, s) => [c.x - s.x * 0.6, c.y - s.y * 0.55, c.z],
-            value: (s) => formatValue(s.z),
+            value: (s) => labelFor("length", s.z),
         },
     ];
 
@@ -803,6 +892,57 @@ function preventWooCommerceImageSwap(modelViewer) {
 // Make switchModelVariant available globally for frontend use
 window.atlasARSwitchVariant = switchModelVariant;
 
+/**
+ * Tripo3D task-history URL. Surfaced under the body editor so a
+ * merchant whose Generate Model button is disabled (because the
+ * mandatory fields are empty) knows where to grab an existing
+ * task_id to resume from.
+ */
+export const TRIPO_TASK_HISTORY_URL = "https://platform.tripo3d.ai/usage/history";
+
+/**
+ * Tripo3D generation-model version list — same source for both
+ * text_to_model and image_to_model. Renders as the datalist
+ * suggestions on the `model_version` body row. Ordered with the
+ * recommended modern release first, v2.5 last (also the API's
+ * own historical default). Add new entries here when Tripo3D
+ * ships a new version — the body editor picks them up
+ * automatically.
+ */
+export const TRIPO_MODEL_VERSIONS = [
+    {value: "v3.1-20260211",       label: "v3.1 (latest)"},
+    {value: "v3.0-20250812",       label: "v3.0"},
+    {value: "P1-20260311",         label: "P1 (low-poly)"},
+    {value: "Turbo-v1.0-20250506", label: "Turbo (fastest)"},
+    {value: "v2.5-20250123",       label: "v2.5 (legacy default)"},
+];
+export const TRIPO_DEFAULT_MODEL_VERSION = "v2.5-20250123";
+
+/**
+ * Shared Tripo3D body-field schema fragments. Each carries the
+ * data the row renderer needs:
+ *   - required:      hides the row's × delete button AND gates
+ *                    the Generate Model button on having a value.
+ *   - description:   shown as a hover/focus tooltip via the
+ *                    `ⓘ` icon next to the row.
+ *   - enum:          renders the value field as a strict <select>.
+ *   - suggestions:   renders the value field as <input list>
+ *                    (open enum — merchant can type anything else).
+ *   - maxLength:     HTML maxLength attribute on text inputs.
+ *
+ * IntegrationSection.js reads these — NO field metadata is
+ * hardcoded in JSX. Adding a future Tripo3D field is a one-line
+ * schema change here.
+ */
+const tripoField = (key, overrides = {}) => ({
+    key,
+    type: "text",
+    value: "",
+    required: false,
+    description: "",
+    ...overrides,
+});
+
 export const getAPITypes = (api_type = "tripo3d") => {
     let api_types = {
         tripo3d: {
@@ -810,6 +950,8 @@ export const getAPITypes = (api_type = "tripo3d") => {
             name: "Tripo 3D",
             url: "https://api.tripo3d.ai/v2/openapi/task",
             api_key_url: "https://platform.tripo3d.ai/api-keys",
+            signup_url: "https://studio.tripo3d.ai?via=atlasaidev",
+            task_history_url: TRIPO_TASK_HISTORY_URL,
             headers: [
                 {key: "Authorization", value: ""},
                 {key: "Content-Type", value: "application/json"},
@@ -818,31 +960,90 @@ export const getAPITypes = (api_type = "tripo3d") => {
                 supported_types: {
                     text_to_model: {
                         input: [
-                            {key: "prompt", type: "textarea", value: ""},
-                            {key: "type", type: "text", value: "text_to_model"},
-                            {key: "model_version", type: "text", value: "v2.5-20250123"},
-                            {key: "texture", type: "boolean", value: true},
-                            {key: "pbr", type: "boolean", value: true},
-                            {key: "texture_alignment", type: "text", value: "geometry"},
-                            {key: "geometry_quality", type: "text", value: "original"},
+                            tripoField("type", {
+                                value: "text_to_model",
+                                required: true,
+                                description: "Must be set to text_to_model. Managed automatically — do not change.",
+                            }),
+                            tripoField("prompt", {
+                                type: "textarea",
+                                required: true,
+                                description: "Text input that directs the model generation. Max 1024 characters. Supports multiple languages.",
+                                maxLength: 1024,
+                            }),
+                            tripoField("model_version", {
+                                value: TRIPO_DEFAULT_MODEL_VERSION,
+                                description: "Tripo3D generation model version. Newer versions = higher mesh quality, slightly more credits. v3.1 is the latest; v2.5 is the historical default. Type any other version Tripo3D releases later.",
+                                suggestions: TRIPO_MODEL_VERSIONS,
+                            }),
+                            tripoField("texture", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable texturing. Default true. Set false to get a base mesh without textures.",
+                            }),
+                            tripoField("pbr", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable PBR (physically based rendering). Default true. When true, texture is forced on regardless of its setting.",
+                            }),
+                            tripoField("texture_alignment", {
+                                value: "geometry",
+                                enum: ["original_image", "geometry"],
+                                description: "Texture alignment priority. original_image favours visual fidelity to the source; geometry favours 3D structural accuracy.",
+                            }),
+                            tripoField("geometry_quality", {
+                                value: "standard",
+                                enum: ["standard", "detailed"],
+                                description: "Ultra-mode detail. Only for model_version >= v3.0. detailed = maximum detail (more credits).",
+                            }),
                         ],
                         doc: "https://platform.tripo3d.ai/docs/generation#text-to-model",
                     },
                     image_to_model: {
                         input: [
-                            {key: "type", type: "text", value: "image_to_model"},
-                            {key: "file.type", type: "text", value: "png"},
-                            {key: "file.file_token", type: "file", value: ""},
-                            {key: "file.object", type: "text", value: ""},
-                            {key: "file.url", type: "url", value: ""},
-                            {key: "model_version", type: "text", value: "v2.5-20250123"},
-                            {key: "texture", type: "boolean", value: true},
-                            {key: "pbr", type: "boolean", value: true},
-                            {
-                                key: "texture_alignment",
-                                type: "text",
+                            tripoField("type", {
+                                value: "image_to_model",
+                                required: true,
+                                description: "Must be set to image_to_model. Managed automatically — do not change.",
+                            }),
+                            tripoField("file.url", {
+                                type: "url",
+                                requiredGroup: "fileSource",
+                                description: "Direct URL to the image. JPEG/PNG, max 20 MB. Picked via the Image source tabs — mutually exclusive with file_token and object.",
+                            }),
+                            tripoField("file.file_token", {
+                                type: "file",
+                                requiredGroup: "fileSource",
+                                description: "Identifier returned from a Tripo3D /upload call. Mutually exclusive with url and object.",
+                            }),
+                            tripoField("file.object", {
+                                requiredGroup: "fileSource",
+                                description: "STS-upload bucket+key reference. Mutually exclusive with url and file_token.",
+                            }),
+                            tripoField("file.type", {
+                                value: "jpg",
+                                description: "Image file extension hint (jpg / png / webp). Not strictly validated by Tripo3D.",
+                            }),
+                            tripoField("model_version", {
+                                value: TRIPO_DEFAULT_MODEL_VERSION,
+                                description: "Tripo3D generation model version. Newer versions = higher mesh quality, slightly more credits. v3.1 is the latest. Type any other version Tripo3D releases later.",
+                                suggestions: TRIPO_MODEL_VERSIONS,
+                            }),
+                            tripoField("texture", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable texturing. Default true. Set false for a base mesh without textures.",
+                            }),
+                            tripoField("pbr", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Enable PBR (physically based rendering). Default true. When true, texture is forced on regardless of its setting.",
+                            }),
+                            tripoField("texture_alignment", {
                                 value: "original_image",
-                            },
+                                enum: ["original_image", "geometry"],
+                                description: "Texture alignment priority. original_image favours visual fidelity to the source; geometry favours 3D structural accuracy.",
+                            }),
                         ],
                         doc: "https://platform.tripo3d.ai/docs/generation#image-to-model",
                     },

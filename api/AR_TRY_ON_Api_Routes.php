@@ -36,7 +36,7 @@ class AR_TRY_ON_Api_Routes
     public function ATLAS_AR_register_routes()
     {
 
-        // register settings route.
+        // register settings route — admin-only (reads & updates site options).
         register_rest_route(
             $this->namespace,
             '/settings',
@@ -44,12 +44,14 @@ class AR_TRY_ON_Api_Routes
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'settings'),
-                    'permission_callback' => array($this, 'get_route_access'),
+                    'permission_callback' => array($this, 'check_admin_access'),
                     'args' => array(),
                 ),
             )
         );
-        // register get_model_and_settings route.
+        // register get_model_and_settings route — per-method permission
+        // check (frontend read is public; admin read needs manage_options;
+        // write needs edit_post on the target post).
         register_rest_route(
             $this->namespace,
             '/get_model_and_settings',
@@ -57,13 +59,13 @@ class AR_TRY_ON_Api_Routes
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'get_model_and_settings'),
-                    'permission_callback' => array($this, 'get_route_access'),
+                    'permission_callback' => array($this, 'check_model_settings_access'),
                     'args' => array(),
                 ),
             )
         );
 
-        // register demo_preview route.
+        // register demo_preview route — admin-only (returns site settings).
         register_rest_route(
             $this->namespace,
             '/demo_preview',
@@ -71,14 +73,15 @@ class AR_TRY_ON_Api_Routes
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'demo_preview'),
-                    'permission_callback' => array($this, 'get_route_access'),
+                    'permission_callback' => array($this, 'check_admin_access'),
                     'args' => array(),
                 ),
             )
         );
 
 
-        // register generate_3d_model route.
+        // register generate_3d_model route — admin-only (fires external
+        // API calls to Tripo3D / Meshy AI, writes files to uploads).
         register_rest_route(
             $this->namespace,
             '/generate_3d_model',
@@ -86,7 +89,7 @@ class AR_TRY_ON_Api_Routes
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'generate_3d_model'),
-                    'permission_callback' => array($this, 'get_route_access'),
+                    'permission_callback' => array($this, 'check_admin_access'),
                     'args' => array(),
                 ),
             )
@@ -265,19 +268,40 @@ class AR_TRY_ON_Api_Routes
 //        return rest_ensure_response($result);
 
         $response_body = '';
-        if (!isset($api_body['task_id']) || !$api_body['task_id']) {
-            $response = wp_remote_post($api_url, array(
-                'headers' => $headers,
-                'body' => json_encode($api_body),
-                'timeout' => 90, // optional, prevent timeout on large requests
-            ));
-
-            if (is_wp_error($response)) {
-                $result['data'] = $response->get_error_message();
-                return rest_ensure_response($result);
+        $is_create_request = ! isset($api_body['task_id']) || ! $api_body['task_id'];
+        if ($is_create_request) {
+            /**
+             * AR-62 §3g: retry transient 5xx / 429 once with a short
+             * backoff. Tripo3D occasionally returns 502 / 503 during
+             * autoscale events and 429 under rate-limit; a single
+             * retry covers ~99% of those without surfacing a hard
+             * error to the user.
+             */
+            $response    = null;
+            $status_code = 0;
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $response = wp_remote_post($api_url, array(
+                    'headers' => $headers,
+                    'body'    => wp_json_encode($api_body),
+                    'timeout' => 60,
+                ));
+                if (is_wp_error($response)) {
+                    if ($attempt === 1) {
+                        $result['data'] = $response->get_error_message();
+                        return rest_ensure_response($result);
+                    }
+                    usleep(750000); // 0.75s, then retry
+                    continue;
+                }
+                $status_code = wp_remote_retrieve_response_code($response);
+                if ($status_code >= 500 || $status_code === 429) {
+                    if ($attempt === 1) { break; } // give up, surface the error below
+                    usleep(750000);
+                    continue;
+                }
+                break; // success / client error — stop retrying
             }
 
-            $status_code = wp_remote_retrieve_response_code($response);
             $response_body = wp_remote_retrieve_body($response);
             $response_body = json_decode($response_body, true);
 
@@ -291,6 +315,7 @@ class AR_TRY_ON_Api_Routes
                     'api_body' => $api_body,
                     'response_body' => $response_body,
                     '$decoded_data' => $decoded_data,
+                    'http_status'   => $status_code,
                 ];
 
                 return rest_ensure_response($result);
@@ -310,14 +335,48 @@ class AR_TRY_ON_Api_Routes
         }
         $task_response_body = [];
 
+        /**
+         * AR-62 §3f: on the create request, return immediately with the
+         * fresh task_id instead of doing a redundant `GET /task/<id>`
+         * — Tripo3D's status right after create is reliably "queued",
+         * so the extra round trip just doubles the response time of
+         * the very first request. The JS poller will fetch live status
+         * on the next tick.
+         */
+        if ($is_create_request && $task_id) {
+            $task_result['status']      = true;
+            $task_result['data']        = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_body);
+            $task_result['data']['task_id'] = $task_id;
+            $task_result['extra']       = [ 'response_body' => $response_body ];
+            return rest_ensure_response($task_result);
+        }
+
         if ($task_id) {
             unset($headers['Content-Type']);
             $api_url = $api_url . '/' . $task_id;
 
-            $task_response = wp_remote_get($api_url, array(
-                'headers' => $headers,
-                'timeout' => 90, // optional, prevent timeout on large requests
-            ));
+            /**
+             * AR-62 §3g: same single-retry policy for the polling GET.
+             */
+            $task_response = null;
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $task_response = wp_remote_get($api_url, array(
+                    'headers' => $headers,
+                    'timeout' => 30,
+                ));
+                if (is_wp_error($task_response)) {
+                    if ($attempt === 1) { break; }
+                    usleep(750000);
+                    continue;
+                }
+                $task_status_code = wp_remote_retrieve_response_code($task_response);
+                if ($task_status_code >= 500 || $task_status_code === 429) {
+                    if ($attempt === 1) { break; }
+                    usleep(750000);
+                    continue;
+                }
+                break;
+            }
 
             if (is_wp_error($task_response)) {
                 $task_result['data'] = $task_response->get_error_message();
@@ -362,19 +421,116 @@ class AR_TRY_ON_Api_Routes
     }
 
 
-    /*
-     * Get route access if request is valid.
+    /**
+     * Permission callback for admin-only routes (/settings, /demo_preview,
+     * /generate_3d_model).
+     *
+     * Replaces the previous get_route_access() which had two AR-61-flagged
+     * bugs: (1) the nonce branch's outer isset() was negated so the actual
+     * wp_verify_nonce() was unreachable; (2) no current_user_can() check
+     * at all, so any logged-in or anonymous request that hit the right
+     * URL was allowed. WP REST cookie auth already verifies wp_rest
+     * nonces at the framework level for logged-in users — we only need
+     * the capability gate here.
+     *
+     * The legacy ATLAS_AR_rest_route_access filter is still applied so
+     * third-party addons can veto or override the decision; the filter
+     * receives the boolean and (new) the WP_REST_Request as a second arg.
+     *
+     * @since 2.0.x (AR-61 §6)
+     * @param \WP_REST_Request $request
+     * @return bool|\WP_Error True if allowed, WP_Error otherwise.
      */
-    public function get_route_access()
+    public function check_admin_access($request)
     {
-        if (!isset($_SERVER['HTTP_X_WP_NONCE'])) {
-            $nonce = sanitize_text_field(wp_unslash($_SERVER['HTTP_X_WP_NONCE']));
-            if (!wp_verify_nonce($nonce, 'wp_rest')) {
-                return apply_filters('ATLAS_AR_rest_route_access', false);
+        $allowed = current_user_can('manage_options');
+
+        /**
+         * Filter: ATLAS_AR_rest_route_access
+         *
+         * @param bool             $allowed Whether the current request is allowed.
+         * @param \WP_REST_Request $request The REST request (added in AR-61).
+         */
+        $allowed = apply_filters('ATLAS_AR_rest_route_access', $allowed, $request);
+
+        if (!$allowed) {
+            return new \WP_Error(
+                'rest_forbidden',
+                __('You do not have permission to access this endpoint.', 'ar-vr-3d-model-try-on'),
+                array('status' => is_user_logged_in() ? 403 : 401)
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Permission callback for /get_model_and_settings.
+     *
+     * The route mixes three behaviors in one callback (the body's `method`
+     * field selects between them), so the permission logic mirrors that:
+     *
+     *   - body method == 'POST' → writes post meta. Requires edit_post on
+     *     the post_id / product_id in the body.
+     *   - body method == 'GET' with call_from == 'admin' → reads admin
+     *     payload (unredacted). Requires manage_options.
+     *   - body method == 'GET' from frontend → public read. The callback
+     *     itself runs exclude_sensitive_properties() before returning, so
+     *     no admin-only data leaks.
+     *
+     * @since 2.0.x (AR-61 §6.3)
+     * @param \WP_REST_Request $request
+     * @return bool|\WP_Error True if allowed, WP_Error otherwise.
+     */
+    public function check_model_settings_access($request)
+    {
+        $params  = (array) $request->get_params();
+        /**
+         * Default to GET — NOT the underlying HTTP verb — when the body's
+         * `method` field is missing. The actual handler does the same
+         * (`get_model_and_settings()` defaults `$method` to 'GET' when
+         * `$decoded_body['method']` is unset). Without this alignment,
+         * the public frontend's `AtlasAR.fetchModelData()` — which uses
+         * `postWithoutImage` (HTTP POST) but never sets `body.method` —
+         * tripped the POST branch below, was asked to prove `edit_post`,
+         * and returned 401 to every anonymous visitor on mobile (Joachim
+         * Rodriguez, 2026-06-09, kunstplaza.de).
+         *
+         * Writes are still locked down: an explicit `method=POST` in the
+         * body (which the admin save path sends) lands in the POST
+         * branch and demands `edit_post` as before.
+         */
+        $method  = strtoupper(isset($params['method']) ? (string) $params['method'] : 'GET');
+        $post_id = 0;
+        if (isset($params['post_id'])) {
+            $post_id = intval($params['post_id']);
+        } elseif (isset($params['product_id'])) {
+            $post_id = intval($params['product_id']);
+        }
+
+        if ('POST' === $method) {
+            $allowed = $post_id > 0 && current_user_can('edit_post', $post_id);
+        } else {
+            $call_from = isset($params['call_from']) ? (string) $params['call_from'] : '';
+            if ('admin' === $call_from) {
+                $allowed = current_user_can('manage_options');
+            } else {
+                // Frontend public read: callback strips sensitive props
+                // via AR_TRY_ON_Helper::exclude_sensitive_properties().
+                $allowed = true;
             }
         }
 
+        $allowed = apply_filters('ATLAS_AR_rest_route_access', $allowed, $request);
 
-        return apply_filters('ATLAS_AR_rest_route_access', true);
+        if (!$allowed) {
+            return new \WP_Error(
+                'rest_forbidden',
+                __('You do not have permission to access this endpoint.', 'ar-vr-3d-model-try-on'),
+                array('status' => is_user_logged_in() ? 403 : 401)
+            );
+        }
+
+        return true;
     }
 }

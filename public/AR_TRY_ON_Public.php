@@ -56,7 +56,15 @@ class AR_TRY_ON_Public {
 	 */
 	private $version;
 
-	private $localize_data = [];
+	/**
+	 * Backing cache for {@see self::get_localize_data()}. Built once
+	 * per request on the first enqueue call so Pro's filter listeners
+	 * (registered via the `atlas_ar_loaded` action — AR-61 §1.1 Phase 4)
+	 * have had a chance to hook in before Free reads the filter values.
+	 *
+	 * @var array|null
+	 */
+	private $localize_data = null;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -74,6 +82,47 @@ class AR_TRY_ON_Public {
 		$this->version       = $version;
 
 
+		// `localize_data` is built lazily by get_localize_data()
+		// rather than here in the constructor — see the long comment
+		// in AR_TRY_ON_Admin's constructor for why. AR-61 §1.1 Phase 4.
+		$this->localize_data = null;
+
+
+		// Add `type="module"` to specific script handles by mutating the
+		// existing <script> tag instead of rebuilding it. The handles are
+		// already registered/enqueued via wp_enqueue_script() elsewhere;
+		// this filter only edits the opening tag WordPress generates for
+		// them. Plugin Check (PluginCheck) flags any literal `<script>`
+		// in a string as a non-enqueued script — using str_replace on
+		// the existing tag avoids that false positive.
+		add_filter( 'script_loader_tag', function ( $tag, $handle ) {
+			if ( 'ar-try-on-google-model-viewer' === $handle || 'AtlasAR' === $handle ) {
+				$tag = str_replace( ' src=', ' type="module" src=', $tag );
+			}
+
+			return $tag;
+		}, 10, 2 );
+
+	}
+
+	/**
+	 * Build (or return the cached copy of) the wp_localize_script
+	 * payload for the public bundle.
+	 *
+	 * Mirrors {@see AR_TRY_ON_Admin::get_localize_data()} on the
+	 * public side. Lazy by design — the Phase 3 filter-driven keys
+	 * (supported_formats, dashboard_tabs, metabox_sections) are read
+	 * here at enqueue time, by which point Pro has had a chance to
+	 * register its filter listeners via the `atlas_ar_loaded` action.
+	 *
+	 * @since   1.0.0
+	 * @updated AR-61 §1.1 Phase 4
+	 * @return  array
+	 */
+	private function get_localize_data() {
+		if ( null !== $this->localize_data ) {
+			return $this->localize_data;
+		}
 		$this->localize_data = [
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
@@ -82,22 +131,21 @@ class AR_TRY_ON_Public {
 			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
-			'plugin_url'       => ATLAS_AR_PLUGIN_URL,
+			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
-            'cached_ids'    => AR_TRY_ON_Helper::update_cache_data(false),
-            'img'    => 'http://localhost/azizulhasan/tts/wp-content/uploads/2025/10/167113823-3f0757ff-c7c2-44d0-a1e9-0b006772b39a-300x300.jpeg',
+			'cached_ids'    => AR_TRY_ON_Helper::update_cache_data( false ),
+
+			/*
+			 * Phase 3 extension-surface payload — kept symmetric with
+			 * the admin-side localize_data so public-bundle code
+			 * (current and future) can read the same Pro-extension
+			 * data without a second REST round-trip.
+			 */
+			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
+			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
 		];
-
-
-		// Add "type=module" attribute
-		add_filter( 'script_loader_tag', function ( $tag, $handle, $src ) {
-			if ( 'ar-try-on-google-model-viewer' === $handle || 'AtlasAR' === $handle ) {
-				$tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
-			}
-
-			return $tag;
-		}, 10, 3 );
-
+		return $this->localize_data;
 	}
 
 	/**
@@ -181,10 +229,10 @@ class AR_TRY_ON_Public {
 		// Model-viewer will load only when AR content becomes visible in viewport
 		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
 		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
-		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->localize_data );
+		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->get_localize_data() );
 
 		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
-		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->localize_data );
+		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->get_localize_data() );
 	}
 
 	/**
@@ -278,7 +326,13 @@ class AR_TRY_ON_Public {
             return;
         }
         self::$qr_rendered_for_post[ $post_id ] = true;
-        echo $qr_html;
+        // QR HTML is built server-side from internal templates and contains an
+        // inline <script> that bootstraps the QR generator. wp_kses cannot be
+        // used here because it HTML-encodes special characters (e.g. `>` → `&gt;`)
+        // inside <script> content, which produces invalid JavaScript and a
+        // browser SyntaxError. The content is entirely under plugin control —
+        // see AR_TRY_ON_Helper::get_qr_code() — and never includes user input.
+        echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled markup with inline <script>; see comment above.
     }
 
     public function atlas_ar_button( $content ) {
@@ -327,9 +381,9 @@ class AR_TRY_ON_Public {
         }
         if ( $is_face ) {
             if ( $current_filter === 'the_content' ) {
-                return $content . $qr_html;
+                return $content . $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
             }
-            echo $qr_html;
+            echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
             return;
         }
 
@@ -367,9 +421,9 @@ class AR_TRY_ON_Public {
         $ar_button_content = $qr_html . $button_html;
 
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
-            return $content . $ar_button_content;
+            return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
         } else {
-            echo $ar_button_content;
+            echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
         }
     }
 
@@ -439,9 +493,9 @@ class AR_TRY_ON_Public {
 
 
 		if ( $post->post_type != 'product' ) {
-			return $content . $ar_button_content;
+			return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
 		} else {
-			echo $ar_button_content;
+			echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
 		}
 	}
 
@@ -478,7 +532,7 @@ class AR_TRY_ON_Public {
 		}
 
 		$tabs['atlas_ar_3d_view'] = array(
-			'title'    => __( 'AtlasAR Product View', 'woocommerce' ),
+			'title'    => __( 'AtlasAR Product View', 'ar-vr-3d-model-try-on' ),
 			'priority' => 50,
 			'callback' => array( $this, 'atlas_ar_button_tab' ),
 		);

@@ -66,16 +66,50 @@ class AR_TRY_ON_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 
+		// wp-admin/includes/plugin.php is required because is_plugin_active() is used
+		// in get_localize_data() below.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		if ( ! function_exists( 'wp_is_mobile' ) ) {
-			require_once ABSPATH . 'wp-includes/vars.php';
-		}
-
 		add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
 
+		// `localize_data` is intentionally NOT built here in the
+		// constructor. It is built lazily by get_localize_data() on
+		// the first enqueue call.
+		//
+		// Why: the Phase 3 extension-surface keys (supported_formats,
+		// dashboard_tabs, metabox_sections) are produced by
+		// apply_filters() calls. The Pro plugin registers those filter
+		// listeners on Free's `atlas_ar_loaded` action — which fires
+		// LATE in the `init` hook chain. The constructor runs during
+		// `init` priority 10, BEFORE Pro's listener has had a chance
+		// to register. Building localize_data here would freeze the
+		// Free-default values into the JS payload and silently break
+		// Phase 4. Building it on `admin_enqueue_scripts` (the actual
+		// localize-script trigger) reads the filters AFTER Pro has
+		// hooked them. AR-61 §1.1 Phase 4.
+		$this->localize_data = null;
+	}
+
+	/**
+	 * Build (or return the cached copy of) the wp_localize_script
+	 * payload for the Admin bundles.
+	 *
+	 * Cached for the duration of a single request — `localize_data`
+	 * is set to null in the constructor; the first enqueue call
+	 * populates it; subsequent enqueue calls reuse the value so each
+	 * bundle gets a consistent payload.
+	 *
+	 * @since   1.0.0
+	 * @updated AR-61 §1.1 Phase 4 — deferred from __construct() so
+	 *          Pro's filter listeners can extend the payload.
+	 * @return  array
+	 */
+	private function get_localize_data() {
+		if ( null !== $this->localize_data ) {
+			return $this->localize_data;
+		}
 		$this->localize_data = [
 			'api_url'       => esc_url_raw( rest_url() ),
 			'api_namespace' => 'ar_try_on',
@@ -87,9 +121,29 @@ class AR_TRY_ON_Admin {
 			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
-			'is_admin' => is_admin(),
+			'is_admin'      => is_admin(),
 
+			/*
+			 * Phase 3 extension-surface payload — React reads these
+			 * and lets Pro extend the UI without importing Pro code.
+			 *
+			 * Forward-stable per backward-compat rule 8: new keys may
+			 * be added, existing key shape is frozen.
+			 *
+			 * These three keys ARE the reason this builder is lazy.
+			 * Pro's filter listeners must be in place before these
+			 * calls run; see the deferral note in __construct().
+			 */
+			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
+			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
+			// AR-62 — generation modes. Free baseline is text_to_model
+			// only; Pro extends via `atlas_ar_generation_supported_modes`
+			// in AR_TRY_ON_Pro_Bridge. The metabox React filters its
+			// "Supported Model Types" dropdown to this list.
+			'generation_supported_modes' => AR_TRY_ON_Helper::generation_supported_modes(),
 		];
+		return $this->localize_data;
 	}
 
 
@@ -119,12 +173,13 @@ class AR_TRY_ON_Admin {
 	public function enqueue_scripts() {
 
 		/**
-		 * Looad script
+		 * Load scripts.
+		 *
+		 * Note: wp-admin/includes/plugin.php is already conditionally loaded by the
+		 * constructor (which runs before this enqueue callback) and is normally already
+		 * loaded by WordPress core during admin requests. Re-loading it here without
+		 * an immediate use violates the wp.org guideline on core file loading (AR-61 §5.1).
 		 */
-
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
 
 		do_action( 'atlas_ar_enqueue_pro_dashboard_scripts' );
 
@@ -132,7 +187,7 @@ class AR_TRY_ON_Admin {
 		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
 			/* Load react js */
 			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
-			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->localize_data );
+			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->get_localize_data() );
 		}
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
@@ -140,7 +195,7 @@ class AR_TRY_ON_Admin {
 			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 
 			// Add WooCommerce product variation data if on product edit page
-			$metabox_localize_data = $this->localize_data;
+			$metabox_localize_data = $this->get_localize_data();
 			$metabox_localize_data['wc_product'] = $this->get_wc_product_data();
 
 			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $metabox_localize_data );
@@ -193,8 +248,27 @@ class AR_TRY_ON_Admin {
 
 			// TODO:: enqueue base on model setup/settings
 			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
+
+			// AR-61 §3.3: point Google's <model-viewer> at the
+			// locally-bundled DRACO / KTX2 (Basis) / Lottie decoders
+			// before the component initializes, so admin previews
+			// don't fall back to the gstatic.com / cdn.jsdelivr.net
+			// defaults baked into google-model-viewer.js (~L1092).
+			$decoder_base = ATLAS_AR_PLUGIN_URL . 'public/js/vendor/decoders/';
+			$inline_decoder_config = sprintf(
+				'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
+				'dracoDecoderLocation: %s,' .
+				'ktx2TranscoderLocation: %s,' .
+				'lottieLoaderLocation: %s' .
+				'});',
+				wp_json_encode( $decoder_base . 'draco/' ),
+				wp_json_encode( $decoder_base . 'basis/' ),
+				wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
+			);
+			wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );
+
 			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
-			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->localize_data );
+			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->get_localize_data() );
 		}
 	}
 
@@ -203,6 +277,15 @@ class AR_TRY_ON_Admin {
 	 */
 
 	public function atlas_ar_menu() {
+		// Position '80.5' (float string) places the menu immediately
+		// after WordPress core Settings (position 80). The previous
+		// value 20 collided with WP core's Pages slot and was flagged
+		// by wp.org (AR-61 §7.3). An interim value of '58.5' was tried
+		// but the project owner asked for placement directly after
+		// Settings instead, so plugin admins always find AtlasAR at
+		// the bottom of the menu, never wedged between core items.
+		// Float-string is used (not integer 81) so other plugins
+		// claiming round-number positions don't collide.
 		add_menu_page(
 			'AtlasAR',
 			'AtlasAR',
@@ -210,7 +293,7 @@ class AR_TRY_ON_Admin {
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
 			ATLAS_AR_PLUGIN_URL . 'admin/images/ar-try-on-logo-resized-30x34.png',
-			20
+			'80.5'
 		);
 
         $this->atlasaidev_plugins('atlas-ar-other-plugins');
@@ -247,8 +330,10 @@ class AR_TRY_ON_Admin {
 			return $product_data;
 		}
 
-		// Get current post ID
-		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0;
+		// Get current post ID. Read-only — `absint()` sanitises and the post-edit
+		// screen URL is the canonical source; nonce verification belongs to the
+		// edit-form POST, not this read.
+		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only context: identifies which product to localize React state for; mutations happen via separate, nonce-protected REST routes.
 		if ( ! $post_id ) {
 			return $product_data;
 		}
@@ -436,7 +521,7 @@ class AR_TRY_ON_Admin {
     const ATLAS_PLUGINS_REMOTE_URL = 'https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json';
 
     /**
-     * Transient key for cached plugin data.
+     * Transient key for cached remote plugin manifest.
      */
     const ATLAS_PLUGINS_TRANSIENT = 'atlas_plugins_remote_data';
 
@@ -451,31 +536,40 @@ class AR_TRY_ON_Admin {
     const ATLAS_PLUGINS_CACHE_TTL = 86400;
 
     /**
-     * Fetch plugin data from GitHub with transient caching.
+     * Fetch the AtlasAiDev plugin manifest with a 24-hour transient
+     * cache, falling back to a local hardcoded list when the network
+     * call fails or returns invalid data.
      *
+     * This call only fires when an administrator opens the
+     * "Other plugins" admin submenu — never on a normal page load.
+     * The submenu page itself shows a visible notice describing what
+     * is fetched and what is not sent; the call is also disclosed in
+     * the plugin's readme under `== External services ==`
+     * (AR-61 §2.1 + §4.9).
+     *
+     * @since 1.0.0
      * @return array List of plugin objects.
      */
     public static function get_atlas_plugins() {
-        $cached = get_transient(self::ATLAS_PLUGINS_TRANSIENT);
-        if (false !== $cached && is_array($cached)) {
+        $cached = get_transient( self::ATLAS_PLUGINS_TRANSIENT );
+        if ( false !== $cached && is_array( $cached ) ) {
             return $cached;
         }
 
-        $response = wp_remote_get(self::ATLAS_PLUGINS_REMOTE_URL, array(
+        $response = wp_remote_get( self::ATLAS_PLUGINS_REMOTE_URL, array(
             'timeout' => 10,
-            'headers' => array('Accept' => 'application/json'),
-        ));
+            'headers' => array( 'Accept' => 'application/json' ),
+        ) );
 
-        if (!is_wp_error($response) && 200 === wp_remote_retrieve_response_code($response)) {
-            $body = wp_remote_retrieve_body($response);
-            $data = json_decode($body, true);
-            if (is_array($data) && !empty($data)) {
-                set_transient(self::ATLAS_PLUGINS_TRANSIENT, $data, self::ATLAS_PLUGINS_CACHE_TTL);
+        if ( ! is_wp_error( $response ) && 200 === wp_remote_retrieve_response_code( $response ) ) {
+            $body = wp_remote_retrieve_body( $response );
+            $data = json_decode( $body, true );
+            if ( is_array( $data ) && ! empty( $data ) ) {
+                set_transient( self::ATLAS_PLUGINS_TRANSIENT, $data, self::ATLAS_PLUGINS_CACHE_TTL );
                 return $data;
             }
         }
 
-        // Fallback: hardcoded plugin data.
         return self::get_fallback_plugins();
     }
 
@@ -667,7 +761,8 @@ class AR_TRY_ON_Admin {
     }
 
     public function atlasaidev_plugins($menu_slug = 'atlas-ar-other-plugins', $plugin_slug = 'ar-vr-3d-model-try-on') {
-        // Atlas Plugins submenu
+        // Atlas Plugins submenu — pure read of the admin page slug for enqueue routing.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only: identifies which admin screen to enqueue assets for; no data mutation.
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
             $js  = plugin_dir_url(__FILE__) . 'js/atlas-plugins.js';
             wp_enqueue_script(
@@ -767,7 +862,11 @@ class AR_TRY_ON_Admin {
     }
 
     /**
-     * AJAX handler to refresh plugin data from remote.
+     * AJAX handler to refresh plugin metadata.
+     *
+     * Clears both transients and re-fetches:
+     *   - the AtlasAiDev plugin manifest (raw.githubusercontent.com),
+     *   - the WP.org info cache (api.wordpress.org).
      */
     public function ajax_refresh_plugins() {
         check_ajax_referer('atlas_plugins_refresh', 'nonce');
@@ -776,7 +875,6 @@ class AR_TRY_ON_Admin {
             wp_send_json_error('Unauthorized', 403);
         }
 
-        // Delete cached data and re-fetch.
         delete_transient(self::ATLAS_PLUGINS_TRANSIENT);
         delete_transient(self::ATLAS_PLUGINS_WPORG_TRANSIENT);
         $plugins    = self::get_atlas_plugins();
@@ -790,10 +888,37 @@ class AR_TRY_ON_Admin {
 
     /**
      * Atlas Plugins page callback.
+     *
+     * Renders a visible disclosure block at the top of the page
+     * (AR-61 §2.1 / §4.9), followed by the React mount point that the
+     * cross-promo JS hydrates with the "You're using …" header and
+     * the plugin grid. Visiting this page triggers the cached fetch
+     * in {@see self::get_atlas_plugins()} which contacts
+     * raw.githubusercontent.com for the AtlasAiDev plugin manifest;
+     * no site or user data is sent in that request.
+     *
+     * Important: the disclosure deliberately does NOT use the
+     * `.notice` admin class. WordPress hoists `.notice` elements to
+     * sit right after the first H1/H2 on the page, which would push
+     * the disclosure underneath the JS-rendered "You're using …"
+     * header. Using a plain styled div keeps it where it belongs —
+     * above the header.
      */
     public function atlas_plugins_page()
     {
-        echo '<div class="wrap"><div id="atlas_plugins_container"></div></div>';
+        $readme_url = self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=ar-vr-3d-model-try-on&section=external_services' );
+
+        echo '<div class="wrap">';
+        echo '<div class="atlas-cross-promo-disclosure" style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid #2271b1;padding:12px 16px;margin:16px 20px 16px 0;max-width:1200px;border-radius:4px;">';
+        echo '<p style="margin:0;font-size:13px;line-height:1.5;color:#1d2327;">';
+        echo esc_html__( 'Heads up: this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see "External services" in the readme for details.', 'ar-vr-3d-model-try-on' );
+        echo ' <a href="' . esc_url( $readme_url ) . '" target="_blank" rel="noopener noreferrer">';
+        echo esc_html__( 'View readme', 'ar-vr-3d-model-try-on' );
+        echo '</a>';
+        echo '</p>';
+        echo '</div>';
+        echo '<div id="atlas_plugins_container"></div>';
+        echo '</div>';
     }
 
 

@@ -1,12 +1,32 @@
 import {useState, useEffect} from "react";
 import Switch from "../../dashboard/components/dashboard/settings/Switch";
 import notify from "../../context/Notify";
+import PremiumBadge, { isProActive } from "../../context/PremiumBadge";
 
 const SliderSection = ({
                            productModel,
                            handleChange,
                            setProductModel
                        }) => {
+    // AR-61 §1.1 Phase 2 — when Pro is absent, the entire slider
+    // section collapses to a single upsell badge. The interactive
+    // editor below (add/duplicate/delete items, per-item model URLs,
+    // HDR environments, etc.) only renders when Pro is loaded. The
+    // previous "Slider is a Pro feature. Changes will appear in
+    // preview but won't be saved" toast was the Yoast-pattern
+    // anti-pattern (a control that silently fails); it is gone.
+    if (!isProActive()) {
+        return (
+            <div className="art-mb-4">
+                <PremiumBadge feature="slider">
+                    <strong>Image / model slider per product</strong> — let shoppers
+                    swipe through multiple GLBs, posters, and HDR environments on a
+                    single product page. Available in AtlasAR Pro.
+                </PremiumBadge>
+            </div>
+        );
+    }
+
     const [items, setItems] = useState([
         {
             id: 1,
@@ -78,17 +98,12 @@ const SliderSection = ({
 
 
     const [dragIndex, setDragIndex] = useState(null);
-    const [hasShownWarning, setHasShownWarning] = useState(false);
 
-    // Show warning when user interacts with slider in free version
-    const showProWarning = () => {
-        if (!ar_try_on.is_pro_active && !hasShownWarning) {
-            notify('Slider (Multiple Models) is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
-                autoClose: 5000,
-            });
-            setHasShownWarning(true);
-        }
-    };
+    // Kept as a no-op so the existing call sites below still type-check.
+    // The Pro gate at the top of the component means this code path
+    // is only reachable when Pro IS active, so the legacy "Pro feature"
+    // toast is never needed (AR-61 §1.1 Phase 2).
+    const showProWarning = () => {};
 
     const [demoBasicData, setDemoBasicData] = useState({
         src: "upload",

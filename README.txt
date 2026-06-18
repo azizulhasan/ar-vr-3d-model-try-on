@@ -1,10 +1,10 @@
 === 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On  ===
-Contributors: atlasaidev, hasanazizul, freemius
+Contributors: atlasaidev, hasanazizul
 Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.2
+Stable tag: 2.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -12,92 +12,32 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 == Description ==
 
-Showcase your 3D Models with immersive AR experiences directly in the browser using advanced 3D Viewer WordPress plugin. No apps or coding needed. Just add a browser-based 3d model, Experience in real environment and build confidence, cut returns, and boost conversions.
+Showcase your 3D models with browser-based AR — no apps, no coding. Let shoppers rotate and zoom .glb/.gltf models, place products in their real-world space on Android and iOS, or try on glasses and caps with the built-in **AtlasTryOn** webcam viewer. All free, with unlimited model uploads.
 
-🚀 **NEW IN VERSION 2.0.0**: **AtlasTryOn — Virtual Try-On for Glasses & Caps**, now built right into the free plugin. Let shoppers see how your eyewear or headwear looks on them, right from your product page — no app downloads, no extra setup.
+🚀 **AtlasTryOn — Virtual Try-On for Glasses & Caps**, built into the free plugin. Shoppers see how eyewear or headwear looks on them right from the product page — no app downloads, no extra setup.
 
-🎁 **14-day Pro free trial included.** Unlock the full AtlasTryOn Pro experience — head-pose tracking, HD watermark-free snapshots, multi-face detection, live calibration — free for 14 days. [Start your free trial →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=trial_cta)
+🎁 **14-day Pro free trial included** for the full AtlasTryOn Pro experience — head-pose tracking, HD watermark-free snapshots, multi-face detection, live calibration. [Start your free trial →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=trial_cta)
 
-#### **Key AR features at a Glance:**
-* **Inspect 3D models from every angle** (rotate/zoom) [Dining Armchair Demo](https://wpaugmentedreality.com/product/dining-armchair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_dining_armchair).
-* **Place products in real spaces** using smartphone AR (floor/wall) [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair).
-* **Preview model** Preview model in the product editor page.
-* **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
-* **🔥 NEW: Automatic model compression** (Pro) - Reduce file sizes by up to 70%
-* **🔥 NEW: Product dimensions display** (Pro) - Show real-world sizes in AR
-* **🔥 NEW: Interactive hotspots** (Pro) - Educate customers with clickable info points
-* **🔥 NEW: Product configurators** (Pro) - Let customers customize colors, materials, options
+#### **Core features (Free):**
 
+* **Rotate / zoom 3D models** on every product page
+* **Mobile AR**: floor + wall placement via Scene Viewer (Android) and AR Quick Look (iOS)
+* **Unlimited model uploads** — no caps on file count or size
+* **WooCommerce native**: automatic "View in AR" button, simple + variable products
+* **Shortcode** `[atlas_ar]` + Gutenberg block for posts/pages
+* **QR code** card for cross-device scanning
+* **AtlasTryOn** webcam try-on for glasses, sunglasses, caps — unlimited products
+* **Tripo3D and Meshy AI integration** to generate 3D models from a text prompt (admin-only; bring your own API key)
+* **Privacy by design** — the camera feed stays on the shopper's device; nothing is uploaded
 
-### SOME USEFUL LINKS:
-* [Augmented Reality In Real World](https://wpaugmentedreality.com/shop/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_shop)
-* [Live Demo](https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1)
-* [Video Tutorial](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
-* [Pro Version Pricing](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)
-* [Download Now](https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip)
+#### **Pro adds (separately installed plugin):**
 
-== How To Install Augmented Reality ( AR VR Try On ) Plugin By AtlasAidev  ==
-[youtube https://www.youtube.com/watch?v=1WgR-xUMHa0&ab_channel=AtlasAiDev]
+* Server-side compression for large model files (~80% size reduction)
+* Interactive hotspots, real-world dimensions, image/model sliders in the metabox
+* HD watermark-free try-on snapshots, head-pose tracking, multi-face detection, live calibration
+* Bulk compression, analytics dashboard, multi-post-type AR, format conversion (FBX/OBJ/USDZ)
 
-== Augmented Reality Plugin From Mobile Phone  ==
-[youtube https://www.youtube.com/watch?v=NlYaGeYeS1w&t=81s&ab_channel=AtlasAiDev]
-
-
-### **Why Choose Our 3d viewer WordPress Solution?**
-
-* ✅ **Unlimited 3D Uploads**: Free version supports unlimited .glb/.gltf/.usdz files.
-* ✅ **True Mobile AR**: Android (GLB) + iOS (USDZ) compatibility.
-* ✅ **WooCommerce Native**: Automatic integration with product pages.
-* ✅ **Zero Coding**: Automatic AR button placement on product pages – no coding required.
-* ✅ **ShortCode**: Easy shortcode setup `[atlas_ar]` .
-* ✅ **QR Code**: Display a QR code in desktop view .
-* ✅ **Integrated with [Tripo3D API ](https://www.tripo3d.ai/) to generate .glb/3D model
-* ✅ **NEW: AtlasTryOn** — webcam try-on for glasses & caps, built right in
-* ✅ **Pro Features**: Dimensions, Hotspots, Sliders, Auto-Compression, Pro AtlasTryOn (head-pose tracking, HD snapshots, multi-face, live calibration)
-
-
-### **✨ AtlasTryOn — Glasses & Caps (NEW)**
-
-* 👓 **Webcam try-on** for glasses, sunglasses, hats and caps — right on the product page
-* 📱 **Works on iOS, Android and desktop** browsers — no app downloads
-* 📸 **Save & share snapshots** — shoppers download a photo of how they look
-* 🔒 **Privacy by design** — the camera feed stays on the shopper's device, nothing is uploaded
-* 🆓 **Unlimited try-on products on Free** — Pro adds head-pose tracking, multi-face, HD watermark-free snapshots and live calibration. [Compare plans →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=description_highlights)
-
-
-### **Core Features:**
-
-#### **1. Complete 3D Model Control**
-* Upload .GLB/.GLTF files for Android AR and 3D view in desktop.
-* Add .USDZ files for iOS AR Quick Look.
-* Set custom posters/thumbnails for each 3D model viewer.
-* Automatic fallback to interactive 3D model viewer on desktop/mobile.
-* **🔥 NEW (Pro)**: Automatic model compression - Reduce file sizes by up to 70% for faster loading
-
-#### **2. Mobile Augmented Reality Magic (AR Placement Options)**
-* **Floor 3d viewer **: Allow customers to visualize furniture, appliances, and other large items in their rooms. [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair)
-* **Wall 3d viewer **: Let users preview wall art, mirrors, and décor directly on their walls. [Sun Painting Demo](https://wpaugmentedreality.com/product/sun-painting-on-wall-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_sun_painting)
-* **🔥 NEW (Pro): Dimensions Display** - Show product measurements in AR to reduce "will it fit?" questions
-* **✨ NEW: AtlasTryOn** - Webcam virtual try-on for glasses, sunglasses and caps. Free version supports unlimited try-on products; Pro adds head-pose tracking, HD watermark-free snapshots, multi-face detection, and live per-product calibration.
-
-#### **3. WooCommerce Optimization**
-* Dedicated "AtlasAR" tab and settings within the WooCommerce product editor.
-* Automatic "View in AR " button placement on product pages.
-* Full support for simple and variable/configurable products.
-* Designed to work seamlessly with all standard WooCommerce themes.
-* **🔥 NEW (Pro)**: Interactive hotspots - Add clickable information points to educate customers
-* **🔥 NEW (Pro)**: Product configurators - Let customers customize colors, materials, and options
-
-#### **4. Enterprise-Ready Performance**
-* Host unlimited 3D models with no file size restrictions in the free version.
-* Optimized for fast and smooth mobile Augmented Reality experiences.
-* Asynchronous loading of models to ensure fast page speeds.
-* **🔥 NEW (Pro)**: Automatic GLB/GLTF compression using Draco and Basis Universal
-* **Coming Soon (Pro)**: Background compression processing for large files
-* **Coming Soon (Pro)**: Bulk compression for entire product catalog
-
-#### **5. QR Code**
-Display a QR code in desktop view, allowing users to scan and switch to an AR capable device.
+[Pro pricing →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link) · [Live demos →](https://wpaugmentedreality.com/shop/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_shop) · [Video tutorials →](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
 
 
 == 3D Model Generation ==
@@ -269,6 +209,115 @@ Display a QR code in desktop view, allowing users to scan and switch to an AR ca
 
 
 
+== External services ==
+
+This plugin connects to the following third-party services. Each service is contacted only when the corresponding feature is used. No service receives personal data unless explicitly noted below.
+
+**1. MediaPipe Tasks Vision WASM bundle (Google / jsDelivr)**
+
+* What it is: Google's MediaPipe machine-learning runtime that powers the face-tracking try-on feature.
+* When it is contacted: only after the visitor explicitly clicks the "Try It On" button on a product page. The WASM bundle is then downloaded from `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm` and cached by the browser.
+* What is sent: a standard HTTPS GET request for the static asset. No site, user, or product data is transmitted.
+* Provider: jsDelivr CDN (delivers the file published by Google).
+* Terms of use: [https://www.jsdelivr.com/terms](https://www.jsdelivr.com/terms)
+* Privacy policy: [https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net](https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net)
+
+**2. MediaPipe Face Landmarker model (Google Cloud Storage)**
+
+* What it is: the trained face-landmark model file MediaPipe needs in order to detect faces.
+* When it is contacted: same trigger as the WASM bundle above — only after the visitor clicks "Try It On". The model is then downloaded from `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task` and cached by the browser (and, on supported browsers, in IndexedDB).
+* What is sent: a standard HTTPS GET request for the static asset. No site, user, or product data is transmitted.
+* Provider: Google.
+* Terms of use: [https://policies.google.com/terms](https://policies.google.com/terms)
+* Privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy)
+
+**3. Google `<model-viewer>` decoders — bundled locally, not an external service**
+
+The DRACO geometry decoder, the KTX2 / Basis Universal texture transcoder, and the three.js Lottie loader are required by Google's `<model-viewer>` web component when an uploaded GLB uses Draco compression, KTX2 textures, or Lottie animation. By default `<model-viewer>` would fetch these from `gstatic.com` and `cdn.jsdelivr.net`.
+
+To avoid every site having to disclose those CDNs, this plugin ships its own copy of all three decoders under `public/js/vendor/decoders/` and overrides `<model-viewer>`'s default URLs at load time (`window.ModelViewerElement.dracoDecoderLocation`, `ktx2TranscoderLocation`, `lottieLoaderLocation`). No external request is made for any of these files — they are served from the plugin folder on the same host as the site.
+
+Versions bundled:
+* DRACO v1.5.6 (from `gstatic.com`)
+* Basis Universal `2021-04-15-ba1c3e4` (from `gstatic.com`)
+* three.js Lottie loader from `three@0.149.0`
+
+The original upstream URLs are documented here purely so anyone reviewing the bundled copies can verify they match the upstream releases.
+
+**4. Tripo3D API**
+
+* What it is: a third-party 3D-model generation service.
+* When it is contacted: only after an administrator opens the AtlasAR dashboard, enters a personal Tripo3D API key, and clicks "Generate 3D Model". No call is made until both the key and the explicit user action are in place.
+* What is sent: the text prompt or image the administrator submits, plus the administrator's own Tripo3D API key in the `Authorization` header. No site visitor data, post content, or visitor IP is transmitted.
+* Where requests go: `https://api.tripo3d.ai/v2/openapi/task`.
+* API key sign-up: [https://platform.tripo3d.ai/api-keys](https://platform.tripo3d.ai/api-keys)
+* Terms of service: [https://www.tripo3d.ai/terms-of-service](https://www.tripo3d.ai/terms-of-service)
+* Privacy policy: [https://www.tripo3d.ai/privacy-policy](https://www.tripo3d.ai/privacy-policy)
+
+**5. Meshy AI API**
+
+* What it is: a third-party text/image-to-3D generation service, used as an alternative provider to Tripo3D.
+* When it is contacted: only after an administrator opens the AtlasAR dashboard, enters a personal Meshy AI API key, and clicks "Generate 3D Model" with Meshy selected as the provider. No call is made until both the key and the explicit user action are in place.
+* What is sent: the text prompt or image the administrator submits, plus the administrator's own Meshy AI API key in the `Authorization` header. No site visitor data is transmitted.
+* Where requests go: `https://api.meshy.ai/openapi/v2/text-to-3d`.
+* API key sign-up: [https://www.meshy.ai/settings/api](https://www.meshy.ai/settings/api)
+* Terms of service: [https://www.meshy.ai/terms](https://www.meshy.ai/terms)
+* Privacy policy: [https://www.meshy.ai/privacy](https://www.meshy.ai/privacy)
+
+**6. AtlasAiDev usage statistics (opt-in only)**
+
+* What it is: AtlasAiDev's own anonymous usage-statistics endpoint, used to count active installs and broad WordPress / PHP version distribution.
+* When it is contacted: ONLY if the administrator explicitly opts in from the plugin's admin notice. Default is OFF; nothing is sent if the administrator dismisses the notice or never sees it.
+* What is sent (when opted in): plugin name and version, WordPress version, PHP version, site URL, site name, site language, count of active and inactive plugins, and the administrator's name and email address (for support follow-up). No visitor data, post content, or product data is transmitted.
+* Where requests go: `https://track.atlasaidev.com/wp-json/atlasaidev_tracker/`.
+* Terms of service: [https://atlasaidev.com/terms-and-conditions/](https://atlasaidev.com/terms-and-conditions/)
+* Privacy policy: [https://atlasaidev.com/privacy-policy/](https://atlasaidev.com/privacy-policy/)
+
+**7. AtlasAiDev usage-statistics IP lookup (icanhazip.com, opt-in only)**
+
+* What it is: `icanhazip.com` is a simple text-only echo service that returns the caller's public IP. The plugin uses it to attach a rough geolocation IP to the AtlasAiDev usage-statistics payload (service 6 above).
+* When it is contacted: ONLY when an administrator has opted in to the AtlasAiDev usage statistics. If the tracker is OFF — which is the default — no request is ever made to `icanhazip.com`.
+* What is sent: a standard HTTPS GET request. No user, site, or product data is transmitted in the request itself; the response (the public IP) is then included in the next tracker payload to AtlasAiDev.
+* Where requests go: `https://icanhazip.com/`.
+* Provider: Cloudflare (operates icanhazip.com).
+* Terms of service: [https://www.cloudflare.com/website-terms/](https://www.cloudflare.com/website-terms/)
+* Privacy policy: [https://www.cloudflare.com/privacypolicy/](https://www.cloudflare.com/privacypolicy/)
+
+**8. AtlasAiDev plugin recommendations manifest (raw.githubusercontent.com)**
+
+* What it is: a publicly-readable JSON file hosted on GitHub that lists the current set of AtlasAiDev plugins shown on the "Other plugins" admin submenu. Keeping it on GitHub lets the recommendations stay accurate without forcing a plugin release every time a new sibling plugin ships.
+* When it is contacted: only when an administrator opens the "AtlasAR → Other plugins" admin submenu page. The page itself displays a visible notice describing this fetch. The result is cached for 24 hours via a WordPress transient, so the request fires at most once per day per site. Visiting any other page does not trigger this call.
+* What is sent: a standard HTTPS GET request for the static JSON file. No site, user, or product data is transmitted.
+* Where requests go: `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`.
+* Provider: GitHub (Microsoft).
+* Terms of service: [https://docs.github.com/en/site-policy/github-terms/github-terms-of-service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)
+* Privacy policy: [https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
+
+
+== Source code ==
+
+The full, un-minified source for every JavaScript and CSS bundle shipped with this plugin is published in a public GitHub repository:
+
+[https://github.com/azizulhasan/ar-vr-3d-model-try-on](https://github.com/azizulhasan/ar-vr-3d-model-try-on)
+
+That repository contains:
+
+* All PHP source files (also present in the plugin zip).
+* The React dashboard sources under `src/dashboard/` and metabox sources under `src/metabox/`.
+* The vanilla-JS public-side sources (try-on controller, MediaPipe face worker, etc.) under `src/context/`.
+* The Tailwind CSS source at `src/tailwind.css`.
+* The webpack-mix and Gulp build configurations (`webpack.mix.js`, `gulpfile.js`).
+* The exact `package.json` and `composer.json` manifests used to produce the bundled assets.
+
+To rebuild the production assets locally from a clean clone:
+
+`composer install`
+`npm install`
+`npm run production`
+
+This regenerates every minified file shipped under `admin/js/build/` and `public/js/build/`, including the `tryon-face-worker.*.js`, `tryon-controller.*.js`, and `ar-compression-client.min.js` chunks. Each chunk's source files live in the `src/` directory described above.
+
+
 == Installation ==
 
 1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
@@ -360,6 +409,23 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 2.1.0 ( 2 June 2026 ) =
+* Improvement: Hotspots, Dimensions, Sliders, bulk compression, analytics and multi-post-type now show a clear Pro badge instead of locked controls.
+* Improvement: Server-side compression for files over 10 MB is provided by the separately installed Pro plugin; Free's client-side compression up to 10 MB is unchanged.
+* Improvement: New filter and action hooks let Pro and add-ons extend the dashboard, metabox sections, supported formats and compression method without touching Free code.
+* Fix: 3D-model compression assets now load correctly on WordPress installs that are not at the root of their domain.
+* Maintenance: Restructured the Free build to remove premium-only code paths, per WordPress.org guidelines.
+
+= 2.0.3 ( 25 May 2026 ) =
+* Security: Fix CVE-2026-8682 — `POST /wp-json/ar_try_on/v1/settings` no longer accepts requests from non-administrators. The shared `get_route_access()` permission callback never enforced a capability check, so any authenticated user (Subscriber and above) could overwrite the `ar_try_on_settings` option. Replaced with per-route `current_user_can( 'manage_options' )` checks on `/settings`, `/demo_preview`, and `/generate_3d_model`, and a per-post `current_user_can( 'edit_post', $post_id )` check on `/get_model_and_settings` writes. Credit to Legion Hunter via Wordfence.
+* Security: Tightened `/get_model_and_settings` so non-admin POSTs can no longer write to arbitrary post meta — the same authorization bypass applied to this endpoint and is now closed.
+* Security: Tightened `/generate_3d_model` so only administrators can trigger Tripo3D / Meshy AI API calls and upload model files.
+* Maintenance: Plugin no longer mis-loads WordPress core files (`wp-admin/includes/plugin.php`, `wp-includes/vars.php`) — every remaining `require_once` now uses a function from the included file immediately afterward.
+* Maintenance: `libs/AtlasAiDev/Client.php` now uses `get_theme_root()` + `wp_normalize_path()` instead of a hardcoded `WP_CONTENT_DIR . '/themes/'`, so the theme/plugin detection honours custom theme roots.
+* Maintenance: Replaced anonymous closures passed to `remove_filter( 'upload_dir', … )` with a named instance callback so the filter actually unregisters after a compressed-file upload.
+* Maintenance: All 50 i18n strings inside `libs/AtlasAiDev/` now use the `ar-vr-3d-model-try-on` text domain (was `atlasaidev`), so translations served by WordPress.org reach them.
+* Maintenance: Admin top-level menu moved from position `20` (which collided with WordPress core's Pages slot) to `'58.5'`, placing AtlasAR alongside other plugin menus.
 
 = 2.0.2 ( 18 May 2026 ) =
 * New: Rename the "View in AR" button store-wide, per product, or per shortcode — "See it in 3D", "Try a 360° view" or any text that fits your store
@@ -623,6 +689,12 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+Cleaner Free and Pro experience. Hotspots, Dimensions, Sliders and bulk compression now appear with a clear Pro badge instead of locked controls. Server-side compression for large files moves to Pro; client-side compression up to 10 MB stays in Free. Safe to update.
+
+= 2.0.3 =
+Security release. Fixes a Subscriber-level authorization bypass on plugin settings and related endpoints. All sites should update immediately.
 
 = 2.0.2 =
 Polish + bugfix release: rename the "View in AR" button without code, add a built-in 360° rotation hint, fix the pink/orange tint on reflective white 3D models, and resolve the empty-modal issue when navigating between products. Safe to update.

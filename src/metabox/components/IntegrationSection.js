@@ -1,6 +1,14 @@
-import React, {useState, useEffect} from "react";
-import {getURL, postWithoutImage, getAPITypes, getPostID} from "../../context/utilities";
+import React, {useState, useEffect, useRef, useMemo} from "react";
+import {
+    getURL,
+    postWithoutImage,
+    getAPITypes,
+    getPostID,
+    setNestedKey,
+    TRIPO_TASK_HISTORY_URL,
+} from "../../context/utilities";
 import notify from "../../context/Notify";
+import ImageSourcePicker from "./ImageSourcePicker";
 
 export default function IntegrationSection({
                                                productModel,
@@ -16,6 +24,276 @@ export default function IntegrationSection({
     const [previousBody, setPreviousBody] = useState(null)
     const [previousModelType, setPreviousModelType] = useState(null)
     const [tempModelData, setTempModelData] = useState(null)
+
+    /**
+     * AR-62 §3 — generation polling state.
+     *
+     * The poll loop is a recursive setTimeout (so we can vary the delay
+     * each tick) instead of setInterval. Refs hold the controls so a
+     * Cancel-button click can stop the loop from outside the closure
+     * and an unmount cleans up any in-flight schedule.
+     */
+    const pollTimeoutRef = useRef(null);
+    const pollAttemptsRef = useRef(0);
+    const pollAbortedRef = useRef(false);
+    const [pollingActive, setPollingActive] = useState(false);
+
+    /**
+     * AR-62 §4 — count of consecutive polls where Tripo3D reported
+     * `progress >= 99`. Once we cross that threshold, the mesh is
+     * done but the GLB/texture encoder is still running on Tripo's
+     * side. The label flips to "Finalizing model" and we override
+     * the backoff to a tight 5 s. After 3 ticks we also surface a
+     * caption under the button so the user knows the slowdown is
+     * expected.
+     */
+    const [finalizeCount, setFinalizeCount] = useState(0);
+
+    /**
+     * AR-62 §4 — one-shot guard for the mount-time "you have an
+     * unfinished task_id in this post's body — resume?" detection.
+     * Without the gate, every change to the body rows would re-run
+     * the resume conversion and clobber the user mid-edit.
+     */
+    const hasCheckedResumeRef = useRef(false);
+
+    /** Exponential backoff schedule: 5s, 10s, 15s, 30s (then 30s cap). */
+    const POLL_DELAYS_MS = [5000, 10000, 15000, 30000];
+    /** Hard cap on polls — ≈ 5 min including backoff growth. */
+    const POLL_MAX_ATTEMPTS = 20;
+    /** Tight poll cadence once Tripo3D reports >=99% (encoder tail). */
+    const FINALIZE_POLL_MS = 5000;
+
+    // Spinner-state set: in-progress states get an animated spinner
+    // glyph alongside the label; idle / success / error states do not.
+    const SPINNER_STATES = new Set(['progress', 'task', 'poster', 'save_progress', 'data_save']);
+
+    /** Tiny HTML escape for the label substituted into innerHTML. */
+    const escapeLabel = (s) => String(s).replace(/[&<>"]/g, c => (
+        {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]
+    ));
+
+    useEffect(() => {
+        return () => {
+            if (pollTimeoutRef.current) clearTimeout(pollTimeoutRef.current);
+            pollAbortedRef.current = true;
+        };
+    }, []);
+
+    /**
+     * AR-62 §4 — on the first render after the body rows arrive from
+     * REST, look for a stored `task_id` that has NOT yet resulted in
+     * a saved model (`productModel.src` is still empty). That's the
+     * exact shape of "user kicked off a generation, got bored or
+     * closed the tab, came back later". Convert the Generate Model
+     * button into a one-click "Resume waiting for Tripo3D task"
+     * affordance instead of forcing them to paste the task_id back
+     * in by hand. Gated by hasCheckedResumeRef so future body edits
+     * don't keep flipping the button.
+     */
+    useEffect(() => {
+        if (hasCheckedResumeRef.current) return;
+        const body = productModel?.exclude_integration_api_body;
+        if (!Array.isArray(body) || body.length === 0) return;
+
+        hasCheckedResumeRef.current = true;
+        const taskIdRow = body.find(r => r && r.key === 'task_id');
+        if (taskIdRow?.value && !productModel?.src) {
+            const btn = document.getElementById('atlas_ar_model_generate');
+            if (btn && btn.getAttribute('data-id') === 'generate') {
+                generateModelButtonStateChange('resume', 'Resume waiting for Tripo3D task', btn);
+            }
+        }
+    }, [productModel?.exclude_integration_api_body, productModel?.src]);
+
+    const stopPolling = () => {
+        if (pollTimeoutRef.current) {
+            clearTimeout(pollTimeoutRef.current);
+            pollTimeoutRef.current = null;
+        }
+        pollAbortedRef.current = true;
+        pollAttemptsRef.current = 0;
+        setPollingActive(false);
+        setFinalizeCount(0);
+    };
+
+    /**
+     * AR-62 §4 — Cancel is the user explicitly abandoning the task.
+     * Clear the task_id row alongside the polling state so the next
+     * Generate Model click starts a fresh task instead of resuming
+     * the abandoned one. Timeout is handled separately and keeps
+     * the row in place.
+     */
+    const cancelGeneration = () => {
+        stopPolling();
+        const updated = structuredClone(productModel);
+        if (Array.isArray(updated.exclude_integration_api_body)) {
+            updated.exclude_integration_api_body = updated.exclude_integration_api_body.filter(
+                r => r && r.key !== 'task_id'
+            );
+        }
+        setProductModel(updated);
+        const btn = document.getElementById('atlas_ar_model_generate');
+        if (btn) {
+            generateModelButtonStateChange('generate', 'Generate Model', btn);
+        }
+        notify('Generation cancelled. Task ID cleared.', 'warn', {autoClose: 3000});
+    };
+
+    /**
+     * Recursive poller for Tripo3D / Meshy AI task status.
+     *
+     * Behaviours covered:
+     *  - exponential backoff (5s → 10s → 15s → 30s cap)
+     *  - hard cap at POLL_MAX_ATTEMPTS polls
+     *  - exits cleanly on Tripo3D status `failed` / `banned` /
+     *    `expired` / `cancelled` (surfaces error_msg / error_code)
+     *  - surfaces live progress percent / ETA / queue position in the
+     *    button label
+     *  - sends only the task_id to PHP, not the original body
+     *  - cancellable from outside via pollAbortedRef
+     */
+    const startPolling = (taskId, baseDataArr, submitButton) => {
+        pollAbortedRef.current = false;
+        pollAttemptsRef.current = 0;
+        setPollingActive(true);
+        setFinalizeCount(0);
+
+        const poll = async () => {
+            if (pollAbortedRef.current) return;
+
+            if (pollAttemptsRef.current >= POLL_MAX_ATTEMPTS) {
+                /**
+                 * AR-62 §4 — local hard cap reached. The Tripo3D
+                 * task is almost certainly still running on their
+                 * side; we just stopped asking. Flip the button to
+                 * a `resume` state instead of `generate` so the
+                 * next click picks up polling without a new create
+                 * (no extra credits) and without making the user
+                 * paste the task_id back in.
+                 */
+                stopPolling();
+                submitButton.setAttribute('data-id', 'resume');
+                generateModelButtonStateChange('resume', 'Click to resume waiting', submitButton);
+                notify(
+                    'Generation is taking longer than expected. Your Tripo3D task is still running — click "Click to resume waiting" to keep polling (no extra credits will be charged).',
+                    'warn',
+                    {autoClose: 12000}
+                );
+                return;
+            }
+            pollAttemptsRef.current++;
+
+            // AR-62 §3e: minimal polling payload.
+            const pollData = {
+                url:      baseDataArr.url,
+                api_name: baseDataArr.api_name,
+                headers:  baseDataArr.headers,
+                post_id:  baseDataArr.post_id,
+                body:     { task_id: taskId, type: baseDataArr.body?.type || '' },
+            };
+
+            let responseData;
+            try {
+                const formData = new FormData();
+                formData.append('data', JSON.stringify(pollData));
+                const response = await fetch(getURL('generate_3d_model'), {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-WP-Nonce': ar_try_on.rest_nonce },
+                });
+                responseData = await response.json();
+            } catch (err) {
+                if (pollAbortedRef.current) return;
+                console.warn('[AR-62 poll] network error, will retry:', err?.message || err);
+                const delay = POLL_DELAYS_MS[Math.min(pollAttemptsRef.current - 1, POLL_DELAYS_MS.length - 1)];
+                pollTimeoutRef.current = setTimeout(poll, delay);
+                return;
+            }
+            if (pollAbortedRef.current) return;
+
+            // Success — files downloaded to temp.
+            if (responseData?.data?.temp?.src?.url) {
+                stopPolling();
+                let tempProductModel = structuredClone(productModel);
+                tempProductModel.src = responseData.data.temp.src.url;
+                if (responseData?.data?.temp?.poster?.url) {
+                    tempProductModel.poster = responseData.data.temp.poster.url;
+                }
+                if (responseData?.data?.task_id) {
+                    tempProductModel.exclude_integration_api_body = insertUnique(
+                        tempProductModel.exclude_integration_api_body,
+                        {key: 'task_id', type: 'textarea', value: responseData.data.task_id}
+                    );
+                }
+                setTempModelData({...{temp: responseData.data.temp}, ...{post_id: baseDataArr.post_id}});
+                setProductModel(tempProductModel);
+                generateModelButtonStateChange('save', 'Save This Model', submitButton);
+                if (typeof wp !== 'undefined' && wp?.hooks?.doAction) {
+                    wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
+                }
+                return;
+            }
+
+            // AR-62 §3a: terminal failure from Tripo3D.
+            const tripoStatus = (responseData?.data?.status || '').toLowerCase();
+            const failureStates = ['failed', 'banned', 'expired', 'cancelled', 'unknown'];
+            if (failureStates.includes(tripoStatus)) {
+                stopPolling();
+                const errorCode = responseData?.data?.error_code;
+                const errMsg    = responseData?.data?.error_msg;
+                const msg = errMsg || (errorCode
+                    ? `Generation failed (Tripo3D error ${errorCode}). Try a different input.`
+                    : 'Generation failed on Tripo3D. Try a different input.');
+                submitButton.setAttribute('data-id', 'generate');
+                generateModelButtonStateChange('error', 'Generation failed — click to try again', submitButton);
+                notify(msg, 'error', {autoClose: 8000});
+                return;
+            }
+
+            // AR-62 §3d + §4: live progress / ETA / queue surface,
+            // with smarter end-game handling.
+            const progress = responseData?.data?.progress;
+            const eta      = responseData?.data?.running_left_time;
+            const queueing = responseData?.data?.queuing_num;
+
+            // Tripo3D jumps to 99% as soon as the mesh is done but
+            // the GLB/texture encoder runs for another 20-60s. Show
+            // "Finalizing model" so the user sees a phase change
+            // instead of staring at a static 99%, AND tighten the
+            // poll cadence so we catch completion sooner.
+            const isFinalizing = typeof progress === 'number' && progress >= 99;
+            let label;
+            if (isFinalizing) {
+                label = 'Finalizing model';
+                setFinalizeCount(c => c + 1);
+            } else {
+                if (finalizeCount !== 0) setFinalizeCount(0);
+                if (tripoStatus === 'queued' && typeof queueing === 'number' && queueing > 0) {
+                    label = `Queued at Tripo3D — position ${queueing}`;
+                } else if (typeof progress === 'number' && progress > 0 && progress < 100) {
+                    label = `Generating model — ${progress}%`;
+                } else if (typeof eta === 'number' && eta > 0) {
+                    label = `Generating model — ~${eta}s left`;
+                } else {
+                    label = 'Generating model';
+                }
+            }
+            generateModelButtonStateChange('poster', label, submitButton);
+
+            // Schedule next poll. Finalizing phase uses a tight 5s
+            // cadence; otherwise fall back to the exponential
+            // backoff schedule.
+            const delay = isFinalizing
+                ? FINALIZE_POLL_MS
+                : POLL_DELAYS_MS[Math.min(pollAttemptsRef.current - 1, POLL_DELAYS_MS.length - 1)];
+            pollTimeoutRef.current = setTimeout(poll, delay);
+        };
+
+        // First poll fires after the short initial delay (Tripo3D is
+        // usually still "queued" for the first ~5s).
+        pollTimeoutRef.current = setTimeout(poll, POLL_DELAYS_MS[0]);
+    };
 
     function insertUnique(array, newItem, shouldReplace = false) {
         const index = array.findIndex(item => item.key === newItem.key);
@@ -41,7 +319,13 @@ export default function IntegrationSection({
         }
 
         if (innerText) {
-            submitButton.innerHTML = innerText;
+            // AR-62 §2: strip the legacy trailing-dots progress hint
+            // and inject a real spinner for in-progress states.
+            const cleaned = String(innerText).replace(/\.{2,}/g, '').replace(/\s+$/, '').trim();
+            const safe = escapeLabel(cleaned);
+            submitButton.innerHTML = SPINNER_STATES.has(state)
+                ? '<span class="atlas-ar-spinner" aria-hidden="true"></span><span>' + safe + '</span>'
+                : safe;
         }
     }
     const handleSubmit = async (e) => {
@@ -56,10 +340,33 @@ export default function IntegrationSection({
         }
 
         if (submitButton.getAttribute('data-id') === 'complete') {
+            /**
+             * After a successful save the button label flips to
+             * "See model from frontend." but it's the same DOM
+             * element — clicking it used to fall through to the
+             * regenerate confirmation, which is the opposite of
+             * what the label promises. When the button is in
+             * "see model from frontend" mode, treat it as a link
+             * to the post permalink instead.
+             */
+            const btnText = (submitButton.innerText || submitButton.textContent || '').toLowerCase();
+            const looksLikeFrontendCta = btnText.includes('frontend') || btnText.includes('see model');
+            if (looksLikeFrontendCta) {
+                const permalink =
+                    document.querySelector('#sample-permalink a')?.href
+                    || document.querySelector('#wp-admin-bar-view a')?.href
+                    || (window.ar_try_on?.permalink || '');
+                if (permalink) {
+                    window.open(permalink, '_blank', 'noopener,noreferrer');
+                    return;
+                }
+                notify('Could not detect the post permalink — use the "View product" link in the admin bar.', 'warn', { autoClose: 4000 });
+                return;
+            }
             if (!confirm('Model is generated successfully. Are you sure you want to generate the model again?')) {
                 return;
             }
-            generateModelButtonStateChange('generate', 'Generating Model......', submitButton)
+            generateModelButtonStateChange('generate', 'Generating Model', submitButton)
         }
 
         /**
@@ -75,10 +382,74 @@ export default function IntegrationSection({
             headers[header.key] = header.value;
         });
 
+        /**
+         * Build the request body. The editor schema is FLAT
+         * (e.g. `{key: "file.url", value: "..."}`) so dot-paths
+         * have to be re-nested into the shape Tripo3D / Meshy AI
+         * actually expect on the wire (`{file: {url: "..."}}`).
+         * Without this, image_to_model never receives the image
+         * and the task polls forever (Joachim Rodriguez, 2026-06-07).
+         *
+         * Values also get type-coerced against the schema before
+         * write — HTML <select> always stores strings, but Tripo3D
+         * returns 1003 "malformed body" if `texture` / `pbr` arrive
+         * as `"true"` instead of JSON `true`. Same risk for
+         * `face_limit` etc. arriving as `"3000"` instead of `3000`.
+         * Coercion uses the per-field schema we already have:
+         *   - enum ['true','false']  → boolean
+         *   - schema.type === 'number' → Number (empty stays empty,
+         *     so optional numeric rows aren't sent as NaN)
+         */
+        const coerceValueForSchema = (rawValue, fieldKey) => {
+            const schema = lookupFieldSchema(fieldKey);
+            if (!schema) return rawValue;
+            const s = String(rawValue ?? '');
+            const isBoolEnum = Array.isArray(schema.enum)
+                && schema.enum.length === 2
+                && schema.enum.every(v => v === 'true' || v === 'false');
+            if (isBoolEnum) {
+                if (s === 'true')  return true;
+                if (s === 'false') return false;
+                return rawValue;
+            }
+            if (schema.type === 'number') {
+                if (s.trim() === '') return '';
+                const n = Number(s);
+                return Number.isFinite(n) ? n : rawValue;
+            }
+            return rawValue;
+        };
+
         let body = {}
-        productModel.exclude_integration_api_body.map(item => {
-            body[item.key] = item.value;
+        productModel.exclude_integration_api_body.forEach(item => {
+            const coerced = coerceValueForSchema(item.value, item.key);
+            setNestedKey(body, item.key, coerced);
         });
+
+        /**
+         * Drop empty-string rows so Tripo3D doesn't see an empty
+         * optional like `face_limit: ""` and reject the whole
+         * request. Top-level keys only — nested `file.*` handled
+         * separately below.
+         */
+        Object.keys(body).forEach(k => {
+            if (body[k] === '') delete body[k];
+        });
+
+        /**
+         * For image_to_model, Tripo3D requires exactly one of
+         * file.file_token / file.url / file.object — they are
+         * mutually exclusive. Empty strings still occupy a slot
+         * and cause the request to be rejected, so drop them.
+         */
+        if (body?.file && typeof body.file === 'object' && body.file !== null) {
+            ['file_token', 'url', 'object'].forEach(k => {
+                if (body.file[k] === '' || body.file[k] == null) {
+                    delete body.file[k];
+                }
+            });
+        }
+
         let data_arr = {};
         data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
         data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
@@ -90,10 +461,36 @@ export default function IntegrationSection({
             return;
         }
 
-        if ((data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
+        const taskType = data_arr?.body?.type;
+        /**
+         * AR-62 §4 — when the user is resuming an existing Tripo3D
+         * task (button data-id === 'resume'), we already have a
+         * task_id and skip the create call entirely. The prompt /
+         * image-input checks below would only ever block the user
+         * from picking up where they left off; bypass them.
+         */
+        const isResume = submitButton.getAttribute('data-id') === 'resume';
+
+        // text_to_model needs a real prompt.
+        if (!isResume
+            && (data_arr?.api_name == 'meshy_ai' || data_arr?.api_name == 'tripo3d')
+            && taskType === 'text_to_model'
             && (data_arr?.body?.prompt == '' || data_arr?.body?.prompt?.length < 3)) {
             notify('Please write a proper prompt', 'error');
             return;
+        }
+
+        // image_to_model needs at least one image input.
+        if (!isResume && data_arr?.api_name == 'tripo3d' && taskType === 'image_to_model') {
+            const hasImage = !!(
+                data_arr?.body?.file?.url ||
+                data_arr?.body?.file?.file_token ||
+                data_arr?.body?.file?.object
+            );
+            if (!hasImage) {
+                notify('Please provide an image URL or upload an image before generating.', 'error');
+                return;
+            }
         }
 
         /**
@@ -101,12 +498,28 @@ export default function IntegrationSection({
          * and temporary poster url and preview it. at that time button state will be "save"
          * If user is satisfied then click button again. To save it on permanent folder
          */
+        /**
+         * AR-62 §4 — Resume: we already have a task_id and just need
+         * to keep polling. Skip the create POST entirely, go straight
+         * to the poller. No extra Tripo3D create charge, no fresh
+         * task — purely a status read.
+         */
+        if (submitButton.getAttribute('data-id') === 'resume') {
+            if (!data_arr?.body?.task_id) {
+                notify('No task ID found to resume. Generate a fresh task instead.', 'error');
+                return;
+            }
+            generateModelButtonStateChange('task', 'Resuming — waiting for Tripo3D', submitButton);
+            startPolling(data_arr.body.task_id, data_arr, submitButton);
+            return;
+        }
+
         if (submitButton.getAttribute('data-id') === 'generate') {
 
             if (data_arr?.body?.task_id) {
-                generateModelButtonStateChange('progress', 'Generating Model......', submitButton)
+                generateModelButtonStateChange('progress', 'Generating Model', submitButton)
             } else {
-                generateModelButtonStateChange('progress', 'Generating Task......', submitButton)
+                generateModelButtonStateChange('progress', 'Generating Task', submitButton)
             }
             console.log(data_arr)
             // return;
@@ -142,64 +555,35 @@ export default function IntegrationSection({
                     }
 
                     if (res?.data?.task_id) {
-                        generateModelButtonStateChange('task', 'Task Created! Please Wait!', submitButton)
+                        /**
+                         * AR-62 §4 — auto-write the task_id into the
+                         * body as a visible row the second it lands.
+                         * If the polling loop times out, browser
+                         * crashes, or the user closes the tab and
+                         * comes back, the task_id is right there in
+                         * the form (and persists to DB on save) —
+                         * Generate Model can resume on the same task
+                         * with no manual paste and no extra Tripo3D
+                         * create charge.
+                         */
+                        const updated = structuredClone(productModel);
+                        updated.exclude_integration_api_body = insertUnique(
+                            updated.exclude_integration_api_body || [],
+                            {key: 'task_id', type: 'text', value: res.data.task_id},
+                            true
+                        );
+                        setProductModel(updated);
+
+                        generateModelButtonStateChange('task', 'Task created — waiting for Tripo3D', submitButton)
                     }
                     /**
-                     * TODO:: meke this a method. This code will be true when
-                     * request is being created without any task_id
+                     * AR-62 §3: hand off to the controlled poller.
+                     * It owns exponential backoff, the hard cap, the
+                     * Tripo3D status-failed bail-out, the live progress
+                     * label, and the trimmed payload.
                      */
                     if (!res?.data?.temp?.src?.url && res?.data?.task_id) {
-                        let responseData = {};
-                        let taskInterval = setInterval(async () => {
-                            if (responseData?.data?.temp?.src?.url) {
-                                clearInterval(taskInterval)
-                                taskInterval = null;
-                                let tempProductModel = structuredClone(productModel)
-                                // set product model file
-                                tempProductModel.src = responseData.data.temp.src.url
-                                // set product poster image
-                                if (responseData?.data?.temp?.poster?.url) {
-                                    tempProductModel.poster = responseData.data.temp.poster.url
-                                }
-
-                                // set product body with task_id
-                                if (responseData?.data?.task_id) {
-                                    tempProductModel.exclude_integration_api_body.push({key: 'task_id', type: 'text', value: responseData.data.task_id})
-                                }
-                                if (responseData?.data?.task_id) {
-                                    tempProductModel.exclude_integration_api_body  = insertUnique(tempProductModel.exclude_integration_api_body,{key: 'task_id', type: 'textarea', value: responseData.data.task_id})
-                                }
-
-                                setTempModelData({...{temp: responseData.data.temp}, ...{post_id: data_arr.post_id}})
-                                setProductModel(tempProductModel)
-                                generateModelButtonStateChange('save', 'Save This Model', submitButton)
-                                console.log({tempProductModel})
-                                wp.hooks.doAction('atlas_ar_preview_data', tempProductModel);
-                                return;
-                            }
-
-                            if (responseData?.data?.temp?.poster?.url || responseData?.data?.output?.poster) {
-                                generateModelButtonStateChange('poster', 'Poster Created! Now Generating Model', submitButton)
-                                setTimeout(() => {
-                                    generateModelButtonStateChange('poster', 'Model .glb file is generating!', submitButton)
-                                }, 5000)
-                            }
-
-                            let formData2 = new FormData();
-                            data_arr.body.task_id = res?.data?.task_id;
-
-                            formData2.append('data', JSON.stringify(data_arr));
-                            // Default options are marked with *
-                            const response = await fetch(getURL('generate_3d_model'), {
-                                method: "POST", // *GET, POST, PUT, DELETE, etc.
-                                body: formData2, // body data type must match "Content-Type" header
-                                headers: {
-                                    'X-WP-Nonce': ar_try_on.rest_nonce
-                                },
-                            });
-                            responseData = await response.json();
-                            console.log(responseData)
-                        }, 30000)
+                        startPolling(res.data.task_id, data_arr, submitButton);
                     }
                 });
             /**
@@ -216,7 +600,7 @@ export default function IntegrationSection({
             /**
              * Save model files from temporary folder to final folder.
              */
-            generateModelButtonStateChange('save_progress', 'Model files saving .......', submitButton)
+            generateModelButtonStateChange('save_progress', 'Saving model files', submitButton)
             let formData2 = new FormData();
             data_arr['temporary_model_data'] = tempModelData
             formData2.append('data', JSON.stringify(data_arr));
@@ -239,6 +623,25 @@ export default function IntegrationSection({
             if (response?.data?.poster?.url) {
                 tempProductModel.poster = response.data.poster.url
             }
+            /**
+             * Default the model-viewer alt to the post title when the
+             * user hasn't customised it. "Title" is the productModel
+             * default in ARProductModelSettings.js — treat that as
+             * "still placeholder". For an image_to_model save, the
+             * product name is the most accurate accessibility label
+             * (screen readers read it as "3D model of <product>").
+             */
+            const currentAlt = (tempProductModel.alt || '').trim();
+            if (currentAlt === '' || currentAlt.toLowerCase() === 'title') {
+                const postTitle = (
+                    document.querySelector('#title')?.value
+                    || document.querySelector('.editor-post-title__input')?.value
+                    || ''
+                ).trim();
+                if (postTitle) {
+                    tempProductModel.alt = postTitle;
+                }
+            }
 
             setTempModelData({})
             setProductModel(tempProductModel)
@@ -254,7 +657,7 @@ export default function IntegrationSection({
             formData.append('method', 'POST');
 
             setTimeout(() => {
-                generateModelButtonStateChange('data_save', 'Model data is saving.......', submitButton)
+                generateModelButtonStateChange('data_save', 'Saving model data', submitButton)
             }, 10)
             postWithoutImage(getURL('get_model_and_settings'), formData)
                 .then((res) => {
@@ -305,6 +708,204 @@ export default function IntegrationSection({
     }, [productModel])
 
 
+    // Pro-gated image picker takes over the image-source rows for
+    // Tripo3D/Meshy AI image_to_model. The body editor below
+    // (Add Body + dynamic rows) is still rendered — we just filter
+    // out the keys the picker / model-version field own, so the
+    // merchant never sees the same value editable in two places.
+    const _proActive = (window.ar_try_on?.is_pro_active === '1'
+        || window.ar_try_on?.is_pro_active === 1
+        || window.ar_try_on?.is_pro_active === true);
+    const pickerActive = _proActive
+        && productModel?.exclude_integration_api_model_type === 'image_to_model';
+
+    /**
+     * Keys hidden from the body editor per mode.
+     *
+     * text_to_model — `type` is automatic and always renders
+     * "text_to_model"; hiding it removes the only row that would
+     * otherwise tempt the merchant into breaking the request.
+     *
+     * image_to_model — `type` plus every `file.*` row are owned
+     * by the picker above the editor. `model_version` is NOT in
+     * this set any more — it lives inside the body editor as a
+     * schema-driven row with the datalist autocomplete, per the
+     * 2026-06-11 follow-up to Joachim's image_to_model parity
+     * request.
+     */
+    const HIDDEN_KEYS_BY_MODE = {
+        text_to_model: new Set(['type']),
+        image_to_model: new Set(['type', 'file.url', 'file.file_token', 'file.object', 'file.type']),
+    };
+    const _hiddenKeys = HIDDEN_KEYS_BY_MODE[productModel?.exclude_integration_api_model_type] || new Set();
+
+    /**
+     * Schema lookup. Returns the field descriptor (with required /
+     * description / enum / suggestions metadata) that utilities.js
+     * defined for the merchant-selected API + model type, or
+     * `undefined` for rows the merchant added via Add Body that
+     * don't match any known schema field.
+     */
+    const _schemaInputs = currentApi?.body?.supported_types?.[productModel?.exclude_integration_api_model_type]?.input || [];
+    const lookupFieldSchema = (key) => _schemaInputs.find(f => f && f.key === key);
+
+    /**
+     * Generate-Model button gate. The button is disabled when:
+     *
+     *   - Any schema row with `required: true` is missing from the
+     *     body or has an empty/whitespace value.
+     *   - Every row in a `requiredGroup` is empty (image_to_model
+     *     needs ONE of `file.url` / `file.file_token` / `file.object`).
+     *
+     * Override — if the body has a `task_id` row with a non-empty
+     * value, the gate opens regardless of the required fields. That
+     * route just polls the existing Tripo3D task instead of
+     * creating a new one, so no extra credits are spent and the
+     * mandatory fields don't apply.
+     */
+    const isGenerateDisabled = useMemo(() => {
+        const body = Array.isArray(productModel?.exclude_integration_api_body)
+            ? productModel.exclude_integration_api_body
+            : [];
+
+        // Task-id override.
+        const taskRow = body.find(r => r && r.key === 'task_id');
+        const taskValue = String(taskRow?.value ?? '').trim();
+        if (taskValue) return false;
+
+        const valueOf = (key) => {
+            const r = body.find(x => x && x.key === key);
+            return String(r?.value ?? '').trim();
+        };
+
+        // Plain `required: true` fields.
+        for (const f of _schemaInputs) {
+            if (!f?.required) continue;
+            if (!valueOf(f.key)) return true;
+        }
+
+        // requiredGroup — at least one row in the group must have value.
+        const groups = {};
+        for (const f of _schemaInputs) {
+            if (!f?.requiredGroup) continue;
+            (groups[f.requiredGroup] = groups[f.requiredGroup] || []).push(f.key);
+        }
+        for (const keys of Object.values(groups)) {
+            if (!keys.some(k => valueOf(k))) return true;
+        }
+
+        return false;
+    }, [productModel?.exclude_integration_api_body, _schemaInputs]);
+
+    /**
+     * Keys we used to seed into the Tripo3D body schema and later
+     * removed (2026-06-12 — Joachim follow-up: "remove these if user
+     * needed then he will add those by reading documentations").
+     * Products saved before that change still have these in their
+     * stored body, so the schema-merge below prunes them on load to
+     * stop the body editor from showing rows the schema no longer
+     * advertises. Anyone who genuinely wants one of these can still
+     * re-add it via Add Body — manual rows aren't in this list and
+     * are never pruned.
+     */
+    const LEGACY_REMOVED_KEYS = new Set([
+        'negative_prompt',
+        'texture_quality',
+        'auto_size',
+        'face_limit',
+        'model_seed',
+        'image_seed',
+        'enable_image_autofix',
+        'orientation',
+        // geometry_quality is image_to_model-only legacy — kept off
+        // this list because text_to_model's current schema still
+        // declares it; pruning is scoped per-mode below.
+    ]);
+
+    /**
+     * Merge schema rows into the body so the body editor surfaces
+     * every Tripo3D field defined in utilities.js. Existing values
+     * are preserved; missing rows are appended with the schema
+     * default. Runs whenever the api/model type changes — exactly
+     * once per switch — so the merchant sees the right knobs for
+     * the mode they're in without losing edits already in the body.
+     *
+     * Also prunes legacy keys we used to seed but no longer do
+     * (LEGACY_REMOVED_KEYS) AND any key from the per-mode legacy
+     * scope (e.g. `geometry_quality` carried over from when
+     * image_to_model briefly included it) — but only when the key
+     * isn't in the current schema. User-added rows survive because
+     * they're not in either deny list.
+     */
+    useEffect(() => {
+        if (!_schemaInputs.length) return;
+        const schemaKeys = new Set(_schemaInputs.map(f => f.key));
+        const mode = productModel?.exclude_integration_api_model_type;
+        // image_to_model briefly seeded geometry_quality — strip it
+        // when we're in image_to_model and the schema no longer
+        // declares it. text_to_model still uses geometry_quality,
+        // so this never touches the text mode.
+        const modeLegacy = mode === 'image_to_model'
+            ? new Set(['geometry_quality'])
+            : new Set();
+        setProductModel((prev) => {
+            const existing = Array.isArray(prev.exclude_integration_api_body)
+                ? prev.exclude_integration_api_body
+                : [];
+
+            const pruned = existing.filter(row => {
+                if (!row || !row.key) return true;
+                if (schemaKeys.has(row.key)) return true;
+                if (LEGACY_REMOVED_KEYS.has(row.key)) return false;
+                if (modeLegacy.has(row.key)) return false;
+                return true;
+            });
+
+            const have = new Set(pruned.map(r => r?.key));
+            const additions = [];
+            for (const f of _schemaInputs) {
+                if (have.has(f.key)) continue;
+                additions.push({
+                    key: f.key,
+                    type: f.type || 'text',
+                    value: f.value ?? '',
+                    required: !!f.required,
+                });
+            }
+
+            if (pruned.length === existing.length && !additions.length) {
+                return prev;
+            }
+            return {
+                ...prev,
+                exclude_integration_api_body: [...pruned, ...additions],
+            };
+        });
+        // Intentionally NOT depending on exclude_integration_api_body — only on
+        // schema identity (modelType + currentApi). Adding the body to the
+        // deps would cause the merge to re-run on every keystroke.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentApi?.id, productModel?.exclude_integration_api_model_type]);
+
+    /**
+     * Generation modes the host site is licensed to actually run.
+     * Filled by Free's `atlas_ar_generation_supported_modes` filter:
+     *   - Free alone returns `['text_to_model']`.
+     *   - Pro extends with `image_to_model` via
+     *     `AR_TRY_ON_Pro_Bridge::add_pro_generation_modes()`.
+     *
+     * The dropdown intersects what the API exposes (text_to_model,
+     * image_to_model, ...) with what the SITE supports — so a
+     * Free-only install hides image_to_model entirely instead of
+     * letting the user pick a feature that can't run.
+     */
+    const _allowedModes = Array.isArray(window.ar_try_on?.generation_supported_modes)
+        ? window.ar_try_on.generation_supported_modes
+        : ['text_to_model'];
+    const _apiSupportedTypes = currentApi?.body?.supported_types || {};
+    const _visibleModes = Object.keys(_apiSupportedTypes).filter(t => _allowedModes.includes(t));
+    const _imageModeUnlocked = _allowedModes.includes('image_to_model');
+
     return (
         <div className="art-bg-gray-100 ">
             <h3 className="art-font-medium art-mb-4">Integration</h3>
@@ -318,17 +919,73 @@ export default function IntegrationSection({
                     style={{width: "100%", padding: "8px", marginTop: "5px"}}
                 >
                     {
-                        Object.keys(currentApi?.body?.supported_types).map(model_type => (
+                        _visibleModes.map(model_type => (
                             <option key={model_type} value={model_type}>
                                 {model_type}
                             </option>
                         ))
                     }
                 </select>
+                {/*
+                  * Upsell notice for Free users: when image_to_model is
+                  * NOT in the host site's allowed list AND the Tripo3D
+                  * schema actually exposes it, surface a small inline
+                  * pitch with a link to atlasaidev.com. This is the
+                  * Yoast-pattern shape — informational link, no locked
+                  * control, no "fake" image_to_model option that the
+                  * user can click to discover it's gated.
+                  */}
+                {!_imageModeUnlocked && _apiSupportedTypes.image_to_model && (
+                    <div
+                        style={{
+                            background: '#eff6ff',
+                            border: '1px solid #93c5fd',
+                            borderRadius: 6,
+                            padding: '10px 12px',
+                            marginTop: 8,
+                            fontSize: 13,
+                            lineHeight: 1.45,
+                            color: '#1e3a8a',
+                        }}
+                    >
+                        <strong>Want image-to-3D generation?</strong>
+                        {' '}Upload a product photo (featured image, gallery, media library,
+                        {' '}or your own URL) and turn it directly into a 3D model — no prompt
+                        {' '}writing needed. <em>Image-to-3D is part of AtlasAR Pro.</em>
+                        {' '}
+                        <a
+                            href="https://wpaugmentedreality.com/pricing/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
+                        >
+                            See Pro pricing →
+                        </a>
+                    </div>
+                )}
             </div>
 
             }
 
+            {/*
+              * Pro-gated image-source picker for Tripo3D / Meshy AI
+              * image_to_model. Renders ONLY when:
+              *   - Pro is active (is_pro_active === '1'), AND
+              *   - the selected supported model type is image_to_model
+              * Replaces the dynamic key/value rows below with a guided
+              * 4-source picker (featured / gallery / library / upload).
+              * The picker writes back into exclude_integration_api_body
+              * so the existing Generate Model submit path works
+              * unchanged.
+              */}
+            {pickerActive && (
+                <ImageSourcePicker
+                    productModel={productModel}
+                    setProductModel={setProductModel}
+                />
+            )}
+
+            <>
             {/* Add new field button */}
             <div className="art-flex art-items-center art-justify-between">
                 {/* Add Body Button */}
@@ -374,45 +1031,125 @@ export default function IntegrationSection({
             </div>
 
 
-            {/* Dynamic rows */}
-            {productModel.exclude_integration_api_body.map((field, index) => (
-                <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap">
+            {/*
+              * Dynamic rows. Mode-specific hidden keys (managed by
+              * the picker or automatic) are skipped. For rows the
+              * schema knows about (utilities.js), we surface:
+              *   - description as a `title` tooltip on a ⓘ icon,
+              *   - <select> when the schema declares a strict enum,
+              *   - <input list> when the schema declares an open
+              *     suggestion list (model_version uses this),
+              *   - required=true hides the × delete button.
+              * Iteration still uses the ORIGINAL array index so
+              * handleIntegrationChange / removeField are unchanged.
+              */}
+            {productModel.exclude_integration_api_body.map((field, index) => {
+                if (field && _hiddenKeys.has(field.key)) {
+                    return null;
+                }
+                const schema = lookupFieldSchema(field?.key);
+                const isRequired = !!(field?.required || schema?.required);
+                const hasReqGroup = !!schema?.requiredGroup;
+                const description = schema?.description || '';
+                const enumValues = Array.isArray(schema?.enum) ? schema.enum : null;
+                const suggestions = Array.isArray(schema?.suggestions) ? schema.suggestions : null;
+                const datalistId = suggestions ? `atlas-ar-suggest-${(field?.key || '').replace(/[^a-zA-Z0-9_-]/g, '_')}` : null;
+                const fieldType = field?.type === 'boolean' ? 'text' : (field?.type || 'text');
+                const showRemove = !isRequired && !hasReqGroup;
+                return (
+                <div key={index} className="art-flex art-gap-4 art-mb-4 art-flex-nowrap art-items-start">
                     <input
                         type="text"
                         placeholder="Key"
                         value={field.key}
                         onChange={(e) => handleIntegrationChange(index, "key", e.target.value)}
                         className="art-border art-rounded art-p-2 art-w-1/5"
+                        readOnly={!!schema}
+                        title={schema ? "Defined by Tripo3D — key not editable" : "Custom key"}
                     />
 
                     <select
-                        value={field.type}
+                        value={fieldType}
                         onChange={(e) => handleIntegrationChange(index, "type", e.target.value)}
                         className="art-border art-rounded art-p-2 art-w-1/5"
+                        disabled={!!schema}
+                        title={schema ? "Defined by Tripo3D" : ""}
                     >
                         <option value="text">Text</option>
                         <option value="number">Number</option>
                         <option value="textarea">Textarea</option>
                         <option value="file">File</option>
+                        <option value="url">URL</option>
                     </select>
 
-                    {field.type === "textarea" ? (
+                    {enumValues ? (
+                        <select
+                            value={String(field.value ?? '')}
+                            onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
+                            className="art-border art-rounded art-p-2 art-w-1/2"
+                        >
+                            {enumValues.map(opt => (
+                                <option key={String(opt)} value={String(opt)}>{String(opt)}</option>
+                            ))}
+                        </select>
+                    ) : suggestions ? (
+                        <>
+                            <input
+                                type="text"
+                                value={String(field.value ?? '')}
+                                onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
+                                className="art-border art-rounded art-p-2 art-w-1/2"
+                                list={datalistId}
+                                autoComplete="off"
+                                spellCheck="false"
+                                placeholder={String(schema?.value ?? '')}
+                            />
+                            <datalist id={datalistId}>
+                                {suggestions.map(s => (
+                                    <option
+                                        key={s.value}
+                                        value={s.value}
+                                    >{s.label}</option>
+                                ))}
+                            </datalist>
+                        </>
+                    ) : fieldType === "textarea" ? (
                         <textarea
-                            placeholder="Value"
+                            placeholder={String(schema?.value ?? 'Value')}
                             value={field.value}
                             onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
                             className="art-border art-rounded art-p-2 art-w-1/2"
                             style={{height: '100px'}}
+                            maxLength={schema?.maxLength || undefined}
                         />
                     ) : (
                         <input
-                            type={field.type}
-                            placeholder="Value"
+                            type={fieldType}
+                            placeholder={String(schema?.value ?? 'Value')}
                             value={field.value}
                             onChange={(e) => handleIntegrationChange(index, "value", e.target.value)}
                             className="art-border art-rounded art-p-2 art-w-1/2"
+                            maxLength={schema?.maxLength || undefined}
                         />
                     )}
+
+                    {/*
+                      * Schema info icon — surfaces the field's Tripo3D
+                      * docs description as a native browser tooltip on
+                      * hover / focus / touch long-press. Only rendered
+                      * when utilities.js gave us a description.
+                      */}
+                    {description ? (
+                        <span
+                            title={description}
+                            aria-label={description}
+                            tabIndex={0}
+                            className="art-text-gray-500 art-cursor-help"
+                            style={{padding: '8px 6px', fontSize: 16, lineHeight: 1, userSelect: 'none'}}
+                        >
+                            ⓘ
+                        </span>
+                    ) : null}
 
                     {/* <button
                         type="button"
@@ -424,7 +1161,7 @@ export default function IntegrationSection({
                     </button> */}
 
 
-                    {!field.required ? (
+                    {showRemove ? (
                         <button
                             type="button"
                             onClick={() => removeField(index)}
@@ -435,20 +1172,129 @@ export default function IntegrationSection({
                         </button>
                     ) : (
                         <div className="art-px-2 art-py-1 art-text-gray-400 art-flex art-items-center"
-                             title="Required field">
+                             title={isRequired
+                                 ? 'Required by Tripo3D — cannot be removed'
+                                 : (hasReqGroup ? 'Part of a required group — managed by the picker above' : '')}
+                             style={{fontSize: 13, userSelect: 'none'}}
+                        >
+                            🔒
                         </div>
                     )}
 
                 </div>
-
-            ))}
+                );
+            })}
+            </>
+            {/*
+              * Generate-Model-gate notice. Tells the merchant why
+              * the button might be disabled and how to unblock it:
+              * fill the mandatory fields, OR paste an existing
+              * task_id from Tripo3D's task history. Both signals
+              * read from utilities.js so this stays in sync with
+              * the schema.
+              */}
+            {isGenerateDisabled && (
+                <div
+                    style={{
+                        background: '#fef3c7',
+                        border: '1px solid #f59e0b',
+                        borderRadius: 6,
+                        padding: '10px 12px',
+                        marginBottom: 10,
+                        fontSize: 13,
+                        lineHeight: 1.5,
+                        color: '#78350f',
+                    }}
+                >
+                    Fill every required (🔒) field to enable <strong>Generate Model</strong>,
+                    {' '}or paste an existing Tripo3D <code>task_id</code> below (via{' '}
+                    <em>Add Body</em> with key <code>task_id</code>) to resume that task
+                    instead — no new credits will be charged.
+                    {' '}
+                    <a
+                        href={TRIPO_TASK_HISTORY_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
+                    >
+                        Open Tripo3D task history →
+                    </a>
+                </div>
+            )}
             <button type="button"
                     onClick={handleSubmit}
                     data-id={'generate'}
                     id={"atlas_ar_model_generate"}
-                    className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-blue-500 art-text-white art-rounded art-border art-border-sky-500 ">
+                    disabled={isGenerateDisabled}
+                    title={isGenerateDisabled
+                        ? 'Fill the required fields, or set a task_id row to resume an existing Tripo3D task'
+                        : ''}
+                    className={
+                        'art-w-full art-mt-2 art-px-4 art-py-2 art-rounded art-border art-border-sky-500 '
+                        + (isGenerateDisabled
+                            ? 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
+                            : 'art-bg-blue-500 art-text-white art-cursor-pointer')
+                    }>
                 Generate Model
             </button>
+            {/*
+              * AR-62 §3c: Cancel button — visible only while a poll
+              * loop is in flight. Clears the next-poll timeout, sets
+              * the abort flag (so any in-flight fetch resolves into a
+              * no-op), resets the button label, and notifies the
+              * user. Without this the user had no way to stop a
+              * mistaken or runaway generation short of a hard reload.
+              */}
+            {pollingActive && (
+                <button
+                    type="button"
+                    onClick={cancelGeneration}
+                    className="art-w-full art-mt-2 art-cursor-pointer art-px-4 art-py-2 art-bg-white art-text-gray-700 art-rounded art-border art-border-gray-300"
+                    style={{fontSize: 13}}
+                >
+                    Cancel generation
+                </button>
+            )}
+            {/*
+              * AR-62 §4 — once we've sat at "Finalizing model" for 3+
+              * polls, Tripo3D's mesh encoder is doing slow tail work.
+              * Surface a small caption so the user doesn't think the
+              * process is stuck (no behavioural change — the poller
+              * keeps the tight 5 s cadence in this phase already).
+              */}
+            {pollingActive && finalizeCount >= 3 && (
+                <div
+                    className="art-text-xs art-text-gray-500 art-mt-2"
+                    style={{textAlign: 'center', lineHeight: 1.4}}
+                >
+                    Tripo3D's mesh encoder finishes after the progress bar — usually 20–40 s more.
+                </div>
+            )}
+            {/*
+              * "Powered by <provider>" attribution + affiliate signup
+              * link. Lowest-weight surface on the metabox so it never
+              * competes with the active task above; passive disclosure
+              * for merchants who don't have a provider account yet.
+              * Only renders when the current API advertises a
+              * signup_url (Tripo3D does; Meshy AI does not).
+              */}
+            {currentApi?.signup_url && (
+                <div
+                    className="art-text-xs art-text-gray-500 art-mt-3"
+                    style={{textAlign: 'center', lineHeight: 1.4}}
+                >
+                    Powered by {currentApi.name} —{' '}
+                    <a
+                        href={currentApi.signup_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="art-text-gray-500 hover:art-text-blue-600"
+                        style={{textDecoration: 'underline'}}
+                    >
+                        Need an account? Sign up →
+                    </a>
+                </div>
+            )}
         </div>
     );
 }

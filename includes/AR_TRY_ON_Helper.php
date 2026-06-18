@@ -411,7 +411,7 @@ class AR_TRY_ON_Helper
             <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
                 <div style="height:100%;width:100%;"
                      id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
-                <?php echo $tryon_overlay_html; ?>
+                <?php echo $tryon_overlay_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled try-on overlay markup built from internal templates. ?>
                 <script type="module">
                     document.addEventListener("DOMContentLoaded", async function () {
                         let atlasAR = new window.AtlasAR()
@@ -649,9 +649,15 @@ class AR_TRY_ON_Helper
     public static function get_structured_model_response($request_decoded_data, $api_response_data = [])
     {
         $response_body = [];
+        // Tripo3D's `text_to_model` and `image_to_model` task responses
+        // share the same `data.output` shape (pbr_model, generated_image,
+        // rendered_image). Prior to AR-62 only text_to_model was handled
+        // — image_to_model responses returned an empty body and the
+        // metabox polling loop never exited (Joachim Rodriguez,
+        // 2026-06-07).
         if (isset($request_decoded_data['api_name'], $request_decoded_data['body']['type'])
             && $request_decoded_data['api_name'] == "tripo3d"
-            && $request_decoded_data['body']['type'] == "text_to_model"
+            && in_array($request_decoded_data['body']['type'], array('text_to_model', 'image_to_model'), true)
         ) {
             if (!empty($api_response_data)) {
 
@@ -665,6 +671,29 @@ class AR_TRY_ON_Helper
 
                 if (isset($api_response_data['data']['input'])) {
                     $response_body['input'] = $api_response_data['data']['input'];
+                }
+
+                // AR-62 §3: surface Tripo3D's live task state to JS so
+                // the polling loop can exit on `failed` / `banned` /
+                // `expired` and render a real progress percentage / ETA
+                // in the button label instead of guessing.
+                if (isset($api_response_data['data']['status'])) {
+                    $response_body['status'] = (string) $api_response_data['data']['status'];
+                }
+                if (isset($api_response_data['data']['progress'])) {
+                    $response_body['progress'] = (int) $api_response_data['data']['progress'];
+                }
+                if (isset($api_response_data['data']['running_left_time'])) {
+                    $response_body['running_left_time'] = (int) $api_response_data['data']['running_left_time'];
+                }
+                if (isset($api_response_data['data']['queuing_num'])) {
+                    $response_body['queuing_num'] = (int) $api_response_data['data']['queuing_num'];
+                }
+                if (isset($api_response_data['data']['error_code']) && $api_response_data['data']['error_code']) {
+                    $response_body['error_code'] = (int) $api_response_data['data']['error_code'];
+                }
+                if (isset($api_response_data['data']['error_msg']) && $api_response_data['data']['error_msg']) {
+                    $response_body['error_msg'] = (string) $api_response_data['data']['error_msg'];
                 }
 
                 $response_body['output'] = [];
@@ -703,6 +732,35 @@ class AR_TRY_ON_Helper
                  */
                 if (!isset($response_body['output']['src']) && isset($api_response_data['data']['result']['pbr_model']['url'])) {
                     $response_body['output']['src'] = $api_response_data['data']['result']['pbr_model']['url'];
+                }
+
+                /**
+                 * Poster fallback for image_to_model. Tripo3D's
+                 * image_to_model response does NOT include
+                 * `generated_image` — that field is text_to_model-only.
+                 * The natural preview for an image_to_model run is the
+                 * input image itself; download_model_files_files_and_store
+                 * will fetch it into the post's uploads folder so the
+                 * stored URL is stable and self-hosted. Without this
+                 * fallback the post's model-viewer poster stays empty
+                 * after save (customer report 2026-06-08).
+                 *
+                 * Tripo3D's `rendered_image` is a textured 3D preview
+                 * (WebP) — second-best fallback if Tripo ever omits the
+                 * input echo.
+                 */
+                if (!isset($response_body['output']['poster'])
+                    && $request_decoded_data['body']['type'] === 'image_to_model'
+                ) {
+                    if (isset($request_decoded_data['body']['file']['url'])
+                        && ! empty($request_decoded_data['body']['file']['url'])
+                    ) {
+                        $response_body['output']['poster'] = $request_decoded_data['body']['file']['url'];
+                    } elseif (isset($api_response_data['data']['output']['rendered_image'])) {
+                        $response_body['output']['poster'] = $api_response_data['data']['output']['rendered_image'];
+                    } elseif (isset($api_response_data['data']['result']['rendered_image']['url'])) {
+                        $response_body['output']['poster'] = $api_response_data['data']['result']['rendered_image']['url'];
+                    }
                 }
                 /**
                  * If thumbnail is not set yet, then look into result.
@@ -759,19 +817,18 @@ class AR_TRY_ON_Helper
                 $response = wp_remote_get($url, ['timeout' => 90]);
 
                 if (is_wp_error($response)) {
-                    error_log(print_r("Failed to download $file_key: " . $response->get_error_message(), true));
+                    // Skip on error — no debug logging in production.
                     continue;
                 }
 
                 $body = wp_remote_retrieve_body($response);
 
                 if (empty($body)) {
-                    error_log(print_r("Empty body for $file_key", true));
                     continue;
                 }
 
                 // Extract filename from URL
-                $filename = basename(parse_url($url, PHP_URL_PATH));
+                $filename = basename(wp_parse_url($url, PHP_URL_PATH));
 
                 // Save file
                 $file_full_path = trailingslashit($file_path) . $file_key . '__' . $filename;
@@ -826,8 +883,19 @@ class AR_TRY_ON_Helper
                 wp_mkdir_p($target_dir);
             }
 
-            // move file
-            rename($file_path, $target_path);
+            // move file via WP_Filesystem (or fallback to copy+delete).
+            global $wp_filesystem;
+            if ( empty( $wp_filesystem ) ) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                WP_Filesystem();
+            }
+            if ( ! empty( $wp_filesystem ) && method_exists( $wp_filesystem, 'move' ) ) {
+                $wp_filesystem->move( $file_path, $target_path, true );
+            } else {
+                if ( copy( $file_path, $target_path ) ) {
+                    wp_delete_file( $file_path );
+                }
+            }
 
             $final_files[$file_key]['path'] = $target_path;
             $final_files[$file_key]['url'] = $target_url;
@@ -839,7 +907,7 @@ class AR_TRY_ON_Helper
     public static function get_post_date($post_id)
     {
         $post_date = get_post_field('post_date', $post_id);
-        $date = date('Y/m/d', strtotime($post_date));
+        $date = gmdate('Y/m/d', strtotime($post_date));
 
         return $date;
     }
@@ -896,40 +964,73 @@ class AR_TRY_ON_Helper
         return $post_cache_data;
     }
 
+    /**
+     * Whether the AtlasAR Pro plugin is loaded.
+     *
+     * Per the AR-61 §1.1 Yoast-pattern split (see
+     * plan/AR-61.1-yoast-pattern-split.md), this method MUST NOT
+     * read any license state. Its only legitimate uses are:
+     *
+     *   - hiding upsell badges and notices when Pro is installed, and
+     *   - delegating optional add-on behaviour to Pro classes when
+     *     those classes exist.
+     *
+     * It MUST NOT be used to gate any feature that ships in Free.
+     * Free is fully functional standalone — there is no "Pro version
+     * of a Free feature" anywhere; if a feature is paid, its code
+     * does not exist in the Free zip at all.
+     *
+     * The detection uses a two-stage check, in order of confidence:
+     *
+     *   1. `defined( 'AR_TRY_ON_PRO_VERSION' )` — the canonical
+     *      sentinel. Pro v3.0.0+ defines this constant during its
+     *      own bootstrap, which runs at `plugins_loaded` priority
+     *      9999. By the time any Free runtime code asks "is Pro
+     *      here?" (init or later), this is reliable.
+     *
+     *   2. `active_plugins` option fallback — covers the rare case
+     *      where Pro is registered as active but its bootstrap
+     *      hasn't yet defined the constant (mid-upgrade, WP-CLI
+     *      with a non-standard load order, an older Pro build
+     *      that pre-dates the constant). We check the option
+     *      directly instead of calling `is_plugin_active()` so
+     *      the method is safe on the front end (where
+     *      wp-admin/includes/plugin.php isn't auto-loaded).
+     *
+     * Important: the previous file_exists() fallback was REPLACED
+     * with the active_plugins check during AR-61 §1.1 Phase 2
+     * smoke-testing. file_exists() returned true for any site that
+     * had Pro on disk but deactivated (for example after a trial)
+     * — which silently hid every upsell badge in Free's UI, the
+     * exact opposite of what should happen. active_plugins
+     * correctly distinguishes "installed but deactivated" from
+     * "active and running".
+     *
+     * @since   1.0.0
+     * @updated AR-61 §1.1 — constant-presence check; Freemius removed
+     *          from Free.
+     * @updated AR-61 §1.1 Phase 2 smoke-test — fallback switched
+     *          from file_exists() to active_plugins lookup so
+     *          deactivated-but-installed Pro doesn't masquerade
+     *          as active.
+     * @return  bool True when the Pro plugin is loaded, false otherwise.
+     */
     public static function is_pro_active() {
-
-        // Freemius gate — trial active OR paid license.
-        // The `__premium_only` suffix tells the Freemius deploy script
-        // to strip this entire block from the Free zip, so on Free
-        // builds this method always returns false after trial expiry.
-        if ( function_exists( 'av3mto_fs' ) && av3mto_fs()->can_use_premium_code__premium_only() ) {
+        if ( defined( 'AR_TRY_ON_PRO_VERSION' ) ) {
             return true;
         }
 
+        $active   = (array) get_option( 'active_plugins', array() );
+        $pro_keys = array(
+            'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
+            'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
+        );
+        foreach ( $pro_keys as $pro_key ) {
+            if ( in_array( $pro_key, $active, true ) ) {
+                return true;
+            }
+        }
         return false;
-
-        // Legacy folder-based detection — superseded by the Freemius
-        // gate above. Kept commented for reference.
-        //
-        // if (!function_exists('is_plugin_active')) {
-        //     include_once ABSPATH . 'wp-admin/includes/plugin.php';
-        // }
-        //
-        // $pro_plugins = [
-        //     'ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
-        //     'ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
-        // ];
-        //
-        // $status = false;
-        //
-        // foreach ($pro_plugins as $plugin) {
-        //     if (is_plugin_active($plugin)) {
-        //         $status = true;
-        //         break; // Exit loop as soon as one active plugin is found
-        //     }
-        // }
-        //
-        // return $status;
     }
 
     /**
@@ -1044,5 +1145,277 @@ class AR_TRY_ON_Helper
         return file_exists( $file_path ) ? $file_url : false;
     }
 
+    /**
+     * Default descriptors for the dashboard's top-level navigation.
+     *
+     * Each entry is `{ id, label, icon? }`. Order in the array is the
+     * order shown in the dashboard sidebar. React reads this from
+     * `ar_try_on.dashboard_tabs` (localized).
+     *
+     * Pro appends its own entries (e.g. "Bulk Compression", "Analytics")
+     * via the `atlas_ar_dashboard_settings_tabs` filter. The React
+     * dashboard maps unknown `id`s to either a Pro-provided component
+     * (when Pro localizes one alongside) or to a graceful "feature is
+     * available in Pro" badge slot.
+     *
+     * @since AR-61 §1.1 Phase 3
+     * @return array<int,array{id:string,label:string,icon?:string}>
+     */
+    public static function dashboard_settings_tabs() {
+        $free_tabs = array(
+            array( 'id' => 'overview',      'label' => 'Overview' ),
+            array( 'id' => 'settings',      'label' => 'Settings' ),
+            array( 'id' => 'integration',   'label' => 'Integration' ),
+            array( 'id' => 'features',      'label' => 'Features' ),
+            array( 'id' => 'documentation', 'label' => 'Documentation' ),
+            array( 'id' => 'contact',       'label' => 'Contact Us' ),
+        );
+
+        /**
+         * Filter: atlas_ar_dashboard_settings_tabs
+         *
+         * Lets Pro and add-ons append tabs to the React dashboard.
+         * Returning an entry whose `id` matches an existing one
+         * replaces that entry (last-write-wins). Returning new ids
+         * appends them after the Free defaults.
+         *
+         * @param array<int,array{id:string,label:string,icon?:string}> $tabs
+         */
+        $tabs = apply_filters( 'atlas_ar_dashboard_settings_tabs', $free_tabs );
+
+        // Defensive: shape-check each entry; drop anything malformed.
+        if ( ! is_array( $tabs ) ) {
+            $tabs = $free_tabs;
+        }
+        $clean = array();
+        foreach ( $tabs as $tab ) {
+            if ( ! is_array( $tab ) || empty( $tab['id'] ) || empty( $tab['label'] ) ) {
+                continue;
+            }
+            $clean[] = array(
+                'id'    => (string) $tab['id'],
+                'label' => (string) $tab['label'],
+                'icon'  => isset( $tab['icon'] ) ? (string) $tab['icon'] : '',
+            );
+        }
+        return $clean;
+    }
+
+    /**
+     * Default descriptors for the per-product metabox section list.
+     *
+     * Each entry is `{ id, label, kind }` where `kind` is one of:
+     *   - 'editor' — Free ships a real editor for this section. The
+     *                React metabox renders the matching component.
+     *   - 'pro'    — the feature is Pro-only. Free's React component
+     *                renders a <PremiumBadge>; Pro replaces it with
+     *                the real editor either by adding its own React
+     *                runtime or by adjusting the entry to 'editor'.
+     *
+     * @since AR-61 §1.1 Phase 3
+     * @return array<int,array{id:string,label:string,kind:string}>
+     */
+    public static function metabox_sections() {
+        $free_sections = array(
+            array( 'id' => 'content',     'label' => 'Content',          'kind' => 'editor' ),
+            array( 'id' => 'style',       'label' => 'Style',            'kind' => 'editor' ),
+            array( 'id' => 'camera',      'label' => 'Camera',           'kind' => 'editor' ),
+            array( 'id' => 'light',       'label' => 'Light & Environment', 'kind' => 'editor' ),
+            array( 'id' => 'integration', 'label' => 'Integration',      'kind' => 'editor' ),
+            array( 'id' => 'compression', 'label' => 'Model Compression', 'kind' => 'editor' ),
+            // Pro-only sections: Free ships the section file as a
+            // PremiumBadge slot; Pro registers an 'editor' override.
+            array( 'id' => 'dimensions',  'label' => 'Dimensions', 'kind' => 'pro' ),
+            array( 'id' => 'hotspots',    'label' => 'Hotspots',   'kind' => 'pro' ),
+            array( 'id' => 'slider',      'label' => 'Slider',     'kind' => 'pro' ),
+        );
+
+        /**
+         * Filter: atlas_ar_metabox_sections
+         *
+         * Lets Pro upgrade Pro-only sections to 'editor' kind (by
+         * returning the same `id` with `kind = 'editor'`) and append
+         * new sections (e.g. variation-models editor in Pro).
+         *
+         * @param array<int,array{id:string,label:string,kind:string}> $sections
+         */
+        $sections = apply_filters( 'atlas_ar_metabox_sections', $free_sections );
+
+        if ( ! is_array( $sections ) ) {
+            $sections = $free_sections;
+        }
+        $clean = array();
+        foreach ( $sections as $section ) {
+            if ( ! is_array( $section ) || empty( $section['id'] ) || empty( $section['label'] ) ) {
+                continue;
+            }
+            $kind = isset( $section['kind'] ) ? (string) $section['kind'] : 'editor';
+            if ( ! in_array( $kind, array( 'editor', 'pro' ), true ) ) {
+                $kind = 'editor';
+            }
+            $clean[] = array(
+                'id'    => (string) $section['id'],
+                'label' => (string) $section['label'],
+                'kind'  => $kind,
+            );
+        }
+        return $clean;
+    }
+
+    /**
+     * The list of 3D-model file formats this site can compress.
+     *
+     * Free returns the formats it natively supports — `glb` and `gltf`,
+     * which are what `admin/js/ar-compression-client.js` can run through
+     * the browser-side gltf-transform pipeline.
+     *
+     * Pro adds its own formats (FBX, OBJ, USDZ) by hooking the
+     * `atlas_ar_supported_formats` filter and pushing extra entries.
+     * The filter shape is intentionally simple — a flat array of lower-
+     * case file-extension strings, no leading dot — so anyone hooking it
+     * can do array_merge without thinking about associative-vs-numeric
+     * keys.
+     *
+     * @since AR-61 §1.1 Phase 3
+     * @return array<int,string> Lower-case file extensions, no leading dot.
+     *                           Order is "Free formats first, hooked
+     *                           formats appended" but consumers should
+     *                           not depend on order.
+     */
+    public static function supported_formats() {
+        $free_formats = array( 'glb', 'gltf' );
+
+        /**
+         * Filter: atlas_ar_supported_formats
+         *
+         * Lets Pro and third-party add-ons register additional 3D-model
+         * file formats. Pro v3.x adds FBX, OBJ, USDZ via its format
+         * converter.
+         *
+         * @param array<int,string> $formats Lower-case extensions, no dot.
+         */
+        $formats = apply_filters( 'atlas_ar_supported_formats', $free_formats );
+
+        // Defensive guards — a misbehaving filter must not crash the
+        // dashboard. Cast to array, force-lowercase strings, dedupe.
+        if ( ! is_array( $formats ) ) {
+            $formats = $free_formats;
+        }
+        $formats = array_values( array_unique( array_filter( array_map( static function ( $ext ) {
+            return is_string( $ext ) ? strtolower( ltrim( $ext, '.' ) ) : '';
+        }, $formats ) ) ) );
+
+        return $formats;
+    }
+
+    /**
+     * AR-62 §3h: WP-Cron callback that deletes temp generation files
+     * older than 24h.
+     *
+     * When a user abandons a generation between the initial Tripo3D
+     * fetch and the "Save This Model" click, the downloaded GLB and
+     * poster sit in `uploads/ar-try-on/<date>/temp/` forever. Over
+     * time they pile up. This sweep runs daily, walks every file
+     * under `ATLAS_AR_CURRENT_MODEL_TEMP_DIR`, and removes anything
+     * whose mtime is older than 24h. Empty directories are also
+     * removed.
+     *
+     * Scheduled by `ar-vr-3d-model-try-on.php` on `init` (via
+     * `wp_schedule_event` if not already scheduled). Unscheduled on
+     * deactivation via `AR_TRY_ON_Deactivate::deactivate()`.
+     *
+     * @since AR-62
+     * @return void
+     */
+    public static function sweep_orphan_temp_files() {
+        if ( ! defined( 'ATLAS_AR_CURRENT_MODEL_TEMP_DIR' ) ) {
+            return;
+        }
+        $root = ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
+        if ( ! is_string( $root ) || ! is_dir( $root ) ) {
+            return;
+        }
+        $cutoff = time() - DAY_IN_SECONDS;
+
+        // Recursive directory iterator — files first, then dirs.
+        try {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator( $root, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+        } catch ( \Exception $e ) {
+            return;
+        }
+        foreach ( $it as $node ) {
+            $path = $node->getPathname();
+            if ( $node->isFile() ) {
+                $mtime = @filemtime( $path );
+                if ( $mtime !== false && $mtime < $cutoff ) {
+                    @unlink( $path );
+                }
+            } elseif ( $node->isDir() ) {
+                // Best-effort rmdir — only succeeds when empty,
+                // which after the file pass means every file inside
+                // was older than the cutoff.
+                @rmdir( $path );
+            }
+        }
+    }
+
+    /**
+     * The list of Tripo3D / Meshy AI generation modes this site can
+     * actually submit.
+     *
+     * Free natively supports `text_to_model` only. `image_to_model`
+     * (and future `multiview_to_model`) require the picker UI plus
+     * server-side helpers that ship in Pro — adding them in Free
+     * without Pro present would expose a feature the user can't run,
+     * which is the Yoast-pattern trap AR-61 §1.1 closed.
+     *
+     * Pro extends the list by hooking
+     * `atlas_ar_generation_supported_modes` from
+     * `AR_TRY_ON_Pro_Bridge::register()`. The filter shape is a flat
+     * array of Tripo3D body `type` strings so anyone hooking it can
+     * just array_merge / array_push without thinking about
+     * associative keys.
+     *
+     * The React metabox reads the result from `ar_try_on.generation_supported_modes`
+     * and filters the "Supported Model Types" dropdown to it.
+     *
+     * @since AR-62
+     * @return array<int,string> Tripo3D / Meshy AI body type strings
+     *                            (e.g. `text_to_model`, `image_to_model`).
+     */
+    public static function generation_supported_modes() {
+        $free_modes = array( 'text_to_model' );
+
+        /**
+         * Filter: atlas_ar_generation_supported_modes
+         *
+         * Lets Pro and third-party add-ons register additional 3D-model
+         * generation modes. Pro v3.x+ adds `image_to_model` via the
+         * `AR_TRY_ON_Pro_Bridge`.
+         *
+         * @param array<int,string> $modes Tripo3D body type strings.
+         */
+        $modes = apply_filters( 'atlas_ar_generation_supported_modes', $free_modes );
+
+        // Defensive guards — a misbehaving filter must not crash the
+        // metabox. Cast to array, force-lowercase strings, dedupe.
+        if ( ! is_array( $modes ) ) {
+            $modes = $free_modes;
+        }
+        $modes = array_values( array_unique( array_filter( array_map( static function ( $m ) {
+            return is_string( $m ) ? strtolower( trim( $m ) ) : '';
+        }, $modes ) ) ) );
+
+        // text_to_model is always present — it's Free's baseline and
+        // dropping it would leave the dropdown empty.
+        if ( ! in_array( 'text_to_model', $modes, true ) ) {
+            array_unshift( $modes, 'text_to_model' );
+        }
+
+        return $modes;
+    }
 
 }

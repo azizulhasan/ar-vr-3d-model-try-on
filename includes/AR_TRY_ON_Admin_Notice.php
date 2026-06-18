@@ -280,7 +280,7 @@ class AR_TRY_ON_Admin_Notice {
 							if ( ! empty( $btn['action'] ) ) {
 								// AJAX button
 								?>
-								<a href="#" class="button <?php echo esc_attr( $btn_class ); ?> ar-notice-action-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" <?php echo $data_attrs; ?> style="<?php echo esc_attr( $btn_style ); ?>">
+								<a href="#" class="button <?php echo esc_attr( $btn_class ); ?> ar-notice-action-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" <?php echo $data_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built above from esc_attr()-escaped fragments. ?> style="<?php echo esc_attr( $btn_style ); ?>">
 									<?php if ( ! empty( $btn['icon'] ) ) : ?>
 									<span class="dashicons dashicons-<?php echo esc_attr( $btn['icon'] ); ?>" style="margin-top: 3px;"></span>
 									<?php endif; ?>
@@ -420,24 +420,18 @@ class AR_TRY_ON_Admin_Notice {
 			array(
 				'id'            => 'promo_notice',
 				'title'         => '🎁 Try AtlasAR Pro Free for 14 Days — No Card Required',
-				'message'       => 'Unlock the full Pro feature set for 2 weeks on us: <strong>unlimited AtlasTryOn products</strong> (glasses & caps), <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, and <strong>GLB compression</strong>. Cancel any time — no automatic charge after the trial.',
+				'message'       => 'Unlock the full Pro feature set for 2 weeks on us: <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, <strong>server-side compression for large GLBs</strong>, <strong>FBX / OBJ / USDZ format conversion</strong>, <strong>interactive hotspots editor</strong>, <strong>real-world dimensions in AR</strong>, and <strong>per-variation model swap</strong>. Cancel any time — no automatic charge after the trial.',
 				'type'          => 'info',
 				'icon'          => '🎁',
 				'dismissible'   => true,
 				'condition'     => function() {
-					// Hide once Pro is active (trial running, or fully paid).
+					// Hide once Pro is active. The trial-utilized check that
+					// used to live here was driven by Free's Freemius SDK,
+					// which AR-61 §1.1 removed — the trial workflow now lives
+					// entirely in the Pro plugin, so Free can only know
+					// "Pro is here or not" via the constant check below.
 					if ( AR_TRY_ON_Helper::is_pro_active() ) {
 						return false;
-					}
-					// Hide if the merchant has already burned their trial —
-					// Freemius tracks `is_trial_utilized` per-install.
-					if ( function_exists( 'av3mto_fs' ) ) {
-						try {
-							$fs = av3mto_fs();
-							if ( $fs && method_exists( $fs, 'is_trial_utilized' ) && $fs->is_trial_utilized() ) {
-								return false;
-							}
-						} catch ( \Throwable $e ) { /* no-op — fall through to show */ }
 					}
 					return true;
 				},

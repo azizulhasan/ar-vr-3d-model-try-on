@@ -26,8 +26,13 @@ import {
 class ARCompressionClient {
     constructor() {
         this.io = null;
-        this.compressionQuality = 85; // Default quality (0-100)
-        this.maxFileSize = 5 * 1024 * 1024; // 5MB threshold for client-side
+        this.compressionQuality = 85; // Default quality (0-100).
+        // Hard ceiling for client-side compression. Above this size
+        // the gltf-transform pipeline would lock the browser tab.
+        // Mirrors AR_TRY_ON_Compression::MAX_CLIENT_SIDE_SIZE on the
+        // PHP side. AR-61 §1.1 Phase 2 raised this from 5 MB to 10 MB
+        // to match the PHP-side constant.
+        this.maxFileSize = 10 * 1024 * 1024;
 
         this.init();
     }
@@ -50,9 +55,11 @@ class ARCompressionClient {
      * @returns {Object} Result object with canCompress and reason
      */
     canCompressClientSide(file) {
-        const isProActive = window.ar_try_on?.is_pro_active === '1' || window.ar_try_on?.is_pro_active === true;
-
-        // Check file type
+        // Check file type — Free supports GLB / GLTF only. The Pro
+        // plugin can extend this list via the `atlas_ar_supported_formats`
+        // filter (Phase 3 wires the filter); until then those formats
+        // are surfaced through the upgrade badge on the dashboard, not
+        // through this method.
         const validExtensions = ['.glb', '.gltf'];
         const fileName = file.name.toLowerCase();
         const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
@@ -65,7 +72,13 @@ class ARCompressionClient {
             };
         }
 
-        // Check file size
+        // Check file size against the 10 MB technical ceiling. This
+        // is a real browser-performance limit — compressing larger
+        // files client-side locks the page up — not a Free-tier
+        // gate. AR-61 §1.1 Phase 2 explicitly does NOT mention Pro
+        // at point-of-failure; the Pro "server-side compression for
+        // large files" feature is advertised separately on the
+        // dashboard's Compression Settings page via <PremiumBadge>.
         if (file.size <= this.maxFileSize) {
             return {
                 canCompress: true,
@@ -74,21 +87,11 @@ class ARCompressionClient {
             };
         }
 
-        // Large files: Pro users can use server-side, free users get warning
-        if (isProActive) {
-            return {
-                canCompress: true,
-                method: 'server',
-                reason: 'Large file will be compressed on server (Pro feature)'
-            };
-        } else {
-            return {
-                canCompress: true,
-                method: 'client',
-                reason: 'Large file will be compressed in browser (may be slow)',
-                warning: 'Files over 5MB compress faster with Pro (server-side compression)'
-            };
-        }
+        return {
+            canCompress: false,
+            method: 'none',
+            reason: "File size is too big — can't be compressed."
+        };
     }
 
     /**
