@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 /**
  * AR Try On - Compression Database Handler
  *
@@ -161,6 +161,7 @@ class AR_TRY_ON_Compression_DB
             return false; // graceful fallback
         }
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Insert into custom plugin table; not eligible for object cache.
         $result = $wpdb->insert(
             $table,
             $data,
@@ -188,6 +189,7 @@ class AR_TRY_ON_Compression_DB
             return false; // graceful fallback
         }
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Update on custom plugin table; not eligible for object cache.
         return (bool)$wpdb->update(
             $table,
             $data,
@@ -201,6 +203,7 @@ class AR_TRY_ON_Compression_DB
     {
         global $wpdb;
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Schema-introspection ($wpdb->get_var on SHOW TABLES) is not cacheable; runs at most once per request.
         return $wpdb->get_var(
                 $wpdb->prepare(
                     "SHOW TABLES LIKE %s",
@@ -227,13 +230,21 @@ class AR_TRY_ON_Compression_DB
             return null; // graceful fallback
         }
 
-        return $wpdb->get_row(
+        // Whitelist the $type column to defend against SQL injection.
+        $allowed_types = array( 'post_id', 'id' );
+        $type = in_array( $type, $allowed_types, true ) ? $type : 'post_id';
+
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $row = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT * FROM $table WHERE $type = %d ORDER BY created_at DESC LIMIT 1",
+                "SELECT * FROM `{$table}` WHERE `{$type}` = %d ORDER BY created_at DESC LIMIT 1",
                 $post_id
             ),
             ARRAY_A
         );
+        // phpcs:enable
+
+        return $row;
     }
 
 
@@ -264,17 +275,41 @@ class AR_TRY_ON_Compression_DB
         }
 
 
-        $where = '1=1';
-        if (!is_null($args['status'])) {
-            $where .= $wpdb->prepare(' AND status = %s', $args['status']);
+        // Whitelist orderby/order to defend against SQL injection via $args.
+        $allowed_orderby = array( 'id', 'created_at', 'updated_at', 'post_id', 'status' );
+        $orderby = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+        $order   = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+
+        // Build the ORDER BY clause from whitelisted columns and direction so the
+        // dynamic part of the SQL is never interpolated from external input.
+        $order_clause = sprintf( 'ORDER BY `%s` %s', $orderby, $order );
+
+        if ( is_null( $args['status'] ) ) {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+            $results = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM `{$table}` WHERE 1=1 {$order_clause} LIMIT %d OFFSET %d",
+                    $args['limit'],
+                    $args['offset']
+                ),
+                ARRAY_A
+            );
+            // phpcs:enable
+        } else {
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+            $results = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM `{$table}` WHERE status = %s {$order_clause} LIMIT %d OFFSET %d",
+                    $args['status'],
+                    $args['limit'],
+                    $args['offset']
+                ),
+                ARRAY_A
+            );
+            // phpcs:enable
         }
 
-        $query = "SELECT * FROM $table WHERE $where ORDER BY {$args['orderby']} {$args['order']} LIMIT %d OFFSET %d";
-
-        return $wpdb->get_results(
-            $wpdb->prepare($query, $args['limit'], $args['offset']),
-            ARRAY_A
-        );
+        return $results;
     }
 
     /**
@@ -294,6 +329,7 @@ class AR_TRY_ON_Compression_DB
         }
 
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $stats = $wpdb->get_row(
             "SELECT
 				COUNT(*) as total_compressions,
@@ -303,10 +339,11 @@ class AR_TRY_ON_Compression_DB
 				SUM(compressed_size) as total_compressed_size,
 				AVG(compression_ratio) as avg_compression_ratio,
 				SUM(original_size - compressed_size) as total_saved_space
-			FROM $table
+			FROM `{$table}`
 			WHERE status = 'complete'",
             ARRAY_A
         );
+        // phpcs:enable
 
         return $stats ? $stats : array();
     }
@@ -322,6 +359,7 @@ class AR_TRY_ON_Compression_DB
             return [];
         }
 
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $stats = $wpdb->get_row(
             "SELECT
             COUNT(*) AS total_compressions,
@@ -333,10 +371,11 @@ class AR_TRY_ON_Compression_DB
             SUM(
                 CAST(original_size AS SIGNED) - CAST(compressed_size AS SIGNED)
             ) AS total_saved_space
-        FROM {$table}
+        FROM `{$table}`
         WHERE status = 'complete'",
             ARRAY_A
         );
+        // phpcs:enable
 
         return $stats ?: [];
     }
@@ -358,9 +397,13 @@ class AR_TRY_ON_Compression_DB
             return 0;
         }
 
-        return (int)$wpdb->get_var(
-            "SELECT COUNT(DISTINCT post_id) FROM $table WHERE status = 'complete'"
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $count = (int) $wpdb->get_var(
+            "SELECT COUNT(DISTINCT post_id) FROM `{$table}` WHERE status = 'complete'"
         );
+        // phpcs:enable
+
+        return $count;
     }
 
     // Queue methods moved to Pro plugin (AR_TRY_ON_Pro_Compression_DB)
@@ -382,6 +425,7 @@ class AR_TRY_ON_Compression_DB
             return false; // graceful fallback
         }
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Delete on custom plugin table; not eligible for object cache.
         return (bool)$wpdb->delete(
             $wpdb->prefix . 'ar_compression_log',
             array('post_id' => $post_id),
@@ -406,12 +450,16 @@ class AR_TRY_ON_Compression_DB
             return false; // graceful fallback
         }
 
-        return $wpdb->query(
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+        $result = $wpdb->query(
             $wpdb->prepare(
-                "DELETE FROM $table WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
+                "DELETE FROM `{$table}` WHERE created_at < DATE_SUB(NOW(), INTERVAL %d DAY)",
                 $days
             )
         );
+        // phpcs:enable
+
+        return $result;
     }
 
     /**
@@ -429,7 +477,9 @@ class AR_TRY_ON_Compression_DB
         );
 
         foreach ($tables as $table) {
-            $wpdb->query("DROP TABLE IF EXISTS $table");
+            // phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange, PluginCheck.Security.DirectDB.UnescapedDBParameter
+            $wpdb->query("DROP TABLE IF EXISTS `{$table}`");
+            // phpcs:enable
         }
 
         delete_option(self::VERSION_OPTION);

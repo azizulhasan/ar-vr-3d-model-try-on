@@ -8,6 +8,7 @@ import CompressionStats from './CompressionStats';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ManageModelsModal from './ManageModelsModal';
 import {getURL} from "../../../../../context/utilities";
+import PremiumBadge from "../../../../../context/PremiumBadge";
 
 /**
  * Compression Settings Component
@@ -121,32 +122,32 @@ export default function CompressionSettings({ isProActive }) {
     };
 
     /**
-     * Handle Pro feature click (show upgrade toast)
+     * Handle Pro feature click — kept for backward compatibility with
+     * the SupportedFormats subcomponent which still calls it. Now
+     * delegates to a static upgrade link rather than a faux-toast that
+     * pretended to do something. Will be removed once SupportedFormats
+     * migrates fully to the PremiumBadge component.
+     *
+     * @since AR-61 §1.1 Phase 2
      */
     const handleProFeatureClick = (featureName) => {
-        toast.info(
-            `🔒 ${featureName} is a Pro feature. Upgrade to unlock this powerful feature!`,
-            {
-                position: 'top-center',
-                autoClose: 5000,
-                onClick: () => {
-                    window.open('https://wpaugmentedreality.com/pricing/', '_blank');
-                },
-            }
-        );
+        // Intentional no-op: the PremiumBadge component now handles
+        // the upgrade-link UI in a visible, non-modal way.
     };
 
     /**
-     * Handle bulk compress (Pro only)
+     * Handle bulk compress (Pro only). When Pro is loaded, Pro's own
+     * dashboard tab handles this. Free never reaches this handler
+     * because the locked button is replaced with a PremiumBadge link
+     * in the JSX below.
+     *
+     * @since AR-61 §1.1 Phase 2
      */
     const handleBulkCompress = () => {
-        if (!isProActive) {
-            handleProFeatureClick('Bulk Compression');
-            return;
-        }
-
-        // TODO: Implement bulk compression
-        toast.info('🚀 Bulk compression will be implemented in the next phase');
+        // Pro replaces the Bulk Compression card with its own
+        // implementation via the Phase 3 extension hooks; this handler
+        // exists only as a fallback if a future build ships the button
+        // without the badge. Stays a no-op in Free.
     };
 
     if (loading) {
@@ -166,11 +167,6 @@ export default function CompressionSettings({ isProActive }) {
                 </h2>
                 <p className="art-text-gray-600">
                     Automatically compress 3D models to reduce file sizes and improve loading speed.
-                    {!isProActive && (
-                        <span className="art-text-blue-600 art-ml-1">
-                            Free users can compress up to 5 models.
-                        </span>
-                    )}
                 </p>
             </div>
 
@@ -209,70 +205,41 @@ export default function CompressionSettings({ isProActive }) {
                         />
                     </div>
 
-                    {/* Free User Limit */}
-                    {!isProActive && (
-                        <div className="art-mb-6 art-p-4 art-bg-blue-50 art-border art-border-blue-200 art-rounded-lg">
+                    {/*
+                     * The Free 5-model cap and its "Free User Limit"
+                     * progress block were removed in AR-61 §1.1 Phase 1.
+                     * Free has unlimited compressions now.
+                     */}
+
+                    {/* Bulk Compression — Pro only */}
+                    {isProActive ? (
+                        <div className="art-mb-6 art-p-4 art-bg-gray-50 art-border art-border-gray-200 art-rounded-lg">
                             <div className="art-flex art-items-start art-justify-between">
                                 <div className="art-flex-1">
-                                    <h3 className="art-text-sm art-font-semibold art-text-gray-900 art-mb-1">
-                                        Free User Limit
-                                    </h3>
-                                    <p className="art-text-sm art-text-gray-600 art-mb-2">
-                                        You have compressed <strong>{userLimit.used}</strong> out of{' '}
-                                        <strong>{userLimit.limit}</strong> models.
-                                        {userLimit.at_limit && (
-                                            <span className="art-text-orange-600 art-ml-1">
-                                                ⚠️ Limit reached. Delete a compressed model to compress new ones.
-                                            </span>
-                                        )}
-                                    </p>
-                                    <button
-                                        onClick={() => setShowManageModal(true)}
-                                        className="art-text-sm art-text-blue-600 hover:art-text-blue-800 art-font-medium"
-                                    >
-                                        Manage Compressed Models →
-                                    </button>
-                                </div>
-                                <div className="art-ml-4">
-                                    <div className="art-text-2xl art-font-bold art-text-blue-600">
-                                        {userLimit.used}/{userLimit.limit}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Bulk Compression (Pro) */}
-                    <div className="art-mb-6 art-p-4 art-bg-gray-50 art-border art-border-gray-200 art-rounded-lg">
-                        <div className="art-flex art-items-start art-justify-between">
-                            <div className="art-flex-1">
-                                <div className="art-flex art-items-center art-mb-2">
-                                    <h3 className="art-text-sm art-font-semibold art-text-gray-900">
+                                    <h3 className="art-text-sm art-font-semibold art-text-gray-900 art-mb-2">
                                         Bulk Compression
                                     </h3>
-                                    {!isProActive && (
-                                        <span className="art-ml-2 art-px-2 art-py-0.5 art-text-xs art-font-medium art-bg-yellow-100 art-text-yellow-800 art-rounded">
-                                            PRO
-                                        </span>
-                                    )}
+                                    <p className="art-text-sm art-text-gray-600 art-mb-3">
+                                        Compress all existing models at once. Save hours of manual work!
+                                    </p>
+                                    <button
+                                        onClick={handleBulkCompress}
+                                        className="art-px-4 art-py-2 art-text-sm art-font-medium art-rounded-md art-bg-blue-600 art-text-white hover:art-bg-blue-700"
+                                    >
+                                        🚀 Compress All Models
+                                    </button>
                                 </div>
-                                <p className="art-text-sm art-text-gray-600 art-mb-3">
-                                    Compress all existing models at once. Save hours of manual work!
-                                </p>
-                                <button
-                                    onClick={handleBulkCompress}
-                                    disabled={!isProActive}
-                                    className={`art-px-4 art-py-2 art-text-sm art-font-medium art-rounded-md ${
-                                        isProActive
-                                            ? 'art-bg-blue-600 art-text-white hover:art-bg-blue-700'
-                                            : 'art-bg-gray-300 art-text-gray-600 art-cursor-not-allowed'
-                                    }`}
-                                >
-                                    {isProActive ? '🚀 Compress All Models' : '🔒 Upgrade to Pro'}
-                                </button>
                             </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="art-mb-6">
+                            <PremiumBadge feature="bulk-compression">
+                                <strong>Bulk compress all models</strong> — one click runs
+                                the compression pipeline across every product on your
+                                site. Available in AtlasAR Pro.
+                            </PremiumBadge>
+                        </div>
+                    )}
 
                     {/* Compression Statistics (Pro) */}
                     {isProActive && (

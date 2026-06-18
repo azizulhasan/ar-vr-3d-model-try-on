@@ -1,5 +1,5 @@
 <?php
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 /**
  * Fired during plugin deactivation
  *
@@ -34,6 +34,11 @@ class AR_TRY_ON_Deactivate {
 		$timestamp = wp_next_scheduled( 'ar_try_on_process_compression_queue' );
 		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, 'ar_try_on_process_compression_queue' );
+		}
+		// AR-62 §3h: orphan-temp sweeper.
+		$temp_sweep = wp_next_scheduled( 'atlas_ar_sweep_orphan_temp_files' );
+		if ( $temp_sweep ) {
+			wp_unschedule_event( $temp_sweep, 'atlas_ar_sweep_orphan_temp_files' );
 		}
     }
 

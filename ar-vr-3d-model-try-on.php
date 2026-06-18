@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           2.0.2
+ * Version:           2.2.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -55,73 +55,21 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/AR_TRY_ON_Admin_Notice.php'
 
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
-/**
- * Is plugin active
+/*
+ * Freemius SDK and the Free-side license bootstrap were removed in
+ * AR-61 §1.1 (the Yoast-pattern split). The free plugin has no license
+ * check, no premium-version handshake, and no trial counter — it is
+ * fully functional standalone for every user.
+ *
+ * The Pro plugin (ar-vr-3d-model-try-on-pro) keeps its own copy of the
+ * Freemius SDK and handles all license / subscription state there. No
+ * Pro upgrade ever requires this Free plugin to "talk to" Freemius.
+ *
+ * Historical implementations of av3mto_fs() / fs_dynamic_init() that
+ * used to live in this block are preserved in git history; recover
+ * with `git show 7d7848a^:ar-vr-3d-model-try-on.php` (the commit just
+ * before AR-61 §1.1 work began) if ever needed.
  */
-function atlas_ar_is_pro_plugin_exists() {
-    $plugin_path = \WP_PLUGIN_DIR;
-    $pro_plugins = [
-        '/ar-vr-3d-model-try-on-pro/ar-vr-3d-model-try-on-premium.php',
-        '/ar-vr-3d-model-try-on-premium/ar-vr-3d-model-try-on-premium.php',
-    ];
-
-    foreach ( $pro_plugins as $pro_plugin ) {
-        if ( file_exists( $plugin_path . $pro_plugin ) ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-//if (  ! function_exists( 'av3mto_fs' ) ) {
-if (! atlas_ar_is_pro_plugin_exists() &&  ! function_exists( 'av3mto_fs' ) ) {
-	// Create a helper function for easy SDK access.
-	function av3mto_fs() {
-		global $av3mto_fs;
-
-		if ( ! isset( $av3mto_fs ) ) {
-			// Activate multisite network integration.
-			if ( ! defined( 'WP_FS__PRODUCT_18159_MULTISITE' ) ) {
-				define( 'WP_FS__PRODUCT_18159_MULTISITE', true );
-			}
-
-			// Include Freemius SDK.
-			require_once dirname( __FILE__ ) . '/vendor/freemius/start.php';
-			$av3mto_fs = fs_dynamic_init( array(
-				'id'                  => '18159',
-				'slug'                => 'ar-vr-3d-model-try-on',
-				'type'                => 'plugin',
-				'public_key'          => 'pk_28cf95aad28914518f7065b97bbe4',
-				'is_premium'          => false,
-                'has_premium_version' => true,
-                'has_paid_plans'      => true,
-				'has_addons'          => false,
-                'has_affiliation'     => 'all',
-                'trial'               => array(
-                    'days'               => 14,
-                    'is_require_payment' => false,
-                ),
-				'menu'                => array(
-					'slug'           => 'ar-vr-3d-model-try-on',
-					'first-path'     => 'admin.php?page=ar-vr-3d-model-try-on',
-                    'support' => 1,
-                    'pricing' => 1,
-					'contact' => true,
-					'account' => true,
-				),
-			) );
-		}
-
-		return $av3mto_fs;
-	}
-
-	// Init Freemius.
-	av3mto_fs();
-	// Signal that SDK was initiated.
-	do_action( 'av3mto_fs_loaded' );
-}
 
 /**
  * Currently plugin version.
@@ -145,9 +93,10 @@ if ( ! defined( 'ATLAS_AR_ROOT_FILE' ) ) {
 }
 
 if ( ! defined( 'ATLAS_AR_ROOT_FILE_NAME' ) ) {
-	$path = explode( DIRECTORY_SEPARATOR, ATLAS_AR_ROOT_FILE );
-	$file = end( $path );
-	define( 'ATLAS_AR_ROOT_FILE_NAME', $file );
+	$atlas_ar_path = explode( DIRECTORY_SEPARATOR, ATLAS_AR_ROOT_FILE );
+	$atlas_ar_file = end( $atlas_ar_path );
+	define( 'ATLAS_AR_ROOT_FILE_NAME', $atlas_ar_file );
+	unset( $atlas_ar_path, $atlas_ar_file );
 }
 
 if ( ! defined( 'ATLAS_AR_ADMIN_PATH' ) ) {
@@ -162,18 +111,19 @@ if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 
 
 if ( ! defined( 'ATLAS_AR_PLUGIN_URL' ) ) {
-	$url         = 'https://playground.wordpress.net';
-	$url_preview = 'http://playground.wordpress.net';
+	$atlas_ar_https        = 'https://playground.wordpress.net';
+	$atlas_ar_http_preview = 'http://playground.wordpress.net';
 
-	$site_url = plugin_dir_url( ATLAS_AR_ROOT_FILE );
-	$site_url = str_replace( $url_preview, $url, $site_url );
+	$atlas_ar_site_url = plugin_dir_url( ATLAS_AR_ROOT_FILE );
+	$atlas_ar_site_url = str_replace( $atlas_ar_http_preview, $atlas_ar_https, $atlas_ar_site_url );
 	/**
 	 * Plugin Directory URL
 	 *
 	 * @var string
 	 * @since 1.2.2
 	 */
-	define( 'ATLAS_AR_PLUGIN_URL', trailingslashit( $site_url ) );
+	define( 'ATLAS_AR_PLUGIN_URL', trailingslashit( $atlas_ar_site_url ) );
+	unset( $atlas_ar_https, $atlas_ar_http_preview, $atlas_ar_site_url );
 }
 
 if ( ! defined( 'ATLAS_AR_PLUGIN_PATH' ) ) {
@@ -199,7 +149,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.0.2' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.2.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
@@ -253,14 +203,47 @@ function atlas_ar_run() {
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();
 
-	// Admin action to manually create compression database tables
+	// Admin action to manually create compression database tables.
 	add_action( 'admin_init', function() {
-		if ( isset( $_GET['ar_create_compression_tables'] ) && current_user_can( 'manage_options' ) ) {
-			AR_TRY_ON_Compression_DB::init();
-			wp_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
-			exit;
+		// Read-only superglobal access guarded by capability + nonce checks below;
+		// the GET flag itself carries no untrusted payload — just toggles the action.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified on the next line.
+		if ( ! isset( $_GET['atlas_ar_create_compression_tables'] ) ) {
+			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified explicitly below.
+		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'atlas_ar_create_compression_tables' ) ) {
+			return;
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		AR_TRY_ON_Compression_DB::init();
+		wp_safe_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
+		exit;
 	} );
+
+	/**
+	 * Action: atlas_ar_loaded
+	 *
+	 * Fires at the end of Free's `init`-priority bootstrap, after every
+	 * Free subsystem (main class, AtlasAiDev lib, REST routes, Tryon
+	 * runtime, Admin Notice system) has been wired up. This is the
+	 * documented hook Pro should use to plug itself into Free —
+	 * preferred over class_exists() / is_pro_active() polling because
+	 * it gives Pro a predictable timing point that arrives after every
+	 * Free hook is in place.
+	 *
+	 * Pro listens with:
+	 *
+	 *   add_action( 'atlas_ar_loaded', array( $this, 'init' ) );
+	 *
+	 * The action fires unconditionally (Free always emits it), so Pro's
+	 * presence is not required for the action to exist — third-party
+	 * add-ons can listen too. AR-61 §1.1 Phase 3.
+	 */
+	do_action( 'atlas_ar_loaded' );
 }
 
 // Add custom cron schedule for compression queue processing
@@ -277,7 +260,12 @@ add_filter( 'cron_schedules', function( $schedules ) {
 
 add_action( 'init', function () {
     atlas_ar_run();
+    // AR-62 §3h: daily sweep for orphan temp generation files.
+    if ( ! wp_next_scheduled( 'atlas_ar_sweep_orphan_temp_files' ) ) {
+        wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'atlas_ar_sweep_orphan_temp_files' );
+    }
 } );
+add_action( 'atlas_ar_sweep_orphan_temp_files', array( 'AR_TRY_ON\\AR_TRY_ON_Helper', 'sweep_orphan_temp_files' ) );
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/AR_TRY_ON_Activator.php

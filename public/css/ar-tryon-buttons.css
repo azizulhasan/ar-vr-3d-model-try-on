@@ -1,0 +1,119 @@
+/**
+ * Dynamic Try-On / View-in-AR buttons block.
+ *
+ * Previously emitted as an inline <style> block (per-wrapper, keyed by the
+ * wrapper DOM id) from AR_TRY_ON_Tryon::build_button_style_block(). Moved to
+ * this enqueued stylesheet (class-scoped) so no inline <style> ships in the
+ * page body — the wp.org reviewer flagged inline style/script output.
+ *
+ * The CSS custom properties below are sensible DEFAULTS derived from block
+ * theme variables (--wp--preset--color--*). The wp_footer sampler
+ * (print_dynamic_button_sampler_script) still overrides them by setting the
+ * same custom properties INLINE on each wrapper element once it has measured
+ * the active theme's primary button — inline custom props win over these
+ * class defaults, so the cascade is identical to the old per-id <style>.
+ *
+ * The two button icons used to be inline <svg> in the markup; they are now
+ * mask-image data-URIs here, tinted with `background-color: currentColor`
+ * so they still inherit the button's text color exactly like the old
+ * `stroke="currentColor"` SVGs did.
+ */
+
+.atlas-ar-tryon-buttons {
+	margin-block-start: var( --wp--style--block-gap, 1.5rem );
+	gap: 0.75rem;
+	border: none !important;
+	padding: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	--atlas-ar-btn-bg: var( --wp--preset--color--primary, var( --wp-admin-theme-color, #111 ) );
+	--atlas-ar-btn-bg-image: none;
+	--atlas-ar-btn-color: var( --wp--preset--color--background, #fff );
+	--atlas-ar-btn-border-width: 0;
+	--atlas-ar-btn-border-style: solid;
+	--atlas-ar-btn-border-color: transparent;
+	--atlas-ar-btn-radius: 9999px;
+	--atlas-ar-btn-padding: 0.7em 1.4em;
+	--atlas-ar-btn-font-family: inherit;
+	--atlas-ar-btn-font-size: 1rem;
+	--atlas-ar-btn-font-weight: 600;
+	--atlas-ar-btn-line-height: 1.2;
+	--atlas-ar-btn-letter-spacing: normal;
+	--atlas-ar-btn-text-transform: none;
+	--atlas-ar-btn-text-decoration: none;
+	--atlas-ar-btn-shadow: none;
+	--atlas-ar-btn-transition: filter .15s ease, background-color .15s ease, color .15s ease;
+	--atlas-ar-btn-cursor: pointer;
+	--atlas-ar-btn-min-height: auto;
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5em;
+	background-color: var( --atlas-ar-btn-bg );
+	background-image: var( --atlas-ar-btn-bg-image );
+	color: var( --atlas-ar-btn-color );
+	border: var( --atlas-ar-btn-border-width ) var( --atlas-ar-btn-border-style ) var( --atlas-ar-btn-border-color );
+	border-radius: var( --atlas-ar-btn-radius );
+	padding: var( --atlas-ar-btn-padding );
+	font-family: var( --atlas-ar-btn-font-family );
+	font-size: var( --atlas-ar-btn-font-size );
+	font-weight: var( --atlas-ar-btn-font-weight );
+	line-height: var( --atlas-ar-btn-line-height );
+	letter-spacing: var( --atlas-ar-btn-letter-spacing );
+	text-transform: var( --atlas-ar-btn-text-transform );
+	text-decoration: var( --atlas-ar-btn-text-decoration );
+	box-shadow: var( --atlas-ar-btn-shadow );
+	transition: var( --atlas-ar-btn-transition );
+	cursor: var( --atlas-ar-btn-cursor );
+	min-height: var( --atlas-ar-btn-min-height );
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn--primary:hover {
+	filter: brightness( 0.92 );
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn--secondary {
+	background-color: transparent;
+	background-image: none;
+	color: var( --atlas-ar-btn-bg );
+	border-width: max( 2px, var( --atlas-ar-btn-border-width ) );
+	border-style: solid;
+	border-color: var( --atlas-ar-btn-bg );
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn--secondary:hover {
+	background-color: var( --atlas-ar-btn-bg );
+	color: var( --atlas-ar-btn-color );
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-btn-label {
+	display: inline-block;
+}
+
+/* Icons — were inline <svg stroke="currentColor">, now mask-image tinted
+   with the button's current text color. */
+.atlas-ar-tryon-buttons .atlas-ar-btn-icon {
+	flex: 0 0 auto;
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	background-color: currentColor;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-btn-icon--3d {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7v10l10 5 10-5V7L12 2z'/%3E%3Cpath d='M2 7l10 5 10-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7v10l10 5 10-5V7L12 2z'/%3E%3Cpath d='M2 7l10 5 10-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E");
+}
+
+.atlas-ar-tryon-buttons .atlas-ar-btn-icon--try {
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='3.5'/%3E%3Cpath d='M5.5 20a6.5 6.5 0 0113 0'/%3E%3Crect x='3' y='4' width='18' height='16' rx='2' ry='2'/%3E%3C/svg%3E");
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='3.5'/%3E%3Cpath d='M5.5 20a6.5 6.5 0 0113 0'/%3E%3Crect x='3' y='4' width='18' height='16' rx='2' ry='2'/%3E%3C/svg%3E");
+}

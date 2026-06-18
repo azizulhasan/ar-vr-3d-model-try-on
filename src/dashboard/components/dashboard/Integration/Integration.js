@@ -151,6 +151,42 @@ export default function Integration({
                     </div>
 
 
+                    {/*
+                      * Sign-up nudge — surfaced when the selected API
+                      * advertises a public sign-up URL (Tripo3D does;
+                      * Meshy AI does not). The link carries our
+                      * affiliate ref so first-time accounts come back
+                      * to us. Existing users with an API key in hand
+                      * just ignore it; the link is small and passive.
+                      */}
+                    {currentApi?.signup_url && (
+                        <div
+                            style={{
+                                background: '#eff6ff',
+                                border: '1px solid #93c5fd',
+                                borderRadius: 6,
+                                padding: '10px 12px',
+                                marginBottom: 12,
+                                fontSize: 13,
+                                lineHeight: 1.45,
+                                color: '#1e3a8a',
+                            }}
+                        >
+                            <strong>New to {currentApi.name}?</strong>
+                            {' '}Create a free account to get your API key, then paste it as the
+                            {' '}<code>Authorization</code> header below.
+                            {' '}
+                            <a
+                                href={currentApi.signup_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
+                            >
+                                Sign up at {currentApi.name} →
+                            </a>
+                        </div>
+                    )}
+
                     {/* Headers Section */}
                     <div>
                         <button

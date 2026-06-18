@@ -1,6 +1,8 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
+
+defined( 'ABSPATH' ) || exit;
 
 class AR_TRY_ON_Constants {
 
@@ -22,7 +24,8 @@ class AR_TRY_ON_Constants {
 		$upload_dir = wp_upload_dir();
 		$base_dir   = $upload_dir['basedir'];
 
-		if ( is_writable( $base_dir ) ) {
+		// wp_is_writable() is the WP_Filesystem-aware wrapper for is_writable().
+		if ( wp_is_writable( $base_dir ) ) {
 			return true;
 		}
 
@@ -56,12 +59,10 @@ class AR_TRY_ON_Constants {
 			define( 'ATLAS_AR_MODEL_DIR', apply_filters( 'atlas_ar_model_dir', $tta_dir . '/' ) );
 			if ( self::is_model_folder_writable() ) {
 				if ( ! \is_dir( ATLAS_AR_MODEL_DIR ) ) {
-					mkdir( ATLAS_AR_MODEL_DIR, 0777, true );
-					// Protect files from public access.
-					// $content = 'deny from all';
-					// $fp = fopen(ATLAS_AR_MODEL_DIR . '.htaccess', 'wb');
-					// fwrite($fp, $content);
-					// fclose($fp);
+					// wp_mkdir_p() is the WordPress wrapper that uses
+					// WP_Filesystem when available; it also recursively
+					// creates parent dirs (replaces native mkdir(..., true)).
+					wp_mkdir_p( ATLAS_AR_MODEL_DIR );
 				}
 			}
 		}
@@ -134,11 +135,14 @@ class AR_TRY_ON_Constants {
 
         }
 
-        if(ATLAS_AR_DEBUG_MODE) {
-            define( 'ATLAS_AR_COMPRESSION_API_URL', 'http://localhost:3000' );
-        }else{
-            define( 'ATLAS_AR_COMPRESSION_API_URL', 'https://compress.atlasaidev.com' );
-        }
+        // ATLAS_AR_COMPRESSION_API_URL moved to Pro (Includes/AR_TRY_ON_Pro_Constants.php)
+        // under the AR-61 Yoast-pattern split: server-side compression is Pro-only,
+        // so the API URL knob has no consumers in Free and must not ship with Free
+        // to wp.org. The ATLAS_AR_DEBUG_MODE constant defined in this plugin's
+        // bootstrap (ar-vr-3d-model-try-on.php) still gates Pro's switch between
+        // local + production endpoints — Pro reads it via the Requires Plugins
+        // dependency. To override the URL for local dev or staging, define
+        // ATLAS_AR_COMPRESSION_API_URL in wp-config.php before plugins load.
 
 	}
 }

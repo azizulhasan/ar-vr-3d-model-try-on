@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useState } from "react";
 import AccordionIcon from "../../icons/AccordionIcon";
 import notify from "../../context/Notify";
+import PremiumBadge, { isProActive } from "../../context/PremiumBadge";
 
 const HotspotsSection = ({
   productModel,
@@ -9,17 +10,46 @@ const HotspotsSection = ({
   toggleAccordion,
 }) => {
 
+  // AR-61 §1.1 Phase 2 — when Pro is absent, the entire section
+  // collapses to a single upsell badge that links to the pricing
+  // page. The editor body below (click-to-place hotspots, label
+  // editing, etc.) only renders when Pro is loaded. There is no
+  // longer a "changes will appear in preview but won't be saved"
+  // toast pretending to do something — that's the Yoast-pattern
+  // anti-pattern (a control that silently fails).
+  if (!isProActive()) {
+    return (
+      <div className="art-mb-4 art-border art-border-gray-200 art-rounded">
+        <button
+          type="button"
+          onClick={() => toggleAccordion("hotspots")}
+          className="art-w-full art-flex art-justify-between art-items-center art-px-3 art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50"
+        >
+          <span className="art-w-full art-flex art-justify-between art-py-2 art-bg-white art-text-left art-text-sm art-font-medium hover:art-bg-gray-50">
+            Hotspots
+          </span>
+          <AccordionIcon status={activeAccordion.hotspots} />
+        </button>
+        {activeAccordion.hotspots && (
+          <div className="art-px-3 art-py-2 art-bg-white art-border-t">
+            <PremiumBadge feature="hotspots">
+              <strong>Interactive 3D hotspots</strong> let shoppers click points
+              on the model to read product details, sizes, or care instructions.
+              Available in AtlasAR Pro.
+            </PremiumBadge>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   const [hasShownWarning, setHasShownWarning] = useState(false);
 
-  // Show warning when user interacts with hotspots in free version
-  const showProWarning = () => {
-    if (!ar_try_on.is_pro_active && !hasShownWarning) {
-      notify('Hotspots is a Pro feature. Changes will appear in preview but won\'t be saved to the database.', 'warn', {
-        autoClose: 5000,
-      });
-      setHasShownWarning(true);
-    }
-  };
+  // Kept as a no-op for now so the existing call sites below don't
+  // need to be touched. With the Pro gate at the top of the component
+  // this branch is only ever reached when Pro IS active, so the
+  // legacy "this is a Pro feature" toast never fires.
+  const showProWarning = () => {};
 
   useEffect(() => {
     wp.hooks.doAction("atlas_ar_preview_data", productModel);

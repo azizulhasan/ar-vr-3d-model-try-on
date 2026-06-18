@@ -12,6 +12,7 @@ import Switch from "./Switch";
 import MultiSelect from "./MultiSelect";
 import BorderCard from "./BorderCard";
 import TryonSettings from "./TryonSettings";
+import { isProActive } from "../../../../context/PremiumBadge";
 
 
 export default function Settings({ settings, handleChange }) {
@@ -194,7 +195,21 @@ export default function Settings({ settings, handleChange }) {
           {/* Description */}
           <p className="art-text-sm art-text-gray-400 art-leading-snug">
             Choose which post types will support AR Try-On functionality.
+            {!isProActive() && (
+              <>
+                {' '}AtlasAR Free supports one post type at a time;
+                AtlasAR Pro lets you enable AR on any combination.
+              </>
+            )}
           </p>
+
+          {/*
+           * AR-61 §1.1 Phase 2 — the multi-post-type cap stays enforced
+           * in App.js (defense-in-depth). The upfront <PremiumBadge>
+           * that used to live here was removed at the project owner's
+           * request — the descriptive note above already explains the
+           * Free limit honestly without a separate visual block.
+           */}
         </BorderCard>
 
         {/* Dropdown Section */}
