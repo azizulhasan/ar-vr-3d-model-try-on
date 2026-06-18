@@ -211,111 +211,39 @@ Showcase your 3D models with browser-based AR — no apps, no coding. Let shoppe
 
 == External services ==
 
-This plugin connects to the following third-party services. Each service is contacted only when the corresponding feature is used. No service receives personal data unless explicitly noted below.
+The third-party services below may be contacted. Each is used only when its feature is used. No visitor or product data is sent unless noted.
 
-**1. MediaPipe Tasks Vision WASM bundle (Google / jsDelivr)**
+= MediaPipe face tracking (Google / jsDelivr) =
 
-* What it is: Google's MediaPipe machine-learning runtime that powers the face-tracking try-on feature.
-* When it is contacted: only after the visitor explicitly clicks the "Try It On" button on a product page. The WASM bundle is then downloaded from `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm` and cached by the browser.
-* What is sent: a standard HTTPS GET request for the static asset. No site, user, or product data is transmitted.
-* Provider: jsDelivr CDN (delivers the file published by Google).
-* Terms of use: [https://www.jsdelivr.com/terms](https://www.jsdelivr.com/terms)
-* Privacy policy: [https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net](https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net)
+Powers the webcam Try-On feature. Only after a visitor clicks "Try It On", the browser downloads the MediaPipe WASM runtime from `cdn.jsdelivr.net` and the face-landmark model from `storage.googleapis.com`, then caches them. A plain HTTPS GET for static assets — no site, user, or visitor data is sent. The camera feed stays on the visitor's device.
+jsDelivr — Terms: https://www.jsdelivr.com/terms Privacy: https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net
+Google — Terms: https://policies.google.com/terms Privacy: https://policies.google.com/privacy
 
-**2. MediaPipe Face Landmarker model (Google Cloud Storage)**
+= 3D model generation (Tripo3D / Meshy AI) =
 
-* What it is: the trained face-landmark model file MediaPipe needs in order to detect faces.
-* When it is contacted: same trigger as the WASM bundle above — only after the visitor clicks "Try It On". The model is then downloaded from `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task` and cached by the browser (and, on supported browsers, in IndexedDB).
-* What is sent: a standard HTTPS GET request for the static asset. No site, user, or product data is transmitted.
-* Provider: Google.
-* Terms of use: [https://policies.google.com/terms](https://policies.google.com/terms)
-* Privacy policy: [https://policies.google.com/privacy](https://policies.google.com/privacy)
+Admin-only. Only after an administrator enters their own API key and clicks "Generate 3D Model" is a request sent — to `api.tripo3d.ai` or `api.meshy.ai` — containing the admin's text prompt or image plus their API key. No site visitor data is sent.
+- Tripo3D — API keys: https://platform.tripo3d.ai/api-keys, Terms: https://www.tripo3d.ai/terms, Privacy: https://www.tripo3d.ai/privacy
+- Meshy AI — API keys: https://www.meshy.ai/settings/api, Terms: https://www.meshy.ai/terms-of-use, Privacy: https://www.meshy.ai/privacy-policy
 
-**3. Google `<model-viewer>` decoders — bundled locally, not an external service**
+= AtlasAiDev tracker (track.atlasaidev.com, icanhazip.com) =
 
-The DRACO geometry decoder, the KTX2 / Basis Universal texture transcoder, and the three.js Lottie loader are required by Google's `<model-viewer>` web component when an uploaded GLB uses Draco compression, KTX2 textures, or Lottie animation. By default `<model-viewer>` would fetch these from `gstatic.com` and `cdn.jsdelivr.net`.
+**Opt-in, off by default** (revocable anytime). When enabled, sends usage telemetry — plugin/WordPress/PHP versions, site URL/name/language, active+inactive plugin counts, admin name and email, and the site's outbound public IP (resolved via icanhazip.com) — so AtlasAiDev can prioritise improvements. No visitor or product data is sent.
+AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
+icanhazip.com (Cloudflare) — Privacy: https://www.cloudflare.com/privacypolicy/
 
-To avoid every site having to disclose those CDNs, this plugin ships its own copy of all three decoders under `public/js/vendor/decoders/` and overrides `<model-viewer>`'s default URLs at load time (`window.ModelViewerElement.dracoDecoderLocation`, `ktx2TranscoderLocation`, `lottieLoaderLocation`). No external request is made for any of these files — they are served from the plugin folder on the same host as the site.
+= AtlasAiDev plugin catalog (raw.githubusercontent.com) =
 
-Versions bundled:
-* DRACO v1.5.6 (from `gstatic.com`)
-* Basis Universal `2021-04-15-ba1c3e4` (from `gstatic.com`)
-* three.js Lottie loader from `three@0.149.0`
+Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.
+GitHub, Inc. — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
-The original upstream URLs are documented here purely so anyone reviewing the bundled copies can verify they match the upstream releases.
+= Bundled decoders (not an external service) =
 
-**4. Tripo3D API**
-
-* What it is: a third-party 3D-model generation service.
-* When it is contacted: only after an administrator opens the AtlasAR dashboard, enters a personal Tripo3D API key, and clicks "Generate 3D Model". No call is made until both the key and the explicit user action are in place.
-* What is sent: the text prompt or image the administrator submits, plus the administrator's own Tripo3D API key in the `Authorization` header. No site visitor data, post content, or visitor IP is transmitted.
-* Where requests go: `https://api.tripo3d.ai/v2/openapi/task`.
-* API key sign-up: [https://platform.tripo3d.ai/api-keys](https://platform.tripo3d.ai/api-keys)
-* Terms of service: [https://www.tripo3d.ai/terms-of-service](https://www.tripo3d.ai/terms-of-service)
-* Privacy policy: [https://www.tripo3d.ai/privacy-policy](https://www.tripo3d.ai/privacy-policy)
-
-**5. Meshy AI API**
-
-* What it is: a third-party text/image-to-3D generation service, used as an alternative provider to Tripo3D.
-* When it is contacted: only after an administrator opens the AtlasAR dashboard, enters a personal Meshy AI API key, and clicks "Generate 3D Model" with Meshy selected as the provider. No call is made until both the key and the explicit user action are in place.
-* What is sent: the text prompt or image the administrator submits, plus the administrator's own Meshy AI API key in the `Authorization` header. No site visitor data is transmitted.
-* Where requests go: `https://api.meshy.ai/openapi/v2/text-to-3d`.
-* API key sign-up: [https://www.meshy.ai/settings/api](https://www.meshy.ai/settings/api)
-* Terms of service: [https://www.meshy.ai/terms](https://www.meshy.ai/terms)
-* Privacy policy: [https://www.meshy.ai/privacy](https://www.meshy.ai/privacy)
-
-**6. AtlasAiDev usage statistics (opt-in only)**
-
-* What it is: AtlasAiDev's own anonymous usage-statistics endpoint, used to count active installs and broad WordPress / PHP version distribution.
-* When it is contacted: ONLY if the administrator explicitly opts in from the plugin's admin notice. Default is OFF; nothing is sent if the administrator dismisses the notice or never sees it.
-* What is sent (when opted in): plugin name and version, WordPress version, PHP version, site URL, site name, site language, count of active and inactive plugins, and the administrator's name and email address (for support follow-up). No visitor data, post content, or product data is transmitted.
-* Where requests go: `https://track.atlasaidev.com/wp-json/atlasaidev_tracker/`.
-* Terms of service: [https://atlasaidev.com/terms-and-conditions/](https://atlasaidev.com/terms-and-conditions/)
-* Privacy policy: [https://atlasaidev.com/privacy-policy/](https://atlasaidev.com/privacy-policy/)
-
-**7. AtlasAiDev usage-statistics IP lookup (icanhazip.com, opt-in only)**
-
-* What it is: `icanhazip.com` is a simple text-only echo service that returns the caller's public IP. The plugin uses it to attach a rough geolocation IP to the AtlasAiDev usage-statistics payload (service 6 above).
-* When it is contacted: ONLY when an administrator has opted in to the AtlasAiDev usage statistics. If the tracker is OFF — which is the default — no request is ever made to `icanhazip.com`.
-* What is sent: a standard HTTPS GET request. No user, site, or product data is transmitted in the request itself; the response (the public IP) is then included in the next tracker payload to AtlasAiDev.
-* Where requests go: `https://icanhazip.com/`.
-* Provider: Cloudflare (operates icanhazip.com).
-* Terms of service: [https://www.cloudflare.com/website-terms/](https://www.cloudflare.com/website-terms/)
-* Privacy policy: [https://www.cloudflare.com/privacypolicy/](https://www.cloudflare.com/privacypolicy/)
-
-**8. AtlasAiDev plugin recommendations manifest (raw.githubusercontent.com)**
-
-* What it is: a publicly-readable JSON file hosted on GitHub that lists the current set of AtlasAiDev plugins shown on the "Other plugins" admin submenu. Keeping it on GitHub lets the recommendations stay accurate without forcing a plugin release every time a new sibling plugin ships.
-* When it is contacted: only when an administrator opens the "AtlasAR → Other plugins" admin submenu page. The page itself displays a visible notice describing this fetch. The result is cached for 24 hours via a WordPress transient, so the request fires at most once per day per site. Visiting any other page does not trigger this call.
-* What is sent: a standard HTTPS GET request for the static JSON file. No site, user, or product data is transmitted.
-* Where requests go: `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`.
-* Provider: GitHub (Microsoft).
-* Terms of service: [https://docs.github.com/en/site-policy/github-terms/github-terms-of-service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)
-* Privacy policy: [https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)
+The DRACO, KTX2/Basis, and three.js Lottie decoders that `<model-viewer>` needs are bundled under `public/js/vendor/decoders/` and served from your own site, so the plugin never fetches them from `gstatic.com` or `cdn.jsdelivr.net`.
 
 
 == Source code ==
 
-The full, un-minified source for every JavaScript and CSS bundle shipped with this plugin is published in a public GitHub repository:
-
-[https://github.com/azizulhasan/ar-vr-3d-model-try-on](https://github.com/azizulhasan/ar-vr-3d-model-try-on)
-
-That repository contains:
-
-* All PHP source files (also present in the plugin zip).
-* The React dashboard sources under `src/dashboard/` and metabox sources under `src/metabox/`.
-* The vanilla-JS public-side sources (try-on controller, MediaPipe face worker, etc.) under `src/context/`.
-* The Tailwind CSS source at `src/tailwind.css`.
-* The webpack-mix and Gulp build configurations (`webpack.mix.js`, `gulpfile.js`).
-* The exact `package.json` and `composer.json` manifests used to produce the bundled assets.
-
-To rebuild the production assets locally from a clean clone:
-
-`composer install`
-`npm install`
-`npm run production`
-
-This regenerates every minified file shipped under `admin/js/build/` and `public/js/build/`, including the `tryon-face-worker.*.js`, `tryon-controller.*.js`, and `ar-compression-client.min.js` chunks. Each chunk's source files live in the `src/` directory described above.
+The complete, unminified source (GPLv3) is on GitHub: https://github.com/azizulhasan/ar-vr-3d-model-try-on. The git tag matching each wp.org version is the exact source used for that release ZIP. Rebuild from a clean clone with `composer install && npm install && npm run production`.
 
 
 == Installation ==
