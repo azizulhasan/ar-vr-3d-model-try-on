@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON_Public;
+namespace AR_TRY_ON_Public; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Cache;
@@ -175,6 +175,16 @@ class AR_TRY_ON_Public {
 
 			// Enqueue image/3D toggle styles
 			wp_enqueue_style( 'atlas-ar-toggle', ATLAS_AR_PLUGIN_URL . 'public/css/image-3d-toggle.css', array(), $this->version, 'all' );
+
+			// Dynamic Try-On / View-in-AR buttons block. Replaces the inline
+			// <style> that build_dynamic_buttons_block() used to emit — the
+			// rules are class-scoped (.atlas-ar-tryon-buttons) and the footer
+			// sampler still sets the per-wrapper CSS custom properties inline.
+			// Enqueued in <head> here so it's present before the_content runs
+			// (the_content fires after wp_head, so a late enqueue would miss).
+			$tryon_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-tryon-buttons.css';
+			$tryon_css_ver  = file_exists( $tryon_css_path ) ? (string) filemtime( $tryon_css_path ) : $this->version;
+			wp_enqueue_style( 'atlas-ar-tryon-buttons', ATLAS_AR_PLUGIN_URL . 'public/css/ar-tryon-buttons.css', array(), $tryon_css_ver, 'all' );
 		}
 
 
@@ -217,6 +227,9 @@ class AR_TRY_ON_Public {
 		// product. Enqueue BEFORE the bail.
 		if ( AR_TRY_ON_Helper::is_qr_code_enabled() ) {
 			wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+			// Builds the QR into the placeholder div rendered by
+			// AR_TRY_ON_Helper::get_qr_code(). Depends on the generator lib.
+			wp_enqueue_script( 'ar-try-on-qr-init', ATLAS_AR_PLUGIN_URL . 'public/js/ar-qr-init.js', array( 'ar-try-on-qr-generator' ), $this->version, true );
 		}
 
 		if ( $skip_static_ar_bundle ) {
@@ -227,12 +240,70 @@ class AR_TRY_ON_Public {
 		// Performance Optimization: Lazy load model-viewer instead of loading immediately
 		// This saves ~956KB and improves initial page load by 100-200ms
 		// Model-viewer will load only when AR content becomes visible in viewport
-		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
-		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
+		//
+		// filemtime-based versioning (same reason as the CSS above): the
+		// webpack dist bundles get rebuilt mid-version (e.g. the AR-66
+		// product-id -> data-product-id rename), but `$this->version` only
+		// changes on release. Without a fresh ?ver, browsers keep serving the
+		// stale cached bundle and miss the rebuild (symptom: a button with a
+		// valid data-product-id logs "Product ID is missing" from the old JS).
+		$atlasar_path   = ATLAS_AR_PLUGIN_PATH . 'public/js/AtlasAR.dist.js';
+		$public_js_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-vr-3d-model-try-on-public-dist.js';
+		$lazy_js_path   = ATLAS_AR_PLUGIN_PATH . 'public/js/lazy-load-model-viewer.js';
+		$atlasar_ver    = file_exists( $atlasar_path ) ? (string) filemtime( $atlasar_path ) : $this->version;
+		$public_js_ver  = file_exists( $public_js_path ) ? (string) filemtime( $public_js_path ) : $this->version;
+		$lazy_js_ver    = file_exists( $lazy_js_path ) ? (string) filemtime( $lazy_js_path ) : $this->version;
+
+		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $atlasar_ver, false );
+		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $public_js_ver, true );
 		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->get_localize_data() );
 
-		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
+		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $lazy_js_ver, true );
 		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->get_localize_data() );
+
+		// Inline `[atlas_ar reveal="true"]` model-viewer reveal. Replaces the
+		// inline <script type="module"> that AR_TRY_ON_Helper::create_shortcode
+		// used to emit — it finds each `.atlas-ar-shortcode-reveal` placeholder
+		// and injects the AtlasAR skeleton. Enqueued here (alongside AtlasAR,
+		// its dependency) so it's reliably printed regardless of which late
+		// gallery / the_content hook actually rendered the shortcode.
+		$reveal_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-shortcode-reveal.js';
+		$reveal_ver  = file_exists( $reveal_path ) ? (string) filemtime( $reveal_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-shortcode-reveal', ATLAS_AR_PLUGIN_URL . 'public/js/ar-shortcode-reveal.js', array( 'AtlasAR' ), $reveal_ver, true );
+
+		// Product-gallery image⇄3D toggle. Replaces the inline <script> that
+		// AR_TRY_ON::add_image_3d_toggle_to_gallery emitted — that method runs
+		// at wp_footer priority 20 (too late to enqueue), so register the
+		// handle here. The JS bails when no #atlas_ar-toggle-3d-container is
+		// present, so enqueuing it on every supported page is harmless.
+		// Depends on the reveal script so the model-viewer skeleton is
+		// injected into the hidden container before the toggle clones it.
+		$toggle_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-image-3d-toggle.js';
+		$toggle_ver  = file_exists( $toggle_path ) ? (string) filemtime( $toggle_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-image-3d-toggle', ATLAS_AR_PLUGIN_URL . 'public/js/ar-image-3d-toggle.js', array( 'AtlasAR', 'atlas-ar-shortcode-reveal' ), $toggle_ver, true );
+
+		// WooCommerce gallery 3D-item poster hydration. Replaces the inline
+		// <script> that AR_TRY_ON::add_3d_file_as_product_gallery_item emitted
+		// (rendered on woocommerce_product_thumbnails). Reads the cached poster
+		// from sessionStorage; bails when no #atlas_ar-3d-gallery-item exists.
+		$poster_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-gallery-poster.js';
+		$poster_ver  = file_exists( $poster_path ) ? (string) filemtime( $poster_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-gallery-poster', ATLAS_AR_PLUGIN_URL . 'public/js/ar-gallery-poster.js', array(), $poster_ver, true );
+
+		// WooCommerce "3D View" product tab lazy loader. Replaces the inline
+		// <script> in atlas_ar_button_tab(); loads the model when the tab is
+		// clicked. Bails when no .atlas-ar-wc-tab-viewer container is present.
+		$wctab_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-wc-tab.js';
+		$wctab_ver  = file_exists( $wctab_path ) ? (string) filemtime( $wctab_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-wc-tab', ATLAS_AR_PLUGIN_URL . 'public/js/ar-wc-tab.js', array( 'AtlasAR' ), $wctab_ver, true );
+
+		// Try-On overlay button placement. Replaces the inline <script> in
+		// AR_TRY_ON_Tryon::render_button_overlay (wp_footer:25, too late to
+		// enqueue). Clones the #atlas_ar-tryon-overlay-source <template> into
+		// the gallery image container; bails when the template is absent.
+		$overlay_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-tryon-overlay-place.js';
+		$overlay_ver  = file_exists( $overlay_path ) ? (string) filemtime( $overlay_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-tryon-overlay-place', ATLAS_AR_PLUGIN_URL . 'public/js/ar-tryon-overlay-place.js', array(), $overlay_ver, true );
 	}
 
 	/**
@@ -250,7 +321,8 @@ class AR_TRY_ON_Public {
 			'ar-try-on-google-model-viewer',
 			'AtlasAR',
 			$this->plugin_name,
-			'ar-try-on-qr-generator'
+			'ar-try-on-qr-generator',
+			'ar-try-on-qr-init'
 		);
 
 		// Add defer attribute if this is one of our scripts
@@ -326,13 +398,10 @@ class AR_TRY_ON_Public {
             return;
         }
         self::$qr_rendered_for_post[ $post_id ] = true;
-        // QR HTML is built server-side from internal templates and contains an
-        // inline <script> that bootstraps the QR generator. wp_kses cannot be
-        // used here because it HTML-encodes special characters (e.g. `>` → `&gt;`)
-        // inside <script> content, which produces invalid JavaScript and a
-        // browser SyntaxError. The content is entirely under plugin control —
-        // see AR_TRY_ON_Helper::get_qr_code() — and never includes user input.
-        echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled markup with inline <script>; see comment above.
+        // get_qr_code() now returns only an escapable placeholder div
+        // (the QR is built at runtime by the enqueued ar-qr-init.js), so
+        // it can be escaped with wp_kses() — no more inline <script>.
+        echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
     }
 
     public function atlas_ar_button( $content ) {
@@ -380,10 +449,12 @@ class AR_TRY_ON_Public {
             $is_face   = AR_TRY_ON_Tryon::is_face_placement( $placement );
         }
         if ( $is_face ) {
+            // $qr_html is now just an escapable placeholder div.
+            $safe_qr = wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
             if ( $current_filter === 'the_content' ) {
-                return $content . $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
+                return $content . $safe_qr;
             }
-            echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
             return;
         }
 
@@ -418,12 +489,17 @@ class AR_TRY_ON_Public {
             self::$btn_rendered_for_post[ $post_id ] = true;
         }
 
-        $ar_button_content = $qr_html . $button_html;
-
+        // Both fragments are now inline-script/style-free (QR script moved to
+        // ar-qr-init.js; button <style>/SVG moved to ar-tryon-buttons.css), so
+        // each is sanitised inline with its own wp_kses allow-list at the
+        // output boundary — no intermediate variable, no phcs:ignore.
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
-            return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
+            return $content
+                . wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+                . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
         } else {
-            echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+                . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
         }
     }
 
@@ -462,40 +538,20 @@ class AR_TRY_ON_Public {
             }
         }
 
-        ob_start();
-        ?>
-        <div  id="atlas_ar_<?php echo esc_attr($post_id) ?>"></div>
-        <script type="module">
-            document.addEventListener("DOMContentLoaded", async function  () {
-                let atlasAR = new window.AtlasAR()
-                let product_id = "<?php echo esc_attr($post_id) ?>";
-                const htmlContent = atlasAR.getModelSkeleton(`model_viewer_${product_id}`);
-
-                let current_product = document.getElementById('atlas_ar_' + product_id);
-                let tab = document.getElementById('tab-title-atlas_ar_3d_view');
-                let modelLoaded = false;
-                tab.addEventListener('click', async function() {
-                    if(!modelLoaded) {
-                        current_product.innerHTML = '<h1>3D File Is Loading</h1>'
-                    }
-                    setTimeout(async  function(){
-                        if (tab.classList.contains('active') && current_product && !modelLoaded) {
-                            current_product.innerHTML = htmlContent; // Insert model-viewer HTML
-                            atlasAR.fetchModelData(product_id, "#model_viewer_"+product_id )
-                        }
-                    }, 500)
-                })
-
-            });
-        </script>
-        <?php
-        $ar_button_content = ob_get_clean();
-
+        // The lazy "3D View" tab loader moved from an inline <script> to the
+        // enqueued public/js/ar-wc-tab.js (registered in enqueue_scripts). It
+        // reads the product id from the container's data attribute and, on
+        // tab click, injects the AtlasAR model-viewer skeleton. The container
+        // is plain HTML escaped via wp_kses() at the output boundary.
+        $ar_button_content = sprintf(
+            '<div class="atlas-ar-wc-tab-viewer" id="atlas_ar_%1$s" data-atlas-product-id="%1$s"></div>',
+            esc_attr( $post_id )
+        );
 
 		if ( $post->post_type != 'product' ) {
-			return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
+			return $content . wp_kses( $ar_button_content, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
 		} else {
-			echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
+			echo wp_kses( $ar_button_content, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
 		}
 	}
 

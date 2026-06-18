@@ -7,8 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (buttons) {
         buttons.map(button => {
             button.addEventListener('click', async () => {
-                // Retrieve the product_id from the button's data-product-id attribute
-                const product_id = button.getAttribute('product-id');
+                // Retrieve the product id from the button's data-product-id
+                // attribute (falls back to the legacy product-id attribute
+                // for any HTML cached before the 2.2.0 rename).
+                const product_id = button.getAttribute('data-product-id') || button.getAttribute('product-id');
 
                 // Verify if product_id is defined
                 if (!product_id) {

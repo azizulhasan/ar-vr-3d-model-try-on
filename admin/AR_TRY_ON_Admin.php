@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON_Admin;
+namespace AR_TRY_ON_Admin; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
 use AR_TRY_ON\AR_TRY_ON_Helper;
 

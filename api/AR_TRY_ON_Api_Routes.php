@@ -187,6 +187,14 @@ class AR_TRY_ON_Api_Routes
             $data += $product_settings;
             $data['product_name'] = $post_id ? get_the_title($post_id) : '';
 
+            // Reviewer item 1: strip any HTML from custom_css before it
+            // leaves the server, so values persisted by an older (un-
+            // sanitized) build can't reach the front-end as a markup
+            // injection vector. New writes are sanitized in the POST branch.
+            if (isset($data['custom_css'])) {
+                $data['custom_css'] = AR_TRY_ON_Helper::sanitize_custom_css($data['custom_css']);
+            }
+
             /**
              * If call is form frontend then exclude api related values.
              * and update cached ids
@@ -201,6 +209,20 @@ class AR_TRY_ON_Api_Routes
             foreach ($fields as $key => $value) {
                 if (strpos($key, 'ar_try_on') === false) {
                     $filtered_data[$key] = $value;
+                }
+            }
+
+            // Reviewer item 1: custom_css is persisted straight from the
+            // request body. Strip any HTML so it can't be used as a stored
+            // CSS/markup injection vector, and keep the echoed response in
+            // sync with what we actually store.
+            if (isset($filtered_data['custom_css'])) {
+                $safe_css = AR_TRY_ON_Helper::sanitize_custom_css($filtered_data['custom_css']);
+                $filtered_data['custom_css'] = $safe_css;
+                if (is_object($data) && isset($data->custom_css)) {
+                    $data->custom_css = $safe_css;
+                } elseif (is_array($data) && isset($data['custom_css'])) {
+                    $data['custom_css'] = $safe_css;
                 }
             }
 
@@ -258,7 +280,7 @@ class AR_TRY_ON_Api_Routes
 //        $response_data = json_decode($response_data, true);
 //
 //        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
-//        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($result['data']['output'], $decoded_data);
+//        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_and_store($result['data']['output'], $decoded_data);
 //
 //        $result['extra'] = [
 //            '$decoded_data' => $decoded_data,
@@ -411,7 +433,7 @@ class AR_TRY_ON_Api_Routes
         }
 
         $task_result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $task_response_body);
-        $task_result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($task_result['data']['output'], $decoded_data);
+        $task_result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_and_store($task_result['data']['output'], $decoded_data);
         $task_result['extra'] = [
             '$task_response_body' => $task_response_body
         ];
