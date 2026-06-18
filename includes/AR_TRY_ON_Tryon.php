@@ -1,24 +1,24 @@
 <?php
 
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 
 /**
  * Virtual Try-On — TensorFlow.js + MediaPipe Face Landmarker integration.
  *
  * Free v1 scope: face only (glasses + hats), single face, snapshot capture.
- * Pro extends via filters declared in {@see ATLAS_AR_Tryon_Hooks}.
+ * Pro extends via filters declared in {@see AR_TRY_ON_Tryon_Hooks}.
  *
  * Try-On is **opt-in per product** via the existing `ar_placement` field
  * (`face-glasses` / `face-hat`). Existing products with `floor`/`wall` are
  * untouched — no extra scripts, no extra buttons, no behavior change.
  *
  * Settings live inside the existing `ar_try_on_settings` option (read via
- * {@see ATLAS_AR_Helper::get_settings}) using a `tryon_` key prefix.
+ * {@see AR_TRY_ON_Helper::get_settings}) using a `tryon_` key prefix.
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  */
-class ATLAS_AR_Tryon {
+class AR_TRY_ON_Tryon {
 
 	const SCRIPT_HANDLE = 'atlas-ar-tryon-bootstrap';
 	const STYLE_HANDLE  = 'atlas-ar-tryon';
@@ -85,11 +85,11 @@ class ATLAS_AR_Tryon {
 	 *  - {@see render_button_for_face_product} (WC numeric-position hook),
 	 *  - {@see render_button_overlay}          (WC toggle-mode footer),
 	 *  - {@see append_button_to_content}       (non-WC `the_content` filter),
-	 *  - {@see \ATLAS_AR\ATLAS_AR_Helper::create_shortcode}
+	 *  - {@see \AR_TRY_ON\AR_TRY_ON_Helper::create_shortcode}
 	 *    (`[atlas_ar]` shortcode reveal=true overlay path).
 	 *
 	 * Public so external callers (like the shortcode renderer in
-	 * `ATLAS_AR_Helper`) can mark the post as rendered and prevent
+	 * `AR_TRY_ON_Helper`) can mark the post as rendered and prevent
 	 * downstream paths (e.g., `render_button_overlay` at `wp_footer`)
 	 * from double-emitting the Try-On button on the same page.
 	 */
@@ -123,7 +123,7 @@ class ATLAS_AR_Tryon {
 		// (`product_image` / `3d_viewer`) get a special path: the button
 		// renders as an overlay on the featured image, right next to the
 		// existing cube toggle (so cube + Try-On co-exist).
-		$global   = ATLAS_AR_Helper::get_settings();
+		$global   = AR_TRY_ON_Helper::get_settings();
 		$position = isset( $global['ar_try_on_wc_hook_position'] ) ? $global['ar_try_on_wc_hook_position'] : 'product_image';
 
 		if ( self::is_toggle_mode_position( $position ) ) {
@@ -194,7 +194,7 @@ class ATLAS_AR_Tryon {
 	 * with sane defaults.
 	 */
 	public static function get_settings() {
-		$saved = ATLAS_AR_Helper::get_settings();
+		$saved = AR_TRY_ON_Helper::get_settings();
 		return wp_parse_args( is_array( $saved ) ? $saved : array(), self::default_settings() );
 	}
 
@@ -235,8 +235,8 @@ class ATLAS_AR_Tryon {
 	 */
 	public static function get_product_settings( $post_id ) {
 		$raw = (array) get_post_meta( (int) $post_id, 'ar_try_on_product_settings', true );
-		if ( method_exists( 'ATLAS_AR\\ATLAS_AR_Helper', 'rename_old_keys_of_product_metadata' ) ) {
-			$raw = ATLAS_AR_Helper::rename_old_keys_of_product_metadata( $raw );
+		if ( method_exists( 'AR_TRY_ON\\AR_TRY_ON_Helper', 'rename_old_keys_of_product_metadata' ) ) {
+			$raw = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata( $raw );
 		}
 		return $raw;
 	}
@@ -259,9 +259,9 @@ class ATLAS_AR_Tryon {
 	/**
 	 * Whether the AtlasAR Pro plugin is loaded.
 	 *
-	 * Thin wrapper around {@see ATLAS_AR_Helper::is_pro_active()} —
+	 * Thin wrapper around {@see AR_TRY_ON_Helper::is_pro_active()} —
 	 * kept on this class because several call-sites elsewhere in the
-	 * codebase reach for `ATLAS_AR_Tryon::is_pro_active()`. The
+	 * codebase reach for `AR_TRY_ON_Tryon::is_pro_active()`. The
 	 * underlying check is a constant-presence check (see Helper); it
 	 * is allowed to hide upsell badges and conditionally delegate
 	 * optional behaviour to Pro classes, never to gate a Free feature.
@@ -271,7 +271,7 @@ class ATLAS_AR_Tryon {
 	 * @return  bool True when the Pro plugin is loaded, false otherwise.
 	 */
 	public static function is_pro_active() {
-		return (bool) ATLAS_AR_Helper::is_pro_active();
+		return (bool) AR_TRY_ON_Helper::is_pro_active();
 	}
 
 	/*
@@ -346,7 +346,7 @@ class ATLAS_AR_Tryon {
 		if ( ! self::should_enqueue_for_current_request() ) {
 			return;
 		}
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return;
 		}
 
@@ -354,7 +354,7 @@ class ATLAS_AR_Tryon {
 		if ( ! $post_id ) {
 			return;
 		}
-		if ( ! ATLAS_AR_Helper::has_3d_model( $post_id ) ) {
+		if ( ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
 			return;
 		}
 		// Per-request guard — first emitter wins. Subsequent calls (e.g.,
@@ -383,18 +383,18 @@ class ATLAS_AR_Tryon {
 	 *
 	 * Runs at `wp_footer` so it can place markup that the front-end JS
 	 * grafts into the gallery container (mirroring the pattern used by
-	 * {@see \ATLAS_AR\ATLAS_AR::add_image_3d_toggle_to_gallery}).
+	 * {@see \AR_TRY_ON\AR_TRY_ON::add_image_3d_toggle_to_gallery}).
 	 */
 	public function render_button_overlay() {
 		if ( ! self::should_enqueue_for_current_request() ) {
 			return;
 		}
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return;
 		}
 
 		$post_id = self::current_product_id();
-		if ( ! $post_id || ! ATLAS_AR_Helper::has_3d_model( $post_id ) ) {
+		if ( ! $post_id || ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
 			return;
 		}
 		// Per-request guard — the overlay path is only used on WC product
@@ -421,7 +421,7 @@ class ATLAS_AR_Tryon {
 
 		// The placement logic moved from an inline <script> to the enqueued
 		// public/js/ar-tryon-overlay-place.js (registered in
-		// ATLAS_AR_Public::enqueue_scripts). It clones the <template> below
+		// AR_TRY_ON_Public::enqueue_scripts). It clones the <template> below
 		// into the gallery image container. The template is literal markup
 		// with every dynamic value escaped inline, so it ships as-is.
 		?>
@@ -483,7 +483,7 @@ class ATLAS_AR_Tryon {
 		if ( ! self::should_enqueue_for_current_request() ) {
 			return $content;
 		}
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return $content;
 		}
 
@@ -491,7 +491,7 @@ class ATLAS_AR_Tryon {
 		if ( ! $post_id ) {
 			return $content;
 		}
-		if ( ! ATLAS_AR_Helper::has_3d_model( $post_id ) ) {
+		if ( ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
 			return $content;
 		}
 
@@ -534,7 +534,7 @@ class ATLAS_AR_Tryon {
 	 *
 	 * Shared by:
 	 *  - {@see append_button_to_content} (non-WC `the_content` filter)
-	 *  - {@see \ATLAS_AR\ATLAS_AR_Helper::create_shortcode} (shortcode
+	 *  - {@see \AR_TRY_ON\AR_TRY_ON_Helper::create_shortcode} (shortcode
 	 *    + block, reveal=false branch)
 	 *
 	 * Returns the HTML string. The caller decides where to insert it.
@@ -748,7 +748,7 @@ class ATLAS_AR_Tryon {
 		if ( ! self::should_enqueue_for_current_request() ) {
 			return;
 		}
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return;
 		}
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace ATLAS_AR_Public;
+namespace AR_TRY_ON_Public;
 
-use ATLAS_AR\ATLAS_AR_Helper;
-use ATLAS_AR\ATLAS_AR_Cache;
-use ATLAS_AR\ATLAS_AR_Tryon;
+use AR_TRY_ON\AR_TRY_ON_Helper;
+use AR_TRY_ON\AR_TRY_ON_Cache;
+use AR_TRY_ON\AR_TRY_ON_Tryon;
 
 /**
  * The public-facing functionality of the plugin.
@@ -12,8 +12,8 @@ use ATLAS_AR\ATLAS_AR_Tryon;
  * @link       https://racmanuel.dev
  * @since      1.0.0
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/public
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/public
  */
 
 /**
@@ -23,11 +23,11 @@ use ATLAS_AR\ATLAS_AR_Tryon;
  * enqueue the public-facing stylesheet and JavaScript.
  * As you add hooks and methods, update this description.
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/public
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/public
  * @author     Manuel Ramirez Coronel <ra_cm@outlook.com>
  */
-class ATLAS_AR_Public {
+class AR_TRY_ON_Public {
 
 	/**
 	 * The ID of this plugin.
@@ -84,7 +84,7 @@ class ATLAS_AR_Public {
 
 		// `localize_data` is built lazily by get_localize_data()
 		// rather than here in the constructor — see the long comment
-		// in ATLAS_AR_Admin's constructor for why. AR-61 §1.1 Phase 4.
+		// in AR_TRY_ON_Admin's constructor for why. AR-61 §1.1 Phase 4.
 		$this->localize_data = null;
 
 
@@ -109,7 +109,7 @@ class ATLAS_AR_Public {
 	 * Build (or return the cached copy of) the wp_localize_script
 	 * payload for the public bundle.
 	 *
-	 * Mirrors {@see ATLAS_AR_Admin::get_localize_data()} on the
+	 * Mirrors {@see AR_TRY_ON_Admin::get_localize_data()} on the
 	 * public side. Lazy by design — the Phase 3 filter-driven keys
 	 * (supported_formats, dashboard_tabs, metabox_sections) are read
 	 * here at enqueue time, by which point Pro has had a chance to
@@ -132,8 +132,8 @@ class ATLAS_AR_Public {
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
 			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
-			'is_pro_active' => ATLAS_AR_Helper::is_pro_active(),
-			'cached_ids'    => ATLAS_AR_Helper::update_cache_data( false ),
+			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
+			'cached_ids'    => AR_TRY_ON_Helper::update_cache_data( false ),
 
 			/*
 			 * Phase 3 extension-surface payload — kept symmetric with
@@ -141,9 +141,9 @@ class ATLAS_AR_Public {
 			 * (current and future) can read the same Pro-extension
 			 * data without a second REST round-trip.
 			 */
-			'supported_formats' => ATLAS_AR_Helper::supported_formats(),
-			'dashboard_tabs'    => ATLAS_AR_Helper::dashboard_settings_tabs(),
-			'metabox_sections'  => ATLAS_AR_Helper::metabox_sections(),
+			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
+			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
 		];
 		return $this->localize_data;
 	}
@@ -154,13 +154,13 @@ class ATLAS_AR_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( is_admin() && ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( is_admin() && AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', ATLAS_AR_PLUGIN_URL . '/public/css/ar-try-on.css', array(), $this->version, 'all' );
 
 
 		}
 
-		if ( ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 
 			// filemtime-based versioning forces browsers to grab a
 			// fresh copy whenever we tweak the CSS — the plugin
@@ -197,7 +197,7 @@ class ATLAS_AR_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return;
 		}
 
@@ -205,15 +205,15 @@ class ATLAS_AR_Public {
 		// `ar_placement` is `face-*` AND the static viewer toggle is OFF,
 		// the AtlasAR + lazy-loader + QR scripts add nothing useful and
 		// just waste bytes. In that one case we ship only tryon-bootstrap
-		// (enqueued separately by ATLAS_AR_Tryon::enqueue_assets). All
+		// (enqueued separately by AR_TRY_ON_Tryon::enqueue_assets). All
 		// other contexts keep the current bundle exactly as before.
 		$skip_static_ar_bundle = false;
-		if ( class_exists( '\\ATLAS_AR\\ATLAS_AR_Tryon' ) ) {
-			$post_id = ATLAS_AR_Tryon::current_product_id();
+		if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+			$post_id = AR_TRY_ON_Tryon::current_product_id();
 			if ( $post_id ) {
-				$placement = ATLAS_AR_Tryon::get_product_placement( $post_id );
-				$show_viewer = ATLAS_AR_Tryon::should_show_static_viewer( $post_id );
-				if ( ATLAS_AR_Tryon::is_face_placement( $placement ) && ! $show_viewer ) {
+				$placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+				$show_viewer = AR_TRY_ON_Tryon::should_show_static_viewer( $post_id );
+				if ( AR_TRY_ON_Tryon::is_face_placement( $placement ) && ! $show_viewer ) {
 					$skip_static_ar_bundle = true;
 				}
 			}
@@ -225,10 +225,10 @@ class ATLAS_AR_Public {
 		// generator JS needs to be on the page regardless of whether
 		// we're about to bail the static AR bundle for a face-only
 		// product. Enqueue BEFORE the bail.
-		if ( ATLAS_AR_Helper::is_qr_code_enabled() ) {
+		if ( AR_TRY_ON_Helper::is_qr_code_enabled() ) {
 			wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
 			// Builds the QR into the placeholder div rendered by
-			// ATLAS_AR_Helper::get_qr_code(). Depends on the generator lib.
+			// AR_TRY_ON_Helper::get_qr_code(). Depends on the generator lib.
 			wp_enqueue_script( 'ar-try-on-qr-init', ATLAS_AR_PLUGIN_URL . 'public/js/ar-qr-init.js', array( 'ar-try-on-qr-generator' ), $this->version, true );
 		}
 
@@ -262,7 +262,7 @@ class ATLAS_AR_Public {
 		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->get_localize_data() );
 
 		// Inline `[atlas_ar reveal="true"]` model-viewer reveal. Replaces the
-		// inline <script type="module"> that ATLAS_AR_Helper::create_shortcode
+		// inline <script type="module"> that AR_TRY_ON_Helper::create_shortcode
 		// used to emit — it finds each `.atlas-ar-shortcode-reveal` placeholder
 		// and injects the AtlasAR skeleton. Enqueued here (alongside AtlasAR,
 		// its dependency) so it's reliably printed regardless of which late
@@ -272,7 +272,7 @@ class ATLAS_AR_Public {
 		wp_enqueue_script( 'atlas-ar-shortcode-reveal', ATLAS_AR_PLUGIN_URL . 'public/js/ar-shortcode-reveal.js', array( 'AtlasAR' ), $reveal_ver, true );
 
 		// Product-gallery image⇄3D toggle. Replaces the inline <script> that
-		// ATLAS_AR::add_image_3d_toggle_to_gallery emitted — that method runs
+		// AR_TRY_ON::add_image_3d_toggle_to_gallery emitted — that method runs
 		// at wp_footer priority 20 (too late to enqueue), so register the
 		// handle here. The JS bails when no #atlas_ar-toggle-3d-container is
 		// present, so enqueuing it on every supported page is harmless.
@@ -283,7 +283,7 @@ class ATLAS_AR_Public {
 		wp_enqueue_script( 'atlas-ar-image-3d-toggle', ATLAS_AR_PLUGIN_URL . 'public/js/ar-image-3d-toggle.js', array( 'AtlasAR', 'atlas-ar-shortcode-reveal' ), $toggle_ver, true );
 
 		// WooCommerce gallery 3D-item poster hydration. Replaces the inline
-		// <script> that ATLAS_AR::add_3d_file_as_product_gallery_item emitted
+		// <script> that AR_TRY_ON::add_3d_file_as_product_gallery_item emitted
 		// (rendered on woocommerce_product_thumbnails). Reads the cached poster
 		// from sessionStorage; bails when no #atlas_ar-3d-gallery-item exists.
 		$poster_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-gallery-poster.js';
@@ -298,7 +298,7 @@ class ATLAS_AR_Public {
 		wp_enqueue_script( 'atlas-ar-wc-tab', ATLAS_AR_PLUGIN_URL . 'public/js/ar-wc-tab.js', array( 'AtlasAR' ), $wctab_ver, true );
 
 		// Try-On overlay button placement. Replaces the inline <script> in
-		// ATLAS_AR_Tryon::render_button_overlay (wp_footer:25, too late to
+		// AR_TRY_ON_Tryon::render_button_overlay (wp_footer:25, too late to
 		// enqueue). Clones the #atlas_ar-tryon-overlay-source <template> into
 		// the gallery image container; bails when the template is absent.
 		$overlay_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-tryon-overlay-place.js';
@@ -348,7 +348,7 @@ class ATLAS_AR_Public {
 
     /**
      * AR-61: lets sibling renderers (e.g. the `[atlas_ar reveal="false"]`
-     * branch in {@see ATLAS_AR_Helper::create_shortcode}) tell us they
+     * branch in {@see AR_TRY_ON_Helper::create_shortcode}) tell us they
      * already emitted a View-in-AR button for `$post_id` from inside the
      * post body, so the auto-display path in {@see atlas_ar_button}
      * doesn't add a second one below the content.
@@ -372,7 +372,7 @@ class ATLAS_AR_Public {
      * `atlas_ar_button` already produced one earlier in the request.
      */
     public function render_qr_code_footer() {
-        if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             return;
         }
         if ( ! is_singular() ) {
@@ -383,17 +383,17 @@ class ATLAS_AR_Public {
         if ( $post_id <= 0 ) {
             return;
         }
-        if ( ! ATLAS_AR_Helper::has_3d_model( $post_id ) ) {
+        if ( ! AR_TRY_ON_Helper::has_3d_model( $post_id ) ) {
             return;
         }
         if ( ! empty( self::$qr_rendered_for_post[ $post_id ] ) ) {
             return;
         }
-        $settings = ATLAS_AR_Helper::get_settings();
-        if ( ! ATLAS_AR_Helper::is_qr_code_enabled( $settings ) ) {
+        $settings = AR_TRY_ON_Helper::get_settings();
+        if ( ! AR_TRY_ON_Helper::is_qr_code_enabled( $settings ) ) {
             return;
         }
-        $qr_html = (string) ATLAS_AR_Helper::get_qr_code( $settings );
+        $qr_html = (string) AR_TRY_ON_Helper::get_qr_code( $settings );
         if ( $qr_html === '' ) {
             return;
         }
@@ -401,12 +401,12 @@ class ATLAS_AR_Public {
         // get_qr_code() now returns only an escapable placeholder div
         // (the QR is built at runtime by the enqueued ar-qr-init.js), so
         // it can be escaped with wp_kses() — no more inline <script>.
-        echo wp_kses( $qr_html, ATLAS_AR_Helper::allowed_html( 'qr' ) );
+        echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
     }
 
     public function atlas_ar_button( $content ) {
         $current_filter = current_filter();
-        if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             if ( $current_filter === 'the_content' ) {
                 return $content;
             }
@@ -423,7 +423,7 @@ class ATLAS_AR_Public {
             $post_id = (int) ( $post->ID ?? 0 );
         }
 
-        $settings = ATLAS_AR_Helper::get_settings();
+        $settings = AR_TRY_ON_Helper::get_settings();
 
         // ── QR code ─────────────────────────────────────────────────
         // QR is independent of placement — face products should also
@@ -432,29 +432,29 @@ class ATLAS_AR_Public {
         // don't double up.
         $qr_html = '';
         if ( $post_id > 0 && empty( self::$qr_rendered_for_post[ $post_id ] ) ) {
-            $qr_html = (string) ATLAS_AR_Helper::get_qr_code( $settings );
+            $qr_html = (string) AR_TRY_ON_Helper::get_qr_code( $settings );
             if ( $qr_html !== '' ) {
                 self::$qr_rendered_for_post[ $post_id ] = true;
             }
         }
 
-        // ── Face-* products: buttons are rendered by ATLAS_AR_Tryon ─
+        // ── Face-* products: buttons are rendered by AR_TRY_ON_Tryon ─
         // (render_button_for_face_product / render_button_overlay /
         // append_button_to_content). This method only contributes the
         // QR for face products — the static-AR "View in AR" button
         // doesn't apply because face products use the Try-On modal.
         $is_face = false;
-        if ( class_exists( '\\ATLAS_AR\\ATLAS_AR_Tryon' ) && $post_id ) {
-            $placement = ATLAS_AR_Tryon::get_product_placement( $post_id );
-            $is_face   = ATLAS_AR_Tryon::is_face_placement( $placement );
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) && $post_id ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+            $is_face   = AR_TRY_ON_Tryon::is_face_placement( $placement );
         }
         if ( $is_face ) {
             // $qr_html is now just an escapable placeholder div.
-            $safe_qr = wp_kses( $qr_html, ATLAS_AR_Helper::allowed_html( 'qr' ) );
+            $safe_qr = wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
             if ( $current_filter === 'the_content' ) {
                 return $content . $safe_qr;
             }
-            echo wp_kses( $qr_html, ATLAS_AR_Helper::allowed_html( 'qr' ) );
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
             return;
         }
 
@@ -473,9 +473,9 @@ class ATLAS_AR_Public {
             && $auto_button
             && empty( self::$btn_rendered_for_post[ $post_id ] )
             && ! has_shortcode( (string) ( $post->post_content ?? '' ), 'atlas_ar' )
-            && class_exists( '\\ATLAS_AR\\ATLAS_AR_Tryon' ) ) {
+            && class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
 
-            $tryon = new ATLAS_AR_Tryon( defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '0.0.0' );
+            $tryon = new AR_TRY_ON_Tryon( defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '0.0.0' );
             $button_html = $tryon->build_dynamic_buttons_block(
                 $post_id,
                 isset( $placement ) ? $placement : '',
@@ -495,18 +495,18 @@ class ATLAS_AR_Public {
         // output boundary — no intermediate variable, no phcs:ignore.
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
             return $content
-                . wp_kses( $qr_html, ATLAS_AR_Helper::allowed_html( 'qr' ) )
-                . wp_kses( $button_html, ATLAS_AR_Helper::allowed_html( 'ar_button' ) );
+                . wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+                . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
         } else {
-            echo wp_kses( $qr_html, ATLAS_AR_Helper::allowed_html( 'qr' ) )
-                . wp_kses( $button_html, ATLAS_AR_Helper::allowed_html( 'ar_button' ) );
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+                . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
         }
     }
 
 
 	public function atlas_ar_button_tab( $content ) {
 		$current_filter = current_filter();
-        if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             if ( $current_filter === 'the_content' ) {
 				return $content;
 			}
@@ -527,10 +527,10 @@ class ATLAS_AR_Public {
         // skipped when the merchant has the static viewer toggle OFF.
         // Emitting `new window.AtlasAR()` in the WC tab here would
         // throw "AtlasAR is not a constructor" on the front-end.
-        if ( class_exists( '\\ATLAS_AR\\ATLAS_AR_Tryon' ) ) {
-            $placement = ATLAS_AR_Tryon::get_product_placement( $post_id );
-            if ( ATLAS_AR_Tryon::is_face_placement( $placement )
-                && ! ATLAS_AR_Tryon::should_show_static_viewer( $post_id ) ) {
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $post_id );
+            if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+                && ! AR_TRY_ON_Tryon::should_show_static_viewer( $post_id ) ) {
                 if ( $current_filter === 'the_content' ) {
                     return $content;
                 }
@@ -549,9 +549,9 @@ class ATLAS_AR_Public {
         );
 
 		if ( $post->post_type != 'product' ) {
-			return $content . wp_kses( $ar_button_content, ATLAS_AR_Helper::allowed_html( 'shortcode' ) );
+			return $content . wp_kses( $ar_button_content, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
 		} else {
-			echo wp_kses( $ar_button_content, ATLAS_AR_Helper::allowed_html( 'shortcode' ) );
+			echo wp_kses( $ar_button_content, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
 		}
 	}
 
@@ -567,7 +567,7 @@ class ATLAS_AR_Public {
 	 */
 	public function atlas_ar_woocommerce_tab( $tabs ) {
 
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return $tabs;
 		}
 
@@ -575,13 +575,13 @@ class ATLAS_AR_Public {
 		// when the merchant hasn't opted into the static viewer alongside.
 		// Otherwise the tab pane would emit `new window.AtlasAR()` even
 		// though we intentionally skipped enqueuing AtlasAR.dist.js.
-		if ( class_exists( '\\ATLAS_AR\\ATLAS_AR_Tryon' ) ) {
+		if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
 			global $product, $post;
 			$pid = $product ? $product->get_id() : ( $post ? $post->ID : 0 );
 			if ( $pid ) {
-				$placement = ATLAS_AR_Tryon::get_product_placement( $pid );
-				if ( ATLAS_AR_Tryon::is_face_placement( $placement )
-					&& ! ATLAS_AR_Tryon::should_show_static_viewer( $pid ) ) {
+				$placement = AR_TRY_ON_Tryon::get_product_placement( $pid );
+				if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+					&& ! AR_TRY_ON_Tryon::should_show_static_viewer( $pid ) ) {
 					return $tabs;
 				}
 			}

@@ -1,5 +1,5 @@
 <?php
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 /**
  * AR Try On - 3D Model Compression Handler
  *
@@ -16,17 +16,17 @@ namespace ATLAS_AR;
  *  - Multi-format upload support (FBX, OBJ, USDZ).
  * None of that Pro code lives in this file or in the Free zip.
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  * @since      1.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Class ATLAS_AR_Compression
+ * Class AR_TRY_ON_Compression
  */
-class ATLAS_AR_Compression {
+class AR_TRY_ON_Compression {
 
 	/**
 	 * Hard ceiling for client-side compression in bytes (10 MB).
@@ -61,7 +61,7 @@ class ATLAS_AR_Compression {
 	 */
 	public static function init() {
 		// Initialize database tables (log table only — queue is Pro).
-		ATLAS_AR_Compression_DB::init();
+		AR_TRY_ON_Compression_DB::init();
 
 		// Register settings.
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
@@ -70,7 +70,7 @@ class ATLAS_AR_Compression {
 		add_action( 'before_delete_post', array( __CLASS__, 'cleanup_on_post_delete' ) );
 	}
 
-	// Cron schedules and cleanup moved to Pro plugin (ATLAS_AR_Pro_Compression)
+	// Cron schedules and cleanup moved to Pro plugin (AR_TRY_ON_Pro_Compression)
 
 	/**
 	 * Register compression settings
@@ -236,7 +236,7 @@ class ATLAS_AR_Compression {
 			return new \WP_Error( 'compression_disabled', __( 'Compression is currently disabled.', 'ar-vr-3d-model-try-on' ) );
 		}
 
-        $source_file = ATLAS_AR_Helper::get_file_path_from_url( $source_url );
+        $source_file = AR_TRY_ON_Helper::get_file_path_from_url( $source_url );
 
 		// Check if file exists.
 		if ( ! $source_file ) {
@@ -263,7 +263,7 @@ class ATLAS_AR_Compression {
 		$format    = pathinfo( $source_file, PATHINFO_EXTENSION );
 
 		// Create compression log entry
-		$log_id = ATLAS_AR_Compression_DB::log_compression(
+		$log_id = AR_TRY_ON_Compression_DB::log_compression(
 			array(
 				'post_id'       => $post_id,
 				'original_file' => $paths['original'],
@@ -294,10 +294,10 @@ class ATLAS_AR_Compression {
 	 * AR-61 closure ("locked feature present in the code in case the user
 	 * upgrades, even if it never runs in Free, is still not allowed"), so
 	 * these methods now live ONLY in the Pro plugin —
-	 * ATLAS_AR_Pro_Compression::compress_server_side(),
-	 * ATLAS_AR_Pro_Format_Converter::convert_format(),
-	 * ATLAS_AR_Pro_Compression::add_to_queue(),
-	 * ATLAS_AR_Pro_Compression::process_queue().
+	 * AR_TRY_ON_Pro_Compression::compress_server_side(),
+	 * AR_TRY_ON_Pro_Format_Converter::convert_format(),
+	 * AR_TRY_ON_Pro_Compression::add_to_queue(),
+	 * AR_TRY_ON_Pro_Compression::process_queue().
 	 */
 
 	/**
@@ -315,7 +315,7 @@ class ATLAS_AR_Compression {
 		}
 
 		$compressed_size = filesize( $compressed_file );
-		$log             = ATLAS_AR_Compression_DB::get_compression_log( $log_id, 'id' );
+		$log             = AR_TRY_ON_Compression_DB::get_compression_log( $log_id, 'id' );
 
 		if ( ! $log ) {
 			return false;
@@ -323,7 +323,7 @@ class ATLAS_AR_Compression {
 
 		$compression_ratio = ( 1 - ( $compressed_size / $log['original_size'] ) ) * 100;
 
-		return ATLAS_AR_Compression_DB::update_compression_log(
+		return AR_TRY_ON_Compression_DB::update_compression_log(
 			$log_id,
 			array(
 				'compressed_size'   => $compressed_size,
@@ -343,7 +343,7 @@ class ATLAS_AR_Compression {
 	 * @return bool Success status.
 	 */
 	public static function fail_compression( $log_id, $error_message ) {
-		return ATLAS_AR_Compression_DB::update_compression_log(
+		return AR_TRY_ON_Compression_DB::update_compression_log(
 			$log_id,
 			array(
 				'status'        => 'failed',
@@ -359,7 +359,7 @@ class ATLAS_AR_Compression {
 	 * @return array Statistics.
 	 */
 	public static function get_stats() {
-		$stats = ATLAS_AR_Compression_DB::get_compression_stats();
+		$stats = AR_TRY_ON_Compression_DB::get_compression_stats();
 
 		// Format sizes for display
 		if ( ! empty( $stats ) ) {
@@ -406,7 +406,7 @@ class ATLAS_AR_Compression {
 		}
 
 		// Delete from database
-		ATLAS_AR_Compression_DB::delete_compression_log( $post_id );
+		AR_TRY_ON_Compression_DB::delete_compression_log( $post_id );
 
 		return $deleted;
 	}
@@ -419,7 +419,7 @@ class ATLAS_AR_Compression {
 	 */
 	public static function cleanup_on_post_delete( $post_id ) {
 		// Only cleanup for AR-enabled post types
-		if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			return;
 		}
 
@@ -433,7 +433,7 @@ class ATLAS_AR_Compression {
 	 * @return bool Whether Pro is active.
 	 */
 	public static function is_pro_active() {
-		return ATLAS_AR_Helper::is_pro_active();
+		return AR_TRY_ON_Helper::is_pro_active();
 	}
 
 	/**
@@ -444,7 +444,7 @@ class ATLAS_AR_Compression {
 	 * @return array Compressed models list.
 	 */
 	public static function get_compressed_models( $args = array() ) {
-		$logs = ATLAS_AR_Compression_DB::get_all_compression_logs( $args );
+		$logs = AR_TRY_ON_Compression_DB::get_all_compression_logs( $args );
 
 		// Enrich with post data
 		foreach ( $logs as &$log ) {

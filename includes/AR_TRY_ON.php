@@ -1,10 +1,10 @@
 <?php
 
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 
-use ATLAS_AR_Admin\ATLAS_AR_Admin;
-use ATLAS_AR_Public\ATLAS_AR_Public;
-use ATLAS_AR\ATLAS_AR_Tryon;
+use AR_TRY_ON_Admin\AR_TRY_ON_Admin;
+use AR_TRY_ON_Public\AR_TRY_ON_Public;
+use AR_TRY_ON\AR_TRY_ON_Tryon;
 
 /**
  * The file that defines the core plugin class
@@ -15,8 +15,8 @@ use ATLAS_AR\ATLAS_AR_Tryon;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  */
 
 /**
@@ -29,11 +29,11 @@ use ATLAS_AR\ATLAS_AR_Tryon;
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class ATLAS_AR {
+class AR_TRY_ON {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -41,7 +41,7 @@ class ATLAS_AR {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      ATLAS_AR_Loader $loader Maintains and registers all hooks for the plugin.
+	 * @var      AR_TRY_ON_Loader $loader Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -76,7 +76,7 @@ class ATLAS_AR {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      ATLAS_AR_Public $plugin_public The string used to uniquely prefix technical functions of this plugin.
+	 * @var      AR_TRY_ON_Public $plugin_public The string used to uniquely prefix technical functions of this plugin.
 	 */
 	protected $plugin_public;
 
@@ -115,10 +115,10 @@ class ATLAS_AR {
 	 */
 	private function load_dependencies() {
 
-		require_once ATLAS_AR_PLUGIN_PATH . '/includes/ATLAS_AR_Constants.php';
-        require_once ATLAS_AR_PLUGIN_PATH . '/includes/ATLAS_AR_Hooks.php';
+		require_once ATLAS_AR_PLUGIN_PATH . '/includes/AR_TRY_ON_Constants.php';
+        require_once ATLAS_AR_PLUGIN_PATH . '/includes/AR_TRY_ON_Hooks.php';
 
-		$this->loader = new ATLAS_AR_Loader();
+		$this->loader = new AR_TRY_ON_Loader();
 
 	}
 
@@ -132,7 +132,7 @@ class ATLAS_AR {
 	 */
 	private function define_admin_hooks() {
 
-		$plugin_admin = new ATLAS_AR_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new AR_TRY_ON_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 10 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 10 );
@@ -192,7 +192,7 @@ class ATLAS_AR {
 	 */
 	private function define_public_hooks() {
 
-		$this->plugin_public = new ATLAS_AR_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
+		$this->plugin_public = new AR_TRY_ON_Public( $this->get_plugin_name(), $this->get_plugin_prefix(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $this->plugin_public, 'enqueue_styles', 10 );
 
@@ -205,7 +205,7 @@ class ATLAS_AR {
 
 	public function define_wc_hooks() {
 
-		$settings = ATLAS_AR_Helper::get_settings();
+		$settings = AR_TRY_ON_Helper::get_settings();
 
 		$wc_hook_id = isset( $settings['ar_try_on_wc_hook_position'] ) ? $settings['ar_try_on_wc_hook_position'] : 'product_image';
 
@@ -264,7 +264,7 @@ class ATLAS_AR {
     public function add_3d_file_as_product_gallery_item() {
         global $product;
         $product_id = $product->get_id();
-        if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             return;
         }
         $attachment_id = get_post_thumbnail_id( $product_id );
@@ -274,7 +274,7 @@ class ATLAS_AR {
 
         // The poster-hydration logic moved from an inline <script> to the
         // enqueued public/js/ar-gallery-poster.js (registered in
-        // ATLAS_AR_Public::enqueue_scripts). It reads the product id and the
+        // AR_TRY_ON_Public::enqueue_scripts). It reads the product id and the
         // default-poster srcset from the gallery item's data attributes, so
         // the markup below is plain HTML that passes cleanly through wp_kses().
         $default_srcset = ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp 100w, '
@@ -283,7 +283,7 @@ class ATLAS_AR {
 
         // create_shortcode() returns server-built, script-free markup; embed
         // it in the gallery item div and escape the whole string via wp_kses.
-        $shortcode_html = ATLAS_AR_Helper::create_shortcode( [], '' );
+        $shortcode_html = AR_TRY_ON_Helper::create_shortcode( [], '' );
 
         $image = sprintf(
             '<div id="atlas_ar-3d-gallery-item" data-thumb="" data-thumb-alt="" class="woocommerce-product-gallery__image" style="width:500px;margin-right:0;float:left;display:block;" data-thumb-srcset="" data-thumb-sizes="%1$s" data-atlas-product-id="%2$s" data-atlas-default-srcset="%3$s">%4$s</div>',
@@ -293,7 +293,7 @@ class ATLAS_AR {
             $shortcode_html
         );
 
-        echo wp_kses( $image, ATLAS_AR_Helper::allowed_html( 'shortcode' ) );
+        echo wp_kses( $image, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
     }
 
     /**
@@ -316,12 +316,12 @@ class ATLAS_AR {
 
         $product_id = $product->get_id();
 
-        if ( ! ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             return;
         }
 
         // Check if product has 3D model
-        if ( ! ATLAS_AR_Helper::has_3d_model( $product_id ) ) {
+        if ( ! AR_TRY_ON_Helper::has_3d_model( $product_id ) ) {
             return;
         }
 
@@ -330,25 +330,25 @@ class ATLAS_AR {
         // When `show_static_viewer_for_tryon` is enabled the cube toggle
         // works exactly as it does for floor/wall products (swap product
         // image with the inline <model-viewer>).
-        if ( class_exists( '\\ATLAS_AR\\ATLAS_AR_Tryon' ) ) {
-            $placement = ATLAS_AR_Tryon::get_product_placement( $product_id );
-            if ( ATLAS_AR_Tryon::is_face_placement( $placement )
-                && ! ATLAS_AR_Tryon::should_show_static_viewer( $product_id ) ) {
+        if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
+            $placement = AR_TRY_ON_Tryon::get_product_placement( $product_id );
+            if ( AR_TRY_ON_Tryon::is_face_placement( $placement )
+                && ! AR_TRY_ON_Tryon::should_show_static_viewer( $product_id ) ) {
                 return;
             }
         }
 
         // Get the effective display mode for this product
-        $display_mode = ATLAS_AR_Helper::get_effective_show_button_in( $product_id );
+        $display_mode = AR_TRY_ON_Helper::get_effective_show_button_in( $product_id );
 
         // Only proceed if toggle mode
-        if ( ! ATLAS_AR_Helper::is_toggle_display_mode( $display_mode ) ) {
+        if ( ! AR_TRY_ON_Helper::is_toggle_display_mode( $display_mode ) ) {
             return;
         }
 
         // The image⇄3D toggle behaviour moved from a large inline <script>
         // to the enqueued public/js/ar-image-3d-toggle.js (registered in
-        // ATLAS_AR_Public::enqueue_scripts — this method runs at wp_footer
+        // AR_TRY_ON_Public::enqueue_scripts — this method runs at wp_footer
         // priority 20, too late to enqueue here). It reads the product id +
         // initial display mode from the container's data attributes and is
         // ordered after ar-shortcode-reveal.js (its dependency) so the
@@ -357,7 +357,7 @@ class ATLAS_AR {
 
         // `suppress_tryon_overlay` tells the shortcode NOT to emit its own
         // Try-On overlay button — the gallery's floating pill (rendered
-        // separately by ATLAS_AR_Tryon::render_button_overlay at wp_footer)
+        // separately by AR_TRY_ON_Tryon::render_button_overlay at wp_footer)
         // is the canonical Try-On entry-point in toggle mode. Without it both
         // buttons end up in the gallery image container.
         //
@@ -365,7 +365,7 @@ class ATLAS_AR {
         // wrap it in the hidden source container (carrying the per-product
         // data attributes the toggle JS reads) and escape the whole string
         // through wp_kses() — no inline script, no phcs:ignore.
-        $shortcode_html = ATLAS_AR_Helper::create_shortcode(
+        $shortcode_html = AR_TRY_ON_Helper::create_shortcode(
             array(
                 'height'                 => '100%',
                 'width'                  => '100%',
@@ -381,7 +381,7 @@ class ATLAS_AR {
             $shortcode_html
         );
 
-        echo wp_kses( $toggle_html, ATLAS_AR_Helper::allowed_html( 'shortcode' ) );
+        echo wp_kses( $toggle_html, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
     }
 
 	/**
@@ -407,7 +407,7 @@ class ATLAS_AR {
 	/**
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
-	 * @return    ATLAS_AR_Loader    Orchestrates the hooks of the plugin.
+	 * @return    AR_TRY_ON_Loader    Orchestrates the hooks of the plugin.
 	 * @since     1.0.0
 	 */
 	public function get_loader() {

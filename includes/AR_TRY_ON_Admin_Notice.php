@@ -1,5 +1,5 @@
 <?php
-namespace  ATLAS_AR;
+namespace  AR_TRY_ON;
 /**
  * Admin Notice System
  *
@@ -8,25 +8,25 @@ namespace  ATLAS_AR;
  * @link       http://azizulhasan.com
  * @since      1.8.0
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * ATLAS_AR_Admin_Notice Class
+ * AR_TRY_ON_Admin_Notice Class
  *
  * Handles admin notices with user-specific dismissal and tracking
  *
  * @since 1.8.0
  */
-class ATLAS_AR_Admin_Notice {
+class AR_TRY_ON_Admin_Notice {
 
 	/**
 	 * Singleton instance
 	 *
-	 * @var ATLAS_AR_Admin_Notice
+	 * @var AR_TRY_ON_Admin_Notice
 	 */
 	private static $instance = null;
 
@@ -40,7 +40,7 @@ class ATLAS_AR_Admin_Notice {
 	/**
 	 * Get singleton instance
 	 *
-	 * @return ATLAS_AR_Admin_Notice
+	 * @return AR_TRY_ON_Admin_Notice
 	 */
 	public static function instance() {
 		if ( self::$instance === null ) {
@@ -423,7 +423,7 @@ class ATLAS_AR_Admin_Notice {
 					// which AR-61 §1.1 removed — the trial workflow now lives
 					// entirely in the Pro plugin, so Free can only know
 					// "Pro is here or not" via the constant check below.
-					if ( ATLAS_AR_Helper::is_pro_active() ) {
+					if ( AR_TRY_ON_Helper::is_pro_active() ) {
 						return false;
 					}
 					return true;

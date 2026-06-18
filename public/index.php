@@ -4,6 +4,6 @@
  *
  * It exists to stop directory listings on poorly configured servers.
  *
- * @package     ATLAS_AR
- * @subpackage  ATLAS_AR/public
+ * @package     AR_TRY_ON
+ * @subpackage  AR_TRY_ON/public
  */

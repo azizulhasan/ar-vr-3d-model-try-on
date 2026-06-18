@@ -1,6 +1,6 @@
 <?php
 
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 
 
 /**
@@ -9,8 +9,8 @@ namespace ATLAS_AR;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  */
 
 /**
@@ -19,11 +19,11 @@ namespace ATLAS_AR;
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class ATLAS_AR_Helper
+class AR_TRY_ON_Helper
 {
     /**
      * Static cache for plugin settings to avoid repeated database queries
@@ -91,8 +91,8 @@ class ATLAS_AR_Helper
 
     public static function get_post_types()
     {
-        $cache_key = ATLAS_AR_Cache::get_key('get_post_types');
-        $cache_value = ATLAS_AR_Cache::get($cache_key);
+        $cache_key = AR_TRY_ON_Cache::get_key('get_post_types');
+        $cache_value = AR_TRY_ON_Cache::get($cache_key);
         if ($cache_value) {
             return $cache_value;
         }
@@ -104,7 +104,7 @@ class ATLAS_AR_Helper
             $final_post_type[$post_type->name] = $post_type->name;
         }
 
-        ATLAS_AR_Cache::set($cache_key, $final_post_type);
+        AR_TRY_ON_Cache::set($cache_key, $final_post_type);
 
         return apply_filters('atlas_ar_get_post_types', $final_post_type);
     }
@@ -206,7 +206,7 @@ class ATLAS_AR_Helper
 
         if (!is_admin()) {
             $product_settings = (array)get_post_meta($post->ID, 'ar_try_on_product_settings', true);
-            $product_settings = ATLAS_AR_Helper::rename_old_keys_of_product_metadata($product_settings);
+            $product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
 
             //Get the file url for android
             if (!isset($product_settings['src'])) {
@@ -267,7 +267,7 @@ class ATLAS_AR_Helper
         ), $attr);
 
         $current_filter = current_filter();
-        if (!ATLAS_AR_Helper::is_ar_supported_post_type('shortcode')) {
+        if (!AR_TRY_ON_Helper::is_ar_supported_post_type('shortcode')) {
             if ($current_filter === 'the_content') {
                 return $content;
             }
@@ -292,21 +292,21 @@ class ATLAS_AR_Helper
         // Detect face placement once so both branches can switch on it.
         $is_face   = false;
         $placement = '';
-        if (class_exists('\\ATLAS_AR\\ATLAS_AR_Tryon')) {
-            $placement = \ATLAS_AR\ATLAS_AR_Tryon::get_product_placement($post_id);
-            $is_face   = \ATLAS_AR\ATLAS_AR_Tryon::is_face_placement($placement);
+        if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+            $placement = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_placement($post_id);
+            $is_face   = \AR_TRY_ON\AR_TRY_ON_Tryon::is_face_placement($placement);
             $placement = apply_filters('atlas_ar_tryon_woocommerce_mode_for_product', $placement, $post_id);
         }
 
         // ── Branch 1: reveal=false → buttons-only ────────────────────
         if (!$reveal) {
-            if ($is_face && class_exists('\\ATLAS_AR\\ATLAS_AR_Tryon')) {
+            if ($is_face && class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
                 // Face product: dynamic-buttons block (Try-On + optional
                 // View-in-AR). View-in-AR appears whenever the merchant
                 // has show_static_viewer_for_tryon on OR the shortcode is
                 // explicitly suppressed (reveal=false makes the AR
                 // button the only secondary action).
-                $tryon   = new \ATLAS_AR\ATLAS_AR_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+                $tryon   = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
                 $args    = array('wrapper_id_suffix' => 'shortcode');
                 if (!empty($attributes['button_label'])) {
                     $args['button_label'] = (string) $attributes['button_label'];
@@ -325,8 +325,8 @@ class ATLAS_AR_Helper
             // reveal="false"]` on a floor/wall post — they saw nothing.
             // AR-61 also adds `button_label="..."` support which only
             // works if this branch actually emits a button.
-            if (class_exists('\\ATLAS_AR\\ATLAS_AR_Tryon')) {
-                $tryon = new \ATLAS_AR\ATLAS_AR_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+            if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+                $tryon = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
                 $args  = array(
                     'wrapper_id_suffix' => 'shortcode',
                     'show_tryon'        => false,
@@ -335,11 +335,11 @@ class ATLAS_AR_Helper
                 if (!empty($attributes['button_label'])) {
                     $args['button_label'] = (string) $attributes['button_label'];
                 }
-                // Mark this post so ATLAS_AR_Public::atlas_ar_button
+                // Mark this post so AR_TRY_ON_Public::atlas_ar_button
                 // doesn't emit a second View-in-AR via the auto-display
                 // path below the content.
-                if (class_exists('\\ATLAS_AR_Public\\ATLAS_AR_Public')) {
-                    \ATLAS_AR_Public\ATLAS_AR_Public::mark_button_rendered($post_id);
+                if (class_exists('\\AR_TRY_ON_Public\\AR_TRY_ON_Public')) {
+                    \AR_TRY_ON_Public\AR_TRY_ON_Public::mark_button_rendered($post_id);
                 }
                 return $tryon->build_dynamic_buttons_block(
                     $post_id,
@@ -377,9 +377,9 @@ class ATLAS_AR_Helper
         // gives it the active theme's primary button color.
         //
         // Suppressed when the shortcode is called from within the WC
-        // gallery toggle wrapper ({@see \ATLAS_AR\ATLAS_AR::add_image_3d_toggle_to_gallery}) —
+        // gallery toggle wrapper ({@see \AR_TRY_ON\AR_TRY_ON::add_image_3d_toggle_to_gallery}) —
         // in that path the gallery's own floating pill (rendered by
-        // {@see \ATLAS_AR\ATLAS_AR_Tryon::render_button_overlay}) is
+        // {@see \AR_TRY_ON\AR_TRY_ON_Tryon::render_button_overlay}) is
         // the canonical Try-On entry-point, and emitting our shortcode
         // overlay too would produce a visible duplicate the moment the
         // shopper clicks the cube toggle. The flag is opt-in via the
@@ -389,12 +389,12 @@ class ATLAS_AR_Helper
         $suppress_tryon_overlay = filter_var($attributes['suppress_tryon_overlay'] ?? '', FILTER_VALIDATE_BOOLEAN);
         if ($is_face
             && ! $suppress_tryon_overlay
-            && class_exists('\\ATLAS_AR\\ATLAS_AR_Tryon')) {
-            $tryon  = new \ATLAS_AR\ATLAS_AR_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
+            && class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
+            $tryon  = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
             $tryon->register_doc_root_sampler();
 
-            $glb_src  = \ATLAS_AR\ATLAS_AR_Tryon::get_product_glb_src($post_id);
-            $settings = \ATLAS_AR\ATLAS_AR_Tryon::get_settings();
+            $glb_src  = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_glb_src($post_id);
+            $settings = \AR_TRY_ON\AR_TRY_ON_Tryon::get_settings();
             $tryon_overlay_html = sprintf(
                 '<button type="button" data-product-id="%1$d" class="ar_vr_3d_model_try_on art-tryon-image-overlay atlas-ar-shortcode-overlay" data-mode="%2$s" data-glb-src="%3$s" aria-label="%4$s">%5$s</button>',
                 $post_id,
@@ -408,7 +408,7 @@ class ATLAS_AR_Helper
         // The model-viewer reveal used to run from an inline
         // <script type="module"> here; it now lives in the enqueued
         // public/js/ar-shortcode-reveal.js (registered in
-        // ATLAS_AR_Public::enqueue_scripts alongside AtlasAR), which finds
+        // AR_TRY_ON_Public::enqueue_scripts alongside AtlasAR), which finds
         // every `.atlas-ar-shortcode-reveal[data-product-id]` placeholder and
         // injects the AtlasAR skeleton. Removing the inline script lets the
         // shortcode markup pass cleanly through wp_kses() at the echo sites.
@@ -526,7 +526,7 @@ class ATLAS_AR_Helper
      * HTML" call site in the plugin can share one escaping helper instead
      * of an ad-hoc map (or a phpcs:ignore) at each site:
      *
-     *     echo wp_kses( $html, ATLAS_AR_Helper::allowed_html( 'qr' ) );
+     *     echo wp_kses( $html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
      *
      * IMPORTANT: wp_kses HTML-encodes characters inside `<script>` (e.g.
      * `>` becomes `&gt;`), which breaks inline JavaScript. Markup that
@@ -1147,13 +1147,13 @@ class ATLAS_AR_Helper
     {
         $has_value_changed = isset($data['has_value_changed']) ? $data['has_value_changed'] : $data;
         $post_cache_data = get_option('get_cache_data');
-        $post_cache_data = ATLAS_AR_Cache::get('get_cache_data');
+        $post_cache_data = AR_TRY_ON_Cache::get('get_cache_data');
         if ($has_value_changed && $post_id) {
             if ($state === 'add') {
                 $post_cache_data = is_array($post_cache_data) ? $post_cache_data : [];
                 $post_cache_data[] = $post_id;
                 update_option('get_cache_data', $post_cache_data);
-                ATLAS_AR_Cache::set('get_cache_data', $post_cache_data);
+                AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
             } elseif ($state === 'remove' && is_array($post_cache_data)) {
                 // Optimized: Use array_filter instead of array_search + unset + array_values
                 // This is more efficient - single pass O(n) instead of multiple passes
@@ -1162,7 +1162,7 @@ class ATLAS_AR_Helper
                 }));
 
                 update_option('get_cache_data', $post_cache_data);
-                ATLAS_AR_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
+                AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
             }
         } elseif ($has_value_changed) {
 
@@ -1188,7 +1188,7 @@ class ATLAS_AR_Helper
                 $post_cache_data[] = 'all';
             }
 
-            ATLAS_AR_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
+            AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
 
         }
 
@@ -1213,7 +1213,7 @@ class ATLAS_AR_Helper
      *
      * The detection uses a two-stage check, in order of confidence:
      *
-     *   1. `defined( 'ATLAS_AR_PRO_VERSION' )` — the canonical
+     *   1. `defined( 'AR_TRY_ON_PRO_VERSION' )` — the canonical
      *      sentinel. Pro v3.0.0+ defines this constant during its
      *      own bootstrap, which runs at `plugins_loaded` priority
      *      9999. By the time any Free runtime code asks "is Pro
@@ -1247,7 +1247,7 @@ class ATLAS_AR_Helper
      * @return  bool True when the Pro plugin is loaded, false otherwise.
      */
     public static function is_pro_active() {
-        if ( defined( 'ATLAS_AR_PRO_VERSION' ) ) {
+        if ( defined( 'AR_TRY_ON_PRO_VERSION' ) ) {
             return true;
         }
 
@@ -1553,7 +1553,7 @@ class ATLAS_AR_Helper
      *
      * Scheduled by `ar-vr-3d-model-try-on.php` on `init` (via
      * `wp_schedule_event` if not already scheduled). Unscheduled on
-     * deactivation via `ATLAS_AR_Deactivate::deactivate()`.
+     * deactivation via `AR_TRY_ON_Deactivate::deactivate()`.
      *
      * @since AR-62
      * @return void
@@ -1605,7 +1605,7 @@ class ATLAS_AR_Helper
      *
      * Pro extends the list by hooking
      * `atlas_ar_generation_supported_modes` from
-     * `ATLAS_AR_Pro_Bridge::register()`. The filter shape is a flat
+     * `AR_TRY_ON_Pro_Bridge::register()`. The filter shape is a flat
      * array of Tripo3D body `type` strings so anyone hooking it can
      * just array_merge / array_push without thinking about
      * associative keys.
@@ -1625,7 +1625,7 @@ class ATLAS_AR_Helper
          *
          * Lets Pro and third-party add-ons register additional 3D-model
          * generation modes. Pro v3.x+ adds `image_to_model` via the
-         * `ATLAS_AR_Pro_Bridge`.
+         * `AR_TRY_ON_Pro_Bridge`.
          *
          * @param array<int,string> $modes Tripo3D body type strings.
          */

@@ -1,6 +1,6 @@
 <?php
 
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -10,8 +10,8 @@ defined( 'ABSPATH' ) || exit;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  */
 
 /**
@@ -20,20 +20,20 @@ defined( 'ABSPATH' ) || exit;
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class ATLAS_AR_Hooks {
+class AR_TRY_ON_Hooks {
 
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'add_custom_meta_box' ) );
 
 		// Hook to update cache when any post is created or updated
-		add_action( 'save_post', [ 'ATLAS_AR\ATLAS_AR_Cache', 'update_post_type_cache' ] );
+		add_action( 'save_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
 
 		// Hook to update cache when any post is deleted
-		add_action( 'delete_post', [ 'ATLAS_AR\ATLAS_AR_Cache', 'update_post_type_cache' ] );
+		add_action( 'delete_post', [ 'AR_TRY_ON\AR_TRY_ON_Cache', 'update_post_type_cache' ] );
 
 		add_filter( 'wp_kses_allowed_html', [ $this, 'allow_model_viewer_attributes' ], 10, 2 );
 	}
@@ -65,7 +65,7 @@ class ATLAS_AR_Hooks {
 		$plugin_name = 'AtlasAR';
 
 		global $post;
-		if ( $post && ATLAS_AR_Helper::is_ar_supported_post_type() ) {
+		if ( $post && AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			add_meta_box(
 				'ar_try_on-meta-box',
 				$plugin_name,
@@ -100,5 +100,5 @@ class ATLAS_AR_Hooks {
 	}
 }
 
-new ATLAS_AR_Hooks();
+new AR_TRY_ON_Hooks();
 

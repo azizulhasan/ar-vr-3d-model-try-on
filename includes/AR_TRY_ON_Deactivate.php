@@ -1,13 +1,13 @@
 <?php
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 /**
  * Fired during plugin deactivation
  *
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  */
 
 /**
@@ -16,11 +16,11 @@ namespace ATLAS_AR;
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/includes
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class ATLAS_AR_Deactivate {
+class AR_TRY_ON_Deactivate {
 
     /**
      * Short Description. (use period)

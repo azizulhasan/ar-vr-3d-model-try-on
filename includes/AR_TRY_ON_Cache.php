@@ -1,8 +1,8 @@
 <?php
 
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 
-class ATLAS_AR_Cache {
+class AR_TRY_ON_Cache {
 	/**
 	 * Get Cached Data
 	 *
@@ -85,7 +85,7 @@ class ATLAS_AR_Cache {
 		$cache_key = self::get_key( 'get_post_types' );
 		self::delete( $cache_key );
 		// Only proceed if the post type is valid
-		ATLAS_AR_Helper::get_post_types();
+		AR_TRY_ON_Helper::get_post_types();
 	}
 
 	public static function update_transient_during_plugins_crud() {

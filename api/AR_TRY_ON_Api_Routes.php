@@ -2,19 +2,19 @@
 
 namespace ATLAS_AR_API;
 
-use ATLAS_AR\ATLAS_AR_Activator;
-use ATLAS_AR\ATLAS_AR_Cache;
-use ATLAS_AR\ATLAS_AR_Helper;
+use AR_TRY_ON\AR_TRY_ON_Activator;
+use AR_TRY_ON\AR_TRY_ON_Cache;
+use AR_TRY_ON\AR_TRY_ON_Helper;
 
 /**
  * This class is for getting all plugin's data  through api.
  * This is applied for tracker menu.
  * @since      1.0.0
- * @package    ATLAS_AR
- * @subpackage ATLAS_AR/api
+ * @package    AR_TRY_ON
+ * @subpackage AR_TRY_ON/api
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class ATLAS_AR_Api_Routes
+class AR_TRY_ON_Api_Routes
 {
 
     protected $namespace;
@@ -109,18 +109,18 @@ class ATLAS_AR_Api_Routes
         if ('post' == $request['method']) {
             $fields = json_decode($request['fields'], true);
             update_option('ar_try_on_settings', $fields);
-            ATLAS_AR_Cache::delete('settings');
+            AR_TRY_ON_Cache::delete('settings');
             // Clear static settings cache in Helper class
-            ATLAS_AR_Helper::clear_settings_cache();
+            AR_TRY_ON_Helper::clear_settings_cache();
 
             if (isset($fields['ar_try_on_clear_cache']) && $fields['ar_try_on_clear_cache']) {
-                ATLAS_AR_Cache::flush();
+                AR_TRY_ON_Cache::flush();
                 $fields['ar_try_on_clear_cache'] = false;
             }
 
             $response['data'] = $fields;
-            ATLAS_AR_Cache::set('settings', $fields);
-            ATLAS_AR_Helper::update_cache_data($request['has_value_changed']);
+            AR_TRY_ON_Cache::set('settings', $fields);
+            AR_TRY_ON_Helper::update_cache_data($request['has_value_changed']);
 
             return rest_ensure_response($response);
         }
@@ -129,7 +129,7 @@ class ATLAS_AR_Api_Routes
         if ('get' == $request['method']) {
             $settings = get_option('ar_try_on_settings');
             if (empty($settings)) {
-                $settings = ATLAS_AR_Activator::activate(1);
+                $settings = AR_TRY_ON_Activator::activate(1);
             }
 
             $response['data'] = $settings;
@@ -156,20 +156,20 @@ class ATLAS_AR_Api_Routes
             $product_settings = [];
             if (empty($post_id) && $call_from == 'admin') {
                 if (empty($settings)) {
-                    $settings = ATLAS_AR_Helper::default_settings();
+                    $settings = AR_TRY_ON_Helper::default_settings();
                 }
-                $product_settings = ATLAS_AR_Helper::default_model_settings();
+                $product_settings = AR_TRY_ON_Helper::default_model_settings();
             }
 
             if ($post_id) {
                 $product_settings = (array)get_post_meta($post_id, 'ar_try_on_product_settings', true);
-                $product_settings = ATLAS_AR_Helper::rename_old_keys_of_product_metadata($product_settings);
+                $product_settings = AR_TRY_ON_Helper::rename_old_keys_of_product_metadata($product_settings);
 
             }
 
             // Get Default value.
             if (empty($product_settings) || !array_key_exists('src', $product_settings)) {
-                $product_settings = ATLAS_AR_Helper::default_model_settings();
+                $product_settings = AR_TRY_ON_Helper::default_model_settings();
             } else {
                 // AR-61: products saved before this release have no
                 // `tone_mapping`, `interaction_prompt`, etc. fields. Fill
@@ -178,7 +178,7 @@ class ATLAS_AR_Api_Routes
                 // existing keys untouched and only adds the new ones.
                 $product_settings = wp_parse_args(
                     $product_settings,
-                    ATLAS_AR_Helper::default_model_settings()
+                    AR_TRY_ON_Helper::default_model_settings()
                 );
             }
 
@@ -192,7 +192,7 @@ class ATLAS_AR_Api_Routes
             // sanitized) build can't reach the front-end as a markup
             // injection vector. New writes are sanitized in the POST branch.
             if (isset($data['custom_css'])) {
-                $data['custom_css'] = ATLAS_AR_Helper::sanitize_custom_css($data['custom_css']);
+                $data['custom_css'] = AR_TRY_ON_Helper::sanitize_custom_css($data['custom_css']);
             }
 
             /**
@@ -200,8 +200,8 @@ class ATLAS_AR_Api_Routes
              * and update cached ids
              */
             if($call_from !== 'admin') {
-                $data = ATLAS_AR_Helper::exclude_sensitive_properties($data);
-                ATLAS_AR_Helper::update_cache_data(true, $post_id, 'remove');
+                $data = AR_TRY_ON_Helper::exclude_sensitive_properties($data);
+                AR_TRY_ON_Helper::update_cache_data(true, $post_id, 'remove');
             }
         } else {
             $fields = json_decode($decoded_body['fields']);
@@ -217,7 +217,7 @@ class ATLAS_AR_Api_Routes
             // CSS/markup injection vector, and keep the echoed response in
             // sync with what we actually store.
             if (isset($filtered_data['custom_css'])) {
-                $safe_css = ATLAS_AR_Helper::sanitize_custom_css($filtered_data['custom_css']);
+                $safe_css = AR_TRY_ON_Helper::sanitize_custom_css($filtered_data['custom_css']);
                 $filtered_data['custom_css'] = $safe_css;
                 if (is_object($data) && isset($data->custom_css)) {
                     $data->custom_css = $safe_css;
@@ -228,7 +228,7 @@ class ATLAS_AR_Api_Routes
 
             update_post_meta($post_id, 'ar_try_on_product_settings', $filtered_data);
 
-            ATLAS_AR_Helper::update_cache_data($decoded_body, $post_id);
+            AR_TRY_ON_Helper::update_cache_data($decoded_body, $post_id);
         }
 
         // Enviar la respuesta en formato JSON
@@ -267,7 +267,7 @@ class ATLAS_AR_Api_Routes
          * Move temporary files to permanent folder.
          */
         if(isset($decoded_data['temporary_model_data'])){
-            $files_data = ATLAS_AR_Helper::move_model_files_to_permanent_folder($decoded_data['temporary_model_data']);
+            $files_data = AR_TRY_ON_Helper::move_model_files_to_permanent_folder($decoded_data['temporary_model_data']);
             $result['data'] = $files_data;
             $result['extra'] = [
                 '$decoded_data' => $decoded_data,
@@ -279,8 +279,8 @@ class ATLAS_AR_Api_Routes
 //        $response_data = file_get_contents('D:\mamp\htdocs\azizulhasan\tts\wp-content\plugins\ar-vr-3d-model-try-on\src\context\tripo3d_final.json');
 //        $response_data = json_decode($response_data, true);
 //
-//        $result['data'] = ATLAS_AR_Helper::get_structured_model_response($decoded_data, $response_data);
-//        $result['data']['temp'] = ATLAS_AR_Helper::download_model_files_and_store($result['data']['output'], $decoded_data);
+//        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
+//        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_and_store($result['data']['output'], $decoded_data);
 //
 //        $result['extra'] = [
 //            '$decoded_data' => $decoded_data,
@@ -367,7 +367,7 @@ class ATLAS_AR_Api_Routes
          */
         if ($is_create_request && $task_id) {
             $task_result['status']      = true;
-            $task_result['data']        = ATLAS_AR_Helper::get_structured_model_response($decoded_data, $response_body);
+            $task_result['data']        = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_body);
             $task_result['data']['task_id'] = $task_id;
             $task_result['extra']       = [ 'response_body' => $response_body ];
             return rest_ensure_response($task_result);
@@ -432,8 +432,8 @@ class ATLAS_AR_Api_Routes
 
         }
 
-        $task_result['data'] = ATLAS_AR_Helper::get_structured_model_response($decoded_data, $task_response_body);
-        $task_result['data']['temp'] = ATLAS_AR_Helper::download_model_files_and_store($task_result['data']['output'], $decoded_data);
+        $task_result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $task_response_body);
+        $task_result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_and_store($task_result['data']['output'], $decoded_data);
         $task_result['extra'] = [
             '$task_response_body' => $task_response_body
         ];
@@ -538,7 +538,7 @@ class ATLAS_AR_Api_Routes
                 $allowed = current_user_can('manage_options');
             } else {
                 // Frontend public read: callback strips sensitive props
-                // via ATLAS_AR_Helper::exclude_sensitive_properties().
+                // via AR_TRY_ON_Helper::exclude_sensitive_properties().
                 $allowed = true;
             }
         }

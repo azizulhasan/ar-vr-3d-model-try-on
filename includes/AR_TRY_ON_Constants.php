@@ -1,10 +1,10 @@
 <?php
 
-namespace ATLAS_AR;
+namespace AR_TRY_ON;
 
 defined( 'ABSPATH' ) || exit;
 
-class ATLAS_AR_Constants {
+class AR_TRY_ON_Constants {
 
 	private static $instance = null;
 
@@ -96,7 +96,7 @@ class ATLAS_AR_Constants {
 			 * @var string.
 			 * @since 1.0.0
 			 */
-            $api_name = ATLAS_AR_Helper::get_integrated_api_name();
+            $api_name = AR_TRY_ON_Helper::get_integrated_api_name();
 
 			define( 'ATLAS_AR_CURRENT_MODEL_DIR', apply_filters( 'atlas_ar_current_model_dir', ATLAS_AR_MODEL_DIR . $api_name . '/' ) );
 		}
@@ -135,7 +135,7 @@ class ATLAS_AR_Constants {
 
         }
 
-        // ATLAS_AR_COMPRESSION_API_URL moved to Pro (Includes/ATLAS_AR_Pro_Constants.php)
+        // ATLAS_AR_COMPRESSION_API_URL moved to Pro (Includes/AR_TRY_ON_Pro_Constants.php)
         // under the AR-61 Yoast-pattern split: server-side compression is Pro-only,
         // so the API URL knob has no consumers in Free and must not ship with Free
         // to wp.org. The ATLAS_AR_DEBUG_MODE constant defined in this plugin's
@@ -146,4 +146,4 @@ class ATLAS_AR_Constants {
 
 	}
 }
-(new ATLAS_AR_Constants())->init();
+(new AR_TRY_ON_Constants())->init();
