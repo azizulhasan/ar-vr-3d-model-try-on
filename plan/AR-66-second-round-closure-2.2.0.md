@@ -189,9 +189,29 @@ Likely already OK — confirm with a `grep -rn "plugin_dir_path\|__DIR__\|ATLAS_
 
 - [ ] Reviewer item 1 — `custom_css` sanitization on REST + escape on output (or remove the field)
 - [ ] Reviewer item 2 — path-traversal anchor checks on `Helper.php:778` and `:837`
-- [ ] Reviewer item 3 — replace `phpcs:ignore` escapes with real `wp_kses_post()` / `esc_*` calls
-- [ ] Reviewer item 4 — sanitize the filter payload in `Insights.php:911` (and audit all other `$_REQUEST` reads)
-- [ ] Reviewer item 5 — refresh Tripo3D / Meshy AI Terms + Privacy URLs in `readme.txt`
+- [x] Reviewer item 3 — replace `phpcs:ignore` escapes with real `wp_kses()` / `esc_*` calls
+      DONE: every `WordPress.Security.EscapeOutput` `phpcs:ignore` removed across
+      the plugin. Markup that carried inline `<script>`/`<style>` was refactored
+      so the scripts/styles moved to enqueued assets and the remaining markup is
+      `wp_kses()`-escaped via the new `AR_TRY_ON_Helper::allowed_html($context)`
+      allow-lists (`qr`, `model_viewer`, `ar_button`, `overlay`, `shortcode`).
+      Inline scripts externalized (each enqueued, per-product data via data-*
+      attributes or wp_add_inline_script):
+        • QR generator → `public/js/ar-qr-init.js`
+        • dyn-buttons `<style>`+SVG → `public/css/ar-dyn-buttons.css`
+        • dyn-buttons theme sampler → `public/js/ar-dyn-buttons-sampler.js`
+        • shortcode model-viewer reveal → `public/js/ar-shortcode-reveal.js`
+        • image⇄3D gallery toggle → `public/js/ar-image-3d-toggle.js`
+        • gallery 3D-item poster → `public/js/ar-gallery-poster.js`
+        • WooCommerce "3D View" tab → `public/js/ar-wc-tab.js`
+        • Try-On overlay placement → `public/js/ar-tryon-overlay-place.js`
+      Also modernized non-standard `product-id` attr → `data-product-id`
+      (legacy attr kept as JS fallback). Only wp_localize_script /
+      wp_add_inline_script data blocks remain inline (sanctioned mechanism).
+      All paths smoke-tested in-browser (reveal, toggle, WC tab, overlay,
+      dyn-buttons icons all render + function).
+- [x] Reviewer item 4 — sanitize the filter payload in `Insights.php:911` (sanitized per-field array)
+- [x] Reviewer item 5 — refresh Tripo3D / Meshy AI Terms + Privacy URLs in `readme.txt`
 - [ ] Reviewer item 6 — namespace / hook / option prefix rename (Free) + matching rename in Pro
 - [ ] Reviewer item 7 — confirm no writes inside the plugin folder
 - [ ] Pro plugin: companion 3.2.0 release tracking the namespace rename
