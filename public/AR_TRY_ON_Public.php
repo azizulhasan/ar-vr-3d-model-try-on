@@ -256,6 +256,17 @@ class AR_TRY_ON_Public {
 		$reveal_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-shortcode-reveal.js';
 		$reveal_ver  = file_exists( $reveal_path ) ? (string) filemtime( $reveal_path ) : $this->version;
 		wp_enqueue_script( 'atlas-ar-shortcode-reveal', ATLAS_AR_PLUGIN_URL . 'public/js/ar-shortcode-reveal.js', array( 'AtlasAR' ), $reveal_ver, true );
+
+		// Product-gallery image⇄3D toggle. Replaces the inline <script> that
+		// AR_TRY_ON::add_image_3d_toggle_to_gallery emitted — that method runs
+		// at wp_footer priority 20 (too late to enqueue), so register the
+		// handle here. The JS bails when no #atlas_ar-toggle-3d-container is
+		// present, so enqueuing it on every supported page is harmless.
+		// Depends on the reveal script so the model-viewer skeleton is
+		// injected into the hidden container before the toggle clones it.
+		$toggle_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-image-3d-toggle.js';
+		$toggle_ver  = file_exists( $toggle_path ) ? (string) filemtime( $toggle_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-image-3d-toggle', ATLAS_AR_PLUGIN_URL . 'public/js/ar-image-3d-toggle.js', array( 'AtlasAR', 'atlas-ar-shortcode-reveal' ), $toggle_ver, true );
 	}
 
 	/**

@@ -409,258 +409,42 @@ class AR_TRY_ON {
             return;
         }
 
-        ob_start();
-        ?>
-        <!-- 3D Viewer Container for Toggle (hidden initially, inserted via JS) -->
-        <div id="atlas_ar-toggle-3d-container" style="display: none;">
-            <?php
-            // `suppress_tryon_overlay` tells the shortcode NOT to emit
-            // its own Try-On overlay button — the gallery's floating
-            // pill (rendered separately by
-            // `AR_TRY_ON_Tryon::render_button_overlay` at wp_footer)
-            // is the canonical Try-On entry-point in toggle mode.
-            // Without this flag both buttons end up in the gallery
-            // image container and both become visible when the cube
-            // toggle activates the 3D viewer overlay.
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled shortcode markup (model-viewer + inline <script>) built from internal templates.
-            echo AR_TRY_ON_Helper::create_shortcode(
-                array(
-                    'height'                 => '100%',
-                    'width'                  => '100%',
-                    'suppress_tryon_overlay' => 'true',
-                ),
-                ''
-            );
-            ?>
-        </div>
+        // The image⇄3D toggle behaviour moved from a large inline <script>
+        // to the enqueued public/js/ar-image-3d-toggle.js (registered in
+        // AR_TRY_ON_Public::enqueue_scripts — this method runs at wp_footer
+        // priority 20, too late to enqueue here). It reads the product id +
+        // initial display mode from the container's data attributes and is
+        // ordered after ar-shortcode-reveal.js (its dependency) so the
+        // model-viewer skeleton is injected before the toggle clones it —
+        // exactly the order the two inline scripts had.
 
-        <script>
-            (function() {
-                'use strict';
+        // `suppress_tryon_overlay` tells the shortcode NOT to emit its own
+        // Try-On overlay button — the gallery's floating pill (rendered
+        // separately by AR_TRY_ON_Tryon::render_button_overlay at wp_footer)
+        // is the canonical Try-On entry-point in toggle mode. Without it both
+        // buttons end up in the gallery image container.
+        //
+        // create_shortcode() returns server-built, script-free markup; we
+        // wrap it in the hidden source container (carrying the per-product
+        // data attributes the toggle JS reads) and escape the whole string
+        // through wp_kses() — no inline script, no phcs:ignore.
+        $shortcode_html = AR_TRY_ON_Helper::create_shortcode(
+            array(
+                'height'                 => '100%',
+                'width'                  => '100%',
+                'suppress_tryon_overlay' => 'true',
+            ),
+            ''
+        );
 
-                const atlas_ar_product_id = "<?php echo esc_js( $product_id ); ?>";
-                const atlas_ar_display_mode = "<?php echo esc_js( $display_mode ); ?>";
+        $toggle_html = sprintf(
+            '<div id="atlas_ar-toggle-3d-container" style="display:none;" data-atlas-product-id="%1$s" data-atlas-display-mode="%2$s">%3$s</div>',
+            esc_attr( $product_id ),
+            esc_attr( $display_mode ),
+            $shortcode_html
+        );
 
-                // SVG Icons
-                const icon3D = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                    <path d="M12 2L2 7v10l10 5 10-5V7L12 2zm0 2.18l6.9 3.45L12 11.09 5.1 7.63 12 4.18zM4 8.82l7 3.5v7.36l-7-3.5V8.82zm9 10.86v-7.36l7-3.5v7.36l-7 3.5z"/>
-                </svg>`;
-
-                const iconImage = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>`;
-
-                const iconFullscreen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-                </svg>`;
-
-                const iconClose = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>`;
-
-                function initToggle() {
-                    // Find the main featured image container
-                    const mainImageContainer = document.querySelector('.woocommerce-product-gallery__image');
-                    const viewer3DSource = document.getElementById('atlas_ar-toggle-3d-container');
-
-                    if (!mainImageContainer || !viewer3DSource) {
-                        return;
-                    }
-
-                    // Get the actual image element inside
-                    const mainImage = mainImageContainer.querySelector('a, img');
-
-                    if (!mainImage) {
-                        return;
-                    }
-
-                    // Make the main image container position relative for overlay
-                    mainImageContainer.style.position = 'relative';
-
-                    // Create the 3D viewer container inside the main image container
-                    const viewer3DContainer = document.createElement('div');
-                    viewer3DContainer.id = 'atlas_ar-3d-viewer-overlay';
-                    viewer3DContainer.className = 'atlas-ar-3d-viewer-overlay';
-                    viewer3DContainer.innerHTML = viewer3DSource.innerHTML;
-                    viewer3DContainer.style.cssText = 'display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #f5f5f5;';
-
-                    // Insert the 3D viewer container inside the main image container
-                    mainImageContainer.appendChild(viewer3DContainer);
-
-                    // Remove the source container from footer
-                    viewer3DSource.remove();
-
-                    // Create toggle button container
-                    const toggleContainer = document.createElement('div');
-                    toggleContainer.className = 'atlas-ar-toggle-container';
-
-                    // Create fullscreen button (hidden initially, shown when 3D is active)
-                    const fullscreenBtn = document.createElement('button');
-                    fullscreenBtn.type = 'button';
-                    fullscreenBtn.className = 'atlas-ar-toggle-btn atlas-ar-fullscreen-btn';
-                    fullscreenBtn.setAttribute('aria-label', 'View 3D model in fullscreen');
-                    fullscreenBtn.innerHTML = iconFullscreen;
-                    fullscreenBtn.title = 'Fullscreen';
-                    fullscreenBtn.style.display = 'none'; // Hidden initially
-
-                    // Create toggle button
-                    const toggleBtn = document.createElement('button');
-                    toggleBtn.type = 'button';
-                    toggleBtn.className = 'atlas-ar-toggle-btn';
-                    toggleBtn.setAttribute('aria-label', 'Toggle between product image and 3D viewer');
-
-                    // Track current view state
-                    let currentView = atlas_ar_display_mode; // 'product_image' or '3d_viewer'
-                    let model3DLoaded = false;
-
-                    // Create fullscreen overlay container
-                    const fullscreenOverlay = document.createElement('div');
-                    fullscreenOverlay.id = 'atlas_ar-fullscreen-overlay';
-                    fullscreenOverlay.className = 'atlas-ar-fullscreen-overlay';
-                    fullscreenOverlay.style.display = 'none';
-
-                    // Create close button for fullscreen
-                    const closeBtn = document.createElement('button');
-                    closeBtn.type = 'button';
-                    closeBtn.className = 'atlas-ar-fullscreen-close-btn';
-                    closeBtn.setAttribute('aria-label', 'Close fullscreen');
-                    closeBtn.innerHTML = iconClose;
-                    closeBtn.title = 'Close';
-
-                    // Create fullscreen 3D viewer container
-                    const fullscreen3DContainer = document.createElement('div');
-                    fullscreen3DContainer.className = 'atlas-ar-fullscreen-viewer';
-
-                    fullscreenOverlay.appendChild(closeBtn);
-                    fullscreenOverlay.appendChild(fullscreen3DContainer);
-                    document.body.appendChild(fullscreenOverlay);
-
-                    // Set initial state based on display mode
-                    if (currentView === '3d_viewer') {
-                        // Show 3D viewer first
-                        toggleBtn.innerHTML = iconImage;
-                        toggleBtn.title = 'View Product Image';
-                        mainImage.style.visibility = 'hidden';
-                        viewer3DContainer.style.display = 'block';
-                        fullscreenBtn.style.display = 'flex'; // Show fullscreen button
-                        load3DModel();
-                    } else {
-                        // Show product image first (default)
-                        toggleBtn.innerHTML = icon3D;
-                        toggleBtn.title = 'View in 3D';
-                        mainImage.style.visibility = 'visible';
-                        viewer3DContainer.style.display = 'none';
-                        fullscreenBtn.style.display = 'none'; // Hide fullscreen button
-                    }
-
-                    // Toggle click handler
-                    toggleBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        if (currentView === 'product_image') {
-                            // Switch to 3D viewer
-                            mainImage.style.visibility = 'hidden';
-                            viewer3DContainer.style.display = 'block';
-                            toggleBtn.innerHTML = iconImage;
-                            toggleBtn.title = 'View Product Image';
-                            fullscreenBtn.style.display = 'flex'; // Show fullscreen button
-                            currentView = '3d_viewer';
-
-                            if (!model3DLoaded) {
-                                load3DModel();
-                            }
-                        } else {
-                            // Switch to product image
-                            mainImage.style.visibility = 'visible';
-                            viewer3DContainer.style.display = 'none';
-                            toggleBtn.innerHTML = icon3D;
-                            toggleBtn.title = 'View in 3D';
-                            fullscreenBtn.style.display = 'none'; // Hide fullscreen button
-                            currentView = 'product_image';
-                        }
-                    });
-
-                    // Fullscreen click handler
-                    fullscreenBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openFullscreen();
-                    });
-
-                    // Close fullscreen click handler
-                    closeBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        closeFullscreen();
-                    });
-
-                    // Close fullscreen on escape key
-                    document.addEventListener('keydown', function(e) {
-                        if (e.key === 'Escape' && fullscreenOverlay.style.display === 'flex') {
-                            closeFullscreen();
-                        }
-                    });
-
-                    // Add buttons to container (toggle on left, fullscreen on right - horizontal layout)
-                    toggleContainer.appendChild(toggleBtn);
-                    toggleContainer.appendChild(fullscreenBtn);
-
-                    // Append toggle button to the main image container (on top of featured image)
-                    mainImageContainer.appendChild(toggleContainer);
-
-                    function load3DModel() {
-                        if (model3DLoaded) return;
-
-                        const modelViewer = viewer3DContainer.querySelector('model-viewer');
-                        if (modelViewer && window.AtlasAR) {
-                            const atlasAR = new window.AtlasAR();
-                            const modelId = modelViewer.id ? '#' + modelViewer.id : '.atlas_ar_model_viewer';
-                            atlasAR.fetchModelData(atlas_ar_product_id, modelId, 'normal');
-                            model3DLoaded = true;
-                        }
-                    }
-
-                    function openFullscreen() {
-                        // Clone the 3D viewer content into fullscreen container
-                        fullscreen3DContainer.innerHTML = viewer3DContainer.innerHTML;
-                        fullscreenOverlay.style.display = 'flex';
-                        document.body.style.overflow = 'hidden'; // Prevent scrolling
-
-                        // Load model in fullscreen viewer
-                        const fullscreenModelViewer = fullscreen3DContainer.querySelector('model-viewer');
-                        if (fullscreenModelViewer && window.AtlasAR) {
-                            const atlasAR = new window.AtlasAR();
-                            const modelId = fullscreenModelViewer.id ? '#' + fullscreenModelViewer.id : '.atlas_ar_model_viewer';
-                            atlasAR.fetchModelData(atlas_ar_product_id, modelId, 'normal');
-                        }
-                    }
-
-                    function closeFullscreen() {
-                        fullscreenOverlay.style.display = 'none';
-                        document.body.style.overflow = ''; // Restore scrolling
-                        fullscreen3DContainer.innerHTML = ''; // Clear content
-                    }
-                }
-
-                // Initialize when DOM is ready
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', initToggle);
-                } else {
-                    initToggle();
-                }
-            })();
-        </script>
-        <?php
-        // Toggle markup buffer includes our own <script> block built from
-        // internal templates (SVG icons, click handlers, no user input).
-        // wp_kses cannot be used here because it HTML-encodes special
-        // characters (e.g. `&&` → `&amp;&amp;`, `>` → `&gt;`) inside
-        // <script> content, producing invalid JavaScript and a browser
-        // SyntaxError. Same reasoning as the four other inline-<script>
-        // emission sites cleaned up by commit 90a4d89.
-        $toggle_html = ob_get_clean();
-        echo $toggle_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled toggle markup with inline <script>; see comment above.
+        echo wp_kses( $toggle_html, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
     }
 
 	/**

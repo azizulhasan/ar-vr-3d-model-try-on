@@ -620,6 +620,28 @@ class AR_TRY_ON_Helper
                 );
                 break;
 
+            case 'shortcode':
+                // `[atlas_ar]` reveal=true markup: nested wrapper <div>s + the
+                // empty `.atlas-ar-shortcode-reveal` placeholder (filled at
+                // runtime by ar-shortcode-reveal.js) + the optional Try-On
+                // overlay <button>. Also covers the hidden toggle source
+                // container, which carries the per-product data attributes.
+                $allowed = array(
+                    'div'    => $global + array(
+                        'data-atlas-product-id'   => true,
+                        'data-atlas-display-mode' => true,
+                    ),
+                    'span'   => $global,
+                    'button' => $global + array(
+                        'type'            => true,
+                        'data-product-id' => true,
+                        'data-mode'       => true,
+                        'data-glb-src'    => true,
+                        'aria-label'      => true,
+                    ),
+                );
+                break;
+
             default:
                 $allowed = array();
         }
