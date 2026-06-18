@@ -229,22 +229,20 @@ Likely already OK — confirm with a `grep -rn "plugin_dir_path\|__DIR__\|ATLAS_
       dyn-buttons icons all render + function).
 - [x] Reviewer item 4 — sanitize the filter payload in `Insights.php:911` (sanitized per-field array)
 - [x] Reviewer item 5 — refresh Tripo3D / Meshy AI Terms + Privacy URLs in `readme.txt`
-- [~] Reviewer item 6 — prefix rename. PART A DONE / PART B PENDING.
-      PART A (rebrand, done + tested): namespace + class prefix
-      `AR_TRY_ON`→`ATLAS_AR` (Free) and `AR_TRY_ON_Pro`→`ATLAS_AR_PRO` (Pro),
-      across files, composer psr-4, regenerated autoloaders. Update-safety:
-      Free ships a fallback autoloader aliasing legacy `AR_TRY_ON\…`→`ATLAS_AR\…`;
-      Pro aliases `AR_TRY_ON_Pro\…`→`ATLAS_AR_PRO\…` and bails with a notice if
-      Free < 2.2.0. Verified: new+new loads (front viewer + admin dashboard, no
-      fatals/console errors); legacy aliases resolve in both. Commits Free
-      fe8e3b1, Pro 6dd995b.
-      PART B (the reviewer's actual flag — STILL TODO): short `ar_`-prefixed
-      globals (prefix "ar", 13 elements): `wp_ajax_ar_dismiss_notice`,
+- [ ] Reviewer item 6 — short prefix rename (namespace/class rename DECLINED).
+      DECISION: do NOT rename the PHP namespace / class prefix. `AR_TRY_ON`
+      (8 chars) and `AR_TRY_ON_Pro` already satisfy the reviewer's ">4 chars"
+      rule, and renaming class/namespace is the one change that can fatal a
+      live site during the Free/Pro update window. A trial `AR_TRY_ON→ATLAS_AR`
+      / `AR_TRY_ON_Pro→ATLAS_AR_PRO` rebrand (Free fe8e3b1, Pro 6dd995b) was
+      built + tested working with compat shims, then REVERTED by choice.
+      STILL TODO — the reviewer's actual flag: the short `ar_`-prefixed globals
+      (prefix "ar", 13 elements): `wp_ajax_ar_dismiss_notice`,
       `wp_ajax_ar_track_notice_action`, `ar_notice_nonce`,
-      `ar_create_compression_tables`, and the DB/option/meta keys
-      `wp_ar_compression_log` table, `ar_compression_settings` option,
-      `ar_placement` meta → `atlas_ar_*`. The hooks/nonces are safe renames;
-      the table/option/meta keys need a one-time migration on activation.
+      `ar_create_compression_tables` → `atlas_ar_*` (per-request, no migration);
+      and the data keys `wp_ar_compression_log` table, `ar_compression_settings`
+      option, `ar_placement` meta → `atlas_ar_*` with a one-time activation
+      migration so existing installs keep their data.
 - [x] Reviewer item 7 — confirm no writes inside the plugin folder.
       DONE (audit, no code change). Every filesystem write targets
       `wp_upload_dir()['basedir']`:
