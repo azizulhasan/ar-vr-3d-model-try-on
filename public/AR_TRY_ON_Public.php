@@ -275,6 +275,13 @@ class AR_TRY_ON_Public {
 		$poster_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-gallery-poster.js';
 		$poster_ver  = file_exists( $poster_path ) ? (string) filemtime( $poster_path ) : $this->version;
 		wp_enqueue_script( 'atlas-ar-gallery-poster', ATLAS_AR_PLUGIN_URL . 'public/js/ar-gallery-poster.js', array(), $poster_ver, true );
+
+		// WooCommerce "3D View" product tab lazy loader. Replaces the inline
+		// <script> in atlas_ar_button_tab(); loads the model when the tab is
+		// clicked. Bails when no .atlas-ar-wc-tab-viewer container is present.
+		$wctab_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-wc-tab.js';
+		$wctab_ver  = file_exists( $wctab_path ) ? (string) filemtime( $wctab_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-wc-tab', ATLAS_AR_PLUGIN_URL . 'public/js/ar-wc-tab.js', array( 'AtlasAR' ), $wctab_ver, true );
 	}
 
 	/**
@@ -508,40 +515,20 @@ class AR_TRY_ON_Public {
             }
         }
 
-        ob_start();
-        ?>
-        <div  id="atlas_ar_<?php echo esc_attr($post_id) ?>"></div>
-        <script type="module">
-            document.addEventListener("DOMContentLoaded", async function  () {
-                let atlasAR = new window.AtlasAR()
-                let product_id = "<?php echo esc_attr($post_id) ?>";
-                const htmlContent = atlasAR.getModelSkeleton(`model_viewer_${product_id}`);
-
-                let current_product = document.getElementById('atlas_ar_' + product_id);
-                let tab = document.getElementById('tab-title-atlas_ar_3d_view');
-                let modelLoaded = false;
-                tab.addEventListener('click', async function() {
-                    if(!modelLoaded) {
-                        current_product.innerHTML = '<h1>3D File Is Loading</h1>'
-                    }
-                    setTimeout(async  function(){
-                        if (tab.classList.contains('active') && current_product && !modelLoaded) {
-                            current_product.innerHTML = htmlContent; // Insert model-viewer HTML
-                            atlasAR.fetchModelData(product_id, "#model_viewer_"+product_id )
-                        }
-                    }, 500)
-                })
-
-            });
-        </script>
-        <?php
-        $ar_button_content = ob_get_clean();
-
+        // The lazy "3D View" tab loader moved from an inline <script> to the
+        // enqueued public/js/ar-wc-tab.js (registered in enqueue_scripts). It
+        // reads the product id from the container's data attribute and, on
+        // tab click, injects the AtlasAR model-viewer skeleton. The container
+        // is plain HTML escaped via wp_kses() at the output boundary.
+        $ar_button_content = sprintf(
+            '<div class="atlas-ar-wc-tab-viewer" id="atlas_ar_%1$s" data-atlas-product-id="%1$s"></div>',
+            esc_attr( $post_id )
+        );
 
 		if ( $post->post_type != 'product' ) {
-			return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
+			return $content . wp_kses( $ar_button_content, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
 		} else {
-			echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled AR-button markup (inline <script>); built from internal templates.
+			echo wp_kses( $ar_button_content, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
 		}
 	}
 
