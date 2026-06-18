@@ -269,18 +269,11 @@ class AR_TRY_ON_Admin_Notice {
 								$btn_style = 'padding: 8px 20px; height: auto; font-size: 14px;';
 							}
 
-							$data_attrs = '';
-							if ( $btn['track'] ) {
-								$data_attrs .= ' data-track="true"';
-							}
 							if ( ! empty( $btn['action'] ) ) {
-								$data_attrs .= ' data-action="' . esc_attr( $btn['action'] ) . '"';
-							}
-
-							if ( ! empty( $btn['action'] ) ) {
-								// AJAX button
+								// AJAX button — emit the data-* attributes inline,
+								// each escaped at the point of output.
 								?>
-								<a href="#" class="button <?php echo esc_attr( $btn_class ); ?> ar-notice-action-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" <?php echo $data_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Built above from esc_attr()-escaped fragments. ?> style="<?php echo esc_attr( $btn_style ); ?>">
+								<a href="#" class="button <?php echo esc_attr( $btn_class ); ?> ar-notice-action-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>"<?php if ( $btn['track'] ) : ?> data-track="true"<?php endif; ?> data-action="<?php echo esc_attr( $btn['action'] ); ?>" style="<?php echo esc_attr( $btn_style ); ?>">
 									<?php if ( ! empty( $btn['icon'] ) ) : ?>
 									<span class="dashicons dashicons-<?php echo esc_attr( $btn['icon'] ); ?>" style="margin-top: 3px;"></span>
 									<?php endif; ?>

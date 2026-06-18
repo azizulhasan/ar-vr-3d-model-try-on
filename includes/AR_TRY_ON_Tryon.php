@@ -419,45 +419,15 @@ class AR_TRY_ON_Tryon {
 			self::$pending_button_wrappers[] = self::DOC_ROOT_SENTINEL;
 		}
 
+		// The placement logic moved from an inline <script> to the enqueued
+		// public/js/ar-tryon-overlay-place.js (registered in
+		// AR_TRY_ON_Public::enqueue_scripts). It clones the <template> below
+		// into the gallery image container. The template is literal markup
+		// with every dynamic value escaped inline, so it ships as-is.
 		?>
 		<template id="atlas_ar-tryon-overlay-source">
 			<button type="button" data-product-id="<?php echo (int) $post_id; ?>" class="ar_vr_3d_model_try_on art-tryon-image-overlay" data-mode="<?php echo esc_attr( $placement ); ?>" data-glb-src="<?php echo esc_url( $glb_src ); ?>"><?php echo esc_html( $label ); ?></button>
 		</template>
-		<script>
-			(function () {
-				'use strict';
-				function place() {
-					var img = document.querySelector('.woocommerce-product-gallery__image');
-					if (!img || img.dataset.atlasArTryonOverlayPlaced === '1') return;
-					var tpl = document.getElementById('atlas_ar-tryon-overlay-source');
-					if (!tpl || !tpl.content) return;
-					if (getComputedStyle(img).position === 'static') {
-						img.style.position = 'relative';
-					}
-					// Reuse the cube's existing container if it's already there
-					// (cube toggle script adds .atlas-ar-toggle-container) — that
-					// way the Try-On button sits visually adjacent to the cube.
-					var container = img.querySelector('.atlas-ar-toggle-container');
-					if (!container) {
-						container = document.createElement('div');
-						container.className = 'atlas-ar-toggle-container';
-						img.appendChild(container);
-					}
-					var btn = tpl.content.firstElementChild.cloneNode(true);
-					container.appendChild(btn);
-					img.dataset.atlasArTryonOverlayPlaced = '1';
-				}
-				if (document.readyState === 'loading') {
-					document.addEventListener('DOMContentLoaded', place);
-				} else {
-					place();
-				}
-				// Cube toggle JS may run later (it also targets the same gallery
-				// element). Re-run after a short delay so we land beside it.
-				setTimeout(place, 250);
-				setTimeout(place, 1000);
-			})();
-		</script>
 		<?php
 	}
 

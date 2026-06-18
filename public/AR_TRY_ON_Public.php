@@ -282,6 +282,14 @@ class AR_TRY_ON_Public {
 		$wctab_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-wc-tab.js';
 		$wctab_ver  = file_exists( $wctab_path ) ? (string) filemtime( $wctab_path ) : $this->version;
 		wp_enqueue_script( 'atlas-ar-wc-tab', ATLAS_AR_PLUGIN_URL . 'public/js/ar-wc-tab.js', array( 'AtlasAR' ), $wctab_ver, true );
+
+		// Try-On overlay button placement. Replaces the inline <script> in
+		// AR_TRY_ON_Tryon::render_button_overlay (wp_footer:25, too late to
+		// enqueue). Clones the #atlas_ar-tryon-overlay-source <template> into
+		// the gallery image container; bails when the template is absent.
+		$overlay_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-tryon-overlay-place.js';
+		$overlay_ver  = file_exists( $overlay_path ) ? (string) filemtime( $overlay_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-tryon-overlay-place', ATLAS_AR_PLUGIN_URL . 'public/js/ar-tryon-overlay-place.js', array(), $overlay_ver, true );
 	}
 
 	/**
@@ -469,14 +477,15 @@ class AR_TRY_ON_Public {
 
         // Both fragments are now inline-script/style-free (QR script moved to
         // ar-qr-init.js; button <style>/SVG moved to ar-dyn-buttons.css), so
-        // each can be sanitised with its own wp_kses allow-list.
-        $ar_button_content = wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
-            . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
-
+        // each is sanitised inline with its own wp_kses allow-list at the
+        // output boundary — no intermediate variable, no phcs:ignore.
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
-            return $content . $ar_button_content;
+            return $content
+                . wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+                . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
         } else {
-            echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped above via wp_kses() with allowed_html() allow-lists.
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+                . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
         }
     }
 
