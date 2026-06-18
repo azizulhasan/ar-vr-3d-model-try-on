@@ -280,7 +280,7 @@ class AR_TRY_ON_Api_Routes
 //        $response_data = json_decode($response_data, true);
 //
 //        $result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $response_data);
-//        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($result['data']['output'], $decoded_data);
+//        $result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_and_store($result['data']['output'], $decoded_data);
 //
 //        $result['extra'] = [
 //            '$decoded_data' => $decoded_data,
@@ -433,7 +433,7 @@ class AR_TRY_ON_Api_Routes
         }
 
         $task_result['data'] = AR_TRY_ON_Helper::get_structured_model_response($decoded_data, $task_response_body);
-        $task_result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_files_and_store($task_result['data']['output'], $decoded_data);
+        $task_result['data']['temp'] = AR_TRY_ON_Helper::download_model_files_and_store($task_result['data']['output'], $decoded_data);
         $task_result['extra'] = [
             '$task_response_body' => $task_response_body
         ];

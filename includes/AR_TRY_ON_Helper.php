@@ -898,7 +898,7 @@ class AR_TRY_ON_Helper
                  * image_to_model response does NOT include
                  * `generated_image` — that field is text_to_model-only.
                  * The natural preview for an image_to_model run is the
-                 * input image itself; download_model_files_files_and_store
+                 * input image itself; download_model_files_and_store
                  * will fetch it into the post's uploads folder so the
                  * stored URL is stable and self-hosted. Without this
                  * fallback the post's model-viewer poster stays empty
@@ -994,7 +994,7 @@ class AR_TRY_ON_Helper
         return strpos($real_ancestor, $anchor) === 0;
     }
 
-    public static function download_model_files_files_and_store($files, $settings = [])
+    public static function download_model_files_and_store($files, $settings = [])
     {
         // Anchor the base dir to the model dir. A caller-supplied temp_path
         // is honoured ONLY if it resolves inside uploads/atlas_ar/; anything
