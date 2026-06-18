@@ -22,7 +22,7 @@
 
 			// Send AJAX request to dismiss notice
 			$.post(arNoticeData.ajaxurl, {
-				action: 'ar_dismiss_notice',
+				action: 'atlas_ar_dismiss_notice',
 				nonce: arNoticeData.nonce,
 				notice_id: noticeId
 			}, function(response) {
@@ -52,7 +52,7 @@
 
 			// Track action via AJAX
 			$.post(arNoticeData.ajaxurl, {
-				action: 'ar_track_notice_action',
+				action: 'atlas_ar_track_notice_action',
 				nonce: arNoticeData.nonce,
 				notice_id: noticeId,
 				action_name: actionName

@@ -208,12 +208,12 @@ function atlas_ar_run() {
 		// Read-only superglobal access guarded by capability + nonce checks below;
 		// the GET flag itself carries no untrusted payload — just toggles the action.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified on the next line.
-		if ( ! isset( $_GET['ar_create_compression_tables'] ) ) {
+		if ( ! isset( $_GET['atlas_ar_create_compression_tables'] ) ) {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified explicitly below.
 		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'ar_create_compression_tables' ) ) {
+		if ( ! wp_verify_nonce( $nonce, 'atlas_ar_create_compression_tables' ) ) {
 			return;
 		}
 		if ( ! current_user_can( 'manage_options' ) ) {

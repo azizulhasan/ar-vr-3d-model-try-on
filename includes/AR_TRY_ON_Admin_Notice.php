@@ -54,8 +54,8 @@ class AR_TRY_ON_Admin_Notice {
 	 */
 	private function __construct() {
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
-		add_action( 'wp_ajax_ar_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
-		add_action( 'wp_ajax_ar_track_notice_action', array( $this, 'ajax_track_notice_action' ) );
+		add_action( 'wp_ajax_atlas_ar_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
+		add_action( 'wp_ajax_atlas_ar_track_notice_action', array( $this, 'ajax_track_notice_action' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		// Register default promo notice
@@ -79,7 +79,7 @@ class AR_TRY_ON_Admin_Notice {
 			'arNoticeData',
 			array(
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'ar_notice_nonce' ),
+				'nonce'   => wp_create_nonce( 'atlas_ar_notice_nonce' ),
 			)
 		);
 	}
@@ -326,7 +326,7 @@ class AR_TRY_ON_Admin_Notice {
 	 * AJAX handler for dismissing notices
 	 */
 	public function ajax_dismiss_notice() {
-		check_ajax_referer( 'ar_notice_nonce', 'nonce' );
+		check_ajax_referer( 'atlas_ar_notice_nonce', 'nonce' );
 
 		$notice_id = isset( $_POST['notice_id'] ) ? sanitize_text_field( wp_unslash( $_POST['notice_id'] ) ) : '';
 
@@ -346,7 +346,7 @@ class AR_TRY_ON_Admin_Notice {
 	 * AJAX handler for notice actions
 	 */
 	public function ajax_track_notice_action() {
-		check_ajax_referer( 'ar_notice_nonce', 'nonce' );
+		check_ajax_referer( 'atlas_ar_notice_nonce', 'nonce' );
 
 		$notice_id = isset( $_POST['notice_id'] ) ? sanitize_text_field( wp_unslash( $_POST['notice_id'] ) ) : '';
 		$action    = isset( $_POST['action_name'] ) ? sanitize_text_field( wp_unslash( $_POST['action_name'] ) ) : '';
