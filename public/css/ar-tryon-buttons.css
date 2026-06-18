@@ -19,7 +19,7 @@
  * `stroke="currentColor"` SVGs did.
  */
 
-.atlas-ar-dyn-buttons {
+.atlas-ar-tryon-buttons {
 	margin-block-start: var( --wp--style--block-gap, 1.5rem );
 	gap: 0.75rem;
 	border: none !important;
@@ -47,7 +47,7 @@
 	--atlas-ar-btn-min-height: auto;
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-dyn-btn {
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5em;
@@ -70,11 +70,11 @@
 	min-height: var( --atlas-ar-btn-min-height );
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-dyn-btn--primary:hover {
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn--primary:hover {
 	filter: brightness( 0.92 );
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-dyn-btn--secondary {
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn--secondary {
 	background-color: transparent;
 	background-image: none;
 	color: var( --atlas-ar-btn-bg );
@@ -83,18 +83,18 @@
 	border-color: var( --atlas-ar-btn-bg );
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-dyn-btn--secondary:hover {
+.atlas-ar-tryon-buttons .atlas-ar-tryon-btn--secondary:hover {
 	background-color: var( --atlas-ar-btn-bg );
 	color: var( --atlas-ar-btn-color );
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-btn-label {
+.atlas-ar-tryon-buttons .atlas-ar-btn-label {
 	display: inline-block;
 }
 
 /* Icons — were inline <svg stroke="currentColor">, now mask-image tinted
    with the button's current text color. */
-.atlas-ar-dyn-buttons .atlas-ar-btn-icon {
+.atlas-ar-tryon-buttons .atlas-ar-btn-icon {
 	flex: 0 0 auto;
 	display: inline-block;
 	width: 20px;
@@ -108,12 +108,12 @@
 	mask-size: contain;
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-btn-icon--3d {
+.atlas-ar-tryon-buttons .atlas-ar-btn-icon--3d {
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7v10l10 5 10-5V7L12 2z'/%3E%3Cpath d='M2 7l10 5 10-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E");
 	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7v10l10 5 10-5V7L12 2z'/%3E%3Cpath d='M2 7l10 5 10-5'/%3E%3Cpath d='M12 22V12'/%3E%3C/svg%3E");
 }
 
-.atlas-ar-dyn-buttons .atlas-ar-btn-icon--try {
+.atlas-ar-tryon-buttons .atlas-ar-btn-icon--try {
 	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='3.5'/%3E%3Cpath d='M5.5 20a6.5 6.5 0 0113 0'/%3E%3Crect x='3' y='4' width='18' height='16' rx='2' ry='2'/%3E%3C/svg%3E");
 	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='3.5'/%3E%3Cpath d='M5.5 20a6.5 6.5 0 0113 0'/%3E%3Crect x='3' y='4' width='18' height='16' rx='2' ry='2'/%3E%3C/svg%3E");
 }

@@ -6,15 +6,15 @@
  * enqueued file (the wp.org reviewer flagged non-enqueued inline scripts).
  *
  * The wrapper IDs to style — and the document-root sentinel — are passed in
- * via `window.atlasArDynButtons` (printed just before this script by
+ * via `window.atlasARTryOnButtons` (printed just before this script by
  * wp_add_inline_script):
  *
- *     window.atlasArDynButtons = { ids: [...], docRoot: "__atlas_ar_doc_root__" };
+ *     window.atlasARTryOnButtons = { ids: [...], docRoot: "__atlas_ar_doc_root__" };
  *
  * For each wrapper the sampler measures the active theme's primary button
  * and copies the result onto the wrapper element as inline CSS custom
  * properties (--atlas-ar-btn-*), overriding the class defaults shipped in
- * ar-dyn-buttons.css.
+ * ar-tryon-buttons.css.
  *
  * Sampling strategy (first match wins):
  *   1. Live theme button already on the page (strongest signal).
@@ -26,11 +26,11 @@
 ( function () {
 	'use strict';
 
-	var cfg = ( typeof window !== 'undefined' && window.atlasArDynButtons ) || {};
+	var cfg = ( typeof window !== 'undefined' && window.atlasARTryOnButtons ) || {};
 	var ids = Array.isArray( cfg.ids ) ? cfg.ids : [];
 	// When this sentinel ID is in the list, the sampler treats
 	// document.documentElement as the wrapper — so CSS vars cascade to
-	// overlay buttons that live outside any `.atlas-ar-dyn-buttons` element
+	// overlay buttons that live outside any `.atlas-ar-tryon-buttons` element
 	// (see `tryon.css` for the `.art-tryon-image-overlay` rule that uses
 	// these vars).
 	var DOC_ROOT = cfg.docRoot || '';

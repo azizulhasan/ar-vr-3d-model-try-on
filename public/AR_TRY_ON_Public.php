@@ -178,13 +178,13 @@ class AR_TRY_ON_Public {
 
 			// Dynamic Try-On / View-in-AR buttons block. Replaces the inline
 			// <style> that build_dynamic_buttons_block() used to emit — the
-			// rules are class-scoped (.atlas-ar-dyn-buttons) and the footer
+			// rules are class-scoped (.atlas-ar-tryon-buttons) and the footer
 			// sampler still sets the per-wrapper CSS custom properties inline.
 			// Enqueued in <head> here so it's present before the_content runs
 			// (the_content fires after wp_head, so a late enqueue would miss).
-			$dyn_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-dyn-buttons.css';
-			$dyn_css_ver  = file_exists( $dyn_css_path ) ? (string) filemtime( $dyn_css_path ) : $this->version;
-			wp_enqueue_style( 'atlas-ar-dyn-buttons', ATLAS_AR_PLUGIN_URL . 'public/css/ar-dyn-buttons.css', array(), $dyn_css_ver, 'all' );
+			$tryon_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-tryon-buttons.css';
+			$tryon_css_ver  = file_exists( $tryon_css_path ) ? (string) filemtime( $tryon_css_path ) : $this->version;
+			wp_enqueue_style( 'atlas-ar-tryon-buttons', ATLAS_AR_PLUGIN_URL . 'public/css/ar-tryon-buttons.css', array(), $tryon_css_ver, 'all' );
 		}
 
 
@@ -476,7 +476,7 @@ class AR_TRY_ON_Public {
         }
 
         // Both fragments are now inline-script/style-free (QR script moved to
-        // ar-qr-init.js; button <style>/SVG moved to ar-dyn-buttons.css), so
+        // ar-qr-init.js; button <style>/SVG moved to ar-tryon-buttons.css), so
         // each is sanitised inline with its own wp_kses allow-list at the
         // output boundary — no intermediate variable, no phcs:ignore.
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {

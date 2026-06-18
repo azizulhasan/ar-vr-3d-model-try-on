@@ -27,10 +27,10 @@ class AR_TRY_ON_Tryon {
 	 * Special wrapper-ID sentinel meaning "set sampled CSS variables on
 	 * `document.documentElement` instead of on a specific wrapper". Used
 	 * by `render_button_overlay` so the overlay button (which lives
-	 * outside any `.atlas-ar-dyn-buttons` wrapper) still gets the
+	 * outside any `.atlas-ar-tryon-buttons` wrapper) still gets the
 	 * theme-sampled colors via `var(--atlas-ar-btn-bg)` in `tryon.css`.
 	 */
-	const DOC_ROOT_SENTINEL = '__atlas_ar_dyn_doc_root';
+	const DOC_ROOT_SENTINEL = '__atlas_ar_tryon_doc_root';
 
 	const CDN_WASM_BASE  = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.18/wasm';
 	const CDN_FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
@@ -411,7 +411,7 @@ class AR_TRY_ON_Tryon {
 		$label     = $settings['tryon_button_label'];
 
 		// Register a sentinel so the theme-button sampler runs even
-		// though no `.atlas-ar-dyn-buttons` wrapper exists on this
+		// though no `.atlas-ar-tryon-buttons` wrapper exists on this
 		// overlay-only page. The sampler reads the sentinel as "set
 		// vars on document.documentElement so the overlay button
 		// inherits them via var() in tryon.css".
@@ -570,7 +570,7 @@ class AR_TRY_ON_Tryon {
 		$view_in_ar_style = isset( $args['view_in_ar_style'] ) ? (string) $args['view_in_ar_style'] : 'outline';
 
 		// Button icons. Previously inline <svg stroke="currentColor">; now
-		// empty <span>s whose icon is a mask-image in ar-dyn-buttons.css
+		// empty <span>s whose icon is a mask-image in ar-tryon-buttons.css
 		// (tinted with background-color:currentColor, so the same theme-color
 		// inheritance is preserved). Moving the SVG out of the markup is what
 		// lets the final button HTML pass cleanly through wp_kses().
@@ -580,9 +580,9 @@ class AR_TRY_ON_Tryon {
 		// The `ar_vr_3d_model_try_on` class is preserved so the existing
 		// JS click handlers in `tryon-bootstrap.js` and `AtlasAR.dist.js`
 		// keep recognising clicks.
-		$btn_base      = 'ar_vr_3d_model_try_on button wp-block-button__link wp-element-button atlas-ar-dyn-btn';
-		$btn_primary   = $btn_base . ' atlas-ar-dyn-btn--primary';
-		$btn_secondary = $btn_base . ' atlas-ar-dyn-btn--secondary';
+		$btn_base      = 'ar_vr_3d_model_try_on button wp-block-button__link wp-element-button atlas-ar-tryon-btn';
+		$btn_primary   = $btn_base . ' atlas-ar-tryon-btn--primary';
+		$btn_secondary = $btn_base . ' atlas-ar-tryon-btn--secondary';
 
 		// View in AR — outline (secondary) by default; primary (filled)
 		// when it's the sole CTA on the page (non-face products).
@@ -639,14 +639,14 @@ class AR_TRY_ON_Tryon {
 			);
 		}
 
-		$wrapper_id = 'atlas-ar-dyn-buttons-' . $post_id . ( $suffix !== '' ? '-' . sanitize_key( $suffix ) : '' );
+		$wrapper_id = 'atlas-ar-tryon-buttons-' . $post_id . ( $suffix !== '' ? '-' . sanitize_key( $suffix ) : '' );
 
 		if ( ! in_array( $wrapper_id, self::$pending_button_wrappers, true ) ) {
 			self::$pending_button_wrappers[] = $wrapper_id;
 		}
 
 		// The per-wrapper inline <style> block was replaced by the enqueued
-		// ar-dyn-buttons.css stylesheet (class-scoped). The footer sampler
+		// ar-tryon-buttons.css stylesheet (class-scoped). The footer sampler
 		// still sets the CSS custom properties inline on `#$wrapper_id`.
 
 		// Wrap in the `.atlas-ar-shortcode-outer` so the buttons block
@@ -654,7 +654,7 @@ class AR_TRY_ON_Tryon {
 		// same way the revealed model viewer does — instead of getting
 		// auto-centered relative to the full-width container.
 		return '<div class="atlas-ar-shortcode-outer">'
-			. '<div id="' . esc_attr( $wrapper_id ) . '" class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex atlas-ar-dyn-buttons">'
+			. '<div id="' . esc_attr( $wrapper_id ) . '" class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex atlas-ar-tryon-buttons">'
 			. $view_in_ar_button
 			. $tryon_button
 			. '</div>'
@@ -676,7 +676,7 @@ class AR_TRY_ON_Tryon {
 
 	// build_button_style_block() was removed in 2.2.0 — the per-wrapper
 	// inline <style> it produced now lives in the enqueued, class-scoped
-	// public/css/ar-dyn-buttons.css. The wp_footer sampler
+	// public/css/ar-tryon-buttons.css. The wp_footer sampler
 	// (print_dynamic_button_sampler_script) still sets the per-wrapper CSS
 	// custom properties inline on `#$wrapper_id`, overriding the class
 	// defaults exactly as before.
@@ -711,7 +711,7 @@ class AR_TRY_ON_Tryon {
 			return;
 		}
 
-		// The sampler logic lives in the enqueued public/js/ar-dyn-buttons-sampler.js;
+		// The sampler logic lives in the enqueued public/js/ar-tryon-buttons-sampler.js;
 		// here we only hand it the wrapper IDs (known just now, after the_content
 		// and the wp_footer overlay callbacks have registered them) via a small
 		// wp_add_inline_script() data assignment.
@@ -722,12 +722,12 @@ class AR_TRY_ON_Tryon {
 		// data + force-print the single handle with wp_print_scripts(), the
 		// standard WP technique for emitting a script that becomes known too
 		// late for the normal enqueue pass.
-		$handle   = 'atlas-ar-dyn-buttons-sampler';
-		$js_path  = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-dyn-buttons-sampler.js';
+		$handle   = 'atlas-ar-tryon-buttons-sampler';
+		$js_path  = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-tryon-buttons-sampler.js';
 		$js_ver   = file_exists( $js_path ) ? (string) filemtime( $js_path ) : $this->version;
 
 		if ( ! wp_script_is( $handle, 'registered' ) ) {
-			wp_register_script( $handle, ATLAS_AR_PLUGIN_URL . 'public/js/ar-dyn-buttons-sampler.js', array(), $js_ver, true );
+			wp_register_script( $handle, ATLAS_AR_PLUGIN_URL . 'public/js/ar-tryon-buttons-sampler.js', array(), $js_ver, true );
 		}
 
 		$data = wp_json_encode(
@@ -736,7 +736,7 @@ class AR_TRY_ON_Tryon {
 				'docRoot' => self::DOC_ROOT_SENTINEL,
 			)
 		);
-		wp_add_inline_script( $handle, 'window.atlasArDynButtons=' . $data . ';', 'before' );
+		wp_add_inline_script( $handle, 'window.atlasARTryOnButtons=' . $data . ';', 'before' );
 
 		wp_enqueue_script( $handle );
 		wp_print_scripts( $handle );
