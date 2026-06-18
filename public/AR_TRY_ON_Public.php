@@ -333,7 +333,7 @@ class AR_TRY_ON_Public {
         // get_qr_code() now returns only an escapable placeholder div
         // (the QR is built at runtime by the enqueued ar-qr-init.js), so
         // it can be escaped with wp_kses() — no more inline <script>.
-        echo wp_kses( $qr_html, AR_TRY_ON_Helper::qr_allowed_html() );
+        echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
     }
 
     public function atlas_ar_button( $content ) {
@@ -382,11 +382,11 @@ class AR_TRY_ON_Public {
         }
         if ( $is_face ) {
             // $qr_html is now just an escapable placeholder div.
-            $safe_qr = wp_kses( $qr_html, AR_TRY_ON_Helper::qr_allowed_html() );
+            $safe_qr = wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
             if ( $current_filter === 'the_content' ) {
                 return $content . $safe_qr;
             }
-            echo wp_kses( $qr_html, AR_TRY_ON_Helper::qr_allowed_html() );
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
             return;
         }
 

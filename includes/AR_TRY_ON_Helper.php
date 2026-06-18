@@ -496,24 +496,133 @@ class AR_TRY_ON_Helper
     }
 
     /**
-     * Allowed-HTML map for echoing the QR placeholder produced by
-     * {@see get_qr_code()} through wp_kses(). Permits the single
-     * placeholder div plus the data attributes the JS initializer reads.
+     * Context-specific allowed-HTML maps for echoing server-built markup
+     * through wp_kses().
+     *
+     * Centralises the per-context allow-lists so every "echo server-built
+     * HTML" call site in the plugin can share one escaping helper instead
+     * of an ad-hoc map (or a phpcs:ignore) at each site:
+     *
+     *     echo wp_kses( $html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
+     *
+     * IMPORTANT: wp_kses HTML-encodes characters inside `<script>` (e.g.
+     * `>` becomes `&gt;`), which breaks inline JavaScript. Markup that
+     * needs an inline `<script>` must first move that script to an
+     * enqueued file (see `public/js/ar-qr-init.js`); only the remaining
+     * script-free markup can be passed through wp_kses() with one of
+     * these maps. None of the contexts below allow `<script>`.
      *
      * @since 2.2.0
-     * @return array
+     * @param string $context Which markup is being escaped. One of:
+     *                        'qr', 'model_viewer', 'ar_button', 'overlay'.
+     * @return array wp_kses allowed-HTML map.
      */
-    public static function qr_allowed_html()
+    public static function allowed_html( $context = 'qr' )
     {
-        return array(
-            'div' => array(
-                'id'                   => true,
-                'class'                => true,
-                'style'                => true,
-                'data-atlas-qr-url'    => true,
-                'data-atlas-qr-brand'  => true,
-            ),
+        // Attributes every wrapper element may carry.
+        $global = array(
+            'id'    => true,
+            'class' => true,
+            'style' => true,
+            'title' => true,
+            'role'  => true,
         );
+
+        switch ( $context ) {
+            case 'qr':
+                $allowed = array(
+                    'div'    => $global + array(
+                        'data-atlas-qr-url'   => true,
+                        'data-atlas-qr-brand' => true,
+                    ),
+                    'button' => $global + array( 'type' => true, 'aria-label' => true ),
+                    'span'   => $global,
+                    'img'    => $global + array( 'src' => true, 'alt' => true, 'width' => true, 'height' => true ),
+                );
+                break;
+
+            case 'model_viewer':
+                // Google's <model-viewer> web component + its wrapper markup.
+                $allowed = array(
+                    'div'          => $global + array(
+                        'data-thumb'        => true,
+                        'data-thumb-alt'    => true,
+                        'data-thumb-srcset' => true,
+                        'data-thumb-sizes'  => true,
+                    ),
+                    'span'         => $global,
+                    'a'            => $global + array( 'href' => true, 'target' => true, 'rel' => true ),
+                    'button'       => $global + array( 'type' => true, 'aria-label' => true ),
+                    'img'          => $global + array( 'src' => true, 'srcset' => true, 'sizes' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true ),
+                    'source'       => array( 'src' => true, 'srcset' => true, 'sizes' => true, 'type' => true ),
+                    'model-viewer' => $global + array(
+                        'src'                 => true,
+                        'ios-src'             => true,
+                        'alt'                 => true,
+                        'poster'              => true,
+                        'seamless-poster'     => true,
+                        'ar'                  => true,
+                        'ar-modes'            => true,
+                        'ar-scale'            => true,
+                        'ar-placement'        => true,
+                        'camera-controls'     => true,
+                        'auto-rotate'         => true,
+                        'auto-rotate-delay'   => true,
+                        'rotation-per-second' => true,
+                        'camera-orbit'        => true,
+                        'camera-target'       => true,
+                        'field-of-view'       => true,
+                        'min-camera-orbit'    => true,
+                        'max-camera-orbit'    => true,
+                        'min-field-of-view'   => true,
+                        'max-field-of-view'   => true,
+                        'environment-image'   => true,
+                        'skybox-image'        => true,
+                        'exposure'            => true,
+                        'shadow-intensity'    => true,
+                        'shadow-softness'     => true,
+                        'loading'             => true,
+                        'reveal'              => true,
+                        'disable-tap'         => true,
+                        'disable-zoom'        => true,
+                        'interaction-prompt'  => true,
+                        'touch-action'        => true,
+                        'tone-mapping'        => true,
+                        'autoplay'            => true,
+                        'data-js-focus-visible' => true,
+                    ),
+                );
+                break;
+
+            case 'ar_button':
+            case 'overlay':
+                // "View in AR" / Try-On button + overlay markup (icons + links).
+                $allowed = array(
+                    'div'    => $global + array( 'data-product-id' => true, 'data-placement' => true ),
+                    'span'   => $global,
+                    'p'      => $global,
+                    'a'      => $global + array( 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true ),
+                    'button' => $global + array( 'type' => true, 'aria-label' => true, 'data-product-id' => true, 'data-placement' => true ),
+                    'img'    => $global + array( 'src' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true ),
+                    'svg'    => $global + array( 'viewBox' => true, 'viewbox' => true, 'xmlns' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'aria-hidden' => true ),
+                    'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ),
+                    'g'      => array( 'fill' => true, 'stroke' => true ),
+                );
+                break;
+
+            default:
+                $allowed = array();
+        }
+
+        /**
+         * Filter the allowed-HTML map for a given echo context, so Pro and
+         * add-ons can extend (or restrict) what their markup may output.
+         *
+         * @since 2.2.0
+         * @param array  $allowed wp_kses allowed-HTML map.
+         * @param string $context Context key.
+         */
+        return apply_filters( 'atlas_ar_allowed_html', $allowed, $context );
     }
 
     public static function default_settings()
