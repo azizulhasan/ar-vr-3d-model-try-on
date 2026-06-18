@@ -628,8 +628,14 @@ class AR_TRY_ON_Helper
                 // container, which carries the per-product data attributes.
                 $allowed = array(
                     'div'    => $global + array(
-                        'data-atlas-product-id'   => true,
-                        'data-atlas-display-mode' => true,
+                        'data-atlas-product-id'    => true,
+                        'data-atlas-display-mode'  => true,
+                        // WooCommerce gallery item (the 3D poster wrapper).
+                        'data-thumb'               => true,
+                        'data-thumb-alt'           => true,
+                        'data-thumb-srcset'        => true,
+                        'data-thumb-sizes'         => true,
+                        'data-atlas-default-srcset' => true,
                     ),
                     'span'   => $global,
                     'button' => $global + array(

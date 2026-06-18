@@ -267,6 +267,14 @@ class AR_TRY_ON_Public {
 		$toggle_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-image-3d-toggle.js';
 		$toggle_ver  = file_exists( $toggle_path ) ? (string) filemtime( $toggle_path ) : $this->version;
 		wp_enqueue_script( 'atlas-ar-image-3d-toggle', ATLAS_AR_PLUGIN_URL . 'public/js/ar-image-3d-toggle.js', array( 'AtlasAR', 'atlas-ar-shortcode-reveal' ), $toggle_ver, true );
+
+		// WooCommerce gallery 3D-item poster hydration. Replaces the inline
+		// <script> that AR_TRY_ON::add_3d_file_as_product_gallery_item emitted
+		// (rendered on woocommerce_product_thumbnails). Reads the cached poster
+		// from sessionStorage; bails when no #atlas_ar-3d-gallery-item exists.
+		$poster_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-gallery-poster.js';
+		$poster_ver  = file_exists( $poster_path ) ? (string) filemtime( $poster_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-gallery-poster', ATLAS_AR_PLUGIN_URL . 'public/js/ar-gallery-poster.js', array(), $poster_ver, true );
 	}
 
 	/**

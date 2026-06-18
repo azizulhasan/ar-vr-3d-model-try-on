@@ -272,91 +272,28 @@ class AR_TRY_ON {
         $thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
         $thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
 
-        ob_start();
-        ?>
+        // The poster-hydration logic moved from an inline <script> to the
+        // enqueued public/js/ar-gallery-poster.js (registered in
+        // AR_TRY_ON_Public::enqueue_scripts). It reads the product id and the
+        // default-poster srcset from the gallery item's data attributes, so
+        // the markup below is plain HTML that passes cleanly through wp_kses().
+        $default_srcset = ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp 100w, '
+            . ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp 150w, '
+            . ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp 300w';
 
-        <div id="atlas_ar-3d-gallery-item"
-             data-thumb=""
-             data-thumb-alt=""
-             class="woocommerce-product-gallery__image"
-             style="width: 500px; margin-right: 0; float: left; display: block;"
-             data-thumb-srcset=""
-             data-thumb-sizes="<?php echo esc_attr( $thumbnail_sizes ); ?>"
-        >
-            <?php echo AR_TRY_ON_Helper::create_shortcode( [], '' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled shortcode markup (model-viewer + inline <script>) built from internal templates. ?>
-        </div>
-        <script>
-            (function() {
-                let atlas_ar_product_id = "<?php echo esc_js( $product_id ); ?>";
+        // create_shortcode() returns server-built, script-free markup; embed
+        // it in the gallery item div and escape the whole string via wp_kses.
+        $shortcode_html = AR_TRY_ON_Helper::create_shortcode( [], '' );
 
-                function getPosterByProductId(productId) {
-                    const data = sessionStorage.getItem('atlas_ar_model_data');
-                    if (!data) return null;
+        $image = sprintf(
+            '<div id="atlas_ar-3d-gallery-item" data-thumb="" data-thumb-alt="" class="woocommerce-product-gallery__image" style="width:500px;margin-right:0;float:left;display:block;" data-thumb-srcset="" data-thumb-sizes="%1$s" data-atlas-product-id="%2$s" data-atlas-default-srcset="%3$s">%4$s</div>',
+            esc_attr( $thumbnail_sizes ),
+            esc_attr( $product_id ),
+            esc_attr( $default_srcset ),
+            $shortcode_html
+        );
 
-                    try {
-                        const parsed = JSON.parse(data);
-                        let poster_data = {}
-                        poster_data['url'] =  parsed.models?.[productId]?.poster || '';
-                        poster_data['sizes'] =  parsed.models?.[productId]?.sizes || {};
-                        poster_data['alt'] =  parsed.models?.[productId]?.alt || '';
-                        return  poster_data;
-                    } catch (e) {
-                        console.error('Error parsing model data:', e);
-                        return null;
-                    }
-                }
-
-                const poster_data = getPosterByProductId(atlas_ar_product_id);
-                if (poster_data) {
-                    const div = document.getElementById('atlas_ar-3d-gallery-item');
-                    div.setAttribute('data-thumb', poster_data.url);
-                    div.setAttribute('data-thumb-alt', poster_data.alt);
-                    let srcset = null;
-
-                    if(poster_data.sizes?.thumbnail?.url) {
-                        srcset = `${poster_data.sizes.thumbnail.url} ${poster_data.sizes.thumbnail.width}w, `;
-                    }
-
-                    if(poster_data.sizes?.medium?.url) {
-                        srcset += `${poster_data.sizes.medium.url} ${poster_data.sizes.medium.width}w, `;
-                    }
-
-                    if(poster_data.sizes?.large?.url) {
-                        srcset += `${poster_data.sizes.large.url} ${poster_data.sizes.large.width}w`;
-                    }
-
-                    if(srcset) {
-                        div.setAttribute('data-thumb-srcset', srcset);
-                    }
-
-                    if(!srcset){
-                        var default_images = "<?php echo esc_url( ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_100x100.webp' ); ?> 100w, "
-                            default_images += "<?php echo esc_url( ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_150x150.webp' ); ?> 150w, "
-                            default_images += "<?php echo esc_url( ATLAS_AR_ADMIN_PATH . 'images/NeilArmstrong_300x300.webp' ); ?> 300w"
-                        div.setAttribute('data-thumb-srcset', default_images);
-                    }
-
-                } else {
-                    console.warn('Poster not found for this product.');
-                }
-            })();
-        </script>
-
-        <?php
-        $image  = ob_get_clean();
-
-        // Output buffer contains server-generated markup (gallery item div + script block).
-        // wp_kses_post leaves script tags out — for the script block to remain functional,
-        // we run the safer combination: ob already produced controlled markup, so output via
-        // wp_kses with a custom allow-list that includes <script>.
-        $allowed = wp_kses_allowed_html( 'post' );
-        $allowed['script'] = array();
-        $allowed['div']    = isset( $allowed['div'] ) ? $allowed['div'] : array();
-        $allowed['div']['data-thumb']        = true;
-        $allowed['div']['data-thumb-alt']    = true;
-        $allowed['div']['data-thumb-srcset'] = true;
-        $allowed['div']['data-thumb-sizes']  = true;
-        echo wp_kses( $image, $allowed );
+        echo wp_kses( $image, AR_TRY_ON_Helper::allowed_html( 'shortcode' ) );
     }
 
     /**
