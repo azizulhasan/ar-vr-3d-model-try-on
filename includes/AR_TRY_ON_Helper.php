@@ -411,7 +411,7 @@ class AR_TRY_ON_Helper
             <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
                 <div style="height:100%;width:100%;"
                      id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
-                <?php echo $tryon_overlay_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled try-on overlay markup built from internal templates. ?>
+                <?php echo wp_kses( $tryon_overlay_html, self::allowed_html( 'overlay' ) ); ?>
                 <script type="module">
                     document.addEventListener("DOMContentLoaded", async function () {
                         let atlasAR = new window.AtlasAR()
@@ -594,19 +594,39 @@ class AR_TRY_ON_Helper
                 );
                 break;
 
-            case 'ar_button':
             case 'overlay':
-                // "View in AR" / Try-On button + overlay markup (icons + links).
+                // The standalone Try-On overlay button: a plain <button> whose
+                // only child is an escaped text label (no SVG, no script).
                 $allowed = array(
-                    'div'    => $global + array( 'data-product-id' => true, 'data-placement' => true ),
+                    'button' => $global + array(
+                        'type'            => true,
+                        'data-product-id' => true,
+                        'data-mode'       => true,
+                        'data-glb-src'    => true,
+                        'aria-label'      => true,
+                    ),
                     'span'   => $global,
-                    'p'      => $global,
-                    'a'      => $global + array( 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true ),
-                    'button' => $global + array( 'type' => true, 'aria-label' => true, 'data-product-id' => true, 'data-placement' => true ),
-                    'img'    => $global + array( 'src' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true ),
-                    'svg'    => $global + array( 'viewBox' => true, 'viewbox' => true, 'xmlns' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'aria-hidden' => true ),
-                    'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ),
-                    'g'      => array( 'fill' => true, 'stroke' => true ),
+                );
+                break;
+
+            case 'ar_button':
+                // "View in AR" / Try-On dynamic-buttons block: wrapper divs +
+                // <button>s (Try-On carries data-mode/data-glb-src) + inline SVG
+                // icons (with their case-sensitive attribute names preserved).
+                $allowed = array(
+                    'div'    => $global,
+                    'span'   => $global,
+                    'button' => $global + array(
+                        'type'            => true,
+                        'aria-label'      => true,
+                        'data-product-id' => true,
+                        'data-mode'       => true,
+                        'data-glb-src'    => true,
+                    ),
+                    'svg'    => $global + array( 'viewBox' => true, 'xmlns' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true, 'aria-hidden' => true, 'focusable' => true ),
+                    'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true ),
+                    'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true, 'stroke' => true ),
+                    'rect'   => array( 'x' => true, 'y' => true, 'width' => true, 'height' => true, 'rx' => true, 'ry' => true, 'fill' => true, 'stroke' => true ),
                 );
                 break;
 
