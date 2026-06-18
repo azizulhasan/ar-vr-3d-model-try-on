@@ -1577,18 +1577,28 @@ class AR_TRY_ON_Helper
         } catch ( \Exception $e ) {
             return;
         }
+
+        // Use the WP Filesystem API for the directory removals (WP coding
+        // standards / Plugin Check flag direct rmdir()). wp_delete_file() is
+        // the sanctioned wrapper for the file removals.
+        global $wp_filesystem;
+        if ( empty( $wp_filesystem ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
+        }
+
         foreach ( $it as $node ) {
             $path = $node->getPathname();
             if ( $node->isFile() ) {
                 $mtime = @filemtime( $path );
                 if ( $mtime !== false && $mtime < $cutoff ) {
-                    @unlink( $path );
+                    wp_delete_file( $path );
                 }
-            } elseif ( $node->isDir() ) {
-                // Best-effort rmdir — only succeeds when empty,
-                // which after the file pass means every file inside
-                // was older than the cutoff.
-                @rmdir( $path );
+            } elseif ( $node->isDir() && ! empty( $wp_filesystem ) ) {
+                // Best-effort rmdir — only succeeds when empty, which after
+                // the file pass means every file inside was older than the
+                // cutoff.
+                $wp_filesystem->rmdir( $path );
             }
         }
     }
