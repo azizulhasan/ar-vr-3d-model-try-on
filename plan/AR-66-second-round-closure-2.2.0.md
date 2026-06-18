@@ -196,7 +196,16 @@ Likely already OK — confirm with a `grep -rn "plugin_dir_path\|__DIR__\|ATLAS_
       (can't break out of the tag). Rebuilt `AtlasAR.dist.js` + metabox preview.
       Verified in-browser: planted `</style><script>` payload does not execute;
       legitimate CSS still applies. POST already gated by `edit_post` cap.
-- [ ] Reviewer item 2 — path-traversal anchor checks on `Helper.php:778` and `:837`
+- [x] Reviewer item 2 — path-traversal anchor checks on the model-file writes.
+      DONE: new `AR_TRY_ON_Helper::path_is_within_model_dir()` (rejects `../`,
+      realpath()s the nearest existing ancestor, prefix-checks against
+      `ATLAS_AR_MODEL_DIR` = uploads/atlas_ar/). Applied in
+      `download_model_files_files_and_store()` (caller temp_path honoured only
+      if inside the model dir; key + filename `sanitize_file_name()`d; final
+      path guarded) and `move_model_files_to_permanent_folder()` (both source
+      and target guarded). Raw `file_put_contents()`/`copy()` replaced with
+      `$wp_filesystem->put_contents()` / `->move()` / `->copy()`. Verified:
+      traversal/absolute/sibling blocked, legit paths pass, legit move works.
 - [x] Reviewer item 3 — replace `phpcs:ignore` escapes with real `wp_kses()` / `esc_*` calls
       DONE: every `WordPress.Security.EscapeOutput` `phpcs:ignore` removed across
       the plugin. Markup that carried inline `<script>`/`<style>` was refactored
