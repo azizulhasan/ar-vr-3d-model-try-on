@@ -3,14 +3,18 @@
 Run: artest → Tools → Plugin Check → "3D Viewer … Virtual Try On" (Free only).
 Categories: General, Plugin Repo, Security, Performance, Accessibility. Types: Error + Warning.
 
-**Totals: 2 ERROR, 30 WARNING.**
+**Initial run: 2 ERROR, 30 WARNING. After fix → re-run: 0 ERROR, 30 WARNING. ✅**
 
-> NOTE: per instruction, NOTHING here is fixed yet — this is the record of what
-> Plugin Check reports so we can decide what (if anything) to act on before SVN.
+> The 2 errors were fixed (commit below) and a re-run confirms 0 errors. The 30
+> warnings are unchanged and are all expected (see analysis).
 
 ---
 
-## ERRORS (2) — the only error-level findings
+## ERRORS (2) — FIXED ✅ (re-run shows 0 errors)
+Fixed in the orphan-temp sweep: `@unlink()` → `wp_delete_file()`,
+`@rmdir()` → `$wp_filesystem->rmdir()` (WP_Filesystem init added). Verified the
+sweep still removes old files + empty dirs and keeps fresh files; artest re-run
+reports 0 errors.
 
 | File | Line | Sniff | Message |
 |---|---|---|---|
