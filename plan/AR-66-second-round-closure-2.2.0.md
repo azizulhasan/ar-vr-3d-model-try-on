@@ -187,7 +187,15 @@ Likely already OK — confirm with a `grep -rn "plugin_dir_path\|__DIR__\|ATLAS_
 
 ## Pre-flight checklist (track per item)
 
-- [ ] Reviewer item 1 — `custom_css` sanitization on REST + escape on output (or remove the field)
+- [x] Reviewer item 1 — `custom_css` sanitization on REST + escape on output.
+      DONE (keep + harden): `AR_TRY_ON_Helper::sanitize_custom_css()`
+      (`sanitize_textarea_field()` + 5000-char cap) applied on the REST write
+      (`AR_TRY_ON_Api_Routes::get_model_and_settings` POST branch) and on the
+      read output (cleans values saved by older builds). Output sink changed
+      from `<style>.innerHTML` to `.textContent` in `src/context/utilities.js`
+      (can't break out of the tag). Rebuilt `AtlasAR.dist.js` + metabox preview.
+      Verified in-browser: planted `</style><script>` payload does not execute;
+      legitimate CSS still applies. POST already gated by `edit_post` cap.
 - [ ] Reviewer item 2 — path-traversal anchor checks on `Helper.php:778` and `:837`
 - [x] Reviewer item 3 — replace `phpcs:ignore` escapes with real `wp_kses()` / `esc_*` calls
       DONE: every `WordPress.Security.EscapeOutput` `phpcs:ignore` removed across
