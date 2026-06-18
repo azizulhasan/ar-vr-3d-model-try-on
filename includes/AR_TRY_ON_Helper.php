@@ -481,57 +481,39 @@ class AR_TRY_ON_Helper
         // Free installs.
         $brand_label = (string) apply_filters( 'atlas_ar_qr_brand_label', 'AtlasAR' );
 
-        ob_start();
-        ?>
-        <div id="atlas_ar_qr_code">
-
-        </div>
-        <script>
-            // The qrcode lib (`ar-try-on-qr-generator.min.js`) is
-            // deferred, so it may not be available the first time this
-            // inline script runs. Poll up to ~5 s on a 100 ms interval
-            // and bail cleanly once we either render or run out of
-            // tries. Single-fire `setTimeout` was missing the QR on
-            // pages that emit this inline script late in the body
-            // (e.g., WC product pages where the div lives in
-            // `wp_footer`, after the head-deferred lib promise).
-            (function () {
-                var typeNumber = 0;
-                var errorCorrectionLevel = 'L';
-                var tries = 0;
-                var maxTries = 50;
-                // Brand label HTML — empty when Pro hooks
-                // `atlas_ar_qr_brand_label` to return ''.
-                var brandLabel = <?php echo wp_json_encode( $brand_label ); ?>;
-                var brandHtml = brandLabel
-                    ? '<div class="atlas_ar_qr_brand">' + brandLabel + '</div>'
-                    : '';
-                var qrcodeInterval = setInterval(function () {
-                    tries++;
-                    if (window.qrcode) {
-                        clearInterval(qrcodeInterval);
-                        var qr = qrcode(typeNumber, errorCorrectionLevel);
-                        qr.addData("<?php echo esc_url($url) ?>");
-                        qr.make();
-                        var target = document.getElementById("atlas_ar_qr_code");
-                        if (!target) return;
-                        target.innerHTML = '<button id="ar_close_btn">&times;</button>' + qr.createImgTag() + brandHtml;
-                        var closeBtn = document.getElementById("ar_close_btn");
-                        if (closeBtn) {
-                            closeBtn.addEventListener("click", function () {
-                                target.style.display = "none";
-                            });
-                        }
-                    } else if (tries >= maxTries) {
-                        clearInterval(qrcodeInterval);
-                    }
-                }, 100);
-            })();
-        </script>
-        <?php
-        $ar_button_content = ob_get_clean();
+        // Output only an escapable placeholder div carrying the page URL
+        // and brand label as data attributes. The QR itself is built at
+        // runtime by the enqueued `ar-qr-init.js` (which reads these
+        // attributes) — no inline <script>, so callers can wp_kses() the
+        // output instead of relying on a phpcs:ignore.
+        $ar_button_content = sprintf(
+            '<div id="atlas_ar_qr_code" data-atlas-qr-url="%s" data-atlas-qr-brand="%s"></div>',
+            esc_url( $url ),
+            esc_attr( $brand_label )
+        );
 
         return $ar_button_content;
+    }
+
+    /**
+     * Allowed-HTML map for echoing the QR placeholder produced by
+     * {@see get_qr_code()} through wp_kses(). Permits the single
+     * placeholder div plus the data attributes the JS initializer reads.
+     *
+     * @since 2.2.0
+     * @return array
+     */
+    public static function qr_allowed_html()
+    {
+        return array(
+            'div' => array(
+                'id'                   => true,
+                'class'                => true,
+                'style'                => true,
+                'data-atlas-qr-url'    => true,
+                'data-atlas-qr-brand'  => true,
+            ),
+        );
     }
 
     public static function default_settings()

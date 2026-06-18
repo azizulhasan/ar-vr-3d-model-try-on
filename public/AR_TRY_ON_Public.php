@@ -217,6 +217,9 @@ class AR_TRY_ON_Public {
 		// product. Enqueue BEFORE the bail.
 		if ( AR_TRY_ON_Helper::is_qr_code_enabled() ) {
 			wp_enqueue_script( 'ar-try-on-qr-generator', ATLAS_AR_PLUGIN_URL . 'public/js/ar-try-on-qr-generator.min.js', array(), $this->version, false );
+			// Builds the QR into the placeholder div rendered by
+			// AR_TRY_ON_Helper::get_qr_code(). Depends on the generator lib.
+			wp_enqueue_script( 'ar-try-on-qr-init', ATLAS_AR_PLUGIN_URL . 'public/js/ar-qr-init.js', array( 'ar-try-on-qr-generator' ), $this->version, true );
 		}
 
 		if ( $skip_static_ar_bundle ) {
@@ -250,7 +253,8 @@ class AR_TRY_ON_Public {
 			'ar-try-on-google-model-viewer',
 			'AtlasAR',
 			$this->plugin_name,
-			'ar-try-on-qr-generator'
+			'ar-try-on-qr-generator',
+			'ar-try-on-qr-init'
 		);
 
 		// Add defer attribute if this is one of our scripts
@@ -326,13 +330,10 @@ class AR_TRY_ON_Public {
             return;
         }
         self::$qr_rendered_for_post[ $post_id ] = true;
-        // QR HTML is built server-side from internal templates and contains an
-        // inline <script> that bootstraps the QR generator. wp_kses cannot be
-        // used here because it HTML-encodes special characters (e.g. `>` → `&gt;`)
-        // inside <script> content, which produces invalid JavaScript and a
-        // browser SyntaxError. The content is entirely under plugin control —
-        // see AR_TRY_ON_Helper::get_qr_code() — and never includes user input.
-        echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled markup with inline <script>; see comment above.
+        // get_qr_code() now returns only an escapable placeholder div
+        // (the QR is built at runtime by the enqueued ar-qr-init.js), so
+        // it can be escaped with wp_kses() — no more inline <script>.
+        echo wp_kses( $qr_html, AR_TRY_ON_Helper::qr_allowed_html() );
     }
 
     public function atlas_ar_button( $content ) {
@@ -380,10 +381,12 @@ class AR_TRY_ON_Public {
             $is_face   = AR_TRY_ON_Tryon::is_face_placement( $placement );
         }
         if ( $is_face ) {
+            // $qr_html is now just an escapable placeholder div.
+            $safe_qr = wp_kses( $qr_html, AR_TRY_ON_Helper::qr_allowed_html() );
             if ( $current_filter === 'the_content' ) {
-                return $content . $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
+                return $content . $safe_qr;
             }
-            echo $qr_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR markup (inline <script>); see render_qr_for_post().
+            echo wp_kses( $qr_html, AR_TRY_ON_Helper::qr_allowed_html() );
             return;
         }
 
