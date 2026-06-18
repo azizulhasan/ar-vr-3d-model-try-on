@@ -240,11 +240,25 @@ class AR_TRY_ON_Public {
 		// Performance Optimization: Lazy load model-viewer instead of loading immediately
 		// This saves ~956KB and improves initial page load by 100-200ms
 		// Model-viewer will load only when AR content becomes visible in viewport
-		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $this->version, false );
-		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $this->version, true );
+		//
+		// filemtime-based versioning (same reason as the CSS above): the
+		// webpack dist bundles get rebuilt mid-version (e.g. the AR-66
+		// product-id -> data-product-id rename), but `$this->version` only
+		// changes on release. Without a fresh ?ver, browsers keep serving the
+		// stale cached bundle and miss the rebuild (symptom: a button with a
+		// valid data-product-id logs "Product ID is missing" from the old JS).
+		$atlasar_path   = ATLAS_AR_PLUGIN_PATH . 'public/js/AtlasAR.dist.js';
+		$public_js_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-vr-3d-model-try-on-public-dist.js';
+		$lazy_js_path   = ATLAS_AR_PLUGIN_PATH . 'public/js/lazy-load-model-viewer.js';
+		$atlasar_ver    = file_exists( $atlasar_path ) ? (string) filemtime( $atlasar_path ) : $this->version;
+		$public_js_ver  = file_exists( $public_js_path ) ? (string) filemtime( $public_js_path ) : $this->version;
+		$lazy_js_ver    = file_exists( $lazy_js_path ) ? (string) filemtime( $lazy_js_path ) : $this->version;
+
+		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $atlasar_ver, false );
+		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $public_js_ver, true );
 		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->get_localize_data() );
 
-		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
+		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $lazy_js_ver, true );
 		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->get_localize_data() );
 
 		// Inline `[atlas_ar reveal="true"]` model-viewer reveal. Replaces the
