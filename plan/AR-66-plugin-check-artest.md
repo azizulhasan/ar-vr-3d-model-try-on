@@ -92,3 +92,38 @@ libs/AtlasAiDev/Insights.php:(1 more) $this->client->getSlug() . '_…'
 1. Fix the 2 ERRORS (`unlink`→`wp_delete_file`, `rmdir`→`$wp_filesystem->rmdir`).
 2. Leave A/B/C warnings as-is (pre-existing, warning-level, declined-rename /
    false-positive / bundled-lib). 2.1.0 carried the same warnings.
+
+---
+
+## Smoke test on artest (deployed Free 2.2.0 candidate)
+
+Content available: product #85 `shirt-green` (non-face, has model); post #1
+`hello-world` (`[atlas_ar]`, but 'post' isn't an AR-supported type so it renders
+nothing — expected). No face products / toggle-mode / extra shortcode posts on
+artest, so those paths were verified on the tts dev site with the identical build.
+
+Verified PASS on artest (product #85, browser):
+- All renamed assets load: `ar-tryon-buttons.css`, `ar-tryon-buttons-sampler.js`,
+  `ar-shortcode-reveal.js`, `ar-image-3d-toggle.js`, `ar-qr-init.js`. No 404s.
+- No inline plugin `<script>` (0 `getModelSkeleton`/`initToggle`/`getPoster`),
+  no critical error, no console errors (only model-viewer's benign
+  "AbortError: Transition was skipped").
+- QR: placeholder div renders (kses'd, data-atlas-qr-url/brand) and `ar-qr-init.js`
+  generates the QR into it (img/canvas present).
+- Dyn buttons block: "View in AR" button renders with the CSS-mask icon
+  (white, currentColor) and `data-product-id="85"` (modernized attr).
+- View-in-AR click → AtlasAR modal opens with `<model-viewer id=…__85>` (built
+  from the freshly-deployed `AtlasAR.dist.js?ver=filemtime`). data-product-id is
+  read correctly (no "Product ID is missing").
+- custom_css (item 1): planted `</style><script>window.__ARTEST_XSS=…</script>
+  .atlas_ar_model_viewer{outline:5px solid magenta}` on #85 → opened modal →
+  `__ARTEST_XSS` undefined (no execution), `<style>` content is the sanitized
+  rule (no `<script>`), and the magenta outline applied (rgb(255,0,255)).
+  Stored payload then cleaned.
+- Admin-notice AJAX rename (item 6): deployed PHP hooks + admin-notice.js actions
+  are `atlas_ar_dismiss_notice` / `atlas_ar_track_notice_action` /
+  `atlas_ar_notice_nonce`; zero old `ar_*` variants remain.
+
+Verified on tts dev (identical build) earlier: shortcode model-viewer reveal,
+image⇄3D gallery toggle, WC "3D View" tab lazy-load, Try-On overlay placement,
+dyn-buttons theme sampler, path-traversal guard (probe).
