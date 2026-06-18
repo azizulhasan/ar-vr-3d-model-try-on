@@ -405,29 +405,22 @@ class AR_TRY_ON_Helper
             );
         }
 
+        // The model-viewer reveal used to run from an inline
+        // <script type="module"> here; it now lives in the enqueued
+        // public/js/ar-shortcode-reveal.js (registered in
+        // AR_TRY_ON_Public::enqueue_scripts alongside AtlasAR), which finds
+        // every `.atlas-ar-shortcode-reveal[data-product-id]` placeholder and
+        // injects the AtlasAR skeleton. Removing the inline script lets the
+        // shortcode markup pass cleanly through wp_kses() at the echo sites.
+
         ob_start();
         ?>
         <div class="atlas-ar-shortcode-outer">
             <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
-                <div style="height:100%;width:100%;"
-                     id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"></div>
+                <div class="atlas-ar-shortcode-reveal" style="height:100%;width:100%;"
+                     id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"
+                     data-atlas-product-id="<?php echo esc_attr($post_id) ?>"></div>
                 <?php echo wp_kses( $tryon_overlay_html, self::allowed_html( 'overlay' ) ); ?>
-                <script type="module">
-                    document.addEventListener("DOMContentLoaded", async function () {
-                        let atlasAR = new window.AtlasAR()
-                        let product_id = "<?php echo esc_attr($post_id) ?>";
-                        const htmlContent = atlasAR.getModelSkeleton(`model_viewer_shortcode_${product_id}`)
-
-                        let current_product = document.getElementById('atlas_ar_shortcode_' + product_id);
-                        let modelLoaded = false;
-                        if (!modelLoaded) {
-                            current_product.innerHTML = '<h1>3D File Is Loading</h1>'
-                        }
-                        current_product.innerHTML = htmlContent; // Insert model-viewer HTML
-
-                        atlasAR.fetchModelData(product_id, "#model_viewer_shortcode_" + product_id)
-                    });
-                </script>
             </div>
         </div>
         <?php

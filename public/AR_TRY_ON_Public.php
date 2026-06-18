@@ -246,6 +246,16 @@ class AR_TRY_ON_Public {
 
 		wp_enqueue_script( 'ar-try-on-lazy-loader', ATLAS_AR_PLUGIN_URL . 'public/js/lazy-load-model-viewer.js', array(), $this->version, true );
 		wp_localize_script( 'ar-try-on-lazy-loader', 'ar_try_on', $this->get_localize_data() );
+
+		// Inline `[atlas_ar reveal="true"]` model-viewer reveal. Replaces the
+		// inline <script type="module"> that AR_TRY_ON_Helper::create_shortcode
+		// used to emit — it finds each `.atlas-ar-shortcode-reveal` placeholder
+		// and injects the AtlasAR skeleton. Enqueued here (alongside AtlasAR,
+		// its dependency) so it's reliably printed regardless of which late
+		// gallery / the_content hook actually rendered the shortcode.
+		$reveal_path = ATLAS_AR_PLUGIN_PATH . 'public/js/ar-shortcode-reveal.js';
+		$reveal_ver  = file_exists( $reveal_path ) ? (string) filemtime( $reveal_path ) : $this->version;
+		wp_enqueue_script( 'atlas-ar-shortcode-reveal', ATLAS_AR_PLUGIN_URL . 'public/js/ar-shortcode-reveal.js', array( 'AtlasAR' ), $reveal_ver, true );
 	}
 
 	/**
