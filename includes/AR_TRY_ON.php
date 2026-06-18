@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
 use AR_TRY_ON_Admin\AR_TRY_ON_Admin;
 use AR_TRY_ON_Public\AR_TRY_ON_Public;
@@ -269,6 +269,7 @@ class AR_TRY_ON {
         }
         $attachment_id = get_post_thumbnail_id( $product_id );
         $gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+        // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Applying WooCommerce's own core filter, not a plugin-declared hook.
         $thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
         $thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
 

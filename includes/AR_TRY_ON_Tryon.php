@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
 /**
  * Virtual Try-On — TensorFlow.js + MediaPipe Face Landmarker integration.
