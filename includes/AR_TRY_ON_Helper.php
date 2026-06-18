@@ -447,6 +447,36 @@ class AR_TRY_ON_Helper
         return trim($value);
     }
 
+    /**
+     * Sanitize the per-product `custom_css` model setting.
+     *
+     * Reviewer item 1 (2026-06 wp.org closure): `custom_css` was persisted
+     * from the `/get_model_and_settings` REST write with no restriction and
+     * applied on the front-end, which is a stored CSS/markup injection
+     * vector. Legitimate CSS never contains `<`/`>`, so stripping HTML tags
+     * is lossless for real stylesheets but neutralises any
+     * `</style><script>…` breakout attempt. The companion output sink in
+     * `src/context/utilities.js` assigns this to a `<style>` element via
+     * `textContent` (not `innerHTML`) so even an already-stored payload from
+     * an older release cannot break out.
+     *
+     * @param string $css Raw CSS from the request / stored meta.
+     * @return string Tag-free, length-capped CSS safe to store and apply.
+     */
+    public static function sanitize_custom_css($css)
+    {
+        // sanitize_textarea_field() is the documented sanitizer for
+        // multi-line text: it runs wp_strip_all_tags() (so a
+        // `</style><script>…` breakout becomes harmless text), keeps
+        // newlines (CSS stays readable) and normalises UTF-8.
+        $css = sanitize_textarea_field((string) $css);
+        // Per-product viewer CSS is small; bound the stored size.
+        if (strlen($css) > 5000) {
+            $css = substr($css, 0, 5000);
+        }
+        return $css;
+    }
+
     public static function is_qr_code_enabled($settings = [])
     {
         if (empty($settings)) {

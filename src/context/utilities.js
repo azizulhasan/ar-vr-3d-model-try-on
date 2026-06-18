@@ -681,7 +681,12 @@ export const setModelAttributes = (modelViewer, model_settings) => {
 
     const modelViewerStyle = document.getElementById("model-viewer-style");
     if (modelViewerStyle) {
-        modelViewerStyle.innerHTML = model_settings.custom_css;
+        // Use textContent (not innerHTML): a <style> element's textContent is
+        // treated as raw CSS text and is NOT HTML-parsed, so a custom_css
+        // value can never break out of the tag — even one persisted by an
+        // older build before the server-side wp_strip_all_tags() sanitizer.
+        // (wp.org reviewer item 1: custom_css injection.)
+        modelViewerStyle.textContent = model_settings.custom_css || "";
     }
 
     modelViewer.style.backgroundColor =
