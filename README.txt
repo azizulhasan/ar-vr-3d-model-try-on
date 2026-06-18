@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -338,6 +338,12 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.2.0 ( 18 June 2026 ) =
+* Security: Per-product Custom CSS is now sanitized when saved and rendered safely, closing a stored-content injection vector.
+* Security: Downloaded 3D model files are now written only inside the uploads/atlas_ar directory, with hardened path checks.
+* Improvement: Reworked front-end output (3D viewer, Try-On buttons, QR code, gallery toggle) to fully escape markup and load all scripts and styles as proper assets.
+* Maintenance: Refreshed external-service links and tightened input handling across the plugin.
+
 = 2.1.0 ( 2 June 2026 ) =
 * Improvement: Hotspots, Dimensions, Sliders, bulk compression, analytics and multi-post-type now show a clear Pro badge instead of locked controls.
 * Improvement: Server-side compression for files over 10 MB is provided by the separately installed Pro plugin; Free's client-side compression up to 10 MB is unchanged.
@@ -617,6 +623,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.0 =
+Security and hardening release: per-product Custom CSS is sanitized, model-file writes are locked to the uploads folder, and front-end output is fully escaped. Recommended for all sites. Safe to update.
 
 = 2.1.0 =
 Cleaner Free and Pro experience. Hotspots, Dimensions, Sliders and bulk compression now appear with a clear Pro badge instead of locked controls. Server-side compression for large files moves to Pro; client-side compression up to 10 MB stays in Free. Safe to update.
