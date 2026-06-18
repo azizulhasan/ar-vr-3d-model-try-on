@@ -369,7 +369,7 @@ class AR_TRY_ON_Tryon {
 		$settings  = self::get_settings();
 
 		printf(
-			'<button type="button" product-id="%1$d" class="ar_vr_3d_model_try_on button" data-mode="%2$s" data-glb-src="%3$s">%4$s</button>',
+			'<button type="button" data-product-id="%1$d" class="ar_vr_3d_model_try_on button" data-mode="%2$s" data-glb-src="%3$s">%4$s</button>',
 			(int) $post_id,
 			esc_attr( $placement ),
 			esc_url( $glb_src ),
@@ -421,7 +421,7 @@ class AR_TRY_ON_Tryon {
 
 		?>
 		<template id="atlas_ar-tryon-overlay-source">
-			<button type="button" product-id="<?php echo (int) $post_id; ?>" class="ar_vr_3d_model_try_on art-tryon-image-overlay" data-mode="<?php echo esc_attr( $placement ); ?>" data-glb-src="<?php echo esc_url( $glb_src ); ?>"><?php echo esc_html( $label ); ?></button>
+			<button type="button" data-product-id="<?php echo (int) $post_id; ?>" class="ar_vr_3d_model_try_on art-tryon-image-overlay" data-mode="<?php echo esc_attr( $placement ); ?>" data-glb-src="<?php echo esc_url( $glb_src ); ?>"><?php echo esc_html( $label ); ?></button>
 		</template>
 		<script>
 			(function () {
@@ -641,7 +641,7 @@ class AR_TRY_ON_Tryon {
 			$view_btn_class   = $is_primary ? $btn_primary : $btn_secondary;
 			$view_block_class = $is_primary ? 'wp-block-button' : 'wp-block-button is-style-outline';
 			$view_in_ar_button = sprintf(
-				'<div class="%1$s"><button product-id="%2$d" class="%3$s" aria-label="%4$s">%5$s<span class="atlas-ar-btn-label">%6$s</span></button></div>',
+				'<div class="%1$s"><button data-product-id="%2$d" class="%3$s" aria-label="%4$s">%5$s<span class="atlas-ar-btn-label">%6$s</span></button></div>',
 				esc_attr( $view_block_class ),
 				$post_id,
 				esc_attr( $view_btn_class ),
@@ -655,7 +655,7 @@ class AR_TRY_ON_Tryon {
 		$tryon_button = '';
 		if ( $show_tryon ) {
 			$tryon_button = sprintf(
-				'<div class="wp-block-button"><button type="button" product-id="%1$d" class="%2$s" data-mode="%3$s" data-glb-src="%4$s" aria-label="%5$s">%6$s<span class="atlas-ar-btn-label">%7$s</span></button></div>',
+				'<div class="wp-block-button"><button type="button" data-product-id="%1$d" class="%2$s" data-mode="%3$s" data-glb-src="%4$s" aria-label="%5$s">%6$s<span class="atlas-ar-btn-label">%7$s</span></button></div>',
 				$post_id,
 				esc_attr( $btn_primary ),
 				esc_attr( $placement ),

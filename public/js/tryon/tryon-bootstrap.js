@@ -59,7 +59,7 @@
 
 		if ( activeSession ) return;
 
-		const productId = btn.getAttribute( 'product-id' ) || btn.dataset.productId || '0';
+		const productId = btn.dataset.productId || btn.getAttribute( 'product-id' ) || '0';
 		const mode = btn.dataset.mode || 'face-glasses';
 		const glbSrc = btn.dataset.glbSrc || '';
 

@@ -396,7 +396,7 @@ class AR_TRY_ON_Helper
             $glb_src  = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_glb_src($post_id);
             $settings = \AR_TRY_ON\AR_TRY_ON_Tryon::get_settings();
             $tryon_overlay_html = sprintf(
-                '<button type="button" product-id="%1$d" class="ar_vr_3d_model_try_on art-tryon-image-overlay atlas-ar-shortcode-overlay" data-mode="%2$s" data-glb-src="%3$s" aria-label="%4$s">%5$s</button>',
+                '<button type="button" data-product-id="%1$d" class="ar_vr_3d_model_try_on art-tryon-image-overlay atlas-ar-shortcode-overlay" data-mode="%2$s" data-glb-src="%3$s" aria-label="%4$s">%5$s</button>',
                 $post_id,
                 esc_attr($placement),
                 esc_url($glb_src),
