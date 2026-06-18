@@ -1,8 +1,8 @@
 <?php
 
-namespace AR_TRY_ON_Admin;
+namespace ATLAS_AR_Admin;
 
-use AR_TRY_ON\AR_TRY_ON_Helper;
+use ATLAS_AR\ATLAS_AR_Helper;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -10,8 +10,8 @@ use AR_TRY_ON\AR_TRY_ON_Helper;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/admin
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/admin
  */
 
 /**
@@ -20,11 +20,11 @@ use AR_TRY_ON\AR_TRY_ON_Helper;
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/admin
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/admin
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class AR_TRY_ON_Admin {
+class ATLAS_AR_Admin {
 
 	/**
 	 * The ID of this plugin.
@@ -118,9 +118,9 @@ class AR_TRY_ON_Admin {
 			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
 			'VERSION'       => ATLAS_AR_VERSION,
 			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
-			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
+			'post_types'    => ATLAS_AR_Helper::get_post_types(),
 			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
-			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
+			'is_pro_active' => ATLAS_AR_Helper::is_pro_active(),
 			'is_admin'      => is_admin(),
 
 			/*
@@ -134,14 +134,14 @@ class AR_TRY_ON_Admin {
 			 * Pro's filter listeners must be in place before these
 			 * calls run; see the deferral note in __construct().
 			 */
-			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
-			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
-			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
+			'supported_formats' => ATLAS_AR_Helper::supported_formats(),
+			'dashboard_tabs'    => ATLAS_AR_Helper::dashboard_settings_tabs(),
+			'metabox_sections'  => ATLAS_AR_Helper::metabox_sections(),
 			// AR-62 — generation modes. Free baseline is text_to_model
 			// only; Pro extends via `atlas_ar_generation_supported_modes`
-			// in AR_TRY_ON_Pro_Bridge. The metabox React filters its
+			// in ATLAS_AR_Pro_Bridge. The metabox React filters its
 			// "Supported Model Types" dropdown to this list.
-			'generation_supported_modes' => AR_TRY_ON_Helper::generation_supported_modes(),
+			'generation_supported_modes' => ATLAS_AR_Helper::generation_supported_modes(),
 		];
 		return $this->localize_data;
 	}
@@ -153,7 +153,7 @@ class AR_TRY_ON_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_atlas_ar_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+		if ( ATLAS_AR_Helper::is_atlas_ar_page() || ATLAS_AR_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_style( 'ar-vr-3d-model-try-on', ATLAS_AR_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
 
             wp_enqueue_style( 'ar-vr-3d-model-try-on-public', ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
@@ -184,13 +184,13 @@ class AR_TRY_ON_Admin {
 		do_action( 'atlas_ar_enqueue_pro_dashboard_scripts' );
 
 
-		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
+		if ( ATLAS_AR_Helper::is_atlas_ar_page() ) {
 			/* Load react js */
 			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
 			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->get_localize_data() );
 		}
 
-		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+		if ( ATLAS_AR_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
 			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
 
@@ -239,7 +239,7 @@ class AR_TRY_ON_Admin {
 
 	public function enqueue_preview() {
 
-		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+		if ( ATLAS_AR_Helper::is_ar_supported_post_type() ) {
 //
 //			wp_enqueue_style( 'alertify', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
 //			wp_enqueue_style( 'alertify-default', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
@@ -484,7 +484,7 @@ class AR_TRY_ON_Admin {
             'usdz' => 'model/vnd.pixar.usd',
         ];
 
-        if(AR_TRY_ON_Helper::is_pro_active()) {
+        if(ATLAS_AR_Helper::is_pro_active()) {
             $mimes += [
                 'obj' => 'model/obj',
                 '3ds' => 'application/x-3ds',

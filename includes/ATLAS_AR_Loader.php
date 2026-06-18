@@ -1,13 +1,13 @@
 <?php
-namespace AR_TRY_ON;
+namespace ATLAS_AR;
 /**
  * Register all actions and filters for the plugin
  *
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/includes
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/includes
  */
 
 /**
@@ -17,11 +17,11 @@ namespace AR_TRY_ON;
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/includes
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class AR_TRY_ON_Loader {
+class ATLAS_AR_Loader {
 
     /**
      * The array of actions registered with WordPress.

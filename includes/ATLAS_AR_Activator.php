@@ -1,6 +1,6 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace ATLAS_AR;
 
 
 /**
@@ -9,8 +9,8 @@ namespace AR_TRY_ON;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/includes
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/includes
  */
 
 /**
@@ -19,11 +19,11 @@ namespace AR_TRY_ON;
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/includes
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class AR_TRY_ON_Activator {
+class ATLAS_AR_Activator {
 
 	/**
 	 * Short Description. (use period)
@@ -39,7 +39,7 @@ class AR_TRY_ON_Activator {
 		if ( $random_post_id ) {
 			// 'The post is missing required keys or some values are empty.';
 			if ( ! self::check_post_meta_keys( $random_post_id ) ) {
-				update_post_meta( $random_post_id, 'ar_try_on_product_settings', AR_TRY_ON_Helper::default_model_settings() );
+				update_post_meta( $random_post_id, 'ar_try_on_product_settings', ATLAS_AR_Helper::default_model_settings() );
 			}
 
 			$post_url = get_permalink( $random_post_id );
@@ -50,14 +50,14 @@ class AR_TRY_ON_Activator {
 		 * Customization settings.
 		 */
 		if ( $renew_all_settings || empty( $all_settings ) ) {
-			$all_settings = AR_TRY_ON_Helper::default_settings();
+			$all_settings = ATLAS_AR_Helper::default_settings();
 			$all_settings['ar_try_on_ar_demo'] = [
 					'id'  => $random_post_id,
 					'url' => $post_url
 			];
 
 			update_option( 'ar_try_on_settings', $all_settings );
-			AR_TRY_ON_Cache::set( 'settings', $all_settings );
+			ATLAS_AR_Cache::set( 'settings', $all_settings );
 		}
 
 		if ( ! isset( $all_settings['ar_try_on_ar_demo'] )
@@ -70,11 +70,11 @@ class AR_TRY_ON_Activator {
 			$all_settings['ar_try_on_ar_demo']['url'] = $post_url;
 			$all_settings['ar_try_on_ar_demo']['id']  = $random_post_id;
 			update_option( 'ar_try_on_settings', $all_settings );
-			AR_TRY_ON_Cache::set( 'settings', $all_settings );
+			ATLAS_AR_Cache::set( 'settings', $all_settings );
 		}
 
 		// Initialize compression database tables (log table only - queue is Pro)
-		AR_TRY_ON_Compression_DB::init();
+		ATLAS_AR_Compression_DB::init();
 
 		// Note: Queue table and cron job are handled by Pro plugin
 

@@ -6,8 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'ATLAS_AR_Public\\' => array($baseDir . '/public'),
+    'ATLAS_AR_Admin\\' => array($baseDir . '/admin'),
     'ATLAS_AR_API\\' => array($baseDir . '/api'),
-    'AR_TRY_ON_Public\\' => array($baseDir . '/public'),
-    'AR_TRY_ON_Admin\\' => array($baseDir . '/admin'),
-    'AR_TRY_ON\\' => array($baseDir . '/includes'),
+    'ATLAS_AR\\' => array($baseDir . '/includes'),
 );

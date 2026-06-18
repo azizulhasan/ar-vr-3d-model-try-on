@@ -1,24 +1,24 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace ATLAS_AR;
 /**
  * AR Try On - Compression Database Handler
  *
  * Manages database tables and operations for 3D model compression tracking.
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/includes
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/includes
  * @since      1.8.0
  */
 
 defined('ABSPATH') || exit;
 
 /**
- * Class AR_TRY_ON_Compression_DB
+ * Class ATLAS_AR_Compression_DB
  *
  * Handles all database operations related to compression feature.
  */
-class AR_TRY_ON_Compression_DB
+class ATLAS_AR_Compression_DB
 {
 
     /**
@@ -406,7 +406,7 @@ class AR_TRY_ON_Compression_DB
         return $count;
     }
 
-    // Queue methods moved to Pro plugin (AR_TRY_ON_Pro_Compression_DB)
+    // Queue methods moved to Pro plugin (ATLAS_AR_Pro_Compression_DB)
 
     /**
      * Delete compression log entry

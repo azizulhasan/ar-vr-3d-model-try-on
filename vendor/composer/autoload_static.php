@@ -9,52 +9,33 @@ class ComposerStaticInit84dbd1765bc8075c6306831ae4ea4ff5
     public static $prefixLengthsPsr4 = array (
         'A' => 
         array (
+            'ATLAS_AR_Public\\' => 16,
+            'ATLAS_AR_Admin\\' => 15,
             'ATLAS_AR_API\\' => 13,
-            'AR_TRY_ON_Public\\' => 17,
-            'AR_TRY_ON_Admin\\' => 16,
-            'AR_TRY_ON\\' => 10,
+            'ATLAS_AR\\' => 9,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
+        'ATLAS_AR_Public\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/public',
+        ),
+        'ATLAS_AR_Admin\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/admin',
+        ),
         'ATLAS_AR_API\\' => 
         array (
             0 => __DIR__ . '/../..' . '/api',
         ),
-        'AR_TRY_ON_Public\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/public',
-        ),
-        'AR_TRY_ON_Admin\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/admin',
-        ),
-        'AR_TRY_ON\\' => 
+        'ATLAS_AR\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),
     );
 
     public static $classMap = array (
-        'AR_TRY_ON\\AR_TRY_ON' => __DIR__ . '/../..' . '/includes/AR_TRY_ON.php',
-        'AR_TRY_ON\\AR_TRY_ON_Activator' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Activator.php',
-        'AR_TRY_ON\\AR_TRY_ON_Admin_Notice' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Admin_Notice.php',
-        'AR_TRY_ON\\AR_TRY_ON_Cache' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Cache.php',
-        'AR_TRY_ON\\AR_TRY_ON_Compression' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Compression.php',
-        'AR_TRY_ON\\AR_TRY_ON_Compression_DB' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Compression_DB.php',
-        'AR_TRY_ON\\AR_TRY_ON_Constants' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Constants.php',
-        'AR_TRY_ON\\AR_TRY_ON_Deactivate' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Deactivate.php',
-        'AR_TRY_ON\\AR_TRY_ON_Helper' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Helper.php',
-        'AR_TRY_ON\\AR_TRY_ON_Hooks' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Hooks.php',
-        'AR_TRY_ON\\AR_TRY_ON_Lib_AtlasAiDev' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Lib_AtlasAiDev.php',
-        'AR_TRY_ON\\AR_TRY_ON_Loader' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Loader.php',
-        'AR_TRY_ON\\AR_TRY_ON_Tryon' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Tryon.php',
-        'AR_TRY_ON\\AR_TRY_ON_Tryon_Hooks' => __DIR__ . '/../..' . '/includes/AR_TRY_ON_Tryon_Hooks.php',
-        'AR_TRY_ON_Admin\\AR_TRY_ON_Admin' => __DIR__ . '/../..' . '/admin/AR_TRY_ON_Admin.php',
-        'AR_TRY_ON_Public\\AR_TRY_ON_Public' => __DIR__ . '/../..' . '/public/AR_TRY_ON_Public.php',
-        'ATLAS_AR_API\\AR_TRY_ON_Api_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Api_Routes.php',
-        'ATLAS_AR_API\\AR_TRY_ON_Compression_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Compression_Routes.php',
-        'ATLAS_AR_API\\AR_TRY_ON_Tryon_Routes' => __DIR__ . '/../..' . '/api/AR_TRY_ON_Tryon_Routes.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

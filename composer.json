@@ -9,9 +9,9 @@
     ],
     "autoload": {
         "psr-4": {
-            "AR_TRY_ON\\": "includes",
-            "AR_TRY_ON_Admin\\": "admin",
-            "AR_TRY_ON_Public\\": "public",
+            "ATLAS_AR\\": "includes",
+            "ATLAS_AR_Admin\\": "admin",
+            "ATLAS_AR_Public\\": "public",
             "ATLAS_AR_API\\": "api"
         }
     },

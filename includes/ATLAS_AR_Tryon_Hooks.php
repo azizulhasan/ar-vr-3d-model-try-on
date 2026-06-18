@@ -1,19 +1,19 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace ATLAS_AR;
 
 /**
  * Documentation-only registry of filter/action hooks the Free try-on layer
  * exposes to the Pro plugin and third-party addons.
  *
  * Pro Phase 2+ wires real implementations against these hook names. Free does
- * NOT call apply_filters() here — those calls live in {@see AR_TRY_ON_Tryon}
+ * NOT call apply_filters() here — those calls live in {@see ATLAS_AR_Tryon}
  * and the JS controller. This class is a single source of truth for hook
  * contracts so both plugins stay in sync.
  *
- * @package AR_TRY_ON
+ * @package ATLAS_AR
  */
-class AR_TRY_ON_Tryon_Hooks {
+class ATLAS_AR_Tryon_Hooks {
 
 	/**
 	 * Filter — extend the list of available tracking modes.

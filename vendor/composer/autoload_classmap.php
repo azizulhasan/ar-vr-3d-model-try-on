@@ -6,24 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'AR_TRY_ON\\AR_TRY_ON' => $baseDir . '/includes/AR_TRY_ON.php',
-    'AR_TRY_ON\\AR_TRY_ON_Activator' => $baseDir . '/includes/AR_TRY_ON_Activator.php',
-    'AR_TRY_ON\\AR_TRY_ON_Admin_Notice' => $baseDir . '/includes/AR_TRY_ON_Admin_Notice.php',
-    'AR_TRY_ON\\AR_TRY_ON_Cache' => $baseDir . '/includes/AR_TRY_ON_Cache.php',
-    'AR_TRY_ON\\AR_TRY_ON_Compression' => $baseDir . '/includes/AR_TRY_ON_Compression.php',
-    'AR_TRY_ON\\AR_TRY_ON_Compression_DB' => $baseDir . '/includes/AR_TRY_ON_Compression_DB.php',
-    'AR_TRY_ON\\AR_TRY_ON_Constants' => $baseDir . '/includes/AR_TRY_ON_Constants.php',
-    'AR_TRY_ON\\AR_TRY_ON_Deactivate' => $baseDir . '/includes/AR_TRY_ON_Deactivate.php',
-    'AR_TRY_ON\\AR_TRY_ON_Helper' => $baseDir . '/includes/AR_TRY_ON_Helper.php',
-    'AR_TRY_ON\\AR_TRY_ON_Hooks' => $baseDir . '/includes/AR_TRY_ON_Hooks.php',
-    'AR_TRY_ON\\AR_TRY_ON_Lib_AtlasAiDev' => $baseDir . '/includes/AR_TRY_ON_Lib_AtlasAiDev.php',
-    'AR_TRY_ON\\AR_TRY_ON_Loader' => $baseDir . '/includes/AR_TRY_ON_Loader.php',
-    'AR_TRY_ON\\AR_TRY_ON_Tryon' => $baseDir . '/includes/AR_TRY_ON_Tryon.php',
-    'AR_TRY_ON\\AR_TRY_ON_Tryon_Hooks' => $baseDir . '/includes/AR_TRY_ON_Tryon_Hooks.php',
-    'AR_TRY_ON_Admin\\AR_TRY_ON_Admin' => $baseDir . '/admin/AR_TRY_ON_Admin.php',
-    'AR_TRY_ON_Public\\AR_TRY_ON_Public' => $baseDir . '/public/AR_TRY_ON_Public.php',
-    'ATLAS_AR_API\\AR_TRY_ON_Api_Routes' => $baseDir . '/api/AR_TRY_ON_Api_Routes.php',
-    'ATLAS_AR_API\\AR_TRY_ON_Compression_Routes' => $baseDir . '/api/AR_TRY_ON_Compression_Routes.php',
-    'ATLAS_AR_API\\AR_TRY_ON_Tryon_Routes' => $baseDir . '/api/AR_TRY_ON_Tryon_Routes.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
 );

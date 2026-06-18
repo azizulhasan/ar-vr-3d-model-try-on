@@ -1,41 +1,41 @@
 <?php
 
-namespace AR_TRY_ON;
+namespace ATLAS_AR;
 
 
 /**
- * class AR_TRY_ON_Lib_AtlasAiDev
+ * class ATLAS_AR_Lib_AtlasAiDev
  */
-final class AR_TRY_ON_Lib_AtlasAiDev {
+final class ATLAS_AR_Lib_AtlasAiDev {
 
     /**
      * Singleton instance
      *
-     * @var AR_TRY_ON_Lib_AtlasAiDev
+     * @var ATLAS_AR_Lib_AtlasAiDev
      */
     protected static $instance;
 
     /**
-     * @var AR_TRY_ON
+     * @var ATLAS_AR
      */
     protected $client = null;
 
     /**
-     * @var AR_TRY_ON
+     * @var ATLAS_AR
      */
     protected $insights = null;
 
     /**
      * Promotions Class Instance
      *
-     * @var AR_TRY_ON
+     * @var ATLAS_AR
      */
     public $promotion = null;
 
     /**
      * Initialize
      *
-     * @return AR_TRY_ON_Lib_AtlasAiDev
+     * @return ATLAS_AR_Lib_AtlasAiDev
      */
     public static function instance() {
         if ( is_null( self::$instance ) ) {

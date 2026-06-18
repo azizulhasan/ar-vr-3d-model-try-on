@@ -18,9 +18,9 @@ namespace ATLAS_AR_API;
  * `wp_localize_script`. There is no separate `/tryon/config` or
  * `/tryon/settings` route — single source of truth.
  *
- * @package AR_TRY_ON
+ * @package ATLAS_AR
  */
-class AR_TRY_ON_Tryon_Routes {
+class ATLAS_AR_Tryon_Routes {
 
 	protected $namespace = 'ar_try_on/v1';
 

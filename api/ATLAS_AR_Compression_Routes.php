@@ -1,27 +1,27 @@
 <?php
 namespace ATLAS_AR_API;
 
-use AR_TRY_ON\AR_TRY_ON_Compression_DB;
-use AR_TRY_ON\AR_TRY_ON_Compression;
-use AR_TRY_ON\AR_TRY_ON_Format_Converter;
-use AR_TRY_ON\AR_TRY_ON_Helper;
+use ATLAS_AR\ATLAS_AR_Compression_DB;
+use ATLAS_AR\ATLAS_AR_Compression;
+use ATLAS_AR\ATLAS_AR_Format_Converter;
+use ATLAS_AR\ATLAS_AR_Helper;
 
 /**
  * AR Try On - Compression REST API Routes
  *
  * REST API endpoints for compression feature.
  *
- * @package    AR_TRY_ON
- * @subpackage AR_TRY_ON/api
+ * @package    ATLAS_AR
+ * @subpackage ATLAS_AR/api
  * @since      1.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Class AR_TRY_ON_Compression_Routes
+ * Class ATLAS_AR_Compression_Routes
  */
-class AR_TRY_ON_Compression_Routes {
+class ATLAS_AR_Compression_Routes {
 
 	/**
 	 * API namespace
@@ -242,7 +242,7 @@ class AR_TRY_ON_Compression_Routes {
 		);
 
 		// Pro-only routes (bulk-compress, server-compress, convert-format) moved to Pro plugin
-		// See: ar-vr-3d-model-try-on-pro/Api/AR_TRY_ON_Pro_Compression_Routes.php
+		// See: ar-vr-3d-model-try-on-pro/Api/ATLAS_AR_Pro_Compression_Routes.php
 
 		// Upload compressed file
 		register_rest_route(
@@ -266,7 +266,7 @@ class AR_TRY_ON_Compression_Routes {
 	 * @return \WP_REST_Response Response object.
 	 */
 	public function get_settings( $request ) {
-		$settings = AR_TRY_ON_Compression::get_settings();
+		$settings = ATLAS_AR_Compression::get_settings();
 
 		return new \WP_REST_Response(
 			array(
@@ -300,14 +300,14 @@ class AR_TRY_ON_Compression_Routes {
 			$settings['auto_compress'] = $request->get_param( 'auto_compress' );
 		}
 
-		$updated = AR_TRY_ON_Compression::update_settings( $settings );
+		$updated = ATLAS_AR_Compression::update_settings( $settings );
 
 		if ( $updated ) {
 			return new \WP_REST_Response(
 				array(
 					'success' => true,
 					'message' => __( 'Settings updated successfully.', 'ar-vr-3d-model-try-on' ),
-					'data'    => AR_TRY_ON_Compression::get_settings(),
+					'data'    => ATLAS_AR_Compression::get_settings(),
 				),
 				200
 			);
@@ -333,7 +333,7 @@ class AR_TRY_ON_Compression_Routes {
 		$post_id     = $request->get_param( 'post_id' );
 		$source_file = $request->get_param( 'source_file' );
 
-		$result = AR_TRY_ON_Compression::prepare_compression( $post_id, $source_file );
+		$result = ATLAS_AR_Compression::prepare_compression( $post_id, $source_file );
 
 		if ( is_wp_error( $result ) ) {
 			return new \WP_REST_Response(
@@ -368,9 +368,9 @@ class AR_TRY_ON_Compression_Routes {
 		$compressed_file  = $request->get_param( 'compressed_file' );
 		$compression_time = $request->get_param( 'compression_time' );
 
-        $compressed_file_url = AR_TRY_ON_Helper::get_file_url_from_path( $compressed_file );
+        $compressed_file_url = ATLAS_AR_Helper::get_file_url_from_path( $compressed_file );
 
-		$result = AR_TRY_ON_Compression::complete_compression( $log_id, $compressed_file, $compression_time );
+		$result = ATLAS_AR_Compression::complete_compression( $log_id, $compressed_file, $compression_time );
 
 		if ( $result ) {
 			return new \WP_REST_Response(
@@ -403,7 +403,7 @@ class AR_TRY_ON_Compression_Routes {
 		$log_id        = $request->get_param( 'log_id' );
 		$error_message = $request->get_param( 'error_message' );
 
-		$result = AR_TRY_ON_Compression::fail_compression( $log_id, $error_message );
+		$result = ATLAS_AR_Compression::fail_compression( $log_id, $error_message );
 
 		if ( $result ) {
 			return new \WP_REST_Response(
@@ -433,7 +433,7 @@ class AR_TRY_ON_Compression_Routes {
 	 */
 	public function get_status( $request ) {
 		$post_id = $request->get_param( 'post_id' );
-		$log     = AR_TRY_ON_Compression_DB::get_compression_log( $post_id );
+		$log     = ATLAS_AR_Compression_DB::get_compression_log( $post_id );
 
 		if ( $log ) {
 			return new \WP_REST_Response(
@@ -462,7 +462,7 @@ class AR_TRY_ON_Compression_Routes {
 	 * @return \WP_REST_Response Response object.
 	 */
 	public function get_stats( $request ) {
-		$stats = AR_TRY_ON_Compression::get_stats();
+		$stats = ATLAS_AR_Compression::get_stats();
 
 		return new \WP_REST_Response(
 			array(
@@ -490,7 +490,7 @@ class AR_TRY_ON_Compression_Routes {
 		return new \WP_REST_Response(
 			array(
 				'success' => true,
-				'data'    => AR_TRY_ON_Compression::can_user_compress(),
+				'data'    => ATLAS_AR_Compression::can_user_compress(),
 			),
 			200
 		);
@@ -510,7 +510,7 @@ class AR_TRY_ON_Compression_Routes {
 			'offset' => $request->get_param( 'offset' ),
 		);
 
-		$models = AR_TRY_ON_Compression::get_compressed_models( $args );
+		$models = ATLAS_AR_Compression::get_compressed_models( $args );
 
 		return new \WP_REST_Response(
 			array(
@@ -530,7 +530,7 @@ class AR_TRY_ON_Compression_Routes {
 	 */
 	public function delete_compressed( $request ) {
 		$post_id = $request->get_param( 'post_id' );
-		$deleted = AR_TRY_ON_Compression::delete_compressed_files( $post_id );
+		$deleted = ATLAS_AR_Compression::delete_compressed_files( $post_id );
 
 		if ( $deleted ) {
 			return new \WP_REST_Response(
@@ -623,8 +623,8 @@ class AR_TRY_ON_Compression_Routes {
 	 * @return \WP_REST_Response Response object.
 	 */
 	public function get_supported_formats( $request ) {
-		// Get formats info from AR_TRY_ON_Format_Converter
-		$formats_info = AR_TRY_ON_Format_Converter::get_formats_info();
+		// Get formats info from ATLAS_AR_Format_Converter
+		$formats_info = ATLAS_AR_Format_Converter::get_formats_info();
 
 		$requirements = array(
 			'api_url' => defined( 'ATLAS_AR_COMPRESSION_API_URL' ) ? ATLAS_AR_COMPRESSION_API_URL : '',
@@ -661,7 +661,7 @@ class AR_TRY_ON_Compression_Routes {
 	 * @return bool Whether user has permission and Pro is active.
 	 */
 	public function check_pro_permission() {
-		return current_user_can( 'manage_options' ) && AR_TRY_ON_Compression::is_pro_active();
+		return current_user_can( 'manage_options' ) && ATLAS_AR_Compression::is_pro_active();
 	}
 
 	/**

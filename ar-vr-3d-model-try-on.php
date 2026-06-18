@@ -8,7 +8,7 @@
  * that starts the plugin.
  *
  * @since             1.0.0
- * @package           AR_TRY_ON
+ * @package           ATLAS_AR
  *
  * @wordpress-plugin
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
@@ -37,21 +37,43 @@ if ( ! defined( 'WPINC' ) ) {
 
 require_once 'vendor/autoload.php';
 
-use AR_TRY_ON\AR_TRY_ON;
-use AR_TRY_ON\AR_TRY_ON_Activator;
-use AR_TRY_ON\AR_TRY_ON_Deactivate;
-use AR_TRY_ON\AR_TRY_ON_Compression;
-use AR_TRY_ON\AR_TRY_ON_Compression_DB;
-use AR_TRY_ON\AR_TRY_ON_Tryon;
-use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
-use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
-use ATLAS_AR_API\AR_TRY_ON_Tryon_Routes;
-use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
-use AR_TRY_ON\AR_TRY_ON_Helper;
-use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
+use ATLAS_AR\ATLAS_AR;
+use ATLAS_AR\ATLAS_AR_Activator;
+use ATLAS_AR\ATLAS_AR_Deactivate;
+use ATLAS_AR\ATLAS_AR_Compression;
+use ATLAS_AR\ATLAS_AR_Compression_DB;
+use ATLAS_AR\ATLAS_AR_Tryon;
+use ATLAS_AR_API\ATLAS_AR_Api_Routes;
+use ATLAS_AR_API\ATLAS_AR_Compression_Routes;
+use ATLAS_AR_API\ATLAS_AR_Tryon_Routes;
+use ATLAS_AR\ATLAS_AR_Lib_AtlasAiDev;
+use ATLAS_AR\ATLAS_AR_Helper;
+use ATLAS_AR\ATLAS_AR_Admin_Notice;
+
+/*
+ * Backward-compatibility shim (AR-66, v2.2.0).
+ *
+ * v2.2.0 renamed every PHP namespace / class prefix from `AR_TRY_ON` to
+ * `ATLAS_AR`. Code outside this plugin — most importantly an OLDER copy of
+ * the Pro plugin that can still be active during the update window — may
+ * reference the legacy `AR_TRY_ON\…` names (e.g. `AR_TRY_ON\AR_TRY_ON_Helper`).
+ * This fallback autoloader transparently aliases any requested `…AR_TRY_ON…`
+ * class to its renamed `…ATLAS_AR…` counterpart, so no fatal occurs until both
+ * plugins are on the new naming. Appended AFTER Composer's autoloader, so
+ * renamed classes load normally and this only fires for the legacy names.
+ */
+spl_autoload_register( function ( $class ) {
+	if ( false === strpos( $class, 'AR_TRY_ON' ) ) {
+		return;
+	}
+	$new = str_replace( 'AR_TRY_ON', 'ATLAS_AR', $class );
+	if ( $new !== $class && ( class_exists( $new ) || interface_exists( $new ) || trait_exists( $new ) ) ) {
+		class_alias( $new, $class );
+	}
+} );
 
 // Load Admin Notice System
-require_once plugin_dir_path( __FILE__ ) . 'includes/AR_TRY_ON_Admin_Notice.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/ATLAS_AR_Admin_Notice.php';
 
 remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 
@@ -145,7 +167,7 @@ if ( ! defined( 'ATLAS_AR_PLUGIN_PATH' ) ) {
  *
  * @since    1.0.0
  */
-class AR_TRY_ON_Init {
+class ATLAS_AR_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
@@ -160,7 +182,7 @@ class AR_TRY_ON_Init {
 	}
 
 	public function run() {
-		$plugin = new AR_TRY_ON();
+		$plugin = new ATLAS_AR();
 		$plugin->run();
 		//HPOS compatibility
 		if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
@@ -175,33 +197,33 @@ class AR_TRY_ON_Init {
 
 
 function atlas_ar_run() {
-	new AR_TRY_ON_Init();
+	new ATLAS_AR_Init();
 //	if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
-		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
+		ATLAS_AR_Lib_AtlasAiDev::instance()->init();
 //	}
-	new AR_TRY_ON_Api_Routes();
+	new ATLAS_AR_Api_Routes();
 
 	// Initialize Compression feature (v1.8.0+)
-    AR_TRY_ON_Compression::init();
+    ATLAS_AR_Compression::init();
 
 
     // Register Compression REST API routes
 	add_action( 'rest_api_init', function() {
-		$compression_routes = new AR_TRY_ON_Compression_Routes();
+		$compression_routes = new ATLAS_AR_Compression_Routes();
 		$compression_routes->register_routes();
 	} );
 
 	// Initialize Try-On feature (v1.10.0+) — face try-on, lazy-loaded.
-	$atlas_ar_tryon = new AR_TRY_ON_Tryon( ATLAS_AR_VERSION );
+	$atlas_ar_tryon = new ATLAS_AR_Tryon( ATLAS_AR_VERSION );
 	$atlas_ar_tryon->register();
 
 	add_action( 'rest_api_init', function() {
-		$tryon_routes = new AR_TRY_ON_Tryon_Routes();
+		$tryon_routes = new ATLAS_AR_Tryon_Routes();
 		$tryon_routes->register_routes();
 	} );
 
 	// Initialize Admin Notice System (v1.8.0+)
-	AR_TRY_ON_Admin_Notice::instance();
+	ATLAS_AR_Admin_Notice::instance();
 
 	// Admin action to manually create compression database tables.
 	add_action( 'admin_init', function() {
@@ -219,7 +241,7 @@ function atlas_ar_run() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		AR_TRY_ON_Compression_DB::init();
+		ATLAS_AR_Compression_DB::init();
 		wp_safe_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
 		exit;
 	} );
@@ -265,20 +287,20 @@ add_action( 'init', function () {
         wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'atlas_ar_sweep_orphan_temp_files' );
     }
 } );
-add_action( 'atlas_ar_sweep_orphan_temp_files', array( 'AR_TRY_ON\\AR_TRY_ON_Helper', 'sweep_orphan_temp_files' ) );
+add_action( 'atlas_ar_sweep_orphan_temp_files', array( 'ATLAS_AR\\ATLAS_AR_Helper', 'sweep_orphan_temp_files' ) );
 /**
  * The code that runs during plugin activation.
- * This action is documented in includes/AR_TRY_ON_Activator.php
+ * This action is documented in includes/ATLAS_AR_Activator.php
  */
 register_activation_hook( __FILE__, function () {
-	AR_TRY_ON_Activator::activate(1);
+	ATLAS_AR_Activator::activate(1);
 } );
 /**
  * The code that runs during plugin deactivation.
- * This action is documented in includes/AR_TRY_ON_Deactivate.php
+ * This action is documented in includes/ATLAS_AR_Deactivate.php
  */
 register_deactivation_hook( __FILE__, function () {
-	AR_TRY_ON_Deactivate::deactivate();
+	ATLAS_AR_Deactivate::deactivate();
 } );
 
 
@@ -298,7 +320,7 @@ register_block_type( 'atlas/ar-shortcode', array(
  */
 function atlas_ar_create_shortcode( $atts ) {
 
-    return AR_TRY_ON_Helper::create_shortcode( $atts );
+    return ATLAS_AR_Helper::create_shortcode( $atts );
 
 }
 
@@ -310,9 +332,9 @@ add_filter( 'do_shortcode_tag', 'atlas_ar_allow_shortcode_in_html_tag', 10, 4 );
 function atlas_ar_allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
     if ( $tag == 'atlas_ar' && ! empty( $attr ) ) {
         if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-            $content = AR_TRY_ON_Helper::create_shortcode( $attr,  $m[5] ) . $m[5];
+            $content = ATLAS_AR_Helper::create_shortcode( $attr,  $m[5] ) . $m[5];
         } else {
-            $content = $m[5] . AR_TRY_ON_Helper::create_shortcode( $attr, $m[5] );
+            $content = $m[5] . ATLAS_AR_Helper::create_shortcode( $attr, $m[5] );
         }
 
         //Get the content wrapped by the shortcode.
