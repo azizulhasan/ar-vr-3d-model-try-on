@@ -464,6 +464,7 @@ class Insights {
 			if ( empty( $this->notice ) ) {
 				$notice = sprintf(
 					apply_filters(
+						// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 						$this->client->getSlug() . '_tracking_default_notice_message',
 						/* translators: 1: plugin name */
 						esc_html__( 'Want to help make %1$s even more awesome? Allow %1$s to collect non-sensitive diagnostic data and usage information.', 'ar-vr-3d-model-try-on' )
