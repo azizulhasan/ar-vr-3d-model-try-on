@@ -190,14 +190,14 @@ class Client {
 		 * @param string    $route
 		 * @param array     $params
 		 */
-		$route = apply_filters( $this->slug . '_request_route', $route );
+		$route = apply_filters( $this->slug . '_request_route', $route ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		/**
 		 * API EndPoint
 		 * @since 1.0.0
 		 * @param string $url
 		 *
 		 */
-		$this->API_EndPoint = apply_filters( $this->slug . '_AtlasAiDev_API_EndPoint', $this->API_EndPoint, $this->apiVersion, $this->clientVersion );
+		$this->API_EndPoint = apply_filters( $this->slug . '_AtlasAiDev_API_EndPoint', $this->API_EndPoint, $this->apiVersion, $this->clientVersion ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		$this->API_EndPoint = untrailingslashit( $this->API_EndPoint );
 		$route = rtrim( $route, '/\\' );
 		$route = ltrim( $route, '/\\' );
@@ -212,7 +212,7 @@ class Client {
 		 * @param string $apiVersion
 		 * @param string $clientVersion
 		 */
-		$URL = apply_filters( $this->slug . '_AtlasAiDev_API_URL', $URL, $this->API_EndPoint, $route, $this->apiVersion, $this->clientVersion );
+		$URL = apply_filters( $this->slug . '_AtlasAiDev_API_URL', $URL, $this->API_EndPoint, $route, $this->apiVersion, $this->clientVersion ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		return untrailingslashit( $URL );
 	}
 	
@@ -282,7 +282,7 @@ class Client {
 		 * @param string $clientVersion
 		 * @param string $url
 		 */
-		do_action( $this->getSlug() . '_before_request', $params, $route, $headers, $this->clientVersion, $url );
+		do_action( $this->getSlug() . '_before_request', $params, $route, $headers, $this->clientVersion, $url ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		if ( ! empty( $route ) ) {
 			/**
 			 * before request to api server to route.
@@ -293,7 +293,7 @@ class Client {
 			 * @param string $clientVersion
 			 * @param string $url
 			 */
-			do_action( $this->getSlug() . '_before_request_' . $route, $params, $route, $headers, $url );
+			do_action( $this->getSlug() . '_before_request_' . $route, $params, $route, $headers, $url ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		}
 		/**
 		 * Request Blocking mode.
@@ -302,7 +302,7 @@ class Client {
 		 * @since 1.0.2
 		 * @param bool $blocking
 		 */
-		$blocking = (bool) apply_filters( $this->getSlug() . '_request_blocking_mode', $blocking );
+		$blocking = (bool) apply_filters( $this->getSlug() . '_request_blocking_mode', $blocking ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		$response = wp_safe_remote_post(
 			esc_url( $url ),
 			[
@@ -336,7 +336,7 @@ class Client {
 		 * @param array $response
 		 * @param string $route
 		 */
-		do_action( $this->getSlug() . '_after_request', $response, $route );
+		do_action( $this->getSlug() . '_after_request', $response, $route ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		if ( ! empty( $route ) ) {
 			/**
 			 * After request to api server to route.
@@ -345,7 +345,7 @@ class Client {
 			 * @param array $response
 			 * @param string $route
 			 */
-			do_action( $this->getSlug() . '_after_request_' . $route, $response, $route );
+			do_action( $this->getSlug() . '_after_request_' . $route, $response, $route ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		}
 
 		return $response;

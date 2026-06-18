@@ -263,7 +263,7 @@ class Insights {
 		 * @see strtotime()
 		 * @link https://www.php.net/manual/en/function.strtotime.php
 		 */
-		$trackingInterval = apply_filters( $this->client->getSlug() . '_tracking_interval', '-1 minute' );
+		$trackingInterval = apply_filters( $this->client->getSlug() . '_tracking_interval', '-1 minute' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		
 		try {
 			$intervalCheck = strtotime( $trackingInterval );
@@ -321,7 +321,7 @@ class Insights {
 			$data['extra'] = $extra;
 		}
 		
-		return apply_filters( $this->client->getSlug() . '_tracker_data', $data );
+		return apply_filters( $this->client->getSlug() . '_tracker_data', $data ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 	}
 	
 	/**
@@ -342,7 +342,7 @@ class Insights {
 		$data = [
 			esc_html__( 'Server environment details (php, mysql, server, WordPress versions).', 'ar-vr-3d-model-try-on' ),
 		];
-		$data = apply_filters( $this->client->getSlug() . '_what_tracked', $data );
+		$data = apply_filters( $this->client->getSlug() . '_what_tracked', $data ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		
 		return $data;
 	}
@@ -790,7 +790,7 @@ class Insights {
 				'placeholder' => esc_html__( 'Could you tell us a bit more?', 'ar-vr-3d-model-try-on' ),
 			],
 		];
-		$extra = apply_filters( $this->client->getSlug() . '_extra_uninstall_reasons', [], $reasons );
+		$extra = apply_filters( $this->client->getSlug() . '_extra_uninstall_reasons', [], $reasons ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
 		if ( is_array( $extra ) && ! empty( $extra ) ) {
 			// extract the last (other) reason and add after extras.
 			$other = array_pop( $reasons );
