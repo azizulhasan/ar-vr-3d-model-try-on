@@ -477,7 +477,7 @@ class Insights {
 			$notice .= ' (<a class="' . $this->client->getSlug() . '-insights-data-we-collect" href="#">' . esc_html__( 'what we collect', 'ar-vr-3d-model-try-on' ) . '</a>)';
 			$notice .= '<p class="description" style="display:none;">' . implode( ', ', $this->data_we_collect() ) . '. ' . esc_html__( 'No sensitive data is tracked.', 'ar-vr-3d-model-try-on' ) . '</p>';
 			echo '<div class="updated"><p>';
-			echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $notice is composed from esc_html__/esc_html with controlled HTML wrappers.
+			echo wp_kses_post( $notice );
 			echo '</p><p class="submit">';
 			echo '&nbsp;<a href="' . esc_url( $this->get_opt_out_url() ) . '" class="button button-secondary">' . esc_html__( 'No thanks', 'ar-vr-3d-model-try-on' ) . '</a>';
 			echo '&nbsp;<a href="' . esc_url( $this->get_opt_in_url() ) . '" class="button button-primary">' . esc_html__( 'Allow', 'ar-vr-3d-model-try-on' ) . '</a>';
@@ -887,18 +887,23 @@ class Insights {
 				),
 			];
 			
+			// Build a sanitized copy of the request instead of mutating the
+			// $_REQUEST superglobal, and pass that copy (never the raw
+			// superglobal) to the filters below. Nonce is verified by
+			// check_ajax_referer() at the top of this handler.
+			$sanitized_request = [];
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified via check_ajax_referer() above.
 			foreach ( $_REQUEST as $k => $v ) {
-				$sanitizer = 'sanitize_text_field';
-				if ( 'email' == $k ) {
-					$sanitizer = 'sanitize_email';
+				$key = sanitize_key( $k );
+				if ( 'email' === $key ) {
+					$value = sanitize_email( wp_unslash( $v ) );
+				} elseif ( 'website' === $key ) {
+					$value = esc_url_raw( wp_unslash( $v ) );
+				} else {
+					$value = sanitize_text_field( wp_unslash( $v ) );
 				}
-				if ( 'website' == $k ) {
-					$sanitizer = 'esc_url';
-				}
-				$v                    = call_user_func_array( $sanitizer, [ $v ] );
-				$_REQUEST[ $k ]       = $v; // phpcs: sanitize ok.
-				$k                    = '__' . strtoupper( $k ) . '__';
-				$this->ticketTemplate = str_replace( [ $k ], [ $v ], $this->ticketTemplate );
+				$sanitized_request[ $key ] = $value;
+				$this->ticketTemplate      = str_replace( '__' . strtoupper( $key ) . '__', $value, $this->ticketTemplate );
 			}
 			$projectSlug = $this->client->getSlug();
 			$isSent = wp_mail( $this->ticketRecipient, sanitize_text_field( wp_unslash( $_REQUEST['subject'] ) ), sprintf( '<div>%s</div>', $this->ticketTemplate ), $headers );// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_mail_wp_mail
@@ -906,9 +911,9 @@ class Insights {
 				/**
 				 * Set Ajax Success Response for Support Ticket Submission
 				 * @param string $supportResponse
-				 * @param array $_REQUEST
+				 * @param array $sanitized_request Sanitized copy of the request.
 				 */
-				$supportResponse = apply_filters( "AtlasAiDev_{$projectSlug}_Support_Request_Ajax_Success_Response" , false, $_REQUEST );
+				$supportResponse = apply_filters( "AtlasAiDev_{$projectSlug}_Support_Request_Ajax_Success_Response" , false, $sanitized_request );
 				if ( false !== $supportResponse ) {
 					$this->supportResponse = $supportResponse;
 				} else {
@@ -923,9 +928,9 @@ class Insights {
 				/**
 				 * Set Support Ticket Ajax Error Response.
 				 * @param string $supportErrorResponse
-				 * @param array $_REQUEST
+				 * @param array $sanitized_request Sanitized copy of the request.
 				 */
-				$supportErrorResponse = apply_filters( "AtlasAiDev_{$projectSlug}_Support_Request_Ajax_Error_Response" , false, $_REQUEST );
+				$supportErrorResponse = apply_filters( "AtlasAiDev_{$projectSlug}_Support_Request_Ajax_Error_Response" , false, $sanitized_request );
 				if ( false !== $supportErrorResponse ) {
 					$this->supportErrorResponse = $supportErrorResponse;
 				} else {
