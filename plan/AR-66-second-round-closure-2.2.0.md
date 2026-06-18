@@ -230,7 +230,18 @@ Likely already OK — confirm with a `grep -rn "plugin_dir_path\|__DIR__\|ATLAS_
 - [x] Reviewer item 4 — sanitize the filter payload in `Insights.php:911` (sanitized per-field array)
 - [x] Reviewer item 5 — refresh Tripo3D / Meshy AI Terms + Privacy URLs in `readme.txt`
 - [ ] Reviewer item 6 — namespace / hook / option prefix rename (Free) + matching rename in Pro
-- [ ] Reviewer item 7 — confirm no writes inside the plugin folder
+- [x] Reviewer item 7 — confirm no writes inside the plugin folder.
+      DONE (audit, no code change). Every filesystem write targets
+      `wp_upload_dir()['basedir']`:
+        • Compression → `uploads/atlas_ar/<post_id>/` (`$upload_dir='atlas_ar'`).
+        • Model download/move (item 2) → `uploads/atlas_ar/`.
+        • `wp_mkdir_p(ATLAS_AR_MODEL_DIR)` → `uploads/atlas_ar/`.
+        • `libs/AtlasAiDev/` writes nothing to disk.
+      No write fn references `ATLAS_AR_PLUGIN_PATH` / `plugin_dir_path` /
+      `__DIR__` (those are all reads: filemtime/enqueue/textdomain).
+      Follow-up (NOT item 7): `AR_TRY_ON_Compression.php:252` still uses a raw
+      `copy()` — targets uploads (fine for item 7) but should move to
+      `$wp_filesystem->copy()` in the final Plugin Check pass.
 - [ ] Pro plugin: companion 3.2.0 release tracking the namespace rename
 - [ ] Version `2.2.0` in `ar-vr-3d-model-try-on.php` plugin header
 - [ ] `ATLAS_AR_VERSION` constant → `2.2.0`
