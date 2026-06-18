@@ -599,10 +599,13 @@ class AR_TRY_ON_Tryon {
 		$show_tryon       = ! isset( $args['show_tryon'] ) || (bool) $args['show_tryon'];
 		$view_in_ar_style = isset( $args['view_in_ar_style'] ) ? (string) $args['view_in_ar_style'] : 'outline';
 
-		// Inline SVG icons — currentColor so they pick up the button text
-		// color regardless of theme. ~200 bytes each, no extra request.
-		$icon_3d  = '<svg class="atlas-ar-btn-icon" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/><path d="M2 7l10 5 10-5"/><path d="M12 22V12"/></svg>';
-		$icon_try = '<svg class="atlas-ar-btn-icon" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0113 0"/><rect x="3" y="4" width="18" height="16" rx="2" ry="2"/></svg>';
+		// Button icons. Previously inline <svg stroke="currentColor">; now
+		// empty <span>s whose icon is a mask-image in ar-dyn-buttons.css
+		// (tinted with background-color:currentColor, so the same theme-color
+		// inheritance is preserved). Moving the SVG out of the markup is what
+		// lets the final button HTML pass cleanly through wp_kses().
+		$icon_3d  = '<span class="atlas-ar-btn-icon atlas-ar-btn-icon--3d" aria-hidden="true"></span>';
+		$icon_try = '<span class="atlas-ar-btn-icon atlas-ar-btn-icon--try" aria-hidden="true"></span>';
 
 		// The `ar_vr_3d_model_try_on` class is preserved so the existing
 		// JS click handlers in `tryon-bootstrap.js` and `AtlasAR.dist.js`
@@ -672,14 +675,15 @@ class AR_TRY_ON_Tryon {
 			self::$pending_button_wrappers[] = $wrapper_id;
 		}
 
-		$style = $this->build_button_style_block( $wrapper_id );
+		// The per-wrapper inline <style> block was replaced by the enqueued
+		// ar-dyn-buttons.css stylesheet (class-scoped). The footer sampler
+		// still sets the CSS custom properties inline on `#$wrapper_id`.
 
 		// Wrap in the `.atlas-ar-shortcode-outer` so the buttons block
 		// aligns with the post content column (constrained layout) the
 		// same way the revealed model viewer does — instead of getting
 		// auto-centered relative to the full-width container.
-		return $style
-			. '<div class="atlas-ar-shortcode-outer">'
+		return '<div class="atlas-ar-shortcode-outer">'
 			. '<div id="' . esc_attr( $wrapper_id ) . '" class="wp-block-buttons is-layout-flex wp-block-buttons-is-layout-flex atlas-ar-dyn-buttons">'
 			. $view_in_ar_button
 			. $tryon_button
@@ -700,88 +704,12 @@ class AR_TRY_ON_Tryon {
 		}
 	}
 
-	/**
-	 * Build only the inline `<style>` block scoped to the wrapper.
-	 * The companion JS sampler lives at {@see print_dynamic_button_sampler_script}
-	 * and runs at `wp_footer` to dodge `the_content` filter mangling.
-	 *
-	 * The CSS sets sensible defaults using block-theme CSS variables
-	 * (`--wp--preset--color--*`) so block themes look reasonable even
-	 * before the JS runs. Once the sampler does run it overrides via
-	 * inline custom properties on the wrapper element.
-	 */
-	protected function build_button_style_block( $wrapper_id ) {
-		// CSS: defaults come from theme CSS variables when available, then
-		// hardcoded final fallback. Anything the JS sampler can derive
-		// overrides these by setting the custom properties inline on the
-		// wrapper element.
-		$style = '<style id="atlas-ar-dyn-buttons-style-' . esc_attr( $wrapper_id ) . '">'
-			. '#' . esc_attr( $wrapper_id ) . '{'
-				. 'margin-block-start:var(--wp--style--block-gap,1.5rem);'
-				. 'gap:0.75rem;'
-				. 'border:none !important;'
-				. 'padding:0 !important;'
-				. 'background:transparent !important;'
-				. 'box-shadow:none !important;'
-				. '--atlas-ar-btn-bg:var(--wp--preset--color--primary,var(--wp-admin-theme-color,#111));'
-				. '--atlas-ar-btn-bg-image:none;'
-				. '--atlas-ar-btn-color:var(--wp--preset--color--background,#fff);'
-				. '--atlas-ar-btn-border-width:0;'
-				. '--atlas-ar-btn-border-style:solid;'
-				. '--atlas-ar-btn-border-color:transparent;'
-				. '--atlas-ar-btn-radius:9999px;'
-				. '--atlas-ar-btn-padding:0.7em 1.4em;'
-				. '--atlas-ar-btn-font-family:inherit;'
-				. '--atlas-ar-btn-font-size:1rem;'
-				. '--atlas-ar-btn-font-weight:600;'
-				. '--atlas-ar-btn-line-height:1.2;'
-				. '--atlas-ar-btn-letter-spacing:normal;'
-				. '--atlas-ar-btn-text-transform:none;'
-				. '--atlas-ar-btn-text-decoration:none;'
-				. '--atlas-ar-btn-shadow:none;'
-				. '--atlas-ar-btn-transition:filter .15s ease, background-color .15s ease, color .15s ease;'
-				. '--atlas-ar-btn-cursor:pointer;'
-				. '--atlas-ar-btn-min-height:auto;'
-			. '}'
-			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn{'
-				. 'display:inline-flex;align-items:center;gap:0.5em;'
-				. 'background-color:var(--atlas-ar-btn-bg);'
-				. 'background-image:var(--atlas-ar-btn-bg-image);'
-				. 'color:var(--atlas-ar-btn-color);'
-				. 'border:var(--atlas-ar-btn-border-width) var(--atlas-ar-btn-border-style) var(--atlas-ar-btn-border-color);'
-				. 'border-radius:var(--atlas-ar-btn-radius);'
-				. 'padding:var(--atlas-ar-btn-padding);'
-				. 'font-family:var(--atlas-ar-btn-font-family);'
-				. 'font-size:var(--atlas-ar-btn-font-size);'
-				. 'font-weight:var(--atlas-ar-btn-font-weight);'
-				. 'line-height:var(--atlas-ar-btn-line-height);'
-				. 'letter-spacing:var(--atlas-ar-btn-letter-spacing);'
-				. 'text-transform:var(--atlas-ar-btn-text-transform);'
-				. 'text-decoration:var(--atlas-ar-btn-text-decoration);'
-				. 'box-shadow:var(--atlas-ar-btn-shadow);'
-				. 'transition:var(--atlas-ar-btn-transition);'
-				. 'cursor:var(--atlas-ar-btn-cursor);'
-				. 'min-height:var(--atlas-ar-btn-min-height);'
-			. '}'
-			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn--primary:hover{filter:brightness(0.92);}'
-			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn--secondary{'
-				. 'background-color:transparent;'
-				. 'background-image:none;'
-				. 'color:var(--atlas-ar-btn-bg);'
-				. 'border-width:max(2px,var(--atlas-ar-btn-border-width));'
-				. 'border-style:solid;'
-				. 'border-color:var(--atlas-ar-btn-bg);'
-			. '}'
-			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-dyn-btn--secondary:hover{'
-				. 'background-color:var(--atlas-ar-btn-bg);'
-				. 'color:var(--atlas-ar-btn-color);'
-			. '}'
-			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-btn-icon{flex:0 0 auto;}'
-			. '#' . esc_attr( $wrapper_id ) . ' .atlas-ar-btn-label{display:inline-block;}'
-			. '</style>';
-
-		return $style;
-	}
+	// build_button_style_block() was removed in 2.2.0 — the per-wrapper
+	// inline <style> it produced now lives in the enqueued, class-scoped
+	// public/css/ar-dyn-buttons.css. The wp_footer sampler
+	// (print_dynamic_button_sampler_script) still sets the per-wrapper CSS
+	// custom properties inline on `#$wrapper_id`, overriding the class
+	// defaults exactly as before.
 
 	/**
 	 * Emit the theme-button sampler JS at `wp_footer`. Runs against

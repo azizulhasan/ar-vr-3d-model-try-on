@@ -611,11 +611,12 @@ class AR_TRY_ON_Helper
 
             case 'ar_button':
                 // "View in AR" / Try-On dynamic-buttons block: wrapper divs +
-                // <button>s (Try-On carries data-mode/data-glb-src) + inline SVG
-                // icons (with their case-sensitive attribute names preserved).
+                // <button>s (Try-On carries data-mode/data-glb-src) + label and
+                // icon <span>s. Icons are CSS mask-image spans (no inline SVG),
+                // so only div/span/button markup needs to be allowed here.
                 $allowed = array(
                     'div'    => $global,
-                    'span'   => $global,
+                    'span'   => $global + array( 'aria-hidden' => true ),
                     'button' => $global + array(
                         'type'            => true,
                         'aria-label'      => true,
@@ -623,10 +624,6 @@ class AR_TRY_ON_Helper
                         'data-mode'       => true,
                         'data-glb-src'    => true,
                     ),
-                    'svg'    => $global + array( 'viewBox' => true, 'xmlns' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true, 'aria-hidden' => true, 'focusable' => true ),
-                    'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true ),
-                    'circle' => array( 'cx' => true, 'cy' => true, 'r' => true, 'fill' => true, 'stroke' => true ),
-                    'rect'   => array( 'x' => true, 'y' => true, 'width' => true, 'height' => true, 'rx' => true, 'ry' => true, 'fill' => true, 'stroke' => true ),
                 );
                 break;
 

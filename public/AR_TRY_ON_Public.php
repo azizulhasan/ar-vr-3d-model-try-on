@@ -175,6 +175,16 @@ class AR_TRY_ON_Public {
 
 			// Enqueue image/3D toggle styles
 			wp_enqueue_style( 'atlas-ar-toggle', ATLAS_AR_PLUGIN_URL . 'public/css/image-3d-toggle.css', array(), $this->version, 'all' );
+
+			// Dynamic Try-On / View-in-AR buttons block. Replaces the inline
+			// <style> that build_dynamic_buttons_block() used to emit — the
+			// rules are class-scoped (.atlas-ar-dyn-buttons) and the footer
+			// sampler still sets the per-wrapper CSS custom properties inline.
+			// Enqueued in <head> here so it's present before the_content runs
+			// (the_content fires after wp_head, so a late enqueue would miss).
+			$dyn_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-dyn-buttons.css';
+			$dyn_css_ver  = file_exists( $dyn_css_path ) ? (string) filemtime( $dyn_css_path ) : $this->version;
+			wp_enqueue_style( 'atlas-ar-dyn-buttons', ATLAS_AR_PLUGIN_URL . 'public/css/ar-dyn-buttons.css', array(), $dyn_css_ver, 'all' );
 		}
 
 
@@ -421,12 +431,16 @@ class AR_TRY_ON_Public {
             self::$btn_rendered_for_post[ $post_id ] = true;
         }
 
-        $ar_button_content = $qr_html . $button_html;
+        // Both fragments are now inline-script/style-free (QR script moved to
+        // ar-qr-init.js; button <style>/SVG moved to ar-dyn-buttons.css), so
+        // each can be sanitised with its own wp_kses allow-list.
+        $ar_button_content = wp_kses( $qr_html, AR_TRY_ON_Helper::allowed_html( 'qr' ) )
+            . wp_kses( $button_html, AR_TRY_ON_Helper::allowed_html( 'ar_button' ) );
 
         if ( ! isset( $post->post_type ) || $post->post_type !== 'product' ) {
-            return $content . $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
+            return $content . $ar_button_content;
         } else {
-            echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Server-controlled QR + button markup (inline <script>); built from internal templates only.
+            echo $ar_button_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Pre-escaped above via wp_kses() with allowed_html() allow-lists.
         }
     }
 
