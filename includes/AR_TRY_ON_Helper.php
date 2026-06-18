@@ -953,11 +953,62 @@ class AR_TRY_ON_Helper
     }
 
 
+    /**
+     * Reviewer item 2 (path traversal): confirm a candidate file path stays
+     * inside the plugin's model directory (uploads/atlas_ar/). Gates the
+     * write sites whose destination is built from request-supplied
+     * `temp_path` / `path` values.
+     *
+     * The file itself need not exist yet — the parent dir (created via
+     * wp_mkdir_p before the write) is resolved with realpath() so symlinks
+     * and `..` segments are collapsed, then prefix-checked against the
+     * model-dir anchor.
+     *
+     * @param string $path Absolute candidate file path.
+     * @return bool True only if the resolved path is within ATLAS_AR_MODEL_DIR.
+     */
+    public static function path_is_within_model_dir($path)
+    {
+        $path = wp_normalize_path((string) $path);
+        if ($path === '' || strpos($path, '../') !== false) {
+            return false;
+        }
+        $real_anchor = realpath(ATLAS_AR_MODEL_DIR);
+        if ($real_anchor === false) {
+            return false;
+        }
+        $anchor = trailingslashit(wp_normalize_path($real_anchor));
+        // The target file/dir may not exist yet. Walk up to the nearest
+        // existing ancestor and realpath() that (collapsing any symlinks in
+        // the real portion); combined with the `../` rejection above, a path
+        // whose existing ancestor is inside the anchor cannot escape it.
+        $ancestor = $path;
+        while (!file_exists($ancestor) && dirname($ancestor) !== $ancestor) {
+            $ancestor = dirname($ancestor);
+        }
+        $real_ancestor = realpath($ancestor);
+        if ($real_ancestor === false) {
+            return false;
+        }
+        $real_ancestor = trailingslashit(wp_normalize_path($real_ancestor));
+        return strpos($real_ancestor, $anchor) === 0;
+    }
+
     public static function download_model_files_files_and_store($files, $settings = [])
     {
-
-        $file_path = isset($settings['temp_path']) ? $settings['temp_path'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
-        $file_url = isset($settings['temp_url']) ? $settings['temp_url'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL;
+        // Anchor the base dir to the model dir. A caller-supplied temp_path
+        // is honoured ONLY if it resolves inside uploads/atlas_ar/; anything
+        // else falls back to the trusted server default (path traversal).
+        $file_path = ATLAS_AR_CURRENT_MODEL_TEMP_DIR;
+        $file_url  = ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL;
+        if (isset($settings['temp_path']) && $settings['temp_path'] !== '') {
+            $candidate    = wp_normalize_path((string) $settings['temp_path']);
+            $anchor_lexic = wp_normalize_path(ATLAS_AR_MODEL_DIR);
+            if (strpos($candidate, '../') === false && strpos($candidate, $anchor_lexic) === 0) {
+                $file_path = $settings['temp_path'];
+                $file_url  = isset($settings['temp_url']) ? $settings['temp_url'] : ATLAS_AR_CURRENT_MODEL_TEMP_DIR_URL;
+            }
+        }
 
         if (isset($settings['post_id']) && !empty($settings['post_id'])) {
             $date = self::get_post_date($settings['post_id']);
@@ -965,13 +1016,19 @@ class AR_TRY_ON_Helper
             $file_url .= $date . '/';
         }
 
+        // Make sure the directory exists.
+        wp_mkdir_p($file_path);
 
-        // Make sure the directory exists
-        if (!file_exists($file_path)) {
-            wp_mkdir_p($file_path);
+        // Use the WP Filesystem API for the actual write instead of a raw
+        // file_put_contents() (wp.org reviewer item 2 + WP coding standards).
+        global $wp_filesystem;
+        if (empty($wp_filesystem)) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            WP_Filesystem();
         }
+
         $uploaded_files = [];
-        if (isset($files['src']) && !empty($files['src'])) {
+        if (!empty($wp_filesystem) && isset($files['src']) && !empty($files['src'])) {
             foreach ($files as $file_key => $url) {
                 $response = wp_remote_get($url, ['timeout' => 90]);
 
@@ -986,14 +1043,21 @@ class AR_TRY_ON_Helper
                     continue;
                 }
 
-                // Extract filename from URL
-                $filename = basename(wp_parse_url($url, PHP_URL_PATH));
+                // Sanitise the array key and the URL-derived filename so they
+                // cannot smuggle path separators / `..` into the destination.
+                $safe_key      = sanitize_file_name((string) $file_key);
+                $filename      = sanitize_file_name(basename(wp_parse_url($url, PHP_URL_PATH)));
+                $file_full_path = trailingslashit($file_path) . $safe_key . '__' . $filename;
+                $file_full_url  = trailingslashit($file_url) . $safe_key . '__' . $filename;
 
-                // Save file
-                $file_full_path = trailingslashit($file_path) . $file_key . '__' . $filename;
-                $file_full_url = trailingslashit($file_url) . $file_key . '__' . $filename;
-                $saved = file_put_contents($file_full_path, $body);
+                // Final defence: never write outside the model directory.
+                if (!self::path_is_within_model_dir($file_full_path)) {
+                    continue;
+                }
 
+                if (!$wp_filesystem->put_contents($file_full_path, $body, FS_CHMOD_FILE)) {
+                    continue;
+                }
 
                 $uploaded_files[$file_key]['url'] = $file_full_url;
                 $uploaded_files[$file_key]['path'] = $file_full_path;
@@ -1036,24 +1100,32 @@ class AR_TRY_ON_Helper
             $target_path = str_replace('/temp/', '/', $file_path);
             $target_url = str_replace('/temp/', '/', $file_url);
 
+            // Reviewer item 2 (path traversal): both the source (from
+            // request-supplied temp metadata) and the derived destination
+            // must stay inside uploads/atlas_ar/ — skip the file otherwise.
+            if ( ! self::path_is_within_model_dir( $file_path ) || ! self::path_is_within_model_dir( $target_path ) ) {
+                continue;
+            }
+
             // make sure destination folder exists
             $target_dir = dirname($target_path);
             if (!is_dir($target_dir)) {
                 wp_mkdir_p($target_dir);
             }
 
-            // move file via WP_Filesystem (or fallback to copy+delete).
+            // Move via the WP Filesystem API (no raw copy()/file ops).
             global $wp_filesystem;
             if ( empty( $wp_filesystem ) ) {
                 require_once ABSPATH . 'wp-admin/includes/file.php';
                 WP_Filesystem();
             }
-            if ( ! empty( $wp_filesystem ) && method_exists( $wp_filesystem, 'move' ) ) {
-                $wp_filesystem->move( $file_path, $target_path, true );
-            } else {
-                if ( copy( $file_path, $target_path ) ) {
-                    wp_delete_file( $file_path );
-                }
+            if ( empty( $wp_filesystem ) ) {
+                continue; // can't write safely without the filesystem API
+            }
+            if ( method_exists( $wp_filesystem, 'move' ) && $wp_filesystem->move( $file_path, $target_path, true ) ) {
+                // moved
+            } elseif ( $wp_filesystem->copy( $file_path, $target_path, true, FS_CHMOD_FILE ) ) {
+                wp_delete_file( $file_path );
             }
 
             $final_files[$file_key]['path'] = $target_path;
