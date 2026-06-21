@@ -363,11 +363,76 @@ export default function Settings({ settings, handleChange }) {
 
             {/* Description */}
             <p className="art-text-sm art-text-gray-500 art-leading-snug">
-              Determines how the model should be preloaded:
+              Determines when the 3D model file (.glb) is fetched, once the
+              viewer is on the page:
               <br />
-              <strong>Auto</strong> — Loads when near the viewport. <br />
-              <strong>Lazy</strong> — Loads only on interaction. <br />
-              <strong>Eager</strong> — Loads immediately on page load.
+              <strong>Auto</strong> — The browser decides; usually the same as
+              Lazy. <br />
+              <strong>Lazy</strong> — Defers the model file until the viewer
+              scrolls near the viewport. <br />
+              <strong>Eager</strong> — Loads the model file immediately on page
+              load.
+            </p>
+          </BorderCard>
+        </div>
+
+        {/* Model Library Loading Behavior (AR-67) */}
+        <div className="art-space-y-4">
+          <h3
+            className="art-text-xl art-font-semibold art-flex art-items-center art-gap-2"
+            style={{
+              backgroundColor: "var(--theme-bg)",
+              color: "var(--theme-text)",
+            }}
+          >
+            <span className="art-dashicons art-dashicons-performance"></span>
+            Model Loading Behavior
+          </h3>
+          <BorderCard>
+            <label
+              htmlFor="model_load_strategy"
+              className="art-block art-font-medium art-text-base"
+            >
+              3D Viewer Library Loading
+            </label>
+
+            <div className="art-flex art-flex-wrap art-gap-4">
+              <label className="art-flex art-items-center art-gap-2 art-cursor-pointer">
+                <Radio
+                  type="radio"
+                  id="model_load_strategy_auto"
+                  name="model_load_strategy"
+                  value="auto"
+                  checked={(settings.model_load_strategy || "auto") === "auto"}
+                  onChange={handleSettingsChange}
+                />
+                <span>Automatic</span>
+              </label>
+
+              <label className="art-flex art-items-center art-gap-2 art-cursor-pointer">
+                <Radio
+                  type="radio"
+                  id="model_load_strategy_interaction"
+                  name="model_load_strategy"
+                  value="interaction"
+                  checked={settings.model_load_strategy === "interaction"}
+                  onChange={handleSettingsChange}
+                />
+                <span>On interaction</span>
+              </label>
+            </div>
+
+            <p className="art-text-sm art-text-gray-500 art-leading-snug">
+              Controls when the ~1&nbsp;MB 3D viewer library is downloaded:
+              <br />
+              <strong>Automatic</strong> — the 3D viewer loads with the page
+              (current behavior). <br />
+              <strong>On interaction</strong> — the product image shows first and
+              the 3D viewer downloads only when the shopper clicks
+              &ldquo;View&nbsp;in&nbsp;3D&rdquo;, improving initial page speed.{" "}
+              <br />
+              This can be overridden per product in the product&rsquo;s AR
+              settings.
             </p>
           </BorderCard>
         </div>

@@ -263,13 +263,13 @@ class Insights {
 		 * @see strtotime()
 		 * @link https://www.php.net/manual/en/function.strtotime.php
 		 */
-		$trackingInterval = apply_filters( $this->client->getSlug() . '_tracking_interval', '-1 minute' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
-		
+		$trackingInterval = apply_filters( $this->client->getSlug() . '_tracking_interval', '-1 week' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- Hook name is runtime-prefixed with the plugin slug.
+
 		try {
 			$intervalCheck = strtotime( $trackingInterval );
 		} catch ( Exception $e ) {
 			// fallback to default 1 week if filter returned unusable data.
-			$intervalCheck = strtotime( '-1 minute' );
+			$intervalCheck = strtotime( '-1 week' );
 		}
 
 		if ( $last_send && $last_send > $intervalCheck && ! $override ) {

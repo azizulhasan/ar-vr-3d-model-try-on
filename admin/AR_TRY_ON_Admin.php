@@ -185,14 +185,20 @@ class AR_TRY_ON_Admin {
 
 
 		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
-			/* Load react js */
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $this->version, true );
+			/* Load react js. filemtime versioning so a rebuilt bundle busts
+			   browser cache even within the same plugin release (the static
+			   $this->version would otherwise keep serving a stale build). */
+			$dashboard_ui_path = ATLAS_AR_PLUGIN_PATH . 'admin/js/build/ar-try-on-dashboard-ui.min.js';
+			$dashboard_ui_ver  = file_exists( $dashboard_ui_path ) ? (string) filemtime( $dashboard_ui_path ) : $this->version;
+			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $dashboard_ui_ver, true );
 			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->get_localize_data() );
 		}
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 			wp_enqueue_media(); // Enqueue the WordPress media uploader
-			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $this->version, true );
+			$metabox_ui_path = ATLAS_AR_PLUGIN_PATH . 'admin/js/build/ar-try-on-metabox-ui.min.js';
+			$metabox_ui_ver  = file_exists( $metabox_ui_path ) ? (string) filemtime( $metabox_ui_path ) : $this->version;
+			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $metabox_ui_ver, true );
 
 			// Add WooCommerce product variation data if on product edit page
 			$metabox_localize_data = $this->get_localize_data();

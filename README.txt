@@ -4,7 +4,7 @@ Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -338,6 +338,13 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.2.1 ( 21 June 2026 ) =
+* New: "Model Loading Behavior" setting — choose whether the ~1 MB 3D viewer library loads with the page (Automatic) or only when the shopper clicks "View in 3D" (On interaction). Includes a per-product override in the product's AR settings. Improves initial page load and reduces server and bandwidth use.
+* Performance: Reduced per-request database work — memoized repeated supported-post-type checks, removed a redundant option read, and stopped the cached-ID list from growing unbounded.
+* Performance: Combined the front-end stylesheets into a single request.
+* Fix: Pro-registered post types are no longer dropped from the cached supported-post-types list.
+* Maintenance: Restored the usage-tracking interval to its intended weekly schedule, clarified the "Loading Type" setting descriptions, and made admin script bundles cache-bust on rebuild. Default behavior is unchanged.
+
 = 2.2.0 ( 18 June 2026 ) =
 * Security: Per-product Custom CSS is now sanitized when saved and rendered safely, closing a stored-content injection vector.
 * Security: Downloaded 3D model files are now written only inside the uploads/atlas_ar directory, with hardened path checks.
@@ -623,6 +630,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.1 =
+Performance release addressing high server/database load. Adds a "Model Loading Behavior" option to defer the 3D viewer library until a shopper clicks "View in 3D" (global setting plus per-product override), trims per-request database work, and combines front-end styles. Default behavior is unchanged. Safe to update.
 
 = 2.2.0 =
 Security and hardening release: per-product Custom CSS is sanitized, model-file writes are locked to the uploads folder, and front-end output is fully escaped. Recommended for all sites. Safe to update.

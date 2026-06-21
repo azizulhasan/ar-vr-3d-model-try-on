@@ -185,6 +185,17 @@ class AR_TRY_ON_Api_Routes
 
             $data = $settings;
             $data += $product_settings;
+
+            // The per-product metabox "model_load_strategy" override must read
+            // as 'inherit' (use global) unless the product EXPLICITLY set it.
+            // Because $data is seeded from the global settings, the global value
+            // would otherwise leak in and the metabox would show a fake
+            // per-product override (and persist it on the next save). Only
+            // expose the key here when the raw product meta actually carries it.
+            if (!array_key_exists('model_load_strategy', $product_settings)) {
+                unset($data['model_load_strategy']);
+            }
+
             $data['product_name'] = $post_id ? get_the_title($post_id) : '';
 
             // Reviewer item 1: strip any HTML from custom_css before it
