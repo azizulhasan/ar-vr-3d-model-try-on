@@ -56,6 +56,54 @@ class AR_TRY_ON_Helper
         self::$settings_cache = null;
     }
 
+    /**
+     * Resolve the effective model-viewer load strategy for a product.
+     *
+     * Resolution order (first match wins):
+     *   1. Per-product metabox override (`ar_try_on_product_settings['model_load_strategy']`),
+     *      when set to a concrete value ('auto' | 'interaction'). 'inherit'
+     *      (or unset / anything invalid) falls through.
+     *   2. Global setting (`ar_try_on_settings['model_load_strategy']`).
+     *   3. Default 'auto' — preserves the historical inline/eager behavior so
+     *      nothing changes for existing sites until they opt in.
+     *
+     * 'auto'        — current behavior: the inline viewer hydrates and
+     *                 google-model-viewer.js loads as soon as the viewer is
+     *                 near the viewport.
+     * 'interaction' — poster-first: the 960 KB library loads only when the
+     *                 user clicks a View-in-3D / Try-On / AR / 3D-tab trigger.
+     *
+     * @param int $post_id Product/post id, or 0 to resolve the global value only.
+     * @return string 'auto' | 'interaction'
+     */
+    public static function get_model_load_strategy( $post_id = 0 ) {
+        $valid = array( 'auto', 'interaction' );
+
+        // 1. Per-product override.
+        if ( $post_id ) {
+            $ps = (array) get_post_meta( (int) $post_id, 'ar_try_on_product_settings', true );
+            if ( method_exists( __CLASS__, 'rename_old_keys_of_product_metadata' ) ) {
+                $ps = self::rename_old_keys_of_product_metadata( $ps );
+            }
+            if ( isset( $ps['model_load_strategy'] ) && in_array( $ps['model_load_strategy'], $valid, true ) ) {
+                return apply_filters( 'atlas_ar_model_load_strategy', (string) $ps['model_load_strategy'], (int) $post_id );
+            }
+        }
+
+        // 2. Global setting, else 3. default 'auto'.
+        $settings = self::get_settings();
+        $global   = isset( $settings['model_load_strategy'] ) ? (string) $settings['model_load_strategy'] : '';
+        $strategy = in_array( $global, $valid, true ) ? $global : 'auto';
+
+        /**
+         * Filter the effective model-viewer load strategy.
+         *
+         * @param string $strategy 'auto' | 'interaction'.
+         * @param int    $post_id  Resolved product/post id (0 for global).
+         */
+        return apply_filters( 'atlas_ar_model_load_strategy', $strategy, (int) $post_id );
+    }
+
     public static function is_atlas_ar_page()
     {
         // Ensure we are in the admin area
@@ -104,9 +152,15 @@ class AR_TRY_ON_Helper
             $final_post_type[$post_type->name] = $post_type->name;
         }
 
+        // Apply the filter BEFORE caching so Pro-added post types are part of
+        // the cached value. Previously the pre-filter array was cached but the
+        // post-filter array returned, so on every cache hit (the common path)
+        // Pro's extra post types were silently dropped.
+        $final_post_type = apply_filters('atlas_ar_get_post_types', $final_post_type);
+
         AR_TRY_ON_Cache::set($cache_key, $final_post_type);
 
-        return apply_filters('atlas_ar_get_post_types', $final_post_type);
+        return $final_post_type;
     }
 
     public static function atlas_ar_should_load_button($post_status = '')
@@ -185,7 +239,19 @@ class AR_TRY_ON_Helper
             return false; // The current page is singular or single on the frontend
         }
 
-        $settings = (array)get_option('ar_try_on_settings');
+        // Per-request memoization. This helper is called several times per page
+        // load (enqueue_styles, enqueue_scripts, the_content, footer, …) and
+        // each call previously re-ran get_option() + get_post_meta(), which
+        // multiplies DB queries on large sites. The result depends on the
+        // current post, the explicit $call_type, and the hook we are running
+        // under (current_filter() is read below), so the key combines all three.
+        static $support_cache = [];
+        $cache_key = $post->ID . '|' . $call_type . '|' . current_filter();
+        if (array_key_exists($cache_key, $support_cache)) {
+            return $support_cache[$cache_key];
+        }
+
+        $settings = self::get_settings();
         $post_types = [];
         if (isset($settings['ar_try_on_allowed_post_types']) && !empty($settings['ar_try_on_allowed_post_types'])) {
             $post_types = $settings['ar_try_on_allowed_post_types'];
@@ -217,6 +283,8 @@ class AR_TRY_ON_Helper
                 $result = false;
             }
         }
+
+        $support_cache[$cache_key] = $result;
 
         return $result;
     }
@@ -1146,12 +1214,16 @@ class AR_TRY_ON_Helper
     public static function update_cache_data($data, $post_id = '', $state = 'add')
     {
         $has_value_changed = isset($data['has_value_changed']) ? $data['has_value_changed'] : $data;
-        $post_cache_data = get_option('get_cache_data');
         $post_cache_data = AR_TRY_ON_Cache::get('get_cache_data');
         if ($has_value_changed && $post_id) {
             if ($state === 'add') {
                 $post_cache_data = is_array($post_cache_data) ? $post_cache_data : [];
-                $post_cache_data[] = $post_id;
+                // Dedup on append: this list is an autoloaded option, so blindly
+                // appending the same post_id on every settings save grows it
+                // unbounded and bloats autoload memory on every request.
+                if (!in_array($post_id, $post_cache_data)) {
+                    $post_cache_data[] = $post_id;
+                }
                 update_option('get_cache_data', $post_cache_data);
                 AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
             } elseif ($state === 'remove' && is_array($post_cache_data)) {
