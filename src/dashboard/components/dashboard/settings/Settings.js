@@ -363,11 +363,15 @@ export default function Settings({ settings, handleChange }) {
 
             {/* Description */}
             <p className="art-text-sm art-text-gray-500 art-leading-snug">
-              Determines how the model should be preloaded:
+              Determines when the 3D model file (.glb) is fetched, once the
+              viewer is on the page:
               <br />
-              <strong>Auto</strong> — Loads when near the viewport. <br />
-              <strong>Lazy</strong> — Loads only on interaction. <br />
-              <strong>Eager</strong> — Loads immediately on page load.
+              <strong>Auto</strong> — The browser decides; usually the same as
+              Lazy. <br />
+              <strong>Lazy</strong> — Defers the model file until the viewer
+              scrolls near the viewport. <br />
+              <strong>Eager</strong> — Loads the model file immediately on page
+              load.
             </p>
           </BorderCard>
         </div>
