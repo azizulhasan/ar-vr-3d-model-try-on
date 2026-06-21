@@ -196,6 +196,15 @@
 
 			var modelViewer = viewer3DContainer.querySelector( 'model-viewer' );
 			if ( modelViewer && window.AtlasAR ) {
+				// The <model-viewer> skeleton is pre-injected (hidden) at init,
+				// so revealing it here adds no new node for the lazy loader's
+				// MutationObserver to catch. Explicitly ask the loader to fetch
+				// google-model-viewer.js now — this IS the user gesture in
+				// 'interaction' mode, and it's idempotent in 'auto' mode (the
+				// library may already be loading from the viewport observer).
+				if ( typeof window.atlasARLoadModelViewer === 'function' ) {
+					window.atlasARLoadModelViewer();
+				}
 				var atlasAR = new window.AtlasAR();
 				var modelId = modelViewer.id ? '#' + modelViewer.id : '.atlas_ar_model_viewer';
 				atlasAR.fetchModelData( atlas_ar_product_id, modelId, 'normal' );
