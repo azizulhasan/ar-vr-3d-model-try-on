@@ -189,76 +189,69 @@
      *  INTERACTION strategy — poster-first, load on user gesture.         *
      * ------------------------------------------------------------------ */
 
-    // Cover an on-load <model-viewer> with a poster + "View in 3D" button,
-    // WITHOUT removing it from layout (so a gallery-embedded viewer keeps its
-    // slot size). The overlay is absolutely positioned over the viewer's box
-    // and shows the viewer's own poster image; clicking it loads the library
-    // and the underlying <model-viewer> upgrades in place.
-    function attachPosterOverlay(mv) {
+    // Defer an on-load <model-viewer> behind a poster, by injecting the poster
+    // as a `slot="poster"` CHILD of the viewer itself (not a sibling overlay).
+    //
+    // Why a child: the WooCommerce gallery (flexslider) clones and re-inserts
+    // its slides; a sibling overlay gets detached and races the clone, but a
+    // child travels WITH the <model-viewer> wherever flexslider moves it.
+    // <model-viewer> also natively renders a slot="poster" child before the
+    // model is revealed, so once the library loads the same element is reused
+    // and the poster auto-hides when the 3D scene appears.
+    function injectPosterChild(mv) {
         if (!mv || mv.__atlasARPosterBound) {
             return;
         }
         mv.__atlasARPosterBound = true;
-
-        var holder = mv.parentElement;
-        if (!holder) {
+        if (mv.querySelector('.atlas-ar-poster-slot')) {
             return;
-        }
-        // The viewer needs a positioned ancestor for the absolute overlay.
-        if (getComputedStyle(holder).position === 'static') {
-            holder.style.position = 'relative';
         }
 
         var poster = mv.getAttribute('poster') || mv.getAttribute('data-poster') || '';
 
-        var ov = document.createElement('div');
-        ov.className = 'atlas-ar-poster-wrap';
-        ov.style.position = 'absolute';
-        ov.style.left = '0';
-        ov.style.top = '0';
-        ov.style.right = '0';
-        ov.style.bottom = '0';
-        ov.style.zIndex = '5';
-        ov.style.cursor = 'pointer';
-        ov.style.display = 'flex';
-        ov.style.alignItems = 'center';
-        ov.style.justifyContent = 'center';
-        if (poster) {
-            ov.style.background = '#fff center/contain no-repeat url("' + poster.replace(/"/g, '%22') + '")';
-        } else {
-            ov.style.background = 'rgba(0,0,0,0.03)';
-        }
-
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'atlas-ar-poster-btn';
+        btn.setAttribute('slot', 'poster');
+        btn.className = 'atlas-ar-poster-slot';
         btn.setAttribute('aria-label', VIEW_IN_3D_LABEL);
-        btn.textContent = VIEW_IN_3D_LABEL;
-        btn.style.padding = '10px 18px';
-        btn.style.border = '0';
-        btn.style.borderRadius = '999px';
-        btn.style.background = 'rgba(0,0,0,0.75)';
-        btn.style.color = '#fff';
-        btn.style.font = '600 14px/1.2 system-ui, sans-serif';
-        btn.style.cursor = 'pointer';
-        ov.appendChild(btn);
+        btn.style.cssText =
+            'width:100%;height:100%;min-height:180px;display:flex;align-items:center;' +
+            'justify-content:center;border:0;cursor:pointer;' +
+            (poster
+                ? 'background:#fff center/contain no-repeat url("' + poster.replace(/"/g, '%22') + '");'
+                : 'background:rgba(0,0,0,0.03);');
 
-        holder.appendChild(ov);
+        var label = document.createElement('span');
+        label.className = 'atlas-ar-poster-label';
+        label.textContent = VIEW_IN_3D_LABEL;
+        label.style.cssText =
+            'padding:10px 18px;border-radius:999px;background:rgba(0,0,0,0.75);' +
+            'color:#fff;font:600 14px/1.2 system-ui,sans-serif;';
+        btn.appendChild(label);
 
-        function reveal() {
-            btn.disabled = true;
-            btn.textContent = '…';
-            loadModelViewerScript().then(function () {
-                if (ov.parentNode) {
-                    ov.parentNode.removeChild(ov);
-                }
-            }).catch(function () {
-                btn.disabled = false;
-                btn.textContent = VIEW_IN_3D_LABEL;
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            label.textContent = '…';
+            loadModelViewerScript().catch(function () {
+                label.textContent = VIEW_IN_3D_LABEL;
             });
+        });
+
+        // If the poster URL is set slightly later (setModelAttributes after the
+        // REST fetch), pick it up so the placeholder shows the product render.
+        if (!poster && 'MutationObserver' in window) {
+            var attrObs = new MutationObserver(function () {
+                var late = mv.getAttribute('poster');
+                if (late) {
+                    btn.style.background = '#fff center/contain no-repeat url("' + late.replace(/"/g, '%22') + '")';
+                    attrObs.disconnect();
+                }
+            });
+            attrObs.observe(mv, { attributes: true, attributeFilter: ['poster'] });
         }
 
-        ov.addEventListener('click', reveal);
+        mv.appendChild(btn);
     }
 
     // Distinguish a viewer injected by a real user gesture (WC 3D tab, image⇄3D
@@ -278,18 +271,40 @@
             return;
         }
         mv.__atlasARHandled = true;
+
         if (injectedByGesture()) {
             // User already clicked a trigger that produced this viewer — load now.
             loadModelViewerScript();
-        } else {
-            // Auto-injected on load — defer behind a poster.
-            attachPosterOverlay(mv);
+            return;
         }
+
+        // A viewer embedded in the WooCommerce gallery is managed by the
+        // image⇄3D toggle (ar-image-3d-toggle.js), which in interaction mode
+        // defaults to the product image and loads the library on its own
+        // "View in 3D" button. Don't touch it — the gallery's flexslider clones
+        // slides, which detaches any listener/overlay we'd attach here.
+        if (mv.closest && mv.closest('.woocommerce-product-gallery, #atlas_ar-toggle-3d-container, #atlas_ar-3d-viewer-overlay, .atlas-ar-3d-viewer-overlay, .atlas-ar-fullscreen-viewer')) {
+            return;
+        }
+
+        // Standalone viewer (e.g. an inline [atlas_ar] shortcode) — not inside
+        // the gallery, so a poster child is safe and not subject to cloning.
+        injectPosterChild(mv);
     }
 
     function removeAllPosterOverlays() {
-        var ovs = document.querySelectorAll('.atlas-ar-poster-wrap');
+        // Once the library is loaded, <model-viewer> manages its own poster
+        // slot (it hides when the model reveals), but strip any of our injected
+        // poster children that belong to viewers which never reveal (e.g. a
+        // hidden duplicate) so no stale "View in 3D" label lingers.
+        var ovs = document.querySelectorAll('.atlas-ar-poster-slot');
         Array.prototype.forEach.call(ovs, function (o) {
+            var mv = o.closest && o.closest('model-viewer');
+            // Keep the poster on the viewer the user is actively revealing;
+            // model-viewer will hide it automatically when the scene loads.
+            if (mv && mv.loaded) {
+                return;
+            }
             if (o.parentNode) {
                 o.parentNode.removeChild(o);
             }

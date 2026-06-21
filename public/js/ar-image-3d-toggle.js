@@ -37,6 +37,18 @@
 		var atlas_ar_product_id = viewer3DSource.getAttribute( 'data-atlas-product-id' ) || '';
 		var atlas_ar_display_mode = viewer3DSource.getAttribute( 'data-atlas-display-mode' ) || 'product_image';
 
+		// AR-67: when the model-load strategy is 'interaction' (global setting or
+		// per-product metabox override, resolved in AR_TRY_ON_Helper and shared
+		// via ar_try_on.model_load_strategy), never auto-show the 3D viewer in
+		// the gallery. Default to the product image so the ~956 KB
+		// google-model-viewer library loads only when the shopper clicks this
+		// gallery's own "View in 3D" toggle (load3DModel runs on that click).
+		// This reuses the gallery-native toggle button — which has a real event
+		// listener and is not a flexslider clone — instead of any overlay.
+		if ( typeof ar_try_on !== 'undefined' && ar_try_on && ar_try_on.model_load_strategy === 'interaction' ) {
+			atlas_ar_display_mode = 'product_image';
+		}
+
 		// Get the actual image element inside
 		var mainImage = mainImageContainer.querySelector( 'a, img' );
 
