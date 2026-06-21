@@ -37,6 +37,18 @@
 		var atlas_ar_product_id = viewer3DSource.getAttribute( 'data-atlas-product-id' ) || '';
 		var atlas_ar_display_mode = viewer3DSource.getAttribute( 'data-atlas-display-mode' ) || 'product_image';
 
+		// AR-67: when the model-load strategy is 'interaction' (global setting or
+		// per-product metabox override, resolved in AR_TRY_ON_Helper and shared
+		// via ar_try_on.model_load_strategy), never auto-show the 3D viewer in
+		// the gallery. Default to the product image so the ~956 KB
+		// google-model-viewer library loads only when the shopper clicks this
+		// gallery's own "View in 3D" toggle (load3DModel runs on that click).
+		// This reuses the gallery-native toggle button — which has a real event
+		// listener and is not a flexslider clone — instead of any overlay.
+		if ( typeof ar_try_on !== 'undefined' && ar_try_on && ar_try_on.model_load_strategy === 'interaction' ) {
+			atlas_ar_display_mode = 'product_image';
+		}
+
 		// Get the actual image element inside
 		var mainImage = mainImageContainer.querySelector( 'a, img' );
 
@@ -184,6 +196,15 @@
 
 			var modelViewer = viewer3DContainer.querySelector( 'model-viewer' );
 			if ( modelViewer && window.AtlasAR ) {
+				// The <model-viewer> skeleton is pre-injected (hidden) at init,
+				// so revealing it here adds no new node for the lazy loader's
+				// MutationObserver to catch. Explicitly ask the loader to fetch
+				// google-model-viewer.js now — this IS the user gesture in
+				// 'interaction' mode, and it's idempotent in 'auto' mode (the
+				// library may already be loading from the viewport observer).
+				if ( typeof window.atlasARLoadModelViewer === 'function' ) {
+					window.atlasARLoadModelViewer();
+				}
 				var atlasAR = new window.AtlasAR();
 				var modelId = modelViewer.id ? '#' + modelViewer.id : '.atlas_ar_model_viewer';
 				atlasAR.fetchModelData( atlas_ar_product_id, modelId, 'normal' );

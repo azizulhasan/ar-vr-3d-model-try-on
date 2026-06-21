@@ -135,6 +135,15 @@ class AR_TRY_ON_Public {
 			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
 			'cached_ids'    => AR_TRY_ON_Helper::update_cache_data( false ),
 
+			// Effective model-viewer load strategy for the current product
+			// ('auto' | 'interaction'). Resolved per-product (metabox override
+			// → global setting → default 'auto'). The lazy loader reads this to
+			// decide between eager/viewport hydration and poster-first
+			// load-on-interaction. See AR_TRY_ON_Helper::get_model_load_strategy().
+			'model_load_strategy' => AR_TRY_ON_Helper::get_model_load_strategy(
+				( function_exists( 'is_singular' ) && is_singular() ) ? (int) get_queried_object_id() : 0
+			),
+
 			/*
 			 * Phase 3 extension-surface payload — kept symmetric with
 			 * the admin-side localize_data so public-bundle code
@@ -162,29 +171,47 @@ class AR_TRY_ON_Public {
 
 		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
 
-			// filemtime-based versioning forces browsers to grab a
-			// fresh copy whenever we tweak the CSS — the plugin
-			// `$this->version` is too coarse (it only changes on
-			// release), so iterative UI/UX tweaks would otherwise be
-			// served from cache.
-			$public_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-vr-3d-model-try-on-public.css';
-			$public_css_ver  = file_exists( $public_css_path ) ? (string) filemtime( $public_css_path ) : $this->version;
+			// The four public stylesheets are concatenated into a single
+			// bundle (public/css/atlas-ar-public.bundle.css, generated from the
+			// sources) so a product page makes one CSS request instead of four.
+			//
+			// Staleness guard: the bundle is only used when it is at least as
+			// new as every source file. If a developer edits a source CSS
+			// without regenerating the bundle, we automatically fall back to
+			// enqueuing the four sources separately — so a tweak is never
+			// silently lost. filemtime-based versioning busts browser cache on
+			// every change (the release $this->version is too coarse).
+			$css_dir      = ATLAS_AR_PLUGIN_PATH . 'public/css/';
+			$css_url      = ATLAS_AR_PLUGIN_URL . 'public/css/';
+			$sources      = array(
+				'ar-vr-3d-model-try-on-public.css',
+				'atlas_ar_modal.css',
+				'image-3d-toggle.css',
+				'ar-tryon-buttons.css',
+			);
+			$bundle_file  = $css_dir . 'atlas-ar-public.bundle.css';
+			$bundle_fresh = file_exists( $bundle_file );
+			$newest_src   = 0;
+			foreach ( $sources as $src ) {
+				if ( file_exists( $css_dir . $src ) ) {
+					$newest_src = max( $newest_src, (int) filemtime( $css_dir . $src ) );
+				}
+			}
+			if ( $bundle_fresh && (int) filemtime( $bundle_file ) < $newest_src ) {
+				$bundle_fresh = false; // a source was edited after the bundle was built
+			}
 
-			wp_enqueue_style( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $public_css_ver, 'all' );
-			wp_enqueue_style( 'atlas_ar_modal', ATLAS_AR_PLUGIN_URL . 'public/css/atlas_ar_modal.css', array(), $this->version, 'all' );
-
-			// Enqueue image/3D toggle styles
-			wp_enqueue_style( 'atlas-ar-toggle', ATLAS_AR_PLUGIN_URL . 'public/css/image-3d-toggle.css', array(), $this->version, 'all' );
-
-			// Dynamic Try-On / View-in-AR buttons block. Replaces the inline
-			// <style> that build_dynamic_buttons_block() used to emit — the
-			// rules are class-scoped (.atlas-ar-tryon-buttons) and the footer
-			// sampler still sets the per-wrapper CSS custom properties inline.
-			// Enqueued in <head> here so it's present before the_content runs
-			// (the_content fires after wp_head, so a late enqueue would miss).
-			$tryon_css_path = ATLAS_AR_PLUGIN_PATH . 'public/css/ar-tryon-buttons.css';
-			$tryon_css_ver  = file_exists( $tryon_css_path ) ? (string) filemtime( $tryon_css_path ) : $this->version;
-			wp_enqueue_style( 'atlas-ar-tryon-buttons', ATLAS_AR_PLUGIN_URL . 'public/css/ar-tryon-buttons.css', array(), $tryon_css_ver, 'all' );
+			if ( $bundle_fresh ) {
+				wp_enqueue_style( $this->plugin_name, $css_url . 'atlas-ar-public.bundle.css', array(), (string) filemtime( $bundle_file ), 'all' );
+			} else {
+				// Fallback: original per-file enqueues (handle names preserved).
+				$public_css_ver = file_exists( $css_dir . 'ar-vr-3d-model-try-on-public.css' ) ? (string) filemtime( $css_dir . 'ar-vr-3d-model-try-on-public.css' ) : $this->version;
+				wp_enqueue_style( $this->plugin_name, $css_url . 'ar-vr-3d-model-try-on-public.css', array(), $public_css_ver, 'all' );
+				wp_enqueue_style( 'atlas_ar_modal', $css_url . 'atlas_ar_modal.css', array(), $this->version, 'all' );
+				wp_enqueue_style( 'atlas-ar-toggle', $css_url . 'image-3d-toggle.css', array(), $this->version, 'all' );
+				$tryon_css_ver = file_exists( $css_dir . 'ar-tryon-buttons.css' ) ? (string) filemtime( $css_dir . 'ar-tryon-buttons.css' ) : $this->version;
+				wp_enqueue_style( 'atlas-ar-tryon-buttons', $css_url . 'ar-tryon-buttons.css', array(), $tryon_css_ver, 'all' );
+			}
 		}
 
 
