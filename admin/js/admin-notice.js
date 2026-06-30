@@ -58,32 +58,24 @@
 				action_name: actionName
 			}, function(response) {
 				if (response.success) {
-					// Show success message
-					$button.html('<span class="dashicons dashicons-yes" style="margin-top: 3px;"></span> Success!');
+					// Show success state
+					$button.html('<span class="dashicons dashicons-yes" style="margin-top: 3px;"></span> Done!');
 
-					// Handle redirect if provided
-					if (response.data.redirect_url) {
-						// Show instructions in alert
-						var instructions = 'NEXT STEPS:\n\n' +
-							'1. Fill out the contact form\n' +
-							'2. Subject: "Request 80% Off Coupon - Early Access"\n' +
-							'3. Your email: ' + response.data.email + '\n' +
-							'4. We\'ll send you the coupon code within 24 hours!\n\n' +
-							'Redirecting to contact page...';
+					var $notice = $button.closest('.notice');
 
-						alert(instructions);
-
-						// Redirect
-						window.location.href = response.data.redirect_url;
-					} else {
-						// Reload page after 1 second
-						setTimeout(function() {
-							location.reload();
-						}, 1000);
+					// Open the destination (e.g. the review form) in a new tab so
+					// the admin stays in wp-admin.
+					if (response.data && response.data.redirect_url) {
+						window.open(response.data.redirect_url, '_blank');
 					}
+
+					// The action is recorded server-side; remove the notice.
+					$notice.fadeOut(300, function() {
+						$(this).remove();
+					});
 				} else {
 					// Show error
-					alert(response.data.message || 'An error occurred. Please try again.');
+					alert((response.data && response.data.message) || 'An error occurred. Please try again.');
 					$button.prop('disabled', false).html(originalText);
 				}
 			}).fail(function() {

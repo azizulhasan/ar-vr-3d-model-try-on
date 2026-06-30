@@ -1,33 +1,33 @@
 === 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On  ===
 Contributors: atlasaidev, hasanazizul
-Tags: 3d viewer, 3d model viewer, Try On, augmented reality, virtual try on
+Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.1
+Stable tag: 2.2.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-3D Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
+3D model viewer with WooCommerce AR and webcam virtual try-on for glasses & caps — view in 3D, place in AR on iOS & Android, no app needed.
 
 == Description ==
 
-Showcase your 3D models with browser-based AR — no apps, no coding. Let shoppers rotate and zoom .glb/.gltf models, place products in their real-world space on Android and iOS, or try on glasses and caps with the built-in **AtlasTryOn** webcam viewer. All free, with unlimited model uploads.
+A complete **3D model viewer for WordPress and WooCommerce** with built-in augmented reality and webcam **virtual try-on** — no apps, no coding. Let shoppers rotate, zoom and pan your `.glb`/`.gltf` models, place products in their real-world space on Android and iOS, or try on glasses and caps with the built-in **AtlasTryOn** viewer. Everything runs in the browser: the camera feed never leaves the shopper's device, there's no app to install and no account to create. All free, with unlimited model uploads.
 
-🚀 **AtlasTryOn — Virtual Try-On for Glasses & Caps**, built into the free plugin. Shoppers see how eyewear or headwear looks on them right from the product page — no app downloads, no extra setup.
+🚀 **AtlasTryOn — virtual try-on for glasses & caps**, built into the free plugin. Shoppers can try on glasses, sunglasses and hats online right from the product page using their webcam — no app downloads, no extra setup, and the camera never leaves their device.
 
 🎁 **14-day Pro free trial included** for the full AtlasTryOn Pro experience — head-pose tracking, HD watermark-free snapshots, multi-face detection, live calibration. [Start your free trial →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=trial_cta)
 
 #### **Core features (Free):**
 
-* **Rotate / zoom 3D models** on every product page
-* **Mobile AR**: floor + wall placement via Scene Viewer (Android) and AR Quick Look (iOS)
+* **Rotate, zoom and pan 3D models** on every product page (Google `<model-viewer>` engine)
+* **Mobile AR**: floor + wall placement via Scene Viewer (Android) and AR Quick Look (iOS, `.usdz`)
 * **Unlimited model uploads** — no caps on file count or size
 * **WooCommerce native**: automatic "View in AR" button, simple + variable products
 * **Shortcode** `[atlas_ar]` + Gutenberg block for posts/pages
 * **QR code** card for cross-device scanning
 * **AtlasTryOn** webcam try-on for glasses, sunglasses, caps — unlimited products
-* **Tripo3D and Meshy AI integration** to generate 3D models from a text prompt (admin-only; bring your own API key)
+* **AI 3D model generator** — Tripo3D and Meshy AI integration to create 3D models from a text prompt (admin-only; bring your own API key)
 * **Privacy by design** — the camera feed stays on the shopper's device; nothing is uploaded
 
 #### **Pro adds (separately installed plugin):**
@@ -259,6 +259,9 @@ The complete, unminified source (GPLv3) is on GitHub: https://github.com/azizulh
 
 == Frequently Asked Questions ==
 
+= Q: Is this 3D model viewer compatible with WooCommerce? =
+A: Yes. The plugin integrates natively with WooCommerce — a "View in AR" button is added automatically to simple and variable product pages, and you can switch the 3D viewer on per product. It also works on regular WordPress posts and pages, so you are not limited to a store.
+
 = Q: What is AtlasTryOn? =
 A: AtlasTryOn is a virtual try-on feature, built right into this plugin, that lets your shoppers see how glasses or caps look on them using their webcam. No app downloads or external services — it runs in the browser.
 
@@ -337,6 +340,10 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 2.2.3 ( 30 June 2026 ) =
+* New: A friendly, dismissible review reminder for site admins — shown only after you've added your own 3D model and used the plugin for a couple of weeks. It includes "Remind me later", "I already did" and "Never ask again" options, and never appears for Pro users.
+* Maintenance: Refreshed the plugin description, search tags and FAQ so it is clearer at a glance what the plugin does — 3D model viewing, augmented reality, and webcam virtual try-on for glasses and caps.
 
 = 2.2.1 ( 21 June 2026 ) =
 * New: "Model Loading Behavior" setting — choose whether the ~1 MB 3D viewer library loads with the page (Automatic) or only when the shopper clicks "View in 3D" (On interaction). Includes a per-product override in the product's AR settings. Improves initial page load and reduces server and bandwidth use.
@@ -630,6 +637,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.3 =
+Adds a polite, dismissible review reminder for admins (shown only after real use, never to Pro users) plus a refreshed description, tags and FAQ. Safe to update.
 
 = 2.2.1 =
 Performance release addressing high server/database load. Adds a "Model Loading Behavior" option to defer the 3D viewer library until a shopper clicks "View in 3D" (global setting plus per-product override), trims per-request database work, and combines front-end styles. Default behavior is unchanged. Safe to update.
