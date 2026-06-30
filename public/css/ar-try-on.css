@@ -10,24 +10,6 @@
   border-width: 0
 }
 
-/* AR-62 §2: spinner for the Generate Model button while a task is in
-   flight. Replaces the old "Generating Model......" trailing-dots
-   indicator. Sized to sit inline with the button label. */
-.atlas-ar-spinner {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-right: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: atlas-ar-spin 0.8s linear infinite;
-  vertical-align: -2px;
-}
-@keyframes atlas-ar-spin {
-  to { transform: rotate(360deg); }
-}
-
 .art-pointer-events-none {
   pointer-events: none
 }
@@ -148,6 +130,11 @@
 .art-mx-auto {
   margin-left: auto;
   margin-right: auto
+}
+
+.art-my-2 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem
 }
 
 .art--mb-px {
@@ -514,6 +501,10 @@
   animation: art-spin 1s linear infinite
 }
 
+.art-cursor-help {
+  cursor: help
+}
+
 .art-cursor-move {
   cursor: move
 }
@@ -685,6 +676,10 @@
   border-color: rgb(229 231 235 / var(--tw-divide-opacity, 1))
 }
 
+.art-self-start {
+  align-self: flex-start
+}
+
 .art-overflow-hidden {
   overflow: hidden
 }
@@ -775,6 +770,11 @@
   border-style: none
 }
 
+.art-border-amber-200 {
+  --tw-border-opacity: 1;
+  border-color: rgb(253 230 138 / var(--tw-border-opacity, 1))
+}
+
 .art-border-black {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1))
@@ -842,6 +842,11 @@
 .art-border-yellow-200 {
   --tw-border-opacity: 1;
   border-color: rgb(254 240 138 / var(--tw-border-opacity, 1))
+}
+
+.art-bg-amber-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 251 235 / var(--tw-bg-opacity, 1))
 }
 
 .art-bg-black {
@@ -916,11 +921,6 @@
 .art-bg-green-50 {
   --tw-bg-opacity: 1;
   background-color: rgb(240 253 244 / var(--tw-bg-opacity, 1))
-}
-
-.art-bg-orange-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 237 213 / var(--tw-bg-opacity, 1))
 }
 
 .art-bg-orange-50 {
@@ -1248,6 +1248,16 @@
   letter-spacing: 0.05em
 }
 
+.art-text-amber-600 {
+  --tw-text-opacity: 1;
+  color: rgb(217 119 6 / var(--tw-text-opacity, 1))
+}
+
+.art-text-amber-700 {
+  --tw-text-opacity: 1;
+  color: rgb(180 83 9 / var(--tw-text-opacity, 1))
+}
+
 .art-text-black {
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity, 1))
@@ -1323,6 +1333,11 @@
   color: rgb(22 163 74 / var(--tw-text-opacity, 1))
 }
 
+.art-text-green-700 {
+  --tw-text-opacity: 1;
+  color: rgb(21 128 61 / var(--tw-text-opacity, 1))
+}
+
 .art-text-green-800 {
   --tw-text-opacity: 1;
   color: rgb(22 101 52 / var(--tw-text-opacity, 1))
@@ -1341,11 +1356,6 @@
 .art-text-orange-700 {
   --tw-text-opacity: 1;
   color: rgb(194 65 12 / var(--tw-text-opacity, 1))
-}
-
-.art-text-orange-800 {
-  --tw-text-opacity: 1;
-  color: rgb(154 52 18 / var(--tw-text-opacity, 1))
 }
 
 .art-text-purple-100 {
@@ -1376,6 +1386,11 @@
 .art-text-red-800 {
   --tw-text-opacity: 1;
   color: rgb(153 27 27 / var(--tw-text-opacity, 1))
+}
+
+.art-text-slate-500 {
+  --tw-text-opacity: 1;
+  color: rgb(100 116 139 / var(--tw-text-opacity, 1))
 }
 
 .art-text-slate-600 {
@@ -1599,9 +1614,19 @@
   --tw-bg-opacity: 0.5
 }
 
+.hover\:art-text-amber-900:hover {
+  --tw-text-opacity: 1;
+  color: rgb(120 53 15 / var(--tw-text-opacity, 1))
+}
+
 .hover\:art-text-blue-300:hover {
   --tw-text-opacity: 1;
   color: rgb(147 197 253 / var(--tw-text-opacity, 1))
+}
+
+.hover\:art-text-blue-600:hover {
+  --tw-text-opacity: 1;
+  color: rgb(37 99 235 / var(--tw-text-opacity, 1))
 }
 
 .hover\:art-text-blue-800:hover {

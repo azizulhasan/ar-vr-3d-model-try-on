@@ -34,6 +34,12 @@ class AR_TRY_ON_Activator {
 	 */
 	public static function activate( $renew_all_settings = false ) {
 
+		// Record first activation time — used to gate time-based admin notices
+		// (e.g. the review request). Only set once so it survives reactivation.
+		if ( ! get_option( 'ar_try_on_activated_at' ) ) {
+			update_option( 'ar_try_on_activated_at', time(), false );
+		}
+
 		$post_url       = '';
 		$random_post_id = self::get_random_post_id();
 		if ( $random_post_id ) {

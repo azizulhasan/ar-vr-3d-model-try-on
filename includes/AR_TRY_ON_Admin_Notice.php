@@ -60,6 +60,9 @@ class AR_TRY_ON_Admin_Notice {
 
 		// Register default promo notice
 		$this->register_promo_notice();
+
+		// Register the smart review-request notice
+		$this->register_review_notice();
 	}
 
 	/**
@@ -106,6 +109,7 @@ class AR_TRY_ON_Admin_Notice {
 			'track_clicks'      => false,        // Track button clicks?
 			'max_clicks'        => 0,            // Max clicks (0 = unlimited)
 			'click_action'      => null,         // Callable when button clicked
+			'reshow_after_days' => 0,            // Re-show this many days after dismissal (0 = permanent)
 		);
 
 		$notice = wp_parse_args( $args, $defaults );
@@ -147,12 +151,9 @@ class AR_TRY_ON_Admin_Notice {
 
 		$user_id = get_current_user_id();
 
-		// Check if dismissed
-		if ( $notice['dismissible'] ) {
-			$dismissed = get_user_meta( $user_id, 'ar_try_on_dismiss_' . $notice_id, true );
-			if ( $dismissed ) {
-				return;
-			}
+		// Check if dismissed (honors timed re-show when reshow_after_days is set)
+		if ( $notice['dismissible'] && $this->is_dismissed( $notice_id, $notice ) ) {
+			return;
 		}
 
 		// Check if shown once
@@ -203,7 +204,7 @@ class AR_TRY_ON_Admin_Notice {
 		<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?> <?php echo esc_attr( $dismissible_class ); ?> ar-try-on-notice" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" style="position: relative; border-left-color: <?php echo esc_attr( $border_color ); ?>; padding: 20px;">
 			<?php if ( $notice['dismissible'] ) : ?>
 			<button type="button" class="notice-dismiss ar-notice-dismiss" data-notice-id="<?php echo esc_attr( $notice_id ); ?>">
-				<span class="screen-reader-text">Dismiss this notice.</span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'ar-vr-3d-model-try-on' ); ?></span>
 			</button>
 			<?php endif; ?>
 
@@ -339,6 +340,17 @@ class AR_TRY_ON_Admin_Notice {
 		// Store dismissal in user meta
 		update_user_meta( $user_id, 'ar_try_on_dismiss_' . $notice_id, true );
 
+		// If the notice is configured to re-show, store the cooldown timestamp so
+		// is_dismissed() surfaces it again once the window has elapsed.
+		$notice = isset( $this->notices[ $notice_id ] ) ? $this->notices[ $notice_id ] : null;
+		if ( $notice && (int) $notice['reshow_after_days'] > 0 ) {
+			update_option(
+				'ar_try_on_reshow_' . $notice_id,
+				time() + ( DAY_IN_SECONDS * (int) $notice['reshow_after_days'] ),
+				false
+			);
+		}
+
 		wp_send_json_success( array( 'message' => 'Notice dismissed' ) );
 	}
 
@@ -412,8 +424,8 @@ class AR_TRY_ON_Admin_Notice {
 		$this->register_notice(
 			array(
 				'id'            => 'promo_notice',
-				'title'         => '🎁 Try AtlasAR Pro Free for 14 Days — No Card Required',
-				'message'       => 'Unlock the full Pro feature set for 2 weeks on us: <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, <strong>server-side compression for large GLBs</strong>, <strong>FBX / OBJ / USDZ format conversion</strong>, <strong>interactive hotspots editor</strong>, <strong>real-world dimensions in AR</strong>, and <strong>per-variation model swap</strong>. Cancel any time — no automatic charge after the trial.',
+				'title'         => __( '🎁 Try AtlasAR Pro Free for 14 Days — No Card Required', 'ar-vr-3d-model-try-on' ),
+				'message'       => __( 'Unlock the full Pro feature set for 2 weeks on us: <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, <strong>server-side compression for large GLBs</strong>, <strong>FBX / OBJ / USDZ format conversion</strong>, <strong>interactive hotspots editor</strong>, <strong>real-world dimensions in AR</strong>, and <strong>per-variation model swap</strong>. Cancel any time — no automatic charge after the trial.', 'ar-vr-3d-model-try-on' ),
 				'type'          => 'info',
 				'icon'          => '🎁',
 				'dismissible'   => true,
@@ -431,20 +443,233 @@ class AR_TRY_ON_Admin_Notice {
 				'track_clicks'  => false,
 				'buttons'       => array(
 					array(
-						'text' => 'Start 14-day Free Trial',
+						'text' => __( 'Start 14-day Free Trial', 'ar-vr-3d-model-try-on' ),
 						'type' => 'primary',
 						'icon' => 'star-filled',
 						'url'  => 'https://wpaugmentedreality.com/pricing/',
 					),
 					array(
-						'text' => 'Read Try-On Docs',
+						'text' => __( 'Read Try-On Docs', 'ar-vr-3d-model-try-on' ),
 						'type' => 'secondary',
 						'icon' => 'book',
 						'url'  => 'https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/',
 					),
 				),
-				'footer_text'   => 'No credit card required. The trial ends after 14 days — your store automatically reverts to the Free plan unless you choose to subscribe.',
+				'footer_text'   => __( 'No credit card required. The trial ends after 14 days — your store automatically reverts to the Free plan unless you choose to subscribe.', 'ar-vr-3d-model-try-on' ),
 			)
 		);
+	}
+
+	/**
+	 * Register the smart review-request notice.
+	 *
+	 * Shown only to admins on the Free plan who have actually got value from
+	 * the plugin — at least one real 3D model set up and the plugin active for
+	 * two weeks. Mirrors the AtlasVoice review-prompt behaviour: a 90-day
+	 * re-show, a 14-day "remind me later" snooze, and a one-click path to the
+	 * WordPress.org 5-star review form. Never shown once Pro is active or once
+	 * the merchant says they've reviewed / never want to be asked again.
+	 */
+	private function register_review_notice() {
+		// Backfill an activation timestamp for installs that predate it (i.e.
+		// users updating to 2.2.3). Seed it 15 days in the past so the 14-day
+		// "active for a while" gate clears right away and these existing,
+		// already-engaged users see the review prompt as soon as possible.
+		// Fresh installs are unaffected: AR_TRY_ON_Activator sets this to the
+		// real activation time on activate(), so the option already exists.
+		if ( ! get_option( 'ar_try_on_activated_at' ) ) {
+			update_option( 'ar_try_on_activated_at', time(), false );
+		}
+
+		$activated_at = (int) get_option( 'ar_try_on_activated_at', 0 );
+		$days_active  = $activated_at ? ( time() - $activated_at ) / DAY_IN_SECONDS : 0;
+
+		$this->register_notice(
+			array(
+				'id'                => 'review',
+				'title'             => __( 'Enjoying 3D Viewer & AtlasTryOn?', 'ar-vr-3d-model-try-on' ),
+				'message'           => __( 'You\'ve set up 3D models on your site — nice work! If the plugin is helping your shoppers, would you consider leaving a quick review? It takes about 30 seconds and genuinely helps us keep building free features.', 'ar-vr-3d-model-try-on' ),
+				'type'              => 'success',
+				'icon'              => '⭐',
+				'dismissible'       => true,
+				'reshow_after_days' => 60,
+				'condition'         => function () use ( $days_active ) {
+					// 1. Admins only.
+					if ( ! current_user_can( 'manage_options' ) ) {
+						return false;
+					}
+					// 2. Never show to Pro users.
+					if ( AR_TRY_ON_Helper::is_pro_active() ) {
+						return false;
+					}
+					// 3. Honoured "Already did" / "Never ask again".
+					if ( get_user_meta( get_current_user_id(), 'ar_try_on_review_done', true ) ) {
+						return false;
+					}
+					// 4. Active for at least 14 days.
+					if ( $days_active < 14 ) {
+						return false;
+					}
+					// 5. At least one real (non-demo) 3D model configured.
+					if ( $this->get_cached_user_model_count() < 1 ) {
+						return false;
+					}
+					return true;
+				},
+				'click_action'      => array( $this, 'handle_review_action' ),
+				'buttons'           => array(
+					array(
+						'text'   => __( '⭐ Leave a Review', 'ar-vr-3d-model-try-on' ),
+						'type'   => 'primary',
+						'action' => 'given',
+						'track'  => true,
+					),
+					array(
+						'text'   => __( 'Remind Me Later', 'ar-vr-3d-model-try-on' ),
+						'type'   => 'secondary',
+						'action' => 'later',
+						'track'  => true,
+					),
+					array(
+						'text'   => __( 'I Already Did', 'ar-vr-3d-model-try-on' ),
+						'type'   => 'secondary',
+						'action' => 'done',
+						'track'  => true,
+					),
+					array(
+						'text'   => __( 'Never Ask Again', 'ar-vr-3d-model-try-on' ),
+						'type'   => 'secondary',
+						'action' => 'never',
+						'track'  => true,
+					),
+				),
+				'footer_text'       => __( 'Thank you for using 3D Viewer & AtlasTryOn.', 'ar-vr-3d-model-try-on' ),
+			)
+		);
+	}
+
+	/**
+	 * Handle review-notice button actions (given / later / done / never).
+	 *
+	 * @param string   $notice_id   Notice ID.
+	 * @param string   $action_name Action key.
+	 * @param \WP_User $user        Current user.
+	 * @return array
+	 */
+	public function handle_review_action( $notice_id, $action_name, $user ) {
+		$user_id = $user->ID;
+		$result  = array( 'dismiss' => true );
+
+		// Hide it for this user right away in every case.
+		update_user_meta( $user_id, 'ar_try_on_dismiss_' . $notice_id, true );
+
+		switch ( $action_name ) {
+			case 'given':
+				// Sent to leave a review — don't ask again, open the review form.
+				update_user_meta( $user_id, 'ar_try_on_review_done', true );
+				$result['redirect_url'] = 'https://wordpress.org/support/plugin/ar-vr-3d-model-try-on/reviews/?rate=5#new-post';
+				break;
+
+			case 'later':
+				// Snooze for 14 days, then surface again.
+				update_option( 'ar_try_on_reshow_' . $notice_id, time() + ( DAY_IN_SECONDS * 14 ), false );
+				break;
+
+			case 'done':
+			case 'never':
+				// Permanently stop asking this user.
+				update_user_meta( $user_id, 'ar_try_on_review_done', true );
+				break;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Whether a notice is dismissed for the current user.
+	 *
+	 * Honours a timed re-show: when reshow_after_days is set, the notice is
+	 * surfaced again once the stored cooldown timestamp has elapsed.
+	 *
+	 * @param string $notice_id Notice ID.
+	 * @param array  $notice    Notice configuration.
+	 * @return bool
+	 */
+	private function is_dismissed( $notice_id, $notice ) {
+		$user_id   = get_current_user_id();
+		$dismissed = get_user_meta( $user_id, 'ar_try_on_dismiss_' . $notice_id, true );
+
+		if ( ! $dismissed ) {
+			return false;
+		}
+
+		// Permanent dismissal when no re-show window is configured.
+		if ( (int) $notice['reshow_after_days'] <= 0 ) {
+			return true;
+		}
+
+		// Timed re-show: clear the dismissal once the cooldown has passed.
+		$next = (int) get_option( 'ar_try_on_reshow_' . $notice_id, 0 );
+		if ( $next && time() > $next ) {
+			delete_user_meta( $user_id, 'ar_try_on_dismiss_' . $notice_id );
+			delete_option( 'ar_try_on_reshow_' . $notice_id );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Number of real (non-demo) 3D models configured on the site, cached daily.
+	 *
+	 * @return int
+	 */
+	private function get_cached_user_model_count() {
+		$cache_key = 'ar_try_on_review_model_count';
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			return (int) $cached;
+		}
+
+		$count = $this->query_user_model_count();
+		set_transient( $cache_key, $count, DAY_IN_SECONDS );
+
+		return $count;
+	}
+
+	/**
+	 * Count posts/products that have a real 3D model assigned.
+	 *
+	 * Excludes the demo model the activator seeds so the review gate only
+	 * trips once the merchant has added a model of their own. Scans a capped
+	 * number of rows to stay light on large sites.
+	 *
+	 * @return int
+	 */
+	private function query_user_model_count() {
+		$demo_src = 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb';
+
+		$query = new \WP_Query(
+			array(
+				'post_type'              => 'any',
+				'post_status'            => 'any',
+				'posts_per_page'         => 20,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_term_cache' => false,
+				'meta_key'               => 'ar_try_on_product_settings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			)
+		);
+
+		$count = 0;
+		foreach ( $query->posts as $post_id ) {
+			$settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
+			if ( ! empty( $settings['src'] ) && $settings['src'] !== $demo_src ) {
+				$count++;
+			}
+		}
+
+		return $count;
 	}
 }
