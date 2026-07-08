@@ -22,7 +22,16 @@ import notify from "../../context/Notify";
  * `ar_try_on.is_pro_active === '1'` so the picker never renders on
  * a Free-only install.
  */
-export default function ImageSourcePicker({productModel, setProductModel}) {
+export default function ImageSourcePicker({
+    productModel,
+    setProductModel,
+    // Body key the picked image is written to. Tripo3D nests it under
+    // `file.url`; Meshy AI uses a top-level `image_url`. Defaults keep
+    // the historical Tripo3D shape.
+    imageSourceKey = 'file.url',
+    apiId = 'tripo3d',
+    providerName = 'Tripo3D',
+}) {
     const [activeTab, setActiveTab] = useState('featured');
     const [galleryImages, setGalleryImages] = useState([]);
     const [featuredImage, setFeaturedImage] = useState(null);
@@ -31,9 +40,9 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
     const [customPreviewState, setCustomPreviewState] = useState('idle'); // idle | loading | ok | error
 
     const selectedUrl = useMemo(() => {
-        const row = (productModel.exclude_integration_api_body || []).find(r => r.key === 'file.url');
+        const row = (productModel.exclude_integration_api_body || []).find(r => r.key === imageSourceKey);
         return row?.value || '';
-    }, [productModel.exclude_integration_api_body]);
+    }, [productModel.exclude_integration_api_body, imageSourceKey]);
 
     const guessExt = (url) => {
         const m = String(url || '').match(/\.(jpe?g|png|webp)(?:\?|$)/i);
@@ -66,16 +75,24 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
             const body = Array.isArray(prev.exclude_integration_api_body)
                 ? [...prev.exclude_integration_api_body]
                 : [];
-            // Update only the rows the picker actually owns. file.url
-            // wins; clear file.file_token and file.object so the body
-            // can't carry two mutually-exclusive sources at once.
-            upsertRow(body, 'type', 'image_to_model');
-            upsertRow(body, 'file.url', url, {type: 'url'});
-            upsertRow(body, 'file.type', ext_);
-            const ftIdx = body.findIndex(r => r && r.key === 'file.file_token');
-            if (ftIdx >= 0) body[ftIdx] = {...body[ftIdx], value: ''};
-            const foIdx = body.findIndex(r => r && r.key === 'file.object');
-            if (foIdx >= 0) body[foIdx] = {...body[foIdx], value: ''};
+            if (apiId === 'meshy_ai') {
+                // Meshy AI: the source image is a single top-level
+                // `image_url`. There is no `type` field and no nested
+                // file.* group, so we only touch image_url.
+                upsertRow(body, 'image_url', url, {type: 'url'});
+            } else {
+                // Tripo3D: nested file.* group. Update only the rows
+                // the picker owns. file.url wins; clear file.file_token
+                // and file.object so the body can't carry two
+                // mutually-exclusive sources at once.
+                upsertRow(body, 'type', 'image_to_model');
+                upsertRow(body, 'file.url', url, {type: 'url'});
+                upsertRow(body, 'file.type', ext_);
+                const ftIdx = body.findIndex(r => r && r.key === 'file.file_token');
+                if (ftIdx >= 0) body[ftIdx] = {...body[ftIdx], value: ''};
+                const foIdx = body.findIndex(r => r && r.key === 'file.object');
+                if (foIdx >= 0) body[foIdx] = {...body[foIdx], value: ''};
+            }
             return {...prev, exclude_integration_api_body: body};
         });
         notify('Image selected. Click Generate Model to start.', 'success', {autoClose: 2500});
@@ -278,10 +295,10 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                     }}
                 >
                     <strong>Heads up — this site is on <code>{window.location.hostname}</code>.</strong>
-                    {' '}Tripo3D pulls images server-side from the public internet, so the
+                    {' '}{providerName} pulls images server-side from the public internet, so the
                     {' '}<em>Featured image</em>, <em>Gallery image</em>, <em>Media library</em>, and
                     {' '}<em>Upload from computer</em> tabs all produce <code>http://{window.location.hostname}/…</code>
-                    {' '}URLs that Tripo3D can't reach — generation will fail silently.
+                    {' '}URLs that {providerName} can't reach — generation will fail silently.
                     {' '}On localhost, use the <strong>Paste URL</strong> tab with a publicly hosted
                     {' '}image (or expose your site via a tunnel like ngrok / Cloudflare Tunnel).
                 </div>
@@ -309,7 +326,7 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                     }}
                 >
                     <strong>Step 1 — select an image.</strong>
-                    {' '}Tripo3D needs a source image to turn into a 3D model. Pick one from
+                    {' '}{providerName} needs a source image to turn into a 3D model. Pick one from
                     {' '}<em>Featured image</em>, <em>Gallery image</em>, <em>Media library</em>,
                     {' '}<em>Upload from computer</em>, or <em>Paste URL</em> below. Once selected,
                     {' '}the <em>Generate Model</em> button activates.
@@ -382,7 +399,7 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                         Upload an image from your computer
                     </button>
                     <div className="art-text-xs art-text-gray-500 art-mt-2">
-                        The image is added to your WordPress media library and used as the Tripo3D source.
+                        The image is added to your WordPress media library and used as the {providerName} source.
                     </div>
                 </div>
             )}
@@ -409,7 +426,7 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                         </button>
                     </div>
                     <div className="art-text-xs art-text-gray-500 art-mt-2">
-                        Direct link to a JPEG, PNG, or WebP image. Tripo3D fetches the URL server-side, so the image must be publicly reachable. Max 20 MB.
+                        Direct link to a JPEG, PNG, or WebP image. {providerName} fetches the URL server-side, so the image must be publicly reachable. Max 20 MB.
                     </div>
 
                     {/* Preview — we attempt to load the URL as an image.
@@ -435,7 +452,7 @@ export default function ImageSourcePicker({productModel, setProductModel}) {
                             )}
                             {!isLikelyImageUrl(customUrlInput) && customPreviewState !== 'error' && (
                                 <div className="art-text-xs art-text-amber-600 art-mt-1">
-                                    URL does not end in .jpg / .png / .webp — Tripo3D may still accept it if the server returns image bytes.
+                                    URL does not end in .jpg / .png / .webp — {providerName} may still accept it if the server returns image bytes.
                                 </div>
                             )}
                         </div>

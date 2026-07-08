@@ -924,6 +924,33 @@ export const TRIPO_MODEL_VERSIONS = [
 export const TRIPO_DEFAULT_MODEL_VERSION = "v2.5-20250123";
 
 /**
+ * Meshy AI `ai_model` suggestion list — shared by both
+ * text_to_model and image_to_model. Renders as the datalist on the
+ * `ai_model` body row (open enum — merchant can type any value
+ * Meshy releases later). meshy-6 is the current best quality;
+ * `latest` always resolves to Meshy's newest model server-side.
+ */
+export const MESHY_MODEL_VERSIONS = [
+    {value: "meshy-6", label: "meshy-6 (latest, best quality)"},
+    {value: "meshy-5", label: "meshy-5 (proven default)"},
+    {value: "latest",  label: "latest (Meshy picks newest)"},
+];
+export const MESHY_DEFAULT_MODEL = "meshy-5";
+
+/**
+ * Meshy forms a DIFFERENT endpoint per task type (unlike Tripo3D,
+ * which uses one endpoint and switches on the body `type`). The
+ * merchant stores only the base URL (https://api.meshy.ai) in the
+ * Integration settings; IntegrationSection appends the matching
+ * path below to build the POST target, and the poll GET is that
+ * same URL + "/{task_id}". Note text-to-3d is v2 while image-to-3d
+ * is v1 — that version split is intentional and matches Meshy's
+ * current API.
+ */
+export const MESHY_TEXT_TO_MODEL_PATH  = "/openapi/v2/text-to-3d";
+export const MESHY_IMAGE_TO_MODEL_PATH = "/openapi/v1/image-to-3d";
+
+/**
  * Shared Tripo3D body-field schema fragments. Each carries the
  * data the row renderer needs:
  *   - required:      hides the row's × delete button AND gates
@@ -947,6 +974,16 @@ const tripoField = (key, overrides = {}) => ({
     description: "",
     ...overrides,
 });
+
+/**
+ * Meshy AI body-field builder. Same descriptor shape the row
+ * renderer in IntegrationSection consumes (required / description /
+ * enum / suggestions / maxLength) — so a Meshy row renders with the
+ * exact same controls (strict <select>, datalist autocomplete,
+ * ⓘ tooltip, required 🔒) as a Tripo3D row. No field metadata is
+ * hardcoded in JSX; adding a Meshy field is a one-line change here.
+ */
+const meshyField = (key, overrides = {}) => tripoField(key, overrides);
 
 export const getAPITypes = (api_type = "tripo3d") => {
     let api_types = {
@@ -1058,8 +1095,21 @@ export const getAPITypes = (api_type = "tripo3d") => {
         meshy_ai: {
             id: "meshy_ai",
             name: "Meshy AI 3D",
-            url: "https://api.meshy.ai/openapi/v2/text-to-3d",
+            // Base URL only. IntegrationSection appends the per-type
+            // path (MESHY_TEXT_TO_MODEL_PATH / MESHY_IMAGE_TO_MODEL_PATH)
+            // to build the actual POST target and the poll GET.
+            url: "https://api.meshy.ai",
             api_key_url: "https://www.meshy.ai/settings/api",
+            // Referral sign-up link — surfaced by the same passive
+            // "New to <provider>?" nudge (Integration settings) and the
+            // "Powered by <provider> — Sign up" metabox footer that
+            // Tripo3D uses. Carries our invite-friends ref code.
+            signup_url: "https://www.meshy.ai/?utm_source=meshy&utm_medium=referral-program&utm_content=ZQ2MO2&share_type=invite-friends",
+            // Meshy's image_to_model image lives at the top-level
+            // `image_url` key (Tripo3D nests it under `file.url`). The
+            // image-source picker + the body-editor hidden-keys read
+            // this so the right key is written / suppressed per API.
+            image_source_key: "image_url",
             headers: [
                 {key: "Authorization", value: ""},
                 {key: "Content-Type", value: "application/json"},
@@ -1067,59 +1117,90 @@ export const getAPITypes = (api_type = "tripo3d") => {
             body: {
                 supported_types: {
                     text_to_model: {
+                        // POST https://api.meshy.ai/openapi/v2/text-to-3d
+                        path: MESHY_TEXT_TO_MODEL_PATH,
                         input: [
-                            {key: "prompt", type: "textarea", value: "", required: true},
-                            {key: "mode", type: "text", value: "preview", required: true},
-                            {
-                                key: "negative_prompt",
+                            meshyField("mode", {
+                                value: "preview",
+                                required: true,
+                                enum: ["preview", "refine"],
+                                description: "Generation stage. preview builds the base mesh from the prompt (one-click generate). refine adds textures and needs a preview_task_id — managed automatically; leave on preview.",
+                            }),
+                            meshyField("prompt", {
                                 type: "textarea",
-                                value: "",
-                                required: false,
-                            },
-                            {
-                                key: "art_style",
-                                type: "text",
+                                required: true,
+                                maxLength: 600,
+                                description: "Text description of the object to generate. Max 600 characters. Supports multiple languages.",
+                            }),
+                            meshyField("ai_model", {
+                                value: MESHY_DEFAULT_MODEL,
+                                suggestions: MESHY_MODEL_VERSIONS,
+                                description: "Meshy generation model. meshy-6 = latest, highest quality; meshy-5 = proven default; latest = Meshy's newest. Type any model id Meshy releases later.",
+                            }),
+                            meshyField("art_style", {
                                 value: "realistic",
-                                required: false,
-                            },
-                            {
-                                key: "should_remesh",
-                                type: "boolean",
-                                value: true,
-                                required: false,
-                            },
+                                enum: ["realistic", "sculpture"],
+                                description: "Visual style. realistic = PBR/coloured look; sculpture = unpainted clay. Deprecated on meshy-6 (ignored there).",
+                            }),
+                            meshyField("should_remesh", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Run the remesh phase so topology / target_polycount apply. Default true.",
+                            }),
+                            meshyField("topology", {
+                                value: "triangle",
+                                enum: ["triangle", "quad"],
+                                description: "Mesh face type. Only applied when should_remesh is true. quad is friendlier for downstream editing.",
+                            }),
+                            meshyField("target_polycount", {
+                                type: "number",
+                                value: "30000",
+                                description: "Target polygon count of the remeshed model. Range 100–300000. Only applied when should_remesh is true.",
+                            }),
                         ],
-                        doc: "https://docs.meshy.ai/en/api/quick-start#make-your-first-text-to-3-d-api-request",
+                        doc: "https://docs.meshy.ai/en/api/text-to-3d",
                     },
                     image_to_model: {
+                        // POST https://api.meshy.ai/openapi/v1/image-to-3d
+                        path: MESHY_IMAGE_TO_MODEL_PATH,
                         input: [
-                            {key: "image_url", type: "file", value: "", required: true},
-                            {
-                                key: "should_texture",
-                                type: "boolean",
-                                value: true,
-                                required: false,
-                            },
-                            {
-                                key: "should_remesh",
-                                type: "boolean",
-                                value: true,
-                                required: false,
-                            },
-                            {
-                                key: "enable_pbr",
-                                type: "boolean",
-                                value: false,
-                                required: false,
-                            },
-                            {
-                                key: "ai_model",
-                                type: "text",
-                                value: "meshy-5",
-                                required: false,
-                            },
+                            meshyField("image_url", {
+                                type: "url",
+                                required: true,
+                                description: "Public URL (or base64 data URI) of the source image — JPG/JPEG/PNG. Picked via the Image source tabs. Meshy fetches it server-side, so it must be publicly reachable.",
+                            }),
+                            meshyField("ai_model", {
+                                value: MESHY_DEFAULT_MODEL,
+                                suggestions: MESHY_MODEL_VERSIONS,
+                                description: "Meshy generation model. meshy-6 = latest, highest quality; meshy-5 = proven default; latest = Meshy's newest.",
+                            }),
+                            meshyField("should_texture", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Generate textures for the model. Default true. Set false for a bare, untextured mesh.",
+                            }),
+                            meshyField("enable_pbr", {
+                                value: "false",
+                                enum: ["true", "false"],
+                                description: "Also generate PBR maps (metallic, roughness, normal). Default false.",
+                            }),
+                            meshyField("should_remesh", {
+                                value: "true",
+                                enum: ["true", "false"],
+                                description: "Run the remesh phase so topology / target_polycount apply. Default true.",
+                            }),
+                            meshyField("topology", {
+                                value: "triangle",
+                                enum: ["triangle", "quad"],
+                                description: "Mesh face type. Only applied when should_remesh is true.",
+                            }),
+                            meshyField("target_polycount", {
+                                type: "number",
+                                value: "30000",
+                                description: "Target polygon count after remesh. Range 100–300000. Only applied when should_remesh is true.",
+                            }),
                         ],
-                        doc: "https://docs.meshy.ai/en/api/image-to-3d#create-an-image-to-3d-task",
+                        doc: "https://docs.meshy.ai/en/api/image-to-3d",
                     },
                 },
             },

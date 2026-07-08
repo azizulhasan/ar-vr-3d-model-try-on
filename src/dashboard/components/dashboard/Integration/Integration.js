@@ -58,9 +58,15 @@ export default function Integration({
                 data.headers = previousHeaders.headers;
             }
 
+            // Order matters: the dedup below keeps the LAST occurrence of
+            // each key, so the SAVED headers must come after the API
+            // defaults. Otherwise the empty default (e.g. Authorization
+            // with value "") overwrites the merchant's saved API key and
+            // the field renders blank even though the DB has the value.
+            // Defaults still fill in any key the saved set is missing.
             let headerData = [
-                ...settings.ar_try_on_exclude_integration_api_headers,
                 ...data.headers,
+                ...settings.ar_try_on_exclude_integration_api_headers,
             ];
 
             // Keep only the last occurrence of each key
