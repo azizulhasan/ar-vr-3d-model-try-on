@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -51,6 +51,22 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 5. Paste your API key in the Integration settings and save.
 6. Now, go back to the **Edit Post** page.
 7. In the AtlasAR metabox, enter your prompt for the 3D model.
+8. Click on the **Generate Model** button.
+   - A `task_id` will be generated.
+   - Wait a few seconds while the model is being processed.
+9. Once the model is generated, a 3D preview will appear on the right side.
+10. Click on the **Save This Model** button to save the generated model and update the post data.
+11. After saving, you can view the generated 3D model on the front end of your site.
+
+= How to Generate 3D Models with Meshy AI API =
+
+1. Generate your API key from the [Meshy AI API](https://www.meshy.ai/settings/api).
+2. Copy the API key.
+3. Go to the **AtlasAR metabox** in the post edit screen.
+4. Click on the **Integration** tab.
+5. Choose **Meshy AI 3D** as the API, paste your API key, and save.
+6. Now, go back to the **Edit Post** page and open the AtlasAR metabox.
+7. Pick a model type — **text_to_model** (write a text prompt) or **image_to_model** (paste a public image URL, or pick a product image).
 8. Click on the **Generate Model** button.
    - A `task_id` will be generated.
    - Wait a few seconds while the model is being processed.
@@ -142,6 +158,21 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 * Basis Universal texture compression for optimal quality
 * Keeps original files for backup
 
+⭐ **Per-Variation 3D Models**:
+* Upload different 3D models for each product variation (color, size, style)
+* Critical for WooCommerce stores with variable products
+* Automatic model switching when customers select variations
+
+⭐ **Glass Mode Virtual Try-On**:
+* Enable realistic virtual try-ons for eyewear and jewelry
+* Face tracking for accurate placement
+* Unique feature - no other AR plugin has this!
+
+⭐ **Multi-Model Scenes**:
+* Display multiple products together in AR
+* Room planning and outfit builders
+* Advanced configurators
+
 ### **Coming Soon in Pro:**
 
 🚀 **Advanced Analytics Dashboard** (Q1 2026):
@@ -150,29 +181,14 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 * Prove ROI with conversion tracking
 * Integration with Google Analytics
 
-🚀 **Per-Variation 3D Models** (Q1 2026):
-* Upload different 3D models for each product variation (color, size, style)
-* Critical for WooCommerce stores with variable products
-* Automatic model switching when customers select variations
-
 🚀 **Background Processing & Bulk Compression** (Q2 2026):
 * Compress large files in background (no upload delays)
 * Bulk compress your entire product catalog with one click
 * Queue system for processing multiple models
 
-🚀 **Glass Mode Virtual Try-On** (Q2 2026):
-* Enable realistic virtual try-ons for eyewear and jewelry
-* Face tracking for accurate placement
-* Unique feature - no other AR plugin has this!
-
 🚀 **Desktop WebAR** (Q3 2026):
 * AR experiences on desktop browsers (no phone needed)
 * Broader accessibility for all users
-
-🚀 **Multi-Model Scenes** (Q3 2026):
-* Display multiple products together in AR
-* Room planning and outfit builders
-* Advanced configurators
 
 ### **Pro Support & Updates:**
 * Priority email support (24-hour response time)
@@ -206,6 +222,8 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 
 ### CHECK OUT OUR OTHER ADDONS 👑:
 🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
+🔥 [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/)
+🔥 [Atlas AI Connector](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/)
 
 
 
@@ -340,6 +358,11 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 2.2.4 ( 8 July 2026 ) =
+* New: You can now create 3D models with Meshy AI, right from the AtlasAR box — generate a model from a written description or from a product image, the same easy way as the existing Tripo3D option.
+* Improvement: A newly generated model now appears straight away, without needing to refresh the page.
+* Fix: Your saved 3D-generation API key now stays visible on the Integration settings screen instead of showing up blank.
 
 = 2.2.3 ( 30 June 2026 ) =
 * New: A friendly, dismissible review reminder for site admins — shown only after you've added your own 3D model and used the plugin for a couple of weeks. It includes "Remind me later", "I already did" and "Never ask again" options, and never appears for Pro users.
@@ -637,6 +660,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.4 =
+Adds Meshy AI as a second way to generate 3D models — from a written description or a product image — alongside Tripo3D. Newly generated models now show up right away, and your saved API key stays visible on the settings screen. Safe to update.
 
 = 2.2.3 =
 Adds a polite, dismissible review reminder for admins (shown only after real use, never to Pro users) plus a refreshed description, tags and FAQ. Safe to update.
