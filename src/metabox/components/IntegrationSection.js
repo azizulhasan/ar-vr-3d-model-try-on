@@ -5,7 +5,6 @@ import {
     getAPITypes,
     getPostID,
     setNestedKey,
-    TRIPO_TASK_HISTORY_URL,
 } from "../../context/utilities";
 import notify from "../../context/Notify";
 import ImageSourcePicker from "./ImageSourcePicker";
@@ -68,6 +67,11 @@ export default function IntegrationSection({
     // glyph alongside the label; idle / success / error states do not.
     const SPINNER_STATES = new Set(['progress', 'task', 'poster', 'save_progress', 'data_save']);
 
+    // Display name of the currently-selected generation provider, used
+    // in all user-facing status labels / notices so a Meshy AI session
+    // never shows "Tripo3D" copy (and vice-versa).
+    const providerName = currentApi?.name || 'the 3D provider';
+
     /** Tiny HTML escape for the label substituted into innerHTML. */
     const escapeLabel = (s) => String(s).replace(/[&<>"]/g, c => (
         {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]
@@ -101,7 +105,7 @@ export default function IntegrationSection({
         if (taskIdRow?.value && !productModel?.src) {
             const btn = document.getElementById('atlas_ar_model_generate');
             if (btn && btn.getAttribute('data-id') === 'generate') {
-                generateModelButtonStateChange('resume', 'Resume waiting for Tripo3D task', btn);
+                generateModelButtonStateChange('resume', `Resume waiting for ${providerName} task`, btn);
             }
         }
     }, [productModel?.exclude_integration_api_body, productModel?.src]);
@@ -176,7 +180,7 @@ export default function IntegrationSection({
                 submitButton.setAttribute('data-id', 'resume');
                 generateModelButtonStateChange('resume', 'Click to resume waiting', submitButton);
                 notify(
-                    'Generation is taking longer than expected. Your Tripo3D task is still running — click "Click to resume waiting" to keep polling (no extra credits will be charged).',
+                    `Generation is taking longer than expected. Your ${providerName} task is still running — click "Click to resume waiting" to keep polling (no extra credits will be charged).`,
                     'warn',
                     {autoClose: 12000}
                 );
@@ -237,14 +241,14 @@ export default function IntegrationSection({
 
             // AR-62 §3a: terminal failure from Tripo3D.
             const tripoStatus = (responseData?.data?.status || '').toLowerCase();
-            const failureStates = ['failed', 'banned', 'expired', 'cancelled', 'unknown'];
+            const failureStates = ['failed', 'banned', 'expired', 'cancelled', 'canceled', 'unknown'];
             if (failureStates.includes(tripoStatus)) {
                 stopPolling();
                 const errorCode = responseData?.data?.error_code;
                 const errMsg    = responseData?.data?.error_msg;
                 const msg = errMsg || (errorCode
-                    ? `Generation failed (Tripo3D error ${errorCode}). Try a different input.`
-                    : 'Generation failed on Tripo3D. Try a different input.');
+                    ? `Generation failed (${providerName} error ${errorCode}). Try a different input.`
+                    : `Generation failed on ${providerName}. Try a different input.`);
                 submitButton.setAttribute('data-id', 'generate');
                 generateModelButtonStateChange('error', 'Generation failed — click to try again', submitButton);
                 notify(msg, 'error', {autoClose: 8000});
@@ -450,8 +454,32 @@ export default function IntegrationSection({
             });
         }
 
+        /**
+         * Build the request URL. Tripo3D uses ONE endpoint for every
+         * task type (the body `type` field distinguishes them), so its
+         * supported_type carries no `path` and the stored URL is used
+         * verbatim. Meshy AI uses a DIFFERENT endpoint per task type
+         * (text-to-3d is v2, image-to-3d is v1), so the merchant stores
+         * only the base (https://api.meshy.ai) and we append the
+         * per-mode `path` from utilities.js here. PHP then appends
+         * "/{task_id}" to this same URL for the polling GET, which is
+         * exactly Meshy's retrieve path — so no server-side change is
+         * needed for the poll.
+         */
+        const _selectedMode = productModel?.exclude_integration_api_model_type;
+        const _supportedTypes = currentApi?.body?.supported_types || {};
+        const _pathSuffix = _supportedTypes?.[_selectedMode]?.path || '';
+        let _baseUrl = (settings?.ar_try_on_exclude_integration_api_url || '').replace(/\/+$/, '');
+        // Migration guard: a merchant who saved Meshy before this change
+        // has the OLD full endpoint stored (e.g. .../openapi/v2/text-to-3d).
+        // Strip any known per-type path off the saved value so we rebuild
+        // from the true base instead of doubling the path.
+        const _knownPaths = Object.values(_supportedTypes).map(t => t?.path).filter(Boolean);
+        for (const p of _knownPaths) {
+            if (p && _baseUrl.endsWith(p)) { _baseUrl = _baseUrl.slice(0, -p.length); break; }
+        }
         let data_arr = {};
-        data_arr['url'] = settings?.ar_try_on_exclude_integration_api_url || ''
+        data_arr['url'] = _pathSuffix ? (_baseUrl + _pathSuffix) : (settings?.ar_try_on_exclude_integration_api_url || '')
         data_arr['api_name'] = settings?.ar_try_on_exclude_integration_api_name || ''
         data_arr['headers'] = headers;
         data_arr['body'] = body
@@ -461,7 +489,10 @@ export default function IntegrationSection({
             return;
         }
 
-        const taskType = data_arr?.body?.type;
+        // Tripo3D carries the mode in the body `type` field; Meshy AI
+        // has no such field (the mode is encoded in the URL path), so
+        // fall back to the merchant-selected model type.
+        const taskType = data_arr?.body?.type || _selectedMode;
         /**
          * AR-62 §4 — when the user is resuming an existing Tripo3D
          * task (button data-id === 'resume'), we already have a
@@ -480,13 +511,17 @@ export default function IntegrationSection({
             return;
         }
 
-        // image_to_model needs at least one image input.
-        if (!isResume && data_arr?.api_name == 'tripo3d' && taskType === 'image_to_model') {
-            const hasImage = !!(
-                data_arr?.body?.file?.url ||
-                data_arr?.body?.file?.file_token ||
-                data_arr?.body?.file?.object
-            );
+        // image_to_model needs at least one image input. Tripo3D reads
+        // it from the nested file.* group; Meshy AI from top-level
+        // `image_url`.
+        if (!isResume && taskType === 'image_to_model') {
+            const hasImage = data_arr?.api_name === 'meshy_ai'
+                ? !!data_arr?.body?.image_url
+                : !!(
+                    data_arr?.body?.file?.url ||
+                    data_arr?.body?.file?.file_token ||
+                    data_arr?.body?.file?.object
+                );
             if (!hasImage) {
                 notify('Please provide an image URL or upload an image before generating.', 'error');
                 return;
@@ -509,7 +544,7 @@ export default function IntegrationSection({
                 notify('No task ID found to resume. Generate a fresh task instead.', 'error');
                 return;
             }
-            generateModelButtonStateChange('task', 'Resuming — waiting for Tripo3D', submitButton);
+            generateModelButtonStateChange('task', `Resuming — waiting for ${providerName}`, submitButton);
             startPolling(data_arr.body.task_id, data_arr, submitButton);
             return;
         }
@@ -574,7 +609,7 @@ export default function IntegrationSection({
                         );
                         setProductModel(updated);
 
-                        generateModelButtonStateChange('task', 'Task created — waiting for Tripo3D', submitButton)
+                        generateModelButtonStateChange('task', `Task created — waiting for ${providerName}`, submitButton)
                     }
                     /**
                      * AR-62 §3: hand off to the controlled poller.
@@ -720,6 +755,14 @@ export default function IntegrationSection({
         && productModel?.exclude_integration_api_model_type === 'image_to_model';
 
     /**
+     * Which body key holds the picked image for the current API.
+     * Tripo3D nests it under `file.url`; Meshy AI uses a top-level
+     * `image_url`. Sourced from utilities.js (`image_source_key`)
+     * with a Tripo3D-shaped default so nothing regresses.
+     */
+    const _imageSourceKey = currentApi?.image_source_key || 'file.url';
+
+    /**
      * Keys hidden from the body editor per mode.
      *
      * text_to_model — `type` is automatic and always renders
@@ -733,10 +776,18 @@ export default function IntegrationSection({
      * 2026-06-11 follow-up to Joachim's image_to_model parity
      * request.
      */
-    const HIDDEN_KEYS_BY_MODE = {
-        text_to_model: new Set(['type']),
-        image_to_model: new Set(['type', 'file.url', 'file.file_token', 'file.object', 'file.type']),
-    };
+    const HIDDEN_KEYS_BY_MODE = currentApi?.id === 'meshy_ai'
+        ? {
+            // Meshy: `mode` is managed automatically (kept on
+            // "preview" for the one-click create→poll flow), and the
+            // image lives in top-level `image_url` owned by the picker.
+            text_to_model: new Set(['mode']),
+            image_to_model: new Set(['image_url']),
+        }
+        : {
+            text_to_model: new Set(['type']),
+            image_to_model: new Set(['type', 'file.url', 'file.file_token', 'file.object', 'file.type']),
+        };
     const _hiddenKeys = HIDDEN_KEYS_BY_MODE[productModel?.exclude_integration_api_model_type] || new Set();
 
     /**
@@ -982,6 +1033,9 @@ export default function IntegrationSection({
                 <ImageSourcePicker
                     productModel={productModel}
                     setProductModel={setProductModel}
+                    imageSourceKey={_imageSourceKey}
+                    apiId={currentApi?.id}
+                    providerName={currentApi?.name || 'the 3D provider'}
                 />
             )}
 
@@ -1207,18 +1261,22 @@ export default function IntegrationSection({
                     }}
                 >
                     Fill every required (🔒) field to enable <strong>Generate Model</strong>,
-                    {' '}or paste an existing Tripo3D <code>task_id</code> below (via{' '}
+                    {' '}or paste an existing {providerName} <code>task_id</code> below (via{' '}
                     <em>Add Body</em> with key <code>task_id</code>) to resume that task
                     instead — no new credits will be charged.
-                    {' '}
-                    <a
-                        href={TRIPO_TASK_HISTORY_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
-                    >
-                        Open Tripo3D task history →
-                    </a>
+                    {currentApi?.task_history_url && (
+                        <>
+                            {' '}
+                            <a
+                                href={currentApi.task_history_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{color: '#1d4ed8', fontWeight: 600, textDecoration: 'underline'}}
+                            >
+                                Open {providerName} task history →
+                            </a>
+                        </>
+                    )}
                 </div>
             )}
             <button type="button"
@@ -1267,7 +1325,7 @@ export default function IntegrationSection({
                     className="art-text-xs art-text-gray-500 art-mt-2"
                     style={{textAlign: 'center', lineHeight: 1.4}}
                 >
-                    Tripo3D's mesh encoder finishes after the progress bar — usually 20–40 s more.
+                    {providerName}'s mesh encoder finishes after the progress bar — usually 20–40 s more.
                 </div>
             )}
             {/*

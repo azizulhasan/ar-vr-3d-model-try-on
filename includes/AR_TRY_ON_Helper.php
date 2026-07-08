@@ -1008,6 +1008,54 @@ class AR_TRY_ON_Helper
             }
         }
 
+        /**
+         * Meshy AI response shaping. Unlike Tripo3D, Meshy's OpenAPI
+         * responses are NOT wrapped in a `data` envelope: the create
+         * call returns `{"result": "<task_id>"}` and the retrieve GET
+         * returns the task object at the top level (`id`, `status`,
+         * `progress`, `model_urls`, `thumbnail_url`, `task_error`).
+         * Map that into the same structured shape the metabox poller
+         * and download_model_files_and_store expect (`output.src` =
+         * GLB, `output.poster` = thumbnail). Without this branch a
+         * Meshy generation created the task but the poll never
+         * produced a downloadable model (only Tripo3D was handled).
+         */
+        if (isset($request_decoded_data['api_name'])
+            && $request_decoded_data['api_name'] === 'meshy_ai'
+            && ! empty($api_response_data)
+        ) {
+            // task_id: `result` on create, `id` on the retrieve GET.
+            if (isset($api_response_data['result']) && $api_response_data['result']) {
+                $response_body['task_id'] = $api_response_data['result'];
+            } elseif (isset($api_response_data['id']) && $api_response_data['id']) {
+                $response_body['task_id'] = $api_response_data['id'];
+            }
+
+            // Live status / progress so the JS poller can render a real
+            // percentage and exit on FAILED / CANCELED.
+            if (isset($api_response_data['status'])) {
+                $response_body['status'] = (string) $api_response_data['status'];
+            }
+            if (isset($api_response_data['progress'])) {
+                $response_body['progress'] = (int) $api_response_data['progress'];
+            }
+            if (isset($api_response_data['task_error']['message']) && $api_response_data['task_error']['message']) {
+                $response_body['error_msg'] = (string) $api_response_data['task_error']['message'];
+            }
+
+            $response_body['output'] = [];
+            // GLB is the <model-viewer> source. Meshy returns a map of
+            // formats under model_urls; prefer glb (the others aren't
+            // renderable by model-viewer).
+            if (isset($api_response_data['model_urls']['glb']) && $api_response_data['model_urls']['glb']) {
+                $response_body['output']['src'] = $api_response_data['model_urls']['glb'];
+            }
+            // Thumbnail is the natural poster image for the viewer.
+            if (isset($api_response_data['thumbnail_url']) && $api_response_data['thumbnail_url']) {
+                $response_body['output']['poster'] = $api_response_data['thumbnail_url'];
+            }
+        }
+
 
         return $response_body;
 
