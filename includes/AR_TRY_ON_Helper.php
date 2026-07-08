@@ -1151,6 +1151,33 @@ class AR_TRY_ON_Helper
             WP_Filesystem();
         }
 
+        // Per-generation filename token — Meshy AI only. Every Meshy output
+        // URL uses the same basename (…/tasks/<id>/output/model.glb →
+        // "model.glb", thumbnail → "preview.png"), so successive generations
+        // would all save to src__model.glb / poster__preview.png and overwrite
+        // each other. Because the saved URL is then identical across
+        // generations, the browser serves the previously-cached model in the
+        // editor preview and on the storefront until a hard reload. Tripo3D
+        // doesn't hit this — its URL basename already embeds a unique task id
+        // (tripo_pbr_model_<uuid>.glb). Prefix Meshy filenames with the task id
+        // so each generation lands on its own file, matching Tripo3D's
+        // effective behaviour. Guarded by api_name so Tripo3D filenames are
+        // byte-for-byte unchanged.
+        $unique_token = '';
+        if (isset($settings['api_name']) && $settings['api_name'] === 'meshy_ai') {
+            $token = isset($settings['body']['task_id'])
+                ? sanitize_file_name((string) $settings['body']['task_id'])
+                : '';
+            if ($token === '' && isset($files['src'])) {
+                // Fallback: short hash of the source URL (unique per signed
+                // Meshy output) in the unlikely case task_id isn't present.
+                $token = substr(md5((string) $files['src']), 0, 8);
+            }
+            if ($token !== '') {
+                $unique_token = $token . '__';
+            }
+        }
+
         $uploaded_files = [];
         if (!empty($wp_filesystem) && isset($files['src']) && !empty($files['src'])) {
             foreach ($files as $file_key => $url) {
@@ -1169,10 +1196,12 @@ class AR_TRY_ON_Helper
 
                 // Sanitise the array key and the URL-derived filename so they
                 // cannot smuggle path separators / `..` into the destination.
+                // $unique_token is empty for Tripo3D (unchanged filenames) and
+                // "<task_id>__" for Meshy AI (unique per generation).
                 $safe_key      = sanitize_file_name((string) $file_key);
                 $filename      = sanitize_file_name(basename(wp_parse_url($url, PHP_URL_PATH)));
-                $file_full_path = trailingslashit($file_path) . $safe_key . '__' . $filename;
-                $file_full_url  = trailingslashit($file_url) . $safe_key . '__' . $filename;
+                $file_full_path = trailingslashit($file_path) . $safe_key . '__' . $unique_token . $filename;
+                $file_full_url  = trailingslashit($file_url) . $safe_key . '__' . $unique_token . $filename;
 
                 // Final defence: never write outside the model directory.
                 if (!self::path_is_within_model_dir($file_full_path)) {
