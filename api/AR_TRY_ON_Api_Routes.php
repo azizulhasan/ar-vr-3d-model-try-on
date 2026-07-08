@@ -339,9 +339,13 @@ class AR_TRY_ON_Api_Routes
             $response_body = json_decode($response_body, true);
 
             /**
-             * Model generated properly .
+             * Model generated properly. Accept any 2xx — Tripo3D returns
+             * 200 on create, but Meshy AI returns 202 (Accepted) for its
+             * asynchronous task creation. A strict `!== 200` check
+             * silently rejected Meshy's valid `{"result":"<task_id>"}`
+             * body and the metabox button hung on "Generating Task".
              */
-            if ($status_code !== 200) {
+            if ($status_code < 200 || $status_code >= 300) {
                 $result['data'] = $response_body;
                 $result['extra'] = [
                     'headers' => $headers,
@@ -426,7 +430,9 @@ class AR_TRY_ON_Api_Routes
             $task_response_body = wp_remote_retrieve_body($task_response);
             $task_response_body = json_decode($task_response_body, true);
 
-            if ($task_status_code !== 200) {
+            // Accept any 2xx (Meshy's retrieve returns 200, but stay
+            // tolerant in case a provider uses 202/203 on the poll GET).
+            if ($task_status_code < 200 || $task_status_code >= 300) {
                 $task_result['data'] = $task_response_body;
                 $task_result['extra'] = [
                     'headers' => $headers,
