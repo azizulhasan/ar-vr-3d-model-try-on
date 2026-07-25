@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -359,6 +359,12 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.2.5 ( 25 July 2026 ) =
+* New: You can now choose Meshy AI as your 3D-model generator on the free version too, not just Tripo3D — pick whichever provider you prefer and generate models from a written description.
+* Fix: Changing a value on the Integration settings screen (for example pasting a new API key) now saves correctly instead of reporting "No changes detected".
+* Fix: The same "No changes detected" issue when updating a product's 3D settings has been resolved, so your edits save reliably.
+* Fix: Cleaned up an unused internal scheduled task so it no longer writes a harmless notice to your site's error log on WordPress 6.7 and newer.
+
 = 2.2.4 ( 8 July 2026 ) =
 * New: You can now create 3D models with Meshy AI, right from the AtlasAR box — generate a model from a written description or from a product image, the same easy way as the existing Tripo3D option.
 * Improvement: A newly generated model now appears straight away, without needing to refresh the page.
@@ -660,6 +666,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.5 =
+Lets you pick Meshy AI as your 3D generator on the free version (alongside Tripo3D), and fixes a bug where editing the Integration settings or a product's 3D options could wrongly report "No changes detected" on save. Safe to update.
 
 = 2.2.4 =
 Adds Meshy AI as a second way to generate 3D models — from a written description or a product image — alongside Tripo3D. Newly generated models now show up right away, and your saved API key stays visible on the settings screen. Safe to update.

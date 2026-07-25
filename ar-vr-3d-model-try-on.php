@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           2.2.4
+ * Version:           2.2.5
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -149,7 +149,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.2.4' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.2.5' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
@@ -246,14 +246,19 @@ function atlas_ar_run() {
 	do_action( 'atlas_ar_loaded' );
 }
 
-// Add custom cron schedule for compression queue processing
-add_filter( 'cron_schedules', function( $schedules ) {
-	$schedules['every_five_minutes'] = array(
-		'interval' => 300, // 5 minutes in seconds
-		'display'  => __( 'Every 5 Minutes', 'ar-vr-3d-model-try-on' ),
-	);
-	return $schedules;
-} );
+/*
+ * The custom `every_five_minutes` cron schedule was removed (AR-69).
+ * It existed only for the old compression-queue cron, which no longer
+ * runs — nothing schedules an `every_five_minutes` event anymore
+ * (AR_TRY_ON_Deactivate still defensively unschedules the legacy
+ * `ar_try_on_process_compression_queue` hook, which does not depend on
+ * this schedule being registered).
+ *
+ * Its `__()` display string was evaluated whenever `cron_schedules` was
+ * applied — which can happen before `init` — triggering the WordPress
+ * 6.7 "translation loading … triggered too early" notice for this text
+ * domain. Removing the unused schedule removes the notice.
+ */
 
 
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
