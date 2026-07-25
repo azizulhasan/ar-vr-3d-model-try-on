@@ -199,9 +199,17 @@ const ARProductModelSettings = () => {
     };
 
     const handleIntegrationChange = (index, name, value) => {
+        // AR-69: immutable update — build a NEW row object instead of
+        // mutating the existing one in place. The old code did
+        // `updated[index][name] = value` on a shallow-copied array, which
+        // mutated the same row object that previousProductModel (the
+        // change-detection baseline) also references — so editing a body
+        // value silently changed the baseline and Save reported
+        // "No changes detected".
         setProductModel((prev) => {
-            const updated = [...prev.exclude_integration_api_body];
-            updated[index][name] = value;
+            const updated = prev.exclude_integration_api_body.map(
+                (row, i) => (i === index ? {...row, [name]: value} : row)
+            );
             return {...prev, exclude_integration_api_body: updated};
         });
     };
@@ -382,7 +390,9 @@ const ARProductModelSettings = () => {
                         }
                         setProductModel(productModelData);
                         setIsProductModelLoad(true);
-                        setPreviousProductModel(productModelData);
+                        // Deep-copy so the change-detection baseline never
+                        // shares nested references with the live productModel.
+                        setPreviousProductModel(structuredClone(productModelData));
                     }
                 );
             }
@@ -455,7 +465,7 @@ const handleSubmit = (e) => {
         .then((res) => {
             console.log(res)
             setProductModel({...productModel, ...res.data});
-            setPreviousProductModel({...productModel, ...res.data});
+            setPreviousProductModel(structuredClone({...productModel, ...res.data}));
             notify('Successfully Saved Data.', 'success',{
                 autoClose: 5000,
             })
