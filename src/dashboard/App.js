@@ -133,7 +133,9 @@ export default function App() {
         console.log(finalSettings);
       }
       setSettings(finalSettings);
-      setPreviousSettings(finalSettings);
+      // Deep-copy the baseline so it can never share nested object
+      // references with `settings` (defense-in-depth for change detection).
+      setPreviousSettings(structuredClone(finalSettings));
     });
   }, []);
 
@@ -216,22 +218,27 @@ export default function App() {
   };
 
   const handleHeaderChange = (index, field, value) => {
-    const updated = [...settings.ar_try_on_exclude_integration_api_headers];
-    updated[index][field] = value;
+    // AR-69 fix: immutable update. The old code did
+    // `updated[index][field] = value` on a SHALLOW-copied array, which
+    // mutated the same header object that `previousSettings` (the
+    // change-detection baseline) also references. Editing a header value
+    // (e.g. the Authorization API key) therefore changed the baseline in
+    // place, so Save reported "No changes detected". Building brand-new
+    // header objects leaves the baseline untouched so the diff is real.
+    const updated = settings.ar_try_on_exclude_integration_api_headers.map(
+      (header, i) => (i === index ? { ...header, [field]: value } : header)
+    );
+    const next = {
+      ...settings,
+      ar_try_on_exclude_integration_api_headers: updated,
+    };
+    // Editing the Authorization value re-asserts the selected provider's
+    // name + URL (preserves the original behaviour).
     if (field === "value" && updated[index]?.key === "Authorization") {
-      setSettings({
-        ...settings,
-        ...{
-          ar_try_on_exclude_integration_api_name: currentApi.id,
-          ar_try_on_exclude_integration_api_url: currentApi.url,
-        },
-      });
-    } else {
-      setSettings({
-        ...settings,
-        ...{ ar_try_on_exclude_integration_api_headers: updated },
-      });
+      next.ar_try_on_exclude_integration_api_name = currentApi.id;
+      next.ar_try_on_exclude_integration_api_url = currentApi.url;
     }
+    setSettings(next);
   };
 
   /**
@@ -286,7 +293,7 @@ const handleSubmit = async (e) => {
     const res = await postWithoutImage(getURL("settings"), formData);
 
     setSettings(res.data);
-    setPreviousSettings(res.data);
+    setPreviousSettings(structuredClone(res.data));
     toast("Successfully Saved.", "info");
   } catch (err) {
     console.log(err);
