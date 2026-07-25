@@ -192,10 +192,15 @@ export default function App() {
 
     if (!e.target.name) return;
 
+    // AR-69: Free may switch the 3D-generation provider between the
+    // providers whose free (text_to_model) tier we support — Tripo3D
+    // and Meshy AI. Any other provider still requires Pro. image_to_model
+    // stays Pro-only regardless of provider (enforced by the metabox
+    // dropdown via generation_supported_modes and server-side in
+    // AR_TRY_ON_Api_Routes::generate_3d_model).
     if (
-
       e.target.name === "ar_try_on_exclude_integration_api_name" &&
-      e.target.value !== "tripo3d" &&
+      !["tripo3d", "meshy_ai"].includes(e.target.value) &&
       !ar_try_on.is_pro_active
     ) {
       notify("API switch is available in pro version", "warn");

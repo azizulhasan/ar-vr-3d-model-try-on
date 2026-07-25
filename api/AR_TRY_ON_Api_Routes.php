@@ -304,6 +304,37 @@ class AR_TRY_ON_Api_Routes
         $is_create_request = ! isset($api_body['task_id']) || ! $api_body['task_id'];
         if ($is_create_request) {
             /**
+             * AR-69: server-side enforcement of the licensed generation
+             * modes. text_to_model ships in Free; image_to_model is
+             * Pro-only (Pro registers it via
+             * `atlas_ar_generation_supported_modes`) — and this holds for
+             * BOTH providers (Tripo3D and Meshy AI). The metabox dropdown
+             * already hides disallowed modes, but the REST route must
+             * reject them too so the gate is not merely cosmetic.
+             *
+             * Only the create request is checked; a poll (task_id present)
+             * is a status read on an already-created task. Tripo3D carries
+             * the mode in the body `type`; Meshy AI has no `type`, so we
+             * read it from the endpoint path it is calling. Plain
+             * technical rejection — NO upsell copy — per wp.org guidelines.
+             */
+            $requested_mode = '';
+            if ( isset( $api_body['type'] ) && $api_body['type'] ) {
+                $requested_mode = strtolower( (string) $api_body['type'] );          // Tripo3D
+            } elseif ( strpos( (string) $api_url, 'image-to-3d' ) !== false ) {
+                $requested_mode = 'image_to_model';                                  // Meshy AI
+            } elseif ( strpos( (string) $api_url, 'text-to-3d' ) !== false ) {
+                $requested_mode = 'text_to_model';                                   // Meshy AI
+            }
+            $allowed_modes = AR_TRY_ON_Helper::generation_supported_modes();
+            if ( $requested_mode !== '' && ! in_array( $requested_mode, $allowed_modes, true ) ) {
+                $result['status'] = false;
+                $result['code']   = 'mode_not_allowed';
+                $result['data']   = __( 'This 3D generation mode is not available on this site.', 'ar-vr-3d-model-try-on' );
+                return rest_ensure_response( $result );
+            }
+
+            /**
              * AR-62 §3g: retry transient 5xx / 429 once with a short
              * backoff. Tripo3D occasionally returns 502 / 503 during
              * autoscale events and 429 under rate-limit; a single
