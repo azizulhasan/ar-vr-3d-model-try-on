@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -27,7 +27,7 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 * **Shortcode** `[atlas_ar]` + Gutenberg block for posts/pages
 * **QR code** card for cross-device scanning
 * **AtlasTryOn** webcam try-on for glasses, sunglasses, caps — unlimited products
-* **AI 3D model generator** — Tripo3D and Meshy AI integration to create 3D models from a text prompt (admin-only; bring your own API key)
+* **AI 3D model generator (text-to-model)** — turn a text prompt into a 3D model using either Tripo3D or Meshy AI (admin-only; bring your own API key)
 * **Privacy by design** — the camera feed stays on the shopper's device; nothing is uploaded
 
 #### **Pro adds (separately installed plugin):**
@@ -36,6 +36,7 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 * Interactive hotspots, real-world dimensions, image/model sliders in the metabox
 * HD watermark-free try-on snapshots, head-pose tracking, multi-face detection, live calibration
 * Bulk compression, analytics dashboard, multi-post-type AR, format conversion (FBX/OBJ/USDZ)
+* AI image-to-model generation — turn a product photo into a 3D model with Tripo3D or Meshy AI
 
 [Pro pricing →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link) · [Live demos →](https://wpaugmentedreality.com/shop/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_shop) · [Video tutorials →](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
 
@@ -173,6 +174,11 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 * Room planning and outfit builders
 * Advanced configurators
 
+⭐ **AI Image-to-3D Generation**:
+* Turn a product photo directly into a 3D model — no prompt writing needed
+* Works with both Tripo3D and Meshy AI (bring your own API key)
+* Complements the free text-to-model generation available in the free version
+
 ### **Coming Soon in Pro:**
 
 🚀 **Advanced Analytics Dashboard** (Q1 2026):
@@ -299,7 +305,13 @@ A: Free covers the core try-on flow on unlimited products — webcam-based glass
 A: A trial banner appears in the plugin dashboard after activation. Or visit [Pricing](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=faq_trial) and click "Start free trial". A valid credit card is required to activate the trial; you won't be charged during the 14-day window and can cancel anytime before it ends.
 
 = Q: What's included in the Free version vs Pro version? =
-A: **Free version** includes unlimited 3D model uploads, full iOS + Android AR support, WooCommerce integration, QR codes, and Tripo3D AI generation. **Pro version** adds dimensions display, interactive hotspots, product configurators, automatic compression, and upcoming features like analytics and per-variation models. [Compare plans here](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
+A: **Free version** includes unlimited 3D model uploads, full iOS + Android AR support, WooCommerce integration, QR codes, and text-to-model AI generation with both Tripo3D and Meshy AI. **Pro version** adds image-to-model AI generation (both providers), dimensions display, interactive hotspots, product configurators, automatic compression, and more. [Compare plans here](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
+
+= Q: How do I generate 3D models with Tripo3D? =
+A: Get an API key from Tripo3D, paste it into the plugin's Integration settings and save. Then open the AtlasAR box on any post or product, write a text prompt (text-to-model, free) — or, with Pro, pick a product image (image-to-model) — and click Generate Model. When the preview appears, click Save This Model. Full step-by-step instructions are in the "3D Model Generation" section above.
+
+= Q: How do I generate 3D models with Meshy AI? =
+A: Get an API key from Meshy AI, choose "Meshy AI 3D" in the plugin's Integration settings, paste your key and save. Then open the AtlasAR box on any post or product, write a text prompt (text-to-model, free) — or, with Pro, pick a product image (image-to-model) — and click Generate Model. When the preview appears, click Save This Model. Full step-by-step instructions are in the "3D Model Generation" section above.
 
 = Q: How does the Pro compression feature work? =
 A: Pro version automatically compresses your .glb and .gltf files using industry-standard Draco geometry compression and Basis Universal texture compression. This reduces file sizes by up to 70% while maintaining visual quality, resulting in faster loading times and better user experience. The original files are kept as backup.
@@ -358,6 +370,12 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 2.2.5 ( 25 July 2026 ) =
+* New: You can now choose Meshy AI as your 3D-model generator on the free version too, not just Tripo3D — pick whichever provider you prefer and generate models from a written description.
+* Fix: Changing a value on the Integration settings screen (for example pasting a new API key) now saves correctly instead of reporting "No changes detected".
+* Fix: The same "No changes detected" issue when updating a product's 3D settings has been resolved, so your edits save reliably.
+* Fix: Cleaned up an unused internal scheduled task so it no longer writes a harmless notice to your site's error log on WordPress 6.7 and newer.
 
 = 2.2.4 ( 8 July 2026 ) =
 * New: You can now create 3D models with Meshy AI, right from the AtlasAR box — generate a model from a written description or from a product image, the same easy way as the existing Tripo3D option.
@@ -660,6 +678,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.5 =
+Lets you pick Meshy AI as your 3D generator on the free version (alongside Tripo3D), and fixes a bug where editing the Integration settings or a product's 3D options could wrongly report "No changes detected" on save. Safe to update.
 
 = 2.2.4 =
 Adds Meshy AI as a second way to generate 3D models — from a written description or a product image — alongside Tripo3D. Newly generated models now show up right away, and your saved API key stays visible on the settings screen. Safe to update.
