@@ -1306,13 +1306,14 @@ class AR_TRY_ON_Helper
         if ($has_value_changed && $post_id) {
             if ($state === 'add') {
                 $post_cache_data = is_array($post_cache_data) ? $post_cache_data : [];
-                // Dedup on append: this list is an autoloaded option, so blindly
-                // appending the same post_id on every settings save grows it
-                // unbounded and bloats autoload memory on every request.
+                // Dedup on append (this list is a cache-invalidation queue,
+                // not needed on every request). AR-70: store it with
+                // autoload = false so it is NOT loaded into memory on every
+                // front-end request — it is only read from the admin save path.
                 if (!in_array($post_id, $post_cache_data)) {
                     $post_cache_data[] = $post_id;
                 }
-                update_option('get_cache_data', $post_cache_data);
+                update_option('get_cache_data', $post_cache_data, false);
                 AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data);
             } elseif ($state === 'remove' && is_array($post_cache_data)) {
                 // Optimized: Use array_filter instead of array_search + unset + array_values
@@ -1321,7 +1322,7 @@ class AR_TRY_ON_Helper
                     return $id != $post_id;
                 }));
 
-                update_option('get_cache_data', $post_cache_data);
+                update_option('get_cache_data', $post_cache_data, false);
                 AR_TRY_ON_Cache::set('get_cache_data', $post_cache_data, 12 * HOUR_IN_SECONDS);
             }
         } elseif ($has_value_changed) {

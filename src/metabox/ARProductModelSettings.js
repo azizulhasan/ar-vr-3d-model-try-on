@@ -714,6 +714,19 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                     <div className="art-hidden art-w-96 art-w-1/3"></div>
                 </div>
             </div>
+
+            {/* AR-70: in-context support / feedback. This is where merchants
+                actually configure models and hit friction, so give them a way
+                to reach us (or report a bug / suggest a feature) right here
+                instead of uninstalling. */}
+            <div className="art-text-center art-text-xs art-text-gray-500 art-mt-4 art-pt-3 art-border-t art-border-gray-200">
+                Need help with AtlasAR?{' '}
+                <a href="https://wpaugmentedreality.com/contact-us/" target="_blank" rel="noopener noreferrer" className="art-text-blue-600 art-underline">Contact us</a>
+                {' · '}
+                <a href="https://wpaugmentedreality.com/contact-us/" target="_blank" rel="noopener noreferrer" className="art-text-blue-600 art-underline">Report an issue</a>
+                {' · '}
+                <a href="https://wpaugmentedreality.com/contact-us/" target="_blank" rel="noopener noreferrer" className="art-text-blue-600 art-underline">Suggest a feature</a>
+            </div>
         </>
     )
         ;
