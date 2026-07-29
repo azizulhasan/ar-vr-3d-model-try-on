@@ -63,6 +63,10 @@ class AR_TRY_ON_Admin_Notice {
 
 		// Register the smart review-request notice
 		$this->register_review_notice();
+
+		// AR-70: nudge existing installs (on the legacy 'auto' load strategy)
+		// to switch to the faster on-interaction loading.
+		$this->register_faster_loading_notice();
 	}
 
 	/**
@@ -580,6 +584,89 @@ class AR_TRY_ON_Admin_Notice {
 				// Permanently stop asking this user.
 				update_user_meta( $user_id, 'ar_try_on_review_done', true );
 				break;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Register the "switch to faster loading" nudge.
+	 *
+	 * Fresh installs (2.2.5+) already default to the on-interaction load
+	 * strategy, so the ~1 MB model-viewer library never blocks initial page
+	 * render. Sites installed earlier were seeded with the legacy 'auto'
+	 * strategy and keep it on update (by design — we don't change live sites
+	 * silently). This one-time, dismissible nudge lets those admins opt into
+	 * the faster behaviour with a single click. It only appears once the site
+	 * actually has a model (so the speed-up is relevant) and disappears for
+	 * everyone the moment the strategy is switched.
+	 */
+	private function register_faster_loading_notice() {
+		$this->register_notice(
+			array(
+				'id'                => 'faster_loading',
+				'title'             => __( '⚡ Speed up your pages', 'ar-vr-3d-model-try-on' ),
+				'message'           => __( 'Your 3D models currently load the viewer library with the page (about 1 MB). Switch to <strong>load on click</strong> so it only downloads when a shopper opens a model — faster pages, same experience. You can change this anytime under Settings → Model Loading Behavior.', 'ar-vr-3d-model-try-on' ),
+				'type'              => 'info',
+				'icon'              => '⚡',
+				'dismissible'       => true,
+				'reshow_after_days' => 0,
+				'condition'         => function () {
+					if ( ! current_user_can( 'manage_options' ) ) {
+						return false;
+					}
+					// Only when the site is still on the legacy 'auto' global
+					// strategy (existing installs). Fresh installs default to
+					// 'interaction' and never see this.
+					if ( AR_TRY_ON_Helper::get_model_load_strategy( 0 ) !== 'auto' ) {
+						return false;
+					}
+					// Only once a real model exists, so the speed-up is relevant.
+					if ( $this->get_cached_user_model_count() < 1 ) {
+						return false;
+					}
+					return true;
+				},
+				'click_action'      => array( $this, 'handle_faster_loading_action' ),
+				'buttons'           => array(
+					array(
+						'text'   => __( 'Switch to faster loading', 'ar-vr-3d-model-try-on' ),
+						'type'   => 'primary',
+						'icon'   => 'performance',
+						'action' => 'switch',
+					),
+					array(
+						'text'   => __( 'Keep current', 'ar-vr-3d-model-try-on' ),
+						'type'   => 'secondary',
+						'action' => 'keep',
+					),
+				),
+				'footer_text'       => __( 'This only changes when the 3D viewer downloads — your models and settings are untouched.', 'ar-vr-3d-model-try-on' ),
+			)
+		);
+	}
+
+	/**
+	 * Handle the faster-loading nudge actions (switch / keep).
+	 *
+	 * @param string   $notice_id   Notice ID.
+	 * @param string   $action_name Action key.
+	 * @param \WP_User $user        Current user.
+	 * @return array
+	 */
+	public function handle_faster_loading_action( $notice_id, $action_name, $user ) {
+		$result = array( 'dismiss' => true );
+
+		// Hide it for this admin either way.
+		update_user_meta( $user->ID, 'ar_try_on_dismiss_' . $notice_id, true );
+
+		if ( 'switch' === $action_name ) {
+			$settings = (array) get_option( 'ar_try_on_settings', array() );
+			$settings['model_load_strategy'] = 'interaction';
+			update_option( 'ar_try_on_settings', $settings );
+			AR_TRY_ON_Helper::clear_settings_cache();
+			AR_TRY_ON_Cache::set( 'settings', $settings );
+			$result['message'] = __( 'Done — 3D models now load on click for faster pages.', 'ar-vr-3d-model-try-on' );
 		}
 
 		return $result;
