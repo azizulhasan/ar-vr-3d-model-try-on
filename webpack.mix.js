@@ -144,4 +144,16 @@ mix.webpackConfig({
 // Override Mix's default behavior
 mix.options({
     processCssUrls: false,
+    // AR-70: strip debug logging from the minified production bundles so
+    // the front end / admin console stays clean (wphive "JavaScript error"
+    // noise flag). Treating console.log/info/debug as pure lets Terser drop
+    // those calls entirely, while console.warn / console.error are kept for
+    // genuine diagnostics. Only applies to the NODE_ENV=production build.
+    terser: {
+        terserOptions: {
+            compress: {
+                pure_funcs: ['console.log', 'console.info', 'console.debug'],
+            },
+        },
+    },
 });

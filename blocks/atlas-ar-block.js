@@ -48,6 +48,11 @@
     }
 
     registerBlockType('atlas/ar-shortcode', {
+        // Block API v3 — renders inside the editor iframe (required from
+        // WP 6.9+; v1/v2 are deprecated). The edit() already uses
+        // useBlockProps and renders only inspector controls + a text
+        // summary, so it is iframe-safe.
+        apiVersion: 3,
         title: __('AtlasAR – 3D Model Viewer', 'ar-vr-3d-model-try-on'),
         description: __('Inserts the [atlas_ar] shortcode automatically.', 'ar-vr-3d-model-try-on'),
         icon: 'visibility',
