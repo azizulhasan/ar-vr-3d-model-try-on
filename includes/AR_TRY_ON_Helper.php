@@ -770,14 +770,17 @@ class AR_TRY_ON_Helper
             'ar_try_on_single_product_tabs' => "yes",
             'ar_try_on_loading_type' => "auto",
             'ar_try_on_reveal_type' => "auto",
-            // AR-67: when the ~956 KB model-viewer library is downloaded.
-            // 'auto' = load with the page (historical behavior); 'interaction'
-            // = poster-first, load on the gallery "View in 3D" click. Resolved
-            // per-product (metabox override → this global → 'auto') in
-            // AR_TRY_ON_Helper::get_model_load_strategy(). Existing installs
-            // without this key fall back to 'auto' there, so no migration is
-            // needed; seeding it here keeps fresh installs self-documenting.
-            'model_load_strategy' => "auto",
+            // AR-67 / AR-70: when the ~956 KB model-viewer library is
+            // downloaded. 'auto' = load with the page; 'interaction' =
+            // poster-first, load the library only when the shopper clicks
+            // "View in 3D". Fresh installs now default to 'interaction' so the
+            // heavy library never blocks initial page render (wphive pagespeed
+            // flag). Resolved per-product (metabox override → this global →
+            // fallback) in AR_TRY_ON_Helper::get_model_load_strategy(); the
+            // fallback stays 'auto' so EXISTING sites without this key keep
+            // their current inline behaviour on update — only new installs get
+            // the faster default. Merchants can switch either way in settings.
+            'model_load_strategy' => "interaction",
             'ar_try_on_poster_color' => "rgba(78,186,79,0)",
             'ar_try_on_ar' => "activate",
             'ar_try_on_ar_modes' => ["webxr", 'scene-viewer', "quick-look"],
