@@ -1,14 +1,22 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
+import { isProActive } from '../../../../context/PremiumBadge';
 
 /**
  * Welcome Component
- * 
+ *
  * Displays the welcome screen with plugin information, video, and support options
- * 
+ *
+ * Upgrade CTAs ("Buy Now", the 14-day trial card) are suppressed once Pro
+ * is active — a paying customer being offered a free trial of what they
+ * already own reads as a bug. `isProActive()` is the shared surface from
+ * PremiumBadge; don't re-implement the `ar_try_on.is_pro_active` read here.
+ *
  * @since 1.8.0
  */
 export default function Welcome() {
+    const proActive = isProActive();
+
     return (
         <div className="art-w-full art-max-w-7xl art-mx-auto">
             <div className="art-grid art-grid-cols-1 lg:art-grid-cols-3 art-gap-6">
@@ -91,6 +99,7 @@ export default function Welcome() {
 
                     {/* Action Buttons */}
                     <div className="art-flex art-gap-4 art-flex-wrap">
+                        {!proActive && (
                         <a
                             href="https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/"
                             target="_blank"
@@ -99,6 +108,7 @@ export default function Welcome() {
                         >
                              {__('Buy Now', 'ar-vr-3d-model-try-on')}
                         </a>
+                        )}
                         <a
                             href="https://wpaugmentedreality.com/docs/3d-model-viewer/"
                             target="_blank"
@@ -140,7 +150,10 @@ export default function Welcome() {
                         </a>
                     </div>
 
-                    {/* NEW: Free 14-day Pro trial card — compact */}
+                    {/* NEW: Free 14-day Pro trial card — compact.
+                        Hidden once Pro is active: offering a trial of Pro to
+                        someone already holding a Pro licence looks broken. */}
+                    {!proActive && (
                     <div
                         className="art-p-4 art-rounded-lg art-shadow-md"
                         style={{
@@ -167,6 +180,7 @@ export default function Welcome() {
                             {__('Start free trial', 'ar-vr-3d-model-try-on')}
                         </a>
                     </div>
+                    )}
 
                     {/* Need Assistance Card */}
                     <div 
