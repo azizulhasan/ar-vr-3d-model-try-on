@@ -372,7 +372,8 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 == Changelog ==
 
 = 2.2.7 ( 6 September 2026 ) =
-* Maintenance: Tested and confirmed working with the latest WordPress release. No changes to how the plugin works — a compatibility update only.
+* Maintenance: Tested and confirmed working with the latest WordPress release.
+* Fix: Upgrade prompts — the "Buy Now" button, the 14-day free-trial card and the Pricing tab — no longer appear on the dashboard for sites that already have Pro installed.
 
 = 2.2.6 ( 6 September 2026 ) =
 * Improvement: New installs now load the 3D viewer only when a shopper opens a model, so pages load faster. Already-running sites can switch to this with a one-click prompt in the dashboard.
@@ -690,7 +691,7 @@ Fixed bug on helper file.
 == Upgrade Notice ==
 
 = 2.2.7 =
-Compatibility update — tested and confirmed working with the latest WordPress release. Nothing else has changed. Safe to update.
+Tested and confirmed working with the latest WordPress release. Also stops upgrade and free-trial prompts from being shown on sites that already have Pro. Safe to update.
 
 = 2.2.6 =
 Faster page loads (new installs load the 3D viewer on demand; existing sites get a one-click switch), lighter server use, a WordPress block-compatibility fix, a cleaner browser console, and a new in-editor "Contact us" link. Safe to update.

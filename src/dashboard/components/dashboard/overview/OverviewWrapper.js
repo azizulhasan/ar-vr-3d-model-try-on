@@ -4,6 +4,7 @@ import Welcome from './Welcome';
 import FeatureComparison from './FeatureComparison';
 // import Demos from './Demos';
 import Pricing from './Pricing';
+import { isProActive } from '../../../../context/PremiumBadge';
 
 /**
  * Overview Wrapper Component
@@ -11,11 +12,16 @@ import Pricing from './Pricing';
  * Provides subtab navigation for Overview page:
  * - Welcome (new)
  *
+ * The Pricing subtab is dropped once Pro is active — a paying customer
+ * has no upgrade left to buy, so the tab is pure noise for them.
+ * `isProActive()` is the shared surface from PremiumBadge.
+ *
  * @since 1.8.0
  */
 export default function OverviewWrapper() {
     const [activeSubtab, setActiveSubtab] = useState('welcome');
-    
+    const proActive = isProActive();
+
     const subtabs = [
         {
             id: 'welcome',
@@ -27,11 +33,11 @@ export default function OverviewWrapper() {
         //     name: __('Demos', 'ar-vr-3d-model-try-on'),
         //     icon: '🎮',
         // },
-        {
+        ...(proActive ? [] : [{
             id: 'pricing',
             name: __('Pricing', 'ar-vr-3d-model-try-on'),
             icon: '💰',
-        },
+        }]),
         {
             id: 'feature-comparison',
             name: __('Feature Comparison', 'ar-vr-3d-model-try-on'),
@@ -77,7 +83,7 @@ export default function OverviewWrapper() {
             <div className="art-px-6 art-pb-6">
                 {activeSubtab === 'welcome' && <Welcome />}
                 {/* {activeSubtab === 'demos' && <Demos/>} */}
-                {activeSubtab === 'pricing' && <Pricing/>}
+                {!proActive && activeSubtab === 'pricing' && <Pricing/>}
                 {activeSubtab === 'feature-comparison' && <FeatureComparison />}
             </div>
         </div>
