@@ -2,9 +2,9 @@
 Contributors: atlasaidev, hasanazizul
 Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -371,7 +371,10 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
-= 2.2.6 ( 29 July 2026 ) =
+= 2.2.7 ( 6 September 2026 ) =
+* Maintenance: Tested and confirmed working with the latest WordPress release. No changes to how the plugin works — a compatibility update only.
+
+= 2.2.6 ( 6 September 2026 ) =
 * Improvement: New installs now load the 3D viewer only when a shopper opens a model, so pages load faster. Already-running sites can switch to this with a one-click prompt in the dashboard.
 * Performance: Trimmed per-request memory use so the plugin is lighter on your server.
 * Fix: Updated the AtlasAR block to the latest WordPress block format, clearing a compatibility notice on recent WordPress versions.
@@ -685,6 +688,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.7 =
+Compatibility update — tested and confirmed working with the latest WordPress release. Nothing else has changed. Safe to update.
 
 = 2.2.6 =
 Faster page loads (new installs load the 3D viewer on demand; existing sites get a one-click switch), lighter server use, a WordPress block-compatibility fix, a cleaner browser console, and a new in-editor "Contact us" link. Safe to update.
