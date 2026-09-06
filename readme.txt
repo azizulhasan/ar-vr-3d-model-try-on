@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.5
+Stable tag: 2.2.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -371,6 +371,13 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.2.6 ( 29 July 2026 ) =
+* Improvement: New installs now load the 3D viewer only when a shopper opens a model, so pages load faster. Already-running sites can switch to this with a one-click prompt in the dashboard.
+* Performance: Trimmed per-request memory use so the plugin is lighter on your server.
+* Fix: Updated the AtlasAR block to the latest WordPress block format, clearing a compatibility notice on recent WordPress versions.
+* Improvement: Removed leftover debug messages from the browser console on the front end and admin.
+* New: Added a "Need help?" link (Contact us, Report an issue, Suggest a feature) inside the AtlasAR box, so you can reach us right where you set up your models.
+
 = 2.2.5 ( 25 July 2026 ) =
 * New: You can now choose Meshy AI as your 3D-model generator on the free version too, not just Tripo3D — pick whichever provider you prefer and generate models from a written description.
 * Fix: Changing a value on the Integration settings screen (for example pasting a new API key) now saves correctly instead of reporting "No changes detected".
@@ -678,6 +685,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.6 =
+Faster page loads (new installs load the 3D viewer on demand; existing sites get a one-click switch), lighter server use, a WordPress block-compatibility fix, a cleaner browser console, and a new in-editor "Contact us" link. Safe to update.
 
 = 2.2.5 =
 Lets you pick Meshy AI as your 3D generator on the free version (alongside Tripo3D), and fixes a bug where editing the Integration settings or a product's 3D options could wrongly report "No changes detected" on save. Safe to update.
