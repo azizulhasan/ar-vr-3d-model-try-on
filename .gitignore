@@ -111,3 +111,6 @@ production/
 
 .DS_Store
 admin/images/.DS_Store
+
+# Gulp minify:css output (build artifact, not shipped)
+admin/css/minify/
