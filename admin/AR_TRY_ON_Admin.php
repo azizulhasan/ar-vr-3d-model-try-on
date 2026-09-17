@@ -223,24 +223,49 @@ class AR_TRY_ON_Admin {
 				true
 			);
 		}
-        // JS — wp-components is required for PanelBody / ToggleControl /
-        // TextControl in the block's InspectorControls sidebar.
-        wp_enqueue_script(
-            'atlas-ar-block',
-            ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block.js',
-            array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-editor', 'wp-block-editor', 'wp-components' ),
-            $this->version,
-            true
-        );
+	}
 
-        // CSS (editor only)
-        wp_enqueue_style(
-            'atlas-ar-block-editor',
-            ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block-editor.css',
-            array( 'wp-edit-blocks' ),
-            $this->version,
-            'all'
-        );
+	/**
+	 * Register the `atlas/ar-shortcode` block and its editor-only assets.
+	 *
+	 * Hooked on `init`. The script and style are only *registered* here and
+	 * passed to register_block_type() as `editor_script` / `editor_style`,
+	 * so WordPress enqueues them inside the block editor and nowhere else.
+	 *
+	 * They used to be enqueued on every admin screen, which also loaded the
+	 * `wp-editor` package there. That package replaces `window.wp.editor`,
+	 * so `wp.editor.initialize` disappeared and any plugin using the classic
+	 * editor API on those screens threw (AR-71). The block never used
+	 * `wp.editor` — it reads InspectorControls from `wp.blockEditor` — so
+	 * that dependency is dropped too.
+	 *
+	 * @since 2.2.8
+	 */
+	public function register_block() {
+		// wp-components is required for PanelBody / ToggleControl /
+		// TextControl in the block's InspectorControls sidebar.
+		wp_register_script(
+			'atlas-ar-block',
+			ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block.js',
+			array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor', 'wp-components' ),
+			$this->version,
+			true
+		);
+
+		wp_register_style(
+			'atlas-ar-block-editor',
+			ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block-editor.css',
+			array( 'wp-edit-blocks' ),
+			$this->version
+		);
+
+		register_block_type(
+			'atlas/ar-shortcode',
+			array(
+				'editor_script' => 'atlas-ar-block',
+				'editor_style'  => 'atlas-ar-block-editor',
+			)
+		);
 	}
 
 	public function enqueue_preview() {
