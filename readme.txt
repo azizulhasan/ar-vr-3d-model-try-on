@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.7
+Stable tag: 2.2.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -371,6 +371,10 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.2.8 ( 18 September 2026 ) =
+* Fix: The plugin no longer loads the block editor's files on other WordPress admin screens. This also clears a browser error that some other plugins ran into on those screens.
+* Fix: Opening a product or post with a 3D model no longer records a harmless "not found" error in the browser console when the model has not been compressed yet.
+
 = 2.2.7 ( 6 September 2026 ) =
 * Maintenance: Tested and confirmed working with the latest WordPress release.
 * Fix: Upgrade prompts — the "Buy Now" button, the 14-day free-trial card and the Pricing tab — no longer appear on the dashboard for sites that already have Pro installed.
@@ -689,6 +693,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.2.8 =
+Housekeeping update: the block editor's files are no longer loaded on other admin screens (which could upset other plugins there), and a harmless console error on models that have not been compressed yet is gone. Safe to update.
 
 = 2.2.7 =
 Tested and confirmed working with the latest WordPress release. Also stops upgrade and free-trial prompts from being shown on sites that already have Pro. Safe to update.
