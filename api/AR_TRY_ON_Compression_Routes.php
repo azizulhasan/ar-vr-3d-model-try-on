@@ -445,12 +445,18 @@ class AR_TRY_ON_Compression_Routes {
 			);
 		}
 
+		// "Not compressed yet" is the normal state for every new model, not a
+		// missing resource. A 404 here made the browser log a console error
+		// each time the AtlasAR box opened on an uncompressed model (AR-71).
+		// CompressionPanel only acts on `success && data`, so `data: null`
+		// is a no-op for it.
 		return new \WP_REST_Response(
 			array(
-				'success' => false,
+				'success' => true,
+				'data'    => null,
 				'message' => __( 'No compression found for this post.', 'ar-vr-3d-model-try-on' ),
 			),
-			404
+			200
 		);
 	}
 

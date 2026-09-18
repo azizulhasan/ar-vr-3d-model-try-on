@@ -114,3 +114,6 @@ admin/images/.DS_Store
 
 # Gulp minify:css output (build artifact, not shipped)
 admin/css/minify/
+
+# Plans live in the private atlasaidev-internal repo — never commit them here.
+plan/

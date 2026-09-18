@@ -138,6 +138,12 @@ class AR_TRY_ON {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 10 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_preview', 10 );
 
+		// Block registration. The loader runs inside Free's own `init`
+		// (priority 10), so this must use a later priority to still fire in
+		// the same dispatch. Registered on every request, not only in admin:
+		// the block editor also reads block types over REST.
+		$this->loader->add_action( 'init', $plugin_admin, 'register_block', 20 );
+
 		// Add defer attribute to admin scripts for better performance
 //		$this->loader->add_filter( 'script_loader_tag', $plugin_admin, 'add_defer_attribute', 10, 3 );
 
