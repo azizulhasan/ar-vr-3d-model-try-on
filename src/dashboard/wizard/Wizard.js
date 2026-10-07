@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { __, sprintf } from "@wordpress/i18n";
 import TopNavbar from "../components/TopNavbar";
@@ -69,6 +69,10 @@ const initialState = (data) => {
   // Keep the AR modes for the preview only (not edited here).
   settings.ar_try_on_ar_modes = saved.ar_try_on_ar_modes;
 
+  // Saved values (defaults where nothing is saved). Finish compares with
+  // this, so suggestions below are saved even if left as they are.
+  const baseline = { ...settings };
+
   // A brand-new WooCommerce store almost always wants products.
   if (data.free_state === "pending" && ar_try_on.is_wc_active && data.posts && data.posts.product) {
     settings.ar_try_on_allowed_post_types = ["product"];
@@ -80,6 +84,7 @@ const initialState = (data) => {
 
   return {
     settings,
+    baseline,
     postType,
     productId: item ? item.id : 0,
     modelSource: item && item.has_model ? "current" : "sample",
@@ -101,6 +106,8 @@ export default function Wizard() {
   const [isDarkMode, toggleTheme] = useDashboardTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [state, setState] = useState(() => initialState(data));
+  // Saved values at start; Finish writes only what differs from them.
+  const startSettings = useRef(state.baseline);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -169,9 +176,14 @@ export default function Wizard() {
     const body = { mode, status };
     if (status === "done") {
       if (mode === "full") {
+        // Only what the merchant changed, so values they never touched
+        // are not written (existing sites keep exactly what they had).
+        const start = startSettings.current;
         const settings = {};
         SETTING_KEYS.forEach((key) => {
-          settings[key] = state.settings[key];
+          if (JSON.stringify(state.settings[key]) !== JSON.stringify(start[key])) {
+            settings[key] = state.settings[key];
+          }
         });
         body.settings = settings;
         body.compression = state.compression;
