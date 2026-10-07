@@ -142,6 +142,10 @@ class AR_TRY_ON_Admin {
 			// in AR_TRY_ON_Pro_Bridge. The metabox React filters its
 			// "Supported Model Types" dropdown to this list.
 			'generation_supported_modes' => AR_TRY_ON_Helper::generation_supported_modes(),
+			// AR-72 — setup wizard. `active` is true only on
+			// `&welcome=1` / `&welcome=pro`; the React entry then renders
+			// the wizard instead of the dashboard tabs.
+			'wizard'                     => AR_TRY_ON_Wizard::instance()->get_client_data(),
 		];
 		return $this->localize_data;
 	}
@@ -190,7 +194,28 @@ class AR_TRY_ON_Admin {
 			   $this->version would otherwise keep serving a stale build). */
 			$dashboard_ui_path = ATLAS_AR_PLUGIN_PATH . 'admin/js/build/ar-try-on-dashboard-ui.min.js';
 			$dashboard_ui_ver  = file_exists( $dashboard_ui_path ) ? (string) filemtime( $dashboard_ui_path ) : $this->version;
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', array(), $dashboard_ui_ver, true );
+			$dashboard_deps    = array( 'wp-hooks' );
+
+			// AR-72 — the setup wizard previews the model with
+			// <model-viewer> and picks files from the media library.
+			if ( '' !== AR_TRY_ON_Wizard::requested_mode() ) {
+				wp_enqueue_media();
+				// Loads as a module (deferred); <model-viewer> elements the
+				// wizard renders upgrade as soon as it is defined.
+				$this->enqueue_model_viewer();
+			}
+
+			/**
+			 * Filter: atlas_ar_dashboard_script_dependencies
+			 *
+			 * Lets Pro load its wizard steps before the dashboard bundle
+			 * reads the `atlasAr.wizard.steps` filter (AR-72).
+			 *
+			 * @param string[] $dashboard_deps Script handles.
+			 */
+			$dashboard_deps = apply_filters( 'atlas_ar_dashboard_script_dependencies', $dashboard_deps );
+
+			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', $dashboard_deps, $dashboard_ui_ver, true );
 			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->get_localize_data() );
 		}
 
@@ -278,29 +303,39 @@ class AR_TRY_ON_Admin {
 
 
 			// TODO:: enqueue base on model setup/settings
-			wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', array('ar-try-on-metabox-ui'), $this->version, true );
-
-			// AR-61 §3.3: point Google's <model-viewer> at the
-			// locally-bundled DRACO / KTX2 (Basis) / Lottie decoders
-			// before the component initializes, so admin previews
-			// don't fall back to the gstatic.com / cdn.jsdelivr.net
-			// defaults baked into google-model-viewer.js (~L1092).
-			$decoder_base = ATLAS_AR_PLUGIN_URL . 'public/js/vendor/decoders/';
-			$inline_decoder_config = sprintf(
-				'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
-				'dracoDecoderLocation: %s,' .
-				'ktx2TranscoderLocation: %s,' .
-				'lottieLoaderLocation: %s' .
-				'});',
-				wp_json_encode( $decoder_base . 'draco/' ),
-				wp_json_encode( $decoder_base . 'basis/' ),
-				wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
-			);
-			wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );
+			$this->enqueue_model_viewer( array( 'ar-try-on-metabox-ui' ) );
 
 			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
 			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->get_localize_data() );
 		}
+	}
+
+	/**
+	 * Enqueue Google's <model-viewer> for admin previews.
+	 *
+	 * AR-61 §3.3: point <model-viewer> at the locally-bundled DRACO /
+	 * KTX2 (Basis) / Lottie decoders before the component initializes,
+	 * so admin previews don't fall back to the gstatic.com /
+	 * cdn.jsdelivr.net defaults baked into google-model-viewer.js.
+	 * Shared by the metabox preview and the setup wizard (AR-72).
+	 *
+	 * @param string[] $deps Script handles model-viewer must load after.
+	 */
+	private function enqueue_model_viewer( $deps = array() ) {
+		wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', $deps, $this->version, true );
+
+		$decoder_base = ATLAS_AR_PLUGIN_URL . 'public/js/vendor/decoders/';
+		$inline_decoder_config = sprintf(
+			'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
+			'dracoDecoderLocation: %s,' .
+			'ktx2TranscoderLocation: %s,' .
+			'lottieLoaderLocation: %s' .
+			'});',
+			wp_json_encode( $decoder_base . 'draco/' ),
+			wp_json_encode( $decoder_base . 'basis/' ),
+			wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
+		);
+		wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );
 	}
 
 	/**
