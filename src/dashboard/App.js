@@ -16,12 +16,15 @@ import {
 import toast from "../context/Notify";
 import notify from "../context/Notify";
 import "./theme.css";
+import TopNavbar from "./components/TopNavbar";
+import SidebarNav from "./components/SidebarNav";
+import useDashboardTheme from "./useDashboardTheme";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [authType, setAuthType] = useState("Bearer");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState("#ffffff");
+  const [isDarkMode, handleThemeToggle] = useDashboardTheme();
   const [isSaving, setIsSaving] = useState(false);
   const [settings, setSettings] = useState({
     ar_try_on_display_button_automatically: "yes",
@@ -88,35 +91,6 @@ export default function App() {
     getAPITypes(settings?.ar_try_on_exclude_integration_api_name || "tripo3d")
   );
   const [previousSettings, setPreviousSettings] = useState({});
-
-  //DARK/LIGHT THEME ON DASHBOARD
-
-  const applyTheme = (dark) => {
-    if (dark) {
-      document.documentElement.style.setProperty("--theme-bg", "#1e1e1e");
-      document.documentElement.style.setProperty("--theme-text", "#ffffff");
-      document.documentElement.style.setProperty("--theme-accent", "#333333");
-    } else {
-      document.documentElement.style.setProperty("--theme-bg", "#ffffff");
-      document.documentElement.style.setProperty("--theme-text", "#000000");
-      document.documentElement.style.setProperty("--theme-accent", "#e5e5e5");
-    }
-    localStorage.setItem("isDarkMode", dark ? "true" : "false");
-  };
-
-
-  useEffect(() => {
-    const saved = localStorage.getItem("isDarkMode");
-    const dark = saved === "true";
-    setIsDarkMode(dark);
-    applyTheme(dark);
-  }, []);
-
-  const handleThemeToggle = () => {
-    const next = !isDarkMode;
-    setIsDarkMode(next);
-    applyTheme(next);
-  };
 
   useEffect(() => {
     /**
@@ -318,123 +292,25 @@ const handleSubmit = async (e) => {
 
 
       {/* Top Navbar */}
-      <div
-        className="art-w-full art-h-[10vh] art-flex art-justify-between art-items-center art-px-5 art-border-b art-sticky art-top-5 art-z-50 "
-        style={{
-          backgroundColor: "var(--theme-bg)",
-          color: "var(--theme-text)",
-        }}
-      >
-        <div className="art-flex art-items-center art-space-x-4">
-          {/* Hamburger Button */}
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="art-p-2 art-rounded-md art-text-gray-600 art-bg-gray-300 hover:art-bg-gray-100 art-focus:outline-none art-cursor-pointer"
-          >
-            {/* Hamburger Icon */}
-            <svg
-              className="art-h-4 art-w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-          <h1 style={{ color: "var(--theme-text)" }}>{ar_try_on.plugin_name}</h1>
-
-          <span className="art-text-center">Version: {ar_try_on.VERSION}</span>
-        </div>
-        <div></div>
-        {/* 🌗 Dark/Light Mode Toggle */}
-        <button
-          onClick={handleThemeToggle}
-          className="art-w-12 art-h-12 art-m-10 art-rounded-full art-flex art-items-center art-justify-center
- art-border-gray-100 art-transition-colors art-duration-300 hover:art-bg-gray-100 dark:hover:art-bg-gray-700 art-cursor-pointer"
-          style={{
-            backgroundColor: "transparent",
-            color: "var(--theme-text)",
-          }}
-        >
-          {isDarkMode ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="art-h-6 art-w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 3v1m0 16v1m8.66-12.66l-.7.7M4.05 19.95l-.7.7M21 12h1M2 12H1m16.95 7.95l-.7-.7M4.05 4.05l-.7-.7"
-              />
-              <circle cx="12" cy="12" r="4" />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="art-h-6 art-w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
-              />
-            </svg>
-          )}
-        </button>
-      </div>
+      <TopNavbar
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        isDarkMode={isDarkMode}
+        onToggleTheme={handleThemeToggle}
+      />
 
       {/* Layout with Sidebar + Main */}
       <div className="art-flex art-h-full">
         {/* Sidebar */}
         {isSidebarOpen && (
-          <div
-            className="art-w-60 art-border-r art-sticky art-top-[10vh] art-h-[90vh] art-overflow-y-auto"
-            style={{
-              backgroundColor: "var(--theme-bg)",
-              color: "var(--theme-text)",
-            }}
-          >
-            <nav className="art-flex art-flex-col art-space-y-0 art-p-4">
-              {tabs.map((tab) => (
-                <a
-                  key={tab.name}
-                  href={tab.href}
-                  onClick={(e) => handleTabChange(e, tab)}
-                  aria-current={activeTab === tab.name ? "page" : undefined}
-                  className={`art-whitespace-nowrap art-px-4 art-py-4 art-text-sm art-font-medium art-relative art-flex art-items-center art-no-underline art-transition-all art-duration-200 ${
-                    activeTab === tab.name
-                      ? "art-text-white"
-                      : "art-text-gray-300 hover:art-text-white hover:art-bg-black hover:art-bg-opacity-10"
-                  }`}
-                  style={{
-                    backgroundColor:
-                      activeTab === tab.name
-                        ? "rgb(59,130,246)"
-                        : "transparent",
-                    color: activeTab === tab.name ? "#ffffff" : "inherit",
-                    border: "none",
-                    outline: "none",
-                  }}
-                >
-                  {tab.name}
-                </a>
-              ))}
-            </nav>
-          </div>
+          <SidebarNav
+            items={tabs.map((tab) => ({
+              key: tab.name,
+              label: tab.name,
+              href: tab.href,
+              active: activeTab === tab.name,
+              onClick: (e) => handleTabChange(e, tab),
+            }))}
+          />
         )}
 
         {/* Main Content */}
