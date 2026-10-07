@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import BorderCard from "../../components/dashboard/settings/BorderCard";
-import { Desc } from "../ui";
+import { Desc } from "../../ui";
 import { resolvedModel, selectedItem } from "../model";
 
 /**

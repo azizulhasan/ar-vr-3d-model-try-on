@@ -2,7 +2,7 @@ import { __ } from "@wordpress/i18n";
 import BorderCard from "../../components/dashboard/settings/BorderCard";
 import Switch from "../../components/dashboard/settings/Switch";
 import Radio from "../../components/dashboard/settings/Radio";
-import { Label, Desc } from "../ui";
+import { Label, Desc } from "../../ui";
 import { resolvedModel } from "../model";
 import { WizardModelViewer } from "./StepPreview";
 
