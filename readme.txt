@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.8
+Stable tag: 2.3.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -371,6 +371,11 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
+= 2.3.0 ( 7 October 2026 ) =
+* New: A setup guide walks you through where 3D appears, adding your first model, previewing it in 3D and AR, page speed, the AR button, compression and virtual try-on. It opens once on new sites and can be run again from the Overview tab.
+* New: Sites that were already using the plugin see a one-time notice offering the guide instead of being redirected. The guide starts from your current settings and only saves what you change.
+* Fix: Deactivating and re-activating the plugin no longer resets your settings to the defaults.
+
 = 2.2.8 ( 18 September 2026 ) =
 * Fix: The plugin no longer loads the block editor's files on other WordPress admin screens. This also clears a browser error that some other plugins ran into on those screens.
 * Fix: Opening a product or post with a 3D model no longer records a harmless "not found" error in the browser console when the model has not been compressed yet.
@@ -693,6 +698,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+Adds a setup guide for new and existing sites, and fixes settings being reset when the plugin is re-activated. Your current settings stay as they are. Safe to update.
 
 = 2.2.8 =
 Housekeeping update: the block editor's files are no longer loaded on other admin screens (which could upset other plugins there), and a harmless console error on models that have not been compressed yet is gone. Safe to update.
