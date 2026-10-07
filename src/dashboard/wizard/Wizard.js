@@ -7,7 +7,7 @@ import useDashboardTheme from "../useDashboardTheme";
 import SpinnerModal from "../../metabox/components/SpinnerModal";
 import notify from "../../context/Notify";
 import { getURL } from "../../context/utilities";
-import ui from "./ui";
+import ui from "../ui";
 import { itemsFor, productPayload, selectedItem } from "./model";
 import StepWhere from "./steps/StepWhere";
 import StepModel from "./steps/StepModel";

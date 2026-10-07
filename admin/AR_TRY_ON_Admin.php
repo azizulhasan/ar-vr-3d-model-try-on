@@ -185,6 +185,13 @@ class AR_TRY_ON_Admin {
 		 * an immediate use violates the wp.org guideline on core file loading (AR-61 §5.1).
 		 */
 
+		// AR-73 — the in-browser model compressor, registered (not loaded)
+		// on the dashboard so Pro's bulk compression card can enqueue it.
+		// The product editor enqueues the same file further down.
+		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
+			wp_register_script( 'ar-compression-client', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-compression-client.min.js', array(), $this->version, true );
+		}
+
 		do_action( 'atlas_ar_enqueue_pro_dashboard_scripts' );
 
 

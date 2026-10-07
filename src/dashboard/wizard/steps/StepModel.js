@@ -1,7 +1,7 @@
 import { __, sprintf } from "@wordpress/i18n";
 import BorderCard from "../../components/dashboard/settings/BorderCard";
 import Radio from "../../components/dashboard/settings/Radio";
-import { Label, Desc } from "../ui";
+import { Label, Desc } from "../../ui";
 import { itemsFor, selectedItem } from "../model";
 
 /**

@@ -4,7 +4,7 @@ import Switch from "../../components/dashboard/settings/Switch";
 import MultiSelect from "../../components/dashboard/settings/MultiSelect";
 import { isProActive } from "../../../context/PremiumBadge";
 import notify from "../../../context/Notify";
-import { Label, Desc } from "../ui";
+import { Label, Desc } from "../../ui";
 
 // Same options as Settings → "Show Button In".
 const HOOK_POSITIONS = [
