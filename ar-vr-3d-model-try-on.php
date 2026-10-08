@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           2.2.8
+ * Version:           2.3.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -46,6 +46,7 @@ use AR_TRY_ON\AR_TRY_ON_Tryon;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Tryon_Routes;
+use AR_TRY_ON_Admin\AR_TRY_ON_Wizard;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
@@ -149,7 +150,7 @@ class AR_TRY_ON_Init {
 
 	public function __construct() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.2.8' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.3.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
@@ -202,6 +203,9 @@ function atlas_ar_run() {
 
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();
+
+	// Setup wizard: flags, first-activation redirect, notice, save route (AR-72).
+	AR_TRY_ON_Wizard::instance()->init();
 
 	// Admin action to manually create compression database tables.
 	add_action( 'admin_init', function() {
@@ -276,7 +280,13 @@ add_action( 'atlas_ar_sweep_orphan_temp_files', array( 'AR_TRY_ON\\AR_TRY_ON_Hel
  * This action is documented in includes/AR_TRY_ON_Activator.php
  */
 register_activation_hook( __FILE__, function () {
-	AR_TRY_ON_Activator::activate(1);
+	// Read before activate() stores the first-activation time (AR-72).
+	$is_fresh_install = false === get_option( 'ar_try_on_activated_at' );
+	// No "renew": re-activating used to reset every saved setting to the
+	// defaults. Defaults are still written when nothing is saved yet, and
+	// the demo post is still seeded when missing (AR-72).
+	AR_TRY_ON_Activator::activate();
+	AR_TRY_ON_Wizard::on_activation( $is_fresh_install );
 } );
 /**
  * The code that runs during plugin deactivation.

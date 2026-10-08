@@ -1,6 +1,7 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { isProActive } from '../../../../context/PremiumBadge';
+import BorderCard from '../settings/BorderCard';
 
 /**
  * Welcome Component
@@ -181,6 +182,22 @@ export default function Welcome() {
                         </a>
                     </div>
                     )}
+
+                    {/* AR-72: re-open the setup wizard. */}
+                    <BorderCard>
+                        <h3 className="art-text-base art-font-semibold art-mb-2">
+                            {__('Setup wizard', 'ar-vr-3d-model-try-on')}
+                        </h3>
+                        <p className="art-text-sm art-text-gray-400 art-leading-snug">
+                            {__('Walk through placement, your first model, loading and try-on again. It starts from your current settings.', 'ar-vr-3d-model-try-on')}
+                        </p>
+                        <a
+                            href={(ar_try_on.wizard && ar_try_on.wizard.url) || '?page=ar-vr-3d-model-try-on&welcome=1'}
+                            className="art-inline-block art-px-4 art-py-2 art-rounded-md art-font-medium art-text-sm art-text-white art-bg-blue-500 hover:art-bg-blue-600 hover:art-text-white art-transition-colors art-no-underline art-cursor-pointer"
+                        >
+                            {__('Run setup again', 'ar-vr-3d-model-try-on')}
+                        </a>
+                    </BorderCard>
 
                     {/* Need Assistance Card */}
                     <div 

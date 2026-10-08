@@ -9,6 +9,7 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import ManageModelsModal from './ManageModelsModal';
 import {getURL} from "../../../../../context/utilities";
 import PremiumBadge from "../../../../../context/PremiumBadge";
+import ui from "../../../../ui";
 
 /**
  * Compression Settings Component
@@ -34,6 +35,16 @@ export default function CompressionSettings({ isProActive }) {
         at_limit: false,
     });
     const [showManageModal, setShowManageModal] = useState(false);
+
+    /**
+     * Filter: atlasAr.compression.bulkPanel
+     *
+     * Pro returns a component (built with the `ui` kit) that renders the
+     * Bulk Compression card. Free returns nothing here (AR-73).
+     */
+    const [BulkPanel] = useState(() =>
+        window.wp && wp.hooks ? wp.hooks.applyFilters('atlasAr.compression.bulkPanel', null, ui) : null
+    );
 
     // Fetch settings and user limit on mount
     useEffect(() => {
@@ -211,8 +222,15 @@ export default function CompressionSettings({ isProActive }) {
                      * Free has unlimited compressions now.
                      */}
 
-                    {/* Bulk Compression — Pro only */}
-                    {isProActive ? (
+                    {/* Bulk Compression — Pro only. Pro renders the card
+                        through the `atlasAr.compression.bulkPanel` slot
+                        (AR-73); the static card below is the fallback for
+                        an older Pro that doesn't fill it. */}
+                    {isProActive && BulkPanel ? (
+                        <div className="art-mb-6">
+                            <BulkPanel quality={settings.quality} />
+                        </div>
+                    ) : isProActive ? (
                         <div className="art-mb-6 art-p-4 art-bg-gray-50 art-border art-border-gray-200 art-rounded-lg">
                             <div className="art-flex art-items-start art-justify-between">
                                 <div className="art-flex-1">

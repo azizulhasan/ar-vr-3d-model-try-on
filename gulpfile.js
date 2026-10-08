@@ -144,7 +144,10 @@ const config = {
 			'D:/mamp/htdocs/azizulhasan/artest/wp-content/plugins/ar-vr-3d-model-try-on/'
 	},
 	release: {
-		src: productionSrc,
+		// Reads the freshly built production tree (same as testArtest),
+		// so SVN trunk receives exactly what ships in the release zip.
+		src: 'production/ar-vr-3d-model-try-on/**',
+		base: 'production/ar-vr-3d-model-try-on',
 		output:
 			'D:/xampp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/'
 	},
@@ -299,9 +302,46 @@ gulp.task('copyProButton', () => {
 		);
 });
 
-gulp.task('release', () => {
+// ---------------------- RELEASE: SVN TRUNK ----------------------
+//
+// Run via `npm run release`, which builds first (`build:release`) and
+// then runs this task: check the build → empty SVN trunk → copy the
+// production tree into it. Emptying trunk first means files removed
+// from the plugin also disappear from trunk (they show as "missing" in
+// the SVN commit dialog). SVN metadata is never touched. Committing and
+// tagging on wordpress.org stay a manual step.
+
+gulp.task('check:release', (done) => {
+	const fs = require('fs');
+	const base = config.release.base + '/';
+	const main = base + 'ar-vr-3d-model-try-on.php';
+	const readme = base + 'readme.txt';
+
+	if (!fs.existsSync(main) || !fs.existsSync(readme)) {
+		return done(new Error('No build in ' + base + ' — run `npm run build:release` first.'));
+	}
+
+	const version = (fs.readFileSync(main, 'utf8').match(/^\s*\*\s*Version:\s*(\S+)/m) || [])[1];
+	const stable = (fs.readFileSync(readme, 'utf8').match(/^Stable tag:\s*(\S+)/m) || [])[1];
+	if (!version || version !== stable) {
+		return done(new Error('Version mismatch: plugin header ' + version + ', readme Stable tag ' + stable + '.'));
+	}
+
+	console.log('Releasing ' + version + ' to ' + config.release.output);
+	done();
+});
+
+gulp.task('clean:release', () => {
+	// del v7+: `force` is required because the target lives outside cwd.
+	return del.deleteAsync(
+		[config.release.output + '**', '!' + config.release.output, '!' + config.release.output + '**/.svn/**'],
+		{ force: true, dot: true }
+	);
+});
+
+gulp.task('copyToRelease', () => {
 	return gulp
-		.src(config.release.src, { base: '.', encoding: false })
+		.src(config.release.src, { base: config.release.base, encoding: false, dot: true })
 		.pipe(gulp.dest(config.release.output))
 		.pipe(
 			notify({
@@ -310,6 +350,8 @@ gulp.task('release', () => {
 			})
 		);
 });
+
+gulp.task('release', gulp.series('check:release', 'clean:release', 'copyToRelease'));
 
 gulp.task('test', () => {
 	return gulp
