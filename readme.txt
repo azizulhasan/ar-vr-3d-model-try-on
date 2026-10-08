@@ -371,10 +371,11 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 
 == Changelog ==
 
-= 2.3.0 ( 7 October 2026 ) =
+= 2.3.0 ( 8 October 2026 ) =
 * New: A setup guide walks you through where 3D appears, adding your first model, previewing it in 3D and AR, page speed, the AR button, compression and virtual try-on. It opens once on new sites and can be run again from the Overview tab.
 * New: Sites that were already using the plugin see a one-time notice offering the guide instead of being redirected. The guide starts from your current settings and only saves what you change.
 * Fix: Deactivating and re-activating the plugin no longer resets your settings to the defaults.
+* Fix: Compressing a 3D model in your browser no longer fails to load one of its helper files, so compression completes without errors.
 
 = 2.2.8 ( 18 September 2026 ) =
 * Fix: The plugin no longer loads the block editor's files on other WordPress admin screens. This also clears a browser error that some other plugins ran into on those screens.
