@@ -23,6 +23,21 @@ import {
     weld
 } from '@gltf-transform/functions';
 
+/*
+ * Webpack's automatic public path climbs one folder too many for this
+ * bundle (it ends at wp-content/plugins/), so its lazy chunks were requested
+ * from wp-content/plugins/admin/js/build/chunks/… and failed, which broke
+ * the compressor's set-up (AR-73). Set it from this script's own URL
+ * instead: …/<plugin>/admin/js/build/<file>.js → …/<plugin>/. The try-on
+ * bundle does the same with `atlas_ar_tryon.plugin_url`.
+ */
+if (typeof document !== 'undefined' && document.currentScript && document.currentScript.src) {
+    // eslint-disable-next-line no-undef, camelcase
+    __webpack_public_path__ = document.currentScript.src
+        .split(/[?#]/)[0]
+        .replace(/admin\/js\/build\/[^/]+$/, '');
+}
+
 class ARCompressionClient {
     constructor() {
         this.io = null;

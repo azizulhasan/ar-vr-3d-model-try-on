@@ -13,7 +13,7 @@
     "makeZip": "gulp makeZip",
     "copy": "gulp copy",
     "zip": "gulp zip",
-    "release": "gulp release",
+    "release": "npm run build:release && gulp release",
     "test:artest": "gulp testArtest",
     "build:release": "npm run production && npm run css && gulp minify:css && gulp makeZip"
   },
