@@ -358,6 +358,9 @@ A: If your Pro subscription expires, the Pro features (dimensions, hotspots, com
 = Q: Can I use Pro on multiple sites? =
 A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sites, and the Business plan ($199/year) covers 10 sites. [See all plans](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
 
+= Q: Where do I report security bugs found in this plugin? =
+A: Please report security bugs found in the source code of the 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/106665f5-7eed-423e-817a-9f00897ab72b). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 == Screenshots ==
 
 1. Settings For Wordpress
