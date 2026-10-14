@@ -202,7 +202,7 @@ class AtlasAR {
           this.setModelSessionData(data, product_id);
         }
         if(button){
-          button.innerHTML = buttonText;
+          button.textContent = buttonText; // AR-85: innerText decodes &lt; back to <, so never write it back as HTML.
         }
       }
     });
