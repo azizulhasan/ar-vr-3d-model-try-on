@@ -436,29 +436,14 @@ class AR_TRY_ON_Wizard {
 			$settings = AR_TRY_ON_Helper::default_settings();
 		}
 
-		foreach ( self::SETTING_RULES as $key => $allowed ) {
-			if ( ! array_key_exists( $key, $input ) ) {
-				continue;
-			}
-			$value = $input[ $key ];
-			if ( is_array( $allowed ) ) {
-				$value = (string) $value;
-				if ( in_array( $value, $allowed, true ) ) {
-					$settings[ $key ] = $value;
-				}
-			} elseif ( false !== strpos( $key, 'color' ) ) {
-				$color = sanitize_hex_color( (string) $value );
-				if ( $color ) {
-					$settings[ $key ] = $color;
-				}
-			} else {
-				$settings[ $key ] = sanitize_text_field( (string) $value );
-			}
-		}
-
+		// AR-85: same per-type checks as the dashboard save (one shared sanitizer), limited to
+		// the fields the wizard shows. SETTING_RULES stays the list of those fields.
+		$wizard_keys = array_merge( array_keys( self::SETTING_RULES ), array( 'tryon_snapshot' ) );
 		if ( array_key_exists( 'tryon_snapshot', $input ) ) {
-			$settings['tryon_snapshot'] = ! empty( $input['tryon_snapshot'] );
+			$input['tryon_snapshot'] = ! empty( $input['tryon_snapshot'] ); // The wizard always sent a truthy flag.
 		}
+		$fields = array_intersect_key( $input, array_flip( $wizard_keys ) );
+		list( $settings ) = \AR_TRY_ON\AR_TRY_ON_Settings_Sanitizer::merge( $fields, $settings, $wizard_keys );
 
 		if ( isset( $input['ar_try_on_allowed_post_types'] ) && is_array( $input['ar_try_on_allowed_post_types'] ) ) {
 			$types = array_values(

@@ -5,6 +5,7 @@ namespace ATLAS_AR_API;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Cache;
 use AR_TRY_ON\AR_TRY_ON_Helper;
+use AR_TRY_ON\AR_TRY_ON_Settings_Sanitizer;
 
 /**
  * This class is for getting all plugin's data  through api.
@@ -107,15 +108,28 @@ class AR_TRY_ON_Api_Routes
         $response['status'] = true;
         // save data about recording.
         if ('post' == $request['method']) {
-            $fields = json_decode($request['fields'], true);
+            // AR-85: never store the request as-is. Only known keys, each checked by type, are
+            // merged into the stored option; unknown stored keys stay (existing sites lose nothing).
+            $input = json_decode((string) $request['fields'], true);
+            if (!is_array($input)) {
+                return new \WP_Error('invalid_settings', __('The settings could not be read. Please reload the page and try again.', 'ar-vr-3d-model-try-on'), array('status' => 422));
+            }
+            $current = get_option('ar_try_on_settings', array());
+            list($fields, $rejected) = AR_TRY_ON_Settings_Sanitizer::merge($input, is_array($current) ? $current : array());
+
+            $clear_cache = !empty($fields['ar_try_on_clear_cache']);
+            $fields['ar_try_on_clear_cache'] = false; // One-shot action, never stored as on.
+
             update_option('ar_try_on_settings', $fields);
             AR_TRY_ON_Cache::delete('settings');
             // Clear static settings cache in Helper class
             AR_TRY_ON_Helper::clear_settings_cache();
 
-            if (isset($fields['ar_try_on_clear_cache']) && $fields['ar_try_on_clear_cache']) {
+            if ($clear_cache) {
                 AR_TRY_ON_Cache::flush();
-                $fields['ar_try_on_clear_cache'] = false;
+            }
+            if ($rejected) {
+                $response['ignored'] = array_values(array_map('sanitize_key', array_slice($rejected, 0, 50)));
             }
 
             $response['data'] = $fields;
