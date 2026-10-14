@@ -562,13 +562,19 @@ class AR_TRY_ON_Compression_Routes {
 	/**
 	 * Upload compressed file
 	 *
+	 * The destination folder is never taken from the client: it is derived
+	 * server-side as uploads/atlas_ar/<post_id>/ (AR-86). The legacy
+	 * `target_path` field is still accepted from older metabox builds, but
+	 * only to read the post ID from it, and only when it resolves to that
+	 * exact folder.
+	 *
 	 * @since 1.8.0
+	 * @updated AR-86 — server-side target folder + GLB/glTF file check.
 	 * @param WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response Response object.
+	 * @return \WP_REST_Response|\WP_Error Response object.
 	 */
 	public function upload_compressed_file( $request ) {
 		$files = $request->get_file_params();
-		$target_path = $request->get_param( 'target_path' );
 
 		if ( empty( $files['file'] ) ) {
 			return new \WP_REST_Response(
@@ -581,6 +587,16 @@ class AR_TRY_ON_Compression_Routes {
 		}
 
 		$file = $files['file'];
+
+		$target_path = $this->resolve_upload_target( $request );
+		if ( is_wp_error( $target_path ) ) {
+			return $target_path;
+		}
+
+		$file_check = $this->validate_compressed_file( $file );
+		if ( is_wp_error( $file_check ) ) {
+			return $file_check;
+		}
 
 		// Use WordPress upload handling
 		if ( ! function_exists( 'wp_handle_upload' ) ) {
@@ -619,6 +635,130 @@ class AR_TRY_ON_Compression_Routes {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Work out the folder a compressed upload is written to (AR-86).
+	 *
+	 * The folder is always uploads/atlas_ar/<post_id>/, built on the server
+	 * by AR_TRY_ON_Compression::get_upload_paths(). The post ID comes from
+	 * the `post_id` field, or — for metabox builds older than AR-86 that
+	 * only send `target_path` — from the last segment of `target_path`.
+	 * Whenever `target_path` is sent it must resolve to exactly that folder,
+	 * so `../` segments, absolute paths, other drives and other plugin
+	 * folders are all rejected.
+	 *
+	 * @since 2.3.1
+	 * @param \WP_REST_Request $request Request object.
+	 * @return string|\WP_Error Absolute folder path, or WP_Error (422/403).
+	 */
+	private function resolve_upload_target( $request ) {
+		$post_id     = absint( $request->get_param( 'post_id' ) );
+		$target_path = $request->get_param( 'target_path' );
+		$has_target  = null !== $target_path && '' !== $target_path;
+
+		if ( $has_target && ! is_string( $target_path ) ) {
+			return $this->upload_target_error();
+		}
+
+		if ( ! $post_id && $has_target ) {
+			$last_segment = wp_basename( untrailingslashit( wp_normalize_path( $target_path ) ) );
+			if ( ctype_digit( $last_segment ) ) {
+				$post_id = absint( $last_segment );
+			}
+		}
+
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new \WP_Error(
+				'atlas_ar_upload_invalid_post',
+				__( 'A valid post ID is required to store the compressed model.', 'ar-vr-3d-model-try-on' ),
+				array( 'status' => 422 )
+			);
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new \WP_Error(
+				'atlas_ar_upload_forbidden',
+				__( 'You are not allowed to change the 3D model of this post.', 'ar-vr-3d-model-try-on' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$paths         = AR_TRY_ON_Compression::get_upload_paths( $post_id );
+		$post_dir      = $paths['post_dir'];
+		$real_post_dir = realpath( $post_dir );
+
+		if ( false === $real_post_dir
+			|| ! AR_TRY_ON_Helper::path_is_within_model_dir( trailingslashit( $post_dir ) . 'model.glb' )
+		) {
+			return $this->upload_target_error();
+		}
+
+		if ( $has_target ) {
+			$real_target = realpath( $target_path );
+			if ( false === $real_target
+				|| wp_normalize_path( $real_target ) !== wp_normalize_path( $real_post_dir )
+			) {
+				return $this->upload_target_error();
+			}
+		}
+
+		return $post_dir;
+	}
+
+	/**
+	 * Stable error for an upload target outside the model folder (AR-86).
+	 *
+	 * @since 2.3.1
+	 * @return \WP_Error
+	 */
+	private function upload_target_error() {
+		return new \WP_Error(
+			'atlas_ar_upload_target_invalid',
+			__( 'The upload folder must be inside the 3D model folder.', 'ar-vr-3d-model-try-on' ),
+			array( 'status' => 422 )
+		);
+	}
+
+	/**
+	 * Check the uploaded file really is a GLB / glTF model (AR-86).
+	 *
+	 * The name may not carry path separators, the extension must be
+	 * .glb or .gltf, a .glb must start with the binary `glTF` magic and a
+	 * .gltf must be JSON with an `asset` block.
+	 *
+	 * @since 2.3.1
+	 * @param array $file One entry from WP_REST_Request::get_file_params().
+	 * @return true|\WP_Error
+	 */
+	private function validate_compressed_file( $file ) {
+		$error = new \WP_Error(
+			'atlas_ar_upload_file_invalid',
+			__( 'Only GLB or glTF model files can be uploaded here.', 'ar-vr-3d-model-try-on' ),
+			array( 'status' => 422 )
+		);
+
+		$name = isset( $file['name'] ) && is_string( $file['name'] ) ? $file['name'] : '';
+		$tmp  = isset( $file['tmp_name'] ) && is_string( $file['tmp_name'] ) ? $file['tmp_name'] : '';
+
+		if ( '' === $name || preg_match( '#[/\\\\\x00]#', $name ) || '' === $tmp || ! is_file( $tmp ) ) {
+			return $error;
+		}
+
+		$extension = strtolower( pathinfo( $name, PATHINFO_EXTENSION ) );
+
+		if ( 'glb' === $extension ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads 4 bytes of a local temp upload.
+			return 'glTF' === file_get_contents( $tmp, false, null, 0, 4 ) ? true : $error;
+		}
+
+		if ( 'gltf' === $extension ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reads a local temp upload.
+			$json = json_decode( (string) file_get_contents( $tmp ), true );
+			return is_array( $json ) && isset( $json['asset'] ) ? true : $error;
+		}
+
+		return $error;
 	}
 
 	/**
@@ -685,7 +825,15 @@ class AR_TRY_ON_Compression_Routes {
 		if ( null === $this->upload_target_path ) {
 			return $dirs;
 		}
-		$custom_subdir  = str_replace( $dirs['basedir'], '', $this->upload_target_path );
+		// Defence in depth (AR-86): the target is resolved server-side by
+		// resolve_upload_target(), but never redirect outside uploads.
+		$basedir = untrailingslashit( wp_normalize_path( $dirs['basedir'] ) );
+		$target  = untrailingslashit( wp_normalize_path( $this->upload_target_path ) );
+		if ( 0 !== strpos( $target . '/', $basedir . '/' ) || false !== strpos( $target, '../' ) ) {
+			$dirs['error'] = __( 'The upload folder must be inside the 3D model folder.', 'ar-vr-3d-model-try-on' );
+			return $dirs;
+		}
+		$custom_subdir  = substr( $target, strlen( $basedir ) );
 		$dirs['subdir'] = $custom_subdir;
 		$dirs['path']   = $dirs['basedir'] . $custom_subdir;
 		$dirs['url']    = $dirs['baseurl'] . $custom_subdir;

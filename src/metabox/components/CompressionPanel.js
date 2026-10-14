@@ -416,6 +416,8 @@ export default function CompressionPanel({ postId, modelFile, onCompressionCompl
         const formData = new FormData();
         formData.append('file', blob, originalFileName.replace(/\.(glb|gltf)$/, '_compressed.$1'));
         formData.append('target_path', targetPath);
+        // AR-86: the server derives the folder from post_id; target_path is kept for older servers.
+        formData.append('post_id', postId);
 
         // Use WordPress media upload endpoint or custom endpoint
         const response = await fetch(getURL('upload-compressed'), {
