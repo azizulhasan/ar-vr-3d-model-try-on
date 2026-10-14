@@ -146,6 +146,8 @@ class AR_TRY_ON_Admin {
 			// `&welcome=1` / `&welcome=pro`; the React entry then renders
 			// the wizard instead of the dashboard tabs.
 			'wizard'                     => AR_TRY_ON_Wizard::instance()->get_client_data(),
+			// AR-84 — AtlasAR Cloud connector status (never the key; no HTTP call).
+			'cloud'                      => \AR_TRY_ON\AR_TRY_ON_Cloud::status(),
 		];
 		return $this->localize_data;
 	}
