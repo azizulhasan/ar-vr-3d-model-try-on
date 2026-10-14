@@ -249,6 +249,11 @@ Admin-only. Only after an administrator enters their own API key and clicks "Gen
 - Tripo3D — API keys: https://platform.tripo3d.ai/api-keys, Terms: https://www.tripo3d.ai/terms, Privacy: https://www.tripo3d.ai/privacy
 - Meshy AI — API keys: https://www.meshy.ai/settings/api, Terms: https://www.meshy.ai/terms-of-use, Privacy: https://www.meshy.ai/privacy-policy
 
+= AtlasAR Cloud model optimization (AtlasAiDev) =
+
+Admin-only and off until an administrator pastes an AtlasAR Cloud API key and ticks the agreement in AtlasAR → Integration. After that, a file is sent only when someone who can edit the item clicks "Optimize with AtlasAR Cloud": the item's GLB model file from the Media Library, the item title (as the model name), the real height entered, the API key, and the site address (in the request's User-Agent). The optimized GLB is downloaded back and saved as a new Media Library file. "Test connection" sends only the API key. No site visitor data is sent.
+AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
+
 = AtlasAiDev tracker (track.atlasaidev.com, icanhazip.com) =
 
 **Opt-in, off by default** (revocable anytime). When enabled, sends usage telemetry — plugin/WordPress/PHP versions, site URL/name/language, active+inactive plugin counts, admin name and email, and the site's outbound public IP (resolved via icanhazip.com) — so AtlasAiDev can prioritise improvements. No visitor or product data is sent.

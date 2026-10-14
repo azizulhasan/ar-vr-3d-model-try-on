@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import Settings from "../settings/Settings";
 import {getAPITypes} from "../../../../context/utilities";
+import CloudConnect from "./CloudConnect";
 
 export default function Integration({
                                         handleHeaderChange,
@@ -87,6 +88,9 @@ export default function Integration({
     }, [settings])
 
     return (
+        <>
+        {/* AR-84: AtlasAR Cloud connector (hidden while the site has no service URL). */}
+        <CloudConnect />
         <div style={{ padding: "20px", border: "1px solid #ccc", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)" }}  >
             <h2 style={{ color: "var(--theme-text)" }}>Integration Settings</h2>
 
@@ -241,5 +245,6 @@ export default function Integration({
                 </>
             }
         </div>
+        </>
     );
 }
