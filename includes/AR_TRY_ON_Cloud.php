@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class AR_TRY_ON_Cloud {
 
-	/** Option holding { key: encrypted, plan, credits, checked_at }. Not autoloaded. */
+	/** Option holding { key: encrypted, plan, used, limit, resets_at, checked_at }. Not autoloaded. */
 	const OPTION = 'atlas_ar_cloud';
 
 	/** Post meta holding the running / last optimize job of an item. */
@@ -153,13 +153,7 @@ class AR_TRY_ON_Cloud {
 		}
 		$nonce  = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
 		$cipher = base64_encode( $nonce . sodium_crypto_secretbox( $key, $nonce, self::box_key() ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Storing ciphertext.
-		$value  = array(
-			'key'        => $cipher,
-			'plan'       => sanitize_key( (string) ( $usage['plan'] ?? '' ) ),
-			'credits'    => absint( $usage['ai_credits'] ?? 0 ),
-			'max_models' => absint( $usage['max_models'] ?? 0 ),
-			'checked_at' => time(),
-		);
+		$value  = array_merge( array( 'key' => $cipher ), self::usage_fields( $usage ) );
 		delete_option( self::OPTION );
 		add_option( self::OPTION, $value, '', false ); // Never autoloaded.
 		return self::status();
@@ -173,7 +167,27 @@ class AR_TRY_ON_Cloud {
 	}
 
 	/**
-	 * Re-read plan / credits with the stored key.
+	 * The plan and this month's model allowance from GET /v1/usage (AR-87: the shared platform's
+	 * contract: { usage: { plan, units_used, units_limit, units_remaining, resets_at } }; a
+	 * unit is one model, units_limit null = no monthly limit).
+	 *
+	 * @param array $data Decoded response.
+	 * @return array
+	 */
+	private static function usage_fields( $data ) {
+		$u     = isset( $data['usage'] ) && is_array( $data['usage'] ) ? $data['usage'] : array();
+		$limit = $u['units_limit'] ?? null;
+		return array(
+			'plan'       => sanitize_key( (string) ( $u['plan'] ?? '' ) ),
+			'used'       => absint( $u['units_used'] ?? 0 ),
+			'limit'      => null === $limit ? null : absint( $limit ),
+			'resets_at'  => sanitize_text_field( (string) ( $u['resets_at'] ?? '' ) ),
+			'checked_at' => time(),
+		);
+	}
+
+	/**
+	 * Re-read plan and this month's usage with the stored key.
 	 *
 	 * @return array|\WP_Error
 	 */
@@ -182,12 +196,7 @@ class AR_TRY_ON_Cloud {
 		if ( is_wp_error( $usage ) ) {
 			return $usage;
 		}
-		$stored               = self::stored();
-		$stored['plan']       = sanitize_key( (string) ( $usage['plan'] ?? '' ) );
-		$stored['credits']    = absint( $usage['ai_credits'] ?? 0 );
-		$stored['max_models'] = absint( $usage['max_models'] ?? 0 );
-		$stored['checked_at'] = time();
-		update_option( self::OPTION, $stored, false );
+		update_option( self::OPTION, array_merge( self::stored(), self::usage_fields( $usage ) ), false );
 		return self::status();
 	}
 
@@ -203,8 +212,10 @@ class AR_TRY_ON_Cloud {
 			'available'  => self::is_available(),
 			'connected'  => $connected,
 			'plan'       => $connected ? (string) ( $stored['plan'] ?? '' ) : '',
-			'credits'    => $connected ? (int) ( $stored['credits'] ?? 0 ) : 0,
-			'max_models' => $connected ? (int) ( $stored['max_models'] ?? 0 ) : 0,
+			// Models this month: used / limit (limit null = no monthly limit).
+			'used'       => $connected ? (int) ( $stored['used'] ?? 0 ) : 0,
+			'limit'      => $connected && isset( $stored['limit'] ) ? (int) $stored['limit'] : null,
+			'resets_at'  => $connected ? (string) ( $stored['resets_at'] ?? '' ) : '',
 			'checked_at' => $connected ? (int) ( $stored['checked_at'] ?? 0 ) : 0,
 		);
 	}
@@ -261,7 +272,7 @@ class AR_TRY_ON_Cloud {
 			return $data;
 		}
 		$error = self::error_from( $code, $data );
-		if ( $using_stored && 'cloud_invalid_key' === $error->get_error_code() ) {
+		if ( $using_stored && 'cloud_invalid_api_key' === $error->get_error_code() ) {
 			self::disconnect(); // Revoked key: clear it so the owner sees "Connect" again.
 			$error = new \WP_Error( 'cloud_not_connected', __( 'Your AtlasAR Cloud key was revoked. Press Connect in AtlasAR → Integration to connect again.', 'ar-vr-3d-model-try-on' ), array( 'status' => 409 ) );
 		}
@@ -278,13 +289,21 @@ class AR_TRY_ON_Cloud {
 	 */
 	private static function error_from( $code, $data ) {
 		$remote   = sanitize_key( (string) ( $data['error']['code'] ?? '' ) );
+		// AR-87: the shared platform's stable error codes (API-V1.md of the service).
 		$messages = array(
-			'missing_key'    => __( 'The API key is missing.', 'ar-vr-3d-model-try-on' ),
-			'invalid_key'    => __( 'This API key is not valid or was revoked. Create a new key in your AtlasAR Cloud dashboard.', 'ar-vr-3d-model-try-on' ),
-			'rate_limited'   => __( 'Too many requests. Please wait a minute and try again.', 'ar-vr-3d-model-try-on' ),
-			'plan_limit'     => __( 'Your AtlasAR Cloud plan has reached its model limit.', 'ar-vr-3d-model-try-on' ),
-			'file_too_large' => __( 'The model is too large for AtlasAR Cloud (50 MB maximum).', 'ar-vr-3d-model-try-on' ),
-			'not_found'      => __( 'AtlasAR Cloud no longer has this model.', 'ar-vr-3d-model-try-on' ),
+			'missing_api_key'       => __( 'The API key is missing.', 'ar-vr-3d-model-try-on' ),
+			'invalid_api_key'       => __( 'This API key is not valid or was revoked. Create a new key in your AtlasAR Cloud dashboard.', 'ar-vr-3d-model-try-on' ),
+			'approval_required'     => __( 'This site is waiting for approval: the AtlasAR Cloud account owner was emailed a link to approve it.', 'ar-vr-3d-model-try-on' ),
+			'suspended'             => __( 'This site is suspended on AtlasAR Cloud. Please contact AtlasAR support.', 'ar-vr-3d-model-try-on' ),
+			'rate_limited'          => __( 'Too many requests. Please wait a minute and try again.', 'ar-vr-3d-model-try-on' ),
+			'quota_exceeded'        => __( 'This month\'s models on your AtlasAR Cloud plan are used up. They renew at the start of next month, or upgrade.', 'ar-vr-3d-model-try-on' ),
+			'feature_not_in_plan'   => __( 'Your AtlasAR Cloud plan does not include this feature.', 'ar-vr-3d-model-try-on' ),
+			'model_limit'           => __( 'Your AtlasAR Cloud plan has reached its limit of hosted models. Delete one or upgrade.', 'ar-vr-3d-model-try-on' ),
+			'too_many_in_progress'  => __( 'Several models are already being processed. Please wait for them to finish.', 'ar-vr-3d-model-try-on' ),
+			'server_busy'           => __( 'AtlasAR Cloud is busy. Please try again in a minute; nothing was charged.', 'ar-vr-3d-model-try-on' ),
+			'file_too_large'        => __( 'The model is too large for AtlasAR Cloud (50 MB maximum).', 'ar-vr-3d-model-try-on' ),
+			'generation_unavailable' => __( 'Photo to 3D is not available yet.', 'ar-vr-3d-model-try-on' ),
+			'not_found'             => __( 'AtlasAR Cloud no longer has this model.', 'ar-vr-3d-model-try-on' ),
 		);
 		$message = $messages[ $remote ] ?? sprintf(
 			/* translators: %s: error code from the service */

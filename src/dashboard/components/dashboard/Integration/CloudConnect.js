@@ -65,7 +65,12 @@ export default function CloudConnect() {
                         {__("Plan:", "ar-vr-3d-model-try-on")} <strong>{status.plan || "—"}</strong>
                     </span>
                     <span>
-                        {__("AI credits:", "ar-vr-3d-model-try-on")} <strong>{status.credits}</strong>
+                        {__("Models this month:", "ar-vr-3d-model-try-on")}{" "}
+                        <strong>
+                            {status.limit === null || status.limit === undefined
+                                ? `${status.used} (${__("no monthly limit", "ar-vr-3d-model-try-on")})`
+                                : `${status.used} / ${status.limit}`}
+                        </strong>
                     </span>
                     <button type="button" className="button" onClick={refresh} disabled={busy}>
                         {__("Test connection", "ar-vr-3d-model-try-on")}

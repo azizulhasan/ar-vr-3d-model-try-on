@@ -120,9 +120,9 @@ foreach ( array( 'not-a-key', "ar_live_' OR 1=1 --", 'ar_live_' . str_repeat( 'A
 	atlas_ok( 422 === $s && 'invalid_key_format' === $d['code'], 'malformed key refused locally: ' . substr( $bad, 0, 20 ) );
 }
 list( $s, $d ) = atlas_rest( 'POST', 'cloud/connect', array( 'api_key' => 'ar_live_' . str_repeat( 'Z', 32 ), 'accept_terms' => true ) );
-atlas_ok( 409 === $s && 'cloud_invalid_key' === $d['code'] && ! get_option( AR_TRY_ON_Cloud::OPTION ), 'well-formed but wrong key: refused by the service, nothing stored', "$s {$d['code']}" );
+atlas_ok( 409 === $s && 'cloud_invalid_api_key' === $d['code'] && ! get_option( AR_TRY_ON_Cloud::OPTION ), 'well-formed but wrong key: refused by the service, nothing stored', "$s {$d['code']}" );
 list( $s, $d, $r ) = atlas_rest( 'POST', 'cloud/connect', array( 'api_key' => $key, 'accept_terms' => true ) );
-atlas_ok( 200 === $s && true === $d['connected'] && 'free' === $d['plan'] && 3 === $d['credits'], 'valid key: connected, plan + credits shown', wp_json_encode( $d ) );
+atlas_ok( 200 === $s && true === $d['connected'] && 'free' === $d['plan'] && is_int( $d['used'] ) && $d['used'] >= 0 && 20 === $d['limit'], 'valid key: connected, plan + models this month shown (shared platform usage)', wp_json_encode( $d ) );
 atlas_ok( false === strpos( wp_json_encode( $d ), 'ar_live_' ), 'the response never contains the key' );
 global $wpdb;
 $row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value, autoload FROM {$wpdb->options} WHERE option_name = %s", AR_TRY_ON_Cloud::OPTION ) );
