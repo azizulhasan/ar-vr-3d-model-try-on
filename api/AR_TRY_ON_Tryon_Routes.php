@@ -32,6 +32,9 @@ class AR_TRY_ON_Tryon_Routes {
 		// uploads/ row, no third-party data collection from the
 		// customer's webcam frame. Privacy-by-default.
 
+		// AR-76: typed, described args (the integer type replaces the old
+		// is_numeric validate closure; the route regex already guarantees
+		// digits) and a route description for AtlasMCP.
 		register_rest_route(
 			$this->namespace,
 			'/tryon/glb-anatomy/(?P<id>\d+)',
@@ -39,9 +42,17 @@ class AR_TRY_ON_Tryon_Routes {
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'save_glb_anatomy' ),
 				'permission_callback' => array( $this, 'can_edit_post' ),
+				'description'         => __( 'Caches the geometry of an item\'s GLB model (bounding box, silhouette, glasses or hat anchor points) that the try-on computed in the browser, so later visitors load it instead of recomputing. Writes the glb_anatomy key of the item\'s ar_try_on_product_settings meta. Requires edit_post on the item.', 'ar-vr-3d-model-try-on' ),
 				'args'                => array(
-					'id' => array(
-						'validate_callback' => function( $v ) { return is_numeric( $v ); },
+					'id'      => array(
+						'type'        => 'integer',
+						'required'    => true,
+						'description' => __( 'ID of the post or product whose model anatomy is cached (from the URL).', 'ar-vr-3d-model-try-on' ),
+					),
+					'anatomy' => array(
+						'type'        => 'object',
+						'required'    => true,
+						'description' => __( 'Anatomy measured from the GLB, numeric only: {"version":1,"computed_by":"…","bbox_min":[x,y,z],"bbox_max":[x,y,z],"silhouette_w":0.0,"silhouette_h":0.0,"hat":{"crown_opening_y":0,"brim_depth_z":0,"inner_radius":0},"glasses":{"lens_center":[x,y,z],"temple_span_x":0,"bridge_z":0}}. Unknown keys are dropped.', 'ar-vr-3d-model-try-on' ),
 					),
 				),
 			)

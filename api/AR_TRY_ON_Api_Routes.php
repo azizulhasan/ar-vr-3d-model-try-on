@@ -36,6 +36,12 @@ class AR_TRY_ON_Api_Routes
     public function ATLAS_AR_register_routes()
     {
 
+        // AR-76: every endpoint carries a 'description' and fully described
+        // args so AtlasMCP (and any REST index reader) can turn the route
+        // into a self-explaining tool. WordPress ignores the extra key.
+        // Arg types add WordPress validation, so each schema mirrors what
+        // the dashboard, metabox and public viewer really send today.
+
         // register settings route — admin-only (reads & updates site options).
         register_rest_route(
             $this->namespace,
@@ -45,13 +51,33 @@ class AR_TRY_ON_Api_Routes
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'settings'),
                     'permission_callback' => array($this, 'check_admin_access'),
-                    'args' => array(),
+                    'description' => __('Reads or replaces the global AtlasAR settings (the ar_try_on_settings option: button placement, AR and QR options, viewer defaults, try-on and AI generation settings). The body field "method" selects the action: "get" returns the settings, "post" saves the JSON in "fields" and flushes the viewer cache. Administrators only (manage_options).', 'ar-vr-3d-model-try-on'),
+                    'args' => array(
+                        'method' => array(
+                            'type' => 'string',
+                            'enum' => array('get', 'post'),
+                            'description' => __('Action to perform, lowercase: "get" returns the current settings, "post" saves the settings sent in "fields".', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'fields' => array(
+                            'type' => 'string',
+                            'description' => __('Only for "post": the complete settings object as a JSON-encoded string, for example {"ar_try_on_ar_button":"activate","model_load_strategy":"interaction"}. It replaces the stored option, so send every key, not only the changed ones.', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'has_value_changed' => array(
+                            'type' => 'boolean',
+                            'description' => __('Only for "post": true when at least one value differs from the stored settings, so cached viewer data is invalidated.', 'ar-vr-3d-model-try-on'),
+                        ),
+                    ),
                 ),
             )
         );
         // register get_model_and_settings route — per-method permission
         // check (frontend read is public; admin read needs manage_options;
         // write needs edit_post on the target post).
+        //
+        // post_id / product_id use absint as sanitize_callback on purpose:
+        // the public viewer may send a non-numeric id, and today that is
+        // treated as 0 (defaults). An explicit sanitizer keeps that
+        // behaviour; WordPress' default type validation would reject it.
         register_rest_route(
             $this->namespace,
             '/get_model_and_settings',
@@ -60,7 +86,38 @@ class AR_TRY_ON_Api_Routes
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'get_model_and_settings'),
                     'permission_callback' => array($this, 'check_model_settings_access'),
-                    'args' => array(),
+                    'description' => __('Returns the merged global and per-item 3D model settings (model URLs, poster, AR placement, viewer options) of a post or product, or saves the per-item settings. The body field "method" chooses: "GET" (default) reads, "POST" saves the JSON in "fields" to the item and requires edit_post on that item. Storefront reads are public and strip admin-only values; "call_from":"admin" returns the unredacted payload and requires manage_options.', 'ar-vr-3d-model-try-on'),
+                    'args' => array(
+                        'post_id' => array(
+                            'type' => 'integer',
+                            'sanitize_callback' => 'absint',
+                            'description' => __('ID of the post or product whose model settings are read or written. For an admin read, omit it (or send 0) to receive the default item settings.', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'product_id' => array(
+                            'type' => 'integer',
+                            'sanitize_callback' => 'absint',
+                            'description' => __('Alias of post_id, used only when post_id is absent.', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'method' => array(
+                            'type' => 'string',
+                            'enum' => array('GET', 'POST'),
+                            'default' => 'GET',
+                            'description' => __('Uppercase action: "GET" reads the settings, "POST" writes them. Defaults to "GET" when omitted.', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'call_from' => array(
+                            'type' => 'string',
+                            'enum' => array('admin'),
+                            'description' => __('Send "admin" to receive the unredacted admin payload (requires manage_options). Omit it for the public storefront read, which removes API keys and other sensitive values.', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'fields' => array(
+                            'type' => 'string',
+                            'description' => __('Only for "POST": the per-item settings as a JSON-encoded string, for example {"src":"https://example.com/model.glb","ios_src":"https://example.com/model.usdz","poster":"https://example.com/poster.png","alt":"Chair","ar_placement":"floor"}. It replaces the stored ar_try_on_product_settings meta; keys starting with "ar_try_on" are dropped.', 'ar-vr-3d-model-try-on'),
+                        ),
+                        'has_value_changed' => array(
+                            'type' => 'boolean',
+                            'description' => __('true when the values differ from what is stored, so the item is marked for a cache refresh.', 'ar-vr-3d-model-try-on'),
+                        ),
+                    ),
                 ),
             )
         );
@@ -74,7 +131,14 @@ class AR_TRY_ON_Api_Routes
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'demo_preview'),
                     'permission_callback' => array($this, 'check_admin_access'),
-                    'args' => array(),
+                    'description' => __('Returns the saved global AtlasAR settings (including the demo model under ar_try_on_ar_demo) so the dashboard can build its live demo preview. Reads the ar_try_on_settings option and changes nothing. Send "method":"post" to get the data. Administrators only (manage_options).', 'ar-vr-3d-model-try-on'),
+                    'args' => array(
+                        'method' => array(
+                            'type' => 'string',
+                            'enum' => array('post'),
+                            'description' => __('Must be "post" (lowercase); any other value returns an empty response.', 'ar-vr-3d-model-try-on'),
+                        ),
+                    ),
                 ),
             )
         );
@@ -90,7 +154,14 @@ class AR_TRY_ON_Api_Routes
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'generate_3d_model'),
                     'permission_callback' => array($this, 'check_admin_access'),
-                    'args' => array(),
+                    'description' => __('Proxies a 3D model generation request to Tripo3D or Meshy AI using the API key stored in the settings: creates a text-to-model task (image-to-model with Pro), polls a task by its task_id, and finally moves the downloaded model files into the permanent uploads/atlas_ar folder. Administrators only (manage_options); it calls an external service and writes files into the uploads folder.', 'ar-vr-3d-model-try-on'),
+                    'args' => array(
+                        'data' => array(
+                            'type' => 'string',
+                            'required' => true,
+                            'description' => __('JSON-encoded request object: {"url": provider endpoint URL, "headers": {"Authorization": API key, ...}, "body": provider request body (include "task_id" to poll an existing task; for Tripo3D "type" is "text_to_model" or "image_to_model"), "temporary_model_data": {...} to move finished files to the permanent folder instead of calling the provider}.', 'ar-vr-3d-model-try-on'),
+                        ),
+                    ),
                 ),
             )
         );

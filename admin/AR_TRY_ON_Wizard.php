@@ -350,17 +350,58 @@ class AR_TRY_ON_Wizard {
 	/* ------------------------------------------------------------------ */
 
 	public function register_routes() {
+		// AR-76: named permission callback (a Closure cannot be inspected by
+		// REST consumers such as AtlasMCP) plus a description and the body
+		// fields the save() callback really reads. Objects are described in
+		// prose on purpose: nested schemas would only add validation.
 		register_rest_route(
 			'ar_try_on/v1',
 			'/wizard',
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'save' ),
-				'permission_callback' => function () {
-					return current_user_can( 'manage_options' );
-				},
+				'permission_callback' => array( $this, 'check_permission' ),
+				'description'         => __( 'Saves the answers of the AtlasAR setup wizard: merges the changed global settings into ar_try_on_settings, puts the chosen model on one item, stores the compression defaults, lets Pro save its own answers, and marks the wizard as done or skipped. Only the keys that are sent are written. Administrators only (manage_options).', 'ar-vr-3d-model-try-on' ),
+				'args'                => array(
+					'mode'        => array(
+						'type'        => 'string',
+						'enum'        => array( 'full', 'pro' ),
+						'description' => __( 'Which wizard was run: "full" (default) is the Free wizard, "pro" the Pro-only run that saves just the "pro" answers.', 'ar-vr-3d-model-try-on' ),
+					),
+					'status'      => array(
+						'type'        => 'string',
+						'enum'        => array( 'done', 'skipped' ),
+						'description' => __( '"done" (default) saves the answers and completes the wizard; "skipped" only records that the merchant skipped it.', 'ar-vr-3d-model-try-on' ),
+					),
+					'settings'    => array(
+						'type'        => 'object',
+						'description' => __( 'Changed global settings, only the keys the merchant touched. Allowed keys: ar_try_on_display_button_automatically (yes|no), ar_try_on_single_product_tabs (yes|no), ar_try_on_wc_hook_position (product_image|3d_viewer|1-7), model_load_strategy (auto|interaction), ar_try_on_ar_button (activate|deactivate), ar_try_on_enable_qr_code (yes|no), ar_try_on_interaction_prompt (auto|when-focused|none), ar_try_on_interaction_prompt_style (wiggle|basic), ar_try_on_ar_button_text, ar_try_on_ar_button_background_color and ar_try_on_ar_button_text_color (hex colors), tryon_button_label, tryon_snapshot (boolean), ar_try_on_allowed_post_types (array of post type slugs).', 'ar-vr-3d-model-try-on' ),
+					),
+					'product'     => array(
+						'type'        => 'object',
+						'description' => __( 'The item to put the first model on: {"id": post or product ID, "src": GLB URL, "ios_src": USDZ URL, "poster": image URL, "alt": text, "ar_placement": floor|wall|face-glasses|face-hat}.', 'ar-vr-3d-model-try-on' ),
+					),
+					'compression' => array(
+						'type'        => 'object',
+						'description' => __( 'Compression defaults: {"enabled": boolean, "quality": integer 10-100 (default 85)}.', 'ar-vr-3d-model-try-on' ),
+					),
+					'pro'         => array(
+						'type'        => 'object',
+						'description' => __( 'Answers of the Pro steps, saved by the Pro plugin through the atlas_ar_wizard_saved action (for example {"tryon_addon_enabled": boolean}). Ignored when Pro is inactive.', 'ar-vr-3d-model-try-on' ),
+					),
+				),
 			)
 		);
+	}
+
+	/**
+	 * Permission callback for POST /wizard (AR-76: named so REST consumers
+	 * can read the capability; same check as the former Closure).
+	 *
+	 * @return bool
+	 */
+	public function check_permission() {
+		return current_user_can( 'manage_options' );
 	}
 
 	/**
