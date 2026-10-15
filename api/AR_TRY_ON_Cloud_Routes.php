@@ -128,8 +128,9 @@ class AR_TRY_ON_Cloud_Routes {
 					'description'         => __( 'Sends the item\'s GLB (a Media Library file) to AtlasAR Cloud to be optimized and scaled to the real height. Returns the job; poll the GET route. Requires edit_post on the item and upload_files.', 'ar-vr-3d-model-try-on' ),
 					'args'                => array(
 						'post_id'   => array(
-							'type'     => 'integer',
-							'required' => true,
+							'type'        => 'integer',
+							'required'    => true,
+							'description' => __( 'ID of the item (post or product) the model belongs to. The user must be able to edit it.', 'ar-vr-3d-model-try-on' ),
 						),
 						'src'       => array(
 							'type'        => 'string',
@@ -152,8 +153,9 @@ class AR_TRY_ON_Cloud_Routes {
 					'description'         => __( 'State of the item\'s AtlasAR Cloud job. When the model is ready it is saved once as a new Media Library file and its URL is returned. Requires edit_post on the item and upload_files.', 'ar-vr-3d-model-try-on' ),
 					'args'                => array(
 						'post_id' => array(
-							'type'     => 'integer',
-							'required' => true,
+							'type'        => 'integer',
+							'required'    => true,
+							'description' => __( 'ID of the item (post or product) the model belongs to. The user must be able to edit it.', 'ar-vr-3d-model-try-on' ),
 						),
 					),
 				),
@@ -176,8 +178,9 @@ class AR_TRY_ON_Cloud_Routes {
 				'description'         => __( 'Sends a product photo (a Media Library image) to AtlasAR Cloud to make a 3D model at the real height. Premium plan; uses 10 models. Poll GET /cloud/optimize/{post_id}. Requires edit_post on the item and upload_files.', 'ar-vr-3d-model-try-on' ),
 				'args'                => array(
 					'post_id'   => array(
-						'type'     => 'integer',
-						'required' => true,
+						'type'        => 'integer',
+						'required'    => true,
+						'description' => __( 'ID of the item (post or product) the model belongs to. The user must be able to edit it.', 'ar-vr-3d-model-try-on' ),
 					),
 					'image_id'  => array(
 						'type'        => 'integer',
