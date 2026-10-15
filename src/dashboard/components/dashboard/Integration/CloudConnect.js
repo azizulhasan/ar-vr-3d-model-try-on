@@ -9,8 +9,10 @@ import { cloudRequest, initialCloudStatus } from "../../../../context/cloud";
  * Three states: sign up with an email (or paste an existing key), waiting for the account
  * owner's approval, connected. Saves through its own routes, not the dashboard Save bar: the key
  * is made or checked by the service, stored encrypted on the server and never sent back.
+ *
+ * AR-105: `embedded` (the setup wizard's step) leaves out the card's own heading and margin.
  */
-export default function CloudConnect() {
+export default function CloudConnect({ embedded = false }) {
     const [status, setStatus] = useState(initialCloudStatus());
     const [email, setEmail] = useState(window?.ar_try_on?.admin_email || "");
     const [apiKey, setApiKey] = useState("");
@@ -55,7 +57,7 @@ export default function CloudConnect() {
         run(() => cloudRequest("DELETE", "cloud/connect"), __("AtlasAR Cloud disconnected.", "ar-vr-3d-model-try-on"));
     };
 
-    const card = { padding: "24px 28px", border: "1px solid #c3c4c7", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "14px" };
+    const card = { padding: "24px 28px", border: "1px solid #c3c4c7", backgroundColor: "var(--theme-bg)", color: "var(--theme-text)", marginBottom: embedded ? 0 : "20px", display: "flex", flexDirection: "column", gap: "14px" };
     const field = { width: "100%", maxWidth: "460px", padding: "8px 10px", fontSize: "14px" };
     const percent = status.limit ? Math.min(100, Math.round((status.used / status.limit) * 100)) : 0;
     const planLabel = status.plan === "premium" ? __("Premium", "ar-vr-3d-model-try-on") : __("Free", "ar-vr-3d-model-try-on");
@@ -70,7 +72,7 @@ export default function CloudConnect() {
     return (
         <div style={card} className="atlas-ar-cloud-connect">
             <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                <h2 style={{ color: "var(--theme-text)", margin: 0 }}>{__("AtlasAR Cloud", "ar-vr-3d-model-try-on")}</h2>
+                {!embedded && <h2 style={{ color: "var(--theme-text)", margin: 0 }}>{__("AtlasAR Cloud", "ar-vr-3d-model-try-on")}</h2>}
                 {!status.connected && !status.pending && (
                     <span style={{ fontSize: "12px", background: "#dcfce7", color: "#14532d", padding: "2px 8px", borderRadius: "10px" }}>
                         {__("Free plan: 20 models a month", "ar-vr-3d-model-try-on")}
