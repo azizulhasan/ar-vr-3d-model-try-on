@@ -15,6 +15,7 @@ import StepPreview from "./steps/StepPreview";
 import StepLook from "./steps/StepLook";
 import StepCompression from "./steps/StepCompression";
 import StepTryOn from "./steps/StepTryOn";
+import StepCloud from "./steps/StepCloud";
 import "../theme.css";
 
 // `ar_try_on_settings` keys the wizard edits (the save route only accepts these).
@@ -140,6 +141,10 @@ export default function Wizard() {
       { id: "preview", label: __("Preview & AR", "ar-vr-3d-model-try-on"), intro: __("This is what shoppers get.", "ar-vr-3d-model-try-on"), Component: StepPreview },
       { id: "look", label: __("Loading & AR button", "ar-vr-3d-model-try-on"), intro: __("Page speed and the AR button. Each item can still override these.", "ar-vr-3d-model-try-on"), Component: StepLook },
       { id: "compression", label: __("Compression", "ar-vr-3d-model-try-on"), intro: __("Smaller model files load faster for shoppers.", "ar-vr-3d-model-try-on"), Component: StepCompression },
+      // AR-105: only when this site has an AtlasAR Cloud address (otherwise the card has nothing to show).
+      ...(ar_try_on.cloud && ar_try_on.cloud.available
+        ? [{ id: "cloud", label: __("AtlasAR Cloud (optional)", "ar-vr-3d-model-try-on"), intro: __("Connect this site to make lighter, true-size models and 3D models from photos.", "ar-vr-3d-model-try-on"), Component: StepCloud }]
+        : []),
       { id: "tryon", label: __("Virtual Try-On", "ar-vr-3d-model-try-on"), intro: __("Optional. For stores that sell glasses or hats.", "ar-vr-3d-model-try-on"), Component: StepTryOn },
     ];
 

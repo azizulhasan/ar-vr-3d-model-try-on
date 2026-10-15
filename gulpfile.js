@@ -55,6 +55,7 @@ const productionSrc = [
 	'!admin/js/ar-compression-client.js',
 	// Internal docs that should never reach customer installs.
 	'!plan/**',
+	'!tests/**', // AR-84: dev-only test scripts (wp eval-file), never shipped.
 	// Freemius SDK is no longer used by the free plugin (AR-61 §1.1
 	// removed all license logic from Free; the Pro plugin keeps its
 	// own copy of the SDK). The vendor directory may still exist in

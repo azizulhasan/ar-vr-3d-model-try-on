@@ -700,9 +700,10 @@ export const setModelAttributes = (modelViewer, model_settings) => {
         modelViewer.removeAttribute("xr-environment");
     }
     if (model_settings.ar_try_on_ar_button === "activate") {
-        modelViewer.innerHTML = `<button> ${
-            model_settings.ar_try_on_ar_button_text || "Activate AR"
-        } </button>`;
+        // AR-85: the label is shop data — insert it as text, never as HTML (DOM XSS).
+        const arButton = document.createElement("button");
+        arButton.textContent = ` ${model_settings.ar_try_on_ar_button_text || "Activate AR"} `;
+        modelViewer.replaceChildren(arButton);
     }
 
     //Dimension
@@ -1356,3 +1357,9 @@ export const SpinnerModal = () => {
         />
     </svg>
 };
+
+/**
+ * AR-98: true for the built-in demo files new items start with (model and poster from
+ * modelviewer.dev), so tools can tell them apart from the merchant's own files.
+ */
+export const isDemoAsset = (url) => /^https:\/\/modelviewer\.dev\/shared-assets\//.test(String(url || ""));
