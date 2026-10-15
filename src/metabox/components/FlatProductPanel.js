@@ -2,6 +2,7 @@ import { useState } from "react";
 import { __, sprintf } from "@wordpress/i18n";
 import notify from "../../context/Notify";
 import { formatBytes } from "../../context/cloud";
+import { isDemoAsset } from "../../context/utilities";
 
 /**
  * AR-98: "Flat product" tab — wall art, posters, canvases, framed prints, rugs and tiles.
@@ -128,7 +129,7 @@ export default function FlatProductPanel({ postId, productModel, setProductModel
                 ios_src: usdzMedia.source_url,
                 ar_placement: placement,
                 // The photo is the natural poster; keep one the merchant chose (not the built-in demo).
-                poster: !productModel.poster || /modelviewer\.dev\/shared-assets\//.test(productModel.poster) ? image.url : productModel.poster,
+                poster: !productModel.poster || isDemoAsset(productModel.poster) ? image.url : productModel.poster,
             };
             setProductModel(next);
             window.wp?.hooks?.doAction("atlas_ar_preview_data", next);

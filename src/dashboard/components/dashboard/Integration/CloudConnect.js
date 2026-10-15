@@ -63,7 +63,7 @@ export default function CloudConnect() {
     const agreement = (
         <label style={{ display: "flex", gap: "8px", alignItems: "flex-start", fontSize: "13px", lineHeight: 1.5, maxWidth: "620px" }}>
             <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} style={{ marginTop: "3px" }} />
-            <span>{__("I agree that model files are sent to AtlasAR Cloud (AtlasAiDev) when I click Optimize, and I accept its terms of service and privacy policy.", "ar-vr-3d-model-try-on")}</span>
+            <span>{__("I agree that model files and product photos are sent to AtlasAR Cloud (AtlasAiDev) only when I click Optimize or Make 3D model, and I accept its terms of service and privacy policy.", "ar-vr-3d-model-try-on")}</span>
         </label>
     );
 
@@ -78,7 +78,7 @@ export default function CloudConnect() {
                 )}
             </div>
             <p style={{ margin: 0, lineHeight: 1.55 }}>
-                {__("Optimize 3D models at their real size and host them for fast pages and AR. Your model file is sent to AtlasAR Cloud only when you click “Optimize with AtlasAR Cloud” on an item.", "ar-vr-3d-model-try-on")}
+                {__("Optimize 3D models at their real size and host them for fast pages and AR. A model file or product photo is sent to AtlasAR Cloud only when you click “Optimize with AtlasAR Cloud” or “Make 3D model” (Photo to 3D) on an item.", "ar-vr-3d-model-try-on")}
             </p>
 
             {!status.connected && !status.pending && !useKey && (

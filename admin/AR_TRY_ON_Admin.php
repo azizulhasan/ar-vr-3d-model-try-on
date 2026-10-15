@@ -340,10 +340,12 @@ class AR_TRY_ON_Admin {
 			'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
 			'dracoDecoderLocation: %s,' .
 			'ktx2TranscoderLocation: %s,' .
+			'meshoptDecoderLocation: %s,' .
 			'lottieLoaderLocation: %s' .
 			'});',
 			wp_json_encode( $decoder_base . 'draco/' ),
 			wp_json_encode( $decoder_base . 'basis/' ),
+			wp_json_encode( $decoder_base . 'meshopt/meshopt_decoder.js' ), // AR-97: meshopt-compressed GLBs.
 			wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
 		);
 		wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );

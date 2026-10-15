@@ -159,6 +159,42 @@ class AR_TRY_ON_Cloud_Routes {
 				),
 			)
 		);
+		$this->register_generate_route();
+	}
+
+	/**
+	 * AR-97: photo to 3D. Same job as optimize (one per item; poll GET /cloud/optimize/{post_id}).
+	 */
+	private function register_generate_route() {
+		register_rest_route(
+			$this->namespace,
+			'/cloud/generate/(?P<post_id>\d+)',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'start_generate' ),
+				'permission_callback' => array( $this, 'can_optimize' ),
+				'description'         => __( 'Sends a product photo (a Media Library image) to AtlasAR Cloud to make a 3D model at the real height. Premium plan; uses 10 models. Poll GET /cloud/optimize/{post_id}. Requires edit_post on the item and upload_files.', 'ar-vr-3d-model-try-on' ),
+				'args'                => array(
+					'post_id'   => array(
+						'type'     => 'integer',
+						'required' => true,
+					),
+					'image_id'  => array(
+						'type'        => 'integer',
+						'required'    => true,
+						'minimum'     => 1,
+						'description' => __( 'Media Library ID of the product photo (JPEG, PNG or WebP).', 'ar-vr-3d-model-try-on' ),
+					),
+					'height_cm' => array(
+						'type'        => 'number',
+						'required'    => true,
+						'minimum'     => 0.1,
+						'maximum'     => 1000,
+						'description' => __( 'Real height of the product in centimetres.', 'ar-vr-3d-model-try-on' ),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -345,6 +381,7 @@ class AR_TRY_ON_Cloud_Routes {
 	private function job_json( $job ) {
 		$out = array(
 			'status'     => (string) ( $job['status'] ?? '' ),
+			'kind'       => 'generate' === ( $job['kind'] ?? '' ) ? 'generate' : 'optimize',
 			'height_cm'  => (float) ( $job['height_cm'] ?? 0 ),
 			'started_at' => (int) ( $job['started_at'] ?? 0 ),
 			'error'      => (string) ( $job['error'] ?? '' ),
@@ -370,9 +407,9 @@ class AR_TRY_ON_Cloud_Routes {
 		if ( is_wp_error( $limited ) ) {
 			return $limited;
 		}
-		$current = get_post_meta( $post_id, AR_TRY_ON_Cloud::JOB_META, true );
-		if ( is_array( $current ) && in_array( $current['status'] ?? '', array( 'queued', 'processing' ), true ) && ( time() - (int) ( $current['started_at'] ?? 0 ) ) < 15 * MINUTE_IN_SECONDS ) {
-			return new \WP_Error( 'job_running', __( 'This model is already being optimized.', 'ar-vr-3d-model-try-on' ), array( 'status' => 409 ) );
+		$current = $this->idle_job( $post_id );
+		if ( is_wp_error( $current ) ) {
+			return $current;
 		}
 
 		$source = AR_TRY_ON_Cloud::attachment_from_url( (string) $request['src'] );
@@ -386,6 +423,65 @@ class AR_TRY_ON_Cloud_Routes {
 				'height_cm' => (float) $request['height_cm'],
 			)
 		);
+		return $this->begin_job( $request, $post_id, $current, $source, $model, 'optimize' );
+	}
+
+	/**
+	 * POST /cloud/generate/{post_id} (AR-97).
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function start_generate( $request ) {
+		$post_id = absint( $request['post_id'] );
+		$limited = $this->rate_limit( 'cloud_generate', 20, HOUR_IN_SECONDS );
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+		$current = $this->idle_job( $post_id );
+		if ( is_wp_error( $current ) ) {
+			return $current;
+		}
+		$source = absint( $request['image_id'] );
+		if ( ! current_user_can( 'edit_post', $source ) ) {
+			return new \WP_Error( 'invalid_source', __( 'Choose a JPEG, PNG or WebP photo from the Media Library.', 'ar-vr-3d-model-try-on' ), array( 'status' => 403 ) );
+		}
+		$model = AR_TRY_ON_Cloud::start_generate(
+			$source,
+			array(
+				'name'      => get_the_title( $post_id ),
+				'height_cm' => (float) $request['height_cm'],
+			)
+		);
+		return $this->begin_job( $request, $post_id, $current, $source, $model, 'generate' );
+	}
+
+	/**
+	 * The item's last job, or an error while one is still running (one job per item at a time).
+	 *
+	 * @param int $post_id Item.
+	 * @return mixed|\WP_Error
+	 */
+	private function idle_job( $post_id ) {
+		$current = get_post_meta( $post_id, AR_TRY_ON_Cloud::JOB_META, true );
+		if ( is_array( $current ) && in_array( $current['status'] ?? '', array( 'queued', 'processing' ), true ) && ( time() - (int) ( $current['started_at'] ?? 0 ) ) < 15 * MINUTE_IN_SECONDS ) {
+			return new \WP_Error( 'job_running', __( 'AtlasAR Cloud is still working on this item. Wait for it to finish.', 'ar-vr-3d-model-try-on' ), array( 'status' => 409 ) );
+		}
+		return $current;
+	}
+
+	/**
+	 * Store the job the service accepted and answer with its state.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @param int              $post_id Item.
+	 * @param mixed            $current Previous job.
+	 * @param int              $source  Source attachment (GLB or photo).
+	 * @param array|\WP_Error  $model   Service answer.
+	 * @param string           $kind    optimize | generate.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	private function begin_job( $request, $post_id, $current, $source, $model, $kind ) {
 		if ( is_wp_error( $model ) ) {
 			return $model;
 		}
@@ -400,6 +496,7 @@ class AR_TRY_ON_Cloud_Routes {
 		}
 		$job = array(
 			'model_id'          => $model_id,
+			'kind'              => $kind,
 			'source_attachment' => $source,
 			'source_size'       => (int) filesize( (string) get_attached_file( $source ) ),
 			'height_cm'         => (float) $request['height_cm'],

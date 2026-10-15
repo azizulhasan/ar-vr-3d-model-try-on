@@ -1357,3 +1357,9 @@ export const SpinnerModal = () => {
         />
     </svg>
 };
+
+/**
+ * AR-98: true for the built-in demo files new items start with (model and poster from
+ * modelviewer.dev), so tools can tell them apart from the merchant's own files.
+ */
+export const isDemoAsset = (url) => /^https:\/\/modelviewer\.dev\/shared-assets\//.test(String(url || ""));

@@ -50,6 +50,9 @@ class AR_TRY_ON_Cloud {
 	/** Largest GLB we send or accept back (the service's own upload cap). */
 	const MAX_BYTES = 50 * 1024 * 1024;
 
+	/** AR-97: largest product photo the service accepts for photo to 3D. */
+	const MAX_IMAGE_BYTES = 25 * 1024 * 1024;
+
 	/**
 	 * Production service URL. Empty until the production domain is live: the connector stays hidden.
 	 * Developers point a site at another service with define( 'ATLAS_AR_SERVICE_URL', '…' ).
@@ -408,11 +411,12 @@ class AR_TRY_ON_Cloud {
 		$remote = (string) ( $model['status'] ?? '' );
 		if ( 'failed' === $remote ) {
 			$job['status'] = 'failed';
-			$job['error']  = sprintf(
+			$code          = sanitize_key( (string) ( $model['error']['code'] ?? 'unknown' ) );
+			$job['error']  = 'generate' === ( $job['kind'] ?? '' )
 				/* translators: %s: error code from the service */
-				__( 'AtlasAR Cloud could not optimize this model (%s).', 'ar-vr-3d-model-try-on' ),
-				sanitize_key( (string) ( $model['error']['code'] ?? 'unknown' ) )
-			);
+				? sprintf( __( 'AtlasAR Cloud could not make a 3D model from this photo (%s). Try a sharper photo of the product alone on a plain background.', 'ar-vr-3d-model-try-on' ), $code )
+				/* translators: %s: error code from the service */
+				: sprintf( __( 'AtlasAR Cloud could not optimize this model (%s).', 'ar-vr-3d-model-try-on' ), $code );
 			update_post_meta( $post_id, self::JOB_META, $job );
 			return $job;
 		}
@@ -432,7 +436,7 @@ class AR_TRY_ON_Cloud {
 			if ( is_array( $fresh ) && 'ready' === ( $fresh['status'] ?? '' ) ) {
 				return $fresh;
 			}
-			$id = self::import_result( (string) $model['files']['glb'], (int) $job['source_attachment'], $post_id, $job['model_id'] );
+			$id = self::import_result( (string) $model['files']['glb'], (int) $job['source_attachment'], $post_id, $job['model_id'], 'generate' === ( $job['kind'] ?? '' ) ? '3d' : 'optimized' );
 		} finally {
 			delete_option( $lock );
 		}
@@ -712,6 +716,75 @@ class AR_TRY_ON_Cloud {
 	}
 
 	/**
+	 * AR-97: absolute path and type of a local product photo (JPEG / PNG / WebP inside uploads).
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return array|\WP_Error { path, type }
+	 */
+	public static function local_image( $attachment_id ) {
+		$attachment_id = absint( $attachment_id );
+		$invalid       = new \WP_Error( 'invalid_source', __( 'Choose a JPEG, PNG or WebP photo from the Media Library.', 'ar-vr-3d-model-try-on' ), array( 'status' => 422 ) );
+		if ( ! $attachment_id || 'attachment' !== get_post_type( $attachment_id ) ) {
+			return $invalid;
+		}
+		$file    = get_attached_file( $attachment_id );
+		$uploads = wp_get_upload_dir();
+		$real    = $file ? realpath( $file ) : false;
+		$base    = realpath( $uploads['basedir'] );
+		if ( ! $real || ! $base || 0 !== strpos( wp_normalize_path( $real ), trailingslashit( wp_normalize_path( $base ) ) ) ) {
+			return $invalid;
+		}
+		// The real content type, not the name: a renamed file is refused.
+		$type = wp_get_image_mime( $real );
+		if ( ! in_array( $type, array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+			return $invalid;
+		}
+		$size = filesize( $real );
+		if ( ! $size || $size > self::MAX_IMAGE_BYTES ) {
+			return new \WP_Error( 'file_too_large', __( 'The photo is too large for AtlasAR Cloud (25 MB maximum).', 'ar-vr-3d-model-try-on' ), array( 'status' => 413 ) );
+		}
+		return array( 'path' => $real, 'type' => $type );
+	}
+
+	/**
+	 * AR-97: photo to 3D — send a product photo to the service (Premium plan; 10 models).
+	 *
+	 * @param int   $attachment_id Photo attachment.
+	 * @param array $meta          { name, height_cm }.
+	 * @return array|\WP_Error Cloud model.
+	 */
+	public static function start_generate( $attachment_id, $meta ) {
+		$image = self::local_image( $attachment_id );
+		if ( is_wp_error( $image ) ) {
+			return $image;
+		}
+		$name   = sanitize_text_field( (string) ( $meta['name'] ?? '' ) );
+		$name   = '' !== $name ? mb_substr( $name, 0, 120 ) : 'Model ' . $attachment_id;
+		$height = (float) ( $meta['height_cm'] ?? 0 );
+		if ( ! ( $height > 0 && $height <= 1000 ) ) {
+			return new \WP_Error( 'invalid_height', __( 'Enter the real height of the product (0.1–1000 cm).', 'ar-vr-3d-model-try-on' ), array( 'status' => 422 ) );
+		}
+		$body = file_get_contents( $image['path'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file inside uploads, validated above.
+		if ( false === $body ) {
+			return new \WP_Error( 'invalid_source', __( 'The photo could not be read.', 'ar-vr-3d-model-try-on' ), array( 'status' => 422 ) );
+		}
+		$query = http_build_query( array( 'name' => $name, 'height_cm' => (string) round( $height, 2 ) ), '', '&', PHP_QUERY_RFC3986 );
+		return self::request(
+			'POST',
+			'/v1/models?' . $query,
+			array(
+				'body'    => $body,
+				'timeout' => 90,
+				'headers' => array(
+					'Content-Type'    => $image['type'],
+					// A retried click never spends 10 models twice.
+					'Idempotency-Key' => 'wpg-' . substr( hash( 'sha256', home_url() . '|' . $attachment_id . '|' . md5( $body ) . '|' . $height ), 0, 40 ),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Origins the finished files may be downloaded from (the API origin, plus optional CDN).
 	 *
 	 * @return string[]
@@ -749,9 +822,10 @@ class AR_TRY_ON_Cloud {
 	 * @param int    $source_id Source attachment.
 	 * @param int    $post_id   Item the model belongs to (attachment parent).
 	 * @param string $model_id  Cloud model id.
+	 * @param string $suffix    File name suffix ('optimized', or '3d' for photo to 3D).
 	 * @return int|\WP_Error New attachment ID.
 	 */
-	public static function import_result( $url, $source_id, $post_id, $model_id ) {
+	public static function import_result( $url, $source_id, $post_id, $model_id, $suffix = 'optimized' ) {
 		$origin = self::origin( $url );
 		if ( '' === $origin || ! in_array( $origin, self::allowed_file_origins(), true ) ) {
 			return new \WP_Error( 'untrusted_file_url', __( 'AtlasAR Cloud returned a file from an unexpected address; it was not downloaded.', 'ar-vr-3d-model-try-on' ), array( 'status' => 502 ) );
@@ -803,7 +877,7 @@ class AR_TRY_ON_Cloud {
 
 		$source_name = pathinfo( (string) get_attached_file( $source_id ), PATHINFO_FILENAME );
 		$file        = array(
-			'name'     => sanitize_file_name( ( '' !== $source_name ? $source_name : 'model' ) . '-optimized-' . wp_generate_password( 6, false ) . '.glb' ),
+			'name'     => sanitize_file_name( ( '' !== $source_name ? $source_name : 'model' ) . '-' . sanitize_key( $suffix ) . '-' . wp_generate_password( 6, false ) . '.glb' ),
 			'tmp_name' => $tmp,
 		);
 		$id = media_handle_sideload( $file, absint( $post_id ), null, array( 'post_mime_type' => 'model/gltf-binary' ) );

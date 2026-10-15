@@ -64,6 +64,8 @@
         window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {
             dracoDecoderLocation: base + 'draco/',
             ktx2TranscoderLocation: base + 'basis/',
+            // AR-97: meshopt-compressed GLBs (gltfpack, AtlasAR Cloud). model-viewer has no default.
+            meshoptDecoderLocation: base + 'meshopt/meshopt_decoder.js',
             lottieLoaderLocation: base + 'lottie/LottieLoader.js'
         });
     }

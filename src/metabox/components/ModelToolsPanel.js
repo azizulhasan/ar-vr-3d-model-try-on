@@ -4,23 +4,29 @@ import notify from "../../context/Notify";
 import CompressionPanel from "./CompressionPanel.js";
 import CloudOptimizePanel from "./CloudOptimizePanel.js";
 import FlatProductPanel from "./FlatProductPanel.js";
+import PhotoTo3DPanel from "./PhotoTo3DPanel.js";
+import { initialCloudStatus } from "../../context/cloud";
+import { isDemoAsset } from "../../context/utilities";
 
 /**
  * AR-98: one "3D model tools" panel with tabs (approved mockup, Metabox artboard).
  *
  * Optimize GLB — the existing compression panel + AtlasAR Cloud optimize (needs a model).
  * Flat product — the in-browser generator (always available, no model or account needed).
- * Extra tabs (e.g. Photo to 3D) are added through the `atlas_ar_model_tools_tabs` filter.
+ * Photo to 3D — AtlasAR Cloud (AR-97); only when the site has a service address.
+ * Extra tabs are added through the `atlas_ar_model_tools_tabs` filter.
  */
 export default function ModelToolsPanel({ postId, productModel, setProductModel }) {
     const hasModel = !!productModel.src;
-    const [tab, setTab] = useState(hasModel ? "optimize" : "flat");
+    // New items start with the built-in demo model: that is not the merchant's own model yet.
+    const ownModel = hasModel && !isDemoAsset(productModel.src);
+    const [tab, setTab] = useState(ownModel ? "optimize" : "flat");
     const [picked, setPicked] = useState(false);
     // Saved settings arrive after the first render: open Optimize once a model is there, unless the
     // merchant has already used the panel (e.g. just made a model in the Flat tab: stay there).
     useEffect(() => {
-        if (hasModel && !picked) setTab("optimize");
-    }, [hasModel]);
+        if (ownModel && !picked) setTab("optimize");
+    }, [ownModel]);
 
     const baseTabs = [
         {
@@ -48,6 +54,13 @@ export default function ModelToolsPanel({ postId, productModel, setProductModel 
             label: __("Flat product (free)", "ar-vr-3d-model-try-on"),
             render: () => <FlatProductPanel postId={postId} productModel={productModel} setProductModel={setProductModel} />,
         },
+        ...(initialCloudStatus().available
+            ? [{
+                id: "photo",
+                label: __("Photo to 3D", "ar-vr-3d-model-try-on"),
+                render: () => <PhotoTo3DPanel postId={postId} productModel={productModel} setProductModel={setProductModel} />,
+            }]
+            : []),
     ];
     const filtered = window.wp?.hooks ? window.wp.hooks.applyFilters("atlas_ar_model_tools_tabs", baseTabs, { postId, productModel, setProductModel }) : baseTabs;
     const tabs = Array.isArray(filtered) ? filtered.filter((t) => t && t.id && typeof t.render === "function") : baseTabs;

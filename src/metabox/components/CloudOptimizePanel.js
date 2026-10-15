@@ -35,7 +35,7 @@ export default function CloudOptimizePanel({ postId, productModel, setProductMod
         if (!cloud.available || !cloud.connected || !postId) return;
         cloudRequest("GET", `cloud/optimize/${postId}`)
             .then((data) => {
-                if (data.status === "processing") {
+                if (data.status === "processing" && data.kind !== "generate") { // AR-97: photo jobs belong to the Photo to 3D tab
                     setJob(data);
                     startedAt.current = Date.now();
                     schedule();
