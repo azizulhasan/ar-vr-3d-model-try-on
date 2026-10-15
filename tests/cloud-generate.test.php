@@ -125,7 +125,14 @@ if ( ! empty( $job['attachment_id'] ) ) {
 	atlas_g_ok( 'glTF' === file_get_contents( $file, false, null, 0, 4 ), 'the saved file is a real GLB' );
 	atlas_g_ok( false !== strpos( basename( $file ), 'ar97-vase-3d-' ), 'named after the photo (…-3d-…glb)', basename( $file ) );
 	atlas_g_ok( (int) wp_get_post_parent_id( $job['attachment_id'] ) === $post, 'attached to the item' );
-	list( , $d ) = atlas_g_rest( 'POST', 'cloud/recheck' );
+	// The service bills finished models on a schedule (every 2 s), so allow it a few seconds.
+	for ( $w = 0; $w < 8; $w++ ) {
+		list( , $d ) = atlas_g_rest( 'POST', 'cloud/recheck' );
+		if ( (int) $d['used'] === $used_before + 10 ) {
+			break;
+		}
+		sleep( 1 );
+	}
 	atlas_g_ok( (int) $d['used'] === $used_before + 10, 'billed 10 models once it was ready', $used_before . ' → ' . $d['used'] );
 
 	// The same photo and height again: the service answers with the same model, nothing new.
