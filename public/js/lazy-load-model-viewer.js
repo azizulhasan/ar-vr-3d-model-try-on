@@ -124,9 +124,23 @@
         return _loadingPromise;
     }
 
+    // AR-114: with the AtlasAR viewer SDK on the page, it loads model-viewer (3.5, its own decoders)
+    // and decides per viewer when (scroll into view, or after a click). The old loader below stays
+    // as the fallback for a page where the SDK file did not load.
+    function sdk() {
+        return window.AtlasARViewer && typeof window.AtlasARViewer.loadModelViewer === 'function' ? window.AtlasARViewer : null;
+    }
+    function loadViaSdk() {
+        return sdk().loadModelViewer().then(function () {
+            window.atlasARModelViewerLoaded = true; // the SDK fires atlasar:viewer-ready itself
+        });
+    }
+
     // Expose for every trigger script (WC 3D tab, image⇄3D toggle, AR button,
     // shortcode reveal) and for Pro.
-    window.atlasARLoadModelViewer = loadModelViewerScript;
+    window.atlasARLoadModelViewer = function () {
+        return sdk() ? loadViaSdk() : loadModelViewerScript();
+    };
 
     /* ------------------------------------------------------------------ *
      *  AUTO strategy — historical IntersectionObserver behavior, intact.  *
@@ -367,8 +381,8 @@
 
     /* ------------------------------------------------------------------ */
     function init() {
-        if (window.atlasARModelViewerLoaded) {
-            return;
+        if (window.atlasARModelViewerLoaded || sdk()) {
+            return; // AR-114: the SDK handles lazy loading itself
         }
         if (STRATEGY === 'interaction') {
             initInteraction();

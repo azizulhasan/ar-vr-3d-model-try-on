@@ -761,6 +761,16 @@ function setupVariationHandling(modelViewer, model_settings) {
  */
 export const switchModelVariant = (modelViewer, variantName, modelSessionData = {}) => {
     if (!modelViewer || !variantName) return false;
+
+    // AR-114: a viewer drawn by the AtlasAR viewer SDK switches through its variants module
+    // (atlasar-pro.js, shipped by AtlasAR Pro). As before, return true so WooCommerce does not swap
+    // the 3D view for the product image, even for an option without a 3D variant.
+    const host = modelViewer.closest && modelViewer.closest('atlasar-viewer');
+    if (host && typeof host.setVariant === 'function') {
+        host.setVariant(variantName);
+        preventWooCommerceImageSwap(modelViewer);
+        return true;
+    }
     console.log('switchModelVariant called with:', variantName);
 
     try {

@@ -213,6 +213,17 @@
 		}
 
 		function openFullscreen() {
+			// AR-114: with the AtlasAR viewer SDK, a fresh viewer (copying a drawn viewer's HTML would
+			// copy its inner parts, not the viewer). Without the SDK: the old copy.
+			if ( window.AtlasARViewer && window.AtlasAR ) {
+				var sdkAtlasAR = new window.AtlasAR();
+				var fsId = 'atlas_ar_fullscreen_model_viewer_' + atlas_ar_product_id;
+				fullscreen3DContainer.innerHTML = sdkAtlasAR.getModelSkeleton( fsId );
+				fullscreenOverlay.style.display = 'flex';
+				document.body.style.overflow = 'hidden';
+				sdkAtlasAR.fetchModelData( atlas_ar_product_id, '#' + fsId, 'normal' );
+				return;
+			}
 			// Clone the 3D viewer content into fullscreen container
 			fullscreen3DContainer.innerHTML = viewer3DContainer.innerHTML;
 			fullscreenOverlay.style.display = 'flex';

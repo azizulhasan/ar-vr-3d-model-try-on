@@ -99,6 +99,11 @@ class AR_TRY_ON_Public {
 			if ( 'ar-try-on-google-model-viewer' === $handle || 'AtlasAR' === $handle ) {
 				$tag = str_replace( ' src=', ' type="module" src=', $tag );
 			}
+			// AR-114: caching / optimisation plugins must not combine or delay the viewer SDK (it
+			// loads its own files next to itself), same as the model-viewer script before.
+			if ( 'atlasar-sdk' === $handle ) {
+				$tag = str_replace( ' src=', ' data-no-optimize="1" data-no-minify="1" data-cfasync="false" data-wpmeteor-nooptimize="true" src=', $tag );
+			}
 
 			return $tag;
 		}, 10, 2 );
@@ -281,7 +286,17 @@ class AR_TRY_ON_Public {
 		$public_js_ver  = file_exists( $public_js_path ) ? (string) filemtime( $public_js_path ) : $this->version;
 		$lazy_js_ver    = file_exists( $lazy_js_path ) ? (string) filemtime( $lazy_js_path ) : $this->version;
 
-		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', array(), $atlasar_ver, false );
+		// AR-114: the AtlasAR viewer SDK draws every viewer (public/js/atlasar-sdk/, the same code as
+		// github.com/atlasaidev/atlasar-viewer, GPL-2.0-or-later). Free features only; AtlasAR Pro adds
+		// its Premium modules (atlasar-pro.js). AtlasAR.dist.js falls back to the old drawing when
+		// this file is missing.
+		$sdk_path = ATLAS_AR_PLUGIN_PATH . 'public/js/atlasar-sdk/atlasar.js';
+		$deps     = array();
+		if ( file_exists( $sdk_path ) ) {
+			wp_enqueue_script( 'atlasar-sdk', ATLAS_AR_PLUGIN_URL . 'public/js/atlasar-sdk/atlasar.js', array(), (string) filemtime( $sdk_path ), false );
+			$deps[] = 'atlasar-sdk';
+		}
+		wp_enqueue_script( 'AtlasAR', ATLAS_AR_PLUGIN_URL . 'public/js/AtlasAR.dist.js', $deps, $atlasar_ver, false );
 		wp_enqueue_script( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/js/ar-vr-3d-model-try-on-public-dist.js', array(), $public_js_ver, true );
 		wp_localize_script( $this->plugin_name, 'ar_try_on', $this->get_localize_data() );
 
@@ -346,6 +361,7 @@ class AR_TRY_ON_Public {
 		$defer_scripts = array(
 			'ar-try-on-lazy-loader',
 			'ar-try-on-google-model-viewer',
+			'atlasar-sdk',
 			'AtlasAR',
 			$this->plugin_name,
 			'ar-try-on-qr-generator',

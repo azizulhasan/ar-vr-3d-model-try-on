@@ -1,4 +1,12 @@
 import {setModelAttributes, createModal, SpinnerModal, switchModelVariant} from "../../src/context/utilities";
+import {toSdkOptions} from "../../src/context/sdkOptions";
+
+/** AR-114: the AtlasAR viewer SDK (public/js/atlasar-sdk/atlasar.js), when it loaded. */
+const sdk = () => (window.AtlasARViewer && typeof window.AtlasARViewer.mount === "function" ? window.AtlasARViewer : null);
+// Tell the SDK where its files are (a caching plugin that combines scripts would hide it).
+if (sdk() && window.ar_try_on && ar_try_on.plugin_url) {
+  sdk().configure({ assetsBase: ar_try_on.plugin_url + "public/js/atlasar-sdk/" });
+}
 
 class AtlasAR {
   alertify = null;
@@ -55,12 +63,17 @@ class AtlasAR {
   };
 
   getModelSkeleton(model_id = "atlas_ar_model_viewer") {
-    // AR-61 (May 2026): skeleton ships with the same safe defaults that
-    // `setModelAttributes` will overlay once REST returns the per-product
-    // settings. The pre-overlay attribute values are what shows during
-    // the first paint, so getting them right here removes the flash of
-    // pink-tinted reflective whites the previous build had — and gives
-    // shoppers an immediate "drag to rotate" cue.
+    // AR-114: with the viewer SDK, an <atlasar-viewer> slot. The empty <model-viewer> inside keeps
+    // the old id and class for the scripts that look for it before the data arrives (gallery
+    // toggle, full screen); the SDK hides it and draws the real one with the same id.
+    if (sdk()) {
+      return `
+                <style id="model-viewer-style"></style>
+                <atlasar-viewer class="atlas-ar-sdk-viewer" data-atlas-ar-slot="${model_id}" style="display:block;width:100%;height:100%;">
+                    <model-viewer id="${model_id}" class="atlas_ar_model_viewer atlas-ar-sdk-placeholder" hidden></model-viewer>
+                </atlasar-viewer>`;
+    }
+    // Without the SDK (blocked or missing file): the original skeleton.
     return `
                 <style id="model-viewer-style"></style>
                     <div style="display: flex; justify-content: center; align-items: center; height: 100%;">
@@ -88,6 +101,19 @@ class AtlasAR {
                     </div>`;
   }
 
+  /** AR-114: the <atlasar-viewer> for an old model-viewer selector ("#id" or ".atlas_ar_model_viewer"). */
+  findViewerHost(model_id) {
+    if (typeof model_id === "string" && model_id.charAt(0) === "#") {
+      const id = model_id.slice(1);
+      const slot = document.querySelector(`atlasar-viewer[data-atlas-ar-slot="${CSS.escape(id)}"]`);
+      if (slot) return slot;
+      const el = document.getElementById(id);
+      return el ? el.closest("atlasar-viewer") : null;
+    }
+    const el = document.querySelector(model_id);
+    return el ? (el.tagName === "ATLASAR-VIEWER" ? el : el.closest("atlasar-viewer")) : document.querySelector("atlasar-viewer.atlas-ar-sdk-viewer");
+  }
+
   isObject(value) {
     return value !== null && typeof value === "object" && !Array.isArray(value);
   }
@@ -102,8 +128,20 @@ class AtlasAR {
       const htmlContent = this.getModelSkeleton(model_id_name);
       createModal(productName, htmlContent);
     }
+    // AR-114: the SDK draws it.
+    const host = sdk() ? this.findViewerHost(model_id) : null;
+    if (host && this.isObject(data)) {
+      const viewerId = host.getAttribute("data-atlas-ar-slot") || "";
+      // Opened by a click (popup, gallery toggle, full screen, tab): load at once.
+      const immediate = type === "modal" || !!host.closest("#atlas_ar-3d-viewer-overlay, .atlas-ar-3d-viewer-overlay, .atlas-ar-fullscreen-viewer, .atlas-ar-wc-tab-viewer, #atlas_ar-toggle-3d-container, .woocommerce-product-gallery");
+      // Custom CSS stays page-level, exactly as before (it may target .atlas_ar_model_viewer).
+      const style = host.parentNode && host.parentNode.querySelector("#model-viewer-style");
+      if (style && typeof data.custom_css === "string") style.textContent = data.custom_css;
+      host.querySelectorAll(":scope > .atlas-ar-sdk-placeholder").forEach((n) => n.remove());
+      host.options = toSdkOptions(data, { viewerId, immediate });
+      return;
+    }
     const modelViewer = document.querySelectorAll(model_id)[0];
-    console.log({ model_id, modelViewer });
     if (modelViewer && this.isObject(data)) {
       setModelAttributes(modelViewer, data);
     }
@@ -285,6 +323,11 @@ class AtlasAR {
     if (!modelViewer) {
       console.warn('Model viewer not found:', modelSelector);
       return false;
+    }
+    // AR-114: with the SDK, its variants module (AtlasAR Pro) switches it.
+    const host = modelViewer.closest && modelViewer.closest("atlasar-viewer");
+    if (host && typeof host.setVariant === "function") {
+      return host.setVariant(variantName);
     }
 
     let modelSessionData = this.getModelSessionData("models", modelViewer.dataset.id);
