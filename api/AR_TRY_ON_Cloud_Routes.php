@@ -80,6 +80,32 @@ class AR_TRY_ON_Cloud_Routes {
 			)
 		);
 
+		// AR-93: connect with an email (the service makes the account and the key).
+		register_rest_route(
+			$this->namespace,
+			'/cloud/register',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'register' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+				'description'         => __( 'Connects this site to AtlasAR Cloud with an email address: a new email is connected at once; an email that already has an account waits for its owner to approve this site by email. The key is stored encrypted and never returned. Administrators only.', 'ar-vr-3d-model-try-on' ),
+				'args'                => array(
+					'email'        => array( 'type' => 'string', 'required' => true, 'format' => 'email', 'description' => __( 'The AtlasAR Cloud account email.', 'ar-vr-3d-model-try-on' ) ),
+					'accept_terms' => array( 'type' => 'boolean', 'required' => true, 'description' => __( 'Must be true: the owner agrees to the AtlasAR Cloud terms (wp.org Guideline 7).', 'ar-vr-3d-model-try-on' ) ),
+				),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/cloud/recheck',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'recheck' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+				'description'         => __( 'Checks again whether the account owner approved this site (after an email sign-up), and refreshes plan and usage. Administrators only.', 'ar-vr-3d-model-try-on' ),
+			)
+		);
+
 		register_rest_route(
 			$this->namespace,
 			'/cloud/webhook',
@@ -263,6 +289,41 @@ class AR_TRY_ON_Cloud_Routes {
 			return $status;
 		}
 		return rest_ensure_response( $status );
+	}
+
+	/**
+	 * POST /cloud/register
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function register( $request ) {
+		$limited = $this->rate_limit( 'cloud_register', 5, HOUR_IN_SECONDS );
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+		if ( true !== $request['accept_terms'] ) {
+			return new \WP_Error( 'terms_not_accepted', __( 'Tick the box to agree to the AtlasAR Cloud terms first.', 'ar-vr-3d-model-try-on' ), array( 'status' => 422 ) );
+		}
+		$status = AR_TRY_ON_Cloud::register( (string) $request['email'] );
+		return is_wp_error( $status ) ? $status : rest_ensure_response( $status );
+	}
+
+	/**
+	 * POST /cloud/recheck
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function recheck() {
+		$limited = $this->rate_limit( 'cloud_recheck', 60, HOUR_IN_SECONDS );
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+		if ( '' === AR_TRY_ON_Cloud::get_key() ) {
+			return rest_ensure_response( AR_TRY_ON_Cloud::status() );
+		}
+		$status = AR_TRY_ON_Cloud::recheck();
+		return is_wp_error( $status ) ? $status : rest_ensure_response( $status );
 	}
 
 	/**

@@ -54,7 +54,7 @@ AR_TRY_ON_Cloud::ensure_webhook();
 atlas_w_ok( AR_TRY_ON_Cloud::webhook_secret() === $secret, 'registering again keeps the same secret (no needless rotation)' );
 
 echo "\n2. Attacker requests are refused\n";
-$fake = wp_json_encode( array( 'id' => 'evt_fake', 'type' => 'model.ready', 'data' => array( 'model' => array( 'id' => 'mdl_' . str_repeat( 'A', 22 ), 'status' => 'ready', 'files' => array( 'glb' => 'http://169.254.169.254/x.glb' ) ) ) ) );
+$fake = wp_json_encode( array( 'id' => 'evt_fake_' . wp_generate_password( 10, false ), 'type' => 'model.ready', 'data' => array( 'model' => array( 'id' => 'mdl_' . str_repeat( 'A', 22 ), 'status' => 'ready', 'files' => array( 'glb' => 'http://169.254.169.254/x.glb' ) ) ) ) );
 foreach (
 	array(
 		'no signature'             => null,
@@ -103,7 +103,7 @@ if ( ! empty( $job['result_attachment'] ) ) {
 	atlas_w_ok( 'glTF' === file_get_contents( get_attached_file( $job['result_attachment'] ), false, null, 0, 4 ), 'the imported file is a real GLB' );
 	// Replay the same delivery (at-least-once): acknowledged, never imported twice.
 	$model = array( 'id' => $job['model_id'], 'status' => 'ready', 'files' => array( 'glb' => 'http://127.0.0.1:8765/files/x/y.glb' ) );
-	$body  = wp_json_encode( array( 'id' => 'evt_replay_test', 'type' => 'model.ready', 'data' => array( 'model' => $model ) ) );
+	$body  = wp_json_encode( array( 'id' => 'evt_replay_' . wp_generate_password( 10, false ), 'type' => 'model.ready', 'data' => array( 'model' => $model ) ) );
 	atlas_w_post( $body, atlas_w_sign( $body, $secret ) );
 	list( $s, $d ) = atlas_w_post( $body, atlas_w_sign( $body, $secret ) );
 	atlas_w_ok( 200 === $s && ! empty( $d['duplicate'] ), 'a repeated event id is acknowledged and ignored', wp_json_encode( $d ) );

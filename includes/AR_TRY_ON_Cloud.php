@@ -85,6 +85,19 @@ class AR_TRY_ON_Cloud {
 	}
 
 	/**
+	 * The customer dashboard (sign in, plans, keys). ATLAS_AR_DASHBOARD_URL or the
+	 * atlas_ar_cloud_dashboard_url filter; default: the service's /app/.
+	 *
+	 * @return string
+	 */
+	public static function dashboard_url() {
+		$base = self::base_url();
+		$url  = defined( 'ATLAS_AR_DASHBOARD_URL' ) ? (string) constant( 'ATLAS_AR_DASHBOARD_URL' ) : ( '' !== $base ? $base . '/app/' : '' );
+		/** @since 2.4.0 @param string $url Dashboard URL ('' = none). */
+		return esc_url_raw( (string) apply_filters( 'atlas_ar_cloud_dashboard_url', $url ), array( 'https', 'http' ) );
+	}
+
+	/**
 	 * Whether the connector is available on this site.
 	 *
 	 * @return bool
@@ -157,12 +170,113 @@ class AR_TRY_ON_Cloud {
 		if ( is_wp_error( $usage ) ) {
 			return $usage;
 		}
-		$nonce  = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
-		$cipher = base64_encode( $nonce . sodium_crypto_secretbox( $key, $nonce, self::box_key() ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Storing ciphertext.
-		$value  = array_merge( array( 'key' => $cipher ), self::usage_fields( $usage ) );
+		$value = array_merge( array( 'key' => self::seal( $key ) ), self::usage_fields( $usage ) );
 		delete_option( self::OPTION );
 		add_option( self::OPTION, $value, '', false ); // Never autoloaded.
 		self::ensure_webhook(); // AR-99: models arrive even when the editor is closed
+		return self::status();
+	}
+
+	/**
+	 * AR-93: connect with an email instead of a pasted key (platform contract, BLUEPRINT §6/§8).
+	 * POST /v1/projects/register { platform, site_url, email, name } — no key needed:
+	 *  - a new email gets an active key at once (connected);
+	 *  - an email that already has an account gets a PENDING key: the account owner is emailed a
+	 *    link to approve this site; until then every call answers approval_required;
+	 *  - a site registered under another email answers project_exists with a masked owner hint.
+	 * The key is stored encrypted and never shown; the email is the owner's own, shown to admins.
+	 *
+	 * @param string $email Account email.
+	 * @return array|\WP_Error Status.
+	 */
+	public static function register( $email ) {
+		$email = sanitize_email( (string) $email );
+		if ( ! is_email( $email ) || strlen( $email ) > 190 ) { // 190 = the service's limit
+			return new \WP_Error( 'invalid_email', __( 'Enter a valid email address.', 'ar-vr-3d-model-try-on' ), array( 'status' => 422 ) );
+		}
+		$base = self::base_url();
+		if ( '' === $base ) {
+			return new \WP_Error( 'cloud_unavailable', __( 'AtlasAR Cloud is not available on this site.', 'ar-vr-3d-model-try-on' ), array( 'status' => 503 ) );
+		}
+		$response = wp_remote_post(
+			$base . '/v1/projects/register',
+			array(
+				'headers'     => array( 'Content-Type' => 'application/json', 'Accept' => 'application/json', 'User-Agent' => 'AtlasAR-WordPress/' . ( defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '0' ) ),
+				'body'        => wp_json_encode( array( 'platform' => 'wordpress', 'site_url' => home_url( '/' ), 'email' => $email, 'name' => wp_strip_all_tags( get_bloginfo( 'name' ) ) ) ),
+				'timeout'     => 20,
+				'redirection' => 0,
+			)
+		);
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error( 'cloud_unreachable', __( 'Could not reach AtlasAR Cloud. Please try again in a minute.', 'ar-vr-3d-model-try-on' ), array( 'status' => 502 ) );
+		}
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		$data = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		$data = is_array( $data ) ? $data : array();
+		if ( $code < 200 || $code >= 300 ) {
+			$remote = sanitize_key( (string) ( $data['error']['code'] ?? '' ) );
+			if ( 'project_exists' === $remote ) {
+				// The service masks it (j•••@example.com); keep the mask characters, plain text only.
+				$hint = mb_substr( sanitize_text_field( (string) ( $data['owner_hint'] ?? '' ) ), 0, 100 );
+				return new \WP_Error( 'cloud_project_exists', sprintf(
+					/* translators: %s: masked email, e.g. j***@example.com */
+					__( 'This site is already connected to another AtlasAR Cloud account (%s). Sign in with that email, or ask its owner to remove the site.', 'ar-vr-3d-model-try-on' ),
+					'' !== $hint ? $hint : '—'
+				), array( 'status' => 409 ) );
+			}
+			$known = array(
+				'invalid_email'     => __( 'Enter a valid email address.', 'ar-vr-3d-model-try-on' ),
+				'project_limit'     => __( 'That AtlasAR Cloud account has reached its plan\'s number of sites. Remove one there, or upgrade.', 'ar-vr-3d-model-try-on' ),
+				'rate_limited'      => __( 'Too many connection attempts. Please try again later.', 'ar-vr-3d-model-try-on' ),
+				'account_suspended' => __( 'That AtlasAR Cloud account is suspended. Please contact AtlasAR support.', 'ar-vr-3d-model-try-on' ),
+				'project_suspended' => __( 'This site is suspended on AtlasAR Cloud. Please contact AtlasAR support.', 'ar-vr-3d-model-try-on' ),
+			);
+			return isset( $known[ $remote ] )
+				? new \WP_Error( 'cloud_' . $remote, $known[ $remote ], array( 'status' => in_array( $code, array( 403, 409, 422, 429 ), true ) ? $code : 400 ) )
+				: self::error_from( $code, $data );
+		}
+		$key = (string) ( $data['api_key'] ?? '' );
+		if ( ! preg_match( self::KEY_PATTERN, $key ) ) {
+			return new \WP_Error( 'cloud_bad_response', __( 'AtlasAR Cloud sent an unexpected answer. Please try again.', 'ar-vr-3d-model-try-on' ), array( 'status' => 502 ) );
+		}
+		$pending = 'pending' === ( $data['approval'] ?? '' );
+		delete_option( self::OPTION );
+		add_option(
+			self::OPTION,
+			array(
+				'key'        => self::seal( $key ),
+				'email'      => $email,
+				'pending'    => $pending,
+				'plan'       => sanitize_key( (string) ( $data['plan'] ?? 'free' ) ),
+				'checked_at' => time(),
+			),
+			'',
+			false
+		);
+		return $pending ? self::status() : self::recheck();
+	}
+
+	/**
+	 * Re-read a pending or connected site: approved → connected (usage + webhook); still waiting →
+	 * pending; revoked → disconnected by request().
+	 *
+	 * @return array|\WP_Error
+	 */
+	public static function recheck() {
+		$usage = self::request( 'GET', '/v1/usage' );
+		if ( is_wp_error( $usage ) ) {
+			if ( 'cloud_approval_required' === $usage->get_error_code() ) {
+				return self::status(); // still waiting for the owner
+			}
+			return $usage;
+		}
+		$was_pending       = ! empty( self::stored()['pending'] );
+		$stored            = array_merge( self::stored(), self::usage_fields( $usage ) );
+		$stored['pending'] = false;
+		update_option( self::OPTION, $stored, false );
+		if ( $was_pending || empty( $stored['webhook'] ) ) {
+			self::ensure_webhook();
+		}
 		return self::status();
 	}
 
@@ -385,17 +499,25 @@ class AR_TRY_ON_Cloud {
 	 */
 	public static function status() {
 		$stored    = self::stored();
-		$connected = '' !== self::get_key();
+		$has_key   = '' !== self::get_key();
+		$pending   = $has_key && ! empty( $stored['pending'] );
+		$connected = $has_key && ! $pending;
 		return array(
 			'available'  => self::is_available(),
 			'connected'  => $connected,
+			// AR-93: email sign-up waiting for the account owner's approval.
+			'pending'    => $pending,
+			'email'      => $has_key ? (string) ( $stored['email'] ?? '' ) : '',
 			'plan'       => $connected ? (string) ( $stored['plan'] ?? '' ) : '',
 			// Models this month: used / limit (limit null = no monthly limit).
 			'used'       => $connected ? (int) ( $stored['used'] ?? 0 ) : 0,
 			'limit'      => $connected && isset( $stored['limit'] ) ? (int) $stored['limit'] : null,
+			// False until the first usage read (e.g. a connection saved by an older version).
+			'usage_known' => $connected && array_key_exists( 'used', $stored ),
 			'resets_at'  => $connected ? (string) ( $stored['resets_at'] ?? '' ) : '',
 			'checked_at' => $connected ? (int) ( $stored['checked_at'] ?? 0 ) : 0,
 			'webhook'    => $connected && ! empty( $stored['webhook'] ),
+			'dashboard_url' => self::dashboard_url(),
 		);
 	}
 

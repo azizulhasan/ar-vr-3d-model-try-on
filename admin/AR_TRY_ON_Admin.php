@@ -148,6 +148,8 @@ class AR_TRY_ON_Admin {
 			'wizard'                     => AR_TRY_ON_Wizard::instance()->get_client_data(),
 			// AR-84 — AtlasAR Cloud connector status (never the key; no HTTP call).
 			'cloud'                      => \AR_TRY_ON\AR_TRY_ON_Cloud::status(),
+			// AR-93: pre-fills the AtlasAR Cloud sign-up email (administrators only).
+			'admin_email'                => current_user_can( 'manage_options' ) ? (string) get_option( 'admin_email' ) : '',
 		];
 		return $this->localize_data;
 	}
