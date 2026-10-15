@@ -418,6 +418,32 @@ class AR_TRY_ON_Compression_Routes {
 
         $compressed_file_url = AR_TRY_ON_Helper::get_file_url_from_path( $compressed_file );
 
+		/*
+		 * AR-107: an unknown log or a missing file is the caller's error, not a server failure.
+		 * A missing file used to mark the log failed and then answer "completed successfully".
+		 */
+		if ( ! AR_TRY_ON_Compression_DB::get_compression_log( $log_id, 'id' ) ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'code'    => 'log_not_found',
+					'message' => __( 'Compression log entry not found.', 'ar-vr-3d-model-try-on' ),
+				),
+				404
+			);
+		}
+		if ( ! is_string( $compressed_file ) || '' === $compressed_file || ! file_exists( $compressed_file ) ) {
+			AR_TRY_ON_Compression::fail_compression( $log_id, __( 'Compressed file not found.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_REST_Response(
+				array(
+					'success' => false,
+					'code'    => 'file_not_found',
+					'message' => __( 'Compressed file not found.', 'ar-vr-3d-model-try-on' ),
+				),
+				400
+			);
+		}
+
 		$result = AR_TRY_ON_Compression::complete_compression( $log_id, $compressed_file, $compression_time );
 
 		if ( $result ) {

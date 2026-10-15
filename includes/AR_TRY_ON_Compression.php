@@ -117,11 +117,16 @@ class AR_TRY_ON_Compression {
 	 *
 	 * @since 1.8.0
 	 * @param array $settings New settings.
-	 * @return bool Success status.
+	 * @return bool Success status. Saving the values already stored counts as
+	 *              success (AR-107): update_option() returns false for "nothing changed".
 	 */
 	public static function update_settings( $settings ) {
 		$current  = self::get_settings();
 		$settings = wp_parse_args( $settings, $current );
+
+		if ( $settings == $current ) { // phpcs:ignore Universal.Operators.StrictComparisons -- '1' and true are the same saved value.
+			return true;
+		}
 
 		return update_option( 'ar_try_on_compression_settings', $settings );
 	}

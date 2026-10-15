@@ -340,10 +340,16 @@ class AR_TRY_ON_Api_Routes
         $body = $request->get_params();
         $result['status'] = false;
         $decoded_data = json_decode($body['data'], 1);
-        $api_url = $decoded_data['url'];
-        $headers = $decoded_data['headers'];
-        $headers['Authorization'] = 'Bearer ' . $headers['Authorization'];
-        $api_body = $decoded_data['body'];
+        // AR-107: a body that is not a JSON object is refused instead of raising PHP warnings.
+        if (! is_array($decoded_data)) {
+            return new \WP_REST_Response(
+                array('status' => false, 'code' => 'invalid_data', 'data' => __('The request data is not valid JSON.', 'ar-vr-3d-model-try-on')),
+                400
+            );
+        }
+        $api_url = isset($decoded_data['url']) ? $decoded_data['url'] : '';
+        $headers = isset($decoded_data['headers']) && is_array($decoded_data['headers']) ? $decoded_data['headers'] : array();
+        $api_body = isset($decoded_data['body']) && is_array($decoded_data['body']) ? $decoded_data['body'] : array();
 
         /**
          * Move temporary files to permanent folder.
@@ -357,6 +363,16 @@ class AR_TRY_ON_Api_Routes
 
             return rest_ensure_response($result);
         }
+
+        // AR-107: every provider call needs the API key (saving files above does not).
+        $api_key = isset($headers['Authorization']) && is_string($headers['Authorization']) ? trim($headers['Authorization']) : '';
+        if ('' === $api_key) {
+            return new \WP_REST_Response(
+                array('status' => false, 'code' => 'api_key_missing', 'data' => __('Add the 3D generation API key in AtlasAR → Integration first.', 'ar-vr-3d-model-try-on')),
+                400
+            );
+        }
+        $headers['Authorization'] = 'Bearer ' . $api_key;
 
 //        $response_data = file_get_contents('D:\mamp\htdocs\azizulhasan\tts\wp-content\plugins\ar-vr-3d-model-try-on\src\context\tripo3d_final.json');
 //        $response_data = json_decode($response_data, true);
