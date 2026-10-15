@@ -82,6 +82,17 @@ class AR_TRY_ON_Cloud_Routes {
 
 		register_rest_route(
 			$this->namespace,
+			'/cloud/webhook',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'webhook' ),
+				'permission_callback' => array( $this, 'verify_webhook' ),
+				'description'         => __( 'Receives signed AtlasAR Cloud events (model.ready, model.failed, ping) and imports a finished model into the Media Library. Only requests signed with this site\'s webhook secret are accepted.', 'ar-vr-3d-model-try-on' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/cloud/optimize/(?P<post_id>\d+)',
 			array(
 				array(
@@ -122,6 +133,59 @@ class AR_TRY_ON_Cloud_Routes {
 				),
 			)
 		);
+	}
+
+	/**
+	 * AR-99: the service's events. Public (the service is not a WordPress user), but every
+	 * request must carry a valid, fresh HMAC signature made with this site's webhook secret.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return true|\WP_Error
+	 */
+	public function verify_webhook( $request ) {
+		$ok = AR_TRY_ON_Cloud::verify_webhook( (string) $request->get_header( 'atlasar_signature' ), (string) $request->get_body(), AR_TRY_ON_Cloud::webhook_secret() );
+		return $ok ? true : new \WP_Error( 'invalid_signature', __( 'Invalid or expired signature.', 'ar-vr-3d-model-try-on' ), array( 'status' => 401 ) );
+	}
+
+	/**
+	 * POST /cloud/webhook — model.ready / model.failed / ping from AtlasAR Cloud.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function webhook( $request ) {
+		$event = json_decode( (string) $request->get_body(), true );
+		if ( ! is_array( $event ) || empty( $event['id'] ) || empty( $event['type'] ) ) {
+			return new \WP_Error( 'invalid_event', 'Invalid event.', array( 'status' => 400 ) );
+		}
+		// Delivery is at-least-once: a repeated event id is acknowledged and ignored (2 days).
+		$seen = 'atlas_ar_cloud_evt_' . substr( hash( 'sha256', (string) $event['id'] ), 0, 32 );
+		if ( get_transient( $seen ) ) {
+			return rest_ensure_response( array( 'ok' => true, 'duplicate' => true ) );
+		}
+		$type = (string) $event['type'];
+		if ( 'ping' === $type ) {
+			set_transient( $seen, 1, 2 * DAY_IN_SECONDS );
+			return rest_ensure_response( array( 'ok' => true ) );
+		}
+		if ( ! in_array( $type, array( 'model.ready', 'model.failed' ), true ) || ! is_array( $event['data']['model'] ?? null ) ) {
+			return rest_ensure_response( array( 'ok' => true, 'ignored' => true ) );
+		}
+		$model   = $event['data']['model'];
+		$post_id = AR_TRY_ON_Cloud::post_for_model( $model['id'] ?? '' );
+		$job     = $post_id ? get_post_meta( $post_id, AR_TRY_ON_Cloud::JOB_META, true ) : null;
+		if ( ! is_array( $job ) ) {
+			set_transient( $seen, 1, 2 * DAY_IN_SECONDS );
+			return rest_ensure_response( array( 'ok' => true, 'ignored' => true ) ); // a model made elsewhere
+		}
+		$job = AR_TRY_ON_Cloud::apply_model( $post_id, $job, $model );
+		if ( 'model.ready' === $type && 'ready' !== ( $job['status'] ?? '' ) ) {
+			// The import did not finish (another request holds the lock, a download failed):
+			// answer 503 so the service retries; polling also still finishes it.
+			return new \WP_Error( 'not_imported', 'Not imported yet.', array( 'status' => 503 ) );
+		}
+		set_transient( $seen, 1, 2 * DAY_IN_SECONDS );
+		return rest_ensure_response( array( 'ok' => true, 'status' => $job['status'] ) );
 	}
 
 	/**
@@ -283,6 +347,10 @@ class AR_TRY_ON_Cloud_Routes {
 			'user'              => get_current_user_id(),
 		);
 		update_post_meta( $post_id, AR_TRY_ON_Cloud::JOB_META, $job );
+		update_post_meta( $post_id, AR_TRY_ON_Cloud::MODEL_META, $model_id ); // AR-99: webhook lookup
+		if ( ! AR_TRY_ON_Cloud::status()['webhook'] ) {
+			AR_TRY_ON_Cloud::ensure_webhook(); // sites connected before AR-99, or a failed first try
+		}
 		// The service may have answered "ready" at once (same file sent before: idempotent).
 		return $this->poll( $request );
 	}
@@ -314,54 +382,6 @@ class AR_TRY_ON_Cloud_Routes {
 			return $model; // Temporary (network, rate limit): the browser polls again.
 		}
 
-		$remote = (string) ( $model['status'] ?? '' );
-		if ( 'failed' === $remote ) {
-			$job['status'] = 'failed';
-			$job['error']  = sprintf(
-				/* translators: %s: error code from the service */
-				__( 'AtlasAR Cloud could not optimize this model (%s).', 'ar-vr-3d-model-try-on' ),
-				sanitize_key( (string) ( $model['error']['code'] ?? 'unknown' ) )
-			);
-			update_post_meta( $post_id, AR_TRY_ON_Cloud::JOB_META, $job );
-			return rest_ensure_response( $this->job_json( $job ) );
-		}
-		if ( 'ready' !== $remote || empty( $model['files']['glb'] ) ) {
-			return rest_ensure_response( $this->job_json( $job ) );
-		}
-
-		// Import exactly once, even when two tabs poll at the same moment.
-		$lock = 'atlas_ar_cloud_import_' . $post_id;
-		if ( ! add_option( $lock, time(), '', false ) ) {
-			if ( time() - (int) get_option( $lock ) < 5 * MINUTE_IN_SECONDS ) {
-				return rest_ensure_response( $this->job_json( $job ) ); // Another request is importing.
-			}
-			update_option( $lock, time(), false ); // Stale lock from a crashed request.
-		}
-		try {
-			$id = AR_TRY_ON_Cloud::import_result( (string) $model['files']['glb'], (int) $job['source_attachment'], $post_id, $job['model_id'] );
-		} finally {
-			delete_option( $lock );
-		}
-		if ( is_wp_error( $id ) ) {
-			$job['status'] = 'failed';
-			$job['error']  = $id->get_error_message();
-		} else {
-			$job['status']            = 'ready';
-			$job['result_attachment'] = $id;
-			$job['result_size']       = (int) filesize( (string) get_attached_file( $id ) );
-			$job['finished_at']       = time();
-		}
-		update_post_meta( $post_id, AR_TRY_ON_Cloud::JOB_META, $job );
-
-		/**
-		 * Fires after a model optimized by AtlasAR Cloud was saved to the Media Library (or failed).
-		 *
-		 * @since 2.4.0
-		 * @param int   $post_id Item ID.
-		 * @param array $job     Job (status, source_attachment, result_attachment, model_id).
-		 */
-		do_action( 'atlas_ar_cloud_optimize_finished', $post_id, $job );
-
-		return rest_ensure_response( $this->job_json( $job ) );
+		return rest_ensure_response( $this->job_json( AR_TRY_ON_Cloud::apply_model( $post_id, $job, $model ) ) );
 	}
 }

@@ -38,6 +38,12 @@ class AR_TRY_ON_Cloud {
 	/** Post meta holding the running / last optimize job of an item. */
 	const JOB_META = '_atlas_ar_cloud_job';
 
+	/** AR-99: post meta holding the cloud model id of the item's job (webhook lookup). */
+	const MODEL_META = '_atlas_ar_cloud_model';
+
+	/** AR-99: webhook events older than this (seconds) are refused (replay window). */
+	const WEBHOOK_TOLERANCE = 300;
+
 	/** Attachment meta marking a file this connector created (and from which source). */
 	const RESULT_META = '_atlas_ar_cloud_source';
 
@@ -156,14 +162,186 @@ class AR_TRY_ON_Cloud {
 		$value  = array_merge( array( 'key' => $cipher ), self::usage_fields( $usage ) );
 		delete_option( self::OPTION );
 		add_option( self::OPTION, $value, '', false ); // Never autoloaded.
+		self::ensure_webhook(); // AR-99: models arrive even when the editor is closed
 		return self::status();
 	}
 
 	/**
-	 * Forget the key.
+	 * Forget the key (and remove this site's webhook on the service, best effort).
+	 *
+	 * @param bool $remote Also tell the service (false when the key is already revoked).
 	 */
-	public static function disconnect() {
+	public static function disconnect( $remote = true ) {
+		if ( $remote && '' !== self::get_key() && ! empty( self::stored()['webhook'] ) ) {
+			self::request( 'DELETE', '/v1/webhook', array( 'timeout' => 10 ) );
+		}
 		delete_option( self::OPTION );
+	}
+
+	/* ------------------------------------------------------------------ */
+	/* AR-99: webhooks (the service tells this site when a model is ready) */
+	/* ------------------------------------------------------------------ */
+
+	/** The URL the service posts events to. */
+	public static function webhook_url() {
+		return rest_url( 'ar_try_on/v1/cloud/webhook' );
+	}
+
+	private static function seal( $plain ) {
+		$nonce = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+		return base64_encode( $nonce . sodium_crypto_secretbox( $plain, $nonce, self::box_key() ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Storing ciphertext.
+	}
+
+	private static function unseal( $sealed ) {
+		$raw = is_string( $sealed ) ? base64_decode( $sealed, true ) : false; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Decoding our own ciphertext.
+		if ( false === $raw || strlen( $raw ) <= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ) {
+			return '';
+		}
+		$plain = sodium_crypto_secretbox_open( substr( $raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ), substr( $raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ), self::box_key() );
+		return is_string( $plain ) ? $plain : '';
+	}
+
+	/** The decrypted webhook secret, or '' (then events are refused and polling still works). */
+	public static function webhook_secret() {
+		$stored = self::stored();
+		return empty( $stored['webhook'] ) ? '' : self::unseal( $stored['webhook'] );
+	}
+
+	/**
+	 * Register this site's receiver with the service and keep its secret (encrypted). The secret
+	 * is shown by the service only on create or rotate; if a URL exists but we lost the secret,
+	 * rotate. Failure is harmless: the editor keeps polling.
+	 *
+	 * @return bool
+	 */
+	public static function ensure_webhook() {
+		if ( '' === self::get_key() ) {
+			return false;
+		}
+		$result = self::request( 'PUT', '/v1/webhook', array( 'body' => wp_json_encode( array( 'url' => self::webhook_url() ) ), 'headers' => array( 'Content-Type' => 'application/json' ), 'timeout' => 10 ) );
+		if ( is_wp_error( $result ) ) {
+			return false;
+		}
+		$secret = (string) ( $result['secret'] ?? '' );
+		if ( '' === $secret && '' === self::webhook_secret() ) {
+			$rotated = self::request( 'POST', '/v1/webhook/rotate-secret', array( 'timeout' => 10 ) );
+			$secret  = is_wp_error( $rotated ) ? '' : (string) ( $rotated['secret'] ?? '' );
+		}
+		if ( '' !== $secret ) {
+			if ( ! preg_match( '/^[A-Za-z0-9_-]{20,200}$/', $secret ) ) {
+				return false;
+			}
+			$stored            = self::stored();
+			$stored['webhook'] = self::seal( $secret );
+			update_option( self::OPTION, $stored, false );
+		}
+		return '' !== self::webhook_secret();
+	}
+
+	/**
+	 * Check an event: AtlasAR-Signature "t=<unix>,v1=<hex HMAC-SHA256(secret, t . '.' . body)>",
+	 * fresh within the window, compared in constant time.
+	 *
+	 * @param string   $header Signature header.
+	 * @param string   $body   Raw request body.
+	 * @param string   $secret Webhook secret.
+	 * @param int|null $now    Current time (tests).
+	 * @return bool
+	 */
+	public static function verify_webhook( $header, $body, $secret, $now = null ) {
+		if ( '' === (string) $secret || ! is_string( $header ) || strlen( $header ) > 300 ) {
+			return false;
+		}
+		$parts = array();
+		foreach ( explode( ',', $header ) as $piece ) {
+			$kv = explode( '=', trim( $piece ), 2 );
+			if ( 2 === count( $kv ) ) {
+				$parts[ $kv[0] ] = $kv[1];
+			}
+		}
+		if ( ! isset( $parts['t'], $parts['v1'] ) || ! ctype_digit( $parts['t'] ) || ! preg_match( '/^[a-f0-9]{64}$/', $parts['v1'] ) ) {
+			return false;
+		}
+		$now = null === $now ? time() : (int) $now;
+		if ( abs( $now - (int) $parts['t'] ) > self::WEBHOOK_TOLERANCE ) {
+			return false;
+		}
+		return hash_equals( hash_hmac( 'sha256', $parts['t'] . '.' . $body, $secret ), $parts['v1'] );
+	}
+
+	/** The item whose job is this cloud model, or 0. */
+	public static function post_for_model( $model_id ) {
+		if ( ! preg_match( '/^mdl_[A-Za-z0-9]{10,40}$/', (string) $model_id ) ) {
+			return 0;
+		}
+		$ids = get_posts( array( 'post_type' => 'any', 'post_status' => 'any', 'fields' => 'ids', 'posts_per_page' => 1, 'no_found_rows' => true, 'meta_key' => self::MODEL_META, 'meta_value' => $model_id ) ); // phpcs:ignore WordPress.DB.SlowDBQuery -- Indexed meta_key lookup, one row.
+		return $ids ? (int) $ids[0] : 0;
+	}
+
+	/**
+	 * Bring an item's job up to date with the service's model JSON (from polling or a webhook).
+	 * Imports the finished GLB exactly once, even when a webhook and a poll arrive together.
+	 *
+	 * @param int   $post_id Item.
+	 * @param array $job     Stored job.
+	 * @param array $model   Model JSON (GET /v1/models/:id shape).
+	 * @return array Updated job.
+	 */
+	public static function apply_model( $post_id, $job, $model ) {
+		if ( in_array( $job['status'] ?? '', array( 'ready', 'failed' ), true ) || ( $model['id'] ?? '' ) !== ( $job['model_id'] ?? '' ) ) {
+			return $job;
+		}
+		$remote = (string) ( $model['status'] ?? '' );
+		if ( 'failed' === $remote ) {
+			$job['status'] = 'failed';
+			$job['error']  = sprintf(
+				/* translators: %s: error code from the service */
+				__( 'AtlasAR Cloud could not optimize this model (%s).', 'ar-vr-3d-model-try-on' ),
+				sanitize_key( (string) ( $model['error']['code'] ?? 'unknown' ) )
+			);
+			update_post_meta( $post_id, self::JOB_META, $job );
+			return $job;
+		}
+		if ( 'ready' !== $remote || empty( $model['files']['glb'] ) ) {
+			return $job;
+		}
+		// Import exactly once, even when a webhook and two tabs arrive at the same moment.
+		$lock = 'atlas_ar_cloud_import_' . $post_id;
+		if ( ! add_option( $lock, time(), '', false ) ) {
+			if ( time() - (int) get_option( $lock ) < 5 * MINUTE_IN_SECONDS ) {
+				return $job; // Another request is importing.
+			}
+			update_option( $lock, time(), false ); // Stale lock from a crashed request.
+		}
+		try {
+			$fresh = get_post_meta( $post_id, self::JOB_META, true ); // the other request may have finished
+			if ( is_array( $fresh ) && 'ready' === ( $fresh['status'] ?? '' ) ) {
+				return $fresh;
+			}
+			$id = self::import_result( (string) $model['files']['glb'], (int) $job['source_attachment'], $post_id, $job['model_id'] );
+		} finally {
+			delete_option( $lock );
+		}
+		if ( is_wp_error( $id ) ) {
+			$job['status'] = 'failed';
+			$job['error']  = $id->get_error_message();
+		} else {
+			$job['status']            = 'ready';
+			$job['result_attachment'] = $id;
+			$job['result_size']       = (int) filesize( (string) get_attached_file( $id ) );
+			$job['finished_at']       = time();
+		}
+		update_post_meta( $post_id, self::JOB_META, $job );
+
+		/**
+		 * Fires after a model optimized by AtlasAR Cloud was saved to the Media Library (or failed).
+		 *
+		 * @since 2.4.0
+		 * @param int   $post_id Item ID.
+		 * @param array $job     Job (status, source_attachment, result_attachment, model_id).
+		 */
+		do_action( 'atlas_ar_cloud_optimize_finished', $post_id, $job );
+		return $job;
 	}
 
 	/**
@@ -217,6 +395,7 @@ class AR_TRY_ON_Cloud {
 			'limit'      => $connected && isset( $stored['limit'] ) ? (int) $stored['limit'] : null,
 			'resets_at'  => $connected ? (string) ( $stored['resets_at'] ?? '' ) : '',
 			'checked_at' => $connected ? (int) ( $stored['checked_at'] ?? 0 ) : 0,
+			'webhook'    => $connected && ! empty( $stored['webhook'] ),
 		);
 	}
 
@@ -273,7 +452,7 @@ class AR_TRY_ON_Cloud {
 		}
 		$error = self::error_from( $code, $data );
 		if ( $using_stored && 'cloud_invalid_api_key' === $error->get_error_code() ) {
-			self::disconnect(); // Revoked key: clear it so the owner sees "Connect" again.
+			self::disconnect( false ); // Revoked key: clear it so the owner sees "Connect" again.
 			$error = new \WP_Error( 'cloud_not_connected', __( 'Your AtlasAR Cloud key was revoked. Press Connect in AtlasAR → Integration to connect again.', 'ar-vr-3d-model-try-on' ), array( 'status' => 409 ) );
 		}
 		return $error;

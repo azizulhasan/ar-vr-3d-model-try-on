@@ -251,7 +251,7 @@ Admin-only. Only after an administrator enters their own API key and clicks "Gen
 
 = AtlasAR Cloud model optimization (AtlasAiDev) =
 
-Admin-only and off until an administrator pastes an AtlasAR Cloud API key and ticks the agreement in AtlasAR → Integration. After that, a file is sent only when someone who can edit the item clicks "Optimize with AtlasAR Cloud": the item's GLB model file from the Media Library, the item title (as the model name), the real height entered, the API key, and the site address (in the request's User-Agent). The optimized GLB is downloaded back and saved as a new Media Library file. "Test connection" sends only the API key. No site visitor data is sent.
+Admin-only and off until an administrator pastes an AtlasAR Cloud API key and ticks the agreement in AtlasAR → Integration. After that, a file is sent only when someone who can edit the item clicks "Optimize with AtlasAR Cloud": the item's GLB model file from the Media Library, the item title (as the model name), the real height entered, the API key, and the site address (in the request's User-Agent). The optimized GLB is downloaded back and saved as a new Media Library file. To deliver finished models even when the editor is closed, connecting also registers this site's address `/wp-json/ar_try_on/v1/cloud/webhook` with AtlasAR Cloud, which then sends signed "model ready / failed" notices there (only requests signed with this site's secret are accepted); disconnecting removes it. "Test connection" sends only the API key. No site visitor data is sent.
 AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
 
 = AtlasAiDev tracker (track.atlasaidev.com, icanhazip.com) =
