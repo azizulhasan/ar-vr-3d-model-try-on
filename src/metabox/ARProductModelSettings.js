@@ -15,8 +15,7 @@ import IntegrationSection from "./components/IntegrationSection.js";
 import DimensionsSection from "./components/DimensionsSection.js";
 import HotspotsSection from "./components/HotspotsSection.js";
 import SettingsSection from "./components/SettingsSection.js";
-import CompressionPanel from "./components/CompressionPanel.js";
-import CloudOptimizePanel from "./components/CloudOptimizePanel.js";
+import ModelToolsPanel from "./components/ModelToolsPanel.js";
 import notify from "../context/Notify";
 import {ToastContainer} from "react-toastify";
 import SliderSection from "./components/SliderSection.js";
@@ -588,28 +587,12 @@ const SaveButton = ({classes = 'art-w-full'}) => (
                                     setProductModel={setProductModel}
                                 />
 
-                                {/* Compression Panel - Show after model upload */}
-                                {productModel.src && (
-                                    <CompressionPanel
-                                        postId={getPostID()}
-                                        modelFile={productModel.src}
-                                        productModel={productModel}
-                                        setProductModel={setProductModel}
-                                        onCompressionComplete={(meta) => {
-                                            console.log('Compression complete:', meta);
-                                            notify('Model compressed successfully!', 'success');
-                                        }}
-                                    />
-                                )}
-
-                                {/* AR-84: AtlasAR Cloud optimize (hidden while the site has no service URL). */}
-                                {productModel.src && (
-                                    <CloudOptimizePanel
-                                        postId={getPostID()}
-                                        productModel={productModel}
-                                        setProductModel={setProductModel}
-                                    />
-                                )}
+                                {/* AR-98: Optimize GLB / Flat product tabs (Flat works before a model exists). */}
+                                <ModelToolsPanel
+                                    postId={getPostID()}
+                                    productModel={productModel}
+                                    setProductModel={setProductModel}
+                                />
 
                                 <CameraSection
                                     productModel={productModel}
