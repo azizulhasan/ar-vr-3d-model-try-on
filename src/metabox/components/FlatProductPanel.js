@@ -26,15 +26,7 @@ const ERRORS = () => ({
     invalid_size: __("Width and height must be 1–1000 cm, thickness 0.5–200 mm.", "ar-vr-3d-model-try-on"),
 });
 
-const loadGenerator = () => {
-    // Chunk paths are relative to the plugin folder; `publicPath: 'auto'` climbs one level too far
-    // from admin/js/build/, so point webpack at the plugin URL WordPress gives us.
-    if (window?.ar_try_on?.plugin_url) {
-        // eslint-disable-next-line no-undef, camelcase
-        __webpack_public_path__ = window.ar_try_on.plugin_url;
-    }
-    return import(/* webpackChunkName: "atlas-ar-flat-generator" */ "../flat/flatGenerator.js");
-};
+const loadGenerator = () => import(/* webpackChunkName: "atlas-ar-flat-generator" */ "../flat/flatGenerator.js");
 
 /** Upload one generated file to the Media Library (core REST route, the editor's own nonce). */
 async function uploadToMedia(bytes, filename, type, postId) {
