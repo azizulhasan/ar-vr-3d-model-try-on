@@ -216,6 +216,12 @@ export default function IntegrationSection({
             }
             if (pollAbortedRef.current) return;
 
+            // AR-107: the server refused the request (e.g. api_key_missing): stop, say why.
+            if (showServerRefusal(responseData, submitButton)) {
+                stopPolling();
+                return;
+            }
+
             // Success — files downloaded to temp.
             if (responseData?.data?.temp?.src?.url) {
                 stopPolling();
@@ -331,6 +337,19 @@ export default function IntegrationSection({
                 ? '<span class="atlas-ar-spinner" aria-hidden="true"></span><span>' + safe + '</span>'
                 : safe;
         }
+    }
+    /**
+     * AR-107: generate_3d_model answers { status: false, code, data: message } when it refuses a
+     * request before calling the provider. Show the message and let the user try again.
+     * @returns {boolean} true when the response was such a refusal.
+     */
+    const showServerRefusal = (res, submitButton) => {
+        if (res?.status !== false || !res?.code) {
+            return false;
+        }
+        generateModelButtonStateChange('error', 'Generation failed — click to try again', submitButton);
+        notify(typeof res.data === 'string' && res.data ? res.data : 'The request was refused.', 'error', {autoClose: 8000});
+        return true;
     }
     const handleSubmit = async (e) => {
         let submitButton = e.target;
@@ -563,6 +582,10 @@ export default function IntegrationSection({
             postWithoutImage(getURL('generate_3d_model'), formData).then(
                 (res) => {
                     console.log(res)
+                    // AR-107: the server refused the request (api_key_missing, invalid_data, mode_not_allowed).
+                    if (showServerRefusal(res, submitButton)) {
+                        return;
+                    }
                     /**
                      * This code  will be true why request is being sent with task_id
                      */
