@@ -99,6 +99,14 @@ class AR_TRY_ON_Admin_Routes {
 					),
 				),
 			),
+			// Public on purpose: AtlasAR Cloud's events are signed (HMAC with this site's secret) and checked in the callback.
+			'/cloud/webhook'     => array(
+				array(
+					'POST', 'cloud_webhook', '__return_true',
+					__( 'AtlasAR Cloud event (webhook)', 'ar-vr-3d-model-try-on' ),
+					__( 'Called by AtlasAR Cloud, not by people: model.ready / model.failed for this site, signed with the site’s webhook secret (AtlasAR-Signature: t=…,v1=HMAC-SHA256 of "<t>.<body>"). A finished "Optimise on AtlasAR Cloud" model is then stored at once. Unsigned or old requests get 401.', 'ar-vr-3d-model-try-on' ),
+				),
+			),
 			'/cloud/takeover'    => array(
 				array(
 					'POST', 'cloud_takeover', $admin,
@@ -362,6 +370,11 @@ class AR_TRY_ON_Admin_Routes {
 			return new \WP_Error( 'atlas_ar_consent', __( 'Please tick the box to agree first.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
 		}
 		return self::cloud_answer( AR_TRY_ON_Cloud::take_over( $r['email'] ) );
+	}
+
+	/** AR-134: AtlasAR Cloud's signed events (checked in AR_TRY_ON_Cloud::receive()). */
+	public static function cloud_webhook( \WP_REST_Request $r ) {
+		return AR_TRY_ON_Cloud::receive( $r );
 	}
 
 	public static function cloud_key( \WP_REST_Request $r ) {

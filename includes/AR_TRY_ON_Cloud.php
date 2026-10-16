@@ -73,18 +73,26 @@ class AR_TRY_ON_Cloud {
 	public static function status( $fresh = false ) {
 		$c   = self::stored();
 		$out = array(
-			'available'  => self::available(),
-			'connected'  => '' !== $c['key'],
-			'key_prefix' => $c['key_prefix'],
-			'email'      => $c['email'],
-			'plan'       => $c['plan'],
-			'approval'   => $c['approval'],
-			'usage'      => null,
-			'error'      => $c['lost'] ? __( 'This site’s secret keys changed, so the saved AtlasAR Cloud key cannot be read any more. Please connect again.', 'ar-vr-3d-model-try-on' ) : '',
-			'links'      => self::links(),
-			'site_url'   => self::links()['dashboard'],
-			'my_email'   => (string) wp_get_current_user()->user_email,
+			'available'     => self::available(),
+			'connected'     => '' !== $c['key'],
+			'key_prefix'    => $c['key_prefix'],
+			'email'         => $c['email'],
+			'plan'          => $c['plan'],
+			'approval'      => $c['approval'],
+			'usage'         => null,
+			'error'         => $c['lost'] ? __( 'This site’s secret keys changed, so the saved AtlasAR Cloud key cannot be read any more. Please connect again.', 'ar-vr-3d-model-try-on' ) : '',
+			'webhook'       => '' !== $c['key'] && '' !== $c['webhook_secret'],
+			'webhook_error' => $c['webhook_error'],
+			'links'         => self::links(),
+			'site_url'      => self::links()['dashboard'],
+			'my_email'      => (string) wp_get_current_user()->user_email,
 		);
+		// AR-134: a site connected before webhooks (or whose last try failed) tries again, at most hourly.
+		if ( $out['connected'] && $out['available'] && ! $out['webhook'] && 'pending' !== $c['approval'] && ! get_transient( self::OPTION . '_webhook_try' ) ) {
+			set_transient( self::OPTION . '_webhook_try', 1, HOUR_IN_SECONDS );
+			$out['webhook']       = self::connect_webhook();
+			$out['webhook_error'] = self::stored()['webhook_error'];
+		}
 		if ( $out['connected'] && $out['available'] ) {
 			$usage = $fresh ? false : get_transient( self::OPTION . '_usage' );
 			if ( false === $usage ) {
@@ -100,6 +108,8 @@ class AR_TRY_ON_Cloud {
 				set_transient( self::OPTION . '_usage', $usage, self::USAGE_TTL );
 				if ( 'pending' === $c['approval'] ) {
 					self::save( array( 'approval' => 'active' ) );
+					self::connect_webhook(); // approved just now: AR-134 instant updates
+					do_action( 'atlas_ar_cloud_connected' );
 					$out['approval'] = 'active';
 				}
 			}
@@ -148,6 +158,9 @@ class AR_TRY_ON_Cloud {
 				'email'      => $email,
 			)
 		);
+		self::connect_webhook(); // AR-134: instant updates (best effort)
+		/** This site is connected to AtlasAR Cloud (AtlasAR Pro: its licence makes the site Premium). */
+		do_action( 'atlas_ar_cloud_connected' );
 		return self::status( true );
 	}
 
@@ -175,11 +188,17 @@ class AR_TRY_ON_Cloud {
 				'plan'       => is_wp_error( $res ) || empty( $res['usage']['plan'] ) ? 'free' : sanitize_key( $res['usage']['plan'] ),
 			)
 		);
+		self::connect_webhook(); // AR-134: instant updates (best effort)
+		/** This site is connected to AtlasAR Cloud (AtlasAR Pro: its licence makes the site Premium). */
+		do_action( 'atlas_ar_cloud_connected' );
 		return self::status( true );
 	}
 
 	/** Forget the key on this site (the account and its hosted models stay on the service). */
 	public static function disconnect() {
+		if ( self::connected() && '' !== self::stored()['webhook_url'] ) {
+			self::request( 'DELETE', '/v1/webhook' ); // best effort: no more events to this site
+		}
 		delete_option( self::OPTION );
 		delete_transient( self::OPTION . '_usage' );
 		return self::status();
@@ -350,18 +369,20 @@ class AR_TRY_ON_Cloud {
 
 	private static function stored() {
 		$c = get_option( self::OPTION, array() );
-		$c = wp_parse_args( is_array( $c ) ? $c : array(), array( 'key' => '', 'key_prefix' => '', 'project_id' => '', 'plan' => '', 'approval' => '', 'email' => '' ) );
+		$c = wp_parse_args( is_array( $c ) ? $c : array(), array( 'key' => '', 'key_prefix' => '', 'project_id' => '', 'plan' => '', 'approval' => '', 'email' => '', 'webhook_secret' => '', 'webhook_url' => '', 'webhook_error' => '' ) );
 
-		$key       = self::unseal( $c['key'] );
-		$c['lost'] = '' !== $c['key'] && '' === $key; // sealed with secret keys that changed since
-		$c['key']  = $key;
+		$key                 = self::unseal( $c['key'] );
+		$c['lost']           = '' !== $c['key'] && '' === $key; // sealed with secret keys that changed since
+		$c['key']            = $key;
+		$c['webhook_secret'] = self::unseal( $c['webhook_secret'] );
 		return $c;
 	}
 
 	private static function save( array $patch ) {
 		$c = array_merge( self::stored(), $patch );
 		unset( $c['lost'] );
-		$c['key'] = self::seal( (string) $c['key'] );
+		$c['key']            = self::seal( (string) $c['key'] );
+		$c['webhook_secret'] = self::seal( (string) $c['webhook_secret'] );
 		update_option( self::OPTION, $c, false );
 		delete_transient( self::OPTION . '_usage' );
 	}
@@ -469,6 +490,103 @@ class AR_TRY_ON_Cloud {
 		return $tmp;
 	}
 
+	/* ---------------------------------------------------------------- webhooks */
+
+	/** The address AtlasAR Cloud sends model.ready / model.failed to. */
+	public static function webhook_url() {
+		return rest_url( 'ar_try_on/v1/cloud/webhook' );
+	}
+
+	/**
+	 * AR-134: ask AtlasAR Cloud to tell this site when a model is ready, so a model arrives even
+	 * when no AtlasAR page is open. Best effort: the plugin still checks while a page is open.
+	 * The secret (shown once by the service) is kept sealed like the key.
+	 *
+	 * @return bool on
+	 */
+	public static function connect_webhook() {
+		$c = self::stored();
+		if ( '' === $c['key'] || 'pending' === $c['approval'] ) {
+			return false;
+		}
+		$url = self::webhook_url();
+		$res = self::request( 'PUT', '/v1/webhook', array( 'url' => $url ) );
+		if ( ! is_wp_error( $res ) && empty( $res['secret'] ) && ( '' === $c['webhook_secret'] || $url !== $c['webhook_url'] ) ) {
+			$res = self::request( 'POST', '/v1/webhook/rotate-secret' ); // there was one already, but not with a secret this site has
+		}
+		if ( is_wp_error( $res ) ) {
+			self::save( array( 'webhook_error' => $res->get_error_message() ) );
+			return false;
+		}
+		$patch = array( 'webhook_url' => $url, 'webhook_error' => '' );
+		if ( ! empty( $res['secret'] ) && is_string( $res['secret'] ) ) {
+			$patch['webhook_secret'] = $res['secret'];
+		}
+		self::save( $patch );
+		return true;
+	}
+
+	/**
+	 * An event from AtlasAR Cloud (REST, no login: it is signed). Checked on the raw body with
+	 * this site's secret (HMAC-SHA256 of "<t>.<body>", at most 5 minutes old); each event is
+	 * handled once. model.ready / model.failed finish the 3D Library's "Optimise on AtlasAR
+	 * Cloud" jobs; add-ons get the action atlas_ar_cloud_event( $type, $model ).
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function receive( \WP_REST_Request $r ) {
+		$secret = self::stored()['webhook_secret'];
+		$body   = (string) $r->get_body();
+		parse_str( str_replace( ',', '&', (string) $r->get_header( 'atlasar_signature' ) ), $sig );
+		$fresh = isset( $sig['t'] ) && abs( time() - (int) $sig['t'] ) <= 300;
+		$valid = '' !== $secret && isset( $sig['v1'] ) && is_string( $sig['v1'] ) && hash_equals( hash_hmac( 'sha256', $sig['t'] . '.' . $body, $secret ), $sig['v1'] );
+		if ( ! $fresh || ! $valid ) {
+			return new \WP_Error( 'atlas_ar_signature', 'Invalid signature.', array( 'status' => 401 ) );
+		}
+		$event = sanitize_text_field( (string) $r->get_header( 'atlasar_event_id' ) );
+		$seen  = 'atlas_ar_cloud_evt_' . md5( $event );
+		if ( '' !== $event && get_transient( $seen ) ) {
+			return new \WP_REST_Response( array( 'ok' => true, 'duplicate' => true ), 200 ); // at-least-once delivery
+		}
+		$data  = json_decode( $body, true );
+		$type  = sanitize_key( str_replace( '.', '_', (string) $r->get_header( 'atlasar_event_type' ) ) );
+		$model = is_array( $data ) && isset( $data['data']['model'] ) && is_array( $data['data']['model'] ) ? $data['data']['model'] : array();
+		$done  = 0;
+		if ( in_array( $type, array( 'model_ready', 'model_failed' ), true ) && ! empty( $model['id'] ) ) {
+			foreach ( self::models_waiting_for( (string) $model['id'] ) as $id ) {
+				self::optimise_poll( $id ); // downloads the finished file (or clears a failed job)
+				++$done;
+			}
+			/**
+			 * An AtlasAR Cloud model finished (AtlasAR Pro: "Make 3D" jobs).
+			 *
+			 * @param string $type  model_ready | model_failed
+			 * @param array  $model the model as GET /v1/models/:id answers it
+			 */
+			do_action( 'atlas_ar_cloud_event', $type, $model );
+		}
+		if ( '' !== $event ) {
+			set_transient( $seen, 1, 2 * DAY_IN_SECONDS );
+		}
+		return new \WP_REST_Response( array( 'ok' => true, 'handled' => $done ), 200 );
+	}
+
+	/** 3D Library models whose "Optimise on AtlasAR Cloud" job is this Cloud model. */
+	private static function models_waiting_for( $cloud_id ) {
+		if ( ! preg_match( '/^[A-Za-z0-9_-]{4,64}$/', $cloud_id ) ) {
+			return array();
+		}
+		return get_posts(
+			array(
+				'post_type'      => AR_TRY_ON_Library::POST_TYPE,
+				'post_status'    => 'any',
+				'posts_per_page' => 5,
+				'fields'         => 'ids',
+				'meta_query'     => array( array( 'key' => self::JOB_META, 'value' => '"' . $cloud_id . '"', 'compare' => 'LIKE' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query -- rare: one AtlasAR Cloud event.
+			)
+		);
+	}
+
 	/* ------------------------------------------------------------- move the site */
 
 	/** The query argument AtlasAR Cloud reads the one-time code from (the core's verifyParam). */
@@ -518,6 +636,9 @@ class AR_TRY_ON_Cloud {
 				'email'      => $email,
 			)
 		);
+		self::connect_webhook(); // AR-134: instant updates (best effort)
+		/** This site is connected to AtlasAR Cloud (AtlasAR Pro: its licence makes the site Premium). */
+		do_action( 'atlas_ar_cloud_connected' );
 		return self::status( true );
 	}
 

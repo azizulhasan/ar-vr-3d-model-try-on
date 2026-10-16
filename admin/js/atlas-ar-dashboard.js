@@ -324,6 +324,9 @@
 					' · ', __('Plan: ', D), cloud.plan || 'free') : null,
 				cloud.error ? el(C.Notice, { status: 'error', isDismissible: false }, cloud.error) : null,
 				cloud.approval !== 'pending' ? el('p', { className: 'description' }, __('Next: open the 3D Library, choose a model and click "Optimise on AtlasAR Cloud".', D)) : null,
+				cloud.approval !== 'pending' ? el('p', { className: 'description' }, cloud.webhook
+					? __('Instant updates are on: a finished model arrives even when no AtlasAR page is open.', D)
+					: sprintf(__('Instant updates are off (%s): finished models arrive the next time you open the 3D Library.', D), cloud.webhook_error || __('not set up yet', D))) : null,
 				el('div', { className: 'atlas-ar-row' },
 					el(C.Button, { variant: 'secondary', isBusy: busy, onClick: function () { run(UI.api('/cloud?fresh=1')); } }, __('Refresh', D)),
 					links.dashboard ? el('a', { className: 'button', href: links.dashboard, target: '_blank', rel: 'noopener noreferrer' }, __('Open the AtlasAR Cloud dashboard', D)) : null,
