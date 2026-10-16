@@ -2,7 +2,6 @@
 
 namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
-
 /**
  * Fired during plugin activation
  *
@@ -122,21 +121,6 @@ class AR_TRY_ON_Helper
         }
     }
 
-
-    public static function is_product_page()
-    {
-        if (!function_exists('get_current_screen')) {
-            require_once ABSPATH . 'wp-admin/includes/screen.php';
-        }
-        $screen = get_current_screen();
-
-        if (($screen && $screen->post_type == 'product' && $screen->base == 'post') || is_singular('product')) {
-            return true;
-        }
-
-        return false;
-    }
-
     public static function get_post_types()
     {
         $cache_key = AR_TRY_ON_Cache::get_key('get_post_types');
@@ -161,70 +145,6 @@ class AR_TRY_ON_Helper
         AR_TRY_ON_Cache::set($cache_key, $final_post_type);
 
         return $final_post_type;
-    }
-
-    public static function atlas_ar_should_load_button($post_status = '')
-    {
-        $should_load_button = false;
-        global $post;
-        // is_home() || is_archive() || is_front_page() || is_category()
-        if (\is_single() || \is_singular()) {
-            $should_load_button = true;
-        }
-
-        $settings = (array)get_option('ar_try_on_settings');
-
-        if (
-            !isset($settings['ar_try_on_allowed_post_types'])
-            || count($settings['ar_try_on_allowed_post_types']) === 0
-            || !is_array($settings['ar_try_on_allowed_post_types'])
-            || !in_array(self::post_type(), $settings['ar_try_on_allowed_post_types'])
-
-        ) {
-            $should_load_button = false;
-        }
-
-        if (self::is_edit_page()) {
-            $should_load_button = true;
-            if (
-                !isset($settings['ar_try_on_allowed_post_types'])
-                || count($settings['ar_try_on_allowed_post_types']) === 0
-                || !is_array($settings['ar_try_on_allowed_post_types'])
-                || !in_array(self::post_type(), $settings['ar_try_on_allowed_post_types'])
-            ) {
-                $should_load_button = false;
-            }
-        }
-
-        return apply_filters('atlas_ar_should_load_button', $should_load_button, $post);
-    }
-
-    /**
-     * Get post type
-     *
-     * @see
-     */
-
-    public static function post_type()
-    {
-        global $post;
-
-        return isset($post->post_type) ? $post->post_type : '';
-    }
-
-
-    public static function is_edit_page()
-    {
-        global $pagenow;
-
-        // Check if we are in the admin area and on the edit post/page screen
-        if (is_admin()) {
-            if ($pagenow === 'post.php' || $pagenow === 'post-new.php') {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -307,211 +227,6 @@ class AR_TRY_ON_Helper
     }
 
     /**
-     * `[atlas_ar]` shortcode renderer and Gutenberg-block render path.
-     *
-     * Attributes (all have safe defaults so the shortcode never breaks
-     * if the merchant omits them):
-     *  - `reveal`       — "true" | "false". Default "true" (preserves
-     *                     existing site behavior). When "false", the
-     *                     `<model-viewer>` is NOT rendered inline and
-     *                     only the Try-On / View-in-AR buttons appear.
-     *  - `height`       — viewer height (any CSS length). Default 400px.
-     *  - `width`        — viewer width (any CSS length). Default 500px.
-     *  - `padding`      — wrapper padding (any CSS value). Default 0.
-     *  - `margin`       — wrapper margin (any CSS value). Default 0.
-     *  - `aspect_ratio` — optional CSS aspect-ratio (e.g. "1/1", "16/9").
-     *                     When set, `height` is ignored and the viewer
-     *                     sizes itself from `width` + `aspect_ratio`.
-     *  - `position`     — legacy attribute, kept for backwards-compat.
-     *
-     * The Gutenberg block (`atlas/ar-shortcode`) emits this shortcode
-     * with attributes set from the block's inspector controls. When
-     * users type the shortcode manually they can pass any subset of
-     * attributes; the defaults fill the rest.
-     */
-    public static function create_shortcode($attr, $content = '')
-    {
-        $attributes = shortcode_atts(array(
-            'reveal'                 => 'true',
-            'height'                 => '400px',
-            'width'                  => '500px',
-            'padding'                => '0',
-            'margin'                 => '0',
-            'aspect_ratio'           => '',
-            'position'               => 'after',
-            // AR-61: override the "View in AR" button text on a per-emit
-            // basis. Empty → falls back to product metabox
-            // `view_in_ar_label`, then the global translated default.
-            // Example: `[atlas_ar button_label="See it in 3D"]`.
-            'button_label'           => '',
-            // Private: suppresses the Try-On overlay on face products.
-            // Used internally by the WC gallery cube-toggle wrapper to
-            // avoid emitting a duplicate Try-On button alongside the
-            // gallery's own floating pill.
-            'suppress_tryon_overlay' => '',
-        ), $attr);
-
-        $current_filter = current_filter();
-        if (!AR_TRY_ON_Helper::is_ar_supported_post_type('shortcode')) {
-            if ($current_filter === 'the_content') {
-                return $content;
-            }
-            return '';
-        }
-
-        $post_id = self::current_post_id();
-        if (!$post_id) {
-            return $current_filter === 'the_content' ? $content : '';
-        }
-
-        // Normalize `reveal` to a strict boolean. Any explicit "false" /
-        // "0" / "no" / "off" / `false` boolean wins; everything else
-        // (including the default empty case) falls back to reveal=true
-        // so we never break an existing post.
-        $reveal = filter_var($attributes['reveal'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
-        if ($reveal === null) {
-            $reveal = true;
-        }
-
-        // Detect face placement once so both branches can switch on it.
-        $is_face   = false;
-        $placement = '';
-        if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
-            $placement = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_placement($post_id);
-            $is_face   = \AR_TRY_ON\AR_TRY_ON_Tryon::is_face_placement($placement);
-            $placement = apply_filters('atlas_ar_tryon_woocommerce_mode_for_product', $placement, $post_id);
-        }
-
-        // ── Branch 1: reveal=false → buttons-only ────────────────────
-        if (!$reveal) {
-            if ($is_face && class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
-                // Face product: dynamic-buttons block (Try-On + optional
-                // View-in-AR). View-in-AR appears whenever the merchant
-                // has show_static_viewer_for_tryon on OR the shortcode is
-                // explicitly suppressed (reveal=false makes the AR
-                // button the only secondary action).
-                $tryon   = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
-                $args    = array('wrapper_id_suffix' => 'shortcode');
-                if (!empty($attributes['button_label'])) {
-                    $args['button_label'] = (string) $attributes['button_label'];
-                }
-                return $tryon->build_dynamic_buttons_block(
-                    $post_id,
-                    $placement,
-                    true, // always show View-in-AR alongside Try-On when reveal=false
-                    $args
-                );
-            }
-            // Non-face product: render the View-in-AR button right here,
-            // at the shortcode location, instead of relying on the
-            // ambient `atlas_ar_button` filter. Returning empty was a
-            // dead-end whenever the merchant placed `[atlas_ar
-            // reveal="false"]` on a floor/wall post — they saw nothing.
-            // AR-61 also adds `button_label="..."` support which only
-            // works if this branch actually emits a button.
-            if (class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
-                $tryon = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
-                $args  = array(
-                    'wrapper_id_suffix' => 'shortcode',
-                    'show_tryon'        => false,
-                    'view_in_ar_style'  => 'primary',
-                );
-                if (!empty($attributes['button_label'])) {
-                    $args['button_label'] = (string) $attributes['button_label'];
-                }
-                // Mark this post so AR_TRY_ON_Public::atlas_ar_button
-                // doesn't emit a second View-in-AR via the auto-display
-                // path below the content.
-                if (class_exists('\\AR_TRY_ON_Public\\AR_TRY_ON_Public')) {
-                    \AR_TRY_ON_Public\AR_TRY_ON_Public::mark_button_rendered($post_id);
-                }
-                return $tryon->build_dynamic_buttons_block(
-                    $post_id,
-                    $placement,
-                    true,
-                    $args
-                );
-            }
-            return '';
-        }
-
-        // ── Branch 2: reveal=true → inline `<model-viewer>` ───────────
-        // Build wrapper CSS from layout attributes. All values have
-        // defaults so the wrapper always has a valid sizing strategy.
-        $wrapper_style_parts = array();
-        if ($attributes['padding'] !== '' && $attributes['padding'] !== null) {
-            $wrapper_style_parts[] = 'padding:' . self::sanitize_css_value($attributes['padding']);
-        }
-        if ($attributes['margin'] !== '' && $attributes['margin'] !== null) {
-            $wrapper_style_parts[] = 'margin:' . self::sanitize_css_value($attributes['margin']);
-        }
-        // `aspect_ratio` (if present) wins over `height`.
-        if ($attributes['aspect_ratio'] !== '' && $attributes['aspect_ratio'] !== null) {
-            $wrapper_style_parts[] = 'width:' . self::sanitize_css_value($attributes['width']);
-            $wrapper_style_parts[] = 'aspect-ratio:' . self::sanitize_css_value($attributes['aspect_ratio']);
-        } else {
-            $wrapper_style_parts[] = 'height:' . self::sanitize_css_value($attributes['height']);
-            $wrapper_style_parts[] = 'width:' . self::sanitize_css_value($attributes['width']);
-        }
-        $wrapper_style = implode(';', $wrapper_style_parts);
-
-        // Try-On overlay button — rendered ABSOLUTELY positioned inside
-        // the viewer wrapper for face products. Uses the same CSS-var
-        // cascade as the WC gallery overlay, so the wp_footer sampler
-        // gives it the active theme's primary button color.
-        //
-        // Suppressed when the shortcode is called from within the WC
-        // gallery toggle wrapper ({@see \AR_TRY_ON\AR_TRY_ON::add_image_3d_toggle_to_gallery}) —
-        // in that path the gallery's own floating pill (rendered by
-        // {@see \AR_TRY_ON\AR_TRY_ON_Tryon::render_button_overlay}) is
-        // the canonical Try-On entry-point, and emitting our shortcode
-        // overlay too would produce a visible duplicate the moment the
-        // shopper clicks the cube toggle. The flag is opt-in via the
-        // `suppress_tryon_overlay` shortcode attribute (private —
-        // merchants never type it).
-        $tryon_overlay_html = '';
-        $suppress_tryon_overlay = filter_var($attributes['suppress_tryon_overlay'] ?? '', FILTER_VALIDATE_BOOLEAN);
-        if ($is_face
-            && ! $suppress_tryon_overlay
-            && class_exists('\\AR_TRY_ON\\AR_TRY_ON_Tryon')) {
-            $tryon  = new \AR_TRY_ON\AR_TRY_ON_Tryon(defined('ATLAS_AR_VERSION') ? ATLAS_AR_VERSION : '0.0.0');
-            $tryon->register_doc_root_sampler();
-
-            $glb_src  = \AR_TRY_ON\AR_TRY_ON_Tryon::get_product_glb_src($post_id);
-            $settings = \AR_TRY_ON\AR_TRY_ON_Tryon::get_settings();
-            $tryon_overlay_html = sprintf(
-                '<button type="button" data-product-id="%1$d" class="ar_vr_3d_model_try_on art-tryon-image-overlay atlas-ar-shortcode-overlay" data-mode="%2$s" data-glb-src="%3$s" aria-label="%4$s">%5$s</button>',
-                $post_id,
-                esc_attr($placement),
-                esc_url($glb_src),
-                esc_attr__('Try this on with your webcam', 'ar-vr-3d-model-try-on'),
-                esc_html($settings['tryon_button_label'])
-            );
-        }
-
-        // The model-viewer reveal used to run from an inline
-        // <script type="module"> here; it now lives in the enqueued
-        // public/js/ar-shortcode-reveal.js (registered in
-        // AR_TRY_ON_Public::enqueue_scripts alongside AtlasAR), which finds
-        // every `.atlas-ar-shortcode-reveal[data-product-id]` placeholder and
-        // injects the AtlasAR skeleton. Removing the inline script lets the
-        // shortcode markup pass cleanly through wp_kses() at the echo sites.
-
-        ob_start();
-        ?>
-        <div class="atlas-ar-shortcode-outer">
-            <div class="atlas-ar-shortcode-wrap" style="position:relative;<?php echo esc_attr($wrapper_style); ?>">
-                <div class="atlas-ar-shortcode-reveal" style="height:100%;width:100%;"
-                     id="atlas_ar_shortcode_<?php echo esc_attr($post_id) ?>"
-                     data-atlas-product-id="<?php echo esc_attr($post_id) ?>"></div>
-                <?php echo wp_kses( $tryon_overlay_html, self::allowed_html( 'overlay' ) ); ?>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    /**
      * Minimal CSS-value sanitiser for shortcode attributes. Strips
      * angle brackets and JavaScript-protocol sneaks; allows any
      * alphanumeric / dot / dash / percent / parens / space / slash /
@@ -559,222 +274,6 @@ class AR_TRY_ON_Helper
             $css = substr($css, 0, 5000);
         }
         return $css;
-    }
-
-    public static function is_qr_code_enabled($settings = [])
-    {
-        if (empty($settings)) {
-            $settings = self::get_settings();
-        }
-        if (!wp_is_mobile() && isset($settings['ar_try_on_enable_qr_code']) && $settings['ar_try_on_enable_qr_code'] == 'yes') {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static function get_qr_code($settings = [])
-    {
-        $ar_button_content = '';
-        if (!self::is_qr_code_enabled($settings)) {
-            return $ar_button_content;
-        }
-
-        $url = \get_permalink();
-
-        // Brand label rendered below the QR image. Filterable so Pro
-        // can short-circuit it to an empty string ("watermark-free" on
-        // paid sites). Default value carries the AtlasAR brand on
-        // Free installs.
-        $brand_label = (string) apply_filters( 'atlas_ar_qr_brand_label', 'AtlasAR' );
-
-        // Output only an escapable placeholder div carrying the page URL
-        // and brand label as data attributes. The QR itself is built at
-        // runtime by the enqueued `ar-qr-init.js` (which reads these
-        // attributes) — no inline <script>, so callers can wp_kses() the
-        // output instead of relying on a phpcs:ignore.
-        $ar_button_content = sprintf(
-            '<div id="atlas_ar_qr_code" data-atlas-qr-url="%s" data-atlas-qr-brand="%s"></div>',
-            esc_url( $url ),
-            esc_attr( $brand_label )
-        );
-
-        return $ar_button_content;
-    }
-
-    /**
-     * Context-specific allowed-HTML maps for echoing server-built markup
-     * through wp_kses().
-     *
-     * Centralises the per-context allow-lists so every "echo server-built
-     * HTML" call site in the plugin can share one escaping helper instead
-     * of an ad-hoc map (or a phpcs:ignore) at each site:
-     *
-     *     echo wp_kses( $html, AR_TRY_ON_Helper::allowed_html( 'qr' ) );
-     *
-     * IMPORTANT: wp_kses HTML-encodes characters inside `<script>` (e.g.
-     * `>` becomes `&gt;`), which breaks inline JavaScript. Markup that
-     * needs an inline `<script>` must first move that script to an
-     * enqueued file (see `public/js/ar-qr-init.js`); only the remaining
-     * script-free markup can be passed through wp_kses() with one of
-     * these maps. None of the contexts below allow `<script>`.
-     *
-     * @since 2.2.0
-     * @param string $context Which markup is being escaped. One of:
-     *                        'qr', 'model_viewer', 'ar_button', 'overlay'.
-     * @return array wp_kses allowed-HTML map.
-     */
-    public static function allowed_html( $context = 'qr' )
-    {
-        // Attributes every wrapper element may carry.
-        $global = array(
-            'id'    => true,
-            'class' => true,
-            'style' => true,
-            'title' => true,
-            'role'  => true,
-        );
-
-        switch ( $context ) {
-            case 'qr':
-                $allowed = array(
-                    'div'    => $global + array(
-                        'data-atlas-qr-url'   => true,
-                        'data-atlas-qr-brand' => true,
-                    ),
-                    'button' => $global + array( 'type' => true, 'aria-label' => true ),
-                    'span'   => $global,
-                    'img'    => $global + array( 'src' => true, 'alt' => true, 'width' => true, 'height' => true ),
-                );
-                break;
-
-            case 'model_viewer':
-                // Google's <model-viewer> web component + its wrapper markup.
-                $allowed = array(
-                    'div'          => $global + array(
-                        'data-thumb'        => true,
-                        'data-thumb-alt'    => true,
-                        'data-thumb-srcset' => true,
-                        'data-thumb-sizes'  => true,
-                    ),
-                    'span'         => $global,
-                    'a'            => $global + array( 'href' => true, 'target' => true, 'rel' => true ),
-                    'button'       => $global + array( 'type' => true, 'aria-label' => true ),
-                    'img'          => $global + array( 'src' => true, 'srcset' => true, 'sizes' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true ),
-                    'source'       => array( 'src' => true, 'srcset' => true, 'sizes' => true, 'type' => true ),
-                    'model-viewer' => $global + array(
-                        'src'                 => true,
-                        'ios-src'             => true,
-                        'alt'                 => true,
-                        'poster'              => true,
-                        'seamless-poster'     => true,
-                        'ar'                  => true,
-                        'ar-modes'            => true,
-                        'ar-scale'            => true,
-                        'ar-placement'        => true,
-                        'camera-controls'     => true,
-                        'auto-rotate'         => true,
-                        'auto-rotate-delay'   => true,
-                        'rotation-per-second' => true,
-                        'camera-orbit'        => true,
-                        'camera-target'       => true,
-                        'field-of-view'       => true,
-                        'min-camera-orbit'    => true,
-                        'max-camera-orbit'    => true,
-                        'min-field-of-view'   => true,
-                        'max-field-of-view'   => true,
-                        'environment-image'   => true,
-                        'skybox-image'        => true,
-                        'exposure'            => true,
-                        'shadow-intensity'    => true,
-                        'shadow-softness'     => true,
-                        'loading'             => true,
-                        'reveal'              => true,
-                        'disable-tap'         => true,
-                        'disable-zoom'        => true,
-                        'interaction-prompt'  => true,
-                        'touch-action'        => true,
-                        'tone-mapping'        => true,
-                        'autoplay'            => true,
-                        'data-js-focus-visible' => true,
-                    ),
-                );
-                break;
-
-            case 'overlay':
-                // The standalone Try-On overlay button: a plain <button> whose
-                // only child is an escaped text label (no SVG, no script).
-                $allowed = array(
-                    'button' => $global + array(
-                        'type'            => true,
-                        'data-product-id' => true,
-                        'data-mode'       => true,
-                        'data-glb-src'    => true,
-                        'aria-label'      => true,
-                    ),
-                    'span'   => $global,
-                );
-                break;
-
-            case 'ar_button':
-                // "View in AR" / Try-On dynamic-buttons block: wrapper divs +
-                // <button>s (Try-On carries data-mode/data-glb-src) + label and
-                // icon <span>s. Icons are CSS mask-image spans (no inline SVG),
-                // so only div/span/button markup needs to be allowed here.
-                $allowed = array(
-                    'div'    => $global,
-                    'span'   => $global + array( 'aria-hidden' => true ),
-                    'button' => $global + array(
-                        'type'            => true,
-                        'aria-label'      => true,
-                        'data-product-id' => true,
-                        'data-mode'       => true,
-                        'data-glb-src'    => true,
-                    ),
-                );
-                break;
-
-            case 'shortcode':
-                // `[atlas_ar]` reveal=true markup: nested wrapper <div>s + the
-                // empty `.atlas-ar-shortcode-reveal` placeholder (filled at
-                // runtime by ar-shortcode-reveal.js) + the optional Try-On
-                // overlay <button>. Also covers the hidden toggle source
-                // container, which carries the per-product data attributes.
-                $allowed = array(
-                    'div'    => $global + array(
-                        'data-atlas-product-id'    => true,
-                        'data-atlas-display-mode'  => true,
-                        // WooCommerce gallery item (the 3D poster wrapper).
-                        'data-thumb'               => true,
-                        'data-thumb-alt'           => true,
-                        'data-thumb-srcset'        => true,
-                        'data-thumb-sizes'         => true,
-                        'data-atlas-default-srcset' => true,
-                    ),
-                    'span'   => $global,
-                    'button' => $global + array(
-                        'type'            => true,
-                        'data-product-id' => true,
-                        'data-mode'       => true,
-                        'data-glb-src'    => true,
-                        'aria-label'      => true,
-                    ),
-                );
-                break;
-
-            default:
-                $allowed = array();
-        }
-
-        /**
-         * Filter the allowed-HTML map for a given echo context, so Pro and
-         * add-ons can extend (or restrict) what their markup may output.
-         *
-         * @since 2.2.0
-         * @param array  $allowed wp_kses allowed-HTML map.
-         * @param string $context Context key.
-         */
-        return apply_filters( 'atlas_ar_allowed_html', $allowed, $context );
     }
 
     public static function default_settings()
@@ -1075,7 +574,6 @@ class AR_TRY_ON_Helper
             }
         }
 
-
         return $response_body;
 
     }
@@ -1094,7 +592,6 @@ class AR_TRY_ON_Helper
 
         return $api_name;
     }
-
 
     /**
      * Reviewer item 2 (path traversal): confirm a candidate file path stays
@@ -1235,7 +732,6 @@ class AR_TRY_ON_Helper
                 $uploaded_files[$file_key]['path'] = $file_full_path;
             }
         }
-
 
         return $uploaded_files;
     }
@@ -1439,58 +935,6 @@ class AR_TRY_ON_Helper
             }
         }
         return false;
-    }
-
-    /**
-     * Get the effective "Show Button In" setting for a product
-     * Priority: Product metabox setting > Global setting
-     *
-     * @since 1.8.2
-     * @param int $post_id Product/Post ID
-     * @return string The hook position value (1-7, 'product_image', '3d_viewer', or empty)
-     */
-    public static function get_effective_show_button_in($post_id) {
-        // Get product-specific settings
-        $product_settings = (array) get_post_meta($post_id, 'ar_try_on_product_settings', true);
-
-        // Check if product has a specific setting (not 'global')
-        if (isset($product_settings['show_button_in']) && $product_settings['show_button_in'] !== 'global') {
-            return $product_settings['show_button_in'];
-        }
-
-        // Fall back to global settings
-        $global_settings = self::get_settings();
-
-        if (isset($global_settings['ar_try_on_wc_hook_position'])) {
-            return $global_settings['ar_try_on_wc_hook_position'];
-        }
-
-        // Default to 'product_image'
-        return 'product_image';
-    }
-
-    /**
-     * Check if the display mode is toggle-based (product_image or 3d_viewer)
-     *
-     * @since 1.8.2
-     * @param string $mode The display mode value
-     * @return bool True if toggle mode
-     */
-    public static function is_toggle_display_mode($mode) {
-        return in_array($mode, ['product_image', '3d_viewer'], true);
-    }
-
-    /**
-     * Check if a product has a 3D model attached
-     *
-     * @since 1.8.2
-     * @param int $post_id Product/Post ID
-     * @return bool True if product has 3D model
-     */
-    public static function has_3d_model($post_id) {
-        $product_settings = (array) get_post_meta($post_id, 'ar_try_on_product_settings', true);
-
-        return isset($product_settings['src']) && !empty($product_settings['src']);
     }
 
     /**

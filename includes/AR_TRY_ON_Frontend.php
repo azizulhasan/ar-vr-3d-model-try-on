@@ -42,6 +42,7 @@ class AR_TRY_ON_Frontend {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'quiet_old_pro' ), 6 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'drop_old_pro_scripts' ), 21 );
 		add_action( 'wp_footer', array( __CLASS__, 'enqueue_if_used' ), 1 );
+		add_filter( 'script_loader_tag', array( __CLASS__, 'no_optimize' ), 10, 2 );
 		add_action( 'wp', array( __CLASS__, 'place' ) );
 		add_filter( 'the_content', array( __CLASS__, 'content' ), 20 );
 	}
@@ -82,6 +83,17 @@ class AR_TRY_ON_Frontend {
 	/** AtlasAR Pro before 4.0 (the old viewer's Pro) is active. */
 	private static function old_pro() {
 		return defined( 'AR_TRY_ON_PRO_VERSION' ) && version_compare( AR_TRY_ON_PRO_VERSION, '4.0.0', '<' );
+	}
+
+	/**
+	 * Caching / optimisation plugins must not combine or delay the viewer SDK: it loads its own
+	 * files (model-viewer, decoders, try-on) from next to itself.
+	 */
+	public static function no_optimize( $tag, $handle ) {
+		if ( self::SDK_HANDLE === $handle && false === strpos( $tag, 'data-no-optimize' ) ) {
+			$tag = str_replace( ' src=', ' data-no-optimize="1" data-no-minify="1" data-cfasync="false" data-wpmeteor-nooptimize="true" src=', $tag );
+		}
+		return $tag;
 	}
 
 	/** Load the scripts in the footer when something on the page used them. */

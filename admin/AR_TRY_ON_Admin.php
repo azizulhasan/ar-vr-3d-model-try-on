@@ -317,6 +317,14 @@ class AR_TRY_ON_Admin {
 		}
 	}
 
+	/** `type="module"` for the admin preview's model-viewer script. */
+	public static function module_tag( $tag, $handle ) {
+		if ( 'ar-try-on-google-model-viewer' === $handle && false === strpos( $tag, 'type="module"' ) ) {
+			$tag = str_replace( ' src=', ' type="module" src=', $tag );
+		}
+		return $tag;
+	}
+
 	/**
 	 * Enqueue Google's <model-viewer> for admin previews.
 	 *
@@ -330,6 +338,10 @@ class AR_TRY_ON_Admin {
 	 */
 	private function enqueue_model_viewer( $deps = array() ) {
 		wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', $deps, $this->version, true );
+		// model-viewer is an ES module: load it as one (edits the tag WordPress prints).
+		if ( ! has_filter( 'script_loader_tag', array( __CLASS__, 'module_tag' ) ) ) {
+			add_filter( 'script_loader_tag', array( __CLASS__, 'module_tag' ), 10, 2 );
+		}
 
 		$decoder_base = ATLAS_AR_PLUGIN_URL . 'public/js/vendor/decoders/';
 		$inline_decoder_config = sprintf(

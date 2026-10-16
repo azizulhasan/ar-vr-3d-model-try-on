@@ -6,22 +6,10 @@ mix.js('src/dashboard/index.js', 'admin/js/build/ar-try-on-dashboard-ui.min.js')
 mix.js('src/metabox/index.js', 'admin/js/build/ar-try-on-metabox-ui.min.js').react();
 mix.js('admin/js/ar-try-on-media-library.js', 'admin/js/build/ar-try-on-media-library.min.js');
 mix.js('admin/js/ar-compression-client.js', 'admin/js/build/ar-compression-client.min.js');
-mix.js('public/js/ar-vr-3d-model-try-on-public.js', 'public/js/ar-vr-3d-model-try-on-public-dist.js');
 mix.js('admin/js/ar-vr-3d-model-try-on-preview.js', 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js');
-mix.js('public/js/AtlasAR.js', 'public/js/AtlasAR.dist.js');
 
-// Try-On (TensorFlow.js + MediaPipe) — lazy-loaded entry, never on initial render.
-// Worker uses native webpack 5 `new Worker(new URL(...), { type: 'module' })` syntax.
-mix.js('public/js/tryon/tryon-bootstrap.js', 'public/js/build/tryon-bootstrap.dist.js');
-
-// `glb-anatomy.js` is dynamic-imported by the Pro renderer at runtime from
-// the Free plugin URL — it's NOT part of the webpack bundle, AND it must
-// remain a valid ES module so the dynamic import can read its named
-// exports (`computeGlbAnatomy`, `persistGlbAnatomy`). `mix.minify()`
-// preserves ES module syntax; `mix.js()` would wrap the output in a
-// webpack IIFE and break the import contract. The raw `.js` is still
-// shipped (SCRIPT_DEBUG fallback) — PHP picks at enqueue.
-mix.minify('public/js/tryon/glb-anatomy.js');
+// AR-116: the shop front end is the AtlasAR viewer SDK (public/js/atlasar-sdk, copied by
+// scripts/copy-atlasar-sdk.js) plus public/js/atlas-ar-front.js (plain, not bundled).
 
 
 mix.webpackConfig({
@@ -37,55 +25,13 @@ mix.webpackConfig({
         // Caught during Pro-active compression smoke-test 2026-06.
         publicPath: 'auto',
 
-        // Route chunks to a path based on chunk name. Try-on chunks
-        // include a contenthash in the filename so every rebuild
-        // produces a unique URL — prevents browsers from holding on
-        // to a stale chunk file whose webpack runtime IDs no longer
-        // match the freshly-built bootstrap.dist.js. The cleanup
-        // hook below wipes orphaned files each build so the chunks
-        // dir doesn't grow forever.
-        chunkFilename: (pathData) => {
-            const name = (pathData.chunk && pathData.chunk.name) || '';
-            if (/tryon|landmarker|mediapipe/i.test(name)) {
-                return 'public/js/build/chunks/[name].[contenthash:8].js';
-            }
-            return 'admin/js/build/chunks/[name].js';
-        },
+        chunkFilename: 'admin/js/build/chunks/[name].js',
     },
     optimization: {
         splitChunks: false, // Disable shared/vendor splitting; dynamic imports still chunk.
         runtimeChunk: false,
     },
     plugins: [
-        // BEFORE-build: wipe the try-on chunks dir so old hashed files
-        // don't pile up after repeated rebuilds.
-        {
-            apply: (compiler) => {
-                compiler.hooks.beforeRun.tapAsync('WipeTryonChunks', (_c, cb) => {
-                    const dir = path.join(__dirname, 'public/js/build/chunks');
-                    if (fs.existsSync(dir)) {
-                        for (const f of fs.readdirSync(dir)) {
-                            try {
-                                fs.unlinkSync(path.join(dir, f));
-                            } catch (e) { /* ignore */ }
-                        }
-                    }
-                    cb();
-                });
-                // Also wipe on `watch` runs.
-                compiler.hooks.watchRun.tapAsync('WipeTryonChunksWatch', (_c, cb) => {
-                    const dir = path.join(__dirname, 'public/js/build/chunks');
-                    if (fs.existsSync(dir)) {
-                        for (const f of fs.readdirSync(dir)) {
-                            try {
-                                fs.unlinkSync(path.join(dir, f));
-                            } catch (e) { /* ignore */ }
-                        }
-                    }
-                    cb();
-                });
-            }
-        },
         // Auto-cleanup unwanted chunk files after compilation.
         {
             apply: (compiler) => {
@@ -112,10 +58,8 @@ mix.webpackConfig({
                         }
                     });
 
-                    // Delete unwanted folders. Note: public/js/build/chunks
-                    // AND admin/js/build/chunks are BOTH intentionally kept
-                    // — public hosts the lazy-loaded try-on controller and
-                    // MediaPipe worker; admin hosts the Draco-encoder chunk
+                    // Delete unwanted folders. Note: admin/js/build/chunks is
+                    // intentionally kept: it hosts the Draco-encoder chunk
                     // that `ar-compression-client.js` dynamic-imports at
                     // compression time. Deleting either folder breaks the
                     // matching feature with a `ChunkLoadError: Loading
