@@ -65,7 +65,7 @@ class AR_TRY_ON_Frontend {
 	 * removed `AtlasAR` script; WordPress 6.9.1+ warns about that missing dependency at once. The
 	 * SDK viewer switches variations itself (atlas-ar-front.js), so the old script has nothing to
 	 * do: an empty `AtlasAR` handle (no file, no code) keeps WordPress quiet, then the old script
-	 * is dropped. Only while Pro 3.x is active; Pro 4 needs neither.
+	 * is dropped. Only while Pro 3.x is active; Pro 4 (ATLAS_AR_PRO_SDK) needs neither.
 	 */
 	public static function quiet_old_pro() {
 		if ( self::old_pro() && ! wp_script_is( 'AtlasAR', 'registered' ) ) {
@@ -80,9 +80,9 @@ class AR_TRY_ON_Frontend {
 		}
 	}
 
-	/** AtlasAR Pro before 4.0 (the old viewer's Pro) is active. */
+	/** AtlasAR Pro 3.x (the old viewer's Pro) is active: Pro 4 defines ATLAS_AR_PRO_SDK. */
 	private static function old_pro() {
-		return defined( 'AR_TRY_ON_PRO_VERSION' ) && version_compare( AR_TRY_ON_PRO_VERSION, '4.0.0', '<' );
+		return defined( 'AR_TRY_ON_PRO_VERSION' ) && ! defined( 'ATLAS_AR_PRO_SDK' );
 	}
 
 	/**

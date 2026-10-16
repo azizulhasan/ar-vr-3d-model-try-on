@@ -8,6 +8,9 @@
  *   atlasAr.wizard.steps         [ { id, label, render(ctx), next } ] setup wizard steps
  *   atlasAr.product.tabs         [ { id, label, render(ctx) } ]       product panel tabs
  *   atlasAr.integrations.cards   [ { id, render(ctx) } ]               Integrations page cards
+ *   atlasAr.product.viewerOptions (options, ctx) → options               the panel's preview
+ *   atlasAr.product.save         (promises, savedItem) → promises        save more with "Save 3D settings"
+ *   atlasAr.proNotes             true → false hides the "See AtlasAR Pro" notes
  */
 (function (wp, boot) {
 	'use strict';
@@ -77,6 +80,7 @@
 
 	/** A short note about what AtlasAR Pro adds (text and a link: never a disabled control). */
 	function ProNote(props) {
+		if (filters('atlasAr.proNotes', true) === false) return null; // AtlasAR Pro is here: no note
 		return el('p', { className: 'atlas-ar-pro-note' },
 			el('span', { className: 'atlas-ar-badge atlas-ar-badge--pro' }, 'Pro'), ' ',
 			props.children, ' ',

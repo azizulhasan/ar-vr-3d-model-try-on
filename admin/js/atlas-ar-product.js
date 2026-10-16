@@ -159,21 +159,35 @@
 			setSt({ busy: true, saved: false, error: '', dirty: true });
 			var data = Object.assign({}, item.data); delete data.model_id;
 			UI.api('/items/' + item.id, { method: 'POST', data: { data: data } }).then(function (res) {
-				setItem(res); setSt({ busy: false, saved: true, error: '', dirty: false });
-			}, function (e) { setSt({ busy: false, saved: false, error: UI.message(e), dirty: true }); });
+				setItem(res);
+				// Lets AtlasAR Pro save its own part with the same click (it can return a Promise).
+				var extra = wp.hooks ? wp.hooks.applyFilters('atlasAr.product.save', [], res) : [];
+				return Promise.all(extra).then(function () { setSt({ busy: false, saved: true, error: '', dirty: false }); });
+			}).catch(function (e) { setSt({ busy: false, saved: false, error: UI.message(e), dirty: true }); });
 		}
-		var ctx = { item: item, setItem: setItem, setData: setData, boot: boot };
+		var _rev = useState(0), rev = _rev[0], setRev = _rev[1];
+		var ctx = {
+			item: item, setItem: setItem, setData: setData, boot: boot,
+			/** The preview's <atlasar-viewer> (e.g. to place hotspots). */
+			viewer: function () { return viewerRef.current; },
+			/** Ask the preview to redraw (after AtlasAR Pro changed what it shows); changed = false for a load. */
+			refresh: function (changed) {
+				setRev(function (n) { return n + 1; });
+				if (changed !== false) setSt(function (cur) { return Object.assign({}, cur, { saved: false, dirty: true }); });
+			}
+		};
 		var tabs = UI.filters('atlasAr.product.tabs', [
 			{ id: 'model', label: __('3D model', D), render: ModelTab },
 			{ id: 'display', label: __('Display', D), render: DisplayTab },
 			{ id: 'tryon', label: __('Try-on', D), render: TryonTab }
 		], ctx);
 		var current = tabs.filter(function (t) { return t.id === tab; })[0] || tabs[0];
-		var options = viewerOptions(item, boot.look);
+		// AtlasAR Pro adds hotspots, sizes and more models to the preview.
+		var options = UI.filters('atlasAr.product.viewerOptions', viewerOptions(item, boot.look), ctx);
 
 		return el('div', { className: 'atlas-ar-panel' },
 			el('div', { className: 'atlas-ar-panel-view' },
-				el(UI.Viewer, { options: Object.assign({ qr: !!boot.qr }, options), height: '340px', reloadKey: JSON.stringify(options), innerRef: viewerRef, empty: __('No 3D model yet. Add one on the right.', D) }),
+				el(UI.Viewer, { options: Object.assign({ qr: !!boot.qr }, options), height: '340px', reloadKey: JSON.stringify(options) + ':' + rev, innerRef: viewerRef, empty: __('No 3D model yet. Add one on the right.', D) }),
 				options.src ? el('div', { className: 'atlas-ar-row' },
 					el(C.Button, { variant: 'secondary', onClick: function () { var h = viewerRef.current; if (h && h.requestFullscreen) h.requestFullscreen().catch(function () {}); } }, __('Full screen', D))) : null),
 			el('div', { className: 'atlas-ar-panel-side' },
