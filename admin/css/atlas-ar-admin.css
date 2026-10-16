@@ -114,3 +114,25 @@
 	.atlas-ar-brand{width:100%}
 	.atlas-ar-split,.atlas-ar-panel{grid-template-columns:1fr}
 }
+
+/* AR-128: desktop-app layout (with the shared rules in atlas-ar-library.css). */
+@media (min-width:961px) and (min-height:560px){
+	body.atlas-ar-fullscreen .atlas-ar-wrap{display:flex;margin:0 0 0 -20px;border-top:1px solid #dcdcde;background:#f6f7f7}
+	body.atlas-ar-fullscreen #atlas-ar-dashboard{flex:1 1 auto;min-height:0;overflow:auto}
+	body.atlas-ar-fullscreen .atlas-ar-app{height:100%;max-width:none;gap:0;grid-template-columns:210px minmax(0,1fr)}
+	body.atlas-ar-fullscreen .atlas-ar-nav{position:static;height:100%;box-sizing:border-box;overflow:auto;padding:16px 10px;border-right:1px solid #dcdcde;background:#fff}
+	body.atlas-ar-fullscreen .atlas-ar-main{height:100%;box-sizing:border-box;overflow:auto;padding:20px 28px 28px}
+	body.atlas-ar-fullscreen .atlas-ar-wizard{padding:20px 0}
+}
+
+/* AR-128: the product panel keeps its preview in view; the tab content scrolls inside the box. */
+@media (min-width:961px){
+	.atlas-ar-panel{height:min(640px,calc(100vh - 140px));min-height:460px}
+	.atlas-ar-panel-view{overflow:hidden}
+	.atlas-ar-panel-side{display:flex;flex-direction:column;min-height:0}
+	.atlas-ar-panel-side .atlas-ar-tabs{flex:none}
+	.atlas-ar-panel-side .atlas-ar-tab-body{flex:1 1 auto;min-height:0;overflow:auto;padding-right:6px}
+	.atlas-ar-panel-side .atlas-ar-tab-body>*{flex-shrink:0}
+	.atlas-ar-panel-side .atlas-ar-savebar{flex:none;margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f1}
+	.atlas-ar-panel-side>.description{flex:none;margin:4px 0 0}
+}

@@ -71,3 +71,30 @@
 .atlas-ar-loading .components-spinner{margin:0}
 .atlas-ar-grid-wrap.is-loading,.atlas-ar-list.is-loading{opacity:.5;pointer-events:none;transition:opacity .15s}
 @media (prefers-reduced-motion:reduce){.atlas-ar-grid-wrap.is-loading,.atlas-ar-list.is-loading{transition:none}}
+
+/*
+ * AR-128: desktop-app layout. On wide, tall enough screens the AtlasAR dashboard and the
+ * 3D Library fill the window under the admin bar: WordPress notices keep their height, the app
+ * takes the rest, and lists and panes scroll inside themselves (no long page). Smaller screens
+ * keep the normal page flow.
+ */
+@media (min-width:961px) and (min-height:560px){
+	/* The page itself may still scroll when WordPress's own admin menu is longer than the window. */
+	body.atlas-ar-fullscreen #wpfooter{display:none}
+	body.atlas-ar-fullscreen #wpcontent{padding-bottom:0}
+	body.atlas-ar-fullscreen #wpbody-content{display:flex;flex-direction:column;box-sizing:border-box;height:calc(100vh - 32px);padding-bottom:0;overflow:hidden}
+	body.atlas-ar-fullscreen #wpbody-content>*{flex:none}
+	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-wrap,
+	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-library-wrap{flex:1 1 auto;min-height:0;margin-bottom:0}
+
+	/* 3D Library page */
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap{display:flex;flex-direction:column;padding-bottom:12px;box-sizing:border-box}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap>#atlas-ar-library,
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-library{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;max-width:none}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-browser{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-upload{flex:none;max-height:40vh;overflow:auto}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-body{flex:1 1 auto;min-height:0}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-grid-wrap{height:100%;overflow:auto;padding:2px 6px 12px 2px;box-sizing:border-box;align-content:start}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-detail{position:static;height:100%;overflow:auto;box-sizing:border-box}
+	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-detail>*{flex-shrink:0} /* the pane scrolls; its parts keep their size */
+}

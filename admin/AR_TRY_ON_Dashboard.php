@@ -30,6 +30,16 @@ class AR_TRY_ON_Dashboard {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'register' ), 4 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_page' ) );
 		add_action( 'admin_init', array( __CLASS__, 'maybe_redirect' ) );
+		add_filter( 'admin_body_class', array( __CLASS__, 'body_class' ) );
+	}
+
+	/** AR-128: the dashboard and the 3D Library are full-window app screens (atlas-ar-admin.css). */
+	public static function body_class( $classes ) {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen && in_array( $screen->id, array( 'toplevel_page_' . self::SLUG, 'atlasar_page_' . AR_TRY_ON_Library_Page::SLUG ), true ) ) {
+			$classes .= ' atlas-ar-fullscreen';
+		}
+		return $classes;
 	}
 
 	/** The page's URL (the wizard: setup=1). */
