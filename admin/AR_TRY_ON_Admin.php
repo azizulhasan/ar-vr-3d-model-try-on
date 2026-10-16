@@ -137,9 +137,10 @@ class AR_TRY_ON_Admin {
 		// the bottom of the menu, never wedged between core items.
 		// Float-string is used (not integer 81) so other plugins
 		// claiming round-number positions don't collide.
+		$brand = self::brand();
 		add_menu_page(
-			'AtlasAR',
-			'AtlasAR',
+			$brand['name'],
+			$brand['name'],
 			'manage_options',
 			'ar-vr-3d-model-try-on',
 			array( $this, "ar_try_on_settings" ),
@@ -152,6 +153,28 @@ class AR_TRY_ON_Admin {
         do_action( 'atlas_ar_menu', $this );
 
     }
+
+	/**
+	 * AR-138: the product name and version the admin shows ("AtlasAR 3.0.0"; AtlasAR Pro sets
+	 * "AtlasAR Pro" and its own version). Filter: atlas_ar_brand.
+	 *
+	 * @return array { name, version }
+	 */
+	public static function brand() {
+		$brand = (array) apply_filters( 'atlas_ar_brand', array( 'name' => 'AtlasAR', 'version' => defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '' ) );
+		return array(
+			'name'    => sanitize_text_field( isset( $brand['name'] ) ? (string) $brand['name'] : 'AtlasAR' ),
+			'version' => sanitize_text_field( isset( $brand['version'] ) ? (string) $brand['version'] : '' ),
+		);
+	}
+
+	/**
+	 * AR-138: the menu icon is a 30 × 34 image: fit it in WordPress's 20 px icon slot, so it sits
+	 * on the same line as the other menu icons (every admin page shows the menu).
+	 */
+	public static function menu_icon_style() {
+		wp_add_inline_style( 'admin-menu', '#adminmenu .toplevel_page_ar-vr-3d-model-try-on .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;object-fit:contain;opacity:1}' );
+	}
 
 	/** The dashboard page (also the callback old AtlasAR Pro 3.x registers for this page). */
 	public function ar_try_on_settings() {

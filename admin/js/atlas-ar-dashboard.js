@@ -143,12 +143,12 @@
 			el(UI.Head, { title: __('Products', D), lead: __('Your products and their 3D, AR and try-on status. Add a model right from here.', D) }),
 			ctx.cloud.available && !ctx.cloud.connected && !s.general.cloud_tip_off ? el('div', { className: 'atlas-ar-cloud-tip' },
 				el('div', null,
-					el('strong', null, __('Get more from your 3D models with AtlasAR Cloud (free plan)', D)),
+					el('strong', null, __('Make your 3D product pages load faster: connect AtlasAR Cloud (free)', D)),
 					el('ul', null,
-						el('li', null, __('Much smaller files, at the real size', D)),
-						el('li', null, __('FBX and OBJ files turned into GLB', D)),
-						el('li', null, __('Fast loading from a worldwide CDN', D)),
-						el('li', null, __('iPhone AR files made for you', D)))),
+						el('li', null, __('Files usually 80–95 % smaller, same look', D)),
+						el('li', null, __('Each model at its real size in AR', D)),
+						el('li', null, __('Big files up to 50 MB, done in the background', D)),
+						el('li', null, __('20 models a month free; no limit with AtlasAR Pro', D)))),
 				el('div', { className: 'atlas-ar-row' },
 					el(C.Button, { variant: 'primary', onClick: function () { ctx.go('integrations'); } }, __('Connect, it is free', D)),
 					el(C.Button, { variant: 'tertiary', onClick: function () { ctx.save({ general: { cloud_tip_off: true } }); } }, __('Not now', D)))) : null,
@@ -296,11 +296,23 @@
 		function link(href, text) {
 			return href ? el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, text) : null;
 		}
-		var benefits = el('ul', { className: 'atlas-ar-benefits' },
-			el('li', null, el('strong', null, __('Optimise: ', D)), __('smaller files at the real size, also big files and FBX / OBJ', D)),
-			el('li', null, el('strong', null, __('Hosting: ', D)), __('models load fast from a worldwide CDN', D)),
-			el('li', null, el('strong', null, __('iPhone AR: ', D)), __('USDZ files made for you', D)),
-			el('li', null, el('strong', null, __('One account: ', D)), __('works for this shop, a Shopify store or any website', D)));
+		// AR-138: what the shop gets, in plain words (all of it true for this plugin today).
+		var benefits = el('div', { className: 'atlas-ar-cloud-benefits' },
+			el('div', { className: 'atlas-ar-cloud-benefit' },
+				el('strong', null, __('Pages load faster', D)),
+				el('span', null, __('3D files usually become 80–95 % smaller, with the same look. Example: 17.7 MB → 0.8 MB.', D))),
+			el('div', { className: 'atlas-ar-cloud-benefit' },
+				el('strong', null, __('True size in AR', D)),
+				el('span', null, __('Each model is scaled to the product’s real height, so a 32 cm vase looks 32 cm on the shopper’s table.', D))),
+			el('div', { className: 'atlas-ar-cloud-benefit' },
+				el('strong', null, __('Big files too', D)),
+				el('span', null, __('Up to 50 MB: files too heavy to optimise in a browser are done on our servers.', D))),
+			el('div', { className: 'atlas-ar-cloud-benefit' },
+				el('strong', null, __('Nothing to wait for', D)),
+				el('span', null, __('Send a model and keep working: the lighter file replaces it on your site by itself, the original is kept.', D))),
+			el('p', { className: 'atlas-ar-cloud-plans' },
+				el('strong', null, __('Free plan: ', D)), __('20 models a month, no card needed.', D), ' ',
+				el('strong', null, __('With AtlasAR Pro: ', D)), __('Premium is included: no monthly limit, optimise in bulk and photo to 3D.', D)));
 		var steps = el('div', { className: 'atlas-ar-cloud-steps' },
 			el('h3', null, __('How connecting works', D)),
 			el('ol', null,
@@ -369,7 +381,7 @@
 							el(C.Button, { variant: 'link', onClick: function () { setMode('new'); } }, __('Make a free account instead', D)))),
 				steps);
 		}
-		return el(UI.Section, { className: 'atlas-ar-card-cloud', title: __('AtlasAR Cloud', D), lead: __('Your 3D models, everywhere. Optional: everything else in AtlasAR works without it.', D) },
+		return el(UI.Section, { className: 'atlas-ar-card-cloud', title: __('AtlasAR Cloud', D), lead: __('Lighter 3D models at their real size: faster product pages and AR that looks right. Optional: everything else in AtlasAR works without it.', D) },
 			body, err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null);
 	}
 
@@ -582,7 +594,7 @@
 
 		return el('div', { className: 'atlas-ar-app' },
 			el('nav', { className: 'atlas-ar-nav', 'aria-label': __('AtlasAR', D) },
-				el('div', { className: 'atlas-ar-brand' }, 'AtlasAR', boot.version ? el('span', null, boot.version) : null),
+				el('div', { className: 'atlas-ar-brand' }, (boot.brand && boot.brand.name) || 'AtlasAR', (boot.brand && boot.brand.version) || boot.version ? el('span', null, (boot.brand && boot.brand.version) || boot.version) : null),
 				pages.map(function (p) {
 					return el('button', { key: p.id, type: 'button', className: 'atlas-ar-nav-item' + (p.id === current.id ? ' is-current' : ''), 'aria-current': p.id === current.id ? 'page' : undefined, onClick: function () { ctx.go(p.id); } }, p.label);
 				}),

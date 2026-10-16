@@ -603,7 +603,7 @@
 
 	function Page() {
 		return el('div', { className: 'atlas-ar-library' },
-			el('h1', { className: 'wp-heading-inline' }, __('3D Library', D)),
+			el('h1', { className: 'wp-heading-inline' }, __('3D Library', D), config.brand && config.brand.name ? el('span', { className: 'atlas-ar-library-brand' }, config.brand.name) : null),
 			el('p', { className: 'atlas-ar-lead' }, __('All your 3D models and their files in one place: GLB, iPhone USDZ and poster images. Kept apart from the Media Library.', D)),
 			el(Browser, null)
 		);

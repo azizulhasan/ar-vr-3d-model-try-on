@@ -199,6 +199,7 @@ class AR_TRY_ON_Admin_Routes {
 				'with3d'   => self::count_with_model(),
 			),
 			'version'    => defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '',
+			'brand'      => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::brand(), // AR-138: "AtlasAR Pro" with Pro
 			'demoModel'  => self::demo_model(),
 		);
 

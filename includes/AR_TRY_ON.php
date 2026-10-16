@@ -175,6 +175,7 @@ class AR_TRY_ON {
 
 
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'atlas_ar_menu' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'menu_icon_style' ); // AR-138
 	}
 
 	/**

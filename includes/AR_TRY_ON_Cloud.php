@@ -98,9 +98,10 @@ class AR_TRY_ON_Cloud {
 			if ( false === $usage ) {
 				$res = self::request( 'GET', '/v1/usage' );
 				if ( is_wp_error( $res ) ) {
-					$out['error'] = $res->get_error_message();
 					if ( 'approval_required' === $res->get_error_code() ) {
-						$out['approval'] = 'pending';
+						$out['approval'] = 'pending'; // the screen explains it once (not an error)
+					} else {
+						$out['error'] = $res->get_error_message();
 					}
 					return $out;
 				}

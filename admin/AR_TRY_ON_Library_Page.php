@@ -40,7 +40,8 @@ class AR_TRY_ON_Library_Page {
 			__( '3D Library', 'ar-vr-3d-model-try-on' ),
 			'upload_files',
 			self::SLUG,
-			array( __CLASS__, 'render' )
+			array( __CLASS__, 'render' ),
+			1 // AR-138: right after the dashboard
 		);
 	}
 
@@ -67,6 +68,7 @@ class AR_TRY_ON_Library_Page {
 				'largeBytes' => AR_TRY_ON_Library::large_bytes(),
 				'accept'     => '.' . implode( ',.', array_unique( array_merge( ...array_values( AR_TRY_ON_Library::KINDS ) ) ) ),
 				'pageUrl'    => admin_url( 'admin.php?page=' . self::SLUG ),
+				'brand'      => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::brand(), // AR-138
 				// AR-121: Optimise.
 				'autoOptimise' => (bool) \AR_TRY_ON\AR_TRY_ON_Settings::get( 'general.auto_optimise' ),
 				'cloud'        => \AR_TRY_ON\AR_TRY_ON_Cloud::available() && \AR_TRY_ON\AR_TRY_ON_Cloud::connected(),

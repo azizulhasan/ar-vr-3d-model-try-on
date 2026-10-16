@@ -12,6 +12,8 @@
 .atlas-ar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
 /* A panel an add-on opens from the toolbar (AtlasAR Pro: Make with AI) */
 .atlas-ar-library-action{margin:0 0 16px;padding:16px;border:1px solid #dcdcde;border-radius:4px;background:#fff}
+/* AR-138: which product this is (AtlasAR / AtlasAR Pro) next to the title */
+.atlas-ar-library-brand{display:inline-block;margin-left:10px;padding:2px 8px;border-radius:10px;background:#f0f6fc;color:#2271b1;font-size:12px;font-weight:600;vertical-align:middle}
 /* Pages of models under the grid */
 .atlas-ar-library-pager{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px;margin:16px 0 4px}
 .atlas-ar-library-pager .atlas-ar-muted{margin-right:auto;color:#646970}
