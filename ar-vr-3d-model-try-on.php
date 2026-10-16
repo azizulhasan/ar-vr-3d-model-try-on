@@ -194,6 +194,10 @@ function atlas_ar_run() {
 	// try-on runtime and its routes are no longer loaded).
 	\AR_TRY_ON\AR_TRY_ON_Library::register();
 	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
+	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Library_Routes', 'register' ) );
+	if ( is_admin() ) {
+		\AR_TRY_ON_Admin\AR_TRY_ON_Library_Page::init();
+	}
 
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();

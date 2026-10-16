@@ -1,0 +1,61 @@
+/* AR-119: AtlasAR 3D Library page and model picker. WordPress admin colours. */
+.atlas-ar-library{max-width:1400px;color:#1d2327}
+.atlas-ar-library .atlas-ar-lead{margin:4px 0 16px;color:#50575e;font-size:14px}
+.atlas-ar-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}
+.atlas-ar-search{flex:1 1 220px;max-width:320px}
+.atlas-ar-filters{display:flex;flex-wrap:wrap;gap:8px}
+.atlas-ar-filter{min-height:32px;padding:6px 12px;border:1px solid #c3c4c7;border-radius:16px;background:#fff;color:#1d2327;font-size:13px;cursor:pointer}
+.atlas-ar-filter.is-on{border-color:#2271b1;background:#2271b1;color:#fff}
+.atlas-ar-filter:focus-visible,.atlas-ar-card:focus-visible{outline:2px solid #2271b1;outline-offset:2px}
+
+.atlas-ar-body{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.atlas-ar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.atlas-ar-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:2px solid #c3c4c7;border-radius:8px;background:#fff;color:#1d2327;text-align:left;font:inherit;cursor:pointer}
+.atlas-ar-card:hover{border-color:#8c8f94}
+.atlas-ar-card.is-selected{border-color:#2271b1}
+.atlas-ar-thumb{display:flex;align-items:center;justify-content:center;height:120px;border-radius:6px;background:#f6f7f7;overflow:hidden}
+.atlas-ar-thumb img{width:100%;height:100%;object-fit:contain}
+.atlas-ar-thumb-icon{font-size:22px;font-weight:700;color:#8c8f94;letter-spacing:.5px}
+.atlas-ar-card-name{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.atlas-ar-card-meta{font-size:12px;color:#50575e}
+.atlas-ar-chips{display:flex;flex-wrap:wrap;gap:4px}
+.atlas-ar-chip{display:inline-block;padding:2px 7px;border-radius:8px;background:#f0f0f1;color:#3c434a;font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap}
+.atlas-ar-chip--glb{background:#e7f3ef;color:#0e6b5c}
+.atlas-ar-chip--usdz{background:#eef4fb;color:#135e96}
+.atlas-ar-chip--poster{background:#f6f0e6;color:#7a4e2d}
+.atlas-ar-chip--warn{background:#fcf0f1;color:#8a2424}
+
+.atlas-ar-detail{position:sticky;top:46px;display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid #c3c4c7;border-radius:8px;background:#fff}
+.atlas-ar-detail h3{margin:8px 0 0;font-size:13px}
+.atlas-ar-preview{border:1px solid #dcdcde;border-radius:8px;background:#fafafa;overflow:hidden}
+.atlas-ar-preview--empty{display:flex;align-items:center;justify-content:center;height:160px;color:#50575e}
+.atlas-ar-preview atlasar-viewer{display:block}
+.atlas-ar-files,.atlas-ar-used,.atlas-ar-kinds,.atlas-ar-queue{margin:0;padding:0;list-style:none}
+.atlas-ar-file,.atlas-ar-missing,.atlas-ar-queue li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f1}
+.atlas-ar-file-name{flex:1 1 120px;min-width:0;overflow-wrap:anywhere}
+.atlas-ar-file-meta{font-size:12px;color:#50575e}
+.atlas-ar-missing span:first-child{flex:1 1 160px;color:#50575e}
+.atlas-ar-used li{padding:3px 0}
+.atlas-ar-detail-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.atlas-ar-detail .components-button,.atlas-ar-toolbar .components-button,.atlas-ar-upload .components-button{min-height:36px}
+
+.atlas-ar-upload{margin-bottom:16px}
+.atlas-ar-drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:2px dashed #8c8f94;border-radius:8px;background:#fff;text-align:center}
+.atlas-ar-drop.is-over{border-color:#2271b1;background:#f0f6fc}
+.atlas-ar-drop p{margin:0;color:#50575e}
+.atlas-ar-kinds{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px;font-size:12px;color:#50575e}
+.atlas-ar-queue{margin-top:8px;padding:8px 12px;border:1px solid #c3c4c7;border-radius:8px;background:#fff}
+.atlas-ar-queue-status{font-size:12px;color:#50575e}
+.atlas-ar-queue .is-done .atlas-ar-queue-status{color:#007017}
+.atlas-ar-queue .is-error .atlas-ar-queue-status{color:#b32d2e}
+.atlas-ar-empty{padding:32px;border:1px solid #c3c4c7;border-radius:8px;background:#fff;text-align:center}
+
+.atlas-ar-picker{width:min(1100px,96vw)}
+.atlas-ar-picker .atlas-ar-body{grid-template-columns:minmax(0,1fr) 320px}
+.atlas-ar-picker .atlas-ar-detail{position:static}
+
+@media (max-width:960px){
+	.atlas-ar-body,.atlas-ar-picker .atlas-ar-body{grid-template-columns:1fr}
+	.atlas-ar-detail{position:static}
+}
+@media (prefers-reduced-motion:reduce){.atlas-ar-library *{transition:none!important}}
