@@ -65,3 +65,9 @@
 .atlas-ar-optimise h3{margin-top:0}
 .atlas-ar-optimise .components-base-control{margin-bottom:0}
 .atlas-ar-step{margin:8px 0 0;color:#50575e}
+
+/* AR-125: loading state of the lists (filters, search). */
+.atlas-ar-loading{display:inline-flex;align-items:center;gap:6px;margin:0;color:#50575e;font-size:13px}
+.atlas-ar-loading .components-spinner{margin:0}
+.atlas-ar-grid-wrap.is-loading,.atlas-ar-list.is-loading{opacity:.5;pointer-events:none;transition:opacity .15s}
+@media (prefers-reduced-motion:reduce){.atlas-ar-grid-wrap.is-loading,.atlas-ar-list.is-loading{transition:none}}

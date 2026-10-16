@@ -98,11 +98,18 @@
 		var _err = useState(''), err = _err[0], setErr = _err[1];
 		var s = ctx.settings;
 
+		var _loading = useState(true), loading = _loading[0], setLoading = _loading[1];
+		var req = UI.useRef(0);
 		function load() {
+			var mine = ++req.current; // only the newest answer is shown (quick filter clicks)
+			setLoading(true);
 			wp.apiFetch({ path: '/ar_try_on/v1/items?filter=' + filter + '&page=' + page + '&search=' + encodeURIComponent(search), parse: false }).then(function (res) {
-				setTotal(parseInt(res.headers.get('X-WP-Total') || '0', 10));
+				if (mine === req.current) setTotal(parseInt(res.headers.get('X-WP-Total') || '0', 10));
 				return res.json();
-			}).then(function (list) { setItems(list); setErr(''); }, function (e) { setItems([]); setErr(UI.message(e)); });
+			}).then(function (list) {
+				if (mine !== req.current) return;
+				setItems(list); setErr(''); setLoading(false);
+			}, function (e) { if (mine !== req.current) return; setItems([]); setErr(UI.message(e)); setLoading(false); });
 		}
 		useEffect(function () { var t = setTimeout(load, search ? 300 : 0); return function () { clearTimeout(t); }; }, [filter, search, page]);
 
@@ -161,8 +168,9 @@
 						[['all', __('All', D)], ['with', __('With 3D', D)], ['without', __('Without 3D', D)], ['tryon', __('Try-on', D)]].map(function (f) {
 							return el('button', { key: f[0], type: 'button', className: 'atlas-ar-filter' + (filter === f[0] ? ' is-on' : ''), 'aria-pressed': filter === f[0] ? 'true' : 'false', onClick: function () { setFilter(f[0]); setPage(1); } }, f[1]);
 						}))),
+				loading && items !== null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
-				items === null ? el(C.Spinner, null) : items.length === 0
+				items === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : el('div', { className: 'atlas-ar-list' + (loading ? ' is-loading' : ''), 'aria-busy': loading ? 'true' : 'false' }, items.length === 0
 					? el('p', { className: 'atlas-ar-empty' }, search || filter !== 'all' ? __('No products match.', D) : __('No products yet.', D))
 					: el('table', { className: 'widefat striped atlas-ar-table' },
 						el('thead', null, el('tr', null,
@@ -178,7 +186,7 @@
 								el('td', { className: 'atlas-ar-actions' }, m
 									? el('a', { href: i.edit_url + '#atlas-ar-panel', className: 'button' }, __('Edit', D))
 									: el(C.Button, { variant: 'primary', onClick: function () { addModel(i); } }, __('Add 3D', D))));
-						}))),
+						})))),
 				total > 20 ? el('div', { className: 'atlas-ar-pager' },
 					el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),
 					el('span', null, sprintf(__('Page %1$d of %2$d', D), page, Math.ceil(total / 20))),

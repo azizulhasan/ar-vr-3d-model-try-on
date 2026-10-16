@@ -480,12 +480,18 @@
 		var _err = useState(''), err = _err[0], setErr = _err[1];
 		var _up = useState(false), up = _up[0], setUp = _up[1];
 
+		var _loading = useState(true), loading = _loading[0], setLoading = _loading[1];
+		var req = useRef(0);
 		function load(keepSel) {
+			var mine = ++req.current; // only the newest answer is shown (quick filter clicks)
+			setLoading(true);
 			return list({ filter: filter, search: search }).then(function (res) {
+				if (mine !== req.current) return;
 				setItems(res);
 				setErr('');
+				setLoading(false);
 				if (!keepSel && res.length && !res.some(function (m) { return m.id === sel; })) setSel(res[0].id);
-			}, function (e) { setItems([]); setErr(message(e)); });
+			}, function (e) { if (mine !== req.current) return; setItems([]); setErr(message(e)); setLoading(false); });
 		}
 		useEffect(function () {
 			var t = setTimeout(function () { load(false); }, search ? 300 : 0);
@@ -507,6 +513,7 @@
 						'aria-pressed': filter === f[0] ? 'true' : 'false', onClick: function () { setFilter(f[0]); }
 					}, f[1]);
 				})),
+				loading && items !== null ? el('span', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null,
 				el(C.Button, { variant: up ? 'secondary' : 'primary', onClick: function () { setUp(!up); } }, up ? __('Close upload', D) : (props.onUse ? __('Upload new', D) : __('Upload 3D files', D)))
 			),
 			up ? el(Uploader, {
@@ -516,8 +523,8 @@
 			}) : null,
 			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 			el('div', { className: 'atlas-ar-body' },
-				el('div', { className: 'atlas-ar-grid-wrap' },
-					items === null ? el(C.Spinner, null)
+				el('div', { className: 'atlas-ar-grid-wrap' + (loading ? ' is-loading' : ''), 'aria-busy': loading ? 'true' : 'false' },
+					items === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D))
 						: items.length ? el('div', { className: 'atlas-ar-grid' }, items.map(function (m) {
 							return el(Card, { key: m.id, model: m, selected: m.id === sel, onPick: function () { setSel(m.id); }, onUse: props.onUse });
 						}))
