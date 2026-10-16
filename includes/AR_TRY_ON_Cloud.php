@@ -419,7 +419,7 @@ class AR_TRY_ON_Cloud {
 			case 'suspended':
 				return __( 'This AtlasAR Cloud account is suspended. Please contact AtlasAR support.', 'ar-vr-3d-model-try-on' );
 			case 'quota_exceeded':
-				return __( 'This month’s models are used up. More are available next month, or with a bigger plan.', 'ar-vr-3d-model-try-on' );
+				return __( 'This month’s optimisations are used up. More are available next month, or with AtlasAR Pro (no monthly limit).', 'ar-vr-3d-model-try-on' );
 			case 'model_limit':
 				return __( 'Your plan’s number of hosted models is reached.', 'ar-vr-3d-model-try-on' );
 			case 'feature_not_in_plan':
