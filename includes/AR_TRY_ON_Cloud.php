@@ -107,11 +107,20 @@ class AR_TRY_ON_Cloud {
 				}
 				$usage = isset( $res['usage'] ) && is_array( $res['usage'] ) ? $res['usage'] : array();
 				set_transient( self::OPTION . '_usage', $usage, self::USAGE_TTL );
-				if ( 'pending' === $c['approval'] ) {
+				// Approved just now. Several dashboard requests can notice it at once: only one runs this.
+				if ( 'pending' === $c['approval'] && ( add_option( self::OPTION . '_approving', time(), '', false ) || time() - (int) get_option( self::OPTION . '_approving' ) > 2 * MINUTE_IN_SECONDS ) ) {
 					self::save( array( 'approval' => 'active' ) );
-					self::connect_webhook(); // approved just now: AR-134 instant updates
-					do_action( 'atlas_ar_cloud_connected' );
+					self::connect_webhook(); // AR-134 instant updates
+					do_action( 'atlas_ar_cloud_connected' ); // AtlasAR Pro: the licence makes the site Premium
+					delete_option( self::OPTION . '_approving' );
+					// AR-143: the plan may have changed just now (Premium), so read the usage again.
+					$again = self::request( 'GET', '/v1/usage' );
+					if ( ! is_wp_error( $again ) && isset( $again['usage'] ) && is_array( $again['usage'] ) ) {
+						$usage = $again['usage'];
+						set_transient( self::OPTION . '_usage', $usage, self::USAGE_TTL );
+					}
 					$out['approval'] = 'active';
+					$out['webhook']  = '' !== self::stored()['webhook_secret'];
 				}
 			}
 			$out['usage'] = self::clean_usage( $usage );
@@ -380,6 +389,9 @@ class AR_TRY_ON_Cloud {
 	}
 
 	private static function save( array $patch ) {
+		// AR-143: merge into what is saved now, not this request's older copy (another request may
+		// have saved the webhook secret meanwhile).
+		wp_cache_delete( self::OPTION, 'options' );
 		$c = array_merge( self::stored(), $patch );
 		unset( $c['lost'] );
 		$c['key']            = self::seal( (string) $c['key'] );
