@@ -76,6 +76,13 @@
 .atlas-ar-cat.is-on{border-color:#9fd0c3;color:#1d2327}
 .atlas-ar-cat .atlas-ar-badge{align-self:flex-start;margin:0}
 .atlas-ar-benefits{margin:0 0 12px 18px;list-style:disc}
+/* AR-133: how connecting AtlasAR Cloud works; the "already registered" choices */
+.atlas-ar-cloud-steps{margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f1}
+.atlas-ar-cloud-steps h3{margin:0 0 8px;font-size:13px}
+.atlas-ar-cloud-steps ol,.atlas-ar-cloud-choices{margin:0 0 8px 20px}
+.atlas-ar-cloud-steps li,.atlas-ar-cloud-choices li{margin-bottom:6px;color:#50575e}
+.atlas-ar-cloud-choices li{margin-bottom:12px}
+.atlas-ar-cloud-links{margin:8px 0 0;color:#646970}
 .atlas-ar-code{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px;border-radius:6px;background:#f6f7f7}
 .atlas-ar-code code{flex:1;background:none;font-size:13px}
 .atlas-ar-checks{margin:0;padding:0;list-style:none}

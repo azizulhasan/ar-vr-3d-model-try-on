@@ -99,6 +99,17 @@ class AR_TRY_ON_Admin_Routes {
 					),
 				),
 			),
+			'/cloud/takeover'    => array(
+				array(
+					'POST', 'cloud_takeover', $admin,
+					__( 'Move this site to another AtlasAR Cloud email', 'ar-vr-3d-model-try-on' ),
+					__( 'For a site already registered with another email (a former owner, an old address): proves this site is yours (AtlasAR Cloud reads a one-time code from the site’s public address), then moves it to this email. The old key stops working, the old owner is told; the new key may wait for approval when the email already has an account. The site must be public.', 'ar-vr-3d-model-try-on' ),
+					array(
+						'email'   => self::arg( 'string', 'The email the site moves to.', array( 'required' => true, 'format' => 'email', 'sanitize_callback' => 'sanitize_email' ) ),
+						'consent' => self::arg( 'boolean', 'Must be true (as for connect).', array( 'required' => true ) ),
+					),
+				),
+			),
 			'/cloud/key'         => array(
 				array(
 					'POST', 'cloud_key', $admin,
@@ -346,6 +357,13 @@ class AR_TRY_ON_Admin_Routes {
 		return self::cloud_answer( AR_TRY_ON_Cloud::register( $r['email'] ) );
 	}
 
+	public static function cloud_takeover( \WP_REST_Request $r ) {
+		if ( true !== $r['consent'] ) {
+			return new \WP_Error( 'atlas_ar_consent', __( 'Please tick the box to agree first.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+		}
+		return self::cloud_answer( AR_TRY_ON_Cloud::take_over( $r['email'] ) );
+	}
+
 	public static function cloud_key( \WP_REST_Request $r ) {
 		return self::cloud_answer( AR_TRY_ON_Cloud::use_key( (string) $r['key'] ) );
 	}
@@ -356,7 +374,9 @@ class AR_TRY_ON_Admin_Routes {
 
 	private static function cloud_answer( $res ) {
 		if ( is_wp_error( $res ) ) {
-			return new \WP_Error( $res->get_error_code(), $res->get_error_message(), array( 'status' => 400 ) );
+			// owner_hint + takeover (project_exists) let the screen offer to move the site.
+			$data = (array) $res->get_error_data();
+			return new \WP_Error( $res->get_error_code(), $res->get_error_message(), array( 'status' => 400 ) + array_intersect_key( $data, array( 'owner_hint' => 1, 'takeover' => 1 ) ) );
 		}
 		return $res;
 	}

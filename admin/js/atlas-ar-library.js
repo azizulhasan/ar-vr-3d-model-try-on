@@ -377,12 +377,19 @@
 			o ? el('p', { className: 'atlas-ar-saved' },
 				sprintf(o.by === 'cloud' ? __('Optimised on AtlasAR Cloud: %1$s → %2$s', D) : __('Optimised in this browser: %1$s → %2$s', D), size(o.before), size(o.after)),
 				o.height_cm ? ' · ' + sprintf(__('real height %s cm', D), o.height_cm) : '') : null,
-			el('p', { className: 'description' }, __('Smaller files load faster. Runs in this browser: nothing is uploaded anywhere. The original file is kept.', D)),
+			el('p', { className: 'description' }, config.cloud
+				? __('Smaller files load faster. "Optimise" runs in this browser: nothing is uploaded. "Optimise on AtlasAR Cloud" sends the file to AtlasAR Cloud (also for very big files) and needs the real height. The original file is kept.', D)
+				: __('Smaller files load faster. Runs in this browser: nothing is uploaded anywhere. The original file is kept.', D)),
 			el('div', { className: 'atlas-ar-row' },
-				el(C.TextControl, { label: __('Real height (cm), optional', D), type: 'number', min: 0.5, max: 1000, step: 0.1, value: heightCm, onChange: setHeightCm, help: __('Scales the model to its true size for AR.', D) })),
+				el(C.TextControl, {
+					label: config.cloud ? __('Real height (cm): optional here, needed for AtlasAR Cloud', D) : __('Real height (cm), optional', D),
+					type: 'number', min: 0.5, max: 1000, step: 0.1, value: heightCm, onChange: setHeightCm,
+					help: __('The product’s real height, e.g. 32 for a 32 cm vase: the model is scaled to its true size for AR.', D)
+				})),
 			el('div', { className: 'atlas-ar-row' },
 				el(C.Button, { variant: 'primary', isBusy: busy === 'optimise', disabled: !!busy, onClick: optimise }, o ? __('Optimise again', D) : __('Optimise', D)),
-				config.cloud ? el(C.Button, { variant: 'secondary', isBusy: busy === 'cloud', disabled: !!busy, onClick: cloudOptimise }, __('Optimise on AtlasAR Cloud', D)) : null,
+				// AtlasAR Cloud always makes the model at its real size: the height is needed first.
+				config.cloud ? el(C.Button, { variant: 'secondary', isBusy: busy === 'cloud', disabled: !!busy || !(parseFloat(heightCm) >= 0.5 && parseFloat(heightCm) <= 1000), onClick: cloudOptimise, title: parseFloat(heightCm) >= 0.5 ? '' : __('Enter the real height first', D) }, __('Optimise on AtlasAR Cloud', D)) : null,
 				m.files.original ? el(C.Button, { variant: 'tertiary', disabled: !!busy, onClick: restore }, __('Restore the original', D)) : null),
 			step ? el('p', { className: 'atlas-ar-step', role: 'status' }, step) : null) : null;
 		var convertBox = m.files.source && !m.files.glb ? el('div', { className: 'atlas-ar-optimise' },

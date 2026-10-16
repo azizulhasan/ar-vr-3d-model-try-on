@@ -179,6 +179,9 @@ function atlas_ar_run() {
 	// try-on runtime and its routes are no longer loaded).
 	\AR_TRY_ON\AR_TRY_ON_Library::register();
 	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
+	// AR-133: AtlasAR Cloud checking this site (moving it to another email). atlas_ar_run() runs on
+	// `init`, before any output: answered here, then the request ends.
+	\AR_TRY_ON\AR_TRY_ON_Cloud::answer_verify();
 	\AR_TRY_ON\AR_TRY_ON_Elementor::init(); // AR-129: widget + live preview (only acts when Elementor runs)
 	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Library_Routes', 'register' ) );
 	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Admin_Routes', 'register' ) );

@@ -272,21 +272,43 @@
 
 	function CloudCard(ctx) {
 		var cloud = ctx.cloud;
-		var _email = useState(''), email = _email[0], setEmail = _email[1];
+		var links = cloud.links || {};
+		var _email = useState(cloud.my_email || ''), email = _email[0], setEmail = _email[1];
 		var _ok = useState(false), consent = _ok[0], setConsent = _ok[1];
 		var _key = useState(''), key = _key[0], setKey = _key[1];
 		var _mode = useState('new'), mode = _mode[0], setMode = _mode[1];
 		var _busy = useState(false), busy = _busy[0], setBusy = _busy[1];
 		var _err = useState(''), err = _err[0], setErr = _err[1];
+		// AR-133: the site is registered with another email: { hint, takeover }.
+		var _taken = useState(null), taken = _taken[0], setTaken = _taken[1];
 		function run(promise) {
 			setBusy(true); setErr('');
-			promise.then(function (st) { setBusy(false); ctx.setCloud(st); }, function (e) { setBusy(false); setErr(UI.message(e)); });
+			promise.then(function (st) { setBusy(false); setTaken(null); ctx.setCloud(st); }, function (e) {
+				setBusy(false);
+				if (e && e.code === 'project_exists') {
+					setTaken({ hint: (e.data && e.data.owner_hint) || '', takeover: !!(e.data && e.data.takeover) });
+					return;
+				}
+				setErr(UI.message(e));
+			});
+		}
+		function link(href, text) {
+			return href ? el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, text) : null;
 		}
 		var benefits = el('ul', { className: 'atlas-ar-benefits' },
 			el('li', null, el('strong', null, __('Optimise: ', D)), __('smaller files at the real size, also big files and FBX / OBJ', D)),
 			el('li', null, el('strong', null, __('Hosting: ', D)), __('models load fast from a worldwide CDN', D)),
 			el('li', null, el('strong', null, __('iPhone AR: ', D)), __('USDZ files made for you', D)),
 			el('li', null, el('strong', null, __('One account: ', D)), __('works for this shop, a Shopify store or any website', D)));
+		var steps = el('div', { className: 'atlas-ar-cloud-steps' },
+			el('h3', null, __('How connecting works', D)),
+			el('ol', null,
+				el('li', null, __('Enter your email and click "Connect this site". A new email gets a free AtlasAR Cloud account at once, no card needed.', D)),
+				el('li', null, __('Already have an AtlasAR Cloud account with this email? We email you a link to approve this site. Click it, then click "Refresh" here.', D)),
+				el('li', null, __('Done: "Optimise on AtlasAR Cloud" appears in the 3D Library. The key is stored encrypted on this site; only its first letters are shown.', D))),
+			el('p', { className: 'atlas-ar-cloud-links' },
+				link(links.connect, __('Step-by-step guide', D)), ' · ', link(links.pricing, __('Plans', D)), ' · ',
+				link(links.terms, __('Terms', D)), ' · ', link(links.privacy, __('Privacy', D))));
 
 		var body;
 		if (!cloud.available) {
@@ -296,19 +318,34 @@
 			body = el(Fragment, null,
 				el('p', null, el('span', { className: 'atlas-ar-saved' }, cloud.approval === 'pending' ? __('Waiting for approval', D) : __('Connected', D)),
 					cloud.email ? ' · ' + cloud.email : '', ' · ', el('code', null, cloud.key_prefix + '…')),
-				cloud.approval === 'pending' ? el(C.Notice, { status: 'warning', isDismissible: false }, __('Open the email from AtlasAR Cloud and approve this site; then press Refresh.', D)) : null,
+				cloud.approval === 'pending' ? el(C.Notice, { status: 'warning', isDismissible: false }, __('Open the email from AtlasAR Cloud and approve this site; then click Refresh.', D)) : null,
 				u.units_limit !== undefined ? el('p', null, el('strong', null, __('Models this month: ', D)),
 					u.units_limit === null ? sprintf(__('%d (no limit)', D), u.units_used) : sprintf('%d / %d', u.units_used, u.units_limit),
 					' · ', __('Plan: ', D), cloud.plan || 'free') : null,
 				cloud.error ? el(C.Notice, { status: 'error', isDismissible: false }, cloud.error) : null,
+				cloud.approval !== 'pending' ? el('p', { className: 'description' }, __('Next: open the 3D Library, choose a model and click "Optimise on AtlasAR Cloud".', D)) : null,
 				el('div', { className: 'atlas-ar-row' },
 					el(C.Button, { variant: 'secondary', isBusy: busy, onClick: function () { run(UI.api('/cloud?fresh=1')); } }, __('Refresh', D)),
-					cloud.site_url ? el('a', { className: 'button', href: cloud.site_url, target: '_blank', rel: 'noopener noreferrer' }, __('Open AtlasAR Cloud', D)) : null,
+					links.dashboard ? el('a', { className: 'button', href: links.dashboard, target: '_blank', rel: 'noopener noreferrer' }, __('Open the AtlasAR Cloud dashboard', D)) : null,
 					el(C.Button, { variant: 'tertiary', isDestructive: true, disabled: busy, onClick: function () { run(UI.api('/cloud', { method: 'DELETE' })); } }, __('Disconnect', D))));
+		} else if (taken) {
+			body = el(Fragment, null,
+				el(C.Notice, { status: 'warning', isDismissible: false },
+					taken.hint ? sprintf(__('This site is already connected to AtlasAR Cloud with another email (%s).', D), taken.hint) : __('This site is already connected to AtlasAR Cloud with another email.', D)),
+				el('p', null, __('Choose one:', D)),
+				el('ol', { className: 'atlas-ar-cloud-choices' },
+					el('li', null, el('strong', null, __('It is your other email: ', D)), __('enter that email and click "Connect this site" again.', D), ' ',
+						el(C.Button, { variant: 'link', onClick: function () { setTaken(null); setEmail(''); } }, __('Use the other email', D))),
+					el('li', null, el('strong', null, __('You have that account’s API key: ', D)), __('paste it (AtlasAR Cloud dashboard › Sites › Keys).', D), ' ',
+						el(C.Button, { variant: 'link', onClick: function () { setTaken(null); setMode('key'); } }, __('Paste a key', D))),
+					taken.takeover ? el('li', null, el('strong', null, sprintf(__('Move this site to %s: ', D), email)),
+						__('AtlasAR Cloud checks that you run this site (it reads a one-time code from the site’s public address), then moves it. The old key stops working and the old email is told. The site must be online and public.', D), ' ',
+						el(C.Button, { variant: 'secondary', isBusy: busy, disabled: busy, onClick: function () { run(UI.api('/cloud/takeover', { method: 'POST', data: { email: email, consent: true } })); } }, __('Move the site to this email', D))) : null),
+				el(C.Button, { variant: 'tertiary', onClick: function () { setTaken(null); } }, __('Back', D)));
 		} else {
 			body = el(Fragment, null, benefits,
 				mode === 'new' ? el(Fragment, null,
-					el(C.TextControl, { label: __('Email for your AtlasAR Cloud account', D), type: 'email', value: email, onChange: setEmail, autoComplete: 'email' }),
+					el(C.TextControl, { label: __('Email for your AtlasAR Cloud account', D), type: 'email', value: email, onChange: setEmail, autoComplete: 'email', name: 'atlas_ar_cloud_email' }),
 					el(C.CheckboxControl, {
 						checked: consent, onChange: setConsent,
 						label: __('I agree that a model is sent to AtlasAR Cloud only when I click a Cloud button, and I accept the AtlasAR Cloud terms and privacy policy.', D)
@@ -317,10 +354,12 @@
 						el(C.Button, { variant: 'primary', isBusy: busy, disabled: busy || !consent || !email, onClick: function () { run(UI.api('/cloud/connect', { method: 'POST', data: { email: email, consent: consent } })); } }, __('Connect this site', D)),
 						el(C.Button, { variant: 'link', onClick: function () { setMode('key'); } }, __('I already have an API key', D))))
 					: el(Fragment, null,
-						el(C.TextControl, { label: __('AtlasAR Cloud API key', D), value: key, onChange: setKey, autoComplete: 'off', spellCheck: false }),
+						// Not a password field: a saved password is never filled in here.
+						el(C.TextControl, { label: __('AtlasAR Cloud API key', D), value: key, onChange: setKey, autoComplete: 'off', spellCheck: false, name: 'atlas_ar_cloud_api_key', 'data-1p-ignore': 'true', 'data-lpignore': 'true', help: __('In the AtlasAR Cloud dashboard: Sites › your site › Keys. It starts with ar_live_.', D) }),
 						el('div', { className: 'atlas-ar-row' },
 							el(C.Button, { variant: 'primary', isBusy: busy, disabled: busy || !key, onClick: function () { run(UI.api('/cloud/key', { method: 'POST', data: { key: key } })); } }, __('Save and test', D)),
-							el(C.Button, { variant: 'link', onClick: function () { setMode('new'); } }, __('Make a free account instead', D)))));
+							el(C.Button, { variant: 'link', onClick: function () { setMode('new'); } }, __('Make a free account instead', D)))),
+				steps);
 		}
 		return el(UI.Section, { className: 'atlas-ar-card-cloud', title: __('AtlasAR Cloud', D), lead: __('Your 3D models, everywhere. Optional: everything else in AtlasAR works without it.', D) },
 			body, err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null);
