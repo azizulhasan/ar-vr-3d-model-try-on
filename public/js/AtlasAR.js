@@ -1,4 +1,4 @@
-import {setModelAttributes, createModal, SpinnerModal, switchModelVariant} from "../../src/context/utilities";
+import {setModelAttributes, createModal, SpinnerModal, switchModelVariant, sdkViewerHost, resetSdkViewer} from "../../src/context/utilities";
 import {toSdkOptions} from "../../src/context/sdkOptions";
 
 /** AR-114: the AtlasAR viewer SDK (public/js/atlasar-sdk/atlasar.js), when it loaded. */
@@ -69,7 +69,7 @@ class AtlasAR {
     if (sdk()) {
       return `
                 <style id="model-viewer-style"></style>
-                <atlasar-viewer class="atlas-ar-sdk-viewer" data-atlas-ar-slot="${model_id}" style="display:block;width:100%;height:100%;">
+                <atlasar-viewer class="atlas-ar-sdk-viewer" data-atlas-ar-slot="${model_id}" qr="false" style="display:block;width:100%;height:100%;">
                     <model-viewer id="${model_id}" class="atlas_ar_model_viewer atlas-ar-sdk-placeholder" hidden></model-viewer>
                 </atlasar-viewer>`;
     }
@@ -103,15 +103,65 @@ class AtlasAR {
 
   /** AR-114: the <atlasar-viewer> for an old model-viewer selector ("#id" or ".atlas_ar_model_viewer"). */
   findViewerHost(model_id) {
+    return this.findViewerHosts(model_id)[0] || null;
+  }
+
+  /**
+   * AR-114: every <atlasar-viewer> for that selector. Two [atlas_ar] shortcodes on one post share
+   * one id (model_viewer_shortcode_<post id>); each gets the model (the old code filled only the first).
+   */
+  findViewerHosts(model_id) {
     if (typeof model_id === "string" && model_id.charAt(0) === "#") {
       const id = model_id.slice(1);
-      const slot = document.querySelector(`atlasar-viewer[data-atlas-ar-slot="${CSS.escape(id)}"]`);
-      if (slot) return slot;
+      const slots = [...document.querySelectorAll(`atlasar-viewer[data-atlas-ar-slot="${CSS.escape(id)}"]`)];
+      if (slots.length) return slots;
       const el = document.getElementById(id);
-      return el ? el.closest("atlasar-viewer") : null;
+      const host = el && el.closest("atlasar-viewer");
+      return host ? [host] : [];
     }
     const el = document.querySelector(model_id);
-    return el ? (el.tagName === "ATLASAR-VIEWER" ? el : el.closest("atlasar-viewer")) : document.querySelector("atlasar-viewer.atlas-ar-sdk-viewer");
+    const host = el ? (el.tagName === "ATLASAR-VIEWER" ? el : el.closest("atlasar-viewer")) : document.querySelector("atlasar-viewer.atlas-ar-sdk-viewer");
+    return host ? [host] : [];
+  }
+
+  /** AR-114: equal SDK options, apart from when they load. */
+  sameSdkOptions(a, b) {
+    const strip = (o) => JSON.stringify({ ...o, load: null });
+    return !!a && !!b && strip(a) === strip(b);
+  }
+
+  /**
+   * AR-114: clearing the WooCommerce selection shows the original model again, as before. (AtlasAR
+   * Pro's own reset handler holds the skeleton's placeholder, which the SDK replaces.) Bound once
+   * per viewer.
+   */
+  bindSdkVariationReset(host) {
+    const form = document.querySelector(".variations_form");
+    if (!form || !window.jQuery || host.dataset.atlasArResetBound) return;
+    host.dataset.atlasArResetBound = "1";
+    window.jQuery(form).on("reset_data", () => resetSdkViewer(host));
+  }
+
+  /** AR-114: give one SDK viewer the plugin's settings for this product. */
+  setSdkViewerData(host, data, type) {
+    const viewerId = host.getAttribute("data-atlas-ar-slot") || "";
+    // Opened by a click (popup, gallery toggle, full screen, tab): load at once. The gallery's
+    // hidden source copy (#atlas_ar-toggle-3d-container) waits, as before, until it is shown.
+    const immediate = type === "modal" || !!host.closest("#atlas_ar-3d-viewer-overlay, .atlas-ar-3d-viewer-overlay, .atlas-ar-fullscreen-viewer, .atlas-ar-wc-tab-viewer");
+    // Already-sized boxes the viewer fills (the plugin's CSS sized model-viewer to 100% there).
+    const fill = !!host.closest(".atlas-ar-3d-viewer-overlay, .atlas-ar-fullscreen-viewer, .atlas-ar-shortcode-wrap");
+    // Custom CSS stays page-level, exactly as before (it may target .atlas_ar_model_viewer).
+    const style = host.parentNode && host.parentNode.querySelector("#model-viewer-style");
+    if (style && typeof data.custom_css === "string") style.textContent = data.custom_css;
+    host.querySelectorAll(":scope > .atlas-ar-sdk-placeholder").forEach((n) => n.remove());
+    const next = toSdkOptions(data, { viewerId, immediate, fill });
+    // The same settings again (a second, slower answer for this viewer) must not redraw it: that
+    // would undo the variation the shopper picked meanwhile. Only a viewer still waiting may be
+    // told to load at once.
+    if (!this.sameSdkOptions(host.options, next) || (!host.modelViewer && next.load !== host.options.load)) {
+      host.options = next;
+    }
+    if (data.variationSettings) this.bindSdkVariationReset(host);
   }
 
   isObject(value) {
@@ -129,16 +179,9 @@ class AtlasAR {
       createModal(productName, htmlContent);
     }
     // AR-114: the SDK draws it.
-    const host = sdk() ? this.findViewerHost(model_id) : null;
-    if (host && this.isObject(data)) {
-      const viewerId = host.getAttribute("data-atlas-ar-slot") || "";
-      // Opened by a click (popup, gallery toggle, full screen, tab): load at once.
-      const immediate = type === "modal" || !!host.closest("#atlas_ar-3d-viewer-overlay, .atlas-ar-3d-viewer-overlay, .atlas-ar-fullscreen-viewer, .atlas-ar-wc-tab-viewer, #atlas_ar-toggle-3d-container, .woocommerce-product-gallery");
-      // Custom CSS stays page-level, exactly as before (it may target .atlas_ar_model_viewer).
-      const style = host.parentNode && host.parentNode.querySelector("#model-viewer-style");
-      if (style && typeof data.custom_css === "string") style.textContent = data.custom_css;
-      host.querySelectorAll(":scope > .atlas-ar-sdk-placeholder").forEach((n) => n.remove());
-      host.options = toSdkOptions(data, { viewerId, immediate });
+    const hosts = sdk() && this.isObject(data) ? this.findViewerHosts(model_id) : [];
+    if (hosts.length) {
+      hosts.forEach((host) => this.setSdkViewerData(host, data, type));
       return;
     }
     const modelViewer = document.querySelectorAll(model_id)[0];
@@ -324,12 +367,7 @@ class AtlasAR {
       console.warn('Model viewer not found:', modelSelector);
       return false;
     }
-    // AR-114: with the SDK, its variants module (AtlasAR Pro) switches it.
-    const host = modelViewer.closest && modelViewer.closest("atlasar-viewer");
-    if (host && typeof host.setVariant === "function") {
-      return host.setVariant(variantName);
-    }
-
+    // AR-114: an SDK viewer is switched by switchModelVariant() too (through the SDK's variants module).
     let modelSessionData = this.getModelSessionData("models", modelViewer.dataset.id);
 
     return switchModelVariant(modelViewer, variantName, modelSessionData);
@@ -367,6 +405,11 @@ class AtlasAR {
     // Listen for reset (when user clears selection)
     jQuery(variationsForm).on('reset_data', function() {
       const modelViewer = document.querySelector(modelSelector);
+      const host = sdkViewerHost(modelViewer);
+      if (host) {
+        resetSdkViewer(host);
+        return;
+      }
       if (modelViewer && modelViewer.dataset.originalSrc) {
         modelViewer.src = modelViewer.dataset.originalSrc;
         modelViewer.variantName = null;

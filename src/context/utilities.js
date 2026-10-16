@@ -753,6 +753,34 @@ function setupVariationHandling(modelViewer, model_settings) {
 }
 
 /**
+ * AR-114: the <atlasar-viewer> that draws this viewer. AtlasAR Pro's variation handler may hold the
+ * hidden placeholder <model-viewer> the SDK skeleton started with (removed once the SDK draws the
+ * real one, with the same id), so a detached element is matched by its id.
+ * @param {HTMLElement} modelViewer
+ * @returns {HTMLElement|null}
+ */
+export function sdkViewerHost(modelViewer) {
+    if (!modelViewer || !window.AtlasARViewer) return null;
+    const host = modelViewer.isConnected && modelViewer.closest ? modelViewer.closest('atlasar-viewer') : null;
+    if (host) return host;
+    const id = modelViewer.id || modelViewer.getAttribute?.('id');
+    return id ? document.querySelector(`atlasar-viewer[data-atlas-ar-slot="${CSS.escape(id)}"]`) : null;
+}
+
+/**
+ * AR-114: show the SDK viewer's original model again (the plugin's own `src`), as the plugin did
+ * for an option without its own model and when the shopper clears the selection.
+ * @param {HTMLElement} host <atlasar-viewer>
+ */
+export function resetSdkViewer(host) {
+    const mv = host && host.modelViewer;
+    const original = host && host.options && host.options.src;
+    if (!mv || !original) return;
+    mv.variantName = null;
+    if (mv.getAttribute('src') !== original) mv.setAttribute('src', original);
+}
+
+/**
  * Switch 3D model variant based on WooCommerce variation selection
  * @param {HTMLElement} modelViewer - The model-viewer element
  * @param {string} variantName - The WooCommerce variant name (e.g., "Blue", "Large")
@@ -765,10 +793,14 @@ export const switchModelVariant = (modelViewer, variantName, modelSessionData = 
     // AR-114: a viewer drawn by the AtlasAR viewer SDK switches through its variants module
     // (atlasar-pro.js, shipped by AtlasAR Pro). As before, return true so WooCommerce does not swap
     // the 3D view for the product image, even for an option without a 3D variant.
-    const host = modelViewer.closest && modelViewer.closest('atlasar-viewer');
+    const host = sdkViewerHost(modelViewer);
     if (host && typeof host.setVariant === 'function') {
-        host.setVariant(variantName);
-        preventWooCommerceImageSwap(modelViewer);
+        const live = host.modelViewer || modelViewer;
+        if (!host.setVariant(variantName)) {
+            // As before: an option without its own 3D model shows the original model.
+            resetSdkViewer(host);
+        }
+        preventWooCommerceImageSwap(live);
         return true;
     }
     console.log('switchModelVariant called with:', variantName);

@@ -63,7 +63,15 @@
 		var viewer3DContainer = document.createElement( 'div' );
 		viewer3DContainer.id = 'atlas_ar-3d-viewer-overlay';
 		viewer3DContainer.className = 'atlas-ar-3d-viewer-overlay';
-		viewer3DContainer.innerHTML = viewer3DSource.innerHTML;
+		// AR-114: with the AtlasAR viewer SDK, move the live <atlasar-viewer> (a copy of its HTML
+		// would be a new, empty viewer). Without the SDK: the old copy.
+		if ( window.AtlasARViewer ) {
+			while ( viewer3DSource.firstChild ) {
+				viewer3DContainer.appendChild( viewer3DSource.firstChild );
+			}
+		} else {
+			viewer3DContainer.innerHTML = viewer3DSource.innerHTML;
+		}
 		viewer3DContainer.style.cssText = 'display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #f5f5f5;';
 
 		// Insert the 3D viewer container inside the main image container
@@ -194,6 +202,13 @@
 		function load3DModel() {
 			if ( model3DLoaded ) return;
 
+			// AR-114: the SDK viewer is <atlasar-viewer data-atlas-ar-slot="<old model-viewer id>">.
+			var sdkHost = window.AtlasARViewer ? viewer3DContainer.querySelector( 'atlasar-viewer[data-atlas-ar-slot]' ) : null;
+			if ( sdkHost && window.AtlasAR ) {
+				new window.AtlasAR().fetchModelData( atlas_ar_product_id, '#' + sdkHost.getAttribute( 'data-atlas-ar-slot' ), 'normal' );
+				model3DLoaded = true;
+				return;
+			}
 			var modelViewer = viewer3DContainer.querySelector( 'model-viewer' );
 			if ( modelViewer && window.AtlasAR ) {
 				// The <model-viewer> skeleton is pre-injected (hidden) at init,
@@ -221,6 +236,19 @@
 				fullscreen3DContainer.innerHTML = sdkAtlasAR.getModelSkeleton( fsId );
 				fullscreenOverlay.style.display = 'flex';
 				document.body.style.overflow = 'hidden';
+				// Full screen shows the variation the shopper picked (AtlasAR Pro's variants module).
+				var fsHost = fullscreen3DContainer.querySelector( 'atlasar-viewer' );
+				if ( fsHost ) {
+					fsHost.addEventListener( 'atlasar:ready', function () {
+						// The SDK adds its features (setVariant) right after `ready`.
+						setTimeout( function () {
+							if ( typeof fsHost.setVariant !== 'function' ) return;
+							document.querySelectorAll( '.variations_form .variations select' ).forEach( function ( select ) {
+								if ( select.value ) fsHost.setVariant( select.value );
+							} );
+						}, 0 );
+					}, { once: true } );
+				}
 				sdkAtlasAR.fetchModelData( atlas_ar_product_id, '#' + fsId, 'normal' );
 				return;
 			}

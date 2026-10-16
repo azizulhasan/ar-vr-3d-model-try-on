@@ -421,8 +421,7 @@ class AR_TRY_ON_Public {
         if ( ! is_singular() ) {
             return;
         }
-        global $product, $post;
-        $post_id = $product ? (int) $product->get_id() : (int) ( $post->ID ?? 0 );
+        $post_id = AR_TRY_ON_Helper::current_post_id();
         if ( $post_id <= 0 ) {
             return;
         }
@@ -457,14 +456,8 @@ class AR_TRY_ON_Public {
             return;
         }
 
-        // Global product variable
-        global $product;
         global $post;
-        if ( $product ) {
-            $post_id = (int) $product->get_id();
-        } else {
-            $post_id = (int) ( $post->ID ?? 0 );
-        }
+        $post_id = AR_TRY_ON_Helper::current_post_id();
 
         $settings = AR_TRY_ON_Helper::get_settings();
 
@@ -558,13 +551,8 @@ class AR_TRY_ON_Public {
 		}
 
         // Global product variable
-		global $product;
 		global $post;
-		if ( $product ) {
-			$post_id = $product->get_id();
-		} else {
-			$post_id = $post->ID;
-		}
+		$post_id = AR_TRY_ON_Helper::current_post_id();
 
         // Try-On (face-*) products: AtlasAR.js bundle is intentionally
         // skipped when the merchant has the static viewer toggle OFF.
@@ -619,8 +607,7 @@ class AR_TRY_ON_Public {
 		// Otherwise the tab pane would emit `new window.AtlasAR()` even
 		// though we intentionally skipped enqueuing AtlasAR.dist.js.
 		if ( class_exists( '\\AR_TRY_ON\\AR_TRY_ON_Tryon' ) ) {
-			global $product, $post;
-			$pid = $product ? $product->get_id() : ( $post ? $post->ID : 0 );
+			$pid = AR_TRY_ON_Helper::current_post_id();
 			if ( $pid ) {
 				$placement = AR_TRY_ON_Tryon::get_product_placement( $pid );
 				if ( AR_TRY_ON_Tryon::is_face_placement( $placement )

@@ -227,6 +227,23 @@ class AR_TRY_ON_Helper
         return false;
     }
 
+    /**
+     * AR-114: the current product's (or post's) ID. WordPress sets the global `$product` to the
+     * product's slug (a string) until WooCommerce replaces it with the WC_Product object, so code
+     * that runs earlier (a shortcode in a product description rendered for an SEO meta
+     * description, for example) must not call get_id() on it.
+     *
+     * @return int 0 when there is no current product or post.
+     */
+    public static function current_post_id()
+    {
+        global $product, $post;
+        if (is_object($product) && method_exists($product, 'get_id')) {
+            return (int) $product->get_id();
+        }
+        return (int) ($post->ID ?? 0);
+    }
+
     public static function is_ar_supported_post_type($call_type = '')
     {
         global $post;
@@ -342,8 +359,7 @@ class AR_TRY_ON_Helper
             return '';
         }
 
-        global $product, $post;
-        $post_id = $product ? (int) $product->get_id() : (int) ($post->ID ?? 0);
+        $post_id = self::current_post_id();
         if (!$post_id) {
             return $current_filter === 'the_content' ? $content : '';
         }

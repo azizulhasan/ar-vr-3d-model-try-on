@@ -15,8 +15,9 @@ const filled = (v) => v !== undefined && v !== null && v !== '';
 
 /**
  * @param {object} data   merged settings from the REST answer
- * @param {object} ctx    { viewerId, immediate } — the old <model-viewer> id, and whether the viewer
- *                        opens after a click (popup, gallery toggle, full screen, tab)
+ * @param {object} ctx    { viewerId, immediate, fill } — the old <model-viewer> id, whether the viewer
+ *                        opens after a click (popup, gallery toggle, full screen, tab), and whether
+ *                        it fills an already-sized box
  */
 export function toSdkOptions(data = {}, ctx = {}) {
     const o = {
@@ -40,11 +41,14 @@ export function toSdkOptions(data = {}, ctx = {}) {
         interactionPromptThreshold: Number(data.interaction_prompt_threshold || data.ar_try_on_interaction_prompt_threshold || 2000),
         background: data.ar_try_on_poster_color || 'transparent',
 
-        width: data.canvas_width || '100%',
-        height: data.canvas_height || '400px',
+        // A viewer inside a box that is already sized (gallery overlay, full screen, a shortcode
+        // wrapper sized by its width / height / aspect_ratio) fills it, as the plugin's CSS meant
+        // (`model-viewer { width:100%; height:100% }` there); elsewhere the canvas settings apply.
+        width: ctx.fill ? '100%' : data.canvas_width || '100%',
+        height: ctx.fill ? '100%' : data.canvas_height || '400px',
         align: data.canvas_alignment || 'left',
-        margin: data.canvas_margin || '0',
-        padding: data.canvas_padding || '2px 0',
+        margin: ctx.fill ? '0' : data.canvas_margin || '0',
+        padding: ctx.fill ? '0' : data.canvas_padding || '2px 0',
 
         ar: data.ar_try_on_ar !== 'deactivate',
         arModes: Array.isArray(data.ar_try_on_ar_modes) && data.ar_try_on_ar_modes.length ? data.ar_try_on_ar_modes : ['webxr', 'scene-viewer', 'quick-look'],

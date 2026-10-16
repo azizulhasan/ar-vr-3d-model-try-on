@@ -268,9 +268,8 @@ class AR_TRY_ON {
      * @return void
      */
     public function add_3d_file_as_product_gallery_item() {
-        global $product;
-        $product_id = $product->get_id();
-        if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
+        $product_id = AR_TRY_ON_Helper::current_post_id();
+        if ( ! $product_id || ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             return;
         }
         $attachment_id = get_post_thumbnail_id( $product_id );
@@ -316,12 +315,10 @@ class AR_TRY_ON {
             return;
         }
 
-        global $product;
-        if ( ! $product ) {
+        $product_id = AR_TRY_ON_Helper::current_post_id();
+        if ( ! $product_id ) {
             return;
         }
-
-        $product_id = $product->get_id();
 
         if ( ! AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
             return;
