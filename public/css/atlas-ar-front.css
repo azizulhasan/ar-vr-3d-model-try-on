@@ -1,0 +1,27 @@
+/* AR-116: AtlasAR on shop pages (WordPress adapter). The viewer SDK styles its own parts. */
+.atlas-ar-viewer{display:block;width:100%}
+/* :where() = no specificity: a theme's content width (block themes' constrained layout) wins; else never wider than the column. */
+:where(.atlas-ar-shortcode){max-width:100%}
+.atlas-ar-shortcode{position:relative;box-sizing:border-box}
+.atlas-ar-shortcode .atlas-ar-viewer{height:100%}
+.atlas-ar-after-content{margin:1.5em 0;display:flex;flex-direction:column;gap:12px}
+
+/* Gallery: the 3D view over the main product image */
+.atlas-ar-gallery-target{position:relative}
+.atlas-ar-gallery-overlay{position:absolute;inset:0;z-index:5;background:#fff}
+.atlas-ar-gallery-overlay[hidden]{display:none}
+.atlas-ar-gallery-overlay .atlas-ar-viewer{height:100%}
+.atlas-ar-gallery-overlay:fullscreen{background:#fff}
+/* Top left: WooCommerce's zoom icon is top right, the SDK's AR / phone buttons are at the bottom. */
+.atlas-ar-gallery-bar{position:absolute;left:12px;top:12px;z-index:6;display:flex;gap:8px}
+.atlas-ar-gallery-btn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:1px solid #c3c4c7;border-radius:50%;background:#fff;color:#1d2327;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.atlas-ar-gallery-btn[hidden]{display:none}
+.atlas-ar-gallery-btn:focus-visible{outline:2px solid #2271b1;outline-offset:2px}
+/* A square slide like the photos; the viewer fills it (a % height needs a sized box). */
+.atlas-ar-slide{position:relative;aspect-ratio:1/1}
+.atlas-ar-slide .atlas-ar-viewer{position:absolute;inset:0;width:100%;height:100%}
+
+/* Try-on button: follows the theme's button style, adds the icon */
+.atlas-ar-tryon-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin:12px 0 0;cursor:pointer}
+.atlas-ar-tryon-icon{width:18px;height:18px;border:1.5px solid currentColor;border-radius:50%;box-sizing:border-box;position:relative}
+.atlas-ar-tryon-icon::after{content:"";position:absolute;left:3px;right:3px;top:6px;height:3px;border-top:1.5px solid currentColor}

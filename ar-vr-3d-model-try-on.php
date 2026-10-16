@@ -192,14 +192,10 @@ function atlas_ar_run() {
 		$compression_routes->register_routes();
 	} );
 
-	// Initialize Try-On feature (v1.10.0+) — face try-on, lazy-loaded.
-	$atlas_ar_tryon = new AR_TRY_ON_Tryon( ATLAS_AR_VERSION );
-	$atlas_ar_tryon->register();
-
-	add_action( 'rest_api_init', function() {
-		$tryon_routes = new AR_TRY_ON_Tryon_Routes();
-		$tryon_routes->register_routes();
-	} );
+	// AR-116: the 3D Library and the shop front end on the viewer SDK (try-on included; the old
+	// try-on runtime and its routes are no longer loaded).
+	\AR_TRY_ON\AR_TRY_ON_Library::register();
+	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
 
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();
@@ -301,39 +297,6 @@ register_deactivation_hook( __FILE__, function () {
 // AR_TRY_ON_Admin::register_block() — not here at file load, which ran
 // before `init` (AR-71).
 
-/**
- *
- * Create short code for qr code.
- * Example [atlasvoice]
- *
- * @param $atts
- *
- * @return string
- */
-function atlas_ar_create_shortcode( $atts ) {
-
-    return AR_TRY_ON_Helper::create_shortcode( $atts );
-
-}
-
-add_shortcode( 'atlas_ar', 'atlas_ar_create_shortcode' );
-
-
-// Filter to allow shortcodes in HTML tags
-add_filter( 'do_shortcode_tag', 'atlas_ar_allow_shortcode_in_html_tag', 10, 4 );
-function atlas_ar_allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
-    if ( $tag == 'atlas_ar' && ! empty( $attr ) ) {
-        if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-            $content = AR_TRY_ON_Helper::create_shortcode( $attr,  $m[5] ) . $m[5];
-        } else {
-            $content = $m[5] . AR_TRY_ON_Helper::create_shortcode( $attr, $m[5] );
-        }
-
-        //Get the content wrapped by the shortcode.
-        return $content;
-    }
-
-    return $output;
-}
+// AR-116: [atlas_ar] is registered by AR_TRY_ON_Frontend (the viewer SDK draws it).
 
 

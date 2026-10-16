@@ -101,8 +101,8 @@ class AR_TRY_ON {
 
 		$this->load_dependencies();
 		$this->define_admin_hooks();
-		$this->define_public_hooks();
-		$this->define_wc_hooks();
+		// AR-116: the shop front end is AR_TRY_ON_Frontend (viewer SDK); the old public and
+		// WooCommerce hooks are no longer registered.
 
 
 	}

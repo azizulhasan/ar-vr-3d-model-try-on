@@ -518,7 +518,7 @@ class AR_TRY_ON_Helper
      * comma / hash combination (which covers every legitimate CSS
      * length, color, calc(), and aspect-ratio value).
      */
-    private static function sanitize_css_value($value)
+    public static function sanitize_css_value($value)
     {
         $value = (string) $value;
         if ($value === '') {
