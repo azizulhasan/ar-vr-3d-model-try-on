@@ -31,11 +31,15 @@ class AR_TRY_ON_Library {
 
 	/** Kinds of file a model holds, and the extensions accepted for each. */
 	const KINDS = array(
-		'glb'    => array( 'glb', 'gltf' ),
-		'usdz'   => array( 'usdz' ),
-		'poster' => array( 'jpg', 'jpeg', 'png', 'webp' ),
-		'source' => array( 'obj', 'fbx' ),
+		'glb'      => array( 'glb', 'gltf' ),
+		'usdz'     => array( 'usdz' ),
+		'poster'   => array( 'jpg', 'jpeg', 'png', 'webp' ),
+		'source'   => array( 'obj', 'fbx' ),
+		'original' => array( 'glb', 'gltf' ), // the GLB before Optimise (AR-121); never chosen by name
 	);
+
+	/** AR-121: what Optimise did — { by, before, after, triangles, budget, time }. */
+	const OPTIMISED_META = '_atlas_ar_optimised';
 
 	/** Register the post type (no admin screens of its own: the 3D Library page lists it). */
 	public static function register() {
@@ -269,16 +273,18 @@ class AR_TRY_ON_Library {
 		foreach ( self::raw_files( $id ) as $kind => $entry ) {
 			$files[ $kind ] = self::file_entry( $entry );
 		}
-		$used = is_array( $usage ) ? ( isset( $usage[ (int) $id ] ) ? $usage[ (int) $id ] : array() ) : self::used_by( $id );
+		$used      = is_array( $usage ) ? ( isset( $usage[ (int) $id ] ) ? $usage[ (int) $id ] : array() ) : self::used_by( $id );
+		$optimised = get_post_meta( $id, self::OPTIMISED_META, true );
 		return array(
 			'id'      => (int) $id,
 			'name'    => get_the_title( $post ),
 			'files'   => $files,
-			'size'    => array_sum( wp_list_pluck( $files, 'size' ) ),
+			'size'    => array_sum( wp_list_pluck( array_diff_key( $files, array( 'original' => 1 ) ), 'size' ) ),
 			'missing' => array_values( array_diff( array( 'glb', 'usdz', 'poster' ), array_keys( $files ) ) ),
 			'large'   => isset( $files['glb'] ) && $files['glb']['size'] > self::large_bytes(),
-			'used_by' => $used,
-			'date'    => get_post_time( 'c', true, $post ),
+			'used_by'   => $used,
+			'date'      => get_post_time( 'c', true, $post ),
+			'optimised' => is_array( $optimised ) ? $optimised : null,
 		);
 	}
 
@@ -391,6 +397,75 @@ class AR_TRY_ON_Library {
 	}
 
 	/**
+	 * AR-121: put an optimised GLB in place. The GLB it replaces is kept as the model's original
+	 * (only the first time), so "Restore the original" always gives back the uploaded file.
+	 *
+	 * @param int   $id
+	 * @param array $upload [ tmp_name, name ] a .glb
+	 * @param array $info   { by: browser | cloud, triangles, budget, height_cm }
+	 * @return array|\WP_Error the model
+	 */
+	public static function put_optimised( $id, array $upload, array $info = array() ) {
+		$files = self::raw_files( $id );
+		if ( get_post_type( $id ) !== self::POST_TYPE || empty( $files['glb']['file'] ) ) {
+			return new \WP_Error( 'atlas_ar_model', __( 'This model has no GLB file to optimise.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$check = self::check_upload( $upload );
+		if ( is_wp_error( $check ) ) {
+			return $check;
+		}
+		if ( 'glb' !== $check['kind'] || 'glb' !== strtolower( pathinfo( $check['name'], PATHINFO_EXTENSION ) ) ) {
+			return new \WP_Error( 'atlas_ar_kind', __( 'The optimised model must be a .glb file.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$before = (int) $files['glb']['size'];
+		if ( empty( $files['original']['file'] ) ) {
+			$files['original'] = $files['glb']; // keep the uploaded file (store_file would delete it)
+			unset( $files['glb'] );
+			update_post_meta( $id, self::FILES_META, $files );
+		} else {
+			$before = (int) $files['original']['size'];
+		}
+		$saved = self::store_file( $id, 'glb', $check['tmp'], pathinfo( $check['name'], PATHINFO_FILENAME ) . '-optimised.glb' );
+		if ( is_wp_error( $saved ) ) {
+			return $saved;
+		}
+		update_post_meta(
+			$id,
+			self::OPTIMISED_META,
+			array(
+				'by'        => isset( $info['by'] ) && 'cloud' === $info['by'] ? 'cloud' : 'browser',
+				'before'    => $before,
+				'after'     => (int) $saved['size'],
+				'triangles' => isset( $info['triangles'] ) ? absint( $info['triangles'] ) : 0,
+				'budget'    => isset( $info['budget'] ) && in_array( $info['budget'], array( 'pass', 'warn', 'fail' ), true ) ? $info['budget'] : '',
+				'height_cm' => isset( $info['height_cm'] ) ? round( (float) $info['height_cm'], 2 ) : 0,
+				'time'      => time(),
+			)
+		);
+		return self::get( $id );
+	}
+
+	/**
+	 * AR-121: back to the uploaded GLB (the optimised one is deleted).
+	 *
+	 * @return array|\WP_Error the model
+	 */
+	public static function restore_original( $id ) {
+		$files = self::raw_files( $id );
+		if ( get_post_type( $id ) !== self::POST_TYPE || empty( $files['original']['file'] ) ) {
+			return new \WP_Error( 'atlas_ar_model', __( 'There is no original file to restore.', 'ar-vr-3d-model-try-on' ) );
+		}
+		if ( ! empty( $files['glb']['file'] ) ) {
+			self::delete_path( $files['glb']['file'] );
+		}
+		$files['glb'] = $files['original'];
+		unset( $files['original'] );
+		update_post_meta( $id, self::FILES_META, $files );
+		delete_post_meta( $id, self::OPTIMISED_META );
+		return self::get( $id );
+	}
+
+	/**
 	 * Remove one optional file (iPhone file, poster or waiting source) from a model. The GLB stays:
 	 * replace it instead.
 	 *
@@ -438,6 +513,22 @@ class AR_TRY_ON_Library {
 		}
 		wp_delete_post( $id, true );
 		return true;
+	}
+
+	/**
+	 * The GLB to optimise from: the original upload when there is one, else the current GLB.
+	 *
+	 * @return string absolute path, '' when there is none
+	 */
+	public static function source_glb_path( $id ) {
+		$files = self::raw_files( $id );
+		$entry = ! empty( $files['original']['file'] ) ? $files['original'] : ( isset( $files['glb'] ) ? $files['glb'] : array() );
+		if ( empty( $entry['file'] ) || 'glb' !== strtolower( pathinfo( $entry['file'], PATHINFO_EXTENSION ) ) ) {
+			return '';
+		}
+		$up   = wp_upload_dir( null, false );
+		$path = trailingslashit( $up['basedir'] ) . $entry['file'];
+		return is_file( $path ) ? $path : '';
 	}
 
 	/** @return string the model's folder (absolute path) */

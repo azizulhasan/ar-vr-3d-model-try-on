@@ -12,3 +12,6 @@ CDNs.
 | qrcode-generator (Kazuhiko Arase) | 2.0.2 | MIT | bundled into `atlasar.js` / `atlasar.module.js` |
 | MediaPipe Tasks Vision (Google) | 0.10.35 | Apache-2.0 | bundled into `tryon-worker.js`; its WebAssembly runtime is served from `vendor/mediapipe/` by AtlasAR Cloud |
 | MediaPipe Face Landmarker model (Google) | float16 v1 | Apache-2.0 | `vendor/mediapipe/face_landmarker.task`, served by AtlasAR Cloud |
+| glTF-Transform (Don McCurdy) | 4.5.1 | MIT | bundled into `atlasar-tools.js` (AtlasAR.tools, loaded on first use) |
+| meshoptimizer encoder / simplifier | 0.22.0 | MIT | bundled into `atlasar-tools.js` |
+| three.js (OBJLoader, FBXLoader, GLTFExporter, USDZExporter) | 0.163.0 | MIT | bundled into `atlasar-tools.js` |

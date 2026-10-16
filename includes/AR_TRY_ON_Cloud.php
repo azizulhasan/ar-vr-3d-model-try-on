@@ -164,9 +164,10 @@ class AR_TRY_ON_Cloud {
 	 * @param string      $path  /v1/…
 	 * @param array|null  $body  JSON body
 	 * @param string|null $key   null = the stored key, '' = none
+	 * @param array       $raw   a binary body instead of JSON: { body, type, headers }
 	 * @return array|\WP_Error the decoded answer
 	 */
-	public static function request( $method, $path, $body = null, $key = null ) {
+	public static function request( $method, $path, $body = null, $key = null, array $raw = array() ) {
 		$base = self::base_url();
 		if ( '' === $base ) {
 			return new \WP_Error( 'atlas_ar_cloud_off', __( 'AtlasAR Cloud is not available yet.', 'ar-vr-3d-model-try-on' ) );
@@ -188,6 +189,11 @@ class AR_TRY_ON_Cloud {
 		if ( null !== $body ) {
 			$args['headers']['Content-Type'] = 'application/json';
 			$args['body']                    = wp_json_encode( $body );
+		} elseif ( isset( $raw['body'] ) ) {
+			$args['headers']['Content-Type'] = isset( $raw['type'] ) ? $raw['type'] : 'application/octet-stream';
+			$args['headers']                 = array_merge( $args['headers'], isset( $raw['headers'] ) ? (array) $raw['headers'] : array() );
+			$args['body']                    = $raw['body'];
+			$args['timeout']                 = 120;
 		}
 		// A local development service (http://localhost) is not a "safe" URL for WordPress.
 		$res = self::is_local( $base ) ? wp_remote_request( $base . $path, $args ) : wp_safe_remote_request( $base . $path, $args );
@@ -205,6 +211,109 @@ class AR_TRY_ON_Cloud {
 			);
 		}
 		return $data;
+	}
+
+	/* ------------------------------------------------------------------- optimise */
+
+	const JOB_META = '_atlas_ar_cloud_job';
+
+	/**
+	 * AR-121: send a model's GLB (its original, when it has one) to AtlasAR Cloud to optimise.
+	 *
+	 * @param int   $id        3D Library model
+	 * @param float $height_cm real height (0 = keep the model's size)
+	 * @return array|\WP_Error { status, cloud_id }
+	 */
+	public static function optimise_start( $id, $height_cm = 0 ) {
+		if ( ! self::connected() ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$path = AR_TRY_ON_Library::source_glb_path( $id );
+		if ( ! $path ) {
+			return new \WP_Error( 'atlas_ar_model', __( 'This model has no GLB file to optimise.', 'ar-vr-3d-model-try-on' ) );
+		}
+		if ( filesize( $path ) > 50 * MB_IN_BYTES ) {
+			return new \WP_Error( 'atlas_ar_size', __( 'AtlasAR Cloud takes GLB files up to 50 MB.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$query = array( 'name' => mb_substr( get_the_title( $id ), 0, 100 ) );
+		if ( $height_cm >= 0.5 && $height_cm <= 1000 ) {
+			$query['height_cm'] = round( (float) $height_cm, 2 );
+		}
+		$res = self::request(
+			'POST',
+			'/v1/models/upload?' . http_build_query( $query ),
+			null,
+			null,
+			array(
+				'body'    => file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local model file sent as the request body.
+				'type'    => 'model/gltf-binary',
+				'headers' => array( 'Idempotency-Key' => 'wp' . (int) $id . '-' . substr( md5_file( $path ), 0, 24 ) ),
+			)
+		);
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$cloud_id = isset( $res['id'] ) ? sanitize_text_field( (string) $res['id'] ) : '';
+		if ( '' === $cloud_id ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		update_post_meta( $id, self::JOB_META, array( 'cloud_id' => $cloud_id, 'status' => 'queued', 'height_cm' => isset( $query['height_cm'] ) ? $query['height_cm'] : 0, 'time' => time() ) );
+		return array( 'status' => 'queued', 'cloud_id' => $cloud_id );
+	}
+
+	/**
+	 * AR-121: check the Cloud job; when the model is ready, its GLB replaces the model's GLB.
+	 *
+	 * @param int $id 3D Library model
+	 * @return array|\WP_Error { status, model? }
+	 */
+	public static function optimise_poll( $id ) {
+		$job = get_post_meta( $id, self::JOB_META, true );
+		if ( ! is_array( $job ) || empty( $job['cloud_id'] ) ) {
+			return new \WP_Error( 'atlas_ar_cloud_job', __( 'No AtlasAR Cloud job for this model.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$res = self::request( 'GET', '/v1/models/' . rawurlencode( $job['cloud_id'] ) );
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$status = isset( $res['status'] ) ? sanitize_key( $res['status'] ) : '';
+		if ( 'failed' === $status ) {
+			delete_post_meta( $id, self::JOB_META );
+			$why = isset( $res['error']['message'] ) ? sanitize_text_field( $res['error']['message'] ) : '';
+			/* translators: %s: reason from the service */
+			return new \WP_Error( 'atlas_ar_cloud_failed', trim( sprintf( __( 'AtlasAR Cloud could not optimise this model. %s', 'ar-vr-3d-model-try-on' ), $why ) ) );
+		}
+		if ( 'ready' !== $status || empty( $res['files']['glb'] ) ) {
+			return array( 'status' => $status ? $status : 'processing' );
+		}
+		$url = is_array( $res['files']['glb'] ) ? (string) ( isset( $res['files']['glb']['url'] ) ? $res['files']['glb']['url'] : '' ) : (string) $res['files']['glb'];
+		// A path is on the configured service (trusted); a full URL (the CDN) must be a safe https URL.
+		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+			$url = self::base_url() . $url;
+		} elseif ( 'https' !== wp_parse_url( $url, PHP_URL_SCHEME ) || ! wp_http_validate_url( $url ) ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		$tmp = download_url( $url, 120 );
+		if ( is_wp_error( $tmp ) ) {
+			return new \WP_Error( 'atlas_ar_cloud_down', __( 'The optimised model could not be downloaded. Please try again.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$model = AR_TRY_ON_Library::put_optimised(
+			$id,
+			array( 'tmp_name' => $tmp, 'name' => sanitize_title( get_the_title( $id ) ) . '.glb' ),
+			array(
+				'by'        => 'cloud',
+				'triangles' => isset( $res['stats']['triangles'] ) ? $res['stats']['triangles'] : 0,
+				'budget'    => isset( $res['budget'] ) ? $res['budget'] : '',
+				'height_cm' => $job['height_cm'],
+			)
+		);
+		wp_delete_file( $tmp );
+		if ( is_wp_error( $model ) ) {
+			return $model;
+		}
+		delete_post_meta( $id, self::JOB_META );
+		return array( 'status' => 'ready', 'model' => $model );
 	}
 
 	/* --------------------------------------------------------------------- helpers */

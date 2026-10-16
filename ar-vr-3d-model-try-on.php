@@ -40,9 +40,6 @@ require_once 'vendor/autoload.php';
 use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
-use AR_TRY_ON\AR_TRY_ON_Compression;
-use AR_TRY_ON\AR_TRY_ON_Compression_DB;
-use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
@@ -105,7 +102,6 @@ if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 
 	define( 'ATLAS_AR_DEBUG_MODE', 0 );
 }
-
 
 if ( ! defined( 'ATLAS_AR_PLUGIN_URL' ) ) {
 	$atlas_ar_https        = 'https://playground.wordpress.net';
@@ -170,22 +166,14 @@ class AR_TRY_ON_Init {
 	}
 }
 
-
 function atlas_ar_run() {
 	new AR_TRY_ON_Init();
 //	if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
 		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
 //	}
 
-	// Initialize Compression feature (v1.8.0+)
-    AR_TRY_ON_Compression::init();
-
-
-    // Register Compression REST API routes
-	add_action( 'rest_api_init', function() {
-		$compression_routes = new AR_TRY_ON_Compression_Routes();
-		$compression_routes->register_routes();
-	} );
+	// AR-121: model optimisation is the Optimise module (AtlasAR.tools in the browser, AtlasAR Cloud
+	// for big files) in the 3D Library; the old compression system is gone.
 
 	// AR-116: the 3D Library and the shop front end on the viewer SDK (try-on included; the old
 	// try-on runtime and its routes are no longer loaded).
@@ -203,27 +191,6 @@ function atlas_ar_run() {
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();
 
-
-	// Admin action to manually create compression database tables.
-	add_action( 'admin_init', function() {
-		// Read-only superglobal access guarded by capability + nonce checks below;
-		// the GET flag itself carries no untrusted payload — just toggles the action.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified on the next line.
-		if ( ! isset( $_GET['atlas_ar_create_compression_tables'] ) ) {
-			return;
-		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified explicitly below.
-		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'atlas_ar_create_compression_tables' ) ) {
-			return;
-		}
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		AR_TRY_ON_Compression_DB::init();
-		wp_safe_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
-		exit;
-	} );
 
 	/**
 	 * Action: atlas_ar_loaded
@@ -261,7 +228,6 @@ function atlas_ar_run() {
  * domain. Removing the unused schedule removes the notice.
  */
 
-
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
 
 add_action( 'init', function () {
@@ -291,11 +257,9 @@ register_deactivation_hook( __FILE__, function () {
 	AR_TRY_ON_Deactivate::deactivate();
 } );
 
-
 // The `atlas/ar-shortcode` block is registered on `init` by
 // AR_TRY_ON_Admin::register_block() — not here at file load, which ran
 // before `init` (AR-71).
 
 // AR-116: [atlas_ar] is registered by AR_TRY_ON_Frontend (the viewer SDK draws it).
-
 

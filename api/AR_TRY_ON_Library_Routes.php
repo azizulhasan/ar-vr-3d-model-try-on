@@ -11,6 +11,9 @@
  *   POST   /library/<id>/files            add or replace one file (file)
  *   DELETE /library/<id>/files/<kind>     remove the iPhone file, poster or waiting source file
  *   POST   /products/<id>/model           show a model on a product / post { model_id } (0 = none)
+ *   POST   /library/<id>/optimised        an optimised GLB made in the browser (file); keeps the original
+ *   POST   /library/<id>/restore          back to the original GLB
+ *   POST   /library/<id>/cloud            optimise on AtlasAR Cloud { height_cm }; GET = check / fetch it
  *
  * Every route needs a logged-in user with the right capability; WordPress checks the REST nonce.
  *
@@ -104,6 +107,49 @@ class AR_TRY_ON_Library_Routes {
 				'callback'            => array( __CLASS__, 'remove_file' ),
 				'permission_callback' => array( __CLASS__, 'can_edit' ),
 				'args'                => $id,
+			)
+		);
+		// AR-121: Optimise.
+		register_rest_route(
+			self::NS,
+			'/library/(?P<id>\d+)/optimised',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'put_optimised' ),
+				'permission_callback' => array( __CLASS__, 'can_edit' ),
+				'args'                => $id + array(
+					'triangles' => array( 'type' => 'integer', 'default' => 0, 'minimum' => 0, 'sanitize_callback' => 'absint' ),
+					'budget'    => array( 'type' => 'string', 'default' => '', 'enum' => array( '', 'pass', 'warn', 'fail' ) ),
+					'height_cm' => array( 'type' => 'number', 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ),
+				),
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/library/(?P<id>\d+)/restore',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'restore' ),
+				'permission_callback' => array( __CLASS__, 'can_edit' ),
+				'args'                => $id,
+			)
+		);
+		register_rest_route(
+			self::NS,
+			'/library/(?P<id>\d+)/cloud',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( __CLASS__, 'cloud_start' ),
+					'permission_callback' => array( __CLASS__, 'can_edit' ),
+					'args'                => $id + array( 'height_cm' => array( 'type' => 'number', 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ) ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( __CLASS__, 'cloud_poll' ),
+					'permission_callback' => array( __CLASS__, 'can_edit' ),
+					'args'                => $id,
+				),
 			)
 		);
 		register_rest_route(
@@ -214,6 +260,32 @@ class AR_TRY_ON_Library_Routes {
 			'product' => AR_TRY_ON_Product::get( (int) $r['id'] ),
 			'model'   => $model ? AR_TRY_ON_Library::get( $model ) : null,
 		);
+	}
+
+	public static function put_optimised( \WP_REST_Request $r ) {
+		$uploads = self::uploads( $r, 'file' );
+		if ( ! $uploads ) {
+			return new \WP_Error( 'atlas_ar_no_files', __( 'Choose a file.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+		}
+		return self::answer(
+			AR_TRY_ON_Library::put_optimised(
+				(int) $r['id'],
+				$uploads[0],
+				array( 'by' => 'browser', 'triangles' => $r['triangles'], 'budget' => $r['budget'], 'height_cm' => $r['height_cm'] )
+			)
+		);
+	}
+
+	public static function restore( \WP_REST_Request $r ) {
+		return self::answer( AR_TRY_ON_Library::restore_original( (int) $r['id'] ) );
+	}
+
+	public static function cloud_start( \WP_REST_Request $r ) {
+		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::optimise_start( (int) $r['id'], (float) $r['height_cm'] ) );
+	}
+
+	public static function cloud_poll( \WP_REST_Request $r ) {
+		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::optimise_poll( (int) $r['id'] ) );
 	}
 
 	/* --------------------------------------------------------------------- helpers */

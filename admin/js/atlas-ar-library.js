@@ -24,7 +24,7 @@
 	var D = 'ar-vr-3d-model-try-on';
 	config = config || {};
 
-	var KIND_LABEL = { glb: 'GLB', usdz: 'USDZ', poster: __('Poster', D), source: __('Source', D) };
+	var KIND_LABEL = { glb: 'GLB', usdz: 'USDZ', poster: __('Poster', D), source: __('Source', D), original: __('Original', D) };
 	var FILTERS = [
 		['all', __('All', D)],
 		['used', __('Used by products', D)],
@@ -54,6 +54,61 @@
 		var f = new FormData();
 		f.append(field, file, file.name);
 		return f;
+	}
+
+	/* ------------------------------------------------------------- optimise */
+
+	function sdkTools() {
+		var sdk = window.AtlasARViewer;
+		return sdk && sdk.tools ? sdk.tools : null;
+	}
+	var STEP = {
+		read: __('Reading the model…', D), geometry: __('Simplifying the shape…', D), textures: __('Making textures smaller…', D),
+		compress: __('Compressing…', D), done: __('Saving…', D)
+	};
+	function fetchBlob(url) {
+		return fetch(url, { credentials: 'same-origin' }).then(function (r) {
+			if (!r.ok) throw new Error(sprintf(__('The file could not be read (%d).', D), r.status));
+			return r.blob();
+		});
+	}
+
+	/**
+	 * AR-121: optimise a model's GLB in this browser (AtlasAR.tools.optimise) and keep the result
+	 * when it is smaller (or when a real height was given). Resolves the model, or null when the
+	 * file was already as small as it gets.
+	 */
+	function optimiseModel(m, heightCm, onStep) {
+		var tools = sdkTools();
+		if (!tools) return Promise.reject(new Error(__('The AtlasAR viewer did not load. Reload the page and try again.', D)));
+		var src = m.files.original || m.files.glb;
+		if (!src) return Promise.reject(new Error(__('This model has no GLB file.', D)));
+		onStep && onStep(STEP.read);
+		return fetchBlob(src.url).then(function (blob) {
+			return tools.optimise(blob, { heightCm: heightCm || 0, onProgress: function (st) { if (onStep && STEP[st]) onStep(STEP[st]); } });
+		}).then(function (res) {
+			if (!heightCm && res.blob.size >= (m.files.glb ? m.files.glb.size : src.size)) return null;
+			var f = new FormData();
+			f.append('file', new File([res.blob], baseName(src.name || 'model') + '.glb', { type: 'model/gltf-binary' }));
+			f.append('triangles', String(res.stats.triangles));
+			f.append('budget', res.budget);
+			if (heightCm) f.append('height_cm', String(heightCm));
+			return api({ path: '/ar_try_on/v1/library/' + m.id + '/optimised', method: 'POST', body: f });
+		});
+	}
+
+	/** AR-121: an OBJ / FBX source file → GLB in this browser, added to the model. */
+	function convertModel(m, onStep) {
+		var tools = sdkTools();
+		if (!tools) return Promise.reject(new Error(__('The AtlasAR viewer did not load. Reload the page and try again.', D)));
+		onStep && onStep(__('Converting to GLB…', D));
+		return fetchBlob(m.files.source.url).then(function (blob) {
+			return tools.convert(new File([blob], m.files.source.name));
+		}).then(function (glb) {
+			var f = new FormData();
+			f.append('file', new File([glb], baseName(m.files.source.name) + '.glb', { type: 'model/gltf-binary' }), baseName(m.files.source.name) + '.glb');
+			return api({ path: '/ar_try_on/v1/library/' + m.id + '/files', method: 'POST', body: f });
+		});
 	}
 
 	/* ---------------------------------------------------------------- data */
@@ -103,6 +158,17 @@
 						modelId = out.model.id;
 						if (touched.indexOf(modelId) === -1) touched.push(modelId);
 						onStatus(item.i, sprintf(__('Added to “%s”', D), out.model.name), true);
+						// AR-121: Settings › "Optimise every new model when it is added".
+						if (config.autoOptimise && extOf(file.name) === 'glb' && file.size > 512 * 1024 && sdkTools()) {
+							onStatus(item.i, __('Optimising…', D), null);
+							return optimiseModel(out.model, 0, function (t) { onStatus(item.i, t, null); }).then(function (m2) {
+								onStatus(item.i, m2 && m2.optimised
+									? sprintf(__('Added and optimised: %1$s → %2$s', D), size(m2.optimised.before), size(m2.optimised.after))
+									: sprintf(__('Added to “%s” (already small)', D), out.model.name), true);
+							}, function () {
+								onStatus(item.i, sprintf(__('Added to “%s” (not optimised)', D), out.model.name), true);
+							});
+						}
 					}, function (err) {
 						onStatus(item.i, message(err), false);
 					});
@@ -232,8 +298,14 @@
 			run('delete', api({ path: '/ar_try_on/v1/library/' + m.id, method: 'DELETE' })).then(function () { props.onDeleted(m); }, function () {});
 		}
 
-		var files = ['glb', 'usdz', 'poster', 'source'].filter(function (k) { return m.files[k]; }).map(function (k) {
+		var files = ['glb', 'usdz', 'poster', 'source', 'original'].filter(function (k) { return m.files[k]; }).map(function (k) {
 			var f = m.files[k];
+			if (k === 'original') {
+				return el('li', { key: k, className: 'atlas-ar-file' },
+					el('span', { className: 'atlas-ar-chip' }, KIND_LABEL[k]),
+					el('a', { className: 'atlas-ar-file-name', href: f.url, target: '_blank', rel: 'noopener noreferrer' }, f.name),
+					el('span', { className: 'atlas-ar-file-meta' }, size(f.size) + ' · ' + __('before Optimise', D)));
+			}
 			return el('li', { key: k, className: 'atlas-ar-file' },
 				el('span', { className: 'atlas-ar-chip atlas-ar-chip--' + k }, KIND_LABEL[k]),
 				el('a', { className: 'atlas-ar-file-name', href: f.url, target: '_blank', rel: 'noopener noreferrer' }, f.name),
@@ -259,6 +331,55 @@
 				el(FileButton, { variant: 'link', busy: busy === 'file', accept: '.glb,.gltf', onFiles: function (fs) { addFile(fs[0]); } }, __('Upload', D)));
 		});
 		var used = m.used_by.length;
+		var _h = useState(''), heightCm = _h[0], setHeightCm = _h[1];
+		var _step = useState(''), step = _step[0], setStep = _step[1];
+		function optimise() {
+			run('optimise', optimiseModel(m, parseFloat(heightCm) || 0, setStep)).then(function (res) {
+				setStep(res ? '' : __('This model is already as small as it gets.', D));
+				if (res) changed(res);
+			}, function () { setStep(''); });
+		}
+		function restore() {
+			run('optimise', api({ path: '/ar_try_on/v1/library/' + m.id + '/restore', method: 'POST' })).then(changed, function () {});
+		}
+		function convert() {
+			run('convert', convertModel(m, setStep)).then(function (res) { setStep(''); changed(res); }, function () { setStep(''); });
+		}
+		function cloudOptimise() {
+			setStep(__('Sending to AtlasAR Cloud…', D));
+			run('cloud', api({ path: '/ar_try_on/v1/library/' + m.id + '/cloud', method: 'POST', data: { height_cm: parseFloat(heightCm) || 0 } }).then(function () {
+				setStep(__('AtlasAR Cloud is optimising the model…', D));
+				return new Promise(function (resolve, reject) {
+					var tries = 0;
+					(function poll() {
+						api({ path: '/ar_try_on/v1/library/' + m.id + '/cloud' }).then(function (res) {
+							if (res.status === 'ready') return resolve(res.model);
+							if (++tries > 120) return reject(new Error(__('AtlasAR Cloud is taking long. Check again later.', D)));
+							setTimeout(poll, 5000);
+						}, reject);
+					})();
+				});
+			})).then(function (model) { setStep(''); changed(model); }, function () { setStep(''); });
+		}
+		var o = m.optimised;
+		var optimiseBox = m.files.glb ? el('div', { className: 'atlas-ar-optimise' },
+			el('h3', null, __('Make it smaller', D)),
+			o ? el('p', { className: 'atlas-ar-saved' },
+				sprintf(o.by === 'cloud' ? __('Optimised on AtlasAR Cloud: %1$s → %2$s', D) : __('Optimised in this browser: %1$s → %2$s', D), size(o.before), size(o.after)),
+				o.height_cm ? ' · ' + sprintf(__('real height %s cm', D), o.height_cm) : '') : null,
+			el('p', { className: 'description' }, __('Smaller files load faster. Runs in this browser: nothing is uploaded anywhere. The original file is kept.', D)),
+			el('div', { className: 'atlas-ar-row' },
+				el(C.TextControl, { label: __('Real height (cm), optional', D), type: 'number', min: 0.5, max: 1000, step: 0.1, value: heightCm, onChange: setHeightCm, help: __('Scales the model to its true size for AR.', D) })),
+			el('div', { className: 'atlas-ar-row' },
+				el(C.Button, { variant: 'primary', isBusy: busy === 'optimise', disabled: !!busy, onClick: optimise }, o ? __('Optimise again', D) : __('Optimise', D)),
+				config.cloud ? el(C.Button, { variant: 'secondary', isBusy: busy === 'cloud', disabled: !!busy, onClick: cloudOptimise }, __('Optimise on AtlasAR Cloud', D)) : null,
+				m.files.original ? el(C.Button, { variant: 'tertiary', disabled: !!busy, onClick: restore }, __('Restore the original', D)) : null),
+			step ? el('p', { className: 'atlas-ar-step', role: 'status' }, step) : null) : null;
+		var convertBox = m.files.source && !m.files.glb ? el('div', { className: 'atlas-ar-optimise' },
+			el('h3', null, __('Convert to GLB', D)),
+			el('p', { className: 'description' }, __('Turns the OBJ / FBX file into a GLB in this browser. Textures inside the file are kept.', D)),
+			el(C.Button, { variant: 'primary', isBusy: busy === 'convert', disabled: !!busy, onClick: convert }, __('Convert to GLB', D)),
+			step ? el('p', { className: 'atlas-ar-step', role: 'status' }, step) : null) : null;
 
 		return el('aside', { className: 'atlas-ar-detail', 'aria-label': __('Model details', D) },
 			el(Preview, { model: m, onHost: function (h) { host.current = h; } }),
@@ -268,6 +389,8 @@
 			}),
 			el('h3', null, __('Files', D)),
 			el('ul', { className: 'atlas-ar-files' }, files, missing),
+			convertBox,
+			optimiseBox,
 			el('h3', null, __('Used by', D)),
 			used
 				? el('ul', { className: 'atlas-ar-used' }, m.used_by.map(function (p) {
@@ -333,7 +456,7 @@
 					el('li', null, el('b', null, __('3D models:', D)), ' .glb, .gltf ', __('(a single-file .gltf)', D)),
 					el('li', null, el('b', null, __('iPhone AR:', D)), ' .usdz'),
 					el('li', null, el('b', null, __('Posters:', D)), ' .jpg, .png, .webp'),
-					el('li', null, el('b', null, __('Converted to GLB by AtlasAR Cloud:', D)), ' .obj, .fbx')
+					el('li', null, el('b', null, __('Converted to GLB in your browser:', D)), ' .obj, .fbx')
 				),
 				config.maxBytes ? el('p', { className: 'description' }, sprintf(__('Up to %s per file.', D), size(config.maxBytes))) : null
 			),

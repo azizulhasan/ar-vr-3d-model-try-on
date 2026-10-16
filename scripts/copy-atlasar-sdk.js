@@ -15,7 +15,7 @@ if (!arg) {
 }
 const dist = fs.existsSync(path.join(arg, 'dist', 'atlasar.js')) ? path.join(arg, 'dist') : arg;
 const out = path.join(__dirname, '..', 'public', 'js', 'atlasar-sdk');
-const FILES = ['atlasar.js', 'atlasar.css', 'atlasar-tryon.js', 'tryon-worker.js', 'THIRD-PARTY-NOTICES.md', 'vendor'];
+const FILES = ['atlasar.js', 'atlasar.css', 'atlasar-tryon.js', 'tryon-worker.js', 'atlasar-tools.js', 'THIRD-PARTY-NOTICES.md', 'vendor'];
 
 for (const f of FILES) {
     if (!fs.existsSync(path.join(dist, f))) {

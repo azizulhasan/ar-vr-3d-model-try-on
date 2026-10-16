@@ -2,7 +2,6 @@
 
 namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
-
 /**
  * Fired during plugin activation
  *
@@ -42,11 +41,6 @@ class AR_TRY_ON_Activator {
 
 		// AR-120: activation no longer writes demo data into a post or the old settings option:
 		// the setup wizard and the 3D Library take over (AR_TRY_ON_Dashboard::on_activation).
-
-		// Initialize compression database tables (log table only - queue is Pro)
-		AR_TRY_ON_Compression_DB::init();
-
-		// Note: Queue table and cron job are handled by Pro plugin
 
 		return array();
 	}

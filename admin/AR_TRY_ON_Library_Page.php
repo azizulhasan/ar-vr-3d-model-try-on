@@ -65,8 +65,11 @@ class AR_TRY_ON_Library_Page {
 			array(
 				'maxBytes'   => AR_TRY_ON_Library::max_bytes(),
 				'largeBytes' => AR_TRY_ON_Library::large_bytes(),
-				'accept'     => '.' . implode( ',.', array_merge( ...array_values( AR_TRY_ON_Library::KINDS ) ) ),
+				'accept'     => '.' . implode( ',.', array_unique( array_merge( ...array_values( AR_TRY_ON_Library::KINDS ) ) ) ),
 				'pageUrl'    => admin_url( 'admin.php?page=' . self::SLUG ),
+				// AR-121: Optimise.
+				'autoOptimise' => (bool) \AR_TRY_ON\AR_TRY_ON_Settings::get( 'general.auto_optimise' ),
+				'cloud'        => \AR_TRY_ON\AR_TRY_ON_Cloud::available() && \AR_TRY_ON\AR_TRY_ON_Cloud::connected(),
 			)
 		);
 		wp_register_style( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/css/atlas-ar-library.css', array( 'wp-components' ), (string) filemtime( $css ) );

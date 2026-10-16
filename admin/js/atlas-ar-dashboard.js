@@ -363,6 +363,12 @@
 				(boot.postTypes || []).map(function (t) {
 					return el(C.CheckboxControl, { key: t.name, label: t.label, checked: (g.post_types || []).indexOf(t.name) !== -1, onChange: function (v) { toggleType(t.name, v); } });
 				})),
+			el(UI.Section, { title: __('Optimisation', D) },
+				el(C.ToggleControl, {
+					label: __('Optimise every new model when it is added', D), checked: !!g.auto_optimise, onChange: function (v) { ctx.set('general', 'auto_optimise', v); },
+					help: __('Smaller files load faster. Runs in your browser when you upload a GLB to the 3D Library (files over 0.5 MB); the original is kept and can be restored.', D)
+				}),
+				ctx.cloud.connected ? el('p', { className: 'description' }, __('Big files can also be optimised on AtlasAR Cloud from the 3D Library.', D)) : null),
 			el(UI.Section, { title: __('Privacy', D) },
 				el(C.ToggleControl, { label: __('Share usage data with AtlasAiDev to help improve AtlasAR', D), help: __('Off unless you turn it on. Sent once a week: this site’s address and name, the admin’s name and email, the IP address, WordPress, PHP and server versions, active plugins and the theme. Never your products, files or visitors.', D), checked: !!g.telemetry, onChange: function (v) { ctx.set('general', 'telemetry', v); } }),
 				el(C.ToggleControl, { label: __('Delete all AtlasAR settings, 3D Library models and product data when the plugin is deleted', D), checked: !!g.remove_data, onChange: function (v) { ctx.set('general', 'remove_data', v); } })),

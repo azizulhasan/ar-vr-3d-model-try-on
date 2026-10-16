@@ -75,7 +75,7 @@ class AR_TRY_ON_Product_Panel {
 					'tryonModels'   => AR_TRY_ON_Viewer::tracker_files( $tryon['tracker'] ),
 				),
 				'libraryUrl'    => admin_url( 'admin.php?page=' . AR_TRY_ON_Library_Page::SLUG ),
-				'accept'        => '.' . implode( ',.', array_merge( ...array_values( AR_TRY_ON_Library::KINDS ) ) ),
+				'accept'        => '.' . implode( ',.', array_unique( array_merge( ...array_values( AR_TRY_ON_Library::KINDS ) ) ) ),
 			)
 		);
 		wp_localize_script( AR_TRY_ON_Dashboard::UI, 'atlasArAdmin', array( 'version' => ATLAS_AR_VERSION ) );

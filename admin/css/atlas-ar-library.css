@@ -59,3 +59,9 @@
 	.atlas-ar-detail{position:static}
 }
 @media (prefers-reduced-motion:reduce){.atlas-ar-library *{transition:none!important}}
+
+/* AR-121: Optimise */
+.atlas-ar-optimise{padding:12px;border:1px solid #dcdcde;border-radius:8px;background:#f6f7f7}
+.atlas-ar-optimise h3{margin-top:0}
+.atlas-ar-optimise .components-base-control{margin-bottom:0}
+.atlas-ar-step{margin:8px 0 0;color:#50575e}
