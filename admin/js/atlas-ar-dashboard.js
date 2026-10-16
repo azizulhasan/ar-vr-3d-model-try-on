@@ -148,7 +148,7 @@
 						el('li', null, __('Files usually 80–95 % smaller, same look', D)),
 						el('li', null, __('Each model at its real size in AR', D)),
 						el('li', null, __('Big files up to 50 MB, done in the background', D)),
-						el('li', null, __('20 models a month free; no limit with AtlasAR Pro', D)))),
+						el('li', null, __('20 free optimisations a month (making your models lighter); no limit with AtlasAR Pro', D)))),
 				el('div', { className: 'atlas-ar-row' },
 					el(C.Button, { variant: 'primary', onClick: function () { ctx.go('integrations'); } }, __('Connect, it is free', D)),
 					el(C.Button, { variant: 'tertiary', onClick: function () { ctx.save({ general: { cloud_tip_off: true } }); } }, __('Not now', D)))) : null,
@@ -311,8 +311,8 @@
 				el('strong', null, __('Nothing to wait for', D)),
 				el('span', null, __('Send a model and keep working: the lighter file replaces it on your site by itself, the original is kept.', D))),
 			el('p', { className: 'atlas-ar-cloud-plans' },
-				el('strong', null, __('Free plan: ', D)), __('20 models a month, no card needed.', D), ' ',
-				el('strong', null, __('With AtlasAR Pro: ', D)), __('Premium is included: no monthly limit, optimise in bulk and photo to 3D.', D)));
+				el('strong', null, __('Free plan: ', D)), __('20 optimisations a month, no card needed. An optimisation makes one of your existing models lighter; it does not create a new model.', D), ' ',
+				el('strong', null, __('With AtlasAR Pro: ', D)), __('Premium is included: no monthly limit on optimisations, optimise in bulk, and photo to 3D (making new 3D models with AI).', D)));
 		var steps = el('div', { className: 'atlas-ar-cloud-steps' },
 			el('h3', null, __('How connecting works', D)),
 			el('ol', null,
@@ -332,7 +332,7 @@
 				el('p', null, el('span', { className: 'atlas-ar-saved' }, cloud.approval === 'pending' ? __('Waiting for approval', D) : __('Connected', D)),
 					cloud.email ? ' · ' + cloud.email : '', ' · ', el('code', null, cloud.key_prefix + '…')),
 				cloud.approval === 'pending' ? el(C.Notice, { status: 'warning', isDismissible: false }, __('Open the email from AtlasAR Cloud and approve this site; then click Refresh.', D)) : null,
-				u.units_limit !== undefined ? el('p', null, el('strong', null, __('Models this month: ', D)),
+				u.units_limit !== undefined ? el('p', null, el('strong', null, __('Optimisations this month: ', D)),
 					u.units_limit === null ? sprintf(__('%d (no limit)', D), u.units_used) : sprintf('%d / %d', u.units_used, u.units_limit),
 					' · ', __('Plan: ', D), cloud.plan || 'free') : null,
 				cloud.error ? el(C.Notice, { status: 'error', isDismissible: false }, cloud.error) : null,

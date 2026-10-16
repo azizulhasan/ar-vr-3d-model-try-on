@@ -27,7 +27,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **Virtual try-on for glasses and caps**: a "Try it on" button opens the webcam; the face tracking runs on the shopper's device. Tracking files from the public CDN or, with one click, from your own site.
 * **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
 * **For developers**: a documented REST API (ready for AI agents), WP-CLI (`wp atlas-ar …`) and hooks.
-* **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself.
+* **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself. The free plan includes 20 optimisations a month: each one makes one of your existing models lighter (it does not create a new model).
 
 = AtlasAR Pro adds =
 
@@ -148,7 +148,7 @@ No. The face tracking runs in the shopper's browser; no video, picture or face d
 The viewer loads only on pages that show a 3D view, the model only when it comes into view, and the try-on only after a click. Lighter files load faster: use Optimise.
 
 = What is AtlasAR Cloud? Do I need it? =
-An optional service by AtlasAiDev, with a free plan: it optimises big models at their real size and hosts them. Connect it in **AtlasAR › Integrations** with your email; nothing is sent until you click a Cloud button. Everything else works without it.
+An optional service by AtlasAiDev, with a free plan of 20 optimisations a month: it makes your existing models lighter at their real size and hosts them. Making new 3D models with AI (photo to 3D) is part of AtlasAR Pro, not of the free plan. Connect it in **AtlasAR › Integrations** with your email; nothing is sent until you click a Cloud button. Everything else works without it.
 
 = What does AtlasAR Pro add? =
 Hotspots, sizes on the 3D view, more models and WooCommerce variations, the try-on fit, 3D models made with AI from a photo or a description (AtlasAR Cloud, Meshy AI, Tripo3D), bulk optimisation and AtlasAR Cloud Premium. [See Pro →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=faq_pro)
