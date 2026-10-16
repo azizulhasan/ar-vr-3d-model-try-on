@@ -1,4 +1,4 @@
-(function (blocks, element, i18n, blockEditor, components) {
+(function (blocks, element, i18n, blockEditor, components, serverSideRender) {
     'use strict';
 
     var registerBlockType = blocks.registerBlockType;
@@ -24,6 +24,8 @@
      */
     function buildShortcode(a) {
         var parts = ['atlas_ar'];
+        // AR-129: another product's / post's 3D view (0 = the post the block is on).
+        if (parseInt(a.id, 10) > 0) parts.push('id="' + parseInt(a.id, 10) + '"');
         // reveal: block default is false (lighter UX for new posts).
         // The shortcode default is true, so we always emit reveal=false
         // explicitly. When the merchant flips reveal=on, we emit
@@ -66,6 +68,7 @@
             // The PHP shortcode default is `true` for backwards-compat
             // with manually-typed `[atlas_ar]` shortcodes that predate
             // this attribute.
+            id:          { type: 'number',  default: 0 },
             reveal:      { type: 'boolean', default: false },
             height:      { type: 'string',  default: '400px' },
             width:       { type: 'string',  default: '500px' },
@@ -89,6 +92,13 @@
                         title: __('AtlasAR Settings', 'ar-vr-3d-model-try-on'),
                         initialOpen: true,
                     },
+                        el(TextControl, {
+                            label: __('Product or post ID', 'ar-vr-3d-model-try-on'),
+                            help: __('Show the 3D model of another product or post. Leave 0 for this one.', 'ar-vr-3d-model-try-on'),
+                            type: 'number', min: 0,
+                            value: String(attributes.id || 0),
+                            onChange: function (v) { setAttributes({ id: Math.max(0, parseInt(v, 10) || 0) }); },
+                        }),
                         el(ToggleControl, {
                             label: __('Reveal model by default', 'ar-vr-3d-model-try-on'),
                             help: attributes.reveal
@@ -155,7 +165,14 @@
                 inspector,
                 el('div', blockProps,
                     el('strong', null, buildShortcode(attributes)),
-                    el('p', { style: { marginTop: '8px', opacity: 0.75, fontSize: '13px' } }, summary)
+                    el('p', { style: { marginTop: '8px', opacity: 0.75, fontSize: '13px' } }, summary),
+                    // AR-129: the real 3D view, rendered by the server (the viewer SDK is loaded in
+                    // the editor), so what you see here is what visitors get.
+                    serverSideRender ? el(serverSideRender, {
+                        block: 'atlas/ar-shortcode',
+                        attributes: attributes,
+                        urlQueryArgs: { post_id: (window.wp && wp.data && wp.data.select('core/editor') && wp.data.select('core/editor').getCurrentPostId()) || 0 }
+                    }) : null
                 )
             );
         },
@@ -243,5 +260,6 @@
     window.wp.element,
     window.wp.i18n,
     window.wp.blockEditor,
-    window.wp.components
+    window.wp.components,
+    window.wp.serverSideRender
 );

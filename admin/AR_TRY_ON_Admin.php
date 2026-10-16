@@ -86,7 +86,7 @@ class AR_TRY_ON_Admin {
 		wp_register_script(
 			'atlas-ar-block',
 			ATLAS_AR_PLUGIN_URL . 'blocks/atlas-ar-block.js',
-			array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor', 'wp-components' ),
+			array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor', 'wp-components', 'wp-server-side-render' ),
 			$this->version,
 			true
 		);
@@ -98,11 +98,24 @@ class AR_TRY_ON_Admin {
 			$this->version
 		);
 
+		// AR-129: rendered on the server (the same [atlas_ar] output), so the editor can show a live
+		// preview (ServerSideRender) and old saved blocks keep working.
 		register_block_type(
 			'atlas/ar-shortcode',
 			array(
-				'editor_script' => 'atlas-ar-block',
-				'editor_style'  => 'atlas-ar-block-editor',
+				'editor_script'   => 'atlas-ar-block',
+				'editor_style'    => 'atlas-ar-block-editor',
+				'render_callback' => array( '\AR_TRY_ON\AR_TRY_ON_Frontend', 'render_block' ),
+				'attributes'      => array(
+					'id'          => array( 'type' => 'number', 'default' => 0 ),
+					'reveal'      => array( 'type' => 'boolean', 'default' => false ),
+					'height'      => array( 'type' => 'string', 'default' => '400px' ),
+					'width'       => array( 'type' => 'string', 'default' => '500px' ),
+					'padding'     => array( 'type' => 'string', 'default' => '0' ),
+					'margin'      => array( 'type' => 'string', 'default' => '0' ),
+					'aspectRatio' => array( 'type' => 'string', 'default' => '' ),
+					'buttonLabel' => array( 'type' => 'string', 'default' => '' ),
+				),
 			)
 		);
 	}

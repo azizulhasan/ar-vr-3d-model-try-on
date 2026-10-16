@@ -45,6 +45,48 @@ class AR_TRY_ON_Frontend {
 		add_filter( 'script_loader_tag', array( __CLASS__, 'no_optimize' ), 10, 2 );
 		add_action( 'wp', array( __CLASS__, 'place' ) );
 		add_filter( 'the_content', array( __CLASS__, 'content' ), 20 );
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'editor_assets' ) );
+	}
+
+	/**
+	 * AR-129: the AtlasAR block — the same output as its [atlas_ar] shortcode. Saved blocks carry
+	 * the shortcode as their content; the editor's preview (ServerSideRender) sends attributes.
+	 *
+	 * @param array  $attrs   block attributes
+	 * @param string $content saved content (the shortcode)
+	 * @return string HTML
+	 */
+	public static function render_block( $attrs, $content = '' ) {
+		if ( false !== strpos( (string) $content, '[atlas_ar' ) ) {
+			return do_shortcode( (string) $content );
+		}
+		$a    = is_array( $attrs ) ? $attrs : array();
+		$atts = array( 'reveal' => ! empty( $a['reveal'] ) ? 'true' : 'false' );
+		if ( ! empty( $a['id'] ) ) {
+			$atts['id'] = (int) $a['id'];
+		}
+		foreach ( array( 'height' => 'height', 'width' => 'width', 'padding' => 'padding', 'margin' => 'margin', 'aspectRatio' => 'aspect_ratio', 'buttonLabel' => 'button_label' ) as $from => $to ) {
+			if ( isset( $a[ $from ] ) && '' !== (string) $a[ $from ] ) {
+				$atts[ $to ] = (string) $a[ $from ];
+			}
+		}
+		$html = self::shortcode( $atts );
+		if ( '' === $html && defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return '<p class="atlas-ar-block-empty">' . esc_html__( 'No 3D model yet: choose one in the AtlasAR panel of this post or product, or set a product ID.', 'ar-vr-3d-model-try-on' ) . '</p>';
+		}
+		return $html;
+	}
+
+	/** AR-129: the viewer SDK inside the block editor, so the block's preview shows the 3D model. */
+	public static function editor_assets() {
+		if ( ! is_admin() ) {
+			return;
+		}
+		self::register_assets();
+		if ( wp_script_is( self::SDK_HANDLE, 'registered' ) ) {
+			wp_enqueue_script( self::SDK_HANDLE );
+			wp_enqueue_style( self::FRONT_HANDLE );
+		}
 	}
 
 	/** Register (not load) the SDK and the small shop script; they load only when a viewer prints. */
