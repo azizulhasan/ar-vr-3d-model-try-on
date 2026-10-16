@@ -12,225 +12,65 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 == Description ==
 
-A complete **3D model viewer for WordPress and WooCommerce** with built-in augmented reality and webcam **virtual try-on** — no apps, no coding. Let shoppers rotate, zoom and pan your `.glb`/`.gltf` models, place products in their real-world space on Android and iOS, or try on glasses and caps with the built-in **AtlasTryOn** viewer. Everything runs in the browser: the camera feed never leaves the shopper's device, there's no app to install and no account to create. All free, with unlimited model uploads.
+A **3D model viewer for WordPress and WooCommerce** with augmented reality and a webcam **virtual try-on** for glasses and caps. Shoppers turn, zoom and inspect your products in 3D, place them in their room with their phone (Android and iPhone, no app), or see glasses and caps on their own face. Everything runs in the visitor's browser: the camera picture never leaves their device. Free, with no limit on models or products.
 
-🚀 **AtlasTryOn — virtual try-on for glasses & caps**, built into the free plugin. Shoppers can try on glasses, sunglasses and hats online right from the product page using their webcam — no app downloads, no extra setup, and the camera never leaves their device.
+🎁 **14-day AtlasAR Pro trial** for hotspots, sizes, variations, AI 3D models and more. [Start your free trial →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=trial_cta)
 
-🎁 **14-day Pro free trial included** for the full AtlasTryOn Pro experience — head-pose tracking, HD watermark-free snapshots, multi-face detection, live calibration. [Start your free trial →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=trial_cta)
+= Free features =
 
-#### **Core features (Free):**
+* **3D view on every product**: turn, zoom, auto-rotate, your background, light and AR button colour. As many 3D views per page as you like.
+* **AR on phones**: Android (Scene Viewer), iPhone and iPad (AR Quick Look, from a `.usdz` file or made from the GLB) and WebXR. A QR code on desktop opens the product in AR on a phone.
+* **3D Library**: all your models in one place, kept apart from the Media Library: GLB, `.gltf` (single file), iPhone `.usdz` and poster images. Search, filters (used, not used, missing files, large files) and pages.
+* **Make files lighter in your browser**: "Optimise" shrinks a heavy GLB (often by 80–90 %) at its real size; nothing is uploaded. OBJ and FBX files are converted to GLB in the browser.
+* **Where it shows**: over the product gallery (photo or 3D first), as a gallery slide, a button with a popup, a product tab, or after the content; per product or for the whole shop.
+* **Works with your editor**: the AtlasAR panel in the block editor and the classic editor, an **AtlasAR block** with a live preview, an **Elementor widget**, and the `[atlas_ar]` shortcode for any other page builder.
+* **Virtual try-on for glasses and caps**: a "Try it on" button opens the webcam; the face tracking runs on the shopper's device. Tracking files from the public CDN or, with one click, from your own site.
+* **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
+* **For developers**: a documented REST API (ready for AI agents), WP-CLI (`wp atlas-ar …`) and hooks.
+* **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself.
 
-* **Rotate, zoom and pan 3D models** on every product page (Google `<model-viewer>` engine)
-* **Mobile AR**: floor + wall placement via Scene Viewer (Android) and AR Quick Look (iOS, `.usdz`)
-* **Unlimited model uploads** — no caps on file count or size
-* **WooCommerce native**: automatic "View in AR" button, simple + variable products
-* **Shortcode** `[atlas_ar]` + Gutenberg block for posts/pages
-* **QR code** card for cross-device scanning
-* **AtlasTryOn** webcam try-on for glasses, sunglasses, caps — unlimited products
-* **AI 3D model generator (text-to-model)** — turn a text prompt into a 3D model using either Tripo3D or Meshy AI (admin-only; bring your own API key)
-* **Privacy by design** — the camera feed stays on the shopper's device; nothing is uploaded
+= AtlasAR Pro adds =
 
-#### **Pro adds (separately installed plugin):**
+* **Hotspots**: click on the model to pin labelled points (materials, features, care).
+* **Sizes**: the product's width, height and depth shown on the 3D view and in AR.
+* **More models** on one product, and **variations**: each WooCommerce variation shows its own model or colour.
+* **Try-on fit**: adjust how glasses or a cap sit on the face, and a more realistic 3D try-on.
+* **Make 3D models with AI** from a product photo or a description, with AtlasAR Cloud, Meshy AI or Tripo3D, in the product editor or straight in the 3D Library.
+* **Optimise in bulk** on AtlasAR Cloud, and **AtlasAR Cloud Premium** with your licence (no monthly limit, photo to 3D).
 
-* Server-side compression for large model files (~80% size reduction)
-* Interactive hotspots, real-world dimensions, image/model sliders in the metabox
-* HD watermark-free try-on snapshots, head-pose tracking, multi-face detection, live calibration
-* Bulk compression, analytics dashboard, multi-post-type AR, format conversion (FBX/OBJ/USDZ)
-* AI image-to-model generation — turn a product photo into a 3D model with Tripo3D or Meshy AI
-
-[Pro pricing →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link) · [Live demos →](https://wpaugmentedreality.com/shop/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_shop) · [Video tutorials →](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
-
-
-== 3D Model Generation ==
-
-= How to Generate 3D Models with Tripo3D API =
-
-1. Generate your API key from the [Tripo3D API](https://www.tripo3d.ai/api).
-2. Copy the API key.
-3. Go to the **AtlasAR metabox** in the post edit screen.
-4. Click on the **Integration** tab.
-5. Paste your API key in the Integration settings and save.
-6. Now, go back to the **Edit Post** page.
-7. In the AtlasAR metabox, enter your prompt for the 3D model.
-8. Click on the **Generate Model** button.
-   - A `task_id` will be generated.
-   - Wait a few seconds while the model is being processed.
-9. Once the model is generated, a 3D preview will appear on the right side.
-10. Click on the **Save This Model** button to save the generated model and update the post data.
-11. After saving, you can view the generated 3D model on the front end of your site.
-
-= How to Generate 3D Models with Meshy AI API =
-
-1. Generate your API key from the [Meshy AI API](https://www.meshy.ai/settings/api).
-2. Copy the API key.
-3. Go to the **AtlasAR metabox** in the post edit screen.
-4. Click on the **Integration** tab.
-5. Choose **Meshy AI 3D** as the API, paste your API key, and save.
-6. Now, go back to the **Edit Post** page and open the AtlasAR metabox.
-7. Pick a model type — **text_to_model** (write a text prompt) or **image_to_model** (paste a public image URL, or pick a product image).
-8. Click on the **Generate Model** button.
-   - A `task_id` will be generated.
-   - Wait a few seconds while the model is being processed.
-9. Once the model is generated, a 3D preview will appear on the right side.
-10. Click on the **Save This Model** button to save the generated model and update the post data.
-11. After saving, you can view the generated 3D model on the front end of your site.
+[Pro pricing →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=pricing_link) · [Live demos →](https://wpaugmentedreality.com/shop/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=demo_shop) · [Video tutorials →](https://www.youtube.com/playlist?list=PLGdmFn36qCRKp58yEtIh747lhw3EM6m8K)
 
 
-== How It Works - 3 Simple Steps ==
+== How it works ==
 
-1.  **Install & Activate**:
-    * In your WordPress admin panel, go to Plugins → Add New.
-    * Search for "AR VR 3D Model Try On".
-    * Click "Install Now" and then "Activate."
-    * Find the "AtlasAR" menu.
-    * Setup you basic settings.
-2.  **Upload Models**:
-    * Navigate to a WordPress post eiditing screen
-    * Find the "AtlasAR" Metabox.
-    * Select the place where you want to display the 3D Model like Floor/Wall etc.
-    * Upload your Android Model: `.glb/.gltf` file.
-    * Upload your iOS Model: `.usdz` file.
-    * Optionally, add a Poster Image (thumbnail) for the 3D model viewer.
-    * If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
-3.  **Display 3D Model Viewer**:
-    * The "View in AR " button is automatically placed on your WordPress Posts/WooCommerce product pages.
-    * For manual placement in other locations, you can use the shortcode: `[atlas_ar]`.
-    * **Pro Users**: Enable dimensions, hotspots, and sliders from the AtlasAR metabox settings.
+1. **Install and activate** the plugin. A short setup asks where the 3D view should appear and how it should look (you can change everything later in **AtlasAR**).
+2. **Add a model**: open a product (or post), find the **AtlasAR** panel and choose or upload a `.glb` file. Add a `.usdz` for iPhone and a poster image if you have them. Big file? Click **Optimise** in the 3D Library.
+3. **Done**: the 3D view and the AR button appear where you chose. Anywhere else, use the AtlasAR block, the Elementor widget or `[atlas_ar]`.
 
-== Real-World 3D Viewer Applications ==
-
-* 🪑 **Furniture Stores**: "Customers visualize sofas in their living rooms before buying."  [Office Chair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair)
-* 🖼️ **Home Decor**: "Preview wall art placement through phone camera." [Dining Armchair Demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=demo_office_chair)
-* 🛋️ **Pro Feature - Dimensions**: Show exact measurements in AR to answer "will it fit?" questions
-* 🎨 **Pro Feature - Configurators**: Let customers customize furniture colors and materials before purchase
-
-== Competitive Advantages ==
-
-**Free Model Limits**
-- Our Plugin: **Unlimited** ⭐
-- Others: Often 1–10 models
-
-**iOS AR Support**
-- Our Plugin: **Full native .USDZ compatibility** ⭐
-- Others: Android-only or limited iOS support
-
-**WooCommerce Integration**
-- Our Plugin: **Native, seamless implementation** ⭐
-- Others: May require add-ons or hacks
-
-**Model Compression**
-- Our Plugin: **Automatic compression up to 70% savings** ⭐
-- Others: Manual compression required
-
-**Product Dimensions**
-- Our Plugin: **Real-world size display in AR (Pro)** ⭐
-- Others: No dimension features
+For glasses and caps, turn on **Try-on** in AtlasAR › Try-on and choose the product type in the product's AtlasAR panel.
 
 
-== Pro Version Features ==
+== Shop examples ==
 
-🎯 **Upgrade to Pro and unlock powerful features that boost conversions and reduce returns!**
-👉 [See Pro Pricing Plans](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)
-
-### **Available Now in Pro:**
-
-⭐ **Dimensions Display**:
-* Show product measurements (length, width, height) directly in AR view
-* Help customers answer "will it fit?" before buying
-* Reduce returns caused by size mismatches
-* Perfect for furniture, appliances, home decor
-
-⭐ **Interactive Hotspots**:
-* Add clickable information points on your 3D models
-* Educate customers about product features, materials, care instructions
-* Increase customer confidence and reduce support questions
-* Perfect for complex products like furniture, electronics, jewelry
-
-⭐ **Product Configurators (Sliders)**:
-* Let customers customize colors, materials, finishes, and options
-* Increase engagement and time spent viewing products
-* Higher average order value through personalization
-* Perfect for furniture, fashion, custom products
-
-⭐ **Automatic Model Compression**:
-* Reduce 3D file sizes by up to 70% automatically
-* Faster loading times = better user experience
-* Uses industry-standard Draco geometry compression
-* Basis Universal texture compression for optimal quality
-* Keeps original files for backup
-
-⭐ **Per-Variation 3D Models**:
-* Upload different 3D models for each product variation (color, size, style)
-* Critical for WooCommerce stores with variable products
-* Automatic model switching when customers select variations
-
-⭐ **Glass Mode Virtual Try-On**:
-* Enable realistic virtual try-ons for eyewear and jewelry
-* Face tracking for accurate placement
-* Unique feature - no other AR plugin has this!
-
-⭐ **Multi-Model Scenes**:
-* Display multiple products together in AR
-* Room planning and outfit builders
-* Advanced configurators
-
-⭐ **AI Image-to-3D Generation**:
-* Turn a product photo directly into a 3D model — no prompt writing needed
-* Works with both Tripo3D and Meshy AI (bring your own API key)
-* Complements the free text-to-model generation available in the free version
-
-### **Coming Soon in Pro:**
-
-🚀 **Advanced Analytics Dashboard** (Q1 2026):
-* Track AR engagement, device types, placement attempts
-* See which products perform best in AR
-* Prove ROI with conversion tracking
-* Integration with Google Analytics
-
-🚀 **Background Processing & Bulk Compression** (Q2 2026):
-* Compress large files in background (no upload delays)
-* Bulk compress your entire product catalog with one click
-* Queue system for processing multiple models
-
-🚀 **Desktop WebAR** (Q3 2026):
-* AR experiences on desktop browsers (no phone needed)
-* Broader accessibility for all users
-
-### **Pro Support & Updates:**
-* Priority email support (24-hour response time)
-* Regular feature updates
-* Early access to beta features
-* Dedicated documentation
-
-👉 **[Upgrade to Pro Now](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)**
-💰 **Starter Plan: Only $49.99/year** - All Pro features for 1 site
+* 🪑 **Furniture**: customers see the sofa or chair in their room, at its real size. [Office chair demo](https://wpaugmentedreality.com/product/office-chair-view-in-augmented-reality-3d/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=demo_office_chair)
+* 🖼️ **Home decor and wall art**: preview a frame or a rug before buying.
+* 🕶️ **Eyewear and caps**: try them on with the webcam, right on the product page.
 
 
-== Technical Specifications ==
+== Technical details ==
 
-* **Supported 3D Formats**: `.glb`, `.gltf` (for Android/Web 3D), `.usdz` (for iOS AR Quick Look).
-* **Mobile Device Requirements**: Android 9.0+ with ARCore support, iOS 12+ with ARKit support.
-* **WooCommerce Compatibility**: Version 3.0 and above.
-* **WordPress Compatibility**: Version 5.0 and above.
-* **Performance**: Models load asynchronously. Lazy loading implemented for archive pages to minimize performance impact. Optimized for mobile 3D rendering.
-* **Pro Compression**: Draco geometry compression + Basis Universal texture compression for up to 70% file size reduction.
-
-
-== Start Your AR Journey Today ==
-
-1.  **Install the Free Version**: Get started with unlimited 3D model uploads, no credit card needed.
-2.  **Upload Your First Model**: Add a `.glb/.gltf` file for Android/Web and a `.usdz` file for iOS to a product.
-3.  **Watch Engagement Soar**: Provide interactive AR experiences.
-4.  **Upgrade to Pro**: Unlock dimensions, hotspots, compression, and configurators to maximize conversions.
-
-👉 **[See What Pro Can Do For You](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link)**
+* **3D files**: `.glb`, single-file `.gltf`; iPhone AR `.usdz`; posters `.jpg`, `.png`, `.webp`. OBJ / FBX are converted to GLB in the browser.
+* **Phones**: Android with ARCore, iPhone / iPad with ARKit (iOS 12+). Desktop shows the 3D view and a QR code.
+* **WordPress** 5.6+, **PHP** 7.4+, **WooCommerce** optional (tested with current versions).
+* **Performance**: the viewer loads only on pages that show a 3D view, and the model only when it scrolls into view. The try-on loads only after the shopper clicks "Try it on".
+* **Privacy**: no visitor data is sent anywhere; the try-on camera picture stays on the device. See *External services* below.
 
 
-### CHECK OUT OUR OTHER ADDONS 👑:
-🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/) – Text To Speech TTS Accessibility is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a text to audio player to your WordPress site!.
+== Our other plugins ==
+
+🔥 [Text To Speech TTS Accessibility](https://wordpress.org/plugins/text-to-audio/): a listen button that reads your posts aloud.
 🔥 [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/)
 🔥 [Atlas AI Connector](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/)
-
 
 
 == External services ==
@@ -272,94 +112,58 @@ The complete, unminified source (GPLv3) is on GitHub: https://github.com/azizulh
 
 == Installation ==
 
-1. Upload the plugin folder (`ar-vr-3d-model-try-on`) to the `/wp-content/plugins/` directory via FTP, OR
-2. Install directly through the WordPress plugins screen: Go to 'Plugins' > 'Add New', search for "3D Model Viewer & AR for Wordpress & WooCommerce" by `Azizul Hasan` , and click 'Install Now'.
-3. Activate the plugin through the 'Plugins' menu in WordPress.
-4. Navigate to a WordPress Post, post metabox section, and find the "AtlasAR" metabox to upload your 3D models.
-5. Navigate to a WooCommerce product, go to the product metabox section, and find the "AtlasAR" metabox to upload your 3D models.
-6. The "View in AR " button will automatically appear on product pages. You can also use the shortcode `[atlas_ar]` for manual placement.
-7. If your site is WooCommerce Store then first go to settings page of the plugin. And Look "Enable AR For Post Types" by default If would be `post' change it to `product' and save.
-8. **For Pro Features**: After upgrading to Pro, enable dimensions, hotspots, and compression from the AtlasAR metabox settings.
+1. In WordPress, go to **Plugins › Add New**, search for "3D Viewer AtlasAR", click **Install Now** and **Activate** (or upload the `ar-vr-3d-model-try-on` folder to `/wp-content/plugins/`).
+2. The short setup opens: choose where the 3D view appears and how it looks. Everything can be changed later in **AtlasAR**.
+3. Open a product (or a post or page), find the **AtlasAR** panel and choose or upload a `.glb` model. The 3D view and the AR button appear on the page.
+4. Products are on by default; turn other post types on in **AtlasAR › Settings**.
+5. **AtlasAR Pro**: install and activate it next to this plugin; its tabs appear in the same AtlasAR panel.
 
 == Frequently Asked Questions ==
 
-= Q: Is this 3D model viewer compatible with WooCommerce? =
-A: Yes. The plugin integrates natively with WooCommerce — a "View in AR" button is added automatically to simple and variable product pages, and you can switch the 3D viewer on per product. It also works on regular WordPress posts and pages, so you are not limited to a store.
+= Is it compatible with WooCommerce? =
+Yes. Simple and variable products, several positions on the product page (gallery, slide, button, tab) and HPOS. It also works on posts, pages and custom post types, so you do not need a shop.
 
-= Q: What is AtlasTryOn? =
-A: AtlasTryOn is a virtual try-on feature, built right into this plugin, that lets your shoppers see how glasses or caps look on them using their webcam. No app downloads or external services — it runs in the browser.
+= Does it work with my editor or page builder? =
+Yes: the AtlasAR panel works in the block editor and the classic editor; there is an **AtlasAR block** with a live preview and an **Elementor widget**; with any other builder (Divi, Beaver Builder, Bricks…), add the `[atlas_ar]` shortcode.
 
-= Q: How do I enable AtlasTryOn on a product? =
-A: Open the WooCommerce product (or any post) you want to enable try-on for, scroll to the **AtlasAR** metabox, and switch the placement to **Face — Glasses** or **Face — Cap**. Save, and the "Try It On" button appears on the product page.
+= Do my customers need an app for AR? =
+No. AR opens from the browser: Scene Viewer on Android, AR Quick Look on iPhone and iPad. On a desktop, a QR code opens the product on a phone.
 
-= Q: Which devices and browsers does AtlasTryOn support? =
-A: Any modern browser with webcam support — Chrome, Edge, Firefox, Safari — on iOS, Android, Windows, macOS and Linux. Shoppers are asked for camera permission the first time they tap "Try It On".
+= Which 3D files can I use? =
+`.glb` and single-file `.gltf` for the 3D view, `.usdz` for iPhone AR (optional: iPhones can also use the GLB), and a poster image. OBJ and FBX files are converted to GLB in your browser.
 
-= Q: Is shopper video sent to a server? =
-A: No. The camera feed stays on the shopper's device. No video, frames, or face data ever leaves the browser.
+= My model file is big. What can I do? =
+Open **AtlasAR › 3D Library**, choose the model and click **Optimise**: it is made lighter in your browser, at its real size if you enter its height, and the original is kept. Very big files can be optimised on AtlasAR Cloud (free plan); AtlasAR Pro optimises many at once.
 
-= Q: What's the difference between Free and Pro AtlasTryOn? =
-A: Free covers the core try-on flow on unlimited products — webcam-based glasses & caps try-on with snapshots. Pro adds head-pose-tracked 3D overlay (more realistic fit as the shopper turns), HD watermark-free snapshots, multi-face detection (up to 2 faces), and a live per-product calibration panel. [Compare plans →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=faq_compare)
+= Is there a limit on models or products? =
+No. As many models, products and 3D views per page as you like.
 
-= Q: How do I get the 14-day Pro trial? =
-A: A trial banner appears in the plugin dashboard after activation. Or visit [Pricing](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=faq_trial) and click "Start free trial". A valid credit card is required to activate the trial; you won't be charged during the 14-day window and can cancel anytime before it ends.
+= How do I turn on the virtual try-on? =
+In **AtlasAR › Try-on**, turn it on; then in the product's AtlasAR panel choose **Glasses** or **Cap**. A "Try it on" button appears on the product page.
 
-= Q: What's included in the Free version vs Pro version? =
-A: **Free version** includes unlimited 3D model uploads, full iOS + Android AR support, WooCommerce integration, QR codes, and text-to-model AI generation with both Tripo3D and Meshy AI. **Pro version** adds image-to-model AI generation (both providers), dimensions display, interactive hotspots, product configurators, automatic compression, and more. [Compare plans here](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
+= Is the shopper's camera picture sent anywhere? =
+No. The face tracking runs in the shopper's browser; no video, picture or face data leaves the device.
 
-= Q: How do I generate 3D models with Tripo3D? =
-A: Get an API key from Tripo3D, paste it into the plugin's Integration settings and save. Then open the AtlasAR box on any post or product, write a text prompt (text-to-model, free) — or, with Pro, pick a product image (image-to-model) — and click Generate Model. When the preview appears, click Save This Model. Full step-by-step instructions are in the "3D Model Generation" section above.
+= Will 3D views slow my site down? =
+The viewer loads only on pages that show a 3D view, the model only when it comes into view, and the try-on only after a click. Lighter files load faster: use Optimise.
 
-= Q: How do I generate 3D models with Meshy AI? =
-A: Get an API key from Meshy AI, choose "Meshy AI 3D" in the plugin's Integration settings, paste your key and save. Then open the AtlasAR box on any post or product, write a text prompt (text-to-model, free) — or, with Pro, pick a product image (image-to-model) — and click Generate Model. When the preview appears, click Save This Model. Full step-by-step instructions are in the "3D Model Generation" section above.
+= What is AtlasAR Cloud? Do I need it? =
+An optional service by AtlasAiDev, with a free plan: it optimises big models at their real size and hosts them. Connect it in **AtlasAR › Integrations** with your email; nothing is sent until you click a Cloud button. Everything else works without it.
 
-= Q: How does the Pro compression feature work? =
-A: Pro version automatically compresses your .glb and .gltf files using industry-standard Draco geometry compression and Basis Universal texture compression. This reduces file sizes by up to 70% while maintaining visual quality, resulting in faster loading times and better user experience. The original files are kept as backup.
+= What does AtlasAR Pro add? =
+Hotspots, sizes on the 3D view, more models and WooCommerce variations, the try-on fit, 3D models made with AI from a photo or a description (AtlasAR Cloud, Meshy AI, Tripo3D), bulk optimisation and AtlasAR Cloud Premium. [See Pro →](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=faq_pro)
 
-= Q: Can I try Pro features before buying? =
-A: Yes! We offer a 14-day money-back guarantee on all Pro plans. If you're not satisfied with the Pro features, you can request a full refund within 14 days of purchase.
+= How do I get the 14-day Pro trial? =
+Visit [Pricing](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlasar_3&utm_content=faq_trial) and click "Start free trial".
 
-= Q: What are dimensions and how do they help? =
-A: The dimensions feature (Pro only) displays real-world measurements (length, width, height) directly in the AR view. This helps customers answer "will it fit?" questions before buying, significantly reducing returns caused by size mismatches. Perfect for furniture, appliances, and home decor products.
+= What happens when my Pro licence expires? =
+The Pro features stop; your site keeps everything the free plugin does, and your models and settings stay.
 
-= Q: What are hotspots and why should I use them? =
-A: Hotspots (Pro only) are clickable information points you can add to your 3D models. They let you educate customers about specific features, materials, care instructions, or benefits. This increases customer confidence, reduces support questions, and helps sell complex products.
+= Can I manage it with WP-CLI or an AI agent? =
+Yes: `wp atlas-ar settings | library | product | cloud | tryon-files | check`, and a REST API (`ar_try_on/v1`) where every route and field is described, so tools like AtlasMCP can use it.
 
-= Q: What is the product configurator (slider) feature? =
-A: The slider/configurator feature (Pro only) lets customers customize product options like colors, materials, finishes, and styles directly in the 3D viewer. This increases engagement, time on page, and often leads to higher average order values through personalization.
-
-= Q: Can I display 3D Models with custom post types? =
-A: Yes, By default it enabled with post type post. If you want to enabled for any other post then go to settings page of the plugin. And Look "Enable AR For Post Types". Change it to `you_custom_post_type' and save.
-
-= Q: Which 3D file formats are supported? =
-A: You can upload `.glb` and `.gltf` files for Android and desktop viewers, and `.usdz` files to enable native iOS AR Quick Look functionality.
-
-= Q: Do my customers need to install an app to use AR? =
-A: No— AtlasAR launch directly in mobile browsers on both Android (via Scene Viewer) and iOS (via Quick Look), with no extra app downloads required.
-
-= Q: How do I display the 3D/AR viewer on my product pages? =
-A: Once the plugin is active, "View in AR " buttons are automatically added to all WooCommerce product pages where models are assigned. For Pro users, dimensions, hotspots, and configurators appear automatically when enabled.
-
-= Q: Is there a limit on how many models I can upload with the free version? =
-A: No. The free version supports unlimited `.glb`/`.gltf` model uploads—no size or quantity caps. This is a major advantage over competitors who limit free users to 1-5 models.
-
-= Q: Will loading 3D models slow down my site? =
-A: We've optimized the plugin for performance. Models load asynchronously (typically taking 0.3–0.7 seconds on a stable 4G connection) and utilize lazy loading on archive/shop pages to minimize any impact on your site's speed. Pro compression makes files even smaller for faster loading.
-
-= Q: Which WooCommerce versions and themes are supported? =
-A: The plugin is compatible with WooCommerce 3.0 and above. It is designed to work seamlessly with all standard WooCommerce themes and major page builders (like Elementor, WPBakery, Beaver Builder, etc.).
-
-= Q: How do I upgrade to Pro? =
-A: Visit our [pricing page](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link) to choose a plan. After purchase, you'll receive a license key to activate Pro features. We offer plans starting at $39/year for single sites.
-
-= Q: What happens when my Pro subscription expires? =
-A: If your Pro subscription expires, the Pro features (dimensions, hotspots, compression, configurators) will be disabled, but your site will continue to work with all the free features. Your existing compressed models will continue to work. You can renew anytime to regain Pro features.
-
-= Q: Can I use Pro on multiple sites? =
-A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sites, and the Business plan ($199/year) covers 10 sites. [See all plans](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
-
-= Q: Where do I report security bugs found in this plugin? =
-A: Please report security bugs found in the source code of the 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/106665f5-7eed-423e-817a-9f00897ab72b). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+= Where do I report security bugs found in this plugin? =
+Please report security bugs found in the source code of the 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/106665f5-7eed-423e-817a-9f00897ab72b). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
 
 == Screenshots ==
 
