@@ -324,6 +324,14 @@ class AR_TRY_ON_Cloud {
 			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
 		}
 		update_post_meta( $id, self::JOB_META, array( 'cloud_id' => $cloud_id, 'status' => 'queued', 'height_cm' => isset( $query['height_cm'] ) ? $query['height_cm'] : 0, 'time' => time() ) );
+		// AR-143: the same file sent again (e.g. after "Restore original") is answered with the model
+		// already made (same Idempotency-Key). It is ready, so no webhook will come: fetch it now.
+		if ( isset( $res['status'] ) && 'ready' === $res['status'] ) {
+			$done = self::optimise_poll( $id );
+			if ( ! is_wp_error( $done ) ) {
+				return array( 'status' => $done['status'], 'cloud_id' => $cloud_id );
+			}
+		}
 		return array( 'status' => 'queued', 'cloud_id' => $cloud_id );
 	}
 
