@@ -111,3 +111,15 @@
 	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-detail{position:static;height:100%;overflow:auto;box-sizing:border-box}
 	body.atlas-ar-fullscreen .atlas-ar-library-wrap .atlas-ar-detail>*{flex-shrink:0} /* the pane scrolls; its parts keep their size */
 }
+
+/* AR-144: Free 3D models (the AtlasAR Cloud library) */
+.atlas-ar-free-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.atlas-ar-free-head h2{margin:0}
+.atlas-ar-free-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0}
+.atlas-ar-free-tools .atlas-ar-search{flex:1 1 260px}
+.atlas-ar-free-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.atlas-ar-free-card{display:flex;flex-direction:column;gap:6px;margin:0;padding:10px;border:1px solid #dcdcde;border-radius:6px;background:#fff}
+.atlas-ar-free-card img,.atlas-ar-free-noimg{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:4px;background:#f0f0f1}
+.atlas-ar-free-noimg{display:flex;align-items:center;justify-content:center;color:#8c8f94;font-weight:600}
+.atlas-ar-free-card .components-button{justify-content:center;margin-top:auto}
+.atlas-ar-free-card .atlas-ar-saved{margin-top:auto}

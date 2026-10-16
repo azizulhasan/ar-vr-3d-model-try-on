@@ -511,6 +511,175 @@ class AR_TRY_ON_Cloud {
 		return $tmp;
 	}
 
+	/* ------------------------------------------------------ free 3D model library */
+
+	/** AR-144: post meta of a model downloaded from the free library: { id, license, credit }. */
+	const LIBRARY_META = '_atlas_ar_library_source';
+
+	/**
+	 * AR-144: search AtlasAR Cloud's free 3D model library (any plan; nothing is used). Sends only
+	 * the search words, category and page.
+	 *
+	 * @return array|\WP_Error { data: [ model… ], total, categories }, each model with `imported`
+	 *                         (the 3D Library model ID when this site has it already)
+	 */
+	public static function library_search( $q = '', $category = '', $page = 1 ) {
+		if ( ! self::connected() ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$query = array_filter(
+			array(
+				'q'        => mb_substr( sanitize_text_field( (string) $q ), 0, 100 ),
+				'category' => sanitize_key( (string) $category ),
+				'page'     => max( 1, (int) $page ),
+				'per_page' => 24,
+			)
+		);
+		$res = self::request( 'GET', '/v1/library?' . http_build_query( $query ) );
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$have = self::library_imported();
+		$out  = array();
+		foreach ( isset( $res['data'] ) && is_array( $res['data'] ) ? $res['data'] : array() as $m ) {
+			if ( ! is_array( $m ) || empty( $m['id'] ) || ! preg_match( '/^lib_[A-Za-z0-9]{22}$/', (string) $m['id'] ) ) {
+				continue;
+			}
+			$out[] = array(
+				'id'          => (string) $m['id'],
+				'name'        => sanitize_text_field( (string) ( $m['name'] ?? '' ) ),
+				'description' => sanitize_text_field( (string) ( $m['description'] ?? '' ) ),
+				'category'    => sanitize_text_field( (string) ( $m['category_label'] ?? '' ) ),
+				'size'        => (int) ( $m['size'] ?? 0 ),
+				'height_cm'   => isset( $m['height_cm'] ) ? (float) $m['height_cm'] : null,
+				'license'     => sanitize_text_field( (string) ( $m['license'] ?? '' ) ),
+				'license_label' => sanitize_text_field( (string) ( $m['license_label'] ?? '' ) ),
+				'credit'      => sanitize_text_field( (string) ( $m['credit'] ?? '' ) ),
+				'poster_url'  => isset( $m['poster_url'] ) ? esc_url_raw( (string) $m['poster_url'] ) : '',
+				'imported'    => isset( $have[ $m['id'] ] ) ? $have[ $m['id'] ] : 0,
+			);
+		}
+		$cats = array();
+		foreach ( isset( $res['categories'] ) && is_array( $res['categories'] ) ? $res['categories'] : array() as $k => $v ) {
+			$cats[ sanitize_key( $k ) ] = sanitize_text_field( (string) $v );
+		}
+		return array( 'data' => $out, 'total' => isset( $res['total'] ) ? (int) $res['total'] : count( $out ), 'categories' => $cats );
+	}
+
+	/**
+	 * AR-144: download a free library model into this site's 3D Library (with its picture as the
+	 * poster). A model the site has already is not downloaded again.
+	 *
+	 * @param string $lib_id lib_…
+	 * @return array|\WP_Error the 3D Library model
+	 */
+	public static function library_import( $lib_id ) {
+		$lib_id = (string) $lib_id;
+		if ( ! preg_match( '/^lib_[A-Za-z0-9]{22}$/', $lib_id ) ) {
+			return new \WP_Error( 'atlas_ar_library', __( 'This free model was not found.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$have = self::library_imported();
+		if ( isset( $have[ $lib_id ] ) && AR_TRY_ON_Library::get( $have[ $lib_id ] ) ) {
+			return AR_TRY_ON_Library::get( $have[ $lib_id ] );
+		}
+		if ( ! self::connected() ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$meta = self::request( 'GET', '/v1/library/' . $lib_id );
+		if ( is_wp_error( $meta ) ) {
+			return $meta;
+		}
+		$tmp = self::fetch_with_key( '/v1/library/' . $lib_id . '/file' );
+		if ( is_wp_error( $tmp ) ) {
+			return $tmp;
+		}
+		$name    = sanitize_text_field( (string) ( $meta['name'] ?? '' ) );
+		$slug    = sanitize_title( (string) ( $meta['slug'] ?? $name ) );
+		$results = AR_TRY_ON_Library::add_uploads( array( array( 'tmp_name' => $tmp, 'name' => ( '' !== $slug ? $slug : 'free-model' ) . '.glb' ) ) );
+		wp_delete_file( $tmp );
+		$res = isset( $results[0] ) ? $results[0] : array();
+		if ( empty( $res['model_id'] ) ) {
+			return new \WP_Error( 'atlas_ar_library', isset( $res['error'] ) ? $res['error'] : __( 'The model could not be added to the 3D Library.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$id = (int) $res['model_id'];
+		if ( '' !== $name ) {
+			AR_TRY_ON_Library::rename( $id, $name );
+		}
+		update_post_meta(
+			$id,
+			self::LIBRARY_META,
+			array(
+				'id'      => $lib_id,
+				'license' => sanitize_text_field( (string) ( $meta['license'] ?? '' ) ),
+				'credit'  => sanitize_text_field( (string) ( $meta['credit'] ?? '' ) ),
+			)
+		);
+		// The picture becomes the poster (best effort: the model works without one).
+		if ( ! empty( $meta['poster_url'] ) ) {
+			$pic = self::download( (string) $meta['poster_url'] );
+			if ( ! is_wp_error( $pic ) ) {
+				$ext = strtolower( pathinfo( (string) wp_parse_url( (string) $meta['poster_url'], PHP_URL_PATH ), PATHINFO_EXTENSION ) );
+				AR_TRY_ON_Library::add_file( $id, array( 'tmp_name' => $pic, 'name' => ( '' !== $slug ? $slug : 'free-model' ) . '.' . ( in_array( $ext, array( 'jpg', 'png', 'webp' ), true ) ? $ext : 'png' ) ) );
+				wp_delete_file( $pic );
+			}
+		}
+		return AR_TRY_ON_Library::get( $id );
+	}
+
+	/** lib_… => 3D Library model ID, for the free models this site has downloaded. */
+	private static function library_imported() {
+		$out = array();
+		$ids = get_posts(
+			array(
+				'post_type'      => AR_TRY_ON_Library::POST_TYPE,
+				'post_status'    => 'any',
+				'posts_per_page' => 500,
+				'fields'         => 'ids',
+				'meta_key'       => self::LIBRARY_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_key -- admin screen only; models downloaded from the free library.
+			)
+		);
+		foreach ( $ids as $id ) {
+			$m = get_post_meta( $id, self::LIBRARY_META, true );
+			if ( is_array( $m ) && ! empty( $m['id'] ) ) {
+				$out[ (string) $m['id'] ] = (int) $id;
+			}
+		}
+		return $out;
+	}
+
+	/** A file from AtlasAR Cloud that needs this site's key (a free library model): a temp file. */
+	private static function fetch_with_key( $path ) {
+		$base = self::base_url();
+		$key  = self::stored()['key'];
+		if ( '' === $base || '' === $key ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		$tmp  = wp_tempnam( 'atlas-ar-library' );
+		$args = array(
+			'timeout'     => 180,
+			'stream'      => true,
+			'filename'    => $tmp,
+			'redirection' => 0,
+			'headers'     => array( 'Authorization' => 'Bearer ' . $key, 'Accept' => 'model/gltf-binary' ),
+		);
+		$res  = self::is_local( $base ) ? wp_remote_get( $base . $path, $args ) : wp_safe_remote_get( $base . $path, $args );
+		$code = is_wp_error( $res ) ? 0 : (int) wp_remote_retrieve_response_code( $res );
+		if ( 200 !== $code ) {
+			$body = $code && is_readable( $tmp ) ? json_decode( (string) file_get_contents( $tmp ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the error answer just written to the temp file.
+			wp_delete_file( $tmp );
+			if ( ! $code ) {
+				return new \WP_Error( 'atlas_ar_cloud_down', __( 'AtlasAR Cloud could not be reached. Please try again in a moment.', 'ar-vr-3d-model-try-on' ) );
+			}
+			if ( 429 === $code ) {
+				return new \WP_Error( 'rate_limited', __( 'This site downloaded many free models today. Please try again tomorrow.', 'ar-vr-3d-model-try-on' ) );
+			}
+			$err = is_array( $body ) && isset( $body['error']['code'] ) ? sanitize_key( $body['error']['code'] ) : 'atlas_ar_cloud_' . $code;
+			return new \WP_Error( $err, 404 === $code ? __( 'This free model is not in the library any more.', 'ar-vr-3d-model-try-on' ) : self::error_text( $err, $code ) );
+		}
+		return $tmp;
+	}
+
 	/* ---------------------------------------------------------------- webhooks */
 
 	/** The address AtlasAR Cloud sends model.ready / model.failed to. */

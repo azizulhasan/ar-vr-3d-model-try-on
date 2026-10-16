@@ -14,6 +14,8 @@
  *   POST   /library/<id>/optimised        an optimised GLB made in the browser (file); keeps the original
  *   POST   /library/<id>/restore          back to the original GLB
  *   POST   /library/<id>/cloud            optimise on AtlasAR Cloud { height_cm }; GET = check / fetch it
+ *   GET    /library/free                  AR-144: search the free 3D model library on AtlasAR Cloud (q, category, page)
+ *   POST   /library/free/<lib_…>          download a free library model into the 3D Library
  *
  * Every route needs a logged-in user with the right capability; WordPress checks the REST nonce.
  *
@@ -149,6 +151,34 @@ class AR_TRY_ON_Library_Routes {
 				'label'               => __( 'Restore the original GLB', 'ar-vr-3d-model-try-on' ),
 				'description'         => __( 'Puts back the GLB as it was uploaded, before it was optimised; the optimised file is deleted.', 'ar-vr-3d-model-try-on' ),
 				'args'                => $id,
+				'schema'              => $model,
+			)
+		);
+		// AR-144: the free 3D model library of AtlasAR Cloud (a connected site, any plan; nothing is used).
+		self::route(
+			'/library/free',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'free_search' ),
+				'permission_callback' => array( __CLASS__, 'can_use' ),
+				'label'               => __( 'Search the free 3D model library', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Searches AtlasAR Cloud’s free 3D model library (needs a connected AtlasAR Cloud account, any plan; nothing is used). Only the search words, category and page are sent.', 'ar-vr-3d-model-try-on' ),
+				'args'                => array(
+					'q'        => self::arg( 'string', 'Search words (name, tags, description).', array( 'default' => '' ) ),
+					'category' => self::arg( 'string', 'A category key (from the answer’s categories).', array( 'default' => '' ) ),
+					'page'     => self::arg( 'integer', 'Page of results (24 a page).', array( 'default' => 1, 'minimum' => 1, 'sanitize_callback' => 'absint' ) ),
+				),
+			)
+		);
+		self::route(
+			'/library/free/(?P<lib>lib_[A-Za-z0-9]{22})',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'free_import' ),
+				'permission_callback' => array( __CLASS__, 'can_use' ),
+				'label'               => __( 'Download a free library model', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Downloads a free 3D model from AtlasAR Cloud’s library into this site’s 3D Library, with its picture as the poster. A model the site has already is returned instead.', 'ar-vr-3d-model-try-on' ),
+				'args'                => array( 'lib' => self::arg( 'string', 'The free model’s ID (lib_…).', array( 'required' => true ) ) ),
 				'schema'              => $model,
 			)
 		);
@@ -420,6 +450,14 @@ class AR_TRY_ON_Library_Routes {
 
 	public static function cloud_poll( \WP_REST_Request $r ) {
 		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::optimise_poll( (int) $r['id'] ) );
+	}
+
+	public static function free_search( \WP_REST_Request $r ) {
+		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::library_search( (string) $r['q'], (string) $r['category'], (int) $r['page'] ) );
+	}
+
+	public static function free_import( \WP_REST_Request $r ) {
+		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::library_import( (string) $r['lib'] ) );
 	}
 
 	/* --------------------------------------------------------------------- helpers */

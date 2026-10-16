@@ -485,6 +485,96 @@
 		);
 	}
 
+	/* ---------------------------------------------------- free 3D model library */
+
+	var FREE = '/ar_try_on/v1/library/free';
+
+	/**
+	 * AR-144: "Free 3D models": search AtlasAR Cloud's free library and download a model into this
+	 * 3D Library with one click. Needs a connected AtlasAR Cloud account (any plan); nothing is used.
+	 */
+	function FreeModels(props) {
+		var _q = useState(''), q = _q[0], setQ = _q[1];
+		var _cat = useState(''), cat = _cat[0], setCat = _cat[1];
+		var _page = useState(1), page = _page[0], setPage = _page[1];
+		var _res = useState(null), res = _res[0], setRes = _res[1];
+		var _cats = useState({}), cats = _cats[0], setCats = _cats[1];
+		var _err = useState(''), err = _err[0], setErr = _err[1];
+		var _busy = useState(''), busy = _busy[0], setBusy = _busy[1];
+		var _got = useState({}), got = _got[0], setGot = _got[1]; // lib id → 3D Library model id
+		var req = useRef(0);
+
+		useEffect(function () { setPage(1); }, [q, cat]);
+		useEffect(function () {
+			if (!config.cloud) return undefined;
+			var mine = ++req.current;
+			var t = setTimeout(function () {
+				setErr('');
+				api({ path: FREE + '?' + new URLSearchParams({ q: q, category: cat, page: String(page) }).toString() }).then(function (r) {
+					if (mine !== req.current) return;
+					setRes(r);
+					if (r.categories && Object.keys(r.categories).length) setCats(r.categories);
+				}, function (e) { if (mine === req.current) { setRes({ data: [], total: 0 }); setErr(message(e)); } });
+			}, q ? 350 : 0);
+			return function () { clearTimeout(t); };
+		}, [q, cat, page]);
+
+		function download(m) {
+			setBusy(m.id); setErr('');
+			api({ path: FREE + '/' + m.id, method: 'POST' }).then(function (model) {
+				setBusy('');
+				setGot(function (cur) { var n = Object.assign({}, cur); n[m.id] = model.id; return n; });
+				props.api.done([model.id]);
+			}, function (e) { setBusy(''); setErr(message(e)); });
+		}
+
+		var head = el('div', { className: 'atlas-ar-free-head' },
+			el('h2', null, __('Free 3D models', D)),
+			el(C.Button, { variant: 'tertiary', onClick: props.api.close }, __('Close', D)));
+		var lead = el('p', { className: 'description' }, __('Ready-made, optimised 3D models from the AtlasAR Cloud library, free to use on your site. Download one and it is added to your 3D Library, ready to show on a product.', D));
+
+		if (!config.cloud) {
+			return el(Fragment, null, head, lead,
+				el('p', null, config.canConnect
+					? el(Fragment, null, __('The free library comes with AtlasAR Cloud (free plan included).', D), ' ', el('a', { href: config.integrationsUrl }, __('Connect AtlasAR Cloud in AtlasAR › Integrations', D)))
+					: __('Ask an administrator to connect AtlasAR Cloud in AtlasAR › Integrations to use the free library.', D)));
+		}
+
+		var list = res ? res.data : null;
+		var pages = res ? Math.max(1, Math.ceil(res.total / 24)) : 1;
+		return el(Fragment, null, head, lead,
+			el('div', { className: 'atlas-ar-free-tools' },
+				el('div', { className: 'atlas-ar-search' }, el(C.SearchControl, { label: __('Search free 3D models', D), value: q, onChange: setQ, __nextHasNoMarginBottom: true })),
+				el(C.SelectControl, {
+					label: __('Category', D), hideLabelFromVision: true, value: cat, onChange: setCat, __nextHasNoMarginBottom: true,
+					options: [{ value: '', label: __('All categories', D) }].concat(Object.keys(cats).map(function (k) { return { value: k, label: cats[k] }; }))
+				})),
+			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
+			list === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D))
+				: !list.length ? el('p', { className: 'description' }, q || cat ? __('No free models match. Try other words.', D) : __('The free library is empty for now. New models are added regularly.', D))
+				: el('ul', { className: 'atlas-ar-free-grid' }, list.map(function (m) {
+					var have = got[m.id] || m.imported;
+					return el('li', { key: m.id, className: 'atlas-ar-free-card' },
+						m.poster_url ? el('img', { src: m.poster_url, alt: '', loading: 'lazy', width: 160, height: 160 }) : el('span', { className: 'atlas-ar-free-noimg', 'aria-hidden': 'true' }, '3D'),
+						el('strong', null, m.name),
+						el('span', { className: 'atlas-ar-muted' }, [m.category, size(m.size), m.height_cm ? sprintf(__('%s cm tall', D), m.height_cm) : ''].filter(Boolean).join(' · ')),
+						el('span', { className: 'atlas-ar-muted', title: m.license_label }, m.credit ? sprintf(__('%1$s · by %2$s', D), m.license, m.credit) : m.license),
+						have ? el('span', { className: 'atlas-ar-saved' }, '✓ ', __('In your 3D Library', D))
+							: el(C.Button, { variant: 'secondary', isBusy: busy === m.id, disabled: !!busy, onClick: function () { download(m); }, 'aria-label': sprintf(__('Download %s', D), m.name) }, busy === m.id ? __('Downloading…', D) : __('Download', D)));
+				})),
+			pages > 1 ? el('nav', { className: 'atlas-ar-library-pager', 'aria-label': __('Free 3D models pages', D) },
+				el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),
+				el('span', { 'aria-live': 'polite' }, sprintf(__('Page %1$d of %2$d', D), page, pages)),
+				el(C.Button, { variant: 'secondary', disabled: page >= pages, onClick: function () { setPage(page + 1); } }, __('Next', D))) : null,
+			el('p', { className: 'description' }, __('Only your search words are sent to AtlasAR Cloud. Downloads are free and do not use your monthly optimisations.', D)));
+	}
+
+	if (wp.hooks && config.cloudAvailable) {
+		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/free-models', function (actions) {
+			return [{ id: 'free-models', label: __('Free 3D models', D), render: FreeModels }].concat(actions);
+		});
+	}
+
 	/* ------------------------------------------------------------ browser */
 
 	/** Search + filters + grid + detail; the page and the picker both use it. */

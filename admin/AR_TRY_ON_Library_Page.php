@@ -72,6 +72,10 @@ class AR_TRY_ON_Library_Page {
 				// AR-121: Optimise.
 				'autoOptimise' => (bool) \AR_TRY_ON\AR_TRY_ON_Settings::get( 'general.auto_optimise' ),
 				'cloud'        => \AR_TRY_ON\AR_TRY_ON_Cloud::available() && \AR_TRY_ON\AR_TRY_ON_Cloud::connected(),
+				// AR-144: the free 3D model library (needs AtlasAR Cloud, any plan).
+				'cloudAvailable'  => \AR_TRY_ON\AR_TRY_ON_Cloud::available(),
+				'canConnect'      => current_user_can( 'manage_options' ),
+				'integrationsUrl' => admin_url( 'admin.php?page=ar-vr-3d-model-try-on#integrations' ),
 			)
 		);
 		wp_register_style( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/css/atlas-ar-library.css', array( 'wp-components' ), (string) filemtime( $css ) );

@@ -28,6 +28,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
 * **For developers**: a documented REST API (ready for AI agents), WP-CLI (`wp atlas-ar …`) and hooks.
 * **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself. The free plan includes 20 optimisations a month: each one makes one of your existing models lighter (it does not create a new model).
+* **Free 3D models**: with AtlasAR Cloud connected (free plan included), search a library of ready-made, optimised 3D models and download one into your 3D Library with one click, at no cost.
 
 = AtlasAR Pro adds =
 
@@ -85,7 +86,7 @@ Google - Terms: https://policies.google.com/terms Privacy: https://policies.goog
 
 = AtlasAR Cloud (optional, by AtlasAiDev) =
 
-Off unless the site owner connects it. When an administrator connects the site, the site address and the email they enter are sent to create the project; AtlasAR Cloud sends a welcome email to that address, and tips and offers only if the separate, unticked "email me tips" box was ticked. While connected, AtlasAR Cloud calls this site's REST address when a model is ready (signed with a secret only this site has). When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. No visitor data is sent.
+Off unless the site owner connects it. When an administrator connects the site, the site address and the email they enter are sent to create the project; AtlasAR Cloud sends a welcome email to that address, and tips and offers only if the separate, unticked "email me tips" box was ticked. While connected, AtlasAR Cloud calls this site's REST address when a model is ready (signed with a secret only this site has). When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. In 3D Library › Free 3D models, the search words and category are sent to search AtlasAR Cloud's free model library, and a model is downloaded to the site only when someone clicks Download. No visitor data is sent.
 AtlasAiDev - Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
 
 = AtlasAiDev usage data (track.atlasaidev.com, icanhazip.com) =
