@@ -67,6 +67,8 @@ class AR_TRY_ON_Settings {
 				'telemetry'     => array( 'type' => 'bool', 'default' => false ),
 				'remove_data'   => array( 'type' => 'bool', 'default' => false ),
 				'wizard_done'   => array( 'type' => 'bool', 'default' => false ),
+				'checklist_off' => array( 'type' => 'bool', 'default' => false ),
+				'cloud_tip_off' => array( 'type' => 'bool', 'default' => false ),
 			),
 		);
 
@@ -125,7 +127,8 @@ class AR_TRY_ON_Settings {
 	 */
 	public static function update( array $input ) {
 		$clean = self::clean( $input, self::all() );
-		update_option( self::OPTION, array( 'version' => self::VERSION ) + $clean, false );
+		// Autoloaded: the shop pages read these settings on every request.
+		update_option( self::OPTION, array( 'version' => self::VERSION ) + $clean, true );
 		self::$cache = null;
 		return self::all();
 	}

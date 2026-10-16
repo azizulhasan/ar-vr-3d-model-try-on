@@ -1,1 +1,1 @@
-(self.webpackChunkar_try_on=self.webpackChunkar_try_on||[]).push([[523],{904:()=>{}}]);
+(self.webpackChunkar_try_on=self.webpackChunkar_try_on||[]).push([[523],{523:()=>{}}]);

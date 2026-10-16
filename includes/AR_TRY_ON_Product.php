@@ -25,7 +25,7 @@ class AR_TRY_ON_Product {
 		$schema = array(
 			'use_site'     => array( 'type' => 'bool', 'default' => true ),
 			'background'   => array( 'type' => 'color', 'default' => '#ffffff' ),
-			'placement'    => array( 'type' => 'enum', 'default' => 'site', 'options' => array( 'site', 'gallery', 'gallery3d', 'button', 'tab' ) ),
+			'placement'    => array( 'type' => 'enum', 'default' => 'site', 'options' => array( 'site', 'gallery', 'gallery3d', 'button', 'tab', 'slide' ) ),
 			'ar_placement' => array( 'type' => 'enum', 'default' => 'floor', 'options' => array( 'floor', 'wall' ) ),
 			'ar_scale'     => array( 'type' => 'enum', 'default' => 'auto', 'options' => array( 'auto', 'fixed' ) ),
 			'tryon'        => array( 'type' => 'enum', 'default' => '', 'options' => array( '', 'glasses', 'hat' ) ),

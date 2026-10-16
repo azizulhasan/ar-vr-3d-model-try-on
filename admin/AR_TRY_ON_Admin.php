@@ -2,7 +2,6 @@
 
 namespace AR_TRY_ON_Admin; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace; renaming risks a Free/Pro update-window fatal (see plan/AR-66).
 
-use AR_TRY_ON\AR_TRY_ON_Helper;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -44,14 +43,6 @@ class AR_TRY_ON_Admin {
 	 */
 	private $version;
 
-	/**
-	 * Plugin's localize data.
-	 *
-	 * @since    1.3.14
-	 * @access   private
-	 * @var      string $localize_data Plugin's localize data.
-	 */
-	public $localize_data;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -66,196 +57,12 @@ class AR_TRY_ON_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 
-		// wp-admin/includes/plugin.php is required because is_plugin_active() is used
-		// in get_localize_data() below.
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
-
-		// `localize_data` is intentionally NOT built here in the
-		// constructor. It is built lazily by get_localize_data() on
-		// the first enqueue call.
-		//
-		// Why: the Phase 3 extension-surface keys (supported_formats,
-		// dashboard_tabs, metabox_sections) are produced by
-		// apply_filters() calls. The Pro plugin registers those filter
-		// listeners on Free's `atlas_ar_loaded` action — which fires
-		// LATE in the `init` hook chain. The constructor runs during
-		// `init` priority 10, BEFORE Pro's listener has had a chance
-		// to register. Building localize_data here would freeze the
-		// Free-default values into the JS payload and silently break
-		// Phase 4. Building it on `admin_enqueue_scripts` (the actual
-		// localize-script trigger) reads the filters AFTER Pro has
-		// hooked them. AR-61 §1.1 Phase 4.
-		$this->localize_data = null;
-	}
-
-	/**
-	 * Build (or return the cached copy of) the wp_localize_script
-	 * payload for the Admin bundles.
-	 *
-	 * Cached for the duration of a single request — `localize_data`
-	 * is set to null in the constructor; the first enqueue call
-	 * populates it; subsequent enqueue calls reuse the value so each
-	 * bundle gets a consistent payload.
-	 *
-	 * @since   1.0.0
-	 * @updated AR-61 §1.1 Phase 4 — deferred from __construct() so
-	 *          Pro's filter listeners can extend the payload.
-	 * @return  array
-	 */
-	private function get_localize_data() {
-		if ( null !== $this->localize_data ) {
-			return $this->localize_data;
-		}
-		$this->localize_data = [
-			'api_url'       => esc_url_raw( rest_url() ),
-			'api_namespace' => 'ar_try_on',
-			'api_version'   => 'v1',
-			'plugin_name'   => ATLAS_AR_PLUGIN_NAME,
-			'rest_nonce'    => wp_create_nonce( 'wp_rest' ),
-			'VERSION'       => ATLAS_AR_VERSION,
-			'plugin_url'    => ATLAS_AR_PLUGIN_URL,
-			'post_types'    => AR_TRY_ON_Helper::get_post_types(),
-			'is_wc_active'  => is_plugin_active( 'woocommerce/woocommerce.php' ),
-			'is_pro_active' => AR_TRY_ON_Helper::is_pro_active(),
-			'is_admin'      => is_admin(),
-
-			/*
-			 * Phase 3 extension-surface payload — React reads these
-			 * and lets Pro extend the UI without importing Pro code.
-			 *
-			 * Forward-stable per backward-compat rule 8: new keys may
-			 * be added, existing key shape is frozen.
-			 *
-			 * These three keys ARE the reason this builder is lazy.
-			 * Pro's filter listeners must be in place before these
-			 * calls run; see the deferral note in __construct().
-			 */
-			'supported_formats' => AR_TRY_ON_Helper::supported_formats(),
-			'dashboard_tabs'    => AR_TRY_ON_Helper::dashboard_settings_tabs(),
-			'metabox_sections'  => AR_TRY_ON_Helper::metabox_sections(),
-			// AR-62 — generation modes. Free baseline is text_to_model
-			// only; Pro extends via `atlas_ar_generation_supported_modes`
-			// in AR_TRY_ON_Pro_Bridge. The metabox React filters its
-			// "Supported Model Types" dropdown to this list.
-			'generation_supported_modes' => AR_TRY_ON_Helper::generation_supported_modes(),
-			// AR-72 — setup wizard. `active` is true only on
-			// `&welcome=1` / `&welcome=pro`; the React entry then renders
-			// the wizard instead of the dashboard tabs.
-			'wizard'                     => AR_TRY_ON_Wizard::instance()->get_client_data(),
-		];
-		return $this->localize_data;
+		add_action( 'wp_ajax_atlas_plugins_refresh', array( $this, 'ajax_refresh_plugins' ) );
 	}
 
 
-	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
-		if ( AR_TRY_ON_Helper::is_atlas_ar_page() || AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			wp_enqueue_style( 'ar-vr-3d-model-try-on', ATLAS_AR_PLUGIN_URL . 'public/css/ar-try-on.css', array(), $this->version, 'all' );
-
-            wp_enqueue_style( 'ar-vr-3d-model-try-on-public', ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
-
-        }
-        wp_enqueue_style( 'atlas_ar_toastify', ATLAS_AR_PLUGIN_URL . 'admin/css/atlas_ar_toastify.css', array(), $this->version, 'all' );
-
-		wp_enqueue_style( 'ar-vr-3d-model-try-on-admin', ATLAS_AR_PLUGIN_URL . 'admin/css/ar-try-on-admin.css', array(), $this->version, 'all' );
-
-	}
-
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
-
-		/**
-		 * Load scripts.
-		 *
-		 * Note: wp-admin/includes/plugin.php is already conditionally loaded by the
-		 * constructor (which runs before this enqueue callback) and is normally already
-		 * loaded by WordPress core during admin requests. Re-loading it here without
-		 * an immediate use violates the wp.org guideline on core file loading (AR-61 §5.1).
-		 */
-
-		// AR-73 — the in-browser model compressor, registered (not loaded)
-		// on the dashboard so Pro's bulk compression card can enqueue it.
-		// The product editor enqueues the same file further down.
-		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
-			wp_register_script( 'ar-compression-client', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-compression-client.min.js', array(), $this->version, true );
-		}
-
-		do_action( 'atlas_ar_enqueue_pro_dashboard_scripts' );
 
 
-		if ( AR_TRY_ON_Helper::is_atlas_ar_page() ) {
-			/* Load react js. filemtime versioning so a rebuilt bundle busts
-			   browser cache even within the same plugin release (the static
-			   $this->version would otherwise keep serving a stale build). */
-			$dashboard_ui_path = ATLAS_AR_PLUGIN_PATH . 'admin/js/build/ar-try-on-dashboard-ui.min.js';
-			$dashboard_ui_ver  = file_exists( $dashboard_ui_path ) ? (string) filemtime( $dashboard_ui_path ) : $this->version;
-			$dashboard_deps    = array( 'wp-hooks' );
-
-			// AR-72 — the setup wizard previews the model with
-			// <model-viewer> and picks files from the media library.
-			if ( '' !== AR_TRY_ON_Wizard::requested_mode() ) {
-				wp_enqueue_media();
-				// Loads as a module (deferred); <model-viewer> elements the
-				// wizard renders upgrade as soon as it is defined.
-				$this->enqueue_model_viewer();
-			}
-
-			/**
-			 * Filter: atlas_ar_dashboard_script_dependencies
-			 *
-			 * Lets Pro load its wizard steps before the dashboard bundle
-			 * reads the `atlasAr.wizard.steps` filter (AR-72).
-			 *
-			 * @param string[] $dashboard_deps Script handles.
-			 */
-			$dashboard_deps = apply_filters( 'atlas_ar_dashboard_script_dependencies', $dashboard_deps );
-
-			wp_enqueue_script( 'ar-try-on-dashboard-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-dashboard-ui.min.js', $dashboard_deps, $dashboard_ui_ver, true );
-			wp_localize_script( 'ar-try-on-dashboard-ui', 'ar_try_on', $this->get_localize_data() );
-		}
-
-		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-			wp_enqueue_media(); // Enqueue the WordPress media uploader
-			$metabox_ui_path = ATLAS_AR_PLUGIN_PATH . 'admin/js/build/ar-try-on-metabox-ui.min.js';
-			$metabox_ui_ver  = file_exists( $metabox_ui_path ) ? (string) filemtime( $metabox_ui_path ) : $this->version;
-			wp_enqueue_script( 'ar-try-on-metabox-ui', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-metabox-ui.min.js', array( 'wp-hooks' ), $metabox_ui_ver, true );
-
-			// Add WooCommerce product variation data if on product edit page
-			$metabox_localize_data = $this->get_localize_data();
-			$metabox_localize_data['wc_product'] = $this->get_wc_product_data();
-
-			wp_localize_script( 'ar-try-on-metabox-ui', 'ar_try_on', $metabox_localize_data );
-
-			wp_enqueue_script(
-				'ar-try-on-media-library',
-				ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-try-on-media-library.min.js', // Path to your JS file
-				['ar-try-on-metabox-ui'], // Dependencies
-				$this->version,
-				true
-			);
-
-			// Enqueue compression client script
-			wp_enqueue_script(
-				'ar-compression-client',
-				ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-compression-client.min.js',
-				array('ar-try-on-metabox-ui'),
-				$this->version,
-				true
-			);
-		}
-	}
 
 	/**
 	 * Register the `atlas/ar-shortcode` block and its editor-only assets.
@@ -300,62 +107,8 @@ class AR_TRY_ON_Admin {
 		);
 	}
 
-	public function enqueue_preview() {
-
-		if ( AR_TRY_ON_Helper::is_ar_supported_post_type() ) {
-//
-//			wp_enqueue_style( 'alertify', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/alertify.css', array(), $this->version, 'all' );
-//			wp_enqueue_style( 'alertify-default', ATLAS_AR_PLUGIN_URL . 'public/css/alertifyjs/themes/default.css', array( 'alertify' ), $this->version, 'all' );
-//			wp_enqueue_style( $this->plugin_name, ATLAS_AR_PLUGIN_URL . 'public/css/ar-vr-3d-model-try-on-public.css', array(), $this->version, 'all' );
 
 
-			// TODO:: enqueue base on model setup/settings
-			$this->enqueue_model_viewer( array( 'ar-try-on-metabox-ui' ) );
-
-			wp_enqueue_script( $this->plugin_name . '-preview', ATLAS_AR_PLUGIN_URL . 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js', array('ar-try-on-google-model-viewer'), $this->version, true );
-			wp_localize_script( $this->plugin_name . '-preview', 'ar_try_on_preview', $this->get_localize_data() );
-		}
-	}
-
-	/** `type="module"` for the admin preview's model-viewer script. */
-	public static function module_tag( $tag, $handle ) {
-		if ( 'ar-try-on-google-model-viewer' === $handle && false === strpos( $tag, 'type="module"' ) ) {
-			$tag = str_replace( ' src=', ' type="module" src=', $tag );
-		}
-		return $tag;
-	}
-
-	/**
-	 * Enqueue Google's <model-viewer> for admin previews.
-	 *
-	 * AR-61 §3.3: point <model-viewer> at the locally-bundled DRACO /
-	 * KTX2 (Basis) / Lottie decoders before the component initializes,
-	 * so admin previews don't fall back to the gstatic.com /
-	 * cdn.jsdelivr.net defaults baked into google-model-viewer.js.
-	 * Shared by the metabox preview and the setup wizard (AR-72).
-	 *
-	 * @param string[] $deps Script handles model-viewer must load after.
-	 */
-	private function enqueue_model_viewer( $deps = array() ) {
-		wp_enqueue_script( 'ar-try-on-google-model-viewer', ATLAS_AR_PLUGIN_URL . 'public/js/google-model-viewer.js', $deps, $this->version, true );
-		// model-viewer is an ES module: load it as one (edits the tag WordPress prints).
-		if ( ! has_filter( 'script_loader_tag', array( __CLASS__, 'module_tag' ) ) ) {
-			add_filter( 'script_loader_tag', array( __CLASS__, 'module_tag' ), 10, 2 );
-		}
-
-		$decoder_base = ATLAS_AR_PLUGIN_URL . 'public/js/vendor/decoders/';
-		$inline_decoder_config = sprintf(
-			'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
-			'dracoDecoderLocation: %s,' .
-			'ktx2TranscoderLocation: %s,' .
-			'lottieLoaderLocation: %s' .
-			'});',
-			wp_json_encode( $decoder_base . 'draco/' ),
-			wp_json_encode( $decoder_base . 'basis/' ),
-			wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
-		);
-		wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );
-	}
 
 	/**
 	 * Add Menu and Submenu page
@@ -387,142 +140,13 @@ class AR_TRY_ON_Admin {
 
     }
 
+	/** The dashboard page (also the callback old AtlasAR Pro 3.x registers for this page). */
 	public function ar_try_on_settings() {
-		echo wp_kses( "<div class='wpwrap'><div id='ar_try_on_dashboard_ui'></div></div>", array(
-			'div' => array(
-				'id'    => array(),
-				'class' => array(),
-			)
-		) );
+		AR_TRY_ON_Dashboard::render();
 	}
 
-	/**
-	 * Get WooCommerce product data for the metabox
-	 * Returns variation and attribute data for variable products
-	 *
-	 * @since 1.8.3
-	 * @return array WooCommerce product data
-	 */
-	public function get_wc_product_data() {
-		$product_data = array(
-			'is_variable' => false,
-			'variations'  => array(),
-			'attributes'  => array(),
-		);
 
-		// Check if WooCommerce is active
-		if ( ! class_exists( 'WooCommerce' ) ) {
-			return $product_data;
-		}
 
-		// Get current post ID. Read-only — `absint()` sanitises and the post-edit
-		// screen URL is the canonical source; nonce verification belongs to the
-		// edit-form POST, not this read.
-		$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only context: identifies which product to localize React state for; mutations happen via separate, nonce-protected REST routes.
-		if ( ! $post_id ) {
-			return $product_data;
-		}
-
-		// Get the product
-		$product = wc_get_product( $post_id );
-		if ( ! $product ) {
-			return $product_data;
-		}
-
-		// Check if variable product
-		if ( ! $product->is_type( 'variable' ) ) {
-			return $product_data;
-		}
-
-		$product_data['is_variable'] = true;
-
-		// Get variations
-		$variations = $product->get_available_variations();
-		$product_data['variations'] = array_map( function( $variation ) {
-			return array(
-				'variation_id' => $variation['variation_id'],
-				'attributes'   => $variation['attributes'],
-//				'image'        => isset( $variation['image'] ) ? $variation['image'] : array(),
-			);
-		}, $variations );
-
-		// Get product attributes that are used for variations
-		$attributes = $product->get_variation_attributes();
-		foreach ( $attributes as $attribute_name => $options ) {
-			// Clean up attribute name (remove 'pa_' prefix if present)
-			$clean_name = str_replace( 'pa_', '', $attribute_name );
-			$clean_name = wc_attribute_label( $attribute_name, $product );
-
-			$product_data['attributes'][] = array(
-				'name'    => $clean_name,
-				'slug'    => $attribute_name,
-				'options' => array_values( $options ),
-			);
-		}
-
-		return $product_data;
-	}
-
-	/**
-	 * Add defer attribute to plugin scripts for better performance
-	 *
-	 * @param string $tag The script tag HTML
-	 * @param string $handle The script handle
-	 * @param string $src The script source URL
-	 * @return string Modified script tag
-	 */
-	public function add_defer_attribute( $tag, $handle, $src ) {
-		// List of plugin scripts that should be deferred
-		$defer_scripts = array(
-			'ar-try-on-dashboard-ui',
-			'ar-try-on-metabox-ui',
-			'ar-try-on-media-library',
-			'atlas-ar-block',
-			$this->plugin_name . '-preview'
-		);
-
-		// Add defer attribute if this is one of our scripts
-		if ( in_array( $handle, $defer_scripts, true ) ) {
-			// Only add defer if not already present
-			if ( strpos( $tag, ' defer' ) === false ) {
-				$tag = str_replace( ' src=', ' defer src=', $tag );
-			}
-		}
-
-		return $tag;
-	}
-
-	/**
-	 * Add version query string to assets for cache busting
-	 * This ensures users get the latest version after plugin updates
-	 *
-	 * @since 1.7.9
-	 * @param string $src The source URL
-	 * @param string $handle The script/style handle
-	 * @return string Modified source URL with version
-	 */
-	public function add_version_to_assets( $src, $handle ) {
-		// List of our plugin handles
-		$plugin_handles = array(
-			'ar-try-on-dashboard-ui',
-			'ar-try-on-metabox-ui',
-			'ar-try-on-media-library',
-			'atlas-ar-block',
-			$this->plugin_name . '-preview',
-			$this->plugin_name,
-			'ar-try-on-admin',
-			'atlas_ar_toastify'
-		);
-
-		if ( in_array( $handle, $plugin_handles, true ) ) {
-			// Add version as query parameter for cache busting
-			if ( strpos( $src, 'ver=' ) === false ) {
-				$src = add_query_arg( 'ver', $this->version, $src );
-			}
-		}
-
-		return $src;
-	}
 
 	/**
 	 * Sets the extension and mime type for Android - .gbl and IOS - .usdz files.
@@ -565,27 +189,11 @@ class AR_TRY_ON_Admin {
 	public function get_3d_mime_types() {
         $mimes = [
             'glb' => 'model/gltf-binary',
-            'gltf' => 'model/gltf-binary',
+            'gltf' => 'model/gltf+json',
             'usdz' => 'model/vnd.pixar.usd',
         ];
 
-        if(AR_TRY_ON_Helper::is_pro_active()) {
-            $mimes += [
-                'obj' => 'model/obj',
-                '3ds' => 'application/x-3ds',
-                'step' => 'application/step',
-                'stl' => 'application/vnd.ms-pki.stl',
-                'fbx' => 'application/octet-stream',
-                '3dml' => 'text/vnd.in3d.3dml',
-                'dae' => 'application/collada+xml',
-                'wrl' => 'model/vrml',
-                '3mf' => 'application/vnd.ms-3mfdocument',
-                'mtl' => 'model/mtl',
-                'bin' => 'application/octet-stream',
-                'hdr' => 'image/vnd.radiance',
-            ];
-        }
-
+        // AtlasAR Pro adds the file types it handles with its own upload_mimes filter.
         return $mimes;
 	}
 

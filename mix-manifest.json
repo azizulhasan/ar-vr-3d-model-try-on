@@ -1,7 +1,3 @@
 {
-    "/admin/js/build/ar-try-on-dashboard-ui.min.js": "/admin/js/build/ar-try-on-dashboard-ui.min.js",
-    "/admin/js/build/ar-try-on-metabox-ui.min.js": "/admin/js/build/ar-try-on-metabox-ui.min.js",
-    "/admin/js/build/ar-try-on-media-library.min.js": "/admin/js/build/ar-try-on-media-library.min.js",
-    "/admin/js/build/ar-compression-client.min.js": "/admin/js/build/ar-compression-client.min.js",
-    "/admin/js/build/ar-vr-3d-model-try-on-preview.min.js": "/admin/js/build/ar-vr-3d-model-try-on-preview.min.js"
+    "/admin/js/build/ar-compression-client.min.js": "/admin/js/build/ar-compression-client.min.js"
 }

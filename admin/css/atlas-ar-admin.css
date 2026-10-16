@@ -1,0 +1,116 @@
+/* AR-120: AtlasAR dashboard, setup wizard and product panel. Builds on atlas-ar-library.css. */
+.atlas-ar-wrap{margin:16px 20px 0 2px;color:#1d2327}
+.atlas-ar-app{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;max-width:1400px}
+.atlas-ar-nav{position:sticky;top:46px;display:flex;flex-direction:column;gap:2px;align-self:start}
+.atlas-ar-brand{display:flex;align-items:baseline;gap:8px;padding:4px 12px 12px;font-size:18px;font-weight:700}
+.atlas-ar-brand span{font-size:12px;font-weight:400;color:#50575e}
+.atlas-ar-nav-item{min-height:40px;padding:10px 12px;border:0;border-radius:6px;background:transparent;color:#1d2327;font-size:14px;text-align:left;text-decoration:none;cursor:pointer}
+.atlas-ar-nav-item:hover{background:#f0f0f1;color:#1d2327}
+.atlas-ar-nav-item.is-current{background:#e7f3ef;color:#0e6b5c;font-weight:600}
+.atlas-ar-nav-item:focus-visible,.atlas-ar-choice-item:focus-visible,.atlas-ar-swatch:focus-visible,.atlas-ar-tab:focus-visible{outline:2px solid #2271b1;outline-offset:2px}
+.atlas-ar-main{min-width:0}
+.atlas-ar-head{margin-bottom:16px}
+.atlas-ar-head h1{margin:0 0 4px;font-size:23px;font-weight:400;line-height:1.3}
+.atlas-ar-head p{margin:0;color:#50575e;font-size:14px}
+
+.atlas-ar-section{margin-bottom:16px;padding:16px 20px;border:1px solid #c3c4c7;border-radius:8px;background:#fff}
+.atlas-ar-section-title{margin:0 0 4px;font-size:15px}
+.atlas-ar-section-lead{margin:0 0 12px;color:#50575e}
+.atlas-ar-section h3{margin:16px 0 8px;font-size:13px}
+.atlas-ar-section .components-base-control{margin-bottom:12px}
+.atlas-ar-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.atlas-ar-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.atlas-ar-muted{color:#50575e}
+.atlas-ar-label{display:block;margin:8px 0 6px;font-size:11px;font-weight:500;text-transform:uppercase}
+.atlas-ar-empty{color:#50575e}
+
+.atlas-ar-badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:10px;background:#e7f3ef;color:#0e6b5c;font-size:11px;font-weight:600;vertical-align:middle}
+.atlas-ar-badge--pro{margin-left:0;background:#fdecdc;color:#7a3410}
+.atlas-ar-badge--warn{background:#fcf0f1;color:#8a2424}
+.atlas-ar-badge--muted{background:#f0f0f1;color:#50575e}
+.atlas-ar-pro-note{margin:12px 0;padding:8px 12px;border-left:3px solid #f0b849;background:#fcf9e8;color:#3c434a}
+
+.atlas-ar-choice{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.atlas-ar-choice.is-compact{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.atlas-ar-choice-item{display:flex;flex-direction:column;gap:6px;min-height:44px;padding:12px;border:2px solid #c3c4c7;border-radius:8px;background:#fff;color:#1d2327;text-align:left;font:inherit;cursor:pointer}
+.atlas-ar-choice-item:hover{border-color:#8c8f94}
+.atlas-ar-choice-item.is-on{border-color:#2271b1;background:#f0f6fc}
+.atlas-ar-choice-title{font-weight:600}
+.atlas-ar-choice-text{font-size:13px;color:#50575e}
+
+.atlas-ar-swatches{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.atlas-ar-swatch{width:36px;height:36px;border:2px solid #c3c4c7;border-radius:50%;cursor:pointer}
+.atlas-ar-swatch.is-on{border-color:#2271b1;box-shadow:0 0 0 2px #fff inset}
+.atlas-ar-swatch-custom{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.atlas-ar-swatch-custom input{width:40px;height:32px;padding:0;border:1px solid #c3c4c7;border-radius:4px;background:none}
+
+.atlas-ar-viewer-box,.atlas-ar-viewer-empty{border:1px solid #dcdcde;border-radius:8px;background:#fafafa;overflow:hidden}
+.atlas-ar-viewer-box atlasar-viewer{display:block}
+.atlas-ar-viewer-empty{display:flex;align-items:center;justify-content:center;padding:16px;color:#50575e;text-align:center}
+.atlas-ar-preview-col h3{margin-top:0}
+
+.atlas-ar-savebar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px}
+.atlas-ar-saved{color:#007017;font-weight:500}
+.atlas-ar-error{color:#b32d2e}
+
+.atlas-ar-cloud-tip{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:16px 20px;border:1px solid #9fd0c3;border-radius:8px;background:#f2faf7}
+.atlas-ar-cloud-tip ul{display:flex;flex-wrap:wrap;gap:4px 16px;margin:6px 0 0;padding:0;list-style:none;color:#3c434a}
+.atlas-ar-checklist ol{margin:0;padding:0;list-style:none}
+.atlas-ar-checklist li{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #f0f0f1}
+.atlas-ar-check{display:inline-flex;flex:none;align-items:center;justify-content:center;width:24px;height:24px;border:2px solid #c3c4c7;border-radius:50%;color:#fff;font-size:13px}
+.atlas-ar-checklist li.is-done .atlas-ar-check{border-color:#0e6b5c;background:#0e6b5c}
+.atlas-ar-check-text{display:flex;flex:1;flex-direction:column}
+.atlas-ar-check-text span{color:#50575e;font-size:13px}
+.atlas-ar-checklist li.is-done strong{color:#50575e;text-decoration:line-through}
+.atlas-ar-progress{display:flex;align-items:center;gap:12px;margin:0 0 8px;color:#50575e}
+
+.atlas-ar-table{border-radius:6px}
+.atlas-ar-table td{vertical-align:middle}
+.atlas-ar-product-name{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.atlas-ar-product-name img{border-radius:4px;object-fit:cover}
+.atlas-ar-actions{text-align:right}
+.atlas-ar-pager{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:12px}
+
+.atlas-ar-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.atlas-ar-cat{display:flex;flex-direction:column;gap:4px;padding:12px;border:1px solid #dcdcde;border-radius:6px;color:#50575e}
+.atlas-ar-cat.is-on{border-color:#9fd0c3;color:#1d2327}
+.atlas-ar-cat .atlas-ar-badge{align-self:flex-start;margin:0}
+.atlas-ar-benefits{margin:0 0 12px 18px;list-style:disc}
+.atlas-ar-code{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px;border-radius:6px;background:#f6f7f7}
+.atlas-ar-code code{flex:1;background:none;font-size:13px}
+.atlas-ar-checks{margin:0;padding:0;list-style:none}
+.atlas-ar-checks li{padding:6px 0}
+.atlas-ar-checks li.is-ok span{color:#007017;font-weight:700}
+.atlas-ar-checks li.is-warn span{color:#b32d2e;font-weight:700}
+.atlas-ar-guides{margin:0 0 0 18px;list-style:disc}
+
+/* Setup wizard */
+.atlas-ar-wizard{max-width:880px;margin:0 auto}
+.atlas-ar-wizard-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:12px}
+.atlas-ar-wizard-head h1{margin:0;font-size:23px;font-weight:400}
+.atlas-ar-wizard-head p{flex:1;margin:0;color:#50575e}
+.atlas-ar-steps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px;padding:0;list-style:none;counter-reset:step}
+.atlas-ar-steps li{flex:1 1 120px;padding:8px 10px;border-bottom:3px solid #dcdcde;color:#50575e;font-size:13px;counter-increment:step}
+.atlas-ar-steps li::before{content:counter(step) ". "}
+.atlas-ar-steps li.is-current{border-color:#2271b1;color:#1d2327;font-weight:600}
+.atlas-ar-steps li.is-done{border-color:#0e6b5c}
+.atlas-ar-wizard .atlas-ar-section h2{margin:0 0 4px;font-size:18px}
+.atlas-ar-wizard-nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+/* Product panel */
+#atlas-ar-panel .inside{margin:0;padding:12px}
+.atlas-ar-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;color:#1d2327}
+.atlas-ar-panel-view{display:flex;flex-direction:column;gap:8px}
+.atlas-ar-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid #dcdcde}
+.atlas-ar-tab{min-height:40px;margin-bottom:-1px;padding:8px 12px;border:0;border-bottom:3px solid transparent;background:none;color:#50575e;font-size:13px;cursor:pointer}
+.atlas-ar-tab.is-current{border-color:#2271b1;color:#1d2327;font-weight:600}
+.atlas-ar-tab-body{display:flex;flex-direction:column;gap:10px}
+.atlas-ar-panel .atlas-ar-drop{padding:16px}
+.atlas-ar-model-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+
+@media (max-width:960px){
+	.atlas-ar-app{grid-template-columns:1fr}
+	.atlas-ar-nav{position:static;flex-direction:row;flex-wrap:wrap}
+	.atlas-ar-brand{width:100%}
+	.atlas-ar-split,.atlas-ar-panel{grid-template-columns:1fr}
+}

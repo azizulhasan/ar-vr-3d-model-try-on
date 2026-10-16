@@ -22,6 +22,9 @@ class AR_TRY_ON_Viewer {
 	/** MediaPipe version the SDK's face tracker is built for (the files must match it). */
 	const MEDIAPIPE = '0.10.35';
 
+	/** Google's face model for MediaPipe (listed under External services in the readme). */
+	const FACE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+
 	/** @var bool a viewer or try-on button was printed on this page */
 	private static $used = false;
 
@@ -144,13 +147,14 @@ class AR_TRY_ON_Viewer {
 	 * @return array { face, wasmBase }
 	 */
 	public static function tracker_files( $source ) {
-		if ( 'self' === $source ) {
+		// "From this site" only once the files are there; until then the CDN keeps try-on working.
+		if ( 'self' === $source && AR_TRY_ON_Tracker_Files::present() ) {
 			$up   = wp_upload_dir( null, false );
 			$base = trailingslashit( $up['baseurl'] ) . AR_TRY_ON_Library::DIR . '/mediapipe/';
 			return array( 'face' => $base . 'face_landmarker.task', 'wasmBase' => $base . 'wasm' );
 		}
 		return array(
-			'face'     => 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+			'face'     => self::FACE_MODEL_URL,
 			'wasmBase' => 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@' . self::MEDIAPIPE . '/wasm',
 		);
 	}

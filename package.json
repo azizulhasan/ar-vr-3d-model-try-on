@@ -7,15 +7,12 @@
     "watch": "cross-env NODE_ENV=development webpack --watch --progress --config=node_modules/laravel-mix/setup/webpack.config.js",
     "dev": "cross-env NODE_ENV=development webpack  --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "production": "cross-env NODE_ENV=production webpack --progress --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "tailwind": "npx tailwindcss -c tailwind.config.js -i src/tailwind.css -o public/css/ar-try-on.css --watch",
-    "modal": "npx tailwindcss -c tailwind.config.modal.js -i src/tailwind.css -o public/css/atlas_ar_modal.css --watch",
-    "css": "npx tailwindcss -c tailwind.config.js -i src/tailwind.css -o public/css/ar-try-on.css --minify && npx tailwindcss -c tailwind.config.modal.js -i src/tailwind.css -o public/css/atlas_ar_modal.css --minify",
     "makeZip": "gulp makeZip",
     "copy": "gulp copy",
     "zip": "gulp zip",
     "release": "npm run build:release && gulp release",
     "test:artest": "gulp testArtest",
-    "build:release": "npm run production && npm run css && gulp minify:css && gulp makeZip"
+    "build:release": "npm run production && gulp minify:css && gulp makeZip"
   },
   "keywords": [
     "ar",

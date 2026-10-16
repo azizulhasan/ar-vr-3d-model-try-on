@@ -2,12 +2,9 @@ const mix = require('laravel-mix');
 const fs = require('fs');
 const path = require('path');
 
-mix.js('src/dashboard/index.js', 'admin/js/build/ar-try-on-dashboard-ui.min.js').react();
-mix.js('src/metabox/index.js', 'admin/js/build/ar-try-on-metabox-ui.min.js').react();
-mix.js('admin/js/ar-try-on-media-library.js', 'admin/js/build/ar-try-on-media-library.min.js');
 mix.js('admin/js/ar-compression-client.js', 'admin/js/build/ar-compression-client.min.js');
-mix.js('admin/js/ar-vr-3d-model-try-on-preview.js', 'admin/js/build/ar-vr-3d-model-try-on-preview.min.js');
 
+// AR-120: the admin screens are plain scripts on wp.element (admin/js/atlas-ar-*.js), not bundled.
 // AR-116: the shop front end is the AtlasAR viewer SDK (public/js/atlasar-sdk, copied by
 // scripts/copy-atlasar-sdk.js) plus public/js/atlas-ar-front.js (plain, not bundled).
 

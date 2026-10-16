@@ -124,9 +124,9 @@ class AR_TRY_ON {
 
 		$plugin_admin = new AR_TRY_ON_Admin( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 10 );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 10 );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_preview', 10 );
+		// AR-120: the dashboard, wizard and product panel are AR_TRY_ON_Dashboard /
+		// AR_TRY_ON_Product_Panel (wired in atlas_ar_run); this class keeps the menu, the block
+		// and the 3D file types.
 
 		// Block registration. The loader runs inside Free's own `init`
 		// (priority 10), so this must use a later priority to still fire in
@@ -138,8 +138,6 @@ class AR_TRY_ON {
 //		$this->loader->add_filter( 'script_loader_tag', $plugin_admin, 'add_defer_attribute', 10, 3 );
 
 		// Add version to assets for cache busting
-		$this->loader->add_filter( 'script_loader_src', $plugin_admin, 'add_version_to_assets', 10, 2 );
-		$this->loader->add_filter( 'style_loader_src', $plugin_admin, 'add_version_to_assets', 10, 2 );
 
         /**
          * Adds support for Android `.glb` and iOS `.usdz` file types by defining their extensions and mime types.
