@@ -34,135 +34,215 @@ class AR_TRY_ON_Library_Routes {
 	const NS = 'ar_try_on/v1';
 
 	public static function register() {
-		$id = array(
-			'id' => array(
-				'type'              => 'integer',
-				'required'          => true,
-				'sanitize_callback' => 'absint',
-			),
-		);
-		register_rest_route(
-			self::NS,
+		$id     = array( 'id' => self::arg( 'integer', 'The 3D Library model ID.', array( 'required' => true, 'sanitize_callback' => 'absint' ) ) );
+		$height = array( 'height_cm' => self::arg( 'number', 'The product’s real height in centimetres (0.5–1000); the model is scaled to it with its base on the floor. 0 keeps the model’s own size.', array( 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ) ) );
+		$model  = array( __CLASS__, 'model_schema' );
+
+		self::route(
 			'/library',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'list_models' ),
 					'permission_callback' => array( __CLASS__, 'can_use' ),
+					'label'               => __( 'List 3D models', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'Lists the models in the AtlasAR 3D Library (newest first) with their files (GLB, iPhone USDZ, poster), size, missing files and the products that show them. The total count is in the X-WP-Total header.', 'ar-vr-3d-model-try-on' ),
 					'args'                => array(
-						'search'   => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ),
-						'filter'   => array( 'type' => 'string', 'default' => 'all', 'enum' => array( 'all', 'used', 'unused', 'missing', 'large' ) ),
-						'page'     => array( 'type' => 'integer', 'default' => 1, 'minimum' => 1, 'sanitize_callback' => 'absint' ),
-						'per_page' => array( 'type' => 'integer', 'default' => 40, 'minimum' => 1, 'maximum' => 100, 'sanitize_callback' => 'absint' ),
+						'search'   => self::arg( 'string', 'Only models whose name contains this text.', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) ),
+						'filter'   => self::arg( 'string', 'all = every model; used = shown by at least one product; unused = not shown anywhere; missing = without an iPhone file or poster; large = GLB over the "large file" size (5 MB).', array( 'default' => 'all', 'enum' => array( 'all', 'used', 'unused', 'missing', 'large' ) ) ),
+						'page'     => self::arg( 'integer', 'Page of results (1 = first).', array( 'default' => 1, 'minimum' => 1, 'sanitize_callback' => 'absint' ) ),
+						'per_page' => self::arg( 'integer', 'Models per page (1–100).', array( 'default' => 40, 'minimum' => 1, 'maximum' => 100, 'sanitize_callback' => 'absint' ) ),
 					),
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( __CLASS__, 'upload' ),
 					'permission_callback' => array( __CLASS__, 'can_use' ),
+					'label'               => __( 'Add 3D model files', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'Adds model files to the 3D Library: either uploaded files (multipart field files[]) or one file from a public https URL. Files with the same base name join one model (chair.glb + chair.usdz + chair.jpg). Accepted: .glb, a self-contained .gltf, .usdz, .jpg/.png/.webp posters, .obj/.fbx (converted to GLB in the browser). Every file is checked by its content.', 'ar-vr-3d-model-try-on' ),
+					'args'                => array(
+						'url'  => self::arg( 'string', 'A public https URL of one model, iPhone or poster file to add (instead of uploading files).', array( 'format' => 'uri' ) ),
+						'name' => self::arg( 'string', 'With url: the file name to keep, e.g. chair.glb (default: from the URL).', array( 'sanitize_callback' => 'sanitize_file_name' ) ),
+					),
 				),
+				'schema' => $model,
 			)
 		);
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/library/(?P<id>\d+)',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'get_model' ),
 					'permission_callback' => array( __CLASS__, 'can_use' ),
+					'label'               => __( 'Get a 3D model', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'One 3D Library model: its name, files with URLs and sizes, missing files, whether it was optimised, and the products that show it.', 'ar-vr-3d-model-try-on' ),
 					'args'                => $id,
 				),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( __CLASS__, 'rename' ),
 					'permission_callback' => array( __CLASS__, 'can_edit' ),
-					'args'                => $id + array(
-						'name' => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
-					),
+					'label'               => __( 'Rename a 3D model', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'Changes the name of a 3D Library model (shown in the library and as the viewer’s alt text default).', 'ar-vr-3d-model-try-on' ),
+					'args'                => $id + array( 'name' => self::arg( 'string', 'The new name (1–120 characters, plain text).', array( 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ) ) ),
 				),
 				array(
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( __CLASS__, 'delete_model' ),
 					'permission_callback' => array( __CLASS__, 'can_delete' ),
+					'label'               => __( 'Delete a 3D model', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'Deletes a 3D Library model and all its files. Refused (HTTP 409) while a product shows it: link those products to another model first.', 'ar-vr-3d-model-try-on' ),
 					'args'                => $id,
 				),
+				'schema' => $model,
 			)
 		);
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/library/(?P<id>\d+)/files',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( __CLASS__, 'add_file' ),
 				'permission_callback' => array( __CLASS__, 'can_edit' ),
-				'args'                => $id,
+				'label'               => __( 'Add or replace a model file', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Adds one file to a model, or replaces the file of the same kind: the GLB, the iPhone USDZ, the poster or an OBJ / FBX source. Upload it (multipart field file) or give a public https URL.', 'ar-vr-3d-model-try-on' ),
+				'args'                => $id + array(
+					'url'  => self::arg( 'string', 'A public https URL of the file (instead of uploading it).', array( 'format' => 'uri' ) ),
+					'name' => self::arg( 'string', 'With url: the file name to keep, e.g. chair.usdz (default: from the URL).', array( 'sanitize_callback' => 'sanitize_file_name' ) ),
+				),
+				'schema'              => $model,
 			)
 		);
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/library/(?P<id>\d+)/files/(?P<kind>usdz|poster|source)',
 			array(
 				'methods'             => \WP_REST_Server::DELETABLE,
 				'callback'            => array( __CLASS__, 'remove_file' ),
 				'permission_callback' => array( __CLASS__, 'can_edit' ),
-				'args'                => $id,
+				'label'               => __( 'Remove a model file', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Removes the iPhone file (usdz), the poster or the OBJ / FBX source from a model. The GLB cannot be removed; replace it instead.', 'ar-vr-3d-model-try-on' ),
+				'args'                => $id + array( 'kind' => self::arg( 'string', 'Which file: usdz, poster or source.', array( 'required' => true, 'enum' => array( 'usdz', 'poster', 'source' ) ) ) ),
+				'schema'              => $model,
 			)
 		);
-		// AR-121: Optimise.
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/library/(?P<id>\d+)/optimised',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( __CLASS__, 'put_optimised' ),
 				'permission_callback' => array( __CLASS__, 'can_edit' ),
-				'args'                => $id + array(
-					'triangles' => array( 'type' => 'integer', 'default' => 0, 'minimum' => 0, 'sanitize_callback' => 'absint' ),
-					'budget'    => array( 'type' => 'string', 'default' => '', 'enum' => array( '', 'pass', 'warn', 'fail' ) ),
-					'height_cm' => array( 'type' => 'number', 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ),
+				'label'               => __( 'Store an optimised GLB', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Stores a GLB optimised in the browser (multipart field file, from AtlasAR.tools.optimise) as the model’s GLB. The GLB it replaces is kept as the original and can be restored.', 'ar-vr-3d-model-try-on' ),
+				'args'                => $id + $height + array(
+					'triangles' => self::arg( 'integer', 'Triangles in the optimised model (for the record shown in the library).', array( 'default' => 0, 'minimum' => 0, 'sanitize_callback' => 'absint' ) ),
+					'budget'    => self::arg( 'string', 'The page-weight grade of the result: pass (≤ 3 MB), warn (≤ 5 MB) or fail.', array( 'default' => '', 'enum' => array( '', 'pass', 'warn', 'fail' ) ) ),
 				),
+				'schema'              => $model,
 			)
 		);
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/library/(?P<id>\d+)/restore',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( __CLASS__, 'restore' ),
 				'permission_callback' => array( __CLASS__, 'can_edit' ),
+				'label'               => __( 'Restore the original GLB', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Puts back the GLB as it was uploaded, before it was optimised; the optimised file is deleted.', 'ar-vr-3d-model-try-on' ),
 				'args'                => $id,
+				'schema'              => $model,
 			)
 		);
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/library/(?P<id>\d+)/cloud',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( __CLASS__, 'cloud_start' ),
 					'permission_callback' => array( __CLASS__, 'can_edit' ),
-					'args'                => $id + array( 'height_cm' => array( 'type' => 'number', 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ) ),
+					'label'               => __( 'Optimise a model on AtlasAR Cloud', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'Sends the model’s original GLB (up to 50 MB) to AtlasAR Cloud to optimise; needs a connected AtlasAR Cloud account and uses one model of its monthly plan. Then call GET on this route until status is ready.', 'ar-vr-3d-model-try-on' ),
+					'args'                => $id + $height,
 				),
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'cloud_poll' ),
 					'permission_callback' => array( __CLASS__, 'can_edit' ),
+					'label'               => __( 'Check an AtlasAR Cloud optimise', 'ar-vr-3d-model-try-on' ),
+					'description'         => __( 'Checks the AtlasAR Cloud job of a model: status queued / processing / ready. When ready, the optimised GLB has replaced the model’s GLB (the original is kept) and the model is returned.', 'ar-vr-3d-model-try-on' ),
 					'args'                => $id,
 				),
 			)
 		);
-		register_rest_route(
-			self::NS,
+		self::route(
 			'/products/(?P<id>\d+)/model',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( __CLASS__, 'link' ),
 				'permission_callback' => array( __CLASS__, 'can_edit_product' ),
-				'args'                => $id + array(
-					'model_id' => array( 'type' => 'integer', 'required' => true, 'minimum' => 0, 'sanitize_callback' => 'absint' ),
+				'label'               => __( 'Show a 3D model on a product', 'ar-vr-3d-model-try-on' ),
+				'description'         => __( 'Links a 3D Library model to a product, post or page, so its 3D view, AR and try-on use it. model_id 0 removes the 3D model from it.', 'ar-vr-3d-model-try-on' ),
+				'args'                => array(
+					'id'       => self::arg( 'integer', 'The product, post or page ID.', array( 'required' => true, 'sanitize_callback' => 'absint' ) ),
+					'model_id' => self::arg( 'integer', 'The 3D Library model ID, or 0 for none.', array( 'required' => true, 'minimum' => 0, 'sanitize_callback' => 'absint' ) ),
 				),
 			)
+		);
+	}
+
+	/** register_rest_route() with the response schema at the route level (also for one endpoint). */
+	private static function route( $path, array $def ) {
+		$schema = isset( $def['schema'] ) ? $def['schema'] : null;
+		unset( $def['schema'] );
+		if ( isset( $def['callback'] ) ) {
+			$def = array( $def );
+		}
+		if ( $schema ) {
+			$def['schema'] = $schema;
+		}
+		register_rest_route( self::NS, $path, $def );
+	}
+
+	/** An argument: type, description and the rest. */
+	private static function arg( $type, $description, array $more = array() ) {
+		return array( 'type' => $type, 'description' => $description ) + $more;
+	}
+
+	/** JSON schema of a 3D Library model (the answer of most routes here). */
+	public static function model_schema() {
+		$file = array(
+			'type'       => 'object',
+			'properties' => array(
+				'name' => array( 'type' => 'string', 'description' => 'File name.' ),
+				'url'  => array( 'type' => 'string', 'format' => 'uri', 'description' => 'Public URL of the file.' ),
+				'size' => array( 'type' => 'integer', 'description' => 'Size in bytes.' ),
+			),
+		);
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'atlas_ar_model',
+			'type'       => 'object',
+			'properties' => array(
+				'id'        => array( 'type' => 'integer', 'description' => 'Model ID.' ),
+				'name'      => array( 'type' => 'string', 'description' => 'Model name.' ),
+				'files'     => array(
+					'type'        => 'object',
+					'description' => 'The model’s files by kind: glb (shown everywhere), usdz (iPhone AR), poster, source (OBJ / FBX), original (the GLB before Optimise).',
+					'properties'  => array( 'glb' => $file, 'usdz' => $file, 'poster' => $file, 'source' => $file, 'original' => $file ),
+				),
+				'size'      => array( 'type' => 'integer', 'description' => 'Total size of the files in bytes (without the original).' ),
+				'missing'   => array( 'type' => 'array', 'items' => array( 'type' => 'string', 'enum' => array( 'glb', 'usdz', 'poster' ) ), 'description' => 'Files the model does not have yet.' ),
+				'large'     => array( 'type' => 'boolean', 'description' => 'The GLB is over the "large file" size (5 MB by default).' ),
+				'used_by'   => array(
+					'type'        => 'array',
+					'description' => 'Products and posts that show this model.',
+					'items'       => array( 'type' => 'object', 'properties' => array( 'id' => array( 'type' => 'integer' ), 'title' => array( 'type' => 'string' ) ) ),
+				),
+				'date'      => array( 'type' => 'string', 'format' => 'date-time', 'description' => 'When the model was added (UTC).' ),
+				'optimised' => array(
+					'type'        => array( 'object', 'null' ),
+					'description' => 'How it was optimised: by (browser | cloud), before / after size in bytes, triangles, budget, height_cm; null when not optimised.',
+				),
+			),
 		);
 	}
 
@@ -213,10 +293,21 @@ class AR_TRY_ON_Library_Routes {
 
 	public static function upload( \WP_REST_Request $r ) {
 		$uploads = self::uploads( $r, 'files' );
+		$temp    = null;
+		if ( ! $uploads && $r['url'] ) {
+			$temp = self::from_url( (string) $r['url'], (string) $r['name'] );
+			if ( is_wp_error( $temp ) ) {
+				return $temp;
+			}
+			$uploads = array( $temp );
+		}
 		if ( ! $uploads ) {
-			return new \WP_Error( 'atlas_ar_no_files', __( 'Choose one or more files.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'atlas_ar_no_files', __( 'Choose one or more files, or give a url.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
 		}
 		$results = AR_TRY_ON_Library::add_uploads( $uploads );
+		if ( $temp ) {
+			wp_delete_file( $temp['tmp_name'] );
+		}
 		$models  = array();
 		foreach ( $results as $res ) {
 			if ( ! empty( $res['model_id'] ) && ! isset( $models[ $res['model_id'] ] ) ) {
@@ -240,10 +331,53 @@ class AR_TRY_ON_Library_Routes {
 
 	public static function add_file( \WP_REST_Request $r ) {
 		$uploads = self::uploads( $r, 'file' );
+		if ( ! $uploads && $r['url'] ) {
+			$temp = self::from_url( (string) $r['url'], (string) $r['name'] );
+			if ( is_wp_error( $temp ) ) {
+				return $temp;
+			}
+			$res = AR_TRY_ON_Library::add_file( (int) $r['id'], $temp );
+			wp_delete_file( $temp['tmp_name'] );
+			return self::answer( $res );
+		}
 		if ( ! $uploads ) {
-			return new \WP_Error( 'atlas_ar_no_files', __( 'Choose a file.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'atlas_ar_no_files', __( 'Choose a file, or give a url.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
 		}
 		return self::answer( AR_TRY_ON_Library::add_file( (int) $r['id'], $uploads[0] ) );
+	}
+
+	/**
+	 * Fetch one file from a public https URL into a temporary file (WordPress's safe request:
+	 * no private / local addresses; at most the 3D Library's size limit).
+	 *
+	 * @return array|\WP_Error [ tmp_name, name ]
+	 */
+	private static function from_url( $url, $name ) {
+		$url = esc_url_raw( trim( $url ), array( 'https' ) );
+		if ( '' === $url || ! wp_http_validate_url( $url ) ) {
+			return new \WP_Error( 'atlas_ar_url', __( 'Give a public https URL.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+		}
+		$name = '' !== $name ? sanitize_file_name( $name ) : sanitize_file_name( wp_basename( (string) wp_parse_url( $url, PHP_URL_PATH ) ) );
+		if ( '' === AR_TRY_ON_Library::kind_of( $name ) ) {
+			return new \WP_Error( 'atlas_ar_kind', __( 'Not a 3D, iPhone AR or poster file (check the file name).', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+		}
+		$limit = function ( $args ) {
+			$args['limit_response_size'] = AR_TRY_ON_Library::max_bytes() + 1;
+			return $args;
+		};
+		add_filter( 'http_request_args', $limit );
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		$tmp = download_url( $url, 60 );
+		remove_filter( 'http_request_args', $limit );
+		if ( is_wp_error( $tmp ) ) {
+			return new \WP_Error( 'atlas_ar_url', __( 'The file could not be downloaded from that URL.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
+		}
+		if ( filesize( $tmp ) > AR_TRY_ON_Library::max_bytes() ) { // cut at the limit: refused, never stored half
+			wp_delete_file( $tmp );
+			/* translators: %s: size like "64 MB" */
+			return new \WP_Error( 'atlas_ar_size', sprintf( __( 'The file is larger than %s.', 'ar-vr-3d-model-try-on' ), size_format( AR_TRY_ON_Library::max_bytes() ) ), array( 'status' => 400 ) );
+		}
+		return array( 'tmp_name' => $tmp, 'name' => $name );
 	}
 
 	public static function remove_file( \WP_REST_Request $r ) {

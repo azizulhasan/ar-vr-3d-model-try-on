@@ -39,52 +39,80 @@ class AR_TRY_ON_Admin_Routes {
 
 	public static function register() {
 		$admin = array( __CLASS__, 'can_manage' );
-		$id    = array(
-			'id' => array( 'type' => 'integer', 'required' => true, 'sanitize_callback' => 'absint' ),
-		);
+		$id    = array( 'id' => self::arg( 'integer', 'The product, post or page ID (a post type AtlasAR is on for).', array( 'required' => true, 'sanitize_callback' => 'absint' ) ) );
 		$routes = array(
-			'/config'        => array(
-				array( 'GET', 'get_config', $admin ),
-				array( 'POST', 'save_config', $admin, array( 'settings' => array( 'type' => 'object', 'required' => true ) ) ),
-			),
-			'/config/reset'  => array( array( 'POST', 'reset_config', $admin ) ),
-			'/items'         => array(
+			'/config'            => array(
 				array(
-					'GET',
-					'list_items',
-					array( __CLASS__, 'can_list' ),
+					'GET', 'get_config', $admin,
+					__( 'Get AtlasAR settings', 'ar-vr-3d-model-try-on' ),
+					__( 'All AtlasAR settings (placement, look, try-on, general) with the choices each field allows, the AtlasAR Cloud status, the try-on files status, the post types AtlasAR can be on, and counts of 3D models.', 'ar-vr-3d-model-try-on' ),
+				),
+				array(
+					'POST', 'save_config', $admin,
+					__( 'Change AtlasAR settings', 'ar-vr-3d-model-try-on' ),
+					__( 'Saves any part of the settings, e.g. {"settings":{"placement":{"mode":"button"}}}. Unknown fields are ignored; every value is cleaned by its type (enums keep their allowed values, numbers stay in range). Returns all settings.', 'ar-vr-3d-model-try-on' ),
+					array( 'settings' => self::arg( 'object', 'Settings to change, by group: placement { mode: gallery|gallery3d|button|tab|slide, button_position: after_cart|before_cart|after_summary|under_images, product_tab, qr }, look { background, lighting: neutral|bright|custom, environment_url, exposure 0.5–2, shadow 0–2, auto_rotate, zoom, ar_button: default|custom, ar_text, ar_color, load: scroll|click }, tryon { enabled, label, consent, snapshot, tracker: cdn|self }, general { post_types, auto_optimise, telemetry, remove_data }.', array( 'required' => true ) ) ),
+				),
+			),
+			'/config/reset'      => array(
+				array( 'POST', 'reset_config', $admin, __( 'Reset AtlasAR settings', 'ar-vr-3d-model-try-on' ), __( 'Puts every AtlasAR setting back to its default (the setup wizard stays done). Products and 3D models are not changed.', 'ar-vr-3d-model-try-on' ) ),
+			),
+			'/items'             => array(
+				array(
+					'GET', 'list_items', array( __CLASS__, 'can_list' ),
+					__( 'List products with their 3D status', 'ar-vr-3d-model-try-on' ),
+					__( 'Products, posts and pages AtlasAR is on for, newest change first, with their 3D model (name, size, iPhone file), try-on type and edit link. The total count is in the X-WP-Total header.', 'ar-vr-3d-model-try-on' ),
 					array(
-						'search'   => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ),
-						'filter'   => array( 'type' => 'string', 'default' => 'all', 'enum' => array( 'all', 'with', 'without', 'tryon' ) ),
-						'page'     => array( 'type' => 'integer', 'default' => 1, 'minimum' => 1, 'sanitize_callback' => 'absint' ),
-						'per_page' => array( 'type' => 'integer', 'default' => 20, 'minimum' => 1, 'maximum' => 100, 'sanitize_callback' => 'absint' ),
+						'search'   => self::arg( 'string', 'Only items whose title contains this text.', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) ),
+						'filter'   => self::arg( 'string', 'all; with = shows a 3D model; without = no 3D model yet; tryon = glasses or cap try-on is on.', array( 'default' => 'all', 'enum' => array( 'all', 'with', 'without', 'tryon' ) ) ),
+						'page'     => self::arg( 'integer', 'Page of results (1 = first).', array( 'default' => 1, 'minimum' => 1, 'sanitize_callback' => 'absint' ) ),
+						'per_page' => self::arg( 'integer', 'Items per page (1–100).', array( 'default' => 20, 'minimum' => 1, 'maximum' => 100, 'sanitize_callback' => 'absint' ) ),
 					),
 				),
 			),
 			'/items/(?P<id>\d+)' => array(
-				array( 'GET', 'get_item', array( __CLASS__, 'can_edit_item' ), $id ),
-				array( 'POST', 'save_item', array( __CLASS__, 'can_edit_item' ), $id + array( 'data' => array( 'type' => 'object', 'required' => true ) ) ),
-			),
-			'/cloud'         => array(
-				array( 'GET', 'cloud_status', $admin ),
-				array( 'DELETE', 'cloud_disconnect', $admin ),
-			),
-			'/cloud/connect' => array(
+				array( 'GET', 'get_item', array( __CLASS__, 'can_edit_item' ), __( 'Get a product’s 3D settings', 'ar-vr-3d-model-try-on' ), __( 'A product’s AtlasAR data (its 3D model, placement, AR and try-on settings) and the full 3D Library model it shows.', 'ar-vr-3d-model-try-on' ), $id ),
 				array(
-					'POST',
-					'cloud_connect',
-					$admin,
+					'POST', 'save_item', array( __CLASS__, 'can_edit_item' ),
+					__( 'Change a product’s 3D settings', 'ar-vr-3d-model-try-on' ),
+					__( 'Saves a product’s AtlasAR fields; fields not given keep their value. To change its 3D model use POST /products/<id>/model.', 'ar-vr-3d-model-try-on' ),
+					$id + array( 'data' => self::arg( 'object', 'Fields: use_site (bool, use the site look), background (#hex), placement (site|gallery|gallery3d|button|tab|slide), ar_placement (floor|wall), ar_scale (auto = shoppers can resize | fixed), tryon ("" | glasses | hat), tryon_viewer (bool, also show the 3D view on a try-on product).', array( 'required' => true ) ) ),
+				),
+			),
+			'/cloud'             => array(
+				array(
+					'GET', 'cloud_status', $admin,
+					__( 'AtlasAR Cloud status', 'ar-vr-3d-model-try-on' ),
+					__( 'Whether AtlasAR Cloud is available and connected, the key prefix (never the key), plan, approval and this month’s usage.', 'ar-vr-3d-model-try-on' ),
+					array( 'fresh' => self::arg( 'boolean', 'Ask the service now instead of the 10-minute cache.', array( 'default' => false ) ) ),
+				),
+				array( 'DELETE', 'cloud_disconnect', $admin, __( 'Disconnect AtlasAR Cloud', 'ar-vr-3d-model-try-on' ), __( 'Forgets the AtlasAR Cloud key on this site. The account and its hosted models stay on AtlasAR Cloud.', 'ar-vr-3d-model-try-on' ) ),
+			),
+			'/cloud/connect'     => array(
+				array(
+					'POST', 'cloud_connect', $admin,
+					__( 'Connect AtlasAR Cloud (free account)', 'ar-vr-3d-model-try-on' ),
+					__( 'Makes a free AtlasAR Cloud account for this site, or adds the site to the account of that email (then the owner approves it by email). Sends the site address and the email to AtlasAR Cloud.', 'ar-vr-3d-model-try-on' ),
 					array(
-						'email'   => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_email' ),
-						'consent' => array( 'type' => 'boolean', 'required' => true ),
+						'email'   => self::arg( 'string', 'The email for the AtlasAR Cloud account.', array( 'required' => true, 'format' => 'email', 'sanitize_callback' => 'sanitize_email' ) ),
+						'consent' => self::arg( 'boolean', 'Must be true: the site owner agrees that a model is sent to AtlasAR Cloud only when asked, and accepts its terms and privacy policy.', array( 'required' => true ) ),
 					),
 				),
 			),
-			'/cloud/key'     => array( array( 'POST', 'cloud_key', $admin, array( 'key' => array( 'type' => 'string', 'required' => true ) ) ) ),
-			'/check'         => array( array( 'GET', 'site_check', $admin ) ),
-			'/tracker'       => array(
-				array( 'POST', 'tracker_download', $admin ),
-				array( 'DELETE', 'tracker_remove', $admin ),
+			'/cloud/key'         => array(
+				array(
+					'POST', 'cloud_key', $admin,
+					__( 'Use an AtlasAR Cloud key', 'ar-vr-3d-model-try-on' ),
+					__( 'Uses a key made in the AtlasAR Cloud dashboard; it is checked with the service before it is kept.', 'ar-vr-3d-model-try-on' ),
+					array( 'key' => self::arg( 'string', 'The key (ar_live_…).', array( 'required' => true ) ) ),
+				),
+			),
+			'/check'             => array(
+				array( 'GET', 'site_check', $admin, __( 'Check the site for AtlasAR', 'ar-vr-3d-model-try-on' ), __( 'A quick check of what AtlasAR needs: HTTPS, writable uploads, WooCommerce, PHP version, a product with 3D, upload size limit. Each item: ok and a sentence.', 'ar-vr-3d-model-try-on' ) ),
+			),
+			'/tracker'           => array(
+				array( 'POST', 'tracker_download', $admin, __( 'Download the try-on files to this site', 'ar-vr-3d-model-try-on' ), __( 'Downloads the try-on’s face-tracking files (about 15 MB, MediaPipe) into the uploads folder and uses them instead of the public CDN.', 'ar-vr-3d-model-try-on' ) ),
+				array( 'DELETE', 'tracker_remove', $admin, __( 'Remove the try-on files from this site', 'ar-vr-3d-model-try-on' ), __( 'Deletes the face-tracking files from the uploads folder; the try-on uses the public CDN again.', 'ar-vr-3d-model-try-on' ) ),
 			),
 		);
 		foreach ( $routes as $path => $methods ) {
@@ -94,11 +122,18 @@ class AR_TRY_ON_Admin_Routes {
 					'methods'             => $m[0],
 					'callback'            => array( __CLASS__, $m[1] ),
 					'permission_callback' => $m[2],
-					'args'                => isset( $m[3] ) ? $m[3] : array(),
+					'label'               => $m[3],
+					'description'         => $m[4],
+					'args'                => isset( $m[5] ) ? $m[5] : array(),
 				);
 			}
 			register_rest_route( self::NS, $path, $defs );
 		}
+	}
+
+	/** An argument: type, description and the rest. */
+	private static function arg( $type, $description, array $more = array() ) {
+		return array( 'type' => $type, 'description' => $description ) + $more;
 	}
 
 	/* ------------------------------------------------------------------ permissions */
