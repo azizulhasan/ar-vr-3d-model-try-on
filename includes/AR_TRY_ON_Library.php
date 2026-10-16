@@ -289,64 +289,108 @@ class AR_TRY_ON_Library {
 	}
 
 	/**
-	 * Models, newest first, with a filter.
+	 * Models, newest first, with a filter, one page at a time. No cap on the library size: only
+	 * the page shown is built in full.
 	 *
 	 * @param array $args search, filter (all | used | unused | missing | large), paged, per_page
 	 * @return array [ items, total ]
 	 */
 	public static function query( array $args = array() ) {
-		$ids = get_posts(
-			array(
-				'post_type'      => self::POST_TYPE,
-				'post_status'    => 'publish',
-				's'              => isset( $args['search'] ) ? sanitize_text_field( $args['search'] ) : '',
-				'posts_per_page' => 500, // a shop's 3D Library; the page below is cut in PHP after the filter
-				'orderby'        => 'date',
-				'order'          => 'DESC',
-				'fields'         => 'ids',
-			)
-		);
-		$usage  = self::usage_map();
+		$per    = isset( $args['per_page'] ) ? max( 1, min( 100, (int) $args['per_page'] ) ) : 40;
+		$page   = isset( $args['paged'] ) ? max( 1, (int) $args['paged'] ) : 1;
 		$filter = isset( $args['filter'] ) ? (string) $args['filter'] : 'all';
-		$items  = array();
+		$base   = array(
+			'post_type'              => self::POST_TYPE,
+			'post_status'            => 'publish',
+			's'                      => isset( $args['search'] ) ? sanitize_text_field( $args['search'] ) : '',
+			'orderby'                => 'date',
+			'order'                  => 'DESC',
+			'fields'                 => 'ids',
+			'update_post_term_cache' => false,
+		);
+		if ( 'used' === $filter || 'unused' === $filter ) {
+			$used = self::used_model_ids();
+			if ( 'used' === $filter && ! $used ) {
+				return array( 'items' => array(), 'total' => 0 );
+			}
+			$base[ 'used' === $filter ? 'post__in' : 'post__not_in' ] = $used; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- the models no product shows; admin screen only.
+		}
+		if ( 'missing' === $filter || 'large' === $filter ) {
+			// Decided by the files of each model: the IDs, then their files in one meta query.
+			$ids = get_posts( array_merge( $base, array( 'posts_per_page' => -1, 'no_found_rows' => true ) ) );
+			update_meta_cache( 'post', $ids );
+			$large = self::large_bytes();
+			$ids   = array_values(
+				array_filter(
+					$ids,
+					function ( $id ) use ( $filter, $large ) {
+						$files = self::raw_files( $id );
+						if ( 'large' === $filter ) {
+							return isset( $files['glb']['size'] ) && (int) $files['glb']['size'] > $large;
+						}
+						return (bool) array_diff( array( 'glb', 'usdz', 'poster' ), array_keys( $files ) );
+					}
+				)
+			);
+			$total = count( $ids );
+			$ids   = array_slice( $ids, ( $page - 1 ) * $per, $per );
+		} else {
+			$q     = new \WP_Query( array_merge( $base, array( 'posts_per_page' => $per, 'paged' => $page ) ) );
+			$ids   = $q->posts;
+			$total = (int) $q->found_posts;
+		}
+		$usage = self::usage_map( $ids );
+		$items = array();
 		foreach ( $ids as $id ) {
 			$m = self::get( $id, $usage );
-			if ( ! $m ) {
-				continue;
-			}
-			$keep = 'used' === $filter ? (bool) $m['used_by']
-				: ( 'unused' === $filter ? ! $m['used_by']
-				: ( 'missing' === $filter ? (bool) $m['missing']
-				: ( 'large' === $filter ? $m['large'] : true ) ) );
-			if ( $keep ) {
+			if ( $m ) {
 				$items[] = $m;
 			}
 		}
-		$per  = isset( $args['per_page'] ) ? max( 1, min( 100, (int) $args['per_page'] ) ) : 40;
-		$page = isset( $args['paged'] ) ? max( 1, (int) $args['paged'] ) : 1;
-		return array(
-			'items' => array_slice( $items, ( $page - 1 ) * $per, $per ),
-			'total' => count( $items ),
+		return array( 'items' => $items, 'total' => $total );
+	}
+
+	/**
+	 * IDs of the models some product or post shows (one grouped query, no limit).
+	 *
+	 * @return int[]
+	 */
+	public static function used_model_ids() {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one grouped lookup for the 3D Library filter; the result changes with every product save.
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT pm.meta_value FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = %s AND pm.meta_value <> '' AND p.post_status NOT IN ( 'trash', 'auto-draft', 'inherit' )",
+				self::PRODUCT_KEY
+			)
 		);
+		return array_values( array_filter( array_map( 'intval', $ids ) ) );
 	}
 
 	/**
 	 * Which posts show which model, in one query: [ model id => [ [ id, title ], … ] ].
 	 *
+	 * @param int[]|null $model_ids only these models (the page being shown); null = all
 	 * @return array
 	 */
-	public static function usage_map() {
-		$q   = new \WP_Query(
-			array(
-				'post_type'              => 'any',
-				'post_status'            => 'any',
-				'posts_per_page'         => 2000,
-				'fields'                 => 'ids',
-				'no_found_rows'          => true,
-				'update_post_term_cache' => false,
-				'meta_key'               => self::PRODUCT_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_key -- one indexed lookup on the 3D Library page.
-			)
+	public static function usage_map( $model_ids = null ) {
+		if ( is_array( $model_ids ) && ! $model_ids ) {
+			return array();
+		}
+		$args = array(
+			'post_type'              => 'any',
+			'post_status'            => 'any',
+			'posts_per_page'         => is_array( $model_ids ) ? -1 : 2000,
+			'fields'                 => 'ids',
+			'no_found_rows'          => true,
+			'update_post_term_cache' => false,
+			'meta_key'               => self::PRODUCT_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_key -- one indexed lookup on the 3D Library page.
 		);
+		if ( is_array( $model_ids ) ) {
+			$args['meta_value']   = array_map( 'strval', array_map( 'intval', $model_ids ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_value
+			$args['meta_compare'] = 'IN';
+		}
+		$q   = new \WP_Query( $args );
 		$map = array();
 		foreach ( $q->posts as $pid ) {
 			$model = (int) get_post_meta( $pid, self::PRODUCT_KEY, true ); // from the meta cache the query filled

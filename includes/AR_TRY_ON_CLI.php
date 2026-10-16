@@ -141,6 +141,12 @@ class AR_TRY_ON_CLI {
 	 * [--search=<text>]
 	 * : list: models whose name has this text.
 	 *
+	 * [--page=<n>]
+	 * : list: page of 100 models (1 = the newest).
+	 * ---
+	 * default: 1
+	 * ---
+	 *
 	 * [--format=<format>]
 	 * : list: table, json, csv, ids or count.
 	 * ---
@@ -162,7 +168,8 @@ class AR_TRY_ON_CLI {
 		$id     = isset( $args[0] ) ? absint( $args[0] ) : 0;
 		switch ( $action ) {
 			case 'list':
-				$res  = AR_TRY_ON_Library::query( array( 'filter' => Utils\get_flag_value( $assoc, 'filter', 'all' ), 'search' => Utils\get_flag_value( $assoc, 'search', '' ), 'per_page' => 100 ) );
+				$page = max( 1, (int) Utils\get_flag_value( $assoc, 'page', 1 ) );
+				$res  = AR_TRY_ON_Library::query( array( 'filter' => Utils\get_flag_value( $assoc, 'filter', 'all' ), 'search' => Utils\get_flag_value( $assoc, 'search', '' ), 'paged' => $page, 'per_page' => 100 ) );
 				$rows = array_map(
 					function ( $m ) {
 						return array(
@@ -176,7 +183,7 @@ class AR_TRY_ON_CLI {
 					},
 					$res['items']
 				);
-				Utils\format_items( Utils\get_flag_value( $assoc, 'format', 'table' ), $rows, array( 'id', 'name', 'files', 'size', 'used_by', 'missing' ) );
+				self::list_out( $assoc, $rows, array( 'id', 'name', 'files', 'size', 'used_by', 'missing' ), $res['total'], $page );
 				return;
 			case 'get':
 				self::print_value( self::need( AR_TRY_ON_Library::get( $id ), 'Unknown model.' ), 'json' );
@@ -248,6 +255,12 @@ class AR_TRY_ON_CLI {
 	 * [--search=<text>]
 	 * : list: products whose title has this text.
 	 *
+	 * [--page=<n>]
+	 * : list: page of 100 (1 = the most recently changed).
+	 * ---
+	 * default: 1
+	 * ---
+	 *
 	 * [--format=<format>]
 	 * : list: table, json, csv, ids or count.
 	 * ---
@@ -272,14 +285,16 @@ class AR_TRY_ON_CLI {
 			foreach ( array( 'filter' => 'all', 'search' => '', 'page' => 1, 'per_page' => 100 ) as $k => $d ) {
 				$req->set_param( $k, Utils\get_flag_value( $assoc, $k, $d ) );
 			}
-			$items = AR_TRY_ON_Admin_Routes::list_items( $req, false )->get_data();
+			$res   = AR_TRY_ON_Admin_Routes::list_items( $req, false );
+			$items = $res->get_data();
+			$hdr   = $res->get_headers();
 			$rows  = array_map(
 				function ( $i ) {
 					return array( 'id' => $i['id'], 'title' => $i['title'], 'type' => $i['type'], 'model' => $i['model'] ? $i['model']['id'] . ' ' . $i['model']['name'] : '', 'tryon' => $i['tryon'] );
 				},
 				$items
 			);
-			Utils\format_items( Utils\get_flag_value( $assoc, 'format', 'table' ), $rows, array( 'id', 'title', 'type', 'model', 'tryon' ) );
+			self::list_out( $assoc, $rows, array( 'id', 'title', 'type', 'model', 'tryon' ), isset( $hdr['X-WP-Total'] ) ? (int) $hdr['X-WP-Total'] : count( $rows ), (int) $req->get_param( 'page' ) );
 			return;
 		}
 		if ( ! $id || ! get_post( $id ) ) {
@@ -436,6 +451,27 @@ class AR_TRY_ON_CLI {
 	}
 
 	/* --------------------------------------------------------------------- helpers */
+
+	/**
+	 * One page of a list in the --format asked for. count = every match (not one page); ids =
+	 * the IDs on one line; a table says when more pages follow.
+	 */
+	private static function list_out( $assoc, array $rows, array $fields, $total, $page ) {
+		$format = Utils\get_flag_value( $assoc, 'format', 'table' );
+		if ( 'count' === $format ) {
+			WP_CLI::line( (string) $total );
+			return;
+		}
+		if ( 'ids' === $format ) {
+			WP_CLI::line( implode( ' ', wp_list_pluck( $rows, 'id' ) ) );
+			return;
+		}
+		Utils\format_items( $format, $rows, $fields );
+		$page = max( 1, (int) $page );
+		if ( 'table' === $format && $total > $page * 100 ) {
+			WP_CLI::log( sprintf( '%d in all; next: --page=%d', $total, $page + 1 ) );
+		}
+	}
 
 	private static function print_value( $value, $format ) {
 		if ( 'yaml' === $format && class_exists( '\Mustangostang\Spyc' ) ) {

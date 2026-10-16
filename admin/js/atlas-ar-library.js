@@ -113,9 +113,19 @@
 
 	/* ---------------------------------------------------------------- data */
 
+	var PER_PAGE = 40;
+
+	/** One page of models: { items, total } (the total from the X-WP-Total header). */
 	function list(args) {
-		var q = '?filter=' + encodeURIComponent(args.filter || 'all') + '&search=' + encodeURIComponent(args.search || '') + '&per_page=100';
-		return api({ path: '/ar_try_on/v1/library' + q });
+		var q = '?filter=' + encodeURIComponent(args.filter || 'all') + '&search=' + encodeURIComponent(args.search || '') + '&page=' + (args.page || 1) + '&per_page=' + PER_PAGE;
+		return api({ path: '/ar_try_on/v1/library' + q, parse: false }).then(function (res) {
+			return res.json().then(function (items) {
+				return { items: items, total: parseInt(res.headers.get('X-WP-Total') || '0', 10) || items.length };
+			});
+		}, function (res) {
+			// parse:false hands back the raw response on errors too: read the WordPress error from it.
+			return res && typeof res.json === 'function' ? res.json().then(function (e) { throw e; }) : Promise.reject(res);
+		});
 	}
 
 	/**
@@ -481,27 +491,58 @@
 		var _up = useState(false), up = _up[0], setUp = _up[1];
 
 		var _loading = useState(true), loading = _loading[0], setLoading = _loading[1];
+		var _page = useState(1), page = _page[0], setPage = _page[1];
+		var _total = useState(0), total = _total[0], setTotal = _total[1];
+		var pages = Math.max(1, Math.ceil(total / PER_PAGE));
 		var req = useRef(0);
-		function load(keepSel) {
+		var grid = useRef(null);
+		function load(keepSel, at) {
 			var mine = ++req.current; // only the newest answer is shown (quick filter clicks)
+			var p = at || page;
 			setLoading(true);
-			return list({ filter: filter, search: search }).then(function (res) {
+			return list({ filter: filter, search: search, page: p }).then(function (res) {
 				if (mine !== req.current) return;
-				setItems(res);
+				// The last page emptied (e.g. its only model was deleted): show the one before.
+				if (!res.items.length && p > 1) { setPage(p - 1); return; }
+				setItems(res.items);
+				setTotal(res.total);
 				setErr('');
 				setLoading(false);
-				if (!keepSel && res.length && !res.some(function (m) { return m.id === sel; })) setSel(res[0].id);
-			}, function (e) { if (mine !== req.current) return; setItems([]); setErr(message(e)); setLoading(false); });
+				if (!keepSel && res.items.length && !res.items.some(function (m) { return m.id === sel; })) setSel(res.items[0].id);
+			}, function (e) { if (mine !== req.current) return; setItems([]); setTotal(0); setErr(message(e)); setLoading(false); });
 		}
+		// A new filter or search starts again at page 1.
+		useEffect(function () { setPage(1); }, [filter, search]);
 		useEffect(function () {
 			var t = setTimeout(function () { load(false); }, search ? 300 : 0);
 			return function () { clearTimeout(t); };
-		}, [filter, search]);
+		}, [filter, search, page]);
+		function go(p) {
+			setPage(p);
+			if (grid.current) grid.current.scrollTop = 0;
+		}
 
 		function replace(model) {
 			setItems(function (cur) { return (cur || []).map(function (m) { return m.id === model.id ? model : m; }); });
 		}
 		var current = (items || []).filter(function (m) { return m.id === sel; })[0];
+
+		/**
+		 * More ways to add models, next to "Upload 3D files" (AtlasAR Pro: "Make with AI").
+		 * Filter atlasAr.library.actions: [{ id, label, render }]; render is a component that gets
+		 * { api }: api.done(ids) shows the new models (page 1, the last one selected), api.close()
+		 * closes the panel.
+		 */
+		var actions = wp.hooks ? wp.hooks.applyFilters('atlasAr.library.actions', [], { picker: !!props.onUse }) : [];
+		var _open = useState(''), open = _open[0], setOpen = _open[1];
+		var openAction = actions.filter(function (a) { return a.id === open; })[0];
+		var actionApi = {
+			close: function () { setOpen(''); },
+			done: function (ids) {
+				setPage(1);
+				return load(true, 1).then(function () { if (ids && ids.length) setSel(ids[ids.length - 1]); });
+			}
+		};
 
 		return el('div', { className: 'atlas-ar-browser' },
 			el('div', { className: 'atlas-ar-toolbar' },
@@ -514,23 +555,34 @@
 					}, f[1]);
 				})),
 				loading && items !== null ? el('span', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null,
-				el(C.Button, { variant: up ? 'secondary' : 'primary', onClick: function () { setUp(!up); } }, up ? __('Close upload', D) : (props.onUse ? __('Upload new', D) : __('Upload 3D files', D)))
+				actions.map(function (a) {
+					return el(C.Button, { key: a.id, variant: 'secondary', 'aria-expanded': open === a.id ? 'true' : 'false', onClick: function () { setUp(false); setOpen(open === a.id ? '' : a.id); } }, a.label);
+				}),
+				el(C.Button, { variant: up ? 'secondary' : 'primary', onClick: function () { setOpen(''); setUp(!up); } }, up ? __('Close upload', D) : (props.onUse ? __('Upload new', D) : __('Upload 3D files', D)))
 			),
+			openAction ? el('div', { className: 'atlas-ar-library-action' }, el(openAction.render, { key: openAction.id, api: actionApi })) : null,
 			up ? el(Uploader, {
 				onDone: function (ids) {
-					load(true).then(function () { if (ids.length) setSel(ids[ids.length - 1]); });
+					// New models are the newest: show page 1, where they are.
+					setPage(1);
+					load(true, 1).then(function () { if (ids.length) setSel(ids[ids.length - 1]); });
 				}
 			}) : null,
 			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 			el('div', { className: 'atlas-ar-body' },
-				el('div', { className: 'atlas-ar-grid-wrap' + (loading ? ' is-loading' : ''), 'aria-busy': loading ? 'true' : 'false' },
+				el('div', { className: 'atlas-ar-grid-wrap' + (loading ? ' is-loading' : ''), 'aria-busy': loading ? 'true' : 'false', ref: grid },
 					items === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D))
 						: items.length ? el('div', { className: 'atlas-ar-grid' }, items.map(function (m) {
 							return el(Card, { key: m.id, model: m, selected: m.id === sel, onPick: function () { setSel(m.id); }, onUse: props.onUse });
 						}))
 							: el('div', { className: 'atlas-ar-empty' },
 								el('p', null, search || filter !== 'all' ? __('No models match.', D) : __('No 3D models yet. Upload a GLB file to start.', D)),
-								!up && !search && filter === 'all' ? el(C.Button, { variant: 'primary', onClick: function () { setUp(true); } }, __('Upload 3D files', D)) : null)
+								!up && !search && filter === 'all' ? el(C.Button, { variant: 'primary', onClick: function () { setUp(true); } }, __('Upload 3D files', D)) : null),
+					total > PER_PAGE ? el('nav', { className: 'atlas-ar-library-pager', 'aria-label': __('3D models pages', D) },
+						el('span', { className: 'atlas-ar-muted' }, sprintf(_n('%s model', '%s models', total, D), total)),
+						el(C.Button, { variant: 'secondary', disabled: page <= 1 || loading, onClick: function () { go(page - 1); } }, __('Previous', D)),
+						el('span', { 'aria-live': 'polite' }, sprintf(__('Page %1$d of %2$d', D), page, pages)),
+						el(C.Button, { variant: 'secondary', disabled: page >= pages || loading, onClick: function () { go(page + 1); } }, __('Next', D))) : null
 				),
 				current ? el(Detail, {
 					key: current.id, model: current, onChange: replace, onUse: props.onUse,

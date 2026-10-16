@@ -53,7 +53,7 @@ class AR_TRY_ON_Library_Page {
 		$js  = ATLAS_AR_PLUGIN_PATH . 'admin/js/atlas-ar-library.js';
 		$css = ATLAS_AR_PLUGIN_PATH . 'admin/css/atlas-ar-library.css';
 		AR_TRY_ON_Frontend::register_assets(); // the viewer SDK, for the 3D preview
-		$deps = array( 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n' );
+		$deps = array( 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n', 'wp-hooks' );
 		if ( wp_script_is( AR_TRY_ON_Frontend::SDK_HANDLE, 'registered' ) ) {
 			$deps[] = AR_TRY_ON_Frontend::SDK_HANDLE;
 		}
@@ -79,6 +79,11 @@ class AR_TRY_ON_Library_Page {
 	public static function enqueue_page( $hook ) {
 		if ( self::$hook && $hook === self::$hook ) {
 			self::enqueue();
+			/**
+			 * The 3D Library page is loading: add-ons enqueue their scripts here (AtlasAR Pro's
+			 * "Make with AI" uses the atlasAr.library.actions filter).
+			 */
+			do_action( 'atlas_ar_library_enqueue' );
 		}
 	}
 
