@@ -88,6 +88,27 @@
 		show(!!placeholder || source.getAttribute('data-atlas-ar-start') === '3d');
 	}
 
+	/* ------------------------------------------------------- slide thumbnail */
+	// WooCommerce draws the gallery thumbnails after load, from each slide's data-thumb: mark the
+	// 3D slide's thumbnail with a "3D" badge so shoppers see there is a 3D view among the photos.
+	function setupSlideThumb(slide) {
+		var gallery = slide.closest('.woocommerce-product-gallery');
+		if (!gallery) return;
+		var index = Array.prototype.indexOf.call(gallery.querySelectorAll('.woocommerce-product-gallery__image'), slide);
+		function mark() {
+			var items = gallery.querySelectorAll('.flex-control-thumbs li');
+			if (!items[index]) return false;
+			items[index].classList.add('atlas-ar-thumb-3d');
+			return true;
+		}
+		if (index < 0 || mark() || !window.MutationObserver) return;
+		var watch = new MutationObserver(function () {
+			if (mark()) watch.disconnect();
+		});
+		watch.observe(gallery, { childList: true, subtree: true });
+		setTimeout(function () { watch.disconnect(); }, 15000); // a theme without thumbnails
+	}
+
 	/* ------------------------------------------------------------- variations */
 	function viewers() {
 		return Array.prototype.slice.call(document.querySelectorAll('atlasar-viewer'));
@@ -144,6 +165,7 @@
 
 	function start() {
 		Array.prototype.forEach.call(document.querySelectorAll('.atlas-ar-gallery'), setupGallery);
+		Array.prototype.forEach.call(document.querySelectorAll('.atlas-ar-slide'), setupSlideThumb);
 		setupVariations();
 		setupTryon();
 	}

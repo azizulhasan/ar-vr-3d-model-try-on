@@ -235,34 +235,34 @@ A complete **3D model viewer for WordPress and WooCommerce** with built-in augme
 
 == External services ==
 
-The third-party services below may be contacted. Each is used only when its feature is used. No visitor or product data is sent unless noted.
+The services below are contacted only when their feature is used. Nothing is sent when a page with a 3D view loads: models, the viewer and its decoders are served from your own site.
 
-= MediaPipe face tracking (Google / jsDelivr) =
+= MediaPipe face tracking (jsDelivr and Google) =
 
-Powers the webcam Try-On feature. Only after a visitor clicks "Try It On", the browser downloads the MediaPipe WASM runtime from `cdn.jsdelivr.net` and the face-landmark model from `storage.googleapis.com`, then caches them. A plain HTTPS GET for static assets — no site, user, or visitor data is sent. The camera feed stays on the visitor's device.
-jsDelivr — Terms: https://www.jsdelivr.com/terms Privacy: https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net
-Google — Terms: https://policies.google.com/terms Privacy: https://policies.google.com/privacy
+Used by the webcam try-on (glasses, caps). Only after a visitor clicks "Try it on" and allows the camera, the visitor's browser downloads the MediaPipe runtime from `cdn.jsdelivr.net` and the face model from `storage.googleapis.com`. These are plain downloads of static files: no site, user or visitor data is sent, and the camera picture never leaves the visitor's device. An administrator can instead download these files once to the site (AtlasAR > Try-on > Face-tracking files > "From this site"); the same two addresses are contacted for that download only, and visitors' browsers then use the site's own copy.
+jsDelivr - Terms: https://www.jsdelivr.com/terms Privacy: https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net
+Google - Terms: https://policies.google.com/terms Privacy: https://policies.google.com/privacy
 
-= 3D model generation (Tripo3D / Meshy AI) =
+= AtlasAR Cloud (optional, by AtlasAiDev) =
 
-Admin-only. Only after an administrator enters their own API key and clicks "Generate 3D Model" is a request sent — to `api.tripo3d.ai` or `api.meshy.ai` — containing the admin's text prompt or image plus their API key. No site visitor data is sent.
-- Tripo3D — API keys: https://platform.tripo3d.ai/api-keys, Terms: https://www.tripo3d.ai/terms, Privacy: https://www.tripo3d.ai/privacy
-- Meshy AI — API keys: https://www.meshy.ai/settings/api, Terms: https://www.meshy.ai/terms-of-use, Privacy: https://www.meshy.ai/privacy-policy
+Off unless the site owner connects it. When an administrator connects the site, the site address and the administrator's email are sent to create the project. When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. No visitor data is sent.
+AtlasAiDev - Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
 
-= AtlasAiDev tracker (track.atlasaidev.com, icanhazip.com) =
+= AtlasAiDev usage data (track.atlasaidev.com, icanhazip.com) =
 
-**Opt-in, off by default** (revocable anytime). When enabled, sends usage telemetry — plugin/WordPress/PHP versions, site URL/name/language, active+inactive plugin counts, admin name and email, and the site's outbound public IP (resolved via icanhazip.com) — so AtlasAiDev can prioritise improvements. No visitor or product data is sent.
-AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
-icanhazip.com (Cloudflare) — Privacy: https://www.cloudflare.com/privacypolicy/
+Opt-in, off by default, and can be turned off at any time (AtlasAR > Settings > "Share usage data with AtlasAiDev"). When it is on, the site sends, once a week: plugin, WordPress and PHP versions, site address, name and language, the number of active and inactive plugins, the administrator's name and email, and the site's public IP address (looked up through icanhazip.com). AtlasAiDev uses it to decide what to improve. No visitor or product data is sent.
+AtlasAiDev - Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
+icanhazip.com (Cloudflare) - Privacy: https://www.cloudflare.com/privacypolicy/
 
-= AtlasAiDev plugin catalog (raw.githubusercontent.com) =
+= AtlasAiDev plugin list (raw.githubusercontent.com, api.wordpress.org) =
 
-Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.
-GitHub, Inc. — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+Only when an administrator opens the "Other AtlasAiDev plugins" screen: the list of our plugins is read from `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`, and their ratings and install counts from `api.wordpress.org`. Both are cached for a day. No site or user data is sent.
+GitHub - Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+WordPress.org - Privacy: https://wordpress.org/about/privacy/
 
-= Bundled decoders (not an external service) =
+= A model address you enter =
 
-The DRACO, KTX2/Basis, and three.js Lottie decoders that `<model-viewer>` needs are bundled under `public/js/vendor/decoders/` and served from your own site, so the plugin never fetches them from `gstatic.com` or `cdn.jsdelivr.net`.
+When an administrator adds a model to the 3D Library from a web address, the site downloads that one file from the address the administrator typed. No other data is sent.
 
 
 == Source code ==

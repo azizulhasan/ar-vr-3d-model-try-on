@@ -184,7 +184,7 @@ class AR_TRY_ON_Frontend {
 						function () use ( $post_id ) {
 							$html = AR_TRY_ON_Viewer::render( $post_id, 'slide' );
 							if ( $html ) {
-								AR_TRY_ON_Viewer::print_html( '<div class="woocommerce-product-gallery__image atlas-ar-slide" data-thumb="' . esc_url( self::thumb( $post_id ) ) . '">' . $html . '</div>' );
+								AR_TRY_ON_Viewer::print_html( '<div class="woocommerce-product-gallery__image atlas-ar-slide" data-thumb="' . esc_url( self::thumb( $post_id ) ) . '" data-thumb-alt="' . esc_attr__( '3D view', 'ar-vr-3d-model-try-on' ) . '">' . $html . '</div>' );
 							}
 						},
 						5

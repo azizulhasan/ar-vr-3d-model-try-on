@@ -199,7 +199,7 @@ class AR_TRY_ON_Viewer {
 		}
 		/** Pro adds the attributes of its options (hotspots, dimensions, items, variants…). */
 		$viewer = (array) apply_filters( 'atlas_ar_viewer_allowed_attributes', $viewer );
-		$box    = array( 'class' => true, 'style' => true, 'hidden' => true, 'data-atlas-ar-start' => true, 'data-thumb' => true );
+		$box    = array( 'class' => true, 'style' => true, 'hidden' => true, 'data-atlas-ar-start' => true, 'data-thumb' => true, 'data-thumb-alt' => true );
 		return array(
 			'atlasar-viewer' => $viewer,
 			'div'            => $box,
