@@ -291,10 +291,8 @@ class AR_TRY_ON_Cloud {
 			return new \WP_Error( 'atlas_ar_size', __( 'AtlasAR Cloud takes GLB files up to 50 MB.', 'ar-vr-3d-model-try-on' ) );
 		}
 		$query = array( 'name' => mb_substr( get_the_title( $id ), 0, 100 ) );
-		// AtlasAR Cloud always makes the model at its real size (API v1: height_cm is required).
-		if ( ! ( $height_cm >= 0.5 && $height_cm <= 1000 ) ) {
-			return new \WP_Error( 'atlas_ar_height', __( 'Enter the product’s real height (0.5–1000 cm) first: AtlasAR Cloud makes the model exactly that size.', 'ar-vr-3d-model-try-on' ) );
-		}
+		// AR-139: with a real height the model is made exactly that size; without one it keeps its
+		// own size (a service before AR-139 answers invalid_height, shown as "enter the height").
 		if ( $height_cm >= 0.5 && $height_cm <= 1000 ) {
 			$query['height_cm'] = round( (float) $height_cm, 2 );
 		}
