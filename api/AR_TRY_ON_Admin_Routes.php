@@ -96,6 +96,7 @@ class AR_TRY_ON_Admin_Routes {
 					array(
 						'email'   => self::arg( 'string', 'The email for the AtlasAR Cloud account.', array( 'required' => true, 'format' => 'email', 'sanitize_callback' => 'sanitize_email' ) ),
 						'consent' => self::arg( 'boolean', 'Must be true: the site owner agrees that a model is sent to AtlasAR Cloud only when asked, and accepts its terms and privacy policy.', array( 'required' => true ) ),
+						'news'    => self::arg( 'boolean', 'Optional, separate opt-in: email tips, new features and offers about AtlasAR (a new account only; unsubscribe any time). Default false.', array( 'default' => false ) ),
 					),
 				),
 			),
@@ -362,7 +363,7 @@ class AR_TRY_ON_Admin_Routes {
 		if ( true !== $r['consent'] ) {
 			return new \WP_Error( 'atlas_ar_consent', __( 'Please tick the box to agree first.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
 		}
-		return self::cloud_answer( AR_TRY_ON_Cloud::register( $r['email'] ) );
+		return self::cloud_answer( AR_TRY_ON_Cloud::register( $r['email'], true === $r['news'] ) );
 	}
 
 	public static function cloud_takeover( \WP_REST_Request $r ) {

@@ -245,7 +245,7 @@ Google - Terms: https://policies.google.com/terms Privacy: https://policies.goog
 
 = AtlasAR Cloud (optional, by AtlasAiDev) =
 
-Off unless the site owner connects it. When an administrator connects the site, the site address and the administrator's email are sent to create the project. When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. No visitor data is sent.
+Off unless the site owner connects it. When an administrator connects the site, the site address and the email they enter are sent to create the project; AtlasAR Cloud sends a welcome email to that address, and tips and offers only if the separate, unticked "email me tips" box was ticked. While connected, AtlasAR Cloud calls this site's REST address when a model is ready (signed with a secret only this site has). When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. No visitor data is sent.
 AtlasAiDev - Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
 
 = AtlasAiDev usage data (track.atlasaidev.com, icanhazip.com) =

@@ -125,9 +125,10 @@ class AR_TRY_ON_Cloud {
 	 * Make a free account for this site (or add the site to the account of that email).
 	 *
 	 * @param string $email
+	 * @param bool   $news  AR-135: the separate, unticked "tips and offers" box was ticked
 	 * @return array|\WP_Error status()
 	 */
-	public static function register( $email ) {
+	public static function register( $email, $news = false ) {
 		$email = sanitize_email( $email );
 		if ( ! is_email( $email ) ) {
 			return new \WP_Error( 'atlas_ar_email', __( 'Enter a valid email address.', 'ar-vr-3d-model-try-on' ) );
@@ -136,9 +137,10 @@ class AR_TRY_ON_Cloud {
 			'POST',
 			'/v1/projects/register',
 			array(
-				'platform' => 'wordpress',
-				'site_url' => home_url( '/' ),
-				'email'    => $email,
+				'platform'          => 'wordpress',
+				'site_url'          => home_url( '/' ),
+				'email'             => $email,
+				'marketing_consent' => true === $news, // AR-135: only an explicit opt-in; ignored for an existing account
 			),
 			''
 		);

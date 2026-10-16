@@ -275,6 +275,7 @@
 		var links = cloud.links || {};
 		var _email = useState(cloud.my_email || ''), email = _email[0], setEmail = _email[1];
 		var _ok = useState(false), consent = _ok[0], setConsent = _ok[1];
+		var _news = useState(false), news = _news[0], setNews = _news[1]; // AR-135: separate, never pre-ticked
 		var _key = useState(''), key = _key[0], setKey = _key[1];
 		var _mode = useState('new'), mode = _mode[0], setMode = _mode[1];
 		var _busy = useState(false), busy = _busy[0], setBusy = _busy[1];
@@ -353,8 +354,12 @@
 						checked: consent, onChange: setConsent,
 						label: __('I agree that a model is sent to AtlasAR Cloud only when I click a Cloud button, and I accept the AtlasAR Cloud terms and privacy policy.', D)
 					}),
+					el(C.CheckboxControl, {
+						checked: news, onChange: setNews,
+						label: __('Optional: email me tips, new features and offers about AtlasAR. Unsubscribe any time.', D)
+					}),
 					el('div', { className: 'atlas-ar-row' },
-						el(C.Button, { variant: 'primary', isBusy: busy, disabled: busy || !consent || !email, onClick: function () { run(UI.api('/cloud/connect', { method: 'POST', data: { email: email, consent: consent } })); } }, __('Connect this site', D)),
+						el(C.Button, { variant: 'primary', isBusy: busy, disabled: busy || !consent || !email, onClick: function () { run(UI.api('/cloud/connect', { method: 'POST', data: { email: email, consent: consent, news: news } })); } }, __('Connect this site', D)),
 						el(C.Button, { variant: 'link', onClick: function () { setMode('key'); } }, __('I already have an API key', D))))
 					: el(Fragment, null,
 						// Not a password field: a saved password is never filled in here.
