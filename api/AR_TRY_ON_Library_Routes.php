@@ -35,7 +35,7 @@ class AR_TRY_ON_Library_Routes {
 
 	public static function register() {
 		$id     = array( 'id' => self::arg( 'integer', 'The 3D Library model ID.', array( 'required' => true, 'sanitize_callback' => 'absint' ) ) );
-		$height = array( 'height_cm' => self::arg( 'number', 'The product’s real height in centimetres (0.5–1000); the model is scaled to it with its base on the floor. 0 keeps the model’s own size.', array( 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ) ) );
+		$height = array( 'height_cm' => self::arg( 'number', 'The product’s real height in centimetres (0.5–1000); the model is scaled to it with its base on the floor. 0 keeps the model’s own size (in the browser only: AtlasAR Cloud needs the real height).', array( 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ) ) );
 		$model  = array( __CLASS__, 'model_schema' );
 
 		self::route(
