@@ -216,7 +216,11 @@ class AR_TRY_ON_Admin_Routes {
 
 	/* ----------------------------------------------------------------------- items */
 
-	public static function list_items( \WP_REST_Request $r ) {
+	/**
+	 * @param \WP_REST_Request $r
+	 * @param bool             $check_user only posts the current user may edit (false: WP-CLI)
+	 */
+	public static function list_items( \WP_REST_Request $r, $check_user = true ) {
 		$types = array_values( array_filter( (array) AR_TRY_ON_Settings::get( 'general.post_types', array( 'product' ) ), 'post_type_exists' ) );
 		if ( ! $types ) {
 			return rest_ensure_response( array() );
@@ -242,7 +246,7 @@ class AR_TRY_ON_Admin_Routes {
 		$q   = new \WP_Query( $args );
 		$out = array();
 		foreach ( $q->posts as $post ) {
-			if ( ! current_user_can( 'edit_post', $post->ID ) ) {
+			if ( $check_user && ! current_user_can( 'edit_post', $post->ID ) ) {
 				continue;
 			}
 			$data  = AR_TRY_ON_Product::get( $post->ID );

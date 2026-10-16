@@ -181,6 +181,9 @@ function atlas_ar_run() {
 	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
 	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Library_Routes', 'register' ) );
 	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Admin_Routes', 'register' ) );
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		\AR_TRY_ON\AR_TRY_ON_CLI::register(); // AR-126: wp atlas-ar …
+	}
 	if ( is_admin() ) {
 		// AR-120: dashboard + setup wizard, 3D Library page, product panel.
 		\AR_TRY_ON_Admin\AR_TRY_ON_Dashboard::init();
