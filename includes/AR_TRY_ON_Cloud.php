@@ -515,6 +515,8 @@ class AR_TRY_ON_Cloud {
 
 	/** AR-144: post meta of a model downloaded from the free library: { id, license, credit }. */
 	const LIBRARY_META = '_atlas_ar_library_source';
+	/** AR-155: the free model's id alone (lib_…), so a search looks up only the models it shows. */
+	const LIBRARY_ID_META = '_atlas_ar_library_id';
 
 	/**
 	 * AR-144: search AtlasAR Cloud's free 3D model library (any plan; nothing is used). Sends only
@@ -539,7 +541,13 @@ class AR_TRY_ON_Cloud {
 		if ( is_wp_error( $res ) ) {
 			return $res;
 		}
-		$have = self::library_imported();
+		$ids  = array();
+		foreach ( isset( $res['data'] ) && is_array( $res['data'] ) ? $res['data'] : array() as $m ) {
+			if ( is_array( $m ) && ! empty( $m['id'] ) ) {
+				$ids[] = (string) $m['id'];
+			}
+		}
+		$have = self::library_imported( $ids );
 		$out  = array();
 		foreach ( isset( $res['data'] ) && is_array( $res['data'] ) ? $res['data'] : array() as $m ) {
 			if ( ! is_array( $m ) || empty( $m['id'] ) || ! preg_match( '/^lib_[A-Za-z0-9]{22}$/', (string) $m['id'] ) ) {
@@ -578,7 +586,7 @@ class AR_TRY_ON_Cloud {
 		if ( ! preg_match( '/^lib_[A-Za-z0-9]{22}$/', $lib_id ) ) {
 			return new \WP_Error( 'atlas_ar_library', __( 'This free model was not found.', 'ar-vr-3d-model-try-on' ) );
 		}
-		$have = self::library_imported();
+		$have = self::library_imported( array( $lib_id ) );
 		if ( isset( $have[ $lib_id ] ) && AR_TRY_ON_Library::get( $have[ $lib_id ] ) ) {
 			return AR_TRY_ON_Library::get( $have[ $lib_id ] );
 		}
@@ -605,6 +613,7 @@ class AR_TRY_ON_Cloud {
 		if ( '' !== $name ) {
 			AR_TRY_ON_Library::rename( $id, $name );
 		}
+		update_post_meta( $id, self::LIBRARY_ID_META, $lib_id );
 		update_post_meta(
 			$id,
 			self::LIBRARY_META,
@@ -626,23 +635,30 @@ class AR_TRY_ON_Cloud {
 		return AR_TRY_ON_Library::get( $id );
 	}
 
-	/** lib_… => 3D Library model ID, for the free models this site has downloaded. */
-	private static function library_imported() {
-		$out = array();
+	/**
+	 * lib_… => 3D Library model ID, for these free models when this site has downloaded them
+	 * (AR-155: one query for the ids shown, never every model).
+	 *
+	 * @param string[] $lib_ids
+	 */
+	private static function library_imported( array $lib_ids ) {
+		$lib_ids = array_values( array_filter( $lib_ids, function ( $v ) { return (bool) preg_match( '/^lib_[A-Za-z0-9]{22}$/', (string) $v ); } ) );
+		if ( ! $lib_ids ) {
+			return array();
+		}
 		$ids = get_posts(
 			array(
 				'post_type'      => AR_TRY_ON_Library::POST_TYPE,
 				'post_status'    => 'any',
-				'posts_per_page' => 500,
+				'posts_per_page' => count( $lib_ids ),
 				'fields'         => 'ids',
-				'meta_key'       => self::LIBRARY_META, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_key -- admin screen only; models downloaded from the free library.
+				'no_found_rows'  => true,
+				'meta_query'     => array( array( 'key' => self::LIBRARY_ID_META, 'value' => $lib_ids, 'compare' => 'IN' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query -- admin screen only; at most one page of free models.
 			)
 		);
+		$out = array();
 		foreach ( $ids as $id ) {
-			$m = get_post_meta( $id, self::LIBRARY_META, true );
-			if ( is_array( $m ) && ! empty( $m['id'] ) ) {
-				$out[ (string) $m['id'] ] = (int) $id;
-			}
+			$out[ (string) get_post_meta( $id, self::LIBRARY_ID_META, true ) ] = (int) $id;
 		}
 		return $out;
 	}

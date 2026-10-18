@@ -41,6 +41,14 @@ class AR_TRY_ON_Library {
 	/** AR-121: what Optimise did — { by, before, after, triangles, budget, time }. */
 	const OPTIMISED_META = '_atlas_ar_optimised';
 
+	/**
+	 * AR-155: a small index kept beside the file list, so "Large files" and "Missing files" are
+	 * paged database queries (a shop may have thousands of models): the GLB size in bytes, and
+	 * '1' when the iPhone file, the poster or the GLB is missing.
+	 */
+	const GLB_BYTES_META = '_atlas_ar_glb_bytes';
+	const MISSING_META   = '_atlas_ar_missing';
+
 	/** Register the post type (no admin screens of its own: the 3D Library page lists it). */
 	public static function register() {
 		register_post_type(
@@ -57,6 +65,49 @@ class AR_TRY_ON_Library {
 				'map_meta_cap'    => true,
 			)
 		);
+		// AR-155: every change of a model's file list (any code path) refreshes its index.
+		add_action( 'added_post_meta', array( __CLASS__, 'on_files_meta' ), 10, 4 );
+		add_action( 'updated_post_meta', array( __CLASS__, 'on_files_meta' ), 10, 4 );
+	}
+
+	/** AR-155: `added_post_meta` / `updated_post_meta`: keep the index of a model's files. */
+	public static function on_files_meta( $meta_id, $post_id, $key, $value ) {
+		if ( self::FILES_META === $key ) {
+			self::index( (int) $post_id, $value );
+		}
+	}
+
+	/** AR-155: the index of one model (from its file list). */
+	private static function index( $id, $files = null ) {
+		$files = is_array( $files ) ? $files : self::raw_files( $id );
+		update_post_meta( $id, self::GLB_BYTES_META, isset( $files['glb']['size'] ) ? (int) $files['glb']['size'] : 0 );
+		update_post_meta( $id, self::MISSING_META, array_diff( array( 'glb', 'usdz', 'poster' ), array_keys( $files ) ) ? '1' : '0' );
+	}
+
+	/**
+	 * AR-155: models from before the index get it, a few hundred at a time (each request does a
+	 * small batch, so a large library never makes one request slow). True when all are indexed.
+	 */
+	private static function index_older( $batch = 200 ) {
+		$ids = get_posts(
+			array(
+				'post_type'              => self::POST_TYPE,
+				'post_status'            => 'any',
+				'posts_per_page'         => $batch,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_term_cache' => false,
+				'meta_query'             => array( array( 'key' => self::GLB_BYTES_META, 'compare' => 'NOT EXISTS' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query -- admin only; models from before the index, in batches.
+			)
+		);
+		if ( ! $ids ) {
+			return true;
+		}
+		update_meta_cache( 'post', $ids );
+		foreach ( $ids as $id ) {
+			self::index( (int) $id );
+		}
+		return count( $ids ) < $batch;
 	}
 
 	/**
@@ -316,29 +367,20 @@ class AR_TRY_ON_Library {
 			$base[ 'used' === $filter ? 'post__in' : 'post__not_in' ] = $used; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- the models no product shows; admin screen only.
 		}
 		if ( 'missing' === $filter || 'large' === $filter ) {
-			// Decided by the files of each model: the IDs, then their files in one meta query.
-			$ids = get_posts( array_merge( $base, array( 'posts_per_page' => -1, 'no_found_rows' => true ) ) );
-			update_meta_cache( 'post', $ids );
-			$large = self::large_bytes();
-			$ids   = array_values(
-				array_filter(
-					$ids,
-					function ( $id ) use ( $filter, $large ) {
-						$files = self::raw_files( $id );
-						if ( 'large' === $filter ) {
-							return isset( $files['glb']['size'] ) && (int) $files['glb']['size'] > $large;
-						}
-						return (bool) array_diff( array( 'glb', 'usdz', 'poster' ), array_keys( $files ) );
-					}
-				)
+			// AR-155: a paged query on the index (never every model at once). Older models are
+			// indexed in small batches first (up to 1,000 on this request).
+			for ( $i = 0; $i < 5 && ! self::index_older(); $i++ ) {
+				continue;
+			}
+			$base['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query -- admin screen only; one page of models.
+				'large' === $filter
+					? array( 'key' => self::GLB_BYTES_META, 'value' => self::large_bytes(), 'compare' => '>', 'type' => 'NUMERIC' )
+					: array( 'key' => self::MISSING_META, 'value' => '1' ),
 			);
-			$total = count( $ids );
-			$ids   = array_slice( $ids, ( $page - 1 ) * $per, $per );
-		} else {
-			$q     = new \WP_Query( array_merge( $base, array( 'posts_per_page' => $per, 'paged' => $page ) ) );
-			$ids   = $q->posts;
-			$total = (int) $q->found_posts;
 		}
+		$q     = new \WP_Query( array_merge( $base, array( 'posts_per_page' => $per, 'paged' => $page ) ) );
+		$ids   = $q->posts;
+		$total = (int) $q->found_posts;
 		$usage = self::usage_map( $ids );
 		$items = array();
 		foreach ( $ids as $id ) {

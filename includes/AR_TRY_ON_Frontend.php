@@ -43,6 +43,7 @@ class AR_TRY_ON_Frontend {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'drop_old_pro_scripts' ), 21 );
 		add_action( 'wp_footer', array( __CLASS__, 'enqueue_if_used' ), 1 );
 		add_filter( 'script_loader_tag', array( __CLASS__, 'no_optimize' ), 10, 2 );
+		self::cache_plugins(); // AR-155
 		add_action( 'wp', array( __CLASS__, 'place' ) );
 		add_filter( 'the_content', array( __CLASS__, 'content' ), 20 );
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'editor_assets' ) );
@@ -132,10 +133,41 @@ class AR_TRY_ON_Frontend {
 	 * files (model-viewer, decoders, try-on) from next to itself.
 	 */
 	public static function no_optimize( $tag, $handle ) {
-		if ( self::SDK_HANDLE === $handle && false === strpos( $tag, 'data-no-optimize' ) ) {
+		if ( in_array( $handle, array( self::SDK_HANDLE, self::FRONT_HANDLE ), true ) && false === strpos( $tag, 'data-no-optimize' ) ) {
 			$tag = str_replace( ' src=', ' data-no-optimize="1" data-no-minify="1" data-cfasync="false" data-wpmeteor-nooptimize="true" src=', $tag );
 		}
 		return $tag;
+	}
+
+	/** AR-155: what caching / optimisation plugins must leave alone (matched in script URLs). */
+	const NO_OPTIMIZE = array( 'atlasar-sdk/', 'atlas-ar-front' );
+
+	/**
+	 * AR-155: the exclusion lists of caching and optimisation plugins that do not read the
+	 * data-no-optimize attribute. Only filters: nothing runs unless that plugin is active.
+	 * WP Rocket (minify/combine, defer, delay JS), Autoptimize, SiteGround Optimizer, WP-Optimize,
+	 * Perfmatters (delay). LiteSpeed Cache, Cloudflare Rocket Loader and WP Meteor read the attributes.
+	 */
+	private static function cache_plugins() {
+		$add = function ( $list ) {
+			return array_values( array_unique( array_merge( (array) $list, self::NO_OPTIMIZE ) ) );
+		};
+		foreach ( array( 'rocket_exclude_js', 'rocket_exclude_defer_js', 'rocket_delay_js_exclusions', 'perfmatters_delay_js_exclusions', 'litespeed_optimize_js_excludes', 'litespeed_optm_js_defer_exc', 'wp-optimize-minify-default-exclusions' ) as $hook ) {
+			add_filter( $hook, $add );
+		}
+		add_filter(
+			'autoptimize_filter_js_exclude',
+			function ( $list ) {
+				return trim( (string) $list . ', ' . implode( ', ', self::NO_OPTIMIZE ), ', ' );
+			}
+		);
+		// SiteGround Optimizer lists script handles.
+		$handles = function ( $list ) {
+			return array_values( array_unique( array_merge( (array) $list, array( self::SDK_HANDLE, self::FRONT_HANDLE ) ) ) );
+		};
+		foreach ( array( 'sgo_js_minify_exclude', 'sgo_javascript_combine_exclude', 'sgo_js_async_exclude' ) as $hook ) {
+			add_filter( $hook, $handles );
+		}
 	}
 
 	/** Load the scripts in the footer when something on the page used them. */
