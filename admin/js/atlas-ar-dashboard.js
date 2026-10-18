@@ -156,6 +156,10 @@
 					el(C.Button, { variant: 'primary', onClick: function () { ctx.go('integrations'); } }, __('Connect, it is free', D)),
 					el(C.Button, { variant: 'tertiary', onClick: function () { ctx.save({ general: { cloud_tip_off: true } }); } }, __('Not now', D)))) : null,
 			!s.general.checklist_off ? el(UI.Section, { className: 'atlas-ar-checklist', title: __('Get started', D) },
+				// AR-151: for beginners — what this page is and what to do first.
+				doneCount < checklist.length ? el('p', { className: 'atlas-ar-lead' },
+					__('New to AtlasAR? Follow these steps from top to bottom: each one takes a minute, and you can change everything later. The list below shows your products and whether they have a 3D model yet.', D), ' ',
+					el('a', { href: ctx.wizardUrl }, __('Or use the guided setup', D))) : null,
 				el('p', { className: 'atlas-ar-progress' }, sprintf(__('%1$d of %2$d done', D), doneCount, checklist.length),
 					el(C.Button, { variant: 'link', onClick: function () { ctx.save({ general: { checklist_off: true } }); } }, __('Hide', D))),
 				el('ol', null, checklist.map(function (c) {

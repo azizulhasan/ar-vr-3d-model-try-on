@@ -132,6 +132,20 @@
 	 * Upload files one per request: the first file of each name group makes the model, the others
 	 * join it (chair.glb + chair.usdz + chair.jpg = one model). onStatus(index, text, ok).
 	 */
+	/**
+	 * AR-151: why a file is not taken, and what to do instead (by its extension).
+	 * The 3D Library takes GLB / single-file glTF, USDZ, posters, and OBJ / FBX (converted here).
+	 */
+	function notTakenText(name) {
+		var ext = extOf(name);
+		if (['stl', 'ply', '3ds', 'dae', 'blend', 'step', 'stp', 'iges', 'igs', '3mf', 'max', 'c4d', 'skp', 'x3d', 'wrl', 'usd', 'usda', 'usdc', 'ma', 'mb'].indexOf(ext) !== -1) {
+			return sprintf(__('.%s is not taken: convert it to GLB first. Free with Blender: File › Import, then File › Export › glTF 2.0 (.glb).', D), ext);
+		}
+		if (ext === 'zip') return __('ZIP files are not taken: unzip it and upload the .glb (or .gltf, .obj, .fbx) inside.', D);
+		if (ext === 'bin') return __('A .bin file belongs to a multi-file glTF: export the model as one .glb file instead.', D);
+		return __('Not a 3D, iPhone AR or poster file.', D);
+	}
+
 	function uploadAll(files, onStatus) {
 		var groups = {};
 		var order = [];
@@ -147,7 +161,7 @@
 				return inner.then(function () {
 					var file = item.file;
 					if (!accepted(file.name)) {
-						onStatus(item.i, __('Not a 3D, iPhone AR or poster file.', D), false);
+						onStatus(item.i, notTakenText(file.name), false);
 						return null;
 					}
 					if (config.maxBytes && file.size > config.maxBytes) {
@@ -327,7 +341,7 @@
 		var missing = m.missing.map(function (k) {
 			if (k === 'usdz') {
 				return el('li', { key: k, className: 'atlas-ar-missing' },
-					el('span', null, __('No iPhone file (iPhones can still open AR from the GLB)', D)),
+					el('span', null, __('No iPhone file: iPhones still open AR, made from the GLB. For the best iPhone quality, upload a .usdz with the same name (Reality Converter on a Mac, or Blender’s USD export).', D)),
 					el(FileButton, { variant: 'link', busy: busy === 'file', accept: '.usdz', onFiles: function (fs) { addFile(fs[0]); } }, __('Upload', D)));
 			}
 			if (k === 'poster') {
@@ -472,8 +486,11 @@
 					el('li', null, el('b', null, __('3D models:', D)), ' .glb, .gltf ', __('(a single-file .gltf)', D)),
 					el('li', null, el('b', null, __('iPhone AR:', D)), ' .usdz'),
 					el('li', null, el('b', null, __('Posters:', D)), ' .jpg, .png, .webp'),
-					el('li', null, el('b', null, __('Converted to GLB in your browser:', D)), ' .obj, .fbx')
+					el('li', null, el('b', null, __('Converted to GLB in your browser:', D)), ' .obj, .fbx'),
+					// AR-151: everything else, and the iPhone file.
+					el('li', null, el('b', null, __('Other formats', D)), ' (STL, DAE, 3DS, BLEND, STEP…): ', __('convert to GLB first, free with Blender (File › Export › glTF 2.0).', D))
 				),
+				el('p', { className: 'description' }, __('iPhone AR: a .usdz is optional. Without one, iPhones make it from the GLB. For the best iPhone quality, upload a .usdz with the same name as the GLB (make one with Apple’s Reality Converter on a Mac, or Blender’s USD export).', D)),
 				config.maxBytes ? el('p', { className: 'description' }, sprintf(__('Up to %s per file.', D), size(config.maxBytes))) : null
 			),
 			rows.length ? el('ul', { className: 'atlas-ar-queue', 'aria-live': 'polite' }, rows.map(function (r, i) {
