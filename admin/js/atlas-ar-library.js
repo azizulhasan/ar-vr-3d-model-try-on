@@ -3,6 +3,7 @@
  * product editor opens instead of the Media Library:
  *
  *   window.AtlasARLibrary.pick({ title, selected, onSelect(model) })
+ *   window.AtlasARLibrary.flat({ name, onDone({ kind, model }) })   (AR-159: a 3D model from a photo)
  *
  * Plain JavaScript on WordPress's own React (wp.element) and components; no build step.
  * Talks to the ar_try_on/v1/library REST routes (wp.apiFetch adds the REST nonce).
@@ -607,7 +608,7 @@
 		var _w = useState(''), w = _w[0], setW = _w[1];
 		var _h = useState(''), h = _h[0], setH = _h[1];
 		var _frame = useState('#2b2b2b'), frame = _frame[0], setFrame = _frame[1];
-		var _name = useState(''), name = _name[0], setName = _name[1];
+		var _name = useState(props.name || ''), name = _name[0], setName = _name[1];
 		var _busy = useState(''), busy = _busy[0], setBusy = _busy[1];
 		var _err = useState(''), err = _err[0], setErr = _err[1];
 		useEffect(function () { return function () { if (url) URL.revokeObjectURL(url); }; }, [url]);
@@ -615,7 +616,7 @@
 		function choose(files) {
 			var f = files[0];
 			if (!f || !/^image\/(jpeg|png|webp)$/.test(f.type)) { setErr(__('Choose a JPEG, PNG or WebP photo.', D)); return; }
-			setErr(''); setFile(f); setName(baseName(f.name).replace(/[-_]+/g, ' '));
+			setErr(''); setFile(f); if (!props.name) setName(baseName(f.name).replace(/[-_]+/g, ' '));
 			var u = URL.createObjectURL(f); setUrl(u);
 			var img = new Image();
 			img.onload = function () { var r = img.naturalHeight / img.naturalWidth; setRatio(r); if (w) setH((parseFloat(w) * r).toFixed(1)); };
@@ -650,16 +651,22 @@
 				});
 			}).then(function (model) {
 				setBusy(''); setFile(null); setUrl(''); setW(''); setH('');
-				props.api.done([model.id]);
+				props.api.done([model.id], { kind: kind, model: model });
 			}, function (e) { setBusy(''); setErr(message(e)); });
 		}
 
 		var sizeOk = parseFloat(w) >= 1 && parseFloat(w) <= 1000 && parseFloat(h) >= 1 && parseFloat(h) <= 1000;
 		return el(Fragment, null,
-			el('div', { className: 'atlas-ar-free-head' },
-				el('h2', null, __('Flat product from a photo', D)),
+			props.modal ? null : el('div', { className: 'atlas-ar-free-head' },
+				el('h2', null, __('Make a 3D model from a photo', D)),
 				el(C.Button, { variant: 'tertiary', onClick: props.api.close }, __('Close', D))),
-			el('p', { className: 'description' }, __('For flat products: wall art, posters, canvas prints, framed pictures, rugs and tiles. One photo becomes a 3D model at its real size, for the 3D view and AR (also on iPhone). Made in this browser, free; the photo stays on your site.', D)),
+			// AR-159: say plainly what it does, and for which products it works.
+			el('p', null, __('Turns one photo of a flat product into a 3D model at its real size, so shoppers can see it in 3D and hang it on their own wall (or lay it on their floor) in AR, on Android and iPhone.', D)),
+			el('p', { className: 'description' }, __('For flat products only: wall art, posters, canvas prints, framed pictures, rugs, mats and tiles. For products with a shape, such as shoes, chairs or bottles, you need a real 3D model (a GLB file). Made in this browser, free; the photo stays on your site.', D)),
+			el('ol', { className: 'atlas-ar-flat-how' },
+				el('li', null, __('Choose a straight-on photo of the product.', D)),
+				el('li', null, __('Say what it is and enter its real size.', D)),
+				el('li', null, __('Click “Make the 3D model”: it is saved in the 3D Library.', D))),
 			el('div', { className: 'atlas-ar-flat' },
 				el('div', { className: 'atlas-ar-flat-photo' },
 					url ? el('img', { src: url, alt: '' }) : el('span', { className: 'atlas-ar-free-noimg', 'aria-hidden': 'true' }, __('Photo', D)),
@@ -679,7 +686,7 @@
 
 	if (wp.hooks) {
 		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/flat-photo', function (actions) {
-			return [{ id: 'flat-photo', label: __('Flat product from a photo', D), render: FlatFromPhoto }].concat(actions);
+			return [{ id: 'flat-photo', label: __('3D model from a photo', D), render: FlatFromPhoto }].concat(actions);
 		}, 9);
 	}
 
@@ -848,6 +855,15 @@
 		return function () { wp.element.unmountComponentAtNode(node); };
 	}
 
+	/** AR-159: "Make a 3D model from a photo" in a window (the product panel). */
+	function FlatModal(props) {
+		return el(C.Modal, { title: __('Make a 3D model from a photo', D), onRequestClose: props.onClose, className: 'atlas-ar-picker atlas-ar-flat-modal', size: 'large' },
+			el('div', { className: 'atlas-ar-library' }, el(FlatFromPhoto, {
+				modal: true, name: props.name,
+				api: { close: props.onClose, done: function (ids, info) { props.onDone(info); props.onClose(); } }
+			})));
+	}
+
 	window.AtlasARLibrary = Object.freeze({
 		/** Open the picker: options { title, selected (model id), onSelect(model) }. */
 		pick: function (options) {
@@ -863,6 +879,27 @@
 			unmount = mount(node, el(Picker, {
 				title: options.title, selected: options.selected,
 				onSelect: function (m) { if (typeof options.onSelect === 'function') options.onSelect(m); },
+				onClose: close
+			}));
+			return close;
+		},
+		/**
+		 * AR-159: make a flat product's 3D model from a photo: options { name, onDone({ kind, model }) }.
+		 * kind: canvas | poster | framed (on a wall) or rug | tile (on the floor).
+		 */
+		flat: function (options) {
+			options = options || {};
+			var node = document.createElement('div');
+			document.body.appendChild(node);
+			var unmount = null;
+			var close = function () {
+				if (unmount) unmount();
+				node.remove();
+				if (options.returnFocus && options.returnFocus.focus) options.returnFocus.focus();
+			};
+			unmount = mount(node, el(FlatModal, {
+				name: options.name,
+				onDone: function (info) { if (typeof options.onDone === 'function') options.onDone(info); },
 				onClose: close
 			}));
 			return close;

@@ -42,14 +42,26 @@
 		var _drag = useState(false), drag = _drag[0], setDrag = _drag[1];
 		var fileRef = useRef(null);
 
-		function link(id) {
+		/** extra: settings to change with it (kept in the panel, saved with the product). */
+		function link(id, extra) {
 			setBusy('link'); setErr('');
 			return UI.api('/products/' + item.id + '/model', { method: 'POST', data: { model_id: id } }).then(function (res) {
-				setBusy(''); ctx.setItem(Object.assign({}, item, { model: res.model, data: res.product }));
+				setBusy(''); ctx.setItem(Object.assign({}, item, { model: res.model, data: Object.assign({}, res.product, extra || {}) }));
 			}, function (e) { setBusy(''); setErr(UI.message(e)); });
 		}
 		function pick() {
 			window.AtlasARLibrary.pick({ title: sprintf(__('Choose a 3D model for “%s”', D), item.title), selected: m ? m.id : 0, onSelect: function (model) { link(model.id); } });
+		}
+		/** AR-159: a flat product (wall art, poster, rug…) from one photo, linked to this product. */
+		function fromPhoto(e) {
+			var btn = e && e.currentTarget;
+			window.AtlasARLibrary.flat({
+				name: item.title, returnFocus: btn,
+				onDone: function (info) {
+					// Wall art goes on a wall in AR, rugs and tiles on the floor.
+					link(info.model.id, { ar_placement: info.kind === 'rug' || info.kind === 'tile' ? 'floor' : 'wall' });
+				}
+			});
 		}
 		/** Upload files into the 3D Library (same name = one model) and show the first new model here. */
 		function upload(files) {
@@ -81,6 +93,7 @@
 				m.large ? el('span', { className: 'atlas-ar-badge atlas-ar-badge--warn' }, __('Large file: optimise it in the 3D Library', D)) : null) : null,
 			el('div', { className: 'atlas-ar-row' },
 				el(C.Button, { variant: m ? 'secondary' : 'primary', isBusy: busy === 'link', disabled: !!busy, onClick: pick }, m ? __('Change model', D) : __('Choose from the 3D Library', D)),
+				window.AtlasARLibrary.flat ? el(C.Button, { variant: 'secondary', disabled: !!busy, onClick: fromPhoto }, __('Make a 3D model from a photo', D)) : null,
 				m ? el(C.Button, { variant: 'tertiary', isDestructive: true, disabled: !!busy, onClick: function () { link(0); } }, __('Remove from this product', D)) : null,
 				m ? el('a', { className: 'button-link', href: boot.libraryUrl }, __('Open in the 3D Library', D)) : null),
 			el('div', {
@@ -93,7 +106,7 @@
 				el(C.Button, { variant: 'secondary', isBusy: busy === 'upload', disabled: !!busy, onClick: function () { fileRef.current.click(); } }, __('Choose files', D)),
 				el('input', { ref: fileRef, type: 'file', multiple: true, hidden: true, accept: boot.accept, onChange: function (e) { var fs = Array.prototype.slice.call(e.target.files || []); e.target.value = ''; if (fs.length) upload(fs); } })),
 			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
-			el('p', { className: 'description' }, __('Without a .usdz file, iPhones open AR from the GLB.', D)),
+			el('p', { className: 'description' }, __('Without a .usdz file, iPhones open AR from the GLB. “Make a 3D model from a photo” is for flat products: wall art, posters, canvas, rugs and tiles.', D)),
 			el(UI.ProNote, { where: 'product_panel', spot: 'make_3d' }, __('Make a 3D model from one product photo (AtlasAR Cloud, Meshy AI or Tripo3D) with AtlasAR Pro.', D)));
 	}
 

@@ -137,3 +137,8 @@
 .atlas-ar-flat-fields{display:grid;gap:12px;max-width:420px}
 .atlas-ar-flat-size{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:600px){.atlas-ar-flat{grid-template-columns:1fr}}
+
+/* AR-159: how "a 3D model from a photo" works, and its window in the product panel */
+.atlas-ar-flat-how{margin:8px 0 4px 20px;color:#3c434a}
+.atlas-ar-flat-how li{margin:2px 0}
+.atlas-ar-flat-modal .components-modal__content{padding-top:8px}
