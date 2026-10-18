@@ -33,6 +33,53 @@ class AR_TRY_ON_CLI {
 		WP_CLI::add_command( 'atlas-ar cloud', array( __CLASS__, 'cloud' ), array( 'shortdesc' => 'Connect to and use AtlasAR Cloud.' ) );
 		WP_CLI::add_command( 'atlas-ar tryon-files', array( __CLASS__, 'tryon_files' ), array( 'shortdesc' => 'Face-tracking files of the try-on on this site.' ) );
 		WP_CLI::add_command( 'atlas-ar check', array( __CLASS__, 'check' ), array( 'shortdesc' => 'Check what AtlasAR needs on this site.' ) );
+		WP_CLI::add_command( 'atlas-ar migrate', array( __CLASS__, 'migrate' ), array( 'shortdesc' => 'Move AtlasAR 2.x data into the 3D Library (AR-160).' ) );
+	}
+
+	/**
+	 * Move AtlasAR 2.x data (settings, product models) into the 3D Library. It also runs by itself
+	 * in the background after the update; this shows how far it is, or finishes it now.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<action>]
+	 * : status (default) | run | again
+	 *   run: finish the move now. again: look for 2.x data again (products that already have a
+	 *   3D Library model are still left alone).
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp atlas-ar migrate
+	 *     wp atlas-ar migrate run
+	 */
+	public static function migrate( $args, $assoc ) {
+		$action = isset( $args[0] ) ? $args[0] : 'status';
+		if ( 'again' === $action ) {
+			delete_option( AR_TRY_ON_Migration::STATE );
+			AR_TRY_ON_Migration::start();
+			$action = 'run';
+		}
+		if ( 'run' === $action ) {
+			$state = AR_TRY_ON_Migration::state();
+			if ( ! $state ) {
+				$state = AR_TRY_ON_Migration::start();
+			}
+			while ( isset( $state['status'] ) && 'running' === $state['status'] ) {
+				$state = AR_TRY_ON_Migration::tick();
+				WP_CLI::log( sprintf( 'moved %d, skipped %d, failed %d', $state['moved'], $state['skipped'], $state['failed'] ) );
+				if ( get_option( AR_TRY_ON_Migration::LOCK ) ) {
+					break; // a background batch is running: try again in a minute
+				}
+			}
+			wp_clear_scheduled_hook( AR_TRY_ON_Migration::HOOK );
+		}
+		$state = AR_TRY_ON_Migration::state();
+		if ( ! $state ) {
+			WP_CLI::log( 'Not checked yet (it starts on the first admin page). Run: wp atlas-ar migrate run' );
+			return;
+		}
+		WP_CLI::log( wp_json_encode( $state ) );
+		WP_CLI::success( 'done' === $state['status'] ? 'The move is done.' : 'The move is running in the background.' );
 	}
 
 	/**

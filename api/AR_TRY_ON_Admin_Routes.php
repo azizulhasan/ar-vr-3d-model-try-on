@@ -194,6 +194,8 @@ class AR_TRY_ON_Admin_Routes {
 			'cloud'      => AR_TRY_ON_Cloud::status(),
 			'tracker'    => AR_TRY_ON_Tracker_Files::status(),
 			'postTypes'  => $types,
+			// AR-160: the move from AtlasAR 2.x (Products shows its progress / what failed).
+			'migration'  => array_intersect_key( \AR_TRY_ON\AR_TRY_ON_Migration::state(), array_flip( array( 'status', 'moved', 'failed', 'finished' ) ) ),
 			'woo'        => class_exists( 'WooCommerce' ),
 			'counts'     => array(
 				'models'   => (int) wp_count_posts( AR_TRY_ON_Library::POST_TYPE )->publish,

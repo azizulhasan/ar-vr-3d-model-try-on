@@ -198,9 +198,15 @@
 			{ key: 'tryon', title: __('Sell glasses or caps? Turn on try-on', D), text: __('Shoppers try products on with their camera.', D), action: __('Try-on', D), go: function () { ctx.go('tryon'); } }
 		].filter(function (c) { return !c.hide; });
 		var doneCount = checklist.filter(function (c) { return done[c.key]; }).length;
+		var mig = boot.migration || {};
 
 		return el(Fragment, null,
 			el(UI.Head, { title: __('Products', D), lead: __('Your products and their 3D, AR and try-on status. Add a model right from here.', D) }),
+			// AR-160: the one-time move from AtlasAR 2.x.
+			mig.status === 'running' ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' },
+				sprintf(__('Moving your 3D models from AtlasAR 2 into the 3D Library (%d so far). It runs in the background; your shop keeps working.', D), mig.moved || 0)) : null,
+			mig.status === 'done' && mig.failed > 0 && mig.finished > Date.now() / 1000 - 30 * 86400 ? el(C.Notice, { status: 'warning', isDismissible: false, className: 'atlas-ar-page-notice' },
+				sprintf(__('%d products from AtlasAR 2 could not be moved (their model file was missing or could not be read). Use “Without 3D” below to find them and add their model again.', D), mig.failed)) : null,
 			ctx.cloud.available && !ctx.cloud.connected && !s.general.cloud_tip_off ? el('div', { className: 'atlas-ar-cloud-tip' },
 				el('div', null,
 					el('strong', null, __('Make your 3D product pages load faster: connect AtlasAR Cloud (free)', D)),
