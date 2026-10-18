@@ -28,6 +28,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
 * **For developers**: a documented REST API (ready for AI agents), WP-CLI (`wp atlas-ar …`) and hooks.
 * **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself. The free plan includes 20 optimisations a month: each one makes one of your existing models lighter (it does not create a new model).
+* **Flat products from a photo**: wall art, posters, canvas prints, framed pictures, rugs and tiles become a 3D model at their real size from one photo, made in your browser (with the iPhone file too), free.
 * **Free 3D models**: with AtlasAR Cloud connected (free plan included), search a library of ready-made, optimised 3D models and download one into your 3D Library with one click, at no cost.
 
 = AtlasAR Pro adds =

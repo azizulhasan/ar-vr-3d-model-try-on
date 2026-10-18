@@ -586,6 +586,103 @@
 			el('p', { className: 'description' }, __('Only your search words are sent to AtlasAR Cloud. Downloads are free and do not use your monthly optimisations.', D)));
 	}
 
+	/* ------------------------------------------- flat products from a photo (AR-153) */
+
+	// The same kinds as the SDK's tools (flat.js); default thickness in mm.
+	var FLAT_KINDS = [
+		['canvas', __('Canvas print', D), 20], ['poster', __('Poster / paper print', D), 1], ['framed', __('Framed picture', D), 25],
+		['rug', __('Rug / mat', D), 10], ['tile', __('Tile / panel', D), 8]
+	];
+
+	/**
+	 * AR-153: "Make 3D from a photo": a flat product (wall art, poster, canvas, rug, tile) built in
+	 * this browser from one photo, at its real size, with an iPhone file and the photo as poster.
+	 * Free; nothing is uploaded anywhere but this site.
+	 */
+	function FlatFromPhoto(props) {
+		var _file = useState(null), file = _file[0], setFile = _file[1];
+		var _url = useState(''), url = _url[0], setUrl = _url[1];
+		var _ratio = useState(0), ratio = _ratio[0], setRatio = _ratio[1];
+		var _kind = useState('canvas'), kind = _kind[0], setKind = _kind[1];
+		var _w = useState(''), w = _w[0], setW = _w[1];
+		var _h = useState(''), h = _h[0], setH = _h[1];
+		var _frame = useState('#2b2b2b'), frame = _frame[0], setFrame = _frame[1];
+		var _name = useState(''), name = _name[0], setName = _name[1];
+		var _busy = useState(''), busy = _busy[0], setBusy = _busy[1];
+		var _err = useState(''), err = _err[0], setErr = _err[1];
+		useEffect(function () { return function () { if (url) URL.revokeObjectURL(url); }; }, [url]);
+
+		function choose(files) {
+			var f = files[0];
+			if (!f || !/^image\/(jpeg|png|webp)$/.test(f.type)) { setErr(__('Choose a JPEG, PNG or WebP photo.', D)); return; }
+			setErr(''); setFile(f); setName(baseName(f.name).replace(/[-_]+/g, ' '));
+			var u = URL.createObjectURL(f); setUrl(u);
+			var img = new Image();
+			img.onload = function () { var r = img.naturalHeight / img.naturalWidth; setRatio(r); if (w) setH((parseFloat(w) * r).toFixed(1)); };
+			img.src = u;
+		}
+		function setWidth(v) { setW(v); if (ratio && parseFloat(v) > 0) setH((parseFloat(v) * ratio).toFixed(1)); }
+		function upload(blob, filename, modelId) {
+			var f = new File([blob], filename, { type: blob.type });
+			return modelId
+				? api({ path: '/ar_try_on/v1/library/' + modelId + '/files', method: 'POST', body: form('file', f) })
+				: api({ path: '/ar_try_on/v1/library', method: 'POST', body: form('files[]', f) }).then(function (res) {
+					var r = res.results && res.results[0];
+					if (!r || r.error) throw new Error(r ? r.error : '');
+					return res.models[0];
+				});
+		}
+		function make() {
+			var tools = sdkTools();
+			if (!tools || !tools.flat) { setErr(__('The 3D tools could not load. Please reload the page.', D)); return; }
+			var depth = FLAT_KINDS.filter(function (k) { return k[0] === kind; })[0][2];
+			var slug = (name || 'flat-product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'flat-product';
+			var ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+			setBusy(__('Making the 3D model in your browser…', D)); setErr('');
+			tools.flat(file, { kind: kind, widthCm: parseFloat(w), heightCm: parseFloat(h), depthMm: depth, frameColor: frame, name: name }).then(function (out) {
+				setBusy(__('Saving to the 3D Library…', D));
+				return upload(out.glb, slug + '.glb').then(function (model) {
+					return upload(out.usdz, slug + '.usdz', model.id)
+						.then(function () { return upload(file, slug + '.' + ext, model.id); })
+						// The name as typed (the file name gives only a slug).
+						.then(function () { return name.trim() ? api({ path: '/ar_try_on/v1/library/' + model.id, method: 'POST', data: { name: name.trim() } }) : model; })
+						.then(function () { return model; });
+				});
+			}).then(function (model) {
+				setBusy(''); setFile(null); setUrl(''); setW(''); setH('');
+				props.api.done([model.id]);
+			}, function (e) { setBusy(''); setErr(message(e)); });
+		}
+
+		var sizeOk = parseFloat(w) >= 1 && parseFloat(w) <= 1000 && parseFloat(h) >= 1 && parseFloat(h) <= 1000;
+		return el(Fragment, null,
+			el('div', { className: 'atlas-ar-free-head' },
+				el('h2', null, __('Flat product from a photo', D)),
+				el(C.Button, { variant: 'tertiary', onClick: props.api.close }, __('Close', D))),
+			el('p', { className: 'description' }, __('For flat products: wall art, posters, canvas prints, framed pictures, rugs and tiles. One photo becomes a 3D model at its real size, for the 3D view and AR (also on iPhone). Made in this browser, free; the photo stays on your site.', D)),
+			el('div', { className: 'atlas-ar-flat' },
+				el('div', { className: 'atlas-ar-flat-photo' },
+					url ? el('img', { src: url, alt: '' }) : el('span', { className: 'atlas-ar-free-noimg', 'aria-hidden': 'true' }, __('Photo', D)),
+					el(FileButton, { accept: 'image/jpeg,image/png,image/webp', variant: 'secondary', onFiles: choose }, file ? __('Choose another photo', D) : __('Choose a photo', D))),
+				el('div', { className: 'atlas-ar-flat-fields' },
+					el(C.SelectControl, { label: __('What is it?', D), value: kind, onChange: setKind, __nextHasNoMarginBottom: true, options: FLAT_KINDS.map(function (k) { return { value: k[0], label: k[1] }; }) }),
+					el('div', { className: 'atlas-ar-flat-size' },
+						el(C.TextControl, { label: __('Width (cm)', D), type: 'number', min: 1, max: 1000, step: 0.1, value: w, onChange: setWidth, __nextHasNoMarginBottom: true }),
+						el(C.TextControl, { label: __('Height (cm)', D), type: 'number', min: 1, max: 1000, step: 0.1, value: h, onChange: setH, __nextHasNoMarginBottom: true })),
+					el('p', { className: 'description' }, __('The real size of the product. The height follows the photo’s shape; change it if needed.', D)),
+					kind === 'framed' ? el('label', { className: 'atlas-ar-label' }, __('Frame colour', D), ' ', el('input', { type: 'color', value: frame, onChange: function (e) { setFrame(e.target.value); } })) : null,
+					el(C.TextControl, { label: __('Name in the 3D Library', D), value: name, maxLength: 100, onChange: setName, __nextHasNoMarginBottom: true }),
+					el(C.Button, { variant: 'primary', isBusy: !!busy, disabled: !!busy || !file || !sizeOk, onClick: make }, __('Make the 3D model', D)),
+					busy ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), busy) : null,
+					err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null)));
+	}
+
+	if (wp.hooks) {
+		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/flat-photo', function (actions) {
+			return [{ id: 'flat-photo', label: __('Flat product from a photo', D), render: FlatFromPhoto }].concat(actions);
+		}, 9);
+	}
+
 	if (wp.hooks && config.cloudAvailable) {
 		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/free-models', function (actions) {
 			return [{ id: 'free-models', label: __('Free 3D models', D), render: FreeModels }].concat(actions);
