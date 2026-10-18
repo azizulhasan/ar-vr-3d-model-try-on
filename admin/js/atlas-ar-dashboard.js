@@ -212,19 +212,28 @@
 				el('div', { className: 'atlas-ar-row' },
 					el(C.Button, { variant: 'primary', onClick: function () { ctx.go('integrations'); } }, __('Connect, it is free', D)),
 					el(C.Button, { variant: 'tertiary', onClick: function () { ctx.save({ general: { cloud_tip_off: true } }); } }, __('Not now', D)))) : null,
-			!s.general.checklist_off ? el(UI.Section, { className: 'atlas-ar-checklist', title: __('Get started', D) },
-				// AR-151: for beginners — what this page is and what to do first.
-				doneCount < checklist.length ? el('p', { className: 'atlas-ar-lead' },
-					__('New to AtlasAR? Follow these steps from top to bottom: each one takes a minute, and you can change everything later. The list below shows your products and whether they have a 3D model yet.', D), ' ',
-					el('a', { href: ctx.wizardUrl }, __('Or use the guided setup', D))) : null,
-				el('p', { className: 'atlas-ar-progress' }, sprintf(__('%1$d of %2$d done', D), doneCount, checklist.length),
-					el(C.Button, { variant: 'link', onClick: function () { ctx.save({ general: { checklist_off: true } }); } }, __('Hide', D))),
-				el('ol', null, checklist.map(function (c) {
-					return el('li', { key: c.key, className: done[c.key] ? 'is-done' : '' },
-						el('span', { className: 'atlas-ar-check', 'aria-hidden': 'true' }, done[c.key] ? '✓' : ''),
-						el('span', { className: 'atlas-ar-check-text' }, el('strong', null, c.title), el('span', null, c.text)),
-						done[c.key] ? el('span', { className: 'screen-reader-text' }, __('Done', D)) : el(C.Button, { variant: 'secondary', onClick: c.go }, c.action));
-				}))) : null,
+			// Get started is always here (design system: collapsed, never removed); the setup wizard
+			// can be run again at any time.
+			el(UI.Section, { className: 'atlas-ar-checklist' + (s.general.checklist_off ? ' is-folded' : '') },
+				el('div', { className: 'atlas-ar-checklist-head' },
+					el('h2', { className: 'atlas-ar-section-title' }, __('Get started', D)),
+					el('span', { className: 'atlas-ar-progress' }, sprintf(__('%1$d of %2$d done', D), doneCount, checklist.length)),
+					el('span', { className: 'atlas-ar-checklist-actions' },
+						el(C.Button, { variant: 'secondary', href: ctx.wizardUrl }, __('Run the setup wizard', D)),
+						el(C.Button, {
+							variant: 'tertiary', 'aria-expanded': s.general.checklist_off ? 'false' : 'true',
+							onClick: function () { ctx.save(Object.assign({}, s, { general: Object.assign({}, s.general, { checklist_off: !s.general.checklist_off }) })); }
+						}, s.general.checklist_off ? __('Show the steps', D) : __('Fold', D)))),
+				s.general.checklist_off ? null : el(Fragment, null,
+					// AR-151: for beginners — what this page is and what to do first.
+					doneCount < checklist.length ? el('p', { className: 'atlas-ar-lead' },
+						__('New to AtlasAR? Follow these steps from top to bottom: each one takes a minute, and you can change everything later. The list below shows your products and whether they have a 3D model yet.', D)) : null,
+					el('ol', null, checklist.map(function (c) {
+						return el('li', { key: c.key, className: done[c.key] ? 'is-done' : '' },
+							el('span', { className: 'atlas-ar-check', 'aria-hidden': 'true' }, done[c.key] ? '✓' : ''),
+							el('span', { className: 'atlas-ar-check-text' }, el('strong', null, c.title), el('span', null, c.text)),
+							done[c.key] ? el('span', { className: 'screen-reader-text' }, __('Done', D)) : el(C.Button, { variant: 'secondary', onClick: c.go }, c.action));
+					})))),
 			el(UI.Section, null,
 				el('div', { className: 'atlas-ar-toolbar' },
 					el('div', { className: 'atlas-ar-search' }, el(C.SearchControl, { label: __('Search products', D), value: search, onChange: function (v) { setSearch(v); setPage(1); }, __nextHasNoMarginBottom: true })),
@@ -247,13 +256,17 @@
 								el('td', null, m ? el(Fragment, null, m.file || m.name, el('span', { className: 'atlas-ar-muted' }, ' · ' + UI.size(m.size)), m.large ? el('span', { className: 'atlas-ar-badge atlas-ar-badge--warn' }, __('Large file', D)) : null) : el('span', { className: 'atlas-ar-muted' }, __('No 3D model', D))),
 								el('td', null, m ? (m.usdz ? __('Ready', D) : __('Ready (Android, WebXR); iPhone from the GLB', D)) : '—'),
 								el('td', null, i.tryon === 'glasses' ? __('Glasses', D) : i.tryon === 'hat' ? __('Cap', D) : '—'),
-								el('td', { className: 'atlas-ar-actions' }, m
-									? el('a', { href: i.edit_url + '#atlas-ar-panel', className: 'button' }, __('Edit', D))
-									: el(C.Button, { variant: 'primary', onClick: function () { addModel(i); } }, __('Add 3D', D)),
-									// AR-148: see the 3D view on the page itself (a draft opens its preview).
-									i.view_url ? el('a', { href: i.view_url, target: '_blank', rel: 'noopener', className: 'button button-link atlas-ar-view' },
-										i.status === 'publish' ? __('View', D) : __('Preview', D),
-										el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', D))) : null));
+								// Design system › RowActions: one aligned group — the main action as a button, View as an
+								// icon button of the same height (a draft opens its preview).
+								el('td', { className: 'atlas-ar-actions' }, el('span', { className: 'atlas-ar-row-actions' },
+									m
+										? el(C.Button, { variant: 'secondary', href: i.edit_url + '#atlas-ar-panel' }, __('Edit', D))
+										: el(C.Button, { variant: 'primary', onClick: function () { addModel(i); } }, __('Add 3D', D)),
+									i.view_url ? el(C.Button, {
+										variant: 'secondary', className: 'atlas-ar-view', icon: 'external', href: i.view_url, target: '_blank', rel: 'noopener',
+										label: sprintf(i.status === 'publish' ? __('View “%s” (opens in a new tab)', D) : __('Preview “%s” (opens in a new tab)', D), i.title || '#' + i.id),
+										showTooltip: true
+									}) : null)));
 						})))),
 				total > 20 ? el('div', { className: 'atlas-ar-pager' },
 					el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),

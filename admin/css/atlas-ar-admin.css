@@ -67,14 +67,15 @@
 .atlas-ar-checklist li.is-done .atlas-ar-check{border-color:#0e6b5c;background:#0e6b5c}
 .atlas-ar-check-text{display:flex;flex:1;flex-direction:column}
 .atlas-ar-check-text span{color:#50575e;font-size:13px}
-.atlas-ar-checklist li.is-done strong{color:#50575e;text-decoration:line-through}
+.atlas-ar-checklist li.is-done strong{color:#50575e;font-weight:500}
 .atlas-ar-progress{display:flex;align-items:center;gap:12px;margin:0 0 8px;color:#50575e}
 
 .atlas-ar-table{border-radius:6px}
 .atlas-ar-table td{vertical-align:middle}
 .atlas-ar-product-name{display:inline-flex;align-items:center;gap:8px;font-weight:600}
 .atlas-ar-product-name img{border-radius:4px;object-fit:cover}
-.atlas-ar-actions{text-align:right}
+.atlas-ar-actions{text-align:right;white-space:nowrap}
+.atlas-ar-table thead th{white-space:nowrap}
 .atlas-ar-pager{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:12px}
 
 .atlas-ar-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
@@ -170,3 +171,15 @@
 	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-scroll{overflow:auto;overscroll-behavior:contain;max-height:100%}
 	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-sticky{align-self:start}
 }
+/* Design system › RowActions: the actions of a row as one right-aligned group of equal height. */
+.atlas-ar-row-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:8px}
+.atlas-ar-row-actions .components-button{height:32px;min-height:32px}
+.atlas-ar-row-actions .atlas-ar-view.has-icon{width:32px;min-width:32px;padding:0;justify-content:center;color:#50575e;box-shadow:inset 0 0 0 1px #c3c4c7}
+.atlas-ar-row-actions .atlas-ar-view.has-icon:hover{color:#2271b1;box-shadow:inset 0 0 0 1px #2271b1}
+/* Design system: Get started is always there; folded it is one line. */
+.atlas-ar-checklist-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.atlas-ar-checklist-head .atlas-ar-section-title{margin:0}
+.atlas-ar-checklist-head .atlas-ar-progress{margin:0;color:#50575e}
+.atlas-ar-checklist-actions{display:inline-flex;gap:8px;margin-left:auto}
+.atlas-ar-checklist.is-folded{padding-top:10px;padding-bottom:10px}
+.atlas-ar-checklist .atlas-ar-lead{margin:12px 0 0}
