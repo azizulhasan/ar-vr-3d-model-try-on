@@ -17,6 +17,8 @@
 .atlas-ar-section-title{margin:0 0 4px;font-size:15px}
 .atlas-ar-section-lead{margin:0 0 12px;color:#50575e}
 .atlas-ar-section h3{margin:16px 0 8px;font-size:13px}
+/* AR-148: each later group of settings stands apart (a gap and a light line). */
+.atlas-ar-section h3:not(:first-child){margin-top:28px;padding-top:16px;border-top:1px solid #f0f0f1}
 .atlas-ar-section .components-base-control{margin-bottom:12px}
 .atlas-ar-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
 .atlas-ar-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}

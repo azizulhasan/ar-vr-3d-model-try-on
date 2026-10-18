@@ -313,6 +313,7 @@ class AR_TRY_ON_Admin_Routes {
 				'type'     => $post->post_type,
 				'status'   => $post->post_status,
 				'edit_url' => get_edit_post_link( $post->ID, 'raw' ),
+				'view_url' => 'publish' === $post->post_status ? get_permalink( $post->ID ) : get_preview_post_link( $post ), // AR-148
 				'thumb'    => (string) get_the_post_thumbnail_url( $post->ID, 'thumbnail' ),
 				'tryon'    => $data['tryon'],
 				'model'    => $model ? array(

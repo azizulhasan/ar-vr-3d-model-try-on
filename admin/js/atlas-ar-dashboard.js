@@ -69,8 +69,10 @@
 				el(C.TextControl, { label: __('Button text', D), value: look.ar_text, maxLength: 60, onChange: function (v) { set('ar_text', v); } }),
 				el('span', { className: 'atlas-ar-label' }, __('Button colour', D)),
 				el(Swatches, { label: __('Button colour', D), colors: COLORS, value: look.ar_color, onChange: function (v) { set('ar_color', v); } })) : null,
+			// AR-148: its own heading, apart from the button style above.
+			props.short ? null : el('h3', null, __('When the 3D view loads', D)),
 			props.short ? null : el(C.RadioControl, {
-				label: __('Loading', D), selected: look.load, onChange: function (v) { set('load', v); },
+				label: __('When the 3D view loads', D), hideLabelFromVision: true, selected: look.load, onChange: function (v) { set('load', v); },
 				options: [
 					{ value: 'scroll', label: __('When the view scrolls into sight — best for most shops', D) },
 					{ value: 'click', label: __('Only after a click on “View in 3D” — fastest pages, shows the image first', D) }
@@ -124,9 +126,10 @@
 		}
 
 		var done = {
-			place: s.general.wizard_done,
-			look: s.general.wizard_done,
-			model: (boot.counts || {}).with3d > 0,
+			place: s.general.wizard_done || s.general.placed,
+			look: s.general.wizard_done || s.general.styled,
+			// AR-148: also a model added on this page just now (the count was read when the page loaded).
+			model: (boot.counts || {}).with3d > 0 || !!(items && items.some(function (i) { return i.model; })),
 			cloud: ctx.cloud.connected,
 			tryon: !!s.tryon.enabled && items && items.some(function (i) { return i.tryon; })
 		};
@@ -185,7 +188,11 @@
 								el('td', null, i.tryon === 'glasses' ? __('Glasses', D) : i.tryon === 'hat' ? __('Cap', D) : '—'),
 								el('td', { className: 'atlas-ar-actions' }, m
 									? el('a', { href: i.edit_url + '#atlas-ar-panel', className: 'button' }, __('Edit', D))
-									: el(C.Button, { variant: 'primary', onClick: function () { addModel(i); } }, __('Add 3D', D))));
+									: el(C.Button, { variant: 'primary', onClick: function () { addModel(i); } }, __('Add 3D', D)),
+									// AR-148: see the 3D view on the page itself (a draft opens its preview).
+									i.view_url ? el('a', { href: i.view_url, target: '_blank', rel: 'noopener', className: 'button button-link atlas-ar-view' },
+										i.status === 'publish' ? __('View', D) : __('Preview', D),
+										el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', D))) : null));
 						})))),
 				total > 20 ? el('div', { className: 'atlas-ar-pager' },
 					el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),
@@ -567,7 +574,14 @@
 			settings: settings, set: set, save: save, replace: replace, cloud: cloud, setCloud: setCloud,
 			go: function (id) { setPage(id); window.location.hash = id; window.scrollTo(0, 0); },
 			dashboardUrl: boot.dashboardUrl, wizardUrl: wizardUrl,
-			saveBar: el(UI.SaveBar, { busy: status.busy, saved: status.saved, error: status.error, onSave: function () { save().catch(function () {}); } })
+			saveBar: el(UI.SaveBar, {
+				busy: status.busy, saved: status.saved, error: status.error, onSave: function () {
+					// AR-148: saving Placement / Appearance ticks its Get started step at once.
+					var flag = page === 'placement' ? 'placed' : page === 'appearance' ? 'styled' : '';
+					var patch = flag && !settings.general[flag] ? Object.assign({}, settings, { general: Object.assign({}, settings.general, (function () { var g = {}; g[flag] = true; return g; })()) }) : undefined;
+					save(patch).catch(function () {});
+				}
+			})
 		};
 		if (params.get('setup')) return el(Wizard, ctx);
 

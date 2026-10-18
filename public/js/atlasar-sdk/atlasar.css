@@ -88,4 +88,16 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-tryon-cancel{border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff}
 .atlasar-tryon-error{margin:0;padding:16px;background:#7f1d1d;color:#fff;font-size:14px}
 .atlasar-tryon-tools{padding:10px 14px;background:#1f2937}
+/* AR-148: with the calibration sliders the window is a column (or two columns on wide screens):
+   the camera picture shrinks and the sliders scroll, so every control stays reachable. */
+.atlasar-tryon[open]{display:flex;flex-direction:column}
+.atlasar-tryon-stage{flex:1 1 auto;min-height:200px}
+.atlasar-tryon-tools{flex:0 0 auto;max-height:42vh;overflow-y:auto;overscroll-behavior:contain}
+.atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])) .atlasar-tryon-canvas{max-height:calc(100vh - 140px - 42vh)}
+@media (min-width:900px){
+.atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])){width:min(1080px,calc(100vw - 24px));display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-rows:auto 1fr}
+.atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])) > *{grid-column:1}
+.atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])) .atlasar-tryon-tools{grid-column:2;grid-row:1 / span 99;max-height:calc(100vh - 24px)}
+.atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])) .atlasar-tryon-canvas{max-height:calc(100vh - 100px)}
+}
 @media (max-width:600px){.atlasar-tryon{width:100vw;max-height:100vh;height:100vh;border-radius:0}}

@@ -68,6 +68,9 @@ class AR_TRY_ON_Settings {
 				'remove_data'   => array( 'type' => 'bool', 'default' => false ),
 				'wizard_done'   => array( 'type' => 'bool', 'default' => false ),
 				'checklist_off' => array( 'type' => 'bool', 'default' => false ),
+				// AR-148: Placement / Appearance saved at least once (ticks the Get started steps).
+				'placed'        => array( 'type' => 'bool', 'default' => false ),
+				'styled'        => array( 'type' => 'bool', 'default' => false ),
 				'cloud_tip_off' => array( 'type' => 'bool', 'default' => false ),
 			),
 		);
