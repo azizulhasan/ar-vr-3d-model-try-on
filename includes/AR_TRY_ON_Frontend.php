@@ -133,14 +133,16 @@ class AR_TRY_ON_Frontend {
 	 * files (model-viewer, decoders, try-on) from next to itself.
 	 */
 	public static function no_optimize( $tag, $handle ) {
-		if ( in_array( $handle, array( self::SDK_HANDLE, self::FRONT_HANDLE ), true ) && false === strpos( $tag, 'data-no-optimize' ) ) {
+		// Any AtlasAR viewer script (free, Pro, add-ons): by handle or by its file's folder.
+		$ours = in_array( $handle, array( self::SDK_HANDLE, self::FRONT_HANDLE ), true ) || preg_match( '#/atlasar-sdk[a-z0-9-]*/#', $tag );
+		if ( $ours && false === strpos( $tag, 'data-no-optimize' ) ) {
 			$tag = str_replace( ' src=', ' data-no-optimize="1" data-no-minify="1" data-cfasync="false" data-wpmeteor-nooptimize="true" src=', $tag );
 		}
 		return $tag;
 	}
 
 	/** AR-155: what caching / optimisation plugins must leave alone (matched in script URLs). */
-	const NO_OPTIMIZE = array( 'atlasar-sdk/', 'atlas-ar-front' );
+	const NO_OPTIMIZE = array( 'atlasar-sdk', 'atlas-ar-front' ); // atlasar-sdk/ and Pro's atlasar-sdk-pro/
 
 	/**
 	 * AR-155: the exclusion lists of caching and optimisation plugins that do not read the
@@ -161,6 +163,16 @@ class AR_TRY_ON_Frontend {
 				return trim( (string) $list . ', ' . implode( ', ', self::NO_OPTIMIZE ), ', ' );
 			}
 		);
+		// Autoptimize also minifies excluded files into its cache folder by default: the SDK then
+		// looks for its other files there (410). Keep our files where they are.
+		// (consider_minified: when Autoptimize aggregates; dontmove: when it does not.)
+		add_filter(
+			'autoptimize_filter_js_consider_minified',
+			function ( $list ) {
+				return array_merge( is_array( $list ) ? $list : array(), self::NO_OPTIMIZE );
+			}
+		);
+		add_filter( 'autoptimize_filter_js_dontmove', $add );
 		// SiteGround Optimizer lists script handles.
 		$handles = function ( $list ) {
 			return array_values( array_unique( array_merge( (array) $list, array( self::SDK_HANDLE, self::FRONT_HANDLE ) ) ) );
