@@ -160,3 +160,13 @@
 .atlas-ar-presets{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
 .atlas-ar-presets .atlas-ar-label{margin:0 4px 0 0}
 .atlas-ar-subhead{margin:20px 0 8px;padding-top:12px;border-top:1px solid #f0f0f1;font-size:13px}
+
+/* AR-156: Appearance as two panes. The "Your style" fields get room under their choice. */
+.atlas-ar-subgroup{display:grid;gap:12px;margin-top:16px;padding-top:4px}
+.atlas-ar-split--preview .atlas-ar-pane-sticky{position:sticky;top:0}
+@media (min-width:961px) and (min-height:560px){
+	/* Full window: the settings column scrolls by itself; the preview never moves. */
+	body.atlas-ar-fullscreen .atlas-ar-split--preview{height:calc(100vh - 220px);min-height:420px;align-items:stretch}
+	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-scroll{overflow:auto;overscroll-behavior:contain;max-height:100%}
+	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-sticky{align-self:start}
+}

@@ -97,7 +97,8 @@
 				label: __('Button style', D), hideLabelFromVision: true, selected: look.ar_button, onChange: function (v) { set('ar_button', v); },
 				options: [{ value: 'default', label: __('Standard', D) }, { value: 'custom', label: __('Your style', D) }]
 			}),
-			look.ar_button === 'custom' || props.short ? el(Fragment, null,
+			// AR-156: the "Your style" fields as their own spaced group under the choice.
+			look.ar_button === 'custom' || props.short ? el('div', { className: 'atlas-ar-subgroup' },
 				el(C.TextControl, { label: __('Button text', D), value: look.ar_text, maxLength: 60, onChange: function (v) { set('ar_text', v); } }),
 				el('span', { className: 'atlas-ar-label' }, __('Button colour', D)),
 				el(Swatches, { label: __('Button colour', D), colors: COLORS, value: look.ar_color, onChange: function (v) { set('ar_color', v); } }),
@@ -272,10 +273,11 @@
 	function AppearancePage(ctx) {
 		return el(Fragment, null,
 			el(UI.Head, { title: __('Appearance', D), lead: __('How every 3D view looks. A product can change these in its own AtlasAR panel.', D) }),
-			el('div', { className: 'atlas-ar-split' },
-				el(UI.Section, null, el(Presets, ctx), el(LookFields, { settings: ctx.settings, set: ctx.set }), ctx.saveBar,
+			// AR-156: two panes like a desktop app: the settings scroll, the live preview stays in view.
+			el('div', { className: 'atlas-ar-split atlas-ar-split--preview' },
+				el(UI.Section, { className: 'atlas-ar-pane-scroll' }, el(Presets, ctx), el(LookFields, { settings: ctx.settings, set: ctx.set }), ctx.saveBar,
 					el(UI.ProNote, { where: 'appearance', spot: 'appearance_extras' }, __('AtlasAR Pro adds hotspots, the real measurements on the view, and several models with thumbnails to switch between.', D))),
-				el(UI.Section, null, el(Preview, { settings: ctx.settings }))));
+				el(UI.Section, { className: 'atlas-ar-pane-sticky' }, el(Preview, { settings: ctx.settings }))));
 	}
 
 	function PlacementPage(ctx) {
