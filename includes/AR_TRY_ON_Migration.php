@@ -40,7 +40,10 @@ class AR_TRY_ON_Migration {
 
 	public static function init() {
 		add_action( self::HOOK, array( __CLASS__, 'tick' ) );
-		add_action( 'admin_init', array( __CLASS__, 'maybe_start' ) );
+		// AR-164: on the first request after the update, shop pages too: a shop whose owner does not
+		// log in for days must not show its products without 3D meanwhile. The state is autoloaded,
+		// so once started this costs nothing.
+		add_action( 'init', array( __CLASS__, 'maybe_start' ), 20 );
 	}
 
 	/** @return array the state (empty before the first check) */
@@ -49,7 +52,7 @@ class AR_TRY_ON_Migration {
 		return is_array( $state ) ? $state : array();
 	}
 
-	/** First admin page after the update: start once, or keep a stalled run going. */
+	/** First request after the update: start once, or keep a stalled run going. */
 	public static function maybe_start() {
 		$state = self::state();
 		if ( isset( $state['status'] ) && 'done' === $state['status'] ) {
@@ -93,7 +96,7 @@ class AR_TRY_ON_Migration {
 				$state['settings'] = false;
 			}
 		}
-		update_option( self::STATE, $state, false );
+		update_option( self::STATE, $state, true );
 		if ( $has_products && ! wp_next_scheduled( self::HOOK ) ) {
 			wp_schedule_single_event( time(), self::HOOK );
 		}
@@ -123,13 +126,13 @@ class AR_TRY_ON_Migration {
 					$result = 'failed';
 				}
 				++$state[ $result ];
-				update_option( self::STATE, $state, false ); // progress survives a timeout
+				update_option( self::STATE, $state, true ); // progress survives a timeout
 			}
 			if ( count( $ids ) < self::BATCH ) {
 				$state['status']   = 'done';
 				$state['finished'] = time();
 			}
-			update_option( self::STATE, $state, false );
+			update_option( self::STATE, $state, true );
 		} finally {
 			delete_option( self::LOCK );
 		}
