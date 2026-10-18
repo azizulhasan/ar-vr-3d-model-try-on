@@ -285,10 +285,11 @@ class AR_TRY_ON_Cloud {
 	 * AR-121: send a model's GLB (its original, when it has one) to AtlasAR Cloud to optimise.
 	 *
 	 * @param int   $id        3D Library model
-	 * @param float $height_cm real height (0 = keep the model's size)
+	 * @param float  $height_cm real height (0 = keep the model's size)
+	 * @param string $level     AR-162: maximum | high | balanced | low | minimum ('' = the site's setting)
 	 * @return array|\WP_Error { status, cloud_id }
 	 */
-	public static function optimise_start( $id, $height_cm = 0 ) {
+	public static function optimise_start( $id, $height_cm = 0, $level = '' ) {
 		if ( ! self::connected() ) {
 			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
 		}
@@ -305,6 +306,9 @@ class AR_TRY_ON_Cloud {
 		if ( $height_cm >= 0.5 && $height_cm <= 1000 ) {
 			$query['height_cm'] = round( (float) $height_cm, 2 );
 		}
+		// AR-162: the level (a service from before levels ignores it and uses its own, = high).
+		$level = in_array( $level, array( 'maximum', 'high', 'balanced', 'low', 'minimum' ), true ) ? $level : (string) AR_TRY_ON_Settings::get( 'general.optimise_level', 'high' );
+		$query['level'] = $level;
 		$res = self::request(
 			'POST',
 			'/v1/models/upload?' . http_build_query( $query ),
@@ -313,7 +317,8 @@ class AR_TRY_ON_Cloud {
 			array(
 				'body'    => file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local model file sent as the request body.
 				'type'    => 'model/gltf-binary',
-				'headers' => array( 'Idempotency-Key' => 'wp' . (int) $id . '-' . substr( md5_file( $path ), 0, 24 ) ),
+				// The same file at another level is a new model (high keeps the key it always had).
+				'headers' => array( 'Idempotency-Key' => 'wp' . (int) $id . '-' . substr( md5_file( $path ), 0, 24 ) . ( 'high' === $level ? '' : '-' . $level ) ),
 			)
 		);
 		if ( is_wp_error( $res ) ) {
@@ -323,7 +328,7 @@ class AR_TRY_ON_Cloud {
 		if ( '' === $cloud_id ) {
 			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
 		}
-		update_post_meta( $id, self::JOB_META, array( 'cloud_id' => $cloud_id, 'status' => 'queued', 'height_cm' => isset( $query['height_cm'] ) ? $query['height_cm'] : 0, 'time' => time() ) );
+		update_post_meta( $id, self::JOB_META, array( 'cloud_id' => $cloud_id, 'status' => 'queued', 'height_cm' => isset( $query['height_cm'] ) ? $query['height_cm'] : 0, 'level' => $level, 'time' => time() ) );
 		// AR-143: the same file sent again (e.g. after "Restore original") is answered with the model
 		// already made (same Idempotency-Key). It is ready, so no webhook will come: fetch it now.
 		if ( isset( $res['status'] ) && 'ready' === $res['status'] ) {
@@ -373,6 +378,7 @@ class AR_TRY_ON_Cloud {
 				'triangles' => isset( $res['stats']['triangles'] ) ? $res['stats']['triangles'] : 0,
 				'budget'    => isset( $res['budget'] ) ? $res['budget'] : '',
 				'height_cm' => $job['height_cm'],
+				'level'     => isset( $res['stats']['level'] ) ? $res['stats']['level'] : ( isset( $job['level'] ) ? $job['level'] : '' ),
 			)
 		);
 		wp_delete_file( $tmp );

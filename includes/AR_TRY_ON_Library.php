@@ -525,6 +525,7 @@ class AR_TRY_ON_Library {
 				'triangles' => isset( $info['triangles'] ) ? absint( $info['triangles'] ) : 0,
 				'budget'    => isset( $info['budget'] ) && in_array( $info['budget'], array( 'pass', 'warn', 'fail' ), true ) ? $info['budget'] : '',
 				'height_cm' => isset( $info['height_cm'] ) ? round( (float) $info['height_cm'], 2 ) : 0,
+				'level'     => isset( $info['level'] ) && in_array( $info['level'], array( 'maximum', 'high', 'balanced', 'low', 'minimum' ), true ) ? $info['level'] : '', // AR-162
 				'time'      => time(),
 			)
 		);

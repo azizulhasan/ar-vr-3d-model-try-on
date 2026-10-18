@@ -75,25 +75,42 @@
 	}
 
 	/**
+	 * AR-162: optimisation levels (the viewer SDK's AtlasAR.tools.levels); high = as before levels.
+	 * The released plugin's quality slider had the same five bands.
+	 */
+	var LEVELS = [
+		{ value: 'maximum', label: __('Maximum quality', D), text: __('Up to 150,000 triangles, textures up to 4096 px. Largest files; for close-up detail.', D) },
+		{ value: 'high', label: __('High (recommended)', D), text: __('Up to 50,000 triangles, textures up to 2048 px. Looks the same, loads fast.', D) },
+		{ value: 'balanced', label: __('Balanced', D), text: __('Up to 30,000 triangles, textures up to 1024 px. Smaller files, small details soften.', D) },
+		{ value: 'low', label: __('Low', D), text: __('Up to 15,000 triangles, textures up to 1024 px. Small files for slow connections.', D) },
+		{ value: 'minimum', label: __('Smallest file', D), text: __('Up to 8,000 triangles, textures up to 512 px. The lightest; simple shapes only.', D) }
+	];
+	var siteLevel = function () { return config.optimiseLevel || 'high'; };
+
+	/**
 	 * AR-121: optimise a model's GLB in this browser (AtlasAR.tools.optimise) and keep the result
 	 * when it is smaller (or when a real height was given). Resolves the model, or null when the
 	 * file was already as small as it gets.
 	 */
-	function optimiseModel(m, heightCm, onStep) {
+	function optimiseModel(m, heightCm, onStep, level) {
+		level = level || siteLevel();
 		var tools = sdkTools();
 		if (!tools) return Promise.reject(new Error(__('The AtlasAR viewer did not load. Reload the page and try again.', D)));
 		var src = m.files.original || m.files.glb;
 		if (!src) return Promise.reject(new Error(__('This model has no GLB file.', D)));
 		onStep && onStep(STEP.read);
 		return fetchBlob(src.url).then(function (blob) {
-			return tools.optimise(blob, { heightCm: heightCm || 0, onProgress: function (st) { if (onStep && STEP[st]) onStep(STEP[st]); } });
+			return tools.optimise(blob, { heightCm: heightCm || 0, level: level, onProgress: function (st) { if (onStep && STEP[st]) onStep(STEP[st]); } });
 		}).then(function (res) {
-			if (!heightCm && res.blob.size >= (m.files.glb ? m.files.glb.size : src.size)) return null;
+			// A higher level may give a bigger file than the current one on purpose (more detail).
+			var asked = m.optimised && m.optimised.level && m.optimised.level !== level;
+			if (!heightCm && !asked && res.blob.size >= (m.files.glb ? m.files.glb.size : src.size)) return null;
 			var f = new FormData();
 			f.append('file', new File([res.blob], baseName(src.name || 'model') + '.glb', { type: 'model/gltf-binary' }));
 			f.append('triangles', String(res.stats.triangles));
 			f.append('budget', res.budget);
 			if (heightCm) f.append('height_cm', String(heightCm));
+			f.append('level', (res.stats && res.stats.level) || level);
 			return api({ path: '/ar_try_on/v1/library/' + m.id + '/optimised', method: 'POST', body: f });
 		});
 	}
@@ -357,9 +374,10 @@
 		});
 		var used = m.used_by.length;
 		var _h = useState(''), heightCm = _h[0], setHeightCm = _h[1];
+		var _lv = useState((m.optimised && m.optimised.level) || siteLevel()), level = _lv[0], setLevel = _lv[1];
 		var _step = useState(''), step = _step[0], setStep = _step[1];
 		function optimise() {
-			run('optimise', optimiseModel(m, parseFloat(heightCm) || 0, setStep)).then(function (res) {
+			run('optimise', optimiseModel(m, parseFloat(heightCm) || 0, setStep, level)).then(function (res) {
 				setStep(res ? '' : __('This model is already as small as it gets.', D));
 				if (res) changed(res);
 			}, function () { setStep(''); });
@@ -372,7 +390,7 @@
 		}
 		function cloudOptimise() {
 			setStep(__('Sending to AtlasAR Cloud…', D));
-			run('cloud', api({ path: '/ar_try_on/v1/library/' + m.id + '/cloud', method: 'POST', data: { height_cm: parseFloat(heightCm) || 0 } }).then(function () {
+			run('cloud', api({ path: '/ar_try_on/v1/library/' + m.id + '/cloud', method: 'POST', data: { height_cm: parseFloat(heightCm) || 0, level: level } }).then(function () {
 				setStep(__('AtlasAR Cloud is optimising the model…', D));
 				return new Promise(function (resolve, reject) {
 					var tries = 0;
@@ -391,11 +409,17 @@
 			el('h3', null, __('Make it smaller', D)),
 			o ? el('p', { className: 'atlas-ar-saved' },
 				sprintf(o.by === 'cloud' ? __('Optimised on AtlasAR Cloud: %1$s → %2$s', D) : __('Optimised in this browser: %1$s → %2$s', D), size(o.before), size(o.after)),
-				o.height_cm ? ' · ' + sprintf(__('real height %s cm', D), o.height_cm) : '') : null,
+				o.height_cm ? ' · ' + sprintf(__('real height %s cm', D), o.height_cm) : '',
+				o.level ? ' · ' + (LEVELS.filter(function (l) { return l.value === o.level; })[0] || { label: o.level }).label : '') : null,
 			el('p', { className: 'description' }, config.cloud
 				? __('Smaller files load faster. "Optimise" runs in this browser: nothing is uploaded. "Optimise on AtlasAR Cloud" sends the file to AtlasAR Cloud (also for very big files). The original file is kept.', D)
 				: __('Smaller files load faster. Runs in this browser: nothing is uploaded anywhere. The original file is kept.', D)),
-			el('div', { className: 'atlas-ar-row' },
+			el('div', { className: 'atlas-ar-row atlas-ar-optimise-fields' },
+				el(C.SelectControl, {
+					label: __('Level', D), value: level, onChange: setLevel, __nextHasNoMarginBottom: true,
+					options: LEVELS.map(function (l) { return { value: l.value, label: l.label }; }),
+					help: (LEVELS.filter(function (l) { return l.value === level; })[0] || LEVELS[1]).text
+				}),
 				el(C.TextControl, {
 					label: __('Real height (cm), optional', D),
 					type: 'number', min: 0.5, max: 1000, step: 0.1, value: heightCm, onChange: setHeightCm,
@@ -865,6 +889,8 @@
 	}
 
 	window.AtlasARLibrary = Object.freeze({
+		/** AR-162: optimisation levels [{ value, label, text }] (Settings uses the same list). */
+		levels: LEVELS,
 		/** Open the picker: options { title, selected (model id), onSelect(model) }. */
 		pick: function (options) {
 			options = options || {};

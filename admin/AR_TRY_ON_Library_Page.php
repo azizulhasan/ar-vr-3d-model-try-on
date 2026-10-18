@@ -71,6 +71,7 @@ class AR_TRY_ON_Library_Page {
 				'brand'      => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::brand(), // AR-138
 				// AR-121: Optimise.
 				'autoOptimise' => (bool) \AR_TRY_ON\AR_TRY_ON_Settings::get( 'general.auto_optimise' ),
+				'optimiseLevel' => (string) \AR_TRY_ON\AR_TRY_ON_Settings::get( 'general.optimise_level', 'high' ), // AR-162
 				'cloud'        => \AR_TRY_ON\AR_TRY_ON_Cloud::available() && \AR_TRY_ON\AR_TRY_ON_Cloud::connected(),
 				// AR-144: the free 3D model library (needs AtlasAR Cloud, any plan).
 				'cloudAvailable'  => \AR_TRY_ON\AR_TRY_ON_Cloud::available(),

@@ -37,6 +37,8 @@ class AR_TRY_ON_Library_Routes {
 
 	public static function register() {
 		$id     = array( 'id' => self::arg( 'integer', 'The 3D Library model ID.', array( 'required' => true, 'sanitize_callback' => 'absint' ) ) );
+		// AR-162: how far Optimise goes ('' = the site's setting).
+		$level  = array( 'level' => self::arg( 'string', 'Optimisation level: maximum, high (recommended), balanced, low or minimum; empty = the site’s setting (Settings › Optimisation).', array( 'default' => '', 'enum' => array( '', 'maximum', 'high', 'balanced', 'low', 'minimum' ) ) ) );
 		$height = array( 'height_cm' => self::arg( 'number', 'The product’s real height in centimetres (0.5–1000); the model is scaled to it with its base on the floor. 0 keeps the model’s own size (in the browser only: AtlasAR Cloud needs the real height).', array( 'default' => 0, 'minimum' => 0, 'maximum' => 1000 ) ) );
 		$model  = array( __CLASS__, 'model_schema' );
 
@@ -135,7 +137,7 @@ class AR_TRY_ON_Library_Routes {
 				'permission_callback' => array( __CLASS__, 'can_edit' ),
 				'label'               => __( 'Store an optimised GLB', 'ar-vr-3d-model-try-on' ),
 				'description'         => __( 'Stores a GLB optimised in the browser (multipart field file, from AtlasAR.tools.optimise) as the model’s GLB. The GLB it replaces is kept as the original and can be restored.', 'ar-vr-3d-model-try-on' ),
-				'args'                => $id + $height + array(
+				'args'                => $id + $height + $level + array(
 					'triangles' => self::arg( 'integer', 'Triangles in the optimised model (for the record shown in the library).', array( 'default' => 0, 'minimum' => 0, 'sanitize_callback' => 'absint' ) ),
 					'budget'    => self::arg( 'string', 'The page-weight grade of the result: pass (≤ 3 MB), warn (≤ 5 MB) or fail.', array( 'default' => '', 'enum' => array( '', 'pass', 'warn', 'fail' ) ) ),
 				),
@@ -191,7 +193,7 @@ class AR_TRY_ON_Library_Routes {
 					'permission_callback' => array( __CLASS__, 'can_edit' ),
 					'label'               => __( 'Optimise a model on AtlasAR Cloud', 'ar-vr-3d-model-try-on' ),
 					'description'         => __( 'Sends the model’s original GLB (up to 50 MB) to AtlasAR Cloud to optimise; needs a connected AtlasAR Cloud account and uses one model of its monthly plan. Then call GET on this route until status is ready.', 'ar-vr-3d-model-try-on' ),
-					'args'                => $id + $height,
+					'args'                => $id + $height + $level,
 				),
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
@@ -435,7 +437,7 @@ class AR_TRY_ON_Library_Routes {
 			AR_TRY_ON_Library::put_optimised(
 				(int) $r['id'],
 				$uploads[0],
-				array( 'by' => 'browser', 'triangles' => $r['triangles'], 'budget' => $r['budget'], 'height_cm' => $r['height_cm'] )
+				array( 'by' => 'browser', 'triangles' => $r['triangles'], 'budget' => $r['budget'], 'height_cm' => $r['height_cm'], 'level' => $r['level'] )
 			)
 		);
 	}
@@ -445,7 +447,7 @@ class AR_TRY_ON_Library_Routes {
 	}
 
 	public static function cloud_start( \WP_REST_Request $r ) {
-		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::optimise_start( (int) $r['id'], (float) $r['height_cm'] ) );
+		return self::answer( \AR_TRY_ON\AR_TRY_ON_Cloud::optimise_start( (int) $r['id'], (float) $r['height_cm'], (string) $r['level'] ) );
 	}
 
 	public static function cloud_poll( \WP_REST_Request $r ) {

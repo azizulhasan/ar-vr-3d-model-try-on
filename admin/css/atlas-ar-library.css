@@ -142,3 +142,7 @@
 .atlas-ar-flat-how{margin:8px 0 4px 20px;color:#3c434a}
 .atlas-ar-flat-how li{margin:2px 0}
 .atlas-ar-flat-modal .components-modal__content{padding-top:8px}
+
+/* AR-162: the level next to the real height */
+.atlas-ar-optimise-fields{align-items:flex-start;gap:12px}
+.atlas-ar-optimise-fields>*{flex:1 1 200px}

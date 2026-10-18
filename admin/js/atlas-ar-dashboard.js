@@ -534,6 +534,13 @@
 					label: __('Optimise every new model when it is added', D), checked: !!g.auto_optimise, onChange: function (v) { ctx.set('general', 'auto_optimise', v); },
 					help: __('Smaller files load faster. Runs in your browser when you upload a GLB to the 3D Library (files over 0.5 MB); the original is kept and can be restored.', D)
 				}),
+				// AR-162: the level Optimise uses (each model can still pick its own in the 3D Library).
+				window.AtlasARLibrary && window.AtlasARLibrary.levels ? el(C.SelectControl, {
+					label: __('Optimisation level', D), value: g.optimise_level || 'high', __nextHasNoMarginBottom: true,
+					options: window.AtlasARLibrary.levels.map(function (l) { return { value: l.value, label: l.label }; }),
+					help: (window.AtlasARLibrary.levels.filter(function (l) { return l.value === (g.optimise_level || 'high'); })[0] || {}).text,
+					onChange: function (v) { ctx.set('general', 'optimise_level', v); }
+				}) : null,
 				ctx.cloud.connected ? el('p', { className: 'description' }, __('Big files can also be optimised on AtlasAR Cloud from the 3D Library.', D)) : null),
 			el(UI.Section, { title: __('Privacy', D) },
 				// AR-161: shopper analytics (Analytics page).

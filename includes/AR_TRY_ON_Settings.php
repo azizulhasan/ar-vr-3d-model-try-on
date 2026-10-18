@@ -81,6 +81,8 @@ class AR_TRY_ON_Settings {
 			'general'    => array(
 				'post_types'    => array( 'type' => 'post_types', 'default' => array( 'product' ) ),
 				'auto_optimise' => array( 'type' => 'bool', 'default' => true ),
+				// AR-162: how far Optimise goes (the viewer SDK's levels; high = as before levels).
+				'optimise_level' => array( 'type' => 'enum', 'default' => 'high', 'options' => array( 'maximum', 'high', 'balanced', 'low', 'minimum' ) ),
 				'telemetry'     => array( 'type' => 'bool', 'default' => false ),
 				// AR-161: count how shoppers use the 3D view (daily totals on this site, no personal data).
 				'stats'         => array( 'type' => 'bool', 'default' => true ),

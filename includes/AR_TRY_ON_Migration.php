@@ -81,7 +81,13 @@ class AR_TRY_ON_Migration {
 		// Only on a site that never saved AtlasAR 3 settings: never over the shop's new choices.
 		if ( is_array( $old_settings ) && false === get_option( AR_TRY_ON_Settings::OPTION ) ) {
 			try {
-				AR_TRY_ON_Settings::update( self::map_settings( $old_settings ) );
+				$mapped = self::map_settings( $old_settings );
+				// AR-162: the released quality slider (0–100) becomes the matching level.
+				$compression = get_option( 'ar_try_on_compression_settings' );
+				if ( is_array( $compression ) && isset( $compression['quality'] ) && is_numeric( $compression['quality'] ) ) {
+					$mapped['general']['optimise_level'] = self::level_from_quality( (int) $compression['quality'] );
+				}
+				AR_TRY_ON_Settings::update( $mapped );
 				$state['settings'] = true;
 			} catch ( \Throwable $e ) {
 				$state['settings'] = false;
@@ -294,6 +300,11 @@ class AR_TRY_ON_Migration {
 
 	private static function file_name( $url ) {
 		return sanitize_file_name( rawurldecode( wp_basename( (string) strtok( (string) $url, '?#' ) ) ) );
+	}
+
+	/** AR-162: the released 0–100 quality → a level (the viewer SDK's bands). */
+	public static function level_from_quality( $q ) {
+		return $q >= 90 ? 'maximum' : ( $q >= 75 ? 'high' : ( $q >= 60 ? 'balanced' : ( $q >= 40 ? 'low' : 'minimum' ) ) );
 	}
 
 	/** 2.x places → [ mode, button position ]. */
