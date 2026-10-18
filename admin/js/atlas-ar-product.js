@@ -30,6 +30,7 @@
 		if (m.files.poster) o.poster = m.files.poster.url;
 		o.arPlacement = d.ar_placement;
 		o.arScale = d.ar_scale;
+		if (d.ar_text) o.arButtonText = d.ar_text; // AR-156: this product only
 		o.alt = item.title;
 		return o;
 	}
@@ -108,7 +109,15 @@
 				label: __('In AR the product goes', D), selected: d.ar_placement, onChange: function (v) { set('ar_placement', v); },
 				options: [{ value: 'floor', label: __('On the floor or a table', D) }, { value: 'wall', label: __('On a wall', D) }]
 			}),
-			el(C.ToggleControl, { label: __('Shoppers can change the size in AR', D), checked: d.ar_scale === 'auto', onChange: function (v) { set('ar_scale', v ? 'auto' : 'fixed'); } }));
+			el(C.ToggleControl, { label: __('Shoppers can change the size in AR', D), checked: d.ar_scale === 'auto', onChange: function (v) { set('ar_scale', v ? 'auto' : 'fixed'); } }),
+			// AR-156: for this product only; empty = the site's Appearance setting.
+			el('h4', { className: 'atlas-ar-subhead' }, __('Only for this product', D)),
+			el(C.TextControl, { label: __('Height of the 3D view (px)', D), type: 'number', min: 0, max: 1200, value: d.height || '', placeholder: __('site setting', D), onChange: function (v) { set('height', parseInt(v, 10) || 0); }, help: __('Empty = the height set in Appearance.', D) }),
+			el(C.TextControl, { label: __('AR button text', D), value: d.ar_text, maxLength: 60, placeholder: __('site setting', D), onChange: function (v) { set('ar_text', v); } }),
+			el(C.SelectControl, {
+				label: __('When the 3D view loads', D), value: d.load, onChange: function (v) { set('load', v); }, __nextHasNoMarginBottom: true,
+				options: [{ value: '', label: __('As set in Appearance', D) }, { value: 'scroll', label: __('When it scrolls into sight', D) }, { value: 'click', label: __('Only after a click on “View in 3D”', D) }]
+			}));
 	}
 
 	function TryonTab(ctx) {

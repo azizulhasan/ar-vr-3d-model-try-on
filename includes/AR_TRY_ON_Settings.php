@@ -53,6 +53,23 @@ class AR_TRY_ON_Settings {
 				'ar_text'         => array( 'type' => 'text', 'default' => __( 'View in your room', 'ar-vr-3d-model-try-on' ), 'max' => 60 ),
 				'ar_color'        => array( 'type' => 'color', 'default' => '#0e6b5c' ),
 				'load'            => array( 'type' => 'enum', 'default' => 'scroll', 'options' => array( 'scroll', 'click' ) ),
+				// AR-156: size and frame of the 3D view (defaults = the look before AR-156).
+				'height'          => array( 'type' => 'number', 'default' => 420, 'min' => 200, 'max' => 1200 ),
+				'mobile_height'   => array( 'type' => 'number', 'default' => 420, 'min' => 200, 'max' => 1200 ),
+				'max_width'       => array( 'type' => 'number', 'default' => 0, 'min' => 0, 'max' => 3000 ),
+				'align'           => array( 'type' => 'enum', 'default' => 'left', 'options' => array( 'left', 'center', 'right' ) ),
+				'border_width'    => array( 'type' => 'number', 'default' => 0, 'min' => 0, 'max' => 10 ),
+				'border_color'    => array( 'type' => 'color', 'default' => '#dcdcde' ),
+				'radius'          => array( 'type' => 'number', 'default' => 0, 'min' => 0, 'max' => 40 ),
+				'frame_shadow'    => array( 'type' => 'enum', 'default' => 'none', 'options' => array( 'none', 'soft', 'strong' ) ),
+				// AR-156: the view (released 2.x options that the rebuild had dropped).
+				'camera'          => array( 'type' => 'enum', 'default' => 'auto', 'options' => array( 'auto', 'front', 'side', 'top' ) ),
+				'prompt'          => array( 'type' => 'bool', 'default' => true ),
+				'tone'            => array( 'type' => 'enum', 'default' => 'neutral', 'options' => array( 'neutral', 'aces', 'agx' ) ),
+				'skybox'          => array( 'type' => 'bool', 'default' => false ),
+				'ar'              => array( 'type' => 'bool', 'default' => true ),
+				'xr_environment'  => array( 'type' => 'bool', 'default' => true ),
+				'ar_text_color'   => array( 'type' => 'color', 'default' => '#ffffff' ),
 			),
 			'tryon'      => array(
 				'enabled'  => array( 'type' => 'bool', 'default' => true ),

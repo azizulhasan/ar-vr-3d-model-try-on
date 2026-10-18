@@ -60,16 +60,26 @@ class AR_TRY_ON_Viewer {
 			'autoRotate'      => (bool) $look['auto_rotate'],
 			'disableZoom'     => ! $look['zoom'],
 			'arButton'        => 'custom' === $look['ar_button'] ? 'custom' : 'default',
-			'arButtonText'    => $look['ar_text'],
+			'arButtonText'    => '' !== (string) $product['ar_text'] ? $product['ar_text'] : $look['ar_text'], // AR-156: per product
 			'arButtonBackground' => $look['ar_color'],
+			'arButtonColor'   => $look['ar_text_color'],
+			// AR-156: the view.
+			'cameraOrbit'     => self::CAMERAS[ $look['camera'] ] ?? '',
+			'interactionPrompt' => $look['prompt'] ? 'auto' : 'none',
+			'toneMapping'     => $look['tone'],
+			'skyboxImage'     => $look['skybox'] && 'custom' === $look['lighting'] && $look['environment_url'] ? $look['environment_url'] : '',
+			'ar'              => (bool) $look['ar'],
+			'xrEnvironment'   => (bool) $look['xr_environment'],
+			'align'           => $look['align'],
 			'arPlacement'     => $product['ar_placement'],
 			'arScale'         => $product['ar_scale'],
 			'qr'              => (bool) AR_TRY_ON_Settings::get( 'placement.qr' ),
 			// Opened by a click (popup, tab, gallery) → load at once; else when scrolled into view.
-			'load'            => in_array( $context, array( 'popup' ), true ) ? 'immediate' : ( 'click' === $look['load'] ? 'interaction' : 'visible' ),
+			'load'            => in_array( $context, array( 'popup' ), true ) ? 'immediate' : ( 'click' === ( '' !== $product['load'] ? $product['load'] : $look['load'] ) ? 'interaction' : 'visible' ),
 			'display'         => 'popup' === $context ? 'popup' : 'inline',
-			'width'           => '100%',
-			'height'          => in_array( $context, array( 'gallery', 'slide' ), true ) ? '100%' : '420px',
+			// AR-156: the height comes from CSS variables set on the element (a phone height too).
+			'width'           => (int) $look['max_width'] > 0 ? 'min(100%, ' . (int) $look['max_width'] . 'px)' : '100%',
+			'height'          => in_array( $context, array( 'gallery', 'slide' ), true ) ? '100%' : 'var(--atlas-ar-h-now, 420px)',
 			'viewerClass'     => 'atlas-ar-viewer-model',
 		);
 
@@ -98,7 +108,33 @@ class AR_TRY_ON_Viewer {
 		}
 		self::$used = true;
 		$opts       = array_merge( $opts, $extra );
-		return '<atlasar-viewer class="atlas-ar-viewer atlas-ar-viewer--' . esc_attr( $context ) . '" data-atlas-ar-post="' . (int) $post_id . '"' . self::attributes( $opts ) . '></atlasar-viewer>';
+		return '<atlasar-viewer class="atlas-ar-viewer atlas-ar-viewer--' . esc_attr( $context ) . '" data-atlas-ar-post="' . (int) $post_id . '" style="' . esc_attr( self::frame_style( $post_id ) ) . '"' . self::attributes( $opts ) . '></atlasar-viewer>';
+	}
+
+	/** AR-156: camera angles for the "Starting view" setting (model-viewer camera-orbit). */
+	const CAMERAS = array( 'auto' => '', 'front' => '0deg 80deg auto', 'side' => '90deg 80deg auto', 'top' => '0deg 25deg auto' );
+
+	/**
+	 * AR-156: the size and frame as CSS variables on the element (public/css/atlas-ar-front.css
+	 * uses them). Numbers only, from the checked settings: no CSS from users.
+	 */
+	public static function frame_style( $post_id ) {
+		$look    = AR_TRY_ON_Settings::get( 'look' );
+		$product = AR_TRY_ON_Product::get( $post_id );
+		$height  = (int) $product['height'] > 0 ? (int) $product['height'] : (int) $look['height'];
+		$mobile  = (int) $product['height'] > 0 ? min( (int) $product['height'], (int) $look['mobile_height'] ) : (int) $look['mobile_height'];
+		$shadow  = array( 'none' => 'none', 'soft' => '0 2px 10px rgba(0,0,0,.12)', 'strong' => '0 6px 24px rgba(0,0,0,.22)' );
+		$color   = sanitize_hex_color( $look['border_color'] );
+		return sprintf(
+			'--atlas-ar-h:%1$dpx;--atlas-ar-h-mobile:%2$dpx;--atlas-ar-border:%3$dpx;--atlas-ar-border-color:%4$s;--atlas-ar-radius:%5$dpx;--atlas-ar-shadow:%6$s;--atlas-ar-overflow:%7$s',
+			$height,
+			$mobile,
+			(int) $look['border_width'],
+			$color ? $color : '#dcdcde',
+			(int) $look['radius'],
+			isset( $shadow[ $look['frame_shadow'] ] ) ? $shadow[ $look['frame_shadow'] ] : 'none',
+			(int) $look['radius'] > 0 ? 'hidden' : 'visible' // round corners clip; otherwise nothing changes
+		);
 	}
 
 	/**
@@ -193,7 +229,7 @@ class AR_TRY_ON_Viewer {
 	 * @return array
 	 */
 	public static function allowed_html() {
-		$viewer = array( 'class' => true, 'data-atlas-ar-post' => true );
+		$viewer = array( 'class' => true, 'data-atlas-ar-post' => true, 'style' => true ); // style: AR-156 CSS variables
 		foreach ( self::SDK_ATTRIBUTES as $name ) {
 			$viewer[ $name ] = true;
 		}

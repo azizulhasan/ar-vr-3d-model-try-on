@@ -125,7 +125,19 @@
 			attrs[k.replace(/[A-Z]/g, function (c) { return '-' + c.toLowerCase(); })] = typeof o[k] === 'boolean' ? String(o[k]) : (typeof o[k] === 'object' ? JSON.stringify(o[k]) : String(o[k]));
 		});
 		if (props.innerRef) attrs.ref = props.innerRef;
-		return el('div', { className: 'atlas-ar-viewer-box' }, el('atlasar-viewer', attrs));
+		// AR-156: the same frame the shop draws (border, corners, shadow, width).
+		var f = props.frame, style;
+		if (f) {
+			var shadow = { none: 'none', soft: '0 2px 10px rgba(0,0,0,.12)', strong: '0 6px 24px rgba(0,0,0,.22)' };
+			style = {
+				border: (Number(f.border_width) || 0) + 'px solid ' + (f.border_color || 'transparent'),
+				borderRadius: (Number(f.radius) || 0) + 'px', boxShadow: shadow[f.frame_shadow] || 'none',
+				overflow: Number(f.radius) > 0 ? 'hidden' : 'visible', boxSizing: 'border-box',
+				maxWidth: Number(f.max_width) > 0 ? Number(f.max_width) + 'px' : '100%',
+				marginLeft: f.align === 'center' || f.align === 'right' ? 'auto' : 0, marginRight: f.align === 'center' ? 'auto' : 0
+			};
+		}
+		return el('div', { className: 'atlas-ar-viewer-box', style: style }, el('atlasar-viewer', attrs));
 	}
 
 	/** Viewer options from the site's Appearance settings (the same mapping the shop uses). */
@@ -140,7 +152,15 @@
 			disableZoom: !look.zoom,
 			arButton: look.ar_button === 'custom' ? 'custom' : 'default',
 			arButtonText: look.ar_text,
-			arButtonBackground: look.ar_color
+			arButtonBackground: look.ar_color,
+			// AR-156 (the same mapping as AR_TRY_ON_Viewer::options()).
+			arButtonColor: look.ar_text_color,
+			cameraOrbit: { front: '0deg 80deg auto', side: '90deg 80deg auto', top: '0deg 25deg auto' }[look.camera] || '',
+			interactionPrompt: look.prompt === false ? 'none' : 'auto',
+			toneMapping: look.tone || 'neutral',
+			skyboxImage: look.skybox && look.lighting === 'custom' ? (look.environment_url || '') : '',
+			ar: look.ar !== false,
+			xrEnvironment: look.xr_environment !== false
 		};
 	}
 

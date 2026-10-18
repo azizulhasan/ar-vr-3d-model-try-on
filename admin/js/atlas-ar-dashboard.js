@@ -59,8 +59,40 @@
 				el(C.RangeControl, { label: __('Brightness', D), value: Number(look.exposure), min: 0.5, max: 2, step: 0.1, onChange: function (v) { set('exposure', v); } }),
 				el(C.RangeControl, { label: __('Shadow', D), value: Number(look.shadow), min: 0, max: 2, step: 0.1, onChange: function (v) { set('shadow', v); } }),
 				el(C.ToggleControl, { label: __('Turn the model slowly until the visitor touches it', D), checked: !!look.auto_rotate, onChange: function (v) { set('auto_rotate', v); } }),
-				el(C.ToggleControl, { label: __('Visitors can zoom', D), checked: !!look.zoom, onChange: function (v) { set('zoom', v); } })),
+				el(C.ToggleControl, { label: __('Visitors can zoom', D), checked: !!look.zoom, onChange: function (v) { set('zoom', v); } }),
+				// AR-156: the view.
+				el('h3', null, __('Starting view', D)),
+				el(C.SelectControl, {
+					label: __('Camera', D), value: look.camera, onChange: function (v) { set('camera', v); }, __nextHasNoMarginBottom: true,
+					options: [{ value: 'auto', label: __('As the model was made (recommended)', D) }, { value: 'front', label: __('From the front', D) }, { value: 'side', label: __('From the side', D) }, { value: 'top', label: __('From above', D) }]
+				}),
+				el(C.SelectControl, {
+					label: __('Colours', D), value: look.tone, onChange: function (v) { set('tone', v); }, __nextHasNoMarginBottom: true,
+					options: [{ value: 'neutral', label: __('True to life (recommended)', D) }, { value: 'aces', label: __('More contrast', D) }, { value: 'agx', label: __('Softer, for very bright products', D) }]
+				}),
+				look.lighting === 'custom' ? el(C.ToggleControl, { label: __('Show the environment image behind the model', D), checked: !!look.skybox, onChange: function (v) { set('skybox', v); } }) : null,
+				el(C.ToggleControl, { label: __('Show a “drag to turn” hint until the visitor touches the model', D), checked: look.prompt !== false, onChange: function (v) { set('prompt', v); } }),
+				// AR-156: size and frame.
+				el('h3', null, __('Size and frame', D)),
+				el(C.RangeControl, { label: __('Height on computers (px)', D), value: Number(look.height), min: 200, max: 1200, step: 10, onChange: function (v) { set('height', v); } }),
+				el(C.RangeControl, { label: __('Height on phones (px)', D), value: Number(look.mobile_height), min: 200, max: 1200, step: 10, onChange: function (v) { set('mobile_height', v); } }),
+				el(C.TextControl, { label: __('Maximum width (px)', D), type: 'number', min: 0, max: 3000, value: look.max_width, onChange: function (v) { set('max_width', v); }, help: __('0 = as wide as the space it is in.', D) }),
+				Number(look.max_width) > 0 ? el(C.SelectControl, {
+					label: __('Position', D), value: look.align, onChange: function (v) { set('align', v); }, __nextHasNoMarginBottom: true,
+					options: [{ value: 'left', label: __('Left', D) }, { value: 'center', label: __('Centre', D) }, { value: 'right', label: __('Right', D) }]
+				}) : null,
+				el(C.RangeControl, { label: __('Border (px)', D), value: Number(look.border_width), min: 0, max: 10, onChange: function (v) { set('border_width', v); } }),
+				Number(look.border_width) > 0 ? el(Fragment, null,
+					el('span', { className: 'atlas-ar-label' }, __('Border colour', D)),
+					el(Swatches, { label: __('Border colour', D), colors: ['#dcdcde', '#c3c4c7', '#1d2327', '#0e6b5c', '#2271b1'], value: look.border_color, onChange: function (v) { set('border_color', v); } })) : null,
+				el(C.RangeControl, { label: __('Rounded corners (px)', D), value: Number(look.radius), min: 0, max: 40, onChange: function (v) { set('radius', v); } }),
+				el(C.SelectControl, {
+					label: __('Shadow around the view', D), value: look.frame_shadow, onChange: function (v) { set('frame_shadow', v); }, __nextHasNoMarginBottom: true,
+					options: [{ value: 'none', label: __('None', D) }, { value: 'soft', label: __('Soft', D) }, { value: 'strong', label: __('Strong', D) }]
+				})),
 			el('h3', null, __('“View in your room” button (AR)', D)),
+			props.short ? null : el(C.ToggleControl, { label: __('Show the button (shoppers place the product in their room)', D), checked: look.ar !== false, onChange: function (v) { set('ar', v); } }),
+			props.short || look.ar === false ? null : el(C.ToggleControl, { label: __('In AR, light the model like the room (Android)', D), checked: look.xr_environment !== false, onChange: function (v) { set('xr_environment', v); } }),
 			props.short ? null : el(C.RadioControl, {
 				label: __('Button style', D), hideLabelFromVision: true, selected: look.ar_button, onChange: function (v) { set('ar_button', v); },
 				options: [{ value: 'default', label: __('Standard', D) }, { value: 'custom', label: __('Your style', D) }]
@@ -68,7 +100,10 @@
 			look.ar_button === 'custom' || props.short ? el(Fragment, null,
 				el(C.TextControl, { label: __('Button text', D), value: look.ar_text, maxLength: 60, onChange: function (v) { set('ar_text', v); } }),
 				el('span', { className: 'atlas-ar-label' }, __('Button colour', D)),
-				el(Swatches, { label: __('Button colour', D), colors: COLORS, value: look.ar_color, onChange: function (v) { set('ar_color', v); } })) : null,
+				el(Swatches, { label: __('Button colour', D), colors: COLORS, value: look.ar_color, onChange: function (v) { set('ar_color', v); } }),
+				props.short ? null : el(Fragment, null,
+					el('span', { className: 'atlas-ar-label' }, __('Button text colour', D)),
+					el(Swatches, { label: __('Button text colour', D), colors: ['#ffffff', '#1d2327'], value: look.ar_text_color, onChange: function (v) { set('ar_text_color', v); } }))) : null,
 			// AR-148: its own heading, apart from the button style above.
 			props.short ? null : el('h3', null, __('When the 3D view loads', D)),
 			props.short ? null : el(C.RadioControl, {
@@ -80,12 +115,33 @@
 			}));
 	}
 
+	/** AR-156: one-click styles for the frame, and back to the defaults (Appearance only). */
+	var PRESETS = {
+		clean: { border_width: 0, radius: 0, frame_shadow: 'none' },
+		card: { border_width: 1, border_color: '#dcdcde', radius: 12, frame_shadow: 'soft' },
+		minimal: { border_width: 0, radius: 8, frame_shadow: 'none', prompt: false }
+	};
+	function Presets(ctx) {
+		function apply(values) { Object.keys(values).forEach(function (k) { ctx.set('look', k, values[k]); }); }
+		function reset() {
+			var schema = (boot.schema || {}).look || {}, d = {};
+			Object.keys(schema).forEach(function (k) { if (schema[k] && 'default' in schema[k]) d[k] = schema[k].default; });
+			apply(d);
+		}
+		return el('div', { className: 'atlas-ar-presets', role: 'group', 'aria-label': __('Quick styles', D) },
+			el('span', { className: 'atlas-ar-label' }, __('Quick styles', D)),
+			el(C.Button, { variant: 'secondary', onClick: function () { apply(PRESETS.clean); } }, __('Clean', D)),
+			el(C.Button, { variant: 'secondary', onClick: function () { apply(PRESETS.card); } }, __('Card', D)),
+			el(C.Button, { variant: 'secondary', onClick: function () { apply(PRESETS.minimal); } }, __('Minimal', D)),
+			el(C.Button, { variant: 'tertiary', onClick: reset }, __('Reset to default', D)));
+	}
+
 	function Preview(props) {
 		var demo = boot.demoModel || {};
 		var o = Object.assign({ src: demo.src, poster: demo.poster }, UI.lookOptions(props.settings.look));
 		return el('div', { className: 'atlas-ar-preview-col' },
 			el('h3', null, __('Live preview', D)),
-			el(UI.Viewer, { options: o, height: props.height || '340px', reloadKey: JSON.stringify(o) }),
+			el(UI.Viewer, { options: o, height: props.height || (Number(props.settings.look.height) || 340) + 'px', frame: props.settings.look, reloadKey: JSON.stringify(o) }),
 			el('p', { className: 'description' }, demo.name ? sprintf(__('Showing “%s”. ', D), demo.name) : '', __('The shop uses the same AtlasAR viewer, so what you see here is what shoppers get.', D)));
 	}
 
@@ -217,7 +273,7 @@
 		return el(Fragment, null,
 			el(UI.Head, { title: __('Appearance', D), lead: __('How every 3D view looks. A product can change these in its own AtlasAR panel.', D) }),
 			el('div', { className: 'atlas-ar-split' },
-				el(UI.Section, null, el(LookFields, { settings: ctx.settings, set: ctx.set }), ctx.saveBar,
+				el(UI.Section, null, el(Presets, ctx), el(LookFields, { settings: ctx.settings, set: ctx.set }), ctx.saveBar,
 					el(UI.ProNote, { where: 'appearance', spot: 'appearance_extras' }, __('AtlasAR Pro adds hotspots, the real measurements on the view, and several models with thumbnails to switch between.', D))),
 				el(UI.Section, null, el(Preview, { settings: ctx.settings }))));
 	}

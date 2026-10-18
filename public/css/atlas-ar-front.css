@@ -29,3 +29,7 @@
 .atlas-ar-tryon-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;margin:12px 0 0;cursor:pointer}
 .atlas-ar-tryon-icon{width:18px;height:18px;border:1.5px solid currentColor;border-radius:50%;box-sizing:border-box;position:relative}
 .atlas-ar-tryon-icon::after{content:"";position:absolute;left:3px;right:3px;top:6px;height:3px;border-top:1.5px solid currentColor}
+
+/* AR-156: size and frame from the settings (CSS variables set on the element by the plugin). */
+.atlas-ar-viewer{--atlas-ar-h-now:var(--atlas-ar-h,420px);border:var(--atlas-ar-border,0) solid var(--atlas-ar-border-color,transparent);border-radius:var(--atlas-ar-radius,0);box-shadow:var(--atlas-ar-shadow,none);overflow:var(--atlas-ar-overflow,visible);box-sizing:border-box}
+@media (max-width:600px){.atlas-ar-viewer{--atlas-ar-h-now:var(--atlas-ar-h-mobile,var(--atlas-ar-h,420px))}}

@@ -155,3 +155,8 @@
 	.atlas-ar-panel-side .atlas-ar-savebar{flex:none;margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f1}
 	.atlas-ar-panel-side>.description{flex:none;margin:4px 0 0}
 }
+
+/* AR-156: quick styles above the Appearance settings */
+.atlas-ar-presets{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.atlas-ar-presets .atlas-ar-label{margin:0 4px 0 0}
+.atlas-ar-subhead{margin:20px 0 8px;padding-top:12px;border-top:1px solid #f0f0f1;font-size:13px}

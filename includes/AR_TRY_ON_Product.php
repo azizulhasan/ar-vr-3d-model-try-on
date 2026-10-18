@@ -30,6 +30,10 @@ class AR_TRY_ON_Product {
 			'ar_scale'     => array( 'type' => 'enum', 'default' => 'auto', 'options' => array( 'auto', 'fixed' ) ),
 			'tryon'        => array( 'type' => 'enum', 'default' => '', 'options' => array( '', 'glasses', 'hat' ) ),
 			'tryon_viewer' => array( 'type' => 'bool', 'default' => true ),
+			// AR-156: this product only (0 / empty = the site's setting).
+			'height'       => array( 'type' => 'number', 'default' => 0, 'min' => 0, 'max' => 1200 ),
+			'ar_text'      => array( 'type' => 'text', 'default' => '', 'max' => 60 ),
+			'load'         => array( 'type' => 'enum', 'default' => '', 'options' => array( '', 'scroll', 'click' ) ),
 		);
 
 		/**
