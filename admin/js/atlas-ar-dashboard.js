@@ -423,7 +423,22 @@
 
 		var body;
 		if (!cloud.available) {
-			body = el('p', { className: 'description' }, __('AtlasAR Cloud is coming soon. Everything in AtlasAR works without it.', D));
+			// AR-165: say what it is, that there is nothing to do, and what works already.
+			body = el('div', { className: 'atlas-ar-cloud-soon' },
+				el('p', null, el('span', { className: 'atlas-ar-badge atlas-ar-badge--muted' }, __('Not open yet', D)), ' ',
+					__('AtlasAR Cloud is our optional online service. It is not open yet: when it opens, an AtlasAR update switches it on here. There is nothing to set up now, and nothing is sent anywhere.', D)),
+				el('h3', null, __('What it will add', D)),
+				el('ul', null,
+					el('li', null, __('Optimise big models (up to 50 MB) on our servers, made at their real size for AR.', D)),
+					el('li', null, __('Free 3D models to import into your 3D Library.', D)),
+					el('li', null, __('With AtlasAR Pro: no monthly limit, optimise in bulk, and photo to 3D with AI.', D))),
+				el('h3', null, __('Works today, without it', D)),
+				el('ul', null,
+					el('li', null, __('3D, AR and try-on on your products.', D)),
+					el('li', null, __('“Optimise” in the 3D Library: makes models lighter in your browser.', D)),
+					el('li', null, __('“Make a 3D model from a photo” for flat products (wall art, posters, rugs, tiles).', D))),
+				el('div', { className: 'atlas-ar-row' },
+					el(C.Button, { variant: 'secondary', href: boot.libraryUrl }, __('Open the 3D Library', D))));
 		} else if (cloud.connected) {
 			var u = cloud.usage || {};
 			body = el(Fragment, null,
