@@ -59,8 +59,20 @@ class AR_TRY_ON_Migration {
 			return;
 		}
 		if ( isset( $state['status'] ) && 'running' === $state['status'] ) {
-			if ( ! wp_next_scheduled( self::HOOK ) ) {
+			$next = wp_next_scheduled( self::HOOK );
+			if ( ! $next ) {
 				wp_schedule_single_event( time(), self::HOOK );
+				return;
+			}
+			// AR-171: WP-Cron does not fire on some hosts (its loopback request is blocked, or it is
+			// switched off without a real cron). A batch more than 2 minutes late runs here instead:
+			// on an admin page at once, on a shop page only after the page was sent to the visitor.
+			if ( $next < time() - 2 * MINUTE_IN_SECONDS && ! wp_doing_cron() && ! wp_doing_ajax() ) {
+				if ( is_admin() && current_user_can( 'manage_options' ) ) {
+					self::tick();
+				} elseif ( ! is_admin() && function_exists( 'fastcgi_finish_request' ) ) {
+					add_action( 'shutdown', array( __CLASS__, 'tick_after_response' ), 999 );
+				}
 			}
 			return;
 		}
@@ -101,6 +113,12 @@ class AR_TRY_ON_Migration {
 			wp_schedule_single_event( time(), self::HOOK );
 		}
 		return $state;
+	}
+
+	/** AR-171: a late batch, after the page was sent (the visitor does not wait for it). */
+	public static function tick_after_response() {
+		fastcgi_finish_request();
+		self::tick();
 	}
 
 	/** One batch (WP-Cron, or `wp atlas-ar migrate`). @return array the state */
