@@ -146,3 +146,7 @@
 /* AR-162: the level next to the real height */
 .atlas-ar-optimise-fields{align-items:flex-start;gap:12px}
 .atlas-ar-optimise-fields>*{flex:1 1 200px}
+
+/* AR-167: photo sources */
+.atlas-ar-flat-photo{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.atlas-ar-flat-photo .components-button{justify-content:center}

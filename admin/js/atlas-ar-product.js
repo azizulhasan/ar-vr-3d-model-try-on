@@ -52,11 +52,29 @@
 		function pick() {
 			window.AtlasARLibrary.pick({ title: sprintf(__('Choose a 3D model for “%s”', D), item.title), selected: m ? m.id : 0, onSelect: function (model) { link(model.id); } });
 		}
+		/**
+		 * AR-167: the product's featured image as it is in the editor now (also one set a moment ago in
+		 * the block editor), else the one saved; null when there is none.
+		 */
+		function featuredPhoto() {
+			var data = wp.data;
+			var editor = data && data.select('core/editor');
+			var id = editor && editor.getEditedPostAttribute ? editor.getEditedPostAttribute('featured_media') : 0;
+			if (id && (!boot.photo || boot.photo.id !== id)) {
+				var media = data.select('core').getMedia(id);
+				var sizes = media && media.media_details && media.media_details.sizes;
+				if (media && /^image\/(jpeg|png|webp)$/.test(media.mime_type || '')) {
+					return { id: id, url: sizes && sizes.large ? sizes.large.source_url : media.source_url, name: (media.title && media.title.rendered) || '' };
+				}
+			}
+			if (editor && editor.getEditedPostAttribute && editor.getEditedPostAttribute('featured_media') === 0) return null; // removed just now
+			return boot.photo || null;
+		}
 		/** AR-159: a flat product (wall art, poster, rug…) from one photo, linked to this product. */
 		function fromPhoto(e) {
 			var btn = e && e.currentTarget;
 			window.AtlasARLibrary.flat({
-				name: item.title, returnFocus: btn,
+				name: item.title, returnFocus: btn, photo: featuredPhoto(),
 				onDone: function (info) {
 					// Wall art goes on a wall in AR, rugs and tiles on the floor.
 					link(info.model.id, { ar_placement: info.kind === 'rug' || info.kind === 'tile' ? 'floor' : 'wall' });

@@ -636,11 +636,36 @@
 		var _busy = useState(''), busy = _busy[0], setBusy = _busy[1];
 		var _err = useState(''), err = _err[0], setErr = _err[1];
 		useEffect(function () { return function () { if (url) URL.revokeObjectURL(url); }; }, [url]);
+		var _from = useState(''), from = _from[0], setFrom = _from[1]; // featured | library | computer
 
-		function choose(files) {
+		/** AR-167: a photo of this site (featured image, Media Library) as a file to work on. */
+		function usePhoto(photo, source) {
+			if (!photo || !photo.url) return;
+			setErr('');
+			fetch(photo.url, { credentials: 'same-origin' }).then(function (r) {
+				if (!r.ok) throw new Error(String(r.status));
+				return r.blob();
+			}).then(function (blob) {
+				var name = (photo.url.split('/').pop() || 'photo').split('?')[0];
+				choose([new File([blob], name, { type: blob.type })], source);
+			}, function () { setErr(__('That photo could not be loaded. Choose another one.', D)); });
+		}
+		// The product's featured image is the photo to start with (product panel).
+		useEffect(function () { if (props.photo) usePhoto(props.photo, 'featured'); }, []);
+		function fromLibrary() {
+			if (!wp.media) return;
+			var frame = wp.media({ title: __('Choose a photo', D), library: { type: ['image/jpeg', 'image/png', 'image/webp'] }, multiple: false });
+			frame.on('select', function () {
+				var a = frame.state().get('selection').first().toJSON();
+				usePhoto({ url: a.sizes && a.sizes.large ? a.sizes.large.url : a.url }, 'library');
+			});
+			frame.open();
+		}
+
+		function choose(files, source) {
 			var f = files[0];
 			if (!f || !/^image\/(jpeg|png|webp)$/.test(f.type)) { setErr(__('Choose a JPEG, PNG or WebP photo.', D)); return; }
-			setErr(''); setFile(f); if (!props.name) setName(baseName(f.name).replace(/[-_]+/g, ' '));
+			setErr(''); setFile(f); setFrom(source || 'computer'); if (!props.name) setName(baseName(f.name).replace(/[-_]+/g, ' '));
 			var u = URL.createObjectURL(f); setUrl(u);
 			var img = new Image();
 			img.onload = function () { var r = img.naturalHeight / img.naturalWidth; setRatio(r); if (w) setH((parseFloat(w) * r).toFixed(1)); };
@@ -694,7 +719,11 @@
 			el('div', { className: 'atlas-ar-flat' },
 				el('div', { className: 'atlas-ar-flat-photo' },
 					url ? el('img', { src: url, alt: '' }) : el('span', { className: 'atlas-ar-free-noimg', 'aria-hidden': 'true' }, __('Photo', D)),
-					el(FileButton, { accept: 'image/jpeg,image/png,image/webp', variant: 'secondary', onFiles: choose }, file ? __('Choose another photo', D) : __('Choose a photo', D))),
+					from === 'featured' ? el('span', { className: 'atlas-ar-muted' }, __('The product’s featured image', D)) : null,
+					// AR-167: another photo, from the Media Library or this computer; back to the featured image.
+					wp.media ? el(C.Button, { variant: 'secondary', onClick: fromLibrary }, __('Choose from the Media Library', D)) : null,
+					el(FileButton, { accept: 'image/jpeg,image/png,image/webp', variant: wp.media ? 'tertiary' : 'secondary', onFiles: function (fs) { choose(fs, 'computer'); } }, wp.media ? __('Upload from your computer', D) : (file ? __('Choose another photo', D) : __('Choose a photo', D))),
+					props.photo && from !== 'featured' ? el(C.Button, { variant: 'link', onClick: function () { usePhoto(props.photo, 'featured'); } }, __('Use the featured image', D)) : null),
 				el('div', { className: 'atlas-ar-flat-fields' },
 					el(C.SelectControl, { label: __('What is it?', D), value: kind, onChange: setKind, __nextHasNoMarginBottom: true, options: FLAT_KINDS.map(function (k) { return { value: k[0], label: k[1] }; }) }),
 					el('div', { className: 'atlas-ar-flat-size' },
@@ -883,7 +912,7 @@
 	function FlatModal(props) {
 		return el(C.Modal, { title: __('Make a 3D model from a photo', D), onRequestClose: props.onClose, className: 'atlas-ar-picker atlas-ar-flat-modal', size: 'large' },
 			el('div', { className: 'atlas-ar-library' }, el(FlatFromPhoto, {
-				modal: true, name: props.name,
+				modal: true, name: props.name, photo: props.photo,
 				api: { close: props.onClose, done: function (ids, info) { props.onDone(info); props.onClose(); } }
 			})));
 	}
@@ -910,7 +939,8 @@
 			return close;
 		},
 		/**
-		 * AR-159: make a flat product's 3D model from a photo: options { name, onDone({ kind, model }) }.
+		 * AR-159: make a flat product's 3D model from a photo: options { name, photo: { url } (AR-167: the
+		 * photo to start with, e.g. the featured image), onDone({ kind, model }) }.
 		 * kind: canvas | poster | framed (on a wall) or rug | tile (on the floor).
 		 */
 		flat: function (options) {
@@ -924,7 +954,7 @@
 				if (options.returnFocus && options.returnFocus.focus) options.returnFocus.focus();
 			};
 			unmount = mount(node, el(FlatModal, {
-				name: options.name,
+				name: options.name, photo: options.photo || null,
 				onDone: function (info) { if (typeof options.onDone === 'function') options.onDone(info); },
 				onClose: close
 			}));

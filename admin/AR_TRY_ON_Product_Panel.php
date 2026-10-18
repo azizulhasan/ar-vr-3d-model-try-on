@@ -75,10 +75,14 @@ class AR_TRY_ON_Product_Panel {
 					'tryonModels'   => AR_TRY_ON_Viewer::tracker_files( $tryon['tracker'] ),
 				),
 				'libraryUrl'    => admin_url( 'admin.php?page=' . AR_TRY_ON_Library_Page::SLUG ),
+				// AR-167: "Make a 3D model from a photo" starts with the featured image (large size: enough
+				// for a sharp texture, small enough for AR).
+				'photo'         => self::photo( $post->ID ),
 				'accept'        => '.' . implode( ',.', array_unique( array_merge( ...array_values( AR_TRY_ON_Library::KINDS ) ) ) ),
 			)
 		);
 		wp_localize_script( AR_TRY_ON_Dashboard::UI, 'atlasArAdmin', array( 'version' => ATLAS_AR_VERSION ) );
+		wp_enqueue_media(); // AR-167: choose the photo from the Media Library
 		wp_enqueue_script( self::HANDLE );
 		wp_enqueue_style( AR_TRY_ON_Dashboard::UI );
 		/** Lets AtlasAR Pro add its product panel tabs (wp.hooks atlasAr.product.tabs). */
@@ -104,4 +108,19 @@ class AR_TRY_ON_Product_Panel {
 			AR_TRY_ON_Product::update( $post_id, $data );
 		}
 	}
+
+	/**
+	 * AR-167: the featured image for "Make a 3D model from a photo", or null.
+	 *
+	 * @return array|null { id, url, name }
+	 */
+	private static function photo( $post_id ) {
+		$id = (int) get_post_thumbnail_id( $post_id );
+		if ( ! $id || ! in_array( get_post_mime_type( $id ), array( 'image/jpeg', 'image/png', 'image/webp' ), true ) ) {
+			return null;
+		}
+		$src = wp_get_attachment_image_src( $id, 'large' );
+		return $src ? array( 'id' => $id, 'url' => $src[0], 'name' => get_the_title( $id ) ) : null;
+	}
 }
+
