@@ -237,12 +237,13 @@ class AR_TRY_ON_Frontend {
 				case 'button':
 					$hook = AR_TRY_ON_Settings::get( 'placement.button_position' );
 					$hook = isset( self::BUTTON_HOOKS[ $hook ] ) ? self::BUTTON_HOOKS[ $hook ] : self::BUTTON_HOOKS['after_cart'];
-					add_action(
+					self::hook_or_summary(
 						$hook[0],
+						$hook[1],
+						$post_id,
 						function () use ( $post_id ) {
 							AR_TRY_ON_Viewer::print_html( AR_TRY_ON_Viewer::render( $post_id, 'popup', array( 'buttonLabel' => __( 'View in 3D', 'ar-vr-3d-model-try-on' ) ) ) );
-						},
-						$hook[1]
+						}
 					);
 					break;
 			}
@@ -252,13 +253,43 @@ class AR_TRY_ON_Frontend {
 		}
 
 		// Try-on button under "Add to cart" (also for products that show no 3D view).
-		add_action(
+		self::hook_or_summary(
 			'woocommerce_after_add_to_cart_form',
+			20,
+			$post_id,
 			function () use ( $post_id ) {
 				self::print_tryon( $post_id );
-			},
-			20
+			}
 		);
+	}
+
+	/**
+	 * Hook $callback to $hook. A product that cannot be bought (no price, out of stock, catalogue
+	 * shops) gets no "Add to cart" form, so the form's hooks never fire: it also gets $callback late
+	 * in the product summary, after where the form would be. Printed once, whichever runs first.
+	 * Products that can be bought keep the plain hook.
+	 *
+	 * @param string   $hook     action
+	 * @param int      $priority its priority
+	 * @param int      $post_id  the product
+	 * @param callable $callback prints the output
+	 */
+	private static function hook_or_summary( $hook, $priority, $post_id, $callback ) {
+		$form    = array( 'woocommerce_before_add_to_cart_form', 'woocommerce_after_add_to_cart_form' );
+		$product = in_array( $hook, $form, true ) ? wc_get_product( $post_id ) : null;
+		if ( ! $product || ( $product->is_purchasable() && $product->is_in_stock() ) ) {
+			add_action( $hook, $callback, $priority );
+			return;
+		}
+		$done = false;
+		$once = function () use ( &$done, $callback ) {
+			if ( ! $done ) {
+				$done = true;
+				$callback();
+			}
+		};
+		add_action( $hook, $once, $priority );
+		add_action( 'woocommerce_single_product_summary', $once, 35 ); // add to cart is at 30, meta at 40
 	}
 
 	/** The "3D view" product tab. */
