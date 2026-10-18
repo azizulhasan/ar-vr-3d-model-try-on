@@ -82,6 +82,8 @@ class AR_TRY_ON_Settings {
 				'post_types'    => array( 'type' => 'post_types', 'default' => array( 'product' ) ),
 				'auto_optimise' => array( 'type' => 'bool', 'default' => true ),
 				'telemetry'     => array( 'type' => 'bool', 'default' => false ),
+				// AR-161: count how shoppers use the 3D view (daily totals on this site, no personal data).
+				'stats'         => array( 'type' => 'bool', 'default' => true ),
 				'remove_data'   => array( 'type' => 'bool', 'default' => false ),
 				'wizard_done'   => array( 'type' => 'bool', 'default' => false ),
 				'checklist_off' => array( 'type' => 'bool', 'default' => false ),

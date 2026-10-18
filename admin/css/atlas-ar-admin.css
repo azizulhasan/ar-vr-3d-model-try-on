@@ -194,3 +194,15 @@
 .atlas-ar-suggested h3{margin:0;font-size:13px;font-weight:600}
 .atlas-ar-suggested-card .atlas-ar-badge{margin-left:0}
 .atlas-ar-page-notice{margin:0 0 16px}
+
+/* AR-161: Analytics */
+.atlas-ar-range{margin:0 0 16px}
+.atlas-ar-stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:0 0 16px}
+.atlas-ar-stat-card{display:flex;flex-direction:column;gap:4px;padding:16px;border:1px solid #dcdcde;border-radius:8px;background:#fff}
+.atlas-ar-stat-card strong{font-size:24px;line-height:1.2;font-weight:600;color:#1d2327}
+.atlas-ar-stat-label{color:#50575e;font-size:12px}
+.atlas-ar-bars{display:flex;align-items:flex-end;gap:2px;height:120px;padding:8px 0;border-bottom:1px solid #dcdcde}
+.atlas-ar-bar{flex:1;min-width:2px;background:#0e6b5c;border-radius:2px 2px 0 0}
+.atlas-ar-bars-axis{display:flex;justify-content:space-between;color:#50575e;font-size:12px;margin-top:4px}
+.atlas-ar-table .num{text-align:right;white-space:nowrap}
+.atlas-ar-stats-table td:first-child,.atlas-ar-stats-table th:first-child{min-width:200px}

@@ -179,6 +179,7 @@ function atlas_ar_run() {
 	// try-on runtime and its routes are no longer loaded).
 	\AR_TRY_ON\AR_TRY_ON_Library::register();
 	\AR_TRY_ON\AR_TRY_ON_Migration::init(); // AR-160: once, 2.x data into the 3D Library
+	\AR_TRY_ON\AR_TRY_ON_Stats::init(); // AR-161: shopper analytics, kept on this site
 	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
 	// AR-133: AtlasAR Cloud checking this site (moving it to another email). atlas_ar_run() runs on
 	// `init`, before any output: answered here, then the request ends.

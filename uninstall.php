@@ -51,6 +51,7 @@ function atlas_ar_uninstall_site() {
 		)
 	);
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}ar_compression_log" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange -- the plugin's own table.
+	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}atlas_ar_stats" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.SchemaChange -- AR-161: shopper analytics.
 	// phpcs:enable
 
 	// The 3D Library files.
@@ -65,6 +66,7 @@ function atlas_ar_uninstall_site() {
 	}
 
 	wp_clear_scheduled_hook( 'atlas_ar_sweep_orphan_temp_files' );
+	wp_clear_scheduled_hook( 'atlas_ar_stats_prune' );
 	wp_cache_flush();
 }
 

@@ -169,9 +169,10 @@ class AR_TRY_ON_Viewer {
 		$opts = (array) apply_filters( 'atlas_ar_tryon_options', $opts, (int) $post_id );
 
 		return sprintf(
-			'<button type="button" class="button atlas-ar-tryon-button" data-atlas-ar-tryon="%1$s"><span class="atlas-ar-tryon-icon" aria-hidden="true"></span>%2$s</button>',
+			'<button type="button" class="button atlas-ar-tryon-button" data-atlas-ar-tryon="%1$s"%3$s><span class="atlas-ar-tryon-icon" aria-hidden="true"></span>%2$s</button>',
 			esc_attr( wp_json_encode( $opts ) ),
-			esc_html( $tryon['label'] )
+			esc_html( $tryon['label'] ),
+			AR_TRY_ON_Stats::button_attributes( $post_id ) // AR-161: the try-on counts too (escaped there)
 		);
 	}
 
@@ -240,7 +241,7 @@ class AR_TRY_ON_Viewer {
 			'atlasar-viewer' => $viewer,
 			'div'            => $box,
 			'span'           => array( 'class' => true, 'aria-hidden' => true ),
-			'button'         => array( 'type' => true, 'class' => true, 'data-atlas-ar-tryon' => true ),
+			'button'         => array( 'type' => true, 'class' => true, 'data-atlas-ar-tryon' => true, 'data-atlasar-analytics' => true, 'data-atlasar-analytics-id' => true ),
 		);
 	}
 
@@ -257,6 +258,7 @@ class AR_TRY_ON_Viewer {
 		'ar-button-text', 'ar-button-background', 'ar-button-color', 'qr', 'qr-url', 'load', 'loading', 'reveal',
 		'display', 'button-label', 'width', 'height', 'align', 'margin', 'padding', 'viewer-id', 'viewer-class',
 		'hotspots', 'dimensions', 'items', 'variants', 'variant',
+		'analytics', 'analytics-id', // AR-161
 	);
 
 	/** The SDK's environment image for the lighting setting. */

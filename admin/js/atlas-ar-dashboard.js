@@ -536,6 +536,8 @@
 				}),
 				ctx.cloud.connected ? el('p', { className: 'description' }, __('Big files can also be optimised on AtlasAR Cloud from the 3D Library.', D)) : null),
 			el(UI.Section, { title: __('Privacy', D) },
+				// AR-161: shopper analytics (Analytics page).
+				el(C.ToggleControl, { label: __('Count how shoppers use the 3D view (Analytics)', D), help: __('Daily totals per product, kept on this site: 3D views, AR, try-on. No cookies and no personal data; nothing is sent to us or anyone else.', D), checked: g.stats !== false, onChange: function (v) { ctx.set('general', 'stats', v); } }),
 				el(C.ToggleControl, { label: __('Share usage data with AtlasAiDev to help improve AtlasAR', D), help: __('Off unless you turn it on. Sent once a week: this site’s address and name, the admin’s name and email, the IP address, WordPress, PHP and server versions, active plugins and the theme. Never your products, files or visitors.', D), checked: !!g.telemetry, onChange: function (v) { ctx.set('general', 'telemetry', v); } }),
 				el(C.ToggleControl, { label: __('Delete all AtlasAR settings, 3D Library models and product data when the plugin is deleted', D), checked: !!g.remove_data, onChange: function (v) { ctx.set('general', 'remove_data', v); } })),
 			ctx.saveBar,
@@ -550,6 +552,81 @@
 							el(C.Button, { variant: 'primary', isDestructive: true, onClick: function () { UI.api('/config/reset', { method: 'POST' }).then(function (r) { ctx.replace(r.settings); setConfirm(false); setMsg(__('Settings reset.', D)); }); } }, __('Reset', D)),
 							el(C.Button, { variant: 'tertiary', onClick: function () { setConfirm(false); } }, __('Cancel', D)))),
 				msg ? el('p', { role: 'status' }, msg) : null));
+	}
+
+	/* ---------------------------------------------------------- analytics */
+
+	/** AR-161: what shoppers do with the 3D views (the viewer SDK counts, this site keeps the totals). */
+	function AnalyticsPage() {
+		var _days = useState(30), days = _days[0], setDays = _days[1];
+		var _page = useState(1), page = _page[0], setPage = _page[1];
+		var _data = useState(null), data = _data[0], setData = _data[1];
+		var _err = useState(''), err = _err[0], setErr = _err[1];
+		useEffect(function () {
+			var live = true;
+			setErr('');
+			UI.api('/stats?days=' + days + '&page=' + page).then(function (res) { if (live) setData(res); }, function (e) { if (live) setErr(UI.message(e)); });
+			return function () { live = false; };
+		}, [days, page]);
+
+		var events = data ? data.events : {};
+		var keys = Object.keys(events);
+		var main = ['view', 'turn', 'ar', 'tryon'].filter(function (k) { return events[k]; });
+		var cols = keys.filter(function (k) { return k !== 'open' && k !== 'tryon_sample'; });
+		var n = function (v) { return (v || 0).toLocaleString(); };
+		var rate = function (a, b) { return b ? Math.round(100 * (a || 0) / b) + ' %' : '—'; };
+		var t = data ? data.totals : {};
+
+		// One bar a day for 3D views (no chart library: plain boxes, the total for screen readers).
+		var series = data && data.series.view ? data.series.view : {};
+		var dayList = [];
+		if (data) {
+			var start = new Date(data.from + 'T00:00:00Z');
+			for (var i = 0; i < data.days; i++) dayList.push(new Date(start.getTime() + i * 86400000).toISOString().slice(0, 10));
+		}
+		var peak = Math.max.apply(null, [1].concat(dayList.map(function (d) { return series[d] || 0; })));
+		var pages = data ? Math.max(1, Math.ceil(data.total / 20)) : 1;
+
+		return el(Fragment, null,
+			el(UI.Head, { title: __('Analytics', D), lead: __('How shoppers use your 3D views: counted on this site only, without cookies or personal data.', D) }),
+			el('div', { className: 'atlas-ar-filters atlas-ar-range', role: 'group', 'aria-label': __('Period', D) },
+				[[7, __('7 days', D)], [30, __('30 days', D)], [90, __('90 days', D)], [365, __('12 months', D)]].map(function (r) {
+					return el('button', { key: r[0], type: 'button', className: 'atlas-ar-filter' + (days === r[0] ? ' is-on' : ''), 'aria-pressed': days === r[0] ? 'true' : 'false', onClick: function () { setDays(r[0]); setPage(1); } }, r[1]);
+				})),
+			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
+			data && !data.enabled ? el(C.Notice, { status: 'warning', isDismissible: false, className: 'atlas-ar-page-notice' }, __('Counting is off (Settings › Privacy). The totals below are from before.', D)) : null,
+			!data && !err ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null,
+			data ? el(Fragment, null,
+				el('div', { className: 'atlas-ar-stat-cards' }, main.map(function (k) {
+					return el('div', { key: k, className: 'atlas-ar-stat-card' },
+						el('span', { className: 'atlas-ar-stat-label' }, events[k]),
+						el('strong', null, n(t[k])),
+						k === 'ar' || k === 'turn' ? el('span', { className: 'atlas-ar-muted' }, sprintf(__('%s of 3D views', D), rate(t[k], t.view))) : null);
+				})),
+				el(UI.Section, { title: __('3D views a day', D) },
+					el('div', { className: 'atlas-ar-bars', role: 'img', 'aria-label': sprintf(__('%1$s 3D views in %2$d days', D), n(t.view), data.days) },
+						dayList.map(function (d) {
+							var v = series[d] || 0;
+							return el('span', { key: d, className: 'atlas-ar-bar', title: d + ': ' + v, style: { height: Math.max(2, Math.round(100 * v / peak)) + '%' } });
+						})),
+					el('div', { className: 'atlas-ar-bars-axis' }, el('span', null, dayList[0]), el('span', null, dayList[dayList.length - 1]))),
+				el(UI.Section, { title: __('Products', D) },
+					data.products.length === 0
+						? el('p', { className: 'atlas-ar-empty' }, __('Nothing counted yet in this period. Counting starts when shoppers open a product with a 3D model.', D))
+						: el('table', { className: 'widefat striped atlas-ar-table atlas-ar-stats-table' },
+							el('thead', null, el('tr', null,
+								el('th', { scope: 'col' }, __('Product', D)),
+								cols.map(function (k) { return el('th', { key: k, scope: 'col', className: 'num' }, events[k]); }))),
+							el('tbody', null, data.products.map(function (p) {
+								return el('tr', { key: p.id },
+									el('td', null, p.edit_url ? el('a', { href: p.edit_url }, p.title) : p.title),
+									cols.map(function (k) { return el('td', { key: k, className: 'num' }, n(p.counts[k])); }));
+							}))),
+					pages > 1 ? el('div', { className: 'atlas-ar-pager' },
+						el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),
+						el('span', null, sprintf(__('Page %1$d of %2$d', D), page, pages)),
+						el(C.Button, { variant: 'secondary', disabled: page >= pages, onClick: function () { setPage(page + 1); } }, __('Next', D))) : null),
+				el(UI.ProNote, { where: 'analytics', spot: 'pro_events' }, __('AtlasAR Pro also counts hotspot clicks, switches to other models and variant changes.', D))) : null);
 	}
 
 	function HelpPage() {
@@ -716,6 +793,7 @@
 			{ id: 'placement', label: __('Placement', D), render: PlacementPage },
 			{ id: 'tryon', label: __('Try-on', D), render: TryonPage },
 			{ id: 'integrations', label: __('Integrations', D), render: IntegrationsPage },
+			{ id: 'analytics', label: __('Analytics', D), render: AnalyticsPage },
 			{ id: 'settings', label: __('Settings', D), render: SettingsPage },
 			{ id: 'help', label: __('Help', D), render: HelpPage }
 		], ctx);
