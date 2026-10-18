@@ -815,6 +815,13 @@
 		};
 
 		return el('div', { className: 'atlas-ar-browser' },
+			// AR-168 (design system): the ways to add models in one row, "Upload 3D files" the one primary.
+			el('div', { className: 'atlas-ar-toolbar-actions', role: 'group', 'aria-label': __('Add models', D) },
+				el('span', { className: 'atlas-ar-toolbar-label' }, __('Add models:', D)),
+				actions.map(function (a) {
+					return el(C.Button, { key: a.id, variant: 'secondary', 'aria-expanded': open === a.id ? 'true' : 'false', onClick: function () { setUp(false); setOpen(open === a.id ? '' : a.id); } }, a.label);
+				}),
+				el(C.Button, { variant: up ? 'secondary' : 'primary', onClick: function () { setOpen(''); setUp(!up); } }, up ? __('Close upload', D) : (props.onUse ? __('Upload new', D) : __('Upload 3D files', D)))),
 			el('div', { className: 'atlas-ar-toolbar' },
 				el('div', { className: 'atlas-ar-search' },
 					el(C.SearchControl, { label: __('Search 3D models', D), value: search, onChange: setSearch, __nextHasNoMarginBottom: true })),
@@ -824,11 +831,7 @@
 						'aria-pressed': filter === f[0] ? 'true' : 'false', onClick: function () { setFilter(f[0]); }
 					}, f[1]);
 				})),
-				loading && items !== null ? el('span', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null,
-				actions.map(function (a) {
-					return el(C.Button, { key: a.id, variant: 'secondary', 'aria-expanded': open === a.id ? 'true' : 'false', onClick: function () { setUp(false); setOpen(open === a.id ? '' : a.id); } }, a.label);
-				}),
-				el(C.Button, { variant: up ? 'secondary' : 'primary', onClick: function () { setOpen(''); setUp(!up); } }, up ? __('Close upload', D) : (props.onUse ? __('Upload new', D) : __('Upload 3D files', D)))
+				loading && items !== null ? el('span', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null
 			),
 			openAction ? el('div', { className: 'atlas-ar-library-action' }, el(openAction.render, { key: openAction.id, api: actionApi })) : null,
 			up ? el(Uploader, {

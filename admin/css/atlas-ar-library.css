@@ -1,61 +1,65 @@
 /* AR-119: AtlasAR 3D Library page and model picker. WordPress admin colours. */
-.atlas-ar-library{max-width:1400px;color:#1d2327}
-.atlas-ar-library .atlas-ar-lead{margin:4px 0 16px;color:#50575e;font-size:14px}
+/* AR-168: the AtlasAR design system's tokens (Design System artifact, tokens.json). Every colour in
+   AtlasAR's admin CSS uses them; the values are WordPress admin's palette plus AtlasAR teal and
+   Pro amber. Spacing: 4 8 12 16 20 28 px; radius: sm 4, md 6, lg 8. */
+:root{--atlas-ar-surface:#fff;--atlas-ar-surface-2:#f6f7f7;--atlas-ar-surface-3:#f0f0f1;--atlas-ar-viewer-ground:#fafafa;--atlas-ar-line:#dcdcde;--atlas-ar-line-strong:#c3c4c7;--atlas-ar-ink:#1d2327;--atlas-ar-ink-2:#3c434a;--atlas-ar-muted:#50575e;--atlas-ar-subtle:#8c8f94;--atlas-ar-action:#2271b1;--atlas-ar-action-ground:#f0f6fc;--atlas-ar-action-ground-2:#eef4fb;--atlas-ar-brand:#0e6b5c;--atlas-ar-brand-ground:#e7f3ef;--atlas-ar-brand-ground-2:#f2faf7;--atlas-ar-brand-soft:#9fd0c3;--atlas-ar-pro:#f0b849;--atlas-ar-pro-ground:#fcf9e8;--atlas-ar-pro-badge:#fdecdc;--atlas-ar-pro-ink:#7a3410;--atlas-ar-danger:#b32d2e;--atlas-ar-danger-ground:#fcf0f1;--atlas-ar-success:#007017;--atlas-ar-radius-sm:4px;--atlas-ar-radius-md:6px;--atlas-ar-radius-lg:8px}
+.atlas-ar-library{max-width:1400px;color:var(--atlas-ar-ink)}
+.atlas-ar-library .atlas-ar-lead{margin:4px 0 16px;color:var(--atlas-ar-muted);font-size:14px}
 .atlas-ar-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:16px}
 .atlas-ar-search{flex:1 1 220px;max-width:320px}
 .atlas-ar-filters{display:flex;flex-wrap:wrap;gap:8px}
-.atlas-ar-filter{min-height:32px;padding:6px 12px;border:1px solid #c3c4c7;border-radius:16px;background:#fff;color:#1d2327;font-size:13px;cursor:pointer}
-.atlas-ar-filter.is-on{border-color:#2271b1;background:#2271b1;color:#fff}
-.atlas-ar-filter:focus-visible,.atlas-ar-card:focus-visible{outline:2px solid #2271b1;outline-offset:2px}
+.atlas-ar-filter{min-height:32px;padding:6px 12px;border:1px solid var(--atlas-ar-line-strong);border-radius:16px;background:#fff;color:var(--atlas-ar-ink);font-size:13px;cursor:pointer}
+.atlas-ar-filter.is-on{border-color:var(--atlas-ar-action);background:var(--atlas-ar-action);color:#fff}
+.atlas-ar-filter:focus-visible,.atlas-ar-card:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px}
 
 .atlas-ar-body{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
 .atlas-ar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
 /* A panel an add-on opens from the toolbar (AtlasAR Pro: Make with AI) */
-.atlas-ar-library-action{margin:0 0 16px;padding:16px;border:1px solid #dcdcde;border-radius:4px;background:#fff}
+.atlas-ar-library-action{margin:0 0 16px;padding:16px 20px;border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-lg);background:var(--atlas-ar-surface)}
 /* AR-138: which product this is (AtlasAR / AtlasAR Pro) next to the title */
-.atlas-ar-library-brand{display:inline-block;margin-left:10px;padding:2px 8px;border-radius:10px;background:#f0f6fc;color:#2271b1;font-size:12px;font-weight:600;vertical-align:middle}
+.atlas-ar-library-brand{display:inline-block;margin-left:10px;padding:2px 8px;border-radius:10px;background:var(--atlas-ar-action-ground);color:var(--atlas-ar-action);font-size:12px;font-weight:600;vertical-align:middle}
 /* Pages of models under the grid */
 .atlas-ar-library-pager{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:12px;margin:16px 0 4px}
 .atlas-ar-library-pager .atlas-ar-muted{margin-right:auto;color:#646970}
-.atlas-ar-card{display:flex;flex-direction:column;gap:8px;padding:10px;border:2px solid #c3c4c7;border-radius:8px;background:#fff;color:#1d2327;text-align:left;font:inherit;cursor:pointer}
-.atlas-ar-card:hover{border-color:#8c8f94}
-.atlas-ar-card.is-selected{border-color:#2271b1}
-.atlas-ar-thumb{display:flex;align-items:center;justify-content:center;height:120px;border-radius:6px;background:#f6f7f7;overflow:hidden}
+.atlas-ar-card{display:flex;flex-direction:column;gap:8px;padding:11px;border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-md);background:#fff;color:var(--atlas-ar-ink);text-align:left;font:inherit;cursor:pointer}
+.atlas-ar-card:hover{border-color:var(--atlas-ar-line-strong)}
+.atlas-ar-card.is-selected{border-color:var(--atlas-ar-action);box-shadow:0 0 0 1px var(--atlas-ar-action)}
+.atlas-ar-thumb{display:flex;align-items:center;justify-content:center;height:120px;border-radius:6px;background:var(--atlas-ar-surface-2);overflow:hidden}
 .atlas-ar-thumb img{width:100%;height:100%;object-fit:contain}
-.atlas-ar-thumb-icon{font-size:22px;font-weight:700;color:#8c8f94;letter-spacing:.5px}
+.atlas-ar-thumb-icon{font-size:22px;font-weight:700;color:var(--atlas-ar-subtle);letter-spacing:.5px}
 .atlas-ar-card-name{font-weight:600;font-size:14px;overflow-wrap:anywhere}
-.atlas-ar-card-meta{font-size:12px;color:#50575e}
+.atlas-ar-card-meta{font-size:12px;color:var(--atlas-ar-muted)}
 .atlas-ar-chips{display:flex;flex-wrap:wrap;gap:4px}
-.atlas-ar-chip{display:inline-block;padding:2px 7px;border-radius:8px;background:#f0f0f1;color:#3c434a;font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap}
-.atlas-ar-chip--glb{background:#e7f3ef;color:#0e6b5c}
-.atlas-ar-chip--usdz{background:#eef4fb;color:#135e96}
+.atlas-ar-chip{display:inline-block;padding:2px 7px;border-radius:8px;background:var(--atlas-ar-surface-3);color:var(--atlas-ar-ink-2);font-size:11px;font-weight:600;line-height:1.5;white-space:nowrap}
+.atlas-ar-chip--glb{background:var(--atlas-ar-brand-ground);color:var(--atlas-ar-brand)}
+.atlas-ar-chip--usdz{background:var(--atlas-ar-action-ground-2);color:#135e96}
 .atlas-ar-chip--poster{background:#f6f0e6;color:#7a4e2d}
-.atlas-ar-chip--warn{background:#fcf0f1;color:#8a2424}
+.atlas-ar-chip--warn{background:var(--atlas-ar-danger-ground);color:#8a2424}
 
-.atlas-ar-detail{position:sticky;top:46px;display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid #c3c4c7;border-radius:8px;background:#fff}
+.atlas-ar-detail{position:sticky;top:46px;display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--atlas-ar-line-strong);border-radius:8px;background:#fff}
 .atlas-ar-detail h3{margin:8px 0 0;font-size:13px}
-.atlas-ar-preview{border:1px solid #dcdcde;border-radius:8px;background:#fafafa;overflow:hidden}
-.atlas-ar-preview--empty{display:flex;align-items:center;justify-content:center;height:160px;color:#50575e}
+.atlas-ar-preview{border:1px solid var(--atlas-ar-line);border-radius:8px;background:var(--atlas-ar-viewer-ground);overflow:hidden}
+.atlas-ar-preview--empty{display:flex;align-items:center;justify-content:center;height:160px;color:var(--atlas-ar-muted)}
 .atlas-ar-preview atlasar-viewer{display:block}
 .atlas-ar-files,.atlas-ar-used,.atlas-ar-kinds,.atlas-ar-queue{margin:0;padding:0;list-style:none}
-.atlas-ar-file,.atlas-ar-missing,.atlas-ar-queue li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f1}
+.atlas-ar-file,.atlas-ar-missing,.atlas-ar-queue li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--atlas-ar-surface-3)}
 .atlas-ar-file-name{flex:1 1 120px;min-width:0;overflow-wrap:anywhere}
-.atlas-ar-file-meta{font-size:12px;color:#50575e}
-.atlas-ar-missing span:first-child{flex:1 1 160px;color:#50575e}
+.atlas-ar-file-meta{font-size:12px;color:var(--atlas-ar-muted)}
+.atlas-ar-missing span:first-child{flex:1 1 160px;color:var(--atlas-ar-muted)}
 .atlas-ar-used li{padding:3px 0}
 .atlas-ar-detail-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .atlas-ar-detail .components-button,.atlas-ar-toolbar .components-button,.atlas-ar-upload .components-button{min-height:36px}
 
 .atlas-ar-upload{margin-bottom:16px}
-.atlas-ar-drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:2px dashed #8c8f94;border-radius:8px;background:#fff;text-align:center}
-.atlas-ar-drop.is-over{border-color:#2271b1;background:#f0f6fc}
-.atlas-ar-drop p{margin:0;color:#50575e}
-.atlas-ar-kinds{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px;font-size:12px;color:#50575e}
-.atlas-ar-queue{margin-top:8px;padding:8px 12px;border:1px solid #c3c4c7;border-radius:8px;background:#fff}
-.atlas-ar-queue-status{font-size:12px;color:#50575e}
-.atlas-ar-queue .is-done .atlas-ar-queue-status{color:#007017}
-.atlas-ar-queue .is-error .atlas-ar-queue-status{color:#b32d2e}
-.atlas-ar-empty{padding:32px;border:1px solid #c3c4c7;border-radius:8px;background:#fff;text-align:center}
+.atlas-ar-drop{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px;border:2px dashed var(--atlas-ar-subtle);border-radius:8px;background:#fff;text-align:center}
+.atlas-ar-drop.is-over{border-color:var(--atlas-ar-action);background:var(--atlas-ar-action-ground)}
+.atlas-ar-drop p{margin:0;color:var(--atlas-ar-muted)}
+.atlas-ar-kinds{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px;font-size:12px;color:var(--atlas-ar-muted)}
+.atlas-ar-queue{margin-top:8px;padding:8px 12px;border:1px solid var(--atlas-ar-line-strong);border-radius:8px;background:#fff}
+.atlas-ar-queue-status{font-size:12px;color:var(--atlas-ar-muted)}
+.atlas-ar-queue .is-done .atlas-ar-queue-status{color:var(--atlas-ar-success)}
+.atlas-ar-queue .is-error .atlas-ar-queue-status{color:var(--atlas-ar-danger)}
+.atlas-ar-empty{padding:32px;border:1px solid var(--atlas-ar-line-strong);border-radius:8px;background:#fff;text-align:center}
 
 .atlas-ar-picker{width:min(1100px,96vw)}
 .atlas-ar-picker .atlas-ar-body{grid-template-columns:minmax(0,1fr) 320px}
@@ -68,13 +72,13 @@
 @media (prefers-reduced-motion:reduce){.atlas-ar-library *{transition:none!important}}
 
 /* AR-121: Optimise */
-.atlas-ar-optimise{padding:12px;border:1px solid #dcdcde;border-radius:8px;background:#f6f7f7}
+.atlas-ar-optimise{padding:12px;border:1px solid var(--atlas-ar-line);border-radius:8px;background:var(--atlas-ar-surface-2)}
 .atlas-ar-optimise h3{margin-top:0}
 .atlas-ar-optimise .components-base-control{margin-bottom:0}
-.atlas-ar-step{margin:8px 0 0;color:#50575e}
+.atlas-ar-step{margin:8px 0 0;color:var(--atlas-ar-muted)}
 
 /* AR-125: loading state of the lists (filters, search). */
-.atlas-ar-loading{display:inline-flex;align-items:center;gap:6px;margin:0;color:#50575e;font-size:13px}
+.atlas-ar-loading{display:inline-flex;align-items:center;gap:6px;margin:0;color:var(--atlas-ar-muted);font-size:13px}
 .atlas-ar-loading .components-spinner{margin:0}
 .atlas-ar-grid-wrap.is-loading,.atlas-ar-list.is-loading{opacity:.5;pointer-events:none;transition:opacity .15s}
 @media (prefers-reduced-motion:reduce){.atlas-ar-grid-wrap.is-loading,.atlas-ar-list.is-loading{transition:none}}
@@ -118,28 +122,28 @@
 .atlas-ar-free-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0}
 .atlas-ar-free-tools .atlas-ar-search{flex:1 1 260px}
 .atlas-ar-free-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin:0;padding:0;list-style:none}
-.atlas-ar-free-card{display:flex;flex-direction:column;gap:6px;margin:0;padding:10px;border:1px solid #dcdcde;border-radius:6px;background:#fff}
-.atlas-ar-free-card img,.atlas-ar-free-noimg{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:4px;background:#f0f0f1}
-.atlas-ar-free-noimg{display:flex;align-items:center;justify-content:center;color:#8c8f94;font-weight:600}
+.atlas-ar-free-card{display:flex;flex-direction:column;gap:6px;margin:0;padding:10px;border:1px solid var(--atlas-ar-line);border-radius:6px;background:#fff}
+.atlas-ar-free-card img,.atlas-ar-free-noimg{width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:4px;background:var(--atlas-ar-surface-3)}
+.atlas-ar-free-noimg{display:flex;align-items:center;justify-content:center;color:var(--atlas-ar-subtle);font-weight:600}
 .atlas-ar-free-card .components-button{justify-content:center;margin-top:auto}
 .atlas-ar-free-card .atlas-ar-saved{margin-top:auto}
 
 /* AR-146: the Pro note under the 3D Library (same look as the dashboard's) */
-.atlas-ar-library .atlas-ar-pro-note{margin:16px 0;padding:8px 12px;border-left:3px solid #f0b849;background:#fcf9e8;color:#3c434a}
+.atlas-ar-library .atlas-ar-pro-note{margin:16px 0;padding:8px 12px;border-left:3px solid var(--atlas-ar-pro);background:var(--atlas-ar-pro-ground);color:var(--atlas-ar-ink-2)}
 .atlas-ar-library .atlas-ar-pro-note p{margin:4px 0}
 .atlas-ar-library .atlas-ar-pro-note ul{margin:6px 0 8px 18px;list-style:disc}
-.atlas-ar-library .atlas-ar-badge--pro{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:#fdecdc;color:#7a3410}
+.atlas-ar-library .atlas-ar-badge--pro{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--atlas-ar-pro-badge);color:var(--atlas-ar-pro-ink)}
 
 /* AR-153: flat product from a photo */
 .atlas-ar-flat{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;margin-top:12px}
 .atlas-ar-flat-photo{display:flex;flex-direction:column;gap:8px}
-.atlas-ar-flat-photo img,.atlas-ar-flat-photo .atlas-ar-free-noimg{width:200px;height:200px;object-fit:contain;border:1px solid #dcdcde;border-radius:6px;background:#f6f7f7}
+.atlas-ar-flat-photo img,.atlas-ar-flat-photo .atlas-ar-free-noimg{width:200px;height:200px;object-fit:contain;border:1px solid var(--atlas-ar-line);border-radius:6px;background:var(--atlas-ar-surface-2)}
 .atlas-ar-flat-fields{display:grid;gap:12px;max-width:420px}
 .atlas-ar-flat-size{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:600px){.atlas-ar-flat{grid-template-columns:1fr}}
 
 /* AR-159: how "a 3D model from a photo" works, and its window in the product panel */
-.atlas-ar-flat-how{margin:8px 0 4px 20px;color:#3c434a}
+.atlas-ar-flat-how{margin:8px 0 4px 20px;color:var(--atlas-ar-ink-2)}
 .atlas-ar-flat-how li{margin:2px 0}
 .atlas-ar-flat-modal .components-modal__content{padding-top:8px}
 
@@ -150,3 +154,9 @@
 /* AR-167: photo sources */
 .atlas-ar-flat-photo{display:flex;flex-direction:column;gap:8px;align-items:stretch}
 .atlas-ar-flat-photo .components-button{justify-content:center}
+
+/* AR-168: the ways to add models in one row (one primary: Upload), search + filters under it */
+.atlas-ar-toolbar-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.atlas-ar-toolbar-actions .atlas-ar-toolbar-label{margin-right:4px;color:var(--atlas-ar-muted);font-size:12px}
+.atlas-ar-toolbar-actions .components-button{min-height:36px}
+.atlas-ar-toolbar-actions .is-primary{margin-left:auto}
