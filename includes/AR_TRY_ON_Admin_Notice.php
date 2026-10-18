@@ -450,13 +450,13 @@ class AR_TRY_ON_Admin_Notice {
 						'text' => __( 'Start 14-day Free Trial', 'ar-vr-3d-model-try-on' ),
 						'type' => 'primary',
 						'icon' => 'star-filled',
-						'url'  => 'https://wpaugmentedreality.com/pricing/',
+						'url'  => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::link( \AR_TRY_ON_Admin\AR_TRY_ON_Admin::PRO_URL, 'notice', 'tryon_trial' ), // AR-146
 					),
 					array(
 						'text' => __( 'Read Try-On Docs', 'ar-vr-3d-model-try-on' ),
 						'type' => 'secondary',
 						'icon' => 'book',
-						'url'  => 'https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/',
+						'url'  => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::link( 'https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/', 'notice', 'tryon_docs' ),
 					),
 				),
 				'footer_text'   => __( 'No credit card required. The trial ends after 14 days — your store automatically reverts to the Free plan unless you choose to subscribe.', 'ar-vr-3d-model-try-on' ),

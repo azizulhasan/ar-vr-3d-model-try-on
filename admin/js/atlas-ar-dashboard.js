@@ -197,14 +197,24 @@
 				total > 20 ? el('div', { className: 'atlas-ar-pager' },
 					el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),
 					el('span', null, sprintf(__('Page %1$d of %2$d', D), page, Math.ceil(total / 20))),
-					el(C.Button, { variant: 'secondary', disabled: page >= Math.ceil(total / 20), onClick: function () { setPage(page + 1); } }, __('Next', D))) : null));
+					el(C.Button, { variant: 'secondary', disabled: page >= Math.ceil(total / 20), onClick: function () { setPage(page + 1); } }, __('Next', D))) : null),
+			// AR-146: what Pro adds for these products, right where they are listed.
+			el(UI.ProNote, {
+				where: 'products', spot: 'products_list', items: [
+					__('Make a 3D model from a product photo or a description with AI (AtlasAR Cloud, Meshy AI, Tripo3D).', D),
+					__('Several models per product, and the right model for each colour or size (WooCommerce variations).', D),
+					__('Hotspots with labels and the real measurements on the 3D view.', D),
+					__('Optimise every large file at once, and AtlasAR Cloud Premium with no monthly limit.', D)
+				]
+			}, __('More for your products with AtlasAR Pro:', D)));
 	}
 
 	function AppearancePage(ctx) {
 		return el(Fragment, null,
 			el(UI.Head, { title: __('Appearance', D), lead: __('How every 3D view looks. A product can change these in its own AtlasAR panel.', D) }),
 			el('div', { className: 'atlas-ar-split' },
-				el(UI.Section, null, el(LookFields, { settings: ctx.settings, set: ctx.set }), ctx.saveBar),
+				el(UI.Section, null, el(LookFields, { settings: ctx.settings, set: ctx.set }), ctx.saveBar,
+					el(UI.ProNote, { where: 'appearance', spot: 'appearance_extras' }, __('AtlasAR Pro adds hotspots, the real measurements on the view, and several models with thumbnails to switch between.', D))),
 				el(UI.Section, null, el(Preview, { settings: ctx.settings }))));
 	}
 
@@ -256,7 +266,7 @@
 				el(C.TextControl, { label: __('Button text', D), value: t.label, maxLength: 60, onChange: function (v) { set('label', v); } }),
 				el(C.TextareaControl, { label: __('Camera message (shown before the camera starts)', D), value: t.consent, rows: 3, onChange: function (v) { set('consent', v); } }),
 				el(C.ToggleControl, { label: __('Let shoppers save a photo of themselves wearing it', D), checked: !!t.snapshot, onChange: function (v) { set('snapshot', v); }, help: __('Saved photos show a small “Powered by AtlasAR” label.', D) }),
-				el(UI.ProNote, null, __('AtlasAR Pro removes the label, saves photos in HD and shows the product in real 3D that turns with the head.', D)),
+				el(UI.ProNote, { where: 'tryon', spot: 'tryon_hd' }, __('AtlasAR Pro removes the label, saves photos in HD and shows the product in real 3D that turns with the head.', D)),
 				el('h3', null, __('Face-tracking files', D)),
 				el('p', { className: 'description' }, __('About 15 MB, loaded only after the shopper allows the camera.', D)),
 				el(C.RadioControl, {
@@ -398,7 +408,7 @@
 			{
 				id: 'ai', render: function () {
 					return el(UI.Section, { title: __('Meshy AI and Tripo3D', D), lead: __('Make 3D models from a product photo or a text, with your own Meshy or Tripo account, right in the product editor.', D) },
-						el(UI.ProNote, null, __('Photo to 3D comes with AtlasAR Pro (AtlasAR Cloud, Meshy AI or Tripo3D).', D)),
+						el(UI.ProNote, { where: 'integrations', spot: 'photo_to_3d' }, __('Photo to 3D comes with AtlasAR Pro (AtlasAR Cloud, Meshy AI or Tripo3D).', D)),
 						el('p', { className: 'description' }, __('With AtlasAR you upload your own models to the 3D Library and optimise them.', D)));
 				}
 			}
@@ -486,10 +496,10 @@
 					})))),
 			el(UI.Section, { title: __('Guides', D) },
 				el('ul', { className: 'atlas-ar-guides' },
-					el('li', null, el('a', { href: UI.LINKS.docs, target: '_blank', rel: 'noopener noreferrer' }, __('Getting started — from install to your first 3D product', D))),
-					el('li', null, el('a', { href: UI.LINKS.docs, target: '_blank', rel: 'noopener noreferrer' }, __('Good 3D models — size, files for iPhone and Android', D))),
-					el('li', null, el('a', { href: UI.LINKS.docs, target: '_blank', rel: 'noopener noreferrer' }, __('Try-on setup — glasses and caps that fit', D))),
-					el('li', null, el('a', { href: UI.LINKS.support, target: '_blank', rel: 'noopener noreferrer' }, __('Contact support — we answer within one working day', D))))));
+					el('li', null, el('a', { href: UI.link(UI.LINKS.docs, 'help', 'help_docs'), target: '_blank', rel: 'noopener noreferrer' }, __('Getting started — from install to your first 3D product', D))),
+					el('li', null, el('a', { href: UI.link(UI.LINKS.docs, 'help', 'help_docs'), target: '_blank', rel: 'noopener noreferrer' }, __('Good 3D models — size, files for iPhone and Android', D))),
+					el('li', null, el('a', { href: UI.link(UI.LINKS.docs, 'help', 'help_docs'), target: '_blank', rel: 'noopener noreferrer' }, __('Try-on setup — glasses and caps that fit', D))),
+					el('li', null, el('a', { href: UI.link(UI.LINKS.support, 'help', 'help_support'), target: '_blank', rel: 'noopener noreferrer' }, __('Contact support — we answer within one working day', D))))));
 	}
 
 	/* ------------------------------------------------------------- wizard */

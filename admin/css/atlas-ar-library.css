@@ -123,3 +123,9 @@
 .atlas-ar-free-noimg{display:flex;align-items:center;justify-content:center;color:#8c8f94;font-weight:600}
 .atlas-ar-free-card .components-button{justify-content:center;margin-top:auto}
 .atlas-ar-free-card .atlas-ar-saved{margin-top:auto}
+
+/* AR-146: the Pro note under the 3D Library (same look as the dashboard's) */
+.atlas-ar-library .atlas-ar-pro-note{margin:16px 0;padding:8px 12px;border-left:3px solid #f0b849;background:#fcf9e8;color:#3c434a}
+.atlas-ar-library .atlas-ar-pro-note p{margin:4px 0}
+.atlas-ar-library .atlas-ar-pro-note ul{margin:6px 0 8px 18px;list-style:disc}
+.atlas-ar-library .atlas-ar-badge--pro{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:#fdecdc;color:#7a3410}

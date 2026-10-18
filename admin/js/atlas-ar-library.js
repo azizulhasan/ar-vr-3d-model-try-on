@@ -690,11 +690,24 @@
 
 	/* ----------------------------------------------------------- page + picker */
 
+	/** AR-146: what AtlasAR Pro adds in the 3D Library (hidden when Pro is active: atlasAr.proNotes). */
+	function ProNote() {
+		if (!config.proUrl || (wp.hooks && wp.hooks.applyFilters('atlasAr.proNotes', true) === false)) return null;
+		return el('div', { className: 'atlas-ar-pro-note' },
+			el('p', null, el('span', { className: 'atlas-ar-badge atlas-ar-badge--pro' }, 'Pro'), ' ', __('More in the 3D Library with AtlasAR Pro:', D)),
+			el('ul', null,
+				el('li', null, __('Make with AI: a 3D model from a product photo or a description (AtlasAR Cloud, Meshy AI, Tripo3D), straight into this library.', D)),
+				el('li', null, __('Optimise in bulk: every large file made lighter at once, in the background.', D)),
+				el('li', null, __('AtlasAR Cloud Premium: no monthly limit on optimisations.', D))),
+			el('a', { href: config.proUrl, target: '_blank', rel: 'noopener noreferrer' }, __('See AtlasAR Pro', D), el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', D))));
+	}
+
 	function Page() {
 		return el('div', { className: 'atlas-ar-library' },
 			el('h1', { className: 'wp-heading-inline' }, __('3D Library', D), config.brand && config.brand.name ? el('span', { className: 'atlas-ar-library-brand' }, config.brand.name) : null),
 			el('p', { className: 'atlas-ar-lead' }, __('All your 3D models and their files in one place: GLB, iPhone USDZ and poster images. Kept apart from the Media Library.', D)),
-			el(Browser, null)
+			el(Browser, null),
+			el(ProNote, null)
 		);
 	}
 

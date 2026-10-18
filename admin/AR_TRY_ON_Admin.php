@@ -168,6 +168,33 @@ class AR_TRY_ON_Admin {
 		);
 	}
 
+	/** AR-146: AtlasAR Pro's pricing page (the one address every "Pro" link goes to). */
+	const PRO_URL = 'https://wpaugmentedreality.com/pricing/';
+
+	/**
+	 * AR-146: one of our own links, tagged so we know where people came from:
+	 * utm_source=plugin, utm_medium=<the screen>, utm_campaign=atlasar_3, utm_content=<the spot>.
+	 * Links to other sites (Meshy, Tripo, wordpress.org) are left as they are.
+	 *
+	 * @param string $url     https://wpaugmentedreality.com/… or https://atlasaidev.com/…
+	 * @param string $medium  dashboard, library, product_panel, plugins_page, notice, …
+	 * @param string $content the button or note
+	 * @return string
+	 */
+	public static function link( $url, $medium, $content = '' ) {
+		$host = (string) wp_parse_url( (string) $url, PHP_URL_HOST );
+		if ( ! preg_match( '/(^|\.)(wpaugmentedreality\.com|atlasaidev\.com)$/', $host ) ) {
+			return (string) $url;
+		}
+		$tags = array(
+			'utm_source'   => 'plugin',
+			'utm_medium'   => sanitize_key( $medium ),
+			'utm_campaign' => 'atlasar_3',
+			'utm_content'  => sanitize_key( $content ),
+		);
+		return add_query_arg( array_filter( $tags ), (string) $url );
+	}
+
 	/**
 	 * AR-138: the menu icon is a 30 × 34 image: fit it in WordPress's 20 px icon slot, so it sits
 	 * on the same line as the other menu icons (every admin page shows the menu).
@@ -280,6 +307,19 @@ class AR_TRY_ON_Admin {
      * @return array List of plugin objects.
      */
     public static function get_atlas_plugins() {
+        // AR-146: our pricing / learn-more links carry UTM tags (the list itself is unchanged).
+        $list = self::fetch_atlas_plugins();
+        foreach ( $list as $i => $p ) {
+            foreach ( array( 'learnMoreUrl', 'proUrl' ) as $k ) {
+                if ( is_array( $p ) && ! empty( $p[ $k ] ) ) {
+                    $list[ $i ][ $k ] = self::link( $p[ $k ], 'plugins_page', ( isset( $p['slug'] ) ? $p['slug'] : 'plugin' ) . '_' . $k );
+                }
+            }
+        }
+        return $list;
+    }
+
+    private static function fetch_atlas_plugins() {
         $cached = get_transient( self::ATLAS_PLUGINS_TRANSIENT );
         if ( false !== $cached && is_array( $cached ) ) {
             return $cached;

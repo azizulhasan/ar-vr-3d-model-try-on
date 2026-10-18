@@ -27,10 +27,26 @@
 	boot = boot || {};
 
 	var LINKS = Object.freeze({
-		pro: 'https://wpaugmentedreality.com/3d-viewer-3d-model-viewer-augmented-reality-atlasar-pricing/',
+		pro: 'https://wpaugmentedreality.com/pricing/',
 		docs: 'https://wpaugmentedreality.com/docs/3d-model-viewer/',
 		support: 'https://wpaugmentedreality.com/contact-us/'
 	});
+
+	/**
+	 * AR-146: one of our links with its UTM tags (the same rule as AR_TRY_ON_Admin::link() in PHP):
+	 * utm_source=plugin, utm_medium=<the screen>, utm_campaign=atlasar_3, utm_content=<the spot>.
+	 */
+	function link(url, medium, content) {
+		try {
+			var u = new URL(url);
+			if (!/(^|\.)(wpaugmentedreality\.com|atlasaidev\.com)$/.test(u.hostname)) return url;
+			u.searchParams.set('utm_source', 'plugin');
+			u.searchParams.set('utm_medium', medium || 'dashboard');
+			u.searchParams.set('utm_campaign', 'atlasar_3');
+			if (content) u.searchParams.set('utm_content', content);
+			return u.toString();
+		} catch (e) { return url; }
+	}
 
 	function api(path, opts) {
 		return wp.apiFetch(Object.assign({ path: '/ar_try_on/v1' + path }, opts || {}));
@@ -79,12 +95,24 @@
 	}
 
 	/** A short note about what AtlasAR Pro adds (text and a link: never a disabled control). */
+	/**
+	 * A short note on what AtlasAR Pro adds right here (AR-146: contextual). `where` = the screen,
+	 * `spot` = this note (UTM). `items` = a few one-line points (optional). Text and a link only:
+	 * nothing in the free plugin is locked.
+	 */
 	function ProNote(props) {
 		if (filters('atlasAr.proNotes', true) === false) return null; // AtlasAR Pro is here: no note
-		return el('p', { className: 'atlas-ar-pro-note' },
-			el('span', { className: 'atlas-ar-badge atlas-ar-badge--pro' }, 'Pro'), ' ',
-			props.children, ' ',
-			el('a', { href: LINKS.pro, target: '_blank', rel: 'noopener noreferrer' }, props.link || __('See AtlasAR Pro', D)));
+		var href = link(LINKS.pro, props.where || 'dashboard', props.spot || 'pro_note');
+		return el('div', { className: 'atlas-ar-pro-note' },
+			el('p', null,
+				el('span', { className: 'atlas-ar-badge atlas-ar-badge--pro' }, 'Pro'), ' ',
+				props.children, ' ',
+				props.items ? null : el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, props.link || __('See AtlasAR Pro', D),
+					el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', D)))),
+			props.items ? el(Fragment, null,
+				el('ul', null, props.items.map(function (t, i) { return el('li', { key: i }, t); })),
+				el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, props.link || __('See AtlasAR Pro', D),
+					el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', D)))) : null);
 	}
 
 	/** The real shop viewer (viewer SDK) with options, for previews. */
@@ -155,7 +183,7 @@
 
 	window.AtlasARAdminUI = Object.freeze({
 		el: el, Fragment: Fragment, useState: useState, useEffect: useEffect, useRef: useRef, C: C, __: __, D: D,
-		api: api, message: message, size: size, filters: filters, LINKS: LINKS, boot: boot,
+		api: api, message: message, size: size, filters: filters, LINKS: LINKS, link: link, boot: boot,
 		Section: Section, Head: Head, Choice: Choice, ProNote: ProNote, Viewer: Viewer, SaveBar: SaveBar,
 		lookOptions: lookOptions, useSettings: useSettings
 	});

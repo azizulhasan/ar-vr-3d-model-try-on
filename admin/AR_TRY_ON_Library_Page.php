@@ -76,6 +76,7 @@ class AR_TRY_ON_Library_Page {
 				'cloudAvailable'  => \AR_TRY_ON\AR_TRY_ON_Cloud::available(),
 				'canConnect'      => current_user_can( 'manage_options' ),
 				'integrationsUrl' => admin_url( 'admin.php?page=ar-vr-3d-model-try-on#integrations' ),
+				'proUrl'          => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::link( \AR_TRY_ON_Admin\AR_TRY_ON_Admin::PRO_URL, 'library', 'library_note' ), // AR-146
 			)
 		);
 		wp_register_style( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/css/atlas-ar-library.css', array( 'wp-components' ), (string) filemtime( $css ) );

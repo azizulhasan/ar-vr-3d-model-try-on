@@ -93,7 +93,7 @@
 				el('input', { ref: fileRef, type: 'file', multiple: true, hidden: true, accept: boot.accept, onChange: function (e) { var fs = Array.prototype.slice.call(e.target.files || []); e.target.value = ''; if (fs.length) upload(fs); } })),
 			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 			el('p', { className: 'description' }, __('Without a .usdz file, iPhones open AR from the GLB.', D)),
-			el(UI.ProNote, null, __('Make a 3D model from one product photo (AtlasAR Cloud, Meshy AI or Tripo3D) with AtlasAR Pro.', D)));
+			el(UI.ProNote, { where: 'product_panel', spot: 'make_3d' }, __('Make a 3D model from one product photo (AtlasAR Cloud, Meshy AI or Tripo3D) with AtlasAR Pro.', D)));
 	}
 
 	function DisplayTab(ctx) {
@@ -136,7 +136,7 @@
 				el('p', { className: 'description' }, __('The product sits on the face automatically.', D)),
 				m && m.files.glb ? el(C.Button, { variant: 'secondary', onClick: test }, __('Test try-on with my camera', D)) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
-				el(UI.ProNote, null, __('AtlasAR Pro lets you fine-tune the fit and shows the product in real 3D.', D))) : null);
+				el(UI.ProNote, { where: 'product_panel', spot: 'tryon_fit' }, __('AtlasAR Pro lets you fine-tune the fit and shows the product in real 3D.', D))) : null);
 	}
 
 	function Panel() {
