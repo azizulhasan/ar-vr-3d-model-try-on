@@ -22,6 +22,8 @@ class AR_TRY_ON_Dashboard {
 	const UI       = 'atlas-ar-ui';
 	const HANDLE   = 'atlas-ar-dashboard';
 	const REDIRECT = 'atlas_ar_setup_redirect';
+	/** AR-158: the version the wizard was offered in (set once, on activation or the first admin page after an update). */
+	const OFFERED  = 'atlas_ar_setup_offered';
 
 	/** @var bool the page root was printed (old Pro 3.x registers the same page again) */
 	private static $rendered = false;
@@ -80,6 +82,10 @@ class AR_TRY_ON_Dashboard {
 		$boot                 = AR_TRY_ON_Admin_Routes::boot();
 		$boot['dashboardUrl'] = self::url();
 		$boot['libraryUrl']   = admin_url( 'admin.php?page=' . AR_TRY_ON_Library_Page::SLUG );
+		// AR-158: the wizard's last screen: our other plugins and the Plugins page.
+		$boot['pluginsUrl']   = admin_url( 'admin.php?page=atlas-ar-other-plugins' );
+		$boot['suggested']    = AR_TRY_ON_Admin::suggested_plugins( array( 'text-to-audio', 'ai-workflow-automation-ai-agent-hub', 'smart-local-ai' ) );
+		add_thickbox(); // WordPress's own plugin details window (Install)
 		wp_localize_script( self::UI, 'atlasArAdmin', $boot );
 		wp_enqueue_script( self::HANDLE );
 		wp_enqueue_style( self::UI );
@@ -89,12 +95,19 @@ class AR_TRY_ON_Dashboard {
 
 	/** Called on activation: open the wizard once on a site that has not finished it. */
 	public static function on_activation() {
+		update_option( self::OFFERED, ATLAS_AR_VERSION, true );
 		if ( ! AR_TRY_ON_Settings::get( 'general.wizard_done' ) ) {
 			set_transient( self::REDIRECT, 1, MINUTE_IN_SECONDS * 5 );
 		}
 	}
 
 	public static function maybe_redirect() {
+		// AR-158: an update (from 2.x, or a zip uploaded over the old folder) does not run the
+		// activation hook: offer the wizard once there too. Deleting the plugin resets both
+		// (uninstall.php), so a reinstall opens the wizard again.
+		if ( false === get_option( self::OFFERED ) ) {
+			self::on_activation();
+		}
 		if ( ! get_transient( self::REDIRECT ) ) {
 			return;
 		}

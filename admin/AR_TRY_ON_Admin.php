@@ -183,7 +183,7 @@ class AR_TRY_ON_Admin {
 	 */
 	public static function link( $url, $medium, $content = '' ) {
 		$host = (string) wp_parse_url( (string) $url, PHP_URL_HOST );
-		if ( ! preg_match( '/(^|\.)(wpaugmentedreality\.com|atlasaidev\.com)$/', $host ) ) {
+		if ( ! preg_match( '/(^|\.)(wpaugmentedreality\.com|atlasaidev\.com|atlasvoice\.cloud|wpatlasmcp\.com)$/', $host ) ) {
 			return (string) $url;
 		}
 		$tags = array(
@@ -319,6 +319,48 @@ class AR_TRY_ON_Admin {
         return $list;
     }
 
+    /**
+     * AR-158: our other plugins for the setup wizard's last screen, from the cached catalogue or
+     * the built-in list: never a network request (the wizard runs right after activation).
+     *
+     * @param string[] $slugs which plugins, in this order
+     * @return array[] { slug, name, description, url, status: active|installed|none, action }
+     */
+    public static function suggested_plugins( array $slugs ) {
+        $cached = get_transient( self::ATLAS_PLUGINS_TRANSIENT );
+        $list   = is_array( $cached ) && ! empty( $cached ) ? $cached : self::get_fallback_plugins();
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        $installed = array_keys( get_plugins() );
+        $out       = array();
+        foreach ( $slugs as $slug ) {
+            foreach ( $list as $p ) {
+                if ( ! is_array( $p ) || ( isset( $p['slug'] ) ? $p['slug'] : '' ) !== $slug ) {
+                    continue;
+                }
+                $base   = isset( $p['basename'] ) ? (string) $p['basename'] : '';
+                $status = in_array( $base, $installed, true ) ? ( is_plugin_active( $base ) ? 'active' : 'installed' ) : 'none';
+                $action = '';
+                if ( 'installed' === $status && current_user_can( 'activate_plugins' ) ) {
+                    $action = html_entity_decode( wp_nonce_url( admin_url( 'plugins.php?action=activate&plugin=' . rawurlencode( $base ) ), 'activate-plugin_' . $base ) );
+                } elseif ( 'none' === $status && current_user_can( 'install_plugins' ) ) {
+                    $action = admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . rawurlencode( $slug ) . '&TB_iframe=true&width=772&height=700' );
+                }
+                $out[] = array(
+                    'slug'        => $slug,
+                    'name'        => isset( $p['name'] ) ? wp_strip_all_tags( (string) $p['name'] ) : $slug,
+                    'description' => isset( $p['description'] ) ? wp_strip_all_tags( (string) $p['description'] ) : '',
+                    'url'         => ! empty( $p['learnMoreUrl'] ) ? self::link( (string) $p['learnMoreUrl'], 'setup_wizard', $slug ) : '',
+                    'status'      => $status,
+                    'action'      => $action,
+                );
+                break;
+            }
+        }
+        return $out;
+    }
+
     private static function fetch_atlas_plugins() {
         $cached = get_transient( self::ATLAS_PLUGINS_TRANSIENT );
         if ( false !== $cached && is_array( $cached ) ) {
@@ -405,11 +447,11 @@ class AR_TRY_ON_Admin {
                 ),
             ),
             array(
-                'name'          => 'AI Workflow Automation – AtlasAgent',
+                'name'          => 'MCP Server for WordPress – AtlasMCP',
                 'slug'          => 'ai-workflow-automation-ai-agent-hub',
                 'basename'      => 'ai-workflow-automation-ai-agent-hub/ai-workflow-automation-ai-agent-hub.php',
                 'icon'          => 'https://ps.w.org/ai-workflow-automation-ai-agent-hub/assets/icon-256x256.gif',
-                'learnMoreUrl'  => 'https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/',
+                'learnMoreUrl'  => 'https://wpatlasmcp.com/',
                 'proBasenames'  => array(
                     'ai-workflow-automation-ai-agent-hub-pro/ai-workflow-automation-ai-agent-hub-pro.php',
                 ),
@@ -418,7 +460,7 @@ class AR_TRY_ON_Admin {
                 'isNew'         => false,
                 'complementary' => array('text-to-audio', 'smart-local-ai'),
                 'priority'      => 1,
-                'description'   => 'Transform WordPress into an AI-powered control center with 70+ abilities, MCP server support, and workflow builder.',
+                'description'   => 'Connect Claude, ChatGPT and other AI assistants to your WordPress site through MCP, with 70+ abilities for posts, media, WooCommerce and more.',
                 'features'      => array(
                     '70+ abilities across 9 modules',
                     'Built-in MCP Server (JSON-RPC 2.0)',

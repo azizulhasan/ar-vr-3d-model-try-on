@@ -580,6 +580,28 @@
 
 	/* ------------------------------------------------------------- wizard */
 
+	/** AR-158: the wizard's last screen: our other free plugins, and the Plugins page. */
+	function Suggested() {
+		var list = boot.suggested || [];
+		if (!list.length) return null;
+		return el('div', { className: 'atlas-ar-suggested' },
+			el('h3', null, __('More free plugins from AtlasAiDev, the makers of AtlasAR', D)),
+			el('ul', { className: 'atlas-ar-suggested-list' }, list.map(function (p) {
+				return el('li', { key: p.slug, className: 'atlas-ar-suggested-card' },
+					el('strong', null, p.name),
+					el('p', null, p.description),
+					el('div', { className: 'atlas-ar-row' },
+						p.status === 'active' ? el('span', { className: 'atlas-ar-badge' }, __('Active', D))
+							: p.action ? el(C.Button, {
+								variant: 'secondary', href: p.action,
+								className: p.status === 'none' ? 'thickbox open-plugin-details-modal' : '',
+								'aria-label': sprintf(p.status === 'none' ? __('Install %s', D) : __('Activate %s', D), p.name)
+							}, p.status === 'none' ? __('Install free', D) : __('Activate', D)) : null,
+						p.url ? el(C.Button, { variant: 'link', href: p.url, target: '_blank', rel: 'noopener noreferrer' }, __('Learn more', D)) : null));
+			})),
+			boot.pluginsUrl ? el('p', null, el('a', { href: boot.pluginsUrl }, __('See all our plugins', D))) : null);
+	}
+
 	function Wizard(ctx) {
 		var steps = UI.filters('atlasAr.wizard.steps', [
 			{ id: 'place', label: __('Placement', D) },
@@ -628,9 +650,20 @@
 		else body = el(Fragment, null,
 			el('h2', null, __('You are ready', D)),
 			el('p', null, __('Now add a 3D model: upload your GLB files to the 3D Library, then pick it on a product.', D)),
+			// AR-158: tracking is opt-in (wp.org Guideline 7): never ticked for the site owner.
+			el('div', { className: 'atlas-ar-wizard-optin' },
+				el(C.CheckboxControl, {
+					label: __('Help improve AtlasAR: share usage data with AtlasAiDev', D),
+					help: __('Off unless you tick it. Sent once a week: this site’s address and name, the admin’s name and email, the IP address, WordPress, PHP and server versions, active plugins and the theme. Never your products, files or visitors. You can change this any time under Settings.', D),
+					checked: !!s.general.telemetry,
+					// saved at once: the plugin buttons below leave this page
+					onChange: function (v) { ctx.set('general', 'telemetry', v); ctx.save(Object.assign({}, s, { general: Object.assign({}, s.general, { telemetry: v }) })).catch(function () {}); },
+					__nextHasNoMarginBottom: true
+				})),
 			el('div', { className: 'atlas-ar-row' },
 				el(C.Button, { variant: 'primary', onClick: function () { finish(false); } }, __('Open the 3D Library', D)),
-				el(C.Button, { variant: 'secondary', onClick: function () { finish(true); } }, __('Go to the dashboard', D))));
+				el(C.Button, { variant: 'secondary', onClick: function () { finish(true); } }, __('Go to the dashboard', D))),
+			el(Suggested, null));
 
 		return el('div', { className: 'atlas-ar-wizard' },
 			el('div', { className: 'atlas-ar-wizard-head' },
