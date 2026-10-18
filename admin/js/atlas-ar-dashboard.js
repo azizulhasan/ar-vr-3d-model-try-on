@@ -506,7 +506,8 @@
 			el(UI.Section, { title: __('Show the AtlasAR panel on', D) },
 				(boot.postTypes || []).map(function (t) {
 					return el(C.CheckboxControl, { key: t.name, label: t.label, checked: (g.post_types || []).indexOf(t.name) !== -1, onChange: function (v) { toggleType(t.name, v); } });
-				})),
+				}),
+				el(UI.ProNote, { where: 'settings', spot: 'post_types' }, __('AtlasAR Pro adds custom post types from any plugin (portfolios, listings, courses…).', D))),
 			el(UI.Section, { title: __('Optimisation', D) },
 				el(C.ToggleControl, {
 					label: __('Optimise every new model when it is added', D), checked: !!g.auto_optimise, onChange: function (v) { ctx.set('general', 'auto_optimise', v); },

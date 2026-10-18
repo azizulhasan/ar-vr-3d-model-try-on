@@ -172,7 +172,7 @@ class AR_TRY_ON_Admin_Routes {
 	}
 
 	private static function enabled_type( $type ) {
-		return $type && in_array( $type, (array) AR_TRY_ON_Settings::get( 'general.post_types', array( 'product' ) ), true );
+		return $type && in_array( $type, AR_TRY_ON_Settings::enabled_post_types(), true ); // AR-154
 	}
 
 	/* ---------------------------------------------------------------------- config */
@@ -180,8 +180,9 @@ class AR_TRY_ON_Admin_Routes {
 	/** Everything the dashboard and the wizard start from. */
 	public static function boot() {
 		$types = array();
+		$allowed = AR_TRY_ON_Settings::post_type_choices(); // AR-154: products, posts, pages (+ Pro: any)
 		foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $type ) {
-			if ( 'attachment' !== $type->name ) {
+			if ( 'attachment' !== $type->name && in_array( $type->name, $allowed, true ) ) {
 				$types[] = array( 'name' => $type->name, 'label' => $type->labels->name );
 			}
 		}
@@ -277,7 +278,7 @@ class AR_TRY_ON_Admin_Routes {
 	 * @param bool             $check_user only posts the current user may edit (false: WP-CLI)
 	 */
 	public static function list_items( \WP_REST_Request $r, $check_user = true ) {
-		$types = array_values( array_filter( (array) AR_TRY_ON_Settings::get( 'general.post_types', array( 'product' ) ), 'post_type_exists' ) );
+		$types = array_values( array_filter( AR_TRY_ON_Settings::enabled_post_types(), 'post_type_exists' ) ); // AR-154
 		if ( ! $types ) {
 			return rest_ensure_response( array() );
 		}

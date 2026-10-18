@@ -32,7 +32,7 @@ class AR_TRY_ON_Product_Panel {
 	}
 
 	private static function types() {
-		return (array) AR_TRY_ON_Settings::get( 'general.post_types', array( 'product' ) );
+		return AR_TRY_ON_Settings::enabled_post_types(); // AR-154
 	}
 
 	public static function add( $post_type, $post = null ) {

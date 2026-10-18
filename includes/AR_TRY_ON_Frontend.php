@@ -346,7 +346,7 @@ class AR_TRY_ON_Frontend {
 
 	/** AtlasAR is on for this post type and the post has a model. */
 	private static function enabled_for( $post_id ) {
-		$types = (array) AR_TRY_ON_Settings::get( 'general.post_types', array( 'product' ) );
+		$types = AR_TRY_ON_Settings::enabled_post_types(); // AR-154
 		return $post_id && in_array( get_post_type( $post_id ), $types, true ) && AR_TRY_ON_Product::has_model( $post_id );
 	}
 

@@ -111,6 +111,35 @@ class AR_TRY_ON_Settings {
 		return $out;
 	}
 
+	/** AR-154: the post types the free plugin offers. */
+	const FREE_POST_TYPES = array( 'product', 'post', 'page' );
+
+	/**
+	 * AR-154: the post types AtlasAR may be turned on for: products, posts and pages; AtlasAR Pro
+	 * adds custom post types through the filter (the free plugin never checks for Pro).
+	 *
+	 * @return string[]
+	 */
+	public static function post_type_choices() {
+		/**
+		 * The post types the "Show the AtlasAR panel on" setting offers.
+		 *
+		 * @param string[] $types post type names
+		 */
+		return array_values( array_unique( array_map( 'sanitize_key', (array) apply_filters( 'atlas_ar_post_type_choices', self::FREE_POST_TYPES ) ) ) );
+	}
+
+	/**
+	 * AR-154: the post types AtlasAR is on for now: the saved ones that may be used. The saved list
+	 * itself is kept as it is (switching AtlasAR Pro off and on keeps the choice).
+	 *
+	 * @return string[]
+	 */
+	public static function enabled_post_types() {
+		$on = array_values( array_intersect( (array) self::get( 'general.post_types', array( 'product' ) ), self::post_type_choices() ) );
+		return $on ? $on : array( 'product' );
+	}
+
 	/** @return array The saved settings, complete and clean (defaults fill what is missing). */
 	public static function all() {
 		if ( null === self::$cache ) {
