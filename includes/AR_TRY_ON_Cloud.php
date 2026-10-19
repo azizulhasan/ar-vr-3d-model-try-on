@@ -132,6 +132,47 @@ class AR_TRY_ON_Cloud {
 	}
 
 	/**
+	 * AR-174: what AtlasAR Cloud offers right now for this site, e.g. whether photo to 3D is open
+	 * or "coming soon". Asked at most every 30 minutes; null when not connected or the service is
+	 * older than this question (callers then keep their old behaviour).
+	 *
+	 * @param bool $fresh ask now
+	 * @return array|null { photo_to_3d: { open, in_plan, status }, … }
+	 */
+	public static function capabilities( $fresh = false ) {
+		if ( ! self::available() || ! self::connected() ) {
+			return null;
+		}
+		$cache = self::OPTION . '_caps';
+		$hit   = $fresh ? false : get_transient( $cache );
+		if ( is_array( $hit ) ) {
+			return empty( $hit ) ? null : $hit;
+		}
+		$res  = self::request( 'GET', '/v1/capabilities' );
+		$caps = array();
+		if ( ! is_wp_error( $res ) && is_array( $res ) ) {
+			foreach ( array( 'photo_to_3d', 'optimize', 'library' ) as $k ) {
+				if ( isset( $res[ $k ] ) && is_array( $res[ $k ] ) ) {
+					$caps[ $k ] = array(
+						'open'    => ! empty( $res[ $k ]['open'] ),
+						'in_plan' => ! empty( $res[ $k ]['in_plan'] ),
+						'status'  => isset( $res[ $k ]['status'] ) && 'coming_soon' === $res[ $k ]['status'] ? 'coming_soon' : 'open',
+					);
+				}
+			}
+		}
+		// An error (an older service, offline) is remembered briefly too, so pages never wait on it.
+		set_transient( $cache, $caps, is_wp_error( $res ) ? 10 * MINUTE_IN_SECONDS : 30 * MINUTE_IN_SECONDS );
+		return empty( $caps ) ? null : $caps;
+	}
+
+	/** AR-174: photo to 3D is not open on AtlasAR Cloud yet (known only when the service says so). */
+	public static function photo_to_3d_soon() {
+		$caps = self::capabilities();
+		return is_array( $caps ) && isset( $caps['photo_to_3d'] ) && 'coming_soon' === $caps['photo_to_3d']['status'];
+	}
+
+	/**
 	 * Make a free account for this site (or add the site to the account of that email).
 	 *
 	 * @param string $email
@@ -213,6 +254,7 @@ class AR_TRY_ON_Cloud {
 		}
 		delete_option( self::OPTION );
 		delete_transient( self::OPTION . '_usage' );
+		delete_transient( self::OPTION . '_caps' ); // AR-174
 		return self::status();
 	}
 
@@ -412,6 +454,7 @@ class AR_TRY_ON_Cloud {
 		$c['webhook_secret'] = self::seal( (string) $c['webhook_secret'] );
 		update_option( self::OPTION, $c, false );
 		delete_transient( self::OPTION . '_usage' );
+		delete_transient( self::OPTION . '_caps' ); // AR-174
 	}
 
 	private static function valid_key( $key ) {
