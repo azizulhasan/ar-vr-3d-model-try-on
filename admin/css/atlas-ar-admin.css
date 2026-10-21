@@ -208,7 +208,7 @@
 .atlas-ar-table .num{text-align:right;white-space:nowrap}
 .atlas-ar-stats-table td:first-child,.atlas-ar-stats-table th:first-child{min-width:200px}
 
-/* AR-165: AtlasAR Cloud not open yet */
+/* AR-165: AtlasAR Cloud turned off on this site */
 .atlas-ar-cloud-soon h3{margin:16px 0 4px;font-size:13px;font-weight:600}
 .atlas-ar-cloud-soon ul{margin:0 0 8px 18px;list-style:disc}
 .atlas-ar-cloud-soon .atlas-ar-badge{margin-left:0}

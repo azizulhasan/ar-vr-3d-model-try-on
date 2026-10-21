@@ -5,8 +5,9 @@
  * Nothing is sent to the service until the site owner clicks "Connect" (with the consent box) or
  * pastes a key. The API key stays on the server: the dashboard only ever gets its prefix.
  *
- * The service's address comes from the ATLAS_AR_CLOUD_URL constant (wp-config.php) or the
- * `atlas_ar_cloud_url` filter; while it is empty the Cloud features are simply not offered.
+ * The service is at DEFAULT_URL. The ATLAS_AR_CLOUD_URL constant (wp-config.php) or the
+ * `atlas_ar_cloud_url` filter can point it elsewhere (a test service); an empty value turns the
+ * Cloud features off on that site.
  *
  * @package AR_TRY_ON
  */
@@ -22,9 +23,12 @@ class AR_TRY_ON_Cloud {
 	const OPTION    = 'atlas_ar_cloud';
 	const USAGE_TTL = 600; // the usage block is cached 10 minutes
 
-	/** @return string the service's base URL, '' while it is not set */
+	/** AtlasAR Cloud: website /, dashboard /app, API /v1 on one host. */
+	const DEFAULT_URL = 'https://cloud.wpaugmentedreality.com';
+
+	/** @return string the service's base URL, '' when it is turned off on this site */
 	public static function base_url() {
-		$url = defined( 'ATLAS_AR_CLOUD_URL' ) ? (string) ATLAS_AR_CLOUD_URL : '';
+		$url = defined( 'ATLAS_AR_CLOUD_URL' ) ? (string) ATLAS_AR_CLOUD_URL : self::DEFAULT_URL;
 		$url = (string) apply_filters( 'atlas_ar_cloud_url', $url );
 		return 'https' === wp_parse_url( $url, PHP_URL_SCHEME ) || self::is_local( $url ) ? untrailingslashit( esc_url_raw( $url ) ) : '';
 	}
@@ -271,7 +275,7 @@ class AR_TRY_ON_Cloud {
 	public static function request( $method, $path, $body = null, $key = null, array $raw = array() ) {
 		$base = self::base_url();
 		if ( '' === $base ) {
-			return new \WP_Error( 'atlas_ar_cloud_off', __( 'AtlasAR Cloud is not available yet.', 'ar-vr-3d-model-try-on' ) );
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'AtlasAR Cloud is turned off on this site.', 'ar-vr-3d-model-try-on' ) );
 		}
 		$key     = null === $key ? self::stored()['key'] : (string) $key;
 		$headers = array(

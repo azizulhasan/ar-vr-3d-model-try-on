@@ -86,10 +86,10 @@ Used by the webcam try-on (glasses, caps). Only after a visitor clicks "Try it o
 jsDelivr - Terms: https://www.jsdelivr.com/terms Privacy: https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net
 Google - Terms: https://policies.google.com/terms Privacy: https://policies.google.com/privacy
 
-= AtlasAR Cloud (optional, by AtlasAiDev) =
+= AtlasAR Cloud (optional, by AtlasAiDev, cloud.wpaugmentedreality.com) =
 
-Off unless the site owner connects it. When an administrator connects the site, the site address and the email they enter are sent to create the project; AtlasAR Cloud sends a welcome email to that address, and tips and offers only if the separate, unticked "email me tips" box was ticked. While connected, AtlasAR Cloud calls this site's REST address when a model is ready (signed with a secret only this site has). When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. In 3D Library › Free 3D models, the search words and category are sent to search AtlasAR Cloud's free model library, and a model is downloaded to the site only when someone clicks Download. No visitor data is sent.
-AtlasAiDev - Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
+Off unless the site owner connects it. The service is at `https://cloud.wpaugmentedreality.com` (a site can point it elsewhere, or turn it off, with the ATLAS_AR_CLOUD_URL constant in wp-config.php). When an administrator connects the site, the site address and the email they enter are sent to create the project; AtlasAR Cloud sends a welcome email to that address, and tips and offers only if the separate, unticked "email me tips" box was ticked. While connected, AtlasAR Cloud calls this site's REST address when a model is ready (signed with a secret only this site has). When an administrator then sends a model to be optimised, that model file and its title are sent, and the optimised files are downloaded back to the site. In 3D Library › Free 3D models, the search words and category are sent to search AtlasAR Cloud's free model library, and a model is downloaded to the site only when someone clicks Download. No visitor data is sent.
+AtlasAR Cloud - Terms: https://cloud.wpaugmentedreality.com/terms/ Privacy: https://cloud.wpaugmentedreality.com/privacy/
 
 = AtlasAiDev usage data (track.atlasaidev.com, icanhazip.com) =
 

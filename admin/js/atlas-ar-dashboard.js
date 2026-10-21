@@ -423,11 +423,11 @@
 
 		var body;
 		if (!cloud.available) {
-			// AR-165: say what it is, that there is nothing to do, and what works already.
+			// Only when the site turned it off (ATLAS_AR_CLOUD_URL empty in wp-config.php): say so, and what works already.
 			body = el('div', { className: 'atlas-ar-cloud-soon' },
-				el('p', null, el('span', { className: 'atlas-ar-badge atlas-ar-badge--muted' }, __('Not open yet', D)), ' ',
-					__('AtlasAR Cloud is our optional online service. It is not open yet: when it opens, an AtlasAR update switches it on here. There is nothing to set up now, and nothing is sent anywhere.', D)),
-				el('h3', null, __('What it will add', D)),
+				el('p', null, el('span', { className: 'atlas-ar-badge atlas-ar-badge--muted' }, __('Turned off', D)), ' ',
+					__('AtlasAR Cloud, our optional online service, is turned off on this site (ATLAS_AR_CLOUD_URL is empty in wp-config.php). Nothing is sent anywhere.', D)),
+				el('h3', null, __('What it adds', D)),
 				el('ul', null,
 					el('li', null, __('Optimise big models (up to 50 MB) on our servers, made at their real size for AR.', D)),
 					el('li', null, __('Free 3D models to import into your 3D Library.', D)),
