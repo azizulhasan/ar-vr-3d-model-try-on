@@ -374,6 +374,7 @@ class AR_TRY_ON_Cloud {
 		if ( '' === $cloud_id ) {
 			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
 		}
+		delete_transient( self::done_key( $id ) );
 		update_post_meta( $id, self::JOB_META, array( 'cloud_id' => $cloud_id, 'status' => 'queued', 'height_cm' => isset( $query['height_cm'] ) ? $query['height_cm'] : 0, 'level' => $level, 'time' => time() ) );
 		// AR-143: the same file sent again (e.g. after "Restore original") is answered with the model
 		// already made (same Idempotency-Key). It is ready, so no webhook will come: fetch it now.
@@ -395,6 +396,14 @@ class AR_TRY_ON_Cloud {
 	public static function optimise_poll( $id ) {
 		$job = get_post_meta( $id, self::JOB_META, true );
 		if ( ! is_array( $job ) || empty( $job['cloud_id'] ) ) {
+			// The job finished a moment ago (often by the webhook, before the screen asked): its result.
+			$done = get_transient( self::done_key( $id ) );
+			if ( is_array( $done ) && 'ready' === $done['status'] ) {
+				return array( 'status' => 'ready', 'model' => AR_TRY_ON_Library::get( $id ) );
+			}
+			if ( is_array( $done ) && 'failed' === $done['status'] ) {
+				return new \WP_Error( 'atlas_ar_cloud_failed', $done['message'] );
+			}
 			return new \WP_Error( 'atlas_ar_cloud_job', __( 'No AtlasAR Cloud job for this model.', 'ar-vr-3d-model-try-on' ) );
 		}
 		$res = self::request( 'GET', '/v1/models/' . rawurlencode( $job['cloud_id'] ) );
@@ -406,7 +415,9 @@ class AR_TRY_ON_Cloud {
 			delete_post_meta( $id, self::JOB_META );
 			$why = isset( $res['error']['message'] ) ? sanitize_text_field( $res['error']['message'] ) : '';
 			/* translators: %s: reason from the service */
-			return new \WP_Error( 'atlas_ar_cloud_failed', trim( sprintf( __( 'AtlasAR Cloud could not optimise this model. %s', 'ar-vr-3d-model-try-on' ), $why ) ) );
+			$message = trim( sprintf( __( 'AtlasAR Cloud could not optimise this model. %s', 'ar-vr-3d-model-try-on' ), $why ) );
+			set_transient( self::done_key( $id ), array( 'status' => 'failed', 'message' => $message ), self::DONE_TTL );
+			return new \WP_Error( 'atlas_ar_cloud_failed', $message );
 		}
 		if ( 'ready' !== $status || empty( $res['files']['glb'] ) ) {
 			return array( 'status' => $status ? $status : 'processing' );
@@ -432,7 +443,16 @@ class AR_TRY_ON_Cloud {
 			return $model;
 		}
 		delete_post_meta( $id, self::JOB_META );
+		set_transient( self::done_key( $id ), array( 'status' => 'ready' ), self::DONE_TTL );
 		return array( 'status' => 'ready', 'model' => $model );
+	}
+
+	/** A finished job's result is kept this long, for a screen that asks after the webhook finished it. */
+	const DONE_TTL = 600;
+
+	/** @return string the transient with model $id's last finished Cloud job */
+	private static function done_key( $id ) {
+		return 'atlas_ar_cloud_done_' . (int) $id;
 	}
 
 	/* --------------------------------------------------------------------- helpers */
