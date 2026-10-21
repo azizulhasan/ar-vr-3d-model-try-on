@@ -123,11 +123,7 @@
 	}
 	function original() {
 		viewers().forEach(function (host) {
-			var mv = host.modelViewer;
-			if (typeof host.setVariant !== 'function' || !mv) return;
-			mv.variantName = null;
-			var src = host.getAttribute('src');
-			if (src && mv.getAttribute('src') !== src) mv.setAttribute('src', src);
+			if (typeof host.resetVariant === 'function') host.resetVariant(); // the SDK's variants module
 		});
 	}
 	function setupVariations() {

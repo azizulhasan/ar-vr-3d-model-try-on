@@ -706,9 +706,6 @@
 
 		var sizeOk = parseFloat(w) >= 1 && parseFloat(w) <= 1000 && parseFloat(h) >= 1 && parseFloat(h) <= 1000;
 		return el(Fragment, null,
-			props.modal ? null : el('div', { className: 'atlas-ar-free-head' },
-				el('h2', null, __('Make a 3D model from a photo', D)),
-				el(C.Button, { variant: 'tertiary', onClick: props.api.close }, __('Close', D))),
 			// AR-159: say plainly what it does, and for which products it works.
 			el('p', null, __('Turns one photo of a flat product into a 3D model at its real size, so shoppers can see it in 3D and hang it on their own wall (or lay it on their floor) in AR, on Android and iPhone.', D)),
 			el('p', { className: 'description' }, __('For flat products only: wall art, posters, canvas prints, framed pictures, rugs, mats and tiles. For products with a shape, such as shoes, chairs or bottles, you need a real 3D model (a GLB file). Made in this browser, free; the photo stays on your site.', D)),
@@ -739,7 +736,13 @@
 
 	if (wp.hooks) {
 		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/flat-photo', function (actions) {
-			return [{ id: 'flat-photo', label: __('3D model from a photo', D), render: FlatFromPhoto }].concat(actions);
+			// One window for the 3D Library and the product panel (AtlasARLibrary.flat).
+			return [{
+				id: 'flat-photo', label: __('3D model from a photo', D),
+				open: function (api, button) {
+					window.AtlasARLibrary.flat({ returnFocus: button, onDone: function (info) { api.done([info.model.id]); } });
+				}
+			}].concat(actions);
 		}, 9);
 	}
 
@@ -801,11 +804,11 @@
 		 * More ways to add models, next to "Upload 3D files" (AtlasAR Pro: "Make with AI").
 		 * Filter atlasAr.library.actions: [{ id, label, render }]; render is a component that gets
 		 * { api }: api.done(ids) shows the new models (page 1, the last one selected), api.close()
-		 * closes the panel.
+		 * closes the panel. An action with open(api, button) instead of render opens its own window.
 		 */
 		var actions = wp.hooks ? wp.hooks.applyFilters('atlasAr.library.actions', [], { picker: !!props.onUse }) : [];
 		var _open = useState(''), open = _open[0], setOpen = _open[1];
-		var openAction = actions.filter(function (a) { return a.id === open; })[0];
+		var openAction = actions.filter(function (a) { return a.id === open && a.render; })[0];
 		var actionApi = {
 			close: function () { setOpen(''); },
 			done: function (ids) {
@@ -819,6 +822,9 @@
 			el('div', { className: 'atlas-ar-toolbar-actions', role: 'group', 'aria-label': __('Add models', D) },
 				el('span', { className: 'atlas-ar-toolbar-label' }, __('Add models:', D)),
 				actions.map(function (a) {
+					if (typeof a.open === 'function') {
+						return el(C.Button, { key: a.id, variant: 'secondary', 'aria-haspopup': 'dialog', onClick: function (e) { setUp(false); setOpen(''); a.open(actionApi, e.currentTarget); } }, a.label);
+					}
 					return el(C.Button, { key: a.id, variant: 'secondary', 'aria-expanded': open === a.id ? 'true' : 'false', onClick: function () { setUp(false); setOpen(open === a.id ? '' : a.id); } }, a.label);
 				}),
 				el(C.Button, { variant: up ? 'secondary' : 'primary', onClick: function () { setOpen(''); setUp(!up); } }, up ? __('Close upload', D) : (props.onUse ? __('Upload new', D) : __('Upload 3D files', D)))),
@@ -915,7 +921,7 @@
 	function FlatModal(props) {
 		return el(C.Modal, { title: __('Make a 3D model from a photo', D), onRequestClose: props.onClose, className: 'atlas-ar-picker atlas-ar-flat-modal', size: 'large' },
 			el('div', { className: 'atlas-ar-library' }, el(FlatFromPhoto, {
-				modal: true, name: props.name, photo: props.photo,
+				name: props.name, photo: props.photo,
 				api: { close: props.onClose, done: function (ids, info) { props.onDone(info); props.onClose(); } }
 			})));
 	}

@@ -16,7 +16,7 @@ const { execFileSync } = require('child_process');
 const root = path.join(__dirname, '..');
 const own = ['admin/js', 'public/js', 'blocks'].flatMap((dir) =>
     fs.readdirSync(path.join(root, dir)).filter((f) => f.endsWith('.js')).map((f) => path.join(dir, f)));
-const sdkFiles = ['atlasar.js', 'atlasar.css', 'atlasar-tryon.js', 'tryon-worker.js', 'atlasar-tools.js', 'THIRD-PARTY-NOTICES.md', 'vendor/model-viewer.min.js', 'vendor/meshopt_decoder.js'];
+const sdkFiles = ['atlasar.js', 'atlasar.css', 'atlasar-tryon.js', 'tryon-worker.js', 'atlasar-tools.js', 'atlasar-flat.js', 'THIRD-PARTY-NOTICES.md', 'vendor/model-viewer.min.js', 'vendor/meshopt_decoder.js'];
 let failed = 0;
 
 for (const rel of own) {

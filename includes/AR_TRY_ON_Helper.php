@@ -55,54 +55,6 @@ class AR_TRY_ON_Helper
         self::$settings_cache = null;
     }
 
-    /**
-     * Resolve the effective model-viewer load strategy for a product.
-     *
-     * Resolution order (first match wins):
-     *   1. Per-product metabox override (`ar_try_on_product_settings['model_load_strategy']`),
-     *      when set to a concrete value ('auto' | 'interaction'). 'inherit'
-     *      (or unset / anything invalid) falls through.
-     *   2. Global setting (`ar_try_on_settings['model_load_strategy']`).
-     *   3. Default 'auto' — preserves the historical inline/eager behavior so
-     *      nothing changes for existing sites until they opt in.
-     *
-     * 'auto'        — current behavior: the inline viewer hydrates and
-     *                 google-model-viewer.js loads as soon as the viewer is
-     *                 near the viewport.
-     * 'interaction' — poster-first: the 960 KB library loads only when the
-     *                 user clicks a View-in-3D / Try-On / AR / 3D-tab trigger.
-     *
-     * @param int $post_id Product/post id, or 0 to resolve the global value only.
-     * @return string 'auto' | 'interaction'
-     */
-    public static function get_model_load_strategy( $post_id = 0 ) {
-        $valid = array( 'auto', 'interaction' );
-
-        // 1. Per-product override.
-        if ( $post_id ) {
-            $ps = (array) get_post_meta( (int) $post_id, 'ar_try_on_product_settings', true );
-            if ( method_exists( __CLASS__, 'rename_old_keys_of_product_metadata' ) ) {
-                $ps = self::rename_old_keys_of_product_metadata( $ps );
-            }
-            if ( isset( $ps['model_load_strategy'] ) && in_array( $ps['model_load_strategy'], $valid, true ) ) {
-                return apply_filters( 'atlas_ar_model_load_strategy', (string) $ps['model_load_strategy'], (int) $post_id );
-            }
-        }
-
-        // 2. Global setting, else 3. default 'auto'.
-        $settings = self::get_settings();
-        $global   = isset( $settings['model_load_strategy'] ) ? (string) $settings['model_load_strategy'] : '';
-        $strategy = in_array( $global, $valid, true ) ? $global : 'auto';
-
-        /**
-         * Filter the effective model-viewer load strategy.
-         *
-         * @param string $strategy 'auto' | 'interaction'.
-         * @param int    $post_id  Resolved product/post id (0 for global).
-         */
-        return apply_filters( 'atlas_ar_model_load_strategy', $strategy, (int) $post_id );
-    }
-
     public static function is_atlas_ar_page()
     {
         // Ensure we are in the admin area
@@ -411,52 +363,6 @@ class AR_TRY_ON_Helper
         );
 
         return file_exists( $file_path ) ? $file_url : false;
-    }
-
-    /**
-     * The list of 3D-model file formats this site can compress.
-     *
-     * Free returns the formats it natively supports — `glb` and `gltf`,
-     * which are what `admin/js/ar-compression-client.js` can run through
-     * the browser-side gltf-transform pipeline.
-     *
-     * Pro adds its own formats (FBX, OBJ, USDZ) by hooking the
-     * `atlas_ar_supported_formats` filter and pushing extra entries.
-     * The filter shape is intentionally simple — a flat array of lower-
-     * case file-extension strings, no leading dot — so anyone hooking it
-     * can do array_merge without thinking about associative-vs-numeric
-     * keys.
-     *
-     * @since AR-61 §1.1 Phase 3
-     * @return array<int,string> Lower-case file extensions, no leading dot.
-     *                           Order is "Free formats first, hooked
-     *                           formats appended" but consumers should
-     *                           not depend on order.
-     */
-    public static function supported_formats() {
-        $free_formats = array( 'glb', 'gltf' );
-
-        /**
-         * Filter: atlas_ar_supported_formats
-         *
-         * Lets Pro and third-party add-ons register additional 3D-model
-         * file formats. Pro v3.x adds FBX, OBJ, USDZ via its format
-         * converter.
-         *
-         * @param array<int,string> $formats Lower-case extensions, no dot.
-         */
-        $formats = apply_filters( 'atlas_ar_supported_formats', $free_formats );
-
-        // Defensive guards — a misbehaving filter must not crash the
-        // dashboard. Cast to array, force-lowercase strings, dedupe.
-        if ( ! is_array( $formats ) ) {
-            $formats = $free_formats;
-        }
-        $formats = array_values( array_unique( array_filter( array_map( static function ( $ext ) {
-            return is_string( $ext ) ? strtolower( ltrim( $ext, '.' ) ) : '';
-        }, $formats ) ) ) );
-
-        return $formats;
     }
 
     /**
