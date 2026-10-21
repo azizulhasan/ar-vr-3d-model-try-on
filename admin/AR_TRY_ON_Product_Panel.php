@@ -7,7 +7,7 @@
  * @package AR_TRY_ON
  */
 
-namespace AR_TRY_ON_Admin;
+namespace AR_TRY_ON_Admin; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace (see AR-66).
 
 use AR_TRY_ON\AR_TRY_ON_Library;
 use AR_TRY_ON\AR_TRY_ON_Product;

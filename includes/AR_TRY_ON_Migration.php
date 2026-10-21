@@ -17,7 +17,7 @@
  * @package AR_TRY_ON
  */
 
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace (see AR-66).
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -291,7 +291,7 @@ class AR_TRY_ON_Migration {
 			$path = $temp;
 		}
 		try {
-			if ( filesize( $path ) > AR_TRY_ON_Library::max_bytes() ) {
+			if ( filesize( $path ) > AR_TRY_ON_Library::stored_max_bytes() ) { // a file already on the site: not limited by PHP's upload size
 				return new \WP_Error( 'atlas_ar_migrate', 'too large' );
 			}
 			$ok = AR_TRY_ON_Library::check_content( $path, $name );

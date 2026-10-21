@@ -24,6 +24,7 @@ const productionSrc = [
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
+	'!scripts/**', // build tools (copy the viewer SDK, build check), not part of the plugin
 	'!src/**',
 	'!.browserslistrc',
 	'!.eslintrc',

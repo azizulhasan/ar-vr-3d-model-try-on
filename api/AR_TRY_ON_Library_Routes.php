@@ -394,7 +394,7 @@ class AR_TRY_ON_Library_Routes {
 			return new \WP_Error( 'atlas_ar_kind', __( 'Not a 3D, iPhone AR or poster file (check the file name).', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
 		}
 		$limit = function ( $args ) {
-			$args['limit_response_size'] = AR_TRY_ON_Library::max_bytes() + 1;
+			$args['limit_response_size'] = AR_TRY_ON_Library::stored_max_bytes() + 1; // fetched by the site: not PHP's upload limit
 			return $args;
 		};
 		add_filter( 'http_request_args', $limit );
@@ -404,10 +404,10 @@ class AR_TRY_ON_Library_Routes {
 		if ( is_wp_error( $tmp ) ) {
 			return new \WP_Error( 'atlas_ar_url', __( 'The file could not be downloaded from that URL.', 'ar-vr-3d-model-try-on' ), array( 'status' => 400 ) );
 		}
-		if ( filesize( $tmp ) > AR_TRY_ON_Library::max_bytes() ) { // cut at the limit: refused, never stored half
+		if ( filesize( $tmp ) > AR_TRY_ON_Library::stored_max_bytes() ) { // cut at the limit: refused, never stored half
 			wp_delete_file( $tmp );
 			/* translators: %s: size like "64 MB" */
-			return new \WP_Error( 'atlas_ar_size', sprintf( __( 'The file is larger than %s.', 'ar-vr-3d-model-try-on' ), size_format( AR_TRY_ON_Library::max_bytes() ) ), array( 'status' => 400 ) );
+			return new \WP_Error( 'atlas_ar_size', sprintf( __( 'The file is larger than %s.', 'ar-vr-3d-model-try-on' ), size_format( AR_TRY_ON_Library::stored_max_bytes(), 1 ) ), array( 'status' => 400 ) );
 		}
 		return array( 'tmp_name' => $tmp, 'name' => $name );
 	}

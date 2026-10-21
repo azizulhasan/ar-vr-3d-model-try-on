@@ -22,7 +22,7 @@
  * Text Domain:       ar-vr-3d-model-try-on
  * Domain Path:       /languages
  * Requires PHP:      7.4
- * Requires at least: 5.6
+ * Requires at least: 5.7
  */
 
 // Absolute path to the WordPress directory.

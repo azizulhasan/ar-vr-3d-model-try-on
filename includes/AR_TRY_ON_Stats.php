@@ -12,7 +12,7 @@
  * @package AR_TRY_ON
  */
 
-namespace AR_TRY_ON;
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace (see AR-66).
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -102,7 +102,7 @@ class AR_TRY_ON_Stats {
 	public static function prune() {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the plugin's own table.
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . ' WHERE day < %s', gmdate( 'Y-m-d', time() - self::KEEP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name from $wpdb->prefix.
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . self::table() . ' WHERE day < %s', gmdate( 'Y-m-d', time() - self::KEEP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (name from $wpdb->prefix), old days removed.
 	}
 
 	/** The viewer counts for this product (SDK options analytics + analyticsId). */
@@ -193,7 +193,7 @@ class AR_TRY_ON_Stats {
 			$values[] = '(%s, %d, %s, %d)';
 			array_push( $args, $day, (int) $row[0], (string) $row[1], (int) $row[2] );
 		}
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- the plugin's own table; placeholders built above.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table; placeholders built above.
 		$wpdb->query( $wpdb->prepare( 'INSERT INTO ' . self::table() . ' (day, post_id, event, n) VALUES ' . implode( ', ', $values ) . ' ON DUPLICATE KEY UPDATE n = n + VALUES(n)', $args ) );
 	}
 
@@ -212,7 +212,7 @@ class AR_TRY_ON_Stats {
 		if ( '1' !== get_option( self::DB_VERSION ) ) {
 			return $out;
 		}
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- the plugin's own table (name from $wpdb->prefix); small grouped reads.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (name from $wpdb->prefix); small grouped reads.
 		foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT event, SUM(n) AS n FROM {$table} WHERE day >= %s GROUP BY event", $from ), ARRAY_A ) as $row ) {
 			$out['totals'][ $row['event'] ] = (int) $row['n'];
 		}

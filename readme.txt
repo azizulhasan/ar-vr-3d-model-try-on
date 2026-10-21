@@ -1,7 +1,7 @@
 === 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On  ===
 Contributors: atlasaidev, hasanazizul
 Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
-Requires at least: 5.6
+Requires at least: 5.7
 Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 2.3.0
@@ -532,7 +532,7 @@ Adds Meshy AI as a second way to generate 3D models — from a written descripti
 Adds a polite, dismissible review reminder for admins (shown only after real use, never to Pro users) plus a refreshed description, tags and FAQ. Safe to update.
 
 = 2.2.1 =
-Performance release addressing high server/database load. Adds a "Model Loading Behavior" option to defer the 3D viewer library until a shopper clicks "View in 3D" (global setting plus per-product override), trims per-request database work, and combines front-end styles. Default behavior is unchanged. Safe to update.
+Performance release: an option to load the 3D viewer only when a shopper clicks "View in 3D" (site-wide or per product), less database work on every page, and combined front-end styles. Default behaviour is unchanged. Safe to update.
 
 = 2.2.0 =
 Security and hardening release: per-product Custom CSS is sanitized, model-file writes are locked to the uploads folder, and front-end output is fully escaped. Recommended for all sites. Safe to update.

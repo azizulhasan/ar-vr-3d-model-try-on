@@ -235,10 +235,11 @@ class AR_TRY_ON_Library {
 		if ( '' === $kind ) {
 			return new \WP_Error( 'atlas_ar_kind', __( 'Not a 3D, iPhone AR or poster file.', 'ar-vr-3d-model-try-on' ) );
 		}
-		$size = is_readable( $tmp ) ? (int) filesize( $tmp ) : 0;
-		if ( $size > self::max_bytes() ) {
+		$size  = is_readable( $tmp ) ? (int) filesize( $tmp ) : 0;
+		$limit = self::limit_for( $tmp );
+		if ( $size > $limit ) {
 			/* translators: %s: size like "64 MB" */
-			return new \WP_Error( 'atlas_ar_size', sprintf( __( 'The file is larger than %s.', 'ar-vr-3d-model-try-on' ), size_format( self::max_bytes() ) ) );
+			return new \WP_Error( 'atlas_ar_size', sprintf( __( 'The file is larger than %s.', 'ar-vr-3d-model-try-on' ), size_format( $limit, 1 ) ) );
 		}
 		$check = self::check_content( $tmp, $name );
 		if ( is_wp_error( $check ) ) {
@@ -661,6 +662,22 @@ class AR_TRY_ON_Library {
 	}
 
 	/**
+	 * The largest file AtlasAR stores that did not come through a browser upload: a model it fetched
+	 * itself (AtlasAR Cloud's optimised file, a free 3D model, an AI-made model, a URL import) or one
+	 * already on the site (the 2.x move, WP-CLI). PHP's upload limit does not apply to those, and
+	 * on hosts with a small one (1–2 MB) it would refuse exactly the big models AtlasAR Cloud makes
+	 * light. Filter: atlas_ar_library_stored_max_bytes (default 100 MB, never less than the upload limit).
+	 */
+	public static function stored_max_bytes() {
+		return max( self::max_bytes(), (int) apply_filters( 'atlas_ar_library_stored_max_bytes', 100 * MB_IN_BYTES ) );
+	}
+
+	/** The limit for this file: PHP's upload limit for a browser upload, the stored limit otherwise. */
+	private static function limit_for( $tmp ) {
+		return is_uploaded_file( $tmp ) ? self::max_bytes() : self::stored_max_bytes();
+	}
+
+	/**
 	 * The stored file name: "Summer Chair v2.php.GLB" → "summer-chair-v2-php.glb". Only the slug of
 	 * the name and its (already checked) extension are kept, so no second extension survives.
 	 */
@@ -678,7 +695,7 @@ class AR_TRY_ON_Library {
 	 */
 	private static function gltf_is_self_contained( $path ) {
 		$size = is_readable( $path ) ? (int) filesize( $path ) : 0;
-		$json = $size > 0 && $size <= self::max_bytes() ? json_decode( self::read_head( $path, $size ), true ) : null;
+		$json = $size > 0 && $size <= self::stored_max_bytes() ? json_decode( self::read_head( $path, $size ), true ) : null;
 		if ( ! is_array( $json ) || empty( $json['asset'] ) ) {
 			return new \WP_Error( 'atlas_ar_content', __( 'This .gltf file could not be read.', 'ar-vr-3d-model-try-on' ) );
 		}

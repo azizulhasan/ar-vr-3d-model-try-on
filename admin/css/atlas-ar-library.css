@@ -95,13 +95,15 @@
 	   the menu's last items, and the app stays where it is. */
 	body.atlas-ar-fullscreen #wpfooter{display:none}
 	body.atlas-ar-fullscreen #wpcontent{padding-bottom:0}
-	body.atlas-ar-fullscreen #wpbody-content{display:flex;flex-direction:column;box-sizing:border-box;position:fixed;top:32px;bottom:0;left:160px;right:0;z-index:1;width:auto;height:auto;float:none;padding:0 0 0 20px;overflow:hidden}
+	body.atlas-ar-fullscreen #wpbody-content{display:flex;flex-direction:column;box-sizing:border-box;position:fixed;top:32px;bottom:0;left:160px;right:0;z-index:1;width:auto;height:auto;float:none;padding:0 0 0 20px;overflow-x:hidden;overflow-y:auto}
 	body.atlas-ar-fullscreen.folded #wpbody-content{left:36px}
 	body.rtl.atlas-ar-fullscreen #wpbody-content{left:0;right:160px;padding:0 20px 0 0}
 	body.rtl.atlas-ar-fullscreen.folded #wpbody-content{right:36px}
 	body.atlas-ar-fullscreen #wpbody-content>*{flex:none}
+	/* Never squeezed by other plugins' notices above it: the app keeps the window's height and the
+	   notices push it down (the area scrolls); without notices it fills the window exactly. */
 	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-wrap,
-	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-library-wrap{flex:1 1 auto;min-height:0;margin-bottom:0}
+	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-library-wrap{flex:1 0 auto;min-height:calc(100vh - 32px);margin-bottom:0}
 
 	/* 3D Library page */
 	body.atlas-ar-fullscreen .atlas-ar-library-wrap{display:flex;flex-direction:column;padding-bottom:12px;box-sizing:border-box}

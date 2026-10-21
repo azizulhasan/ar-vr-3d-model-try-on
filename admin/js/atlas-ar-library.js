@@ -211,6 +211,17 @@
 								onStatus(item.i, sprintf(__('Added to “%s” (not optimised)', D), out.model.name), true);
 							});
 						}
+						// An OBJ / FBX is converted to GLB right away, so the model can be shown (as the panel
+						// says); a GLB of the same name in the same upload wins. Failing that, the model's
+						// "Convert to GLB" button stays.
+						var ext = extOf(file.name);
+						if (('obj' === ext || 'fbx' === ext) && out.model.files && out.model.files.source && !out.model.files.glb && sdkTools()) {
+							return convertModel(out.model, function (t) { onStatus(item.i, t, null); }).then(function () {
+								onStatus(item.i, sprintf(__('Added to “%s” and converted to GLB', D), out.model.name), true);
+							}, function (err) {
+								onStatus(item.i, sprintf(__('Added to “%1$s”, not converted: %2$s', D), out.model.name, message(err)), false);
+							});
+						}
 					}, function (err) {
 						onStatus(item.i, message(err), false);
 					});
