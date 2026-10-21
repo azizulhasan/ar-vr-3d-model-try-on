@@ -141,6 +141,16 @@ if ( ! defined( 'ATLAS_AR_PLUGIN_PATH' ) ) {
 class AR_TRY_ON_Init {
 
 	public function __construct() {
+		self::define_constants();
+
+		$this->run();
+	}
+
+	/**
+	 * Version + name constants. Defined on `init` (so the filters can still change them), and
+	 * by the activation hook, which runs before `init` ever loads the plugin.
+	 */
+	public static function define_constants() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
 			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.3.0' ) );
 		}
@@ -148,8 +158,6 @@ class AR_TRY_ON_Init {
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
 			define( 'ATLAS_AR_PLUGIN_NAME', apply_filters( 'ATLAS_AR_plugin_name', 'AtlasAR' ) );
 		}
-
-		$this->run();
 	}
 
 	public function run() {
@@ -255,6 +263,7 @@ register_activation_hook( __FILE__, function () {
 	// No "renew": re-activating used to reset every saved setting to the
 	// defaults. Defaults are still written when nothing is saved yet, and
 	// the demo post is still seeded when missing (AR-72).
+	AR_TRY_ON_Init::define_constants(); // the plugin has not run `init` yet on this request
 	AR_TRY_ON_Activator::activate();
 	\AR_TRY_ON_Admin\AR_TRY_ON_Dashboard::on_activation();
 } );
