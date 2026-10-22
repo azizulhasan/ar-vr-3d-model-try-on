@@ -259,6 +259,7 @@ class AR_TRY_ON_Viewer {
 		'display', 'button-label', 'width', 'height', 'align', 'margin', 'padding', 'viewer-id', 'viewer-class',
 		'hotspots', 'dimensions', 'items', 'variants', 'variant',
 		'analytics', 'analytics-id', // AR-161
+		'white-label', // no AtlasAR mark for shoppers (AtlasAR Pro sets it)
 	);
 
 	/** The SDK's environment image for the lighting setting. */
