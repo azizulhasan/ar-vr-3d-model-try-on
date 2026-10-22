@@ -148,6 +148,12 @@ In **AtlasAR › Try-on**, turn it on; then in the product's AtlasAR panel choos
 = Is the shopper's camera picture sent anywhere? =
 No. The face tracking runs in the shopper's browser; no video, picture or face data leaves the device.
 
+= Are my models locked in to AtlasAR? =
+No. Every model is a file in your own uploads folder (`wp-content/uploads/atlasar/`), the 3D views work without AtlasAR Cloud, and nothing is hosted elsewhere unless you choose the Cloud. If you delete the plugin, your models and settings stay unless you turned on "Delete all AtlasAR settings, 3D Library models and product data when the plugin is deleted" (off by default).
+
+= What do I write in my privacy policy? =
+AtlasAR adds ready-made text to Settings › Privacy › Policy Guide: no cookies, no personal data, the try-on camera picture stays on the visitor's device, and which public servers the try-on's tracking files come from (unless you serve them from your own site).
+
 = Can my products show in 3D on Google? =
 AtlasAR adds each product's 3D model to the product data Google reads on the product page (WooCommerce's own, Rank Math or Yoast). For Google Shopping, map the custom field `atlas_ar_virtual_model_link` to Merchant Center's `virtual_model_link` in your product feed plugin: it gives the model's GLB file (15 MB or less; use Optimise). Google decides when to show a 3D result. To turn this off: `add_filter( 'atlas_ar_structured_data', '__return_false' );`.
 

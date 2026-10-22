@@ -250,7 +250,11 @@ class AR_TRY_ON_Stats {
 		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
 			wp_add_privacy_policy_content(
 				'AtlasAR',
-				'<p>' . esc_html__( 'When a visitor uses a 3D view (turns the model, opens it in AR, uses the virtual try-on), the AtlasAR plugin adds one to a daily total for that product on this website. No cookies are set and no personal data is stored: no IP address, no visitor or device information. The try-on camera picture never leaves the visitor’s device.', 'ar-vr-3d-model-try-on' ) . '</p>'
+				// Ready to paste into the site's privacy policy (Settings › Privacy › Policy Guide).
+				'<p>' . esc_html__( 'When a visitor uses a 3D view (turns the model, opens it in AR, uses the virtual try-on), the AtlasAR plugin adds one to a daily total for that product on this website. No cookies are set and no personal data is stored: no IP address, no visitor or device information.', 'ar-vr-3d-model-try-on' ) . '</p>'
+				. '<p>' . esc_html__( 'The 3D models, the 3D viewer and its decoders are served from this website. The virtual try-on uses the camera only after the visitor clicks "Try it on" and allows it; the face tracking runs in the visitor’s browser and no video, picture or face data leaves the device.', 'ar-vr-3d-model-try-on' ) . '</p>'
+				. '<p>' . esc_html__( 'Unless this site serves the face-tracking files itself (AtlasAR › Try-on › "From this site"), the visitor’s browser downloads them from cdn.jsdelivr.net and storage.googleapis.com when the try-on opens; like any download, those services see the visitor’s IP address.', 'ar-vr-3d-model-try-on' ) . '</p>'
+				. '<p>' . esc_html__( 'AtlasAR Cloud, if the site owner connects it, only receives the site’s 3D models to optimise them; no visitor data is sent to it.', 'ar-vr-3d-model-try-on' ) . '</p>'
 			);
 		}
 	}
