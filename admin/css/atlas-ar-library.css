@@ -166,3 +166,6 @@
 .atlas-ar-speed{margin:4px 0 8px;padding:8px 10px;border-radius:6px;background:#eef7f3;color:#14532d}
 .atlas-ar-speed.is-slow{background:#fff7ed;color:#7c2d12}
 .atlas-ar-card-saved{display:inline-block;align-self:flex-start;margin:2px 0;padding:1px 7px;border-radius:999px;background:#eef7f3;color:#14532d;font-size:11px;font-weight:600}
+/* "From a phone scan" guide */
+.atlas-ar-scan{max-width:760px}
+.atlas-ar-scan ol{margin:8px 0 12px 20px;display:grid;gap:6px}

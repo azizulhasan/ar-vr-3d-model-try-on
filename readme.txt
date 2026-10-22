@@ -137,6 +137,9 @@ No. AR opens from the browser: Scene Viewer on Android, AR Quick Look on iPhone 
 = Which 3D files can I use? =
 `.glb` and single-file `.gltf` for the 3D view, `.usdz` for iPhone AR (optional: iPhones can also use the GLB), and a poster image. OBJ and FBX files are converted to GLB in your browser. Other formats (STL, DAE, 3DS, BLEND, STEP…) must be converted to GLB first, for example with the free Blender (File › Export › glTF 2.0). For the best iPhone quality, upload a `.usdz` with the same name as the GLB (Apple's Reality Converter on a Mac, or Blender's USD export).
 
+= Can I use a 3D scan from my phone? =
+Yes. Scan the product with Polycam, Scaniverse, Luma AI or Object Capture on an iPhone, export a GLB file and upload it to the 3D Library (AtlasAR › 3D Library › "From a phone scan" has the steps). Scans are heavy; they are made lighter on the way in, at their real size, with their textures kept. A scan saved only as `.usdz` needs a GLB too: export one with Reality Composer or Blender.
+
 = My model file is big. What can I do? =
 Open **AtlasAR › 3D Library**, choose the model and click **Optimise**: it is made lighter in your browser, at its real size if you enter its height, and the original is kept. Very big files can be optimised on AtlasAR Cloud (free plan); AtlasAR Pro optimises many at once.
 

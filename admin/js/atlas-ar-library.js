@@ -776,6 +776,31 @@
 		}, 9);
 	}
 
+	/**
+	 * "From a phone scan": how to get a scan (Polycam, Scaniverse, Luma, iPhone Object Capture) into
+	 * the library. Scans are heavy (hundreds of thousands of triangles, big textures); uploads are
+	 * optimised on the way in, so the guide is the missing part, not another setting.
+	 */
+	function PhoneScan(props) {
+		var steps = [
+			__('Scan the product with a phone app: Polycam, Scaniverse, Luma AI, or Object Capture on an iPhone. Even light, the whole product in view, and crop away the floor before you export.', D),
+			__('Export the scan as a GLB file (glTF binary). An iPhone scan that only saves a .usdz file: open it in Reality Composer or Blender and export a GLB, or upload both files with the same name.', D),
+			__('Upload it here. It is made lighter on the way in: a scan of tens of megabytes usually becomes just a few, at its real size, with its textures kept.', D),
+			__('Then link it to a product. iPhones get their AR file from the GLB by themselves.', D)
+		];
+		return el('div', { className: 'atlas-ar-scan' },
+			el('h3', null, __('From a phone scan', D)),
+			el('ol', null, steps.map(function (t, i) { return el('li', { key: i }, t); })),
+			el('div', { className: 'atlas-ar-row' },
+				el(C.Button, { variant: 'primary', onClick: function () { props.api.upload(); } }, __('Upload the scan', D)),
+				el(C.Button, { variant: 'tertiary', onClick: function () { props.api.close(); } }, __('Close', D))));
+	}
+	if (wp.hooks) {
+		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/phone-scan', function (actions) {
+			return actions.concat([{ id: 'phone-scan', label: __('From a phone scan', D), render: PhoneScan }]);
+		}, 20);
+	}
+
 	if (wp.hooks && config.cloudAvailable) {
 		wp.hooks.addFilter('atlasAr.library.actions', 'atlas-ar/free-models', function (actions) {
 			return [{ id: 'free-models', label: __('Free 3D models', D), render: FreeModels }].concat(actions);
@@ -841,6 +866,8 @@
 		var openAction = actions.filter(function (a) { return a.id === open && a.render; })[0];
 		var actionApi = {
 			close: function () { setOpen(''); },
+			upload: function () { setOpen(''); setUp(true); }, // opens "Upload 3D files"
+
 			done: function (ids) {
 				setPage(1);
 				return load(true, 1).then(function () { if (ids && ids.length) setSel(ids[ids.length - 1]); });
