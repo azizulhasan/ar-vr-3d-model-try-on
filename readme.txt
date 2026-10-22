@@ -26,6 +26,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **Works with your editor**: the AtlasAR panel in the block editor and the classic editor, an **AtlasAR block** with a live preview, an **Elementor widget**, and the `[atlas_ar]` shortcode for any other page builder.
 * **Virtual try-on for glasses and caps**: a "Try it on" button opens the webcam; the face tracking runs on the shopper's device. Tracking files from the public CDN or, with one click, from your own site.
 * **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
+* **Products in Google's 3D results**: each product's 3D model is added to the product data Google reads (WooCommerce, Rank Math or Yoast), and Google Merchant Center feeds can send the 3D file too.
 * **For developers**: a documented REST API (ready for AI agents), WP-CLI (`wp atlas-ar …`) and hooks.
 * **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself. The free plan includes 20 optimisations a month: each one makes one of your existing models lighter (it does not create a new model).
 * **Make a 3D model from a photo (flat products)**: wall art, posters, canvas prints, framed pictures, rugs and tiles become a 3D model at their real size from one photo, in the 3D Library or right on the product, made in your browser (with the iPhone file too), free.
@@ -146,6 +147,9 @@ In **AtlasAR › Try-on**, turn it on; then in the product's AtlasAR panel choos
 
 = Is the shopper's camera picture sent anywhere? =
 No. The face tracking runs in the shopper's browser; no video, picture or face data leaves the device.
+
+= Can my products show in 3D on Google? =
+AtlasAR adds each product's 3D model to the product data Google reads on the product page (WooCommerce's own, Rank Math or Yoast). For Google Shopping, map the custom field `atlas_ar_virtual_model_link` to Merchant Center's `virtual_model_link` in your product feed plugin: it gives the model's GLB file (15 MB or less; use Optimise). Google decides when to show a 3D result. To turn this off: `add_filter( 'atlas_ar_structured_data', '__return_false' );`.
 
 = Will 3D views slow my site down? =
 The viewer loads only on pages that show a 3D view, the model only when it comes into view, and the try-on only after a click. Lighter files load faster: use Optimise.

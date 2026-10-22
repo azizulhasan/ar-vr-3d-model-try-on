@@ -189,6 +189,7 @@ function atlas_ar_run() {
 	\AR_TRY_ON\AR_TRY_ON_Migration::init(); // AR-160: once, 2.x data into the 3D Library
 	\AR_TRY_ON\AR_TRY_ON_Stats::init(); // AR-161: shopper analytics, kept on this site
 	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
+	\AR_TRY_ON\AR_TRY_ON_Search::init(); // Products in Google's 3D results (structured data + feed field)
 	// AR-133: AtlasAR Cloud checking this site (moving it to another email). atlas_ar_run() runs on
 	// `init`, before any output: answered here, then the request ends.
 	\AR_TRY_ON\AR_TRY_ON_Cloud::answer_verify();
