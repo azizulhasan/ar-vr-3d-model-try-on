@@ -150,12 +150,16 @@ class AR_TRY_ON_Viewer {
 			return '';
 		}
 		$model = $product['model_id'] ? AR_TRY_ON_Library::get( $product['model_id'] ) : null;
-		if ( ! $model || empty( $model['files']['glb']['url'] ) ) {
+		$glb   = $model && ! empty( $model['files']['glb']['url'] ) ? $model['files']['glb']['url'] : '';
+		// No 3D file: the product's try-on picture (a front photo; its plain background is removed).
+		$photo = $glb || ! $product['tryon_image'] ? '' : (string) wp_get_attachment_image_url( (int) $product['tryon_image'], 'large' );
+		if ( ! $glb && ! $photo ) {
 			return '';
 		}
 		self::$used = true;
 		$opts       = array(
-			'src'               => $model['files']['glb']['url'],
+			'src'               => $glb,
+			'tryonImage'        => $photo,
 			'tryon'             => $product['tryon'],
 			'tryonLabel'        => $tryon['label'],
 			'tryonConsent'      => $tryon['consent'],

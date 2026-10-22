@@ -30,6 +30,8 @@ class AR_TRY_ON_Product {
 			'ar_scale'     => array( 'type' => 'enum', 'default' => 'auto', 'options' => array( 'auto', 'fixed' ) ),
 			'tryon'        => array( 'type' => 'enum', 'default' => '', 'options' => array( '', 'glasses', 'hat' ) ),
 			'tryon_viewer' => array( 'type' => 'bool', 'default' => true ),
+			// Try-on from a photo: a front picture (Media Library id) used when the product has no 3D model.
+			'tryon_image'  => array( 'type' => 'number', 'default' => 0, 'min' => 0, 'max' => 2147483647 ),
 			// AR-156: this product only (0 / empty = the site's setting).
 			'height'       => array( 'type' => 'number', 'default' => 0, 'min' => 0, 'max' => 1200 ),
 			'ar_text'      => array( 'type' => 'text', 'default' => '', 'max' => 60 ),

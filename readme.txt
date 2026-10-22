@@ -26,6 +26,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **Where it shows**: over the product gallery (photo or 3D first), as a gallery slide, a button with a popup, a product tab, or after the content; per product or for the whole shop.
 * **Works with your editor**: the AtlasAR panel in the block editor and the classic editor, an **AtlasAR block** with a live preview, an **Elementor widget**, and the `[atlas_ar]` shortcode for any other page builder.
 * **Virtual try-on for glasses and caps**: a "Try it on" button opens the webcam; the face tracking runs on the shopper's device. Tracking files from the public CDN or, with one click, from your own site.
+* **Try-on from a photo**: no 3D model of the glasses or cap? Choose a straight-on photo in the product's Try-on tab; its plain background is removed and it sits on the face.
 * **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
 * **Colours for variations**: when a shopper picks a variation (for example "Red"), the 3D model switches to its own colour or material of the same name (glTF material variants), with no setup. A choice made before the 3D view opens is shown when it loads.
 * **Products in Google's 3D results**: each product's 3D model is added to the product data Google reads (WooCommerce, Rank Math or Yoast), and Google Merchant Center feeds can send the 3D file too.

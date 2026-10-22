@@ -197,6 +197,17 @@ class AR_TRY_ON_Frontend {
 		}
 		$post_id = (int) get_queried_object_id();
 		if ( ! self::enabled_for( $post_id ) ) {
+			// Try-on from a photo: no 3D model, so no 3D view, only the "Try it on" button.
+			if ( self::photo_tryon( $post_id ) ) {
+				self::hook_or_summary(
+					'woocommerce_after_add_to_cart_form',
+					20,
+					$post_id,
+					function () use ( $post_id ) {
+						self::print_tryon( $post_id );
+					}
+				);
+			}
 			return;
 		}
 		$product = AR_TRY_ON_Product::get( $post_id );
@@ -385,6 +396,15 @@ class AR_TRY_ON_Frontend {
 			self::$tryon_done[ $post_id ] = true;
 			AR_TRY_ON_Viewer::print_html( $html );
 		}
+	}
+
+	/** AtlasAR is on for this post type, the post has no model, and its try-on uses a picture. */
+	private static function photo_tryon( $post_id ) {
+		if ( ! $post_id || ! in_array( get_post_type( $post_id ), AR_TRY_ON_Settings::enabled_post_types(), true ) ) {
+			return false;
+		}
+		$product = AR_TRY_ON_Product::get( $post_id );
+		return '' !== $product['tryon'] && (int) $product['tryon_image'] > 0;
 	}
 
 	/** AtlasAR is on for this post type and the post has a model. */

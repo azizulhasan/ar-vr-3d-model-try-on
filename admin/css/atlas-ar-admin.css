@@ -214,3 +214,7 @@
 .atlas-ar-cloud-soon .atlas-ar-badge{margin-left:0}
 /* AR-168: a single field reads better at a measured width (not the whole window) */
 .atlas-ar-section>.components-base-control,.atlas-ar-section>.atlas-ar-subgroup>.components-base-control{max-width:640px}
+/* Try-on from a photo (product panel) */
+.atlas-ar-tryon-photo{margin:12px 0;padding:10px 12px;border:1px solid #dcdcde;border-radius:8px;background:#f6f7f7}
+.atlas-ar-tryon-photo h3{margin:0 0 4px}
+.atlas-ar-tryon-photo-preview{display:block;max-width:220px;max-height:120px;margin:8px 0;object-fit:contain;background:#fff;border:1px solid #dcdcde;border-radius:6px}

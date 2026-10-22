@@ -155,12 +155,38 @@
 		var d = ctx.item.data, set = ctx.setData;
 		var m = ctx.item.model;
 		var _err = useState(''), err = _err[0], setErr = _err[1];
+		// Try-on from a photo when the product has no 3D model (its plain background is removed).
+		var _photo = useState(ctx.item.tryon_image_url || ''), photoUrl = _photo[0], setPhotoUrl = _photo[1];
+		var hasModel = !!(m && m.files && m.files.glb);
 		function test() {
 			var sdk = window.AtlasARViewer;
-			if (!sdk || !sdk.tryon || !m || !m.files.glb) return;
+			if (!sdk || !sdk.tryon || (!hasModel && !photoUrl)) return;
 			setErr('');
-			sdk.tryon.open(Object.assign({ src: m.files.glb.url, tryon: d.tryon }, boot.tryon || {}), {}).catch(function (e) { setErr(UI.message(e)); });
+			var src = hasModel ? { src: m.files.glb.url } : { tryonImage: photoUrl };
+			sdk.tryon.open(Object.assign(src, { tryon: d.tryon }, boot.tryon || {}), {}).catch(function (e) { setErr(UI.message(e)); });
 		}
+		function choosePhoto() {
+			if (!wp.media) return;
+			var frame = wp.media({ title: __('Choose the try-on picture', D), library: { type: ['image/png', 'image/jpeg', 'image/webp'] }, multiple: false });
+			frame.on('select', function () {
+				var a = frame.state().get('selection').first().toJSON();
+				set('tryon_image', a.id);
+				setPhotoUrl(a.sizes && a.sizes.large ? a.sizes.large.url : a.url);
+			});
+			frame.open();
+		}
+		function useFeatured() {
+			set('tryon_image', ctx.item.thumb_id);
+			setPhotoUrl(ctx.item.thumb);
+		}
+		var photoBox = !hasModel ? el('div', { className: 'atlas-ar-tryon-photo' },
+			el('h3', null, __('No 3D model? Use a photo', D)),
+			el('p', { className: 'description' }, __('A straight-on photo of the glasses or cap is enough: its plain background is removed and it sits on the face. Best on a white background, or a PNG with a transparent background (clear lenses look best that way). With a 3D model, the model is used instead.', D)),
+			photoUrl ? el('img', { src: photoUrl, alt: '', className: 'atlas-ar-tryon-photo-preview' }) : null,
+			el('div', { className: 'atlas-ar-row' },
+				wp.media ? el(C.Button, { variant: 'secondary', onClick: choosePhoto }, photoUrl ? __('Choose another picture', D) : __('Choose a picture', D)) : null,
+				ctx.item.thumb_id && Number(d.tryon_image) !== Number(ctx.item.thumb_id) ? el(C.Button, { variant: 'tertiary', onClick: useFeatured }, __('Use the featured image', D)) : null,
+				photoUrl ? el(C.Button, { variant: 'tertiary', isDestructive: true, onClick: function () { set('tryon_image', 0); setPhotoUrl(''); } }, __('Remove', D)) : null)) : null;
 		return el(Fragment, null,
 			el(UI.Choice, {
 				label: __('Can shoppers try this on?', D), value: d.tryon, compact: true, onChange: function (v) { set('tryon', v); },
@@ -174,7 +200,8 @@
 				el(C.ToggleControl, { label: __('Also show the 3D view and AR button for this product', D), checked: !!d.tryon_viewer, onChange: function (v) { set('tryon_viewer', v); } }),
 				!boot.tryonEnabled ? el(C.Notice, { status: 'warning', isDismissible: false }, __('Try-on is turned off in AtlasAR › Try-on, so the button does not show.', D)) : null,
 				el('p', { className: 'description' }, __('The product sits on the face automatically.', D)),
-				m && m.files.glb ? el(C.Button, { variant: 'secondary', onClick: test }, __('Test try-on with my camera', D)) : null,
+				photoBox,
+				hasModel || photoUrl ? el(C.Button, { variant: 'secondary', onClick: test }, __('Test try-on with my camera', D)) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 				el(UI.ProNote, { where: 'product_panel', spot: 'tryon_fit' }, __('AtlasAR Pro lets you fine-tune the fit and shows the product in real 3D.', D))) : null);
 	}
