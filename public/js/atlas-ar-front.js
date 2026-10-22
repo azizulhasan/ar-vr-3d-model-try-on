@@ -113,15 +113,20 @@
 	function viewers() {
 		return Array.prototype.slice.call(document.querySelectorAll('atlasar-viewer'));
 	}
-	function pick(values) {
-		viewers().forEach(function (host) {
-			if (typeof host.setVariant !== 'function') return; // no variants module (AtlasAR Pro)
-			values.forEach(function (v) {
-				if (v) host.setVariant(v);
-			});
+	// The shopper's last choice: a 3D view opened (or loaded) after it shows it too.
+	var chosen = [];
+	function apply(host) {
+		if (typeof host.setVariant !== 'function') return; // the SDK's variants (Free: the model's own; Pro: mapping, files)
+		chosen.forEach(function (v) {
+			if (v) host.setVariant(v);
 		});
 	}
+	function pick(values) {
+		chosen = values;
+		viewers().forEach(apply);
+	}
 	function original() {
+		chosen = [];
 		viewers().forEach(function (host) {
 			if (typeof host.resetVariant === 'function') host.resetVariant(); // the SDK's variants module
 		});
@@ -134,6 +139,10 @@
 			pick(Object.keys(attrs).map(function (k) { return String(attrs[k] || ''); }));
 		});
 		$(document).on('reset_data', '.variations_form', original);
+		document.addEventListener('atlasar:load', function (e) {
+			var host = e.target && e.target.closest ? e.target.closest('atlasar-viewer') : null;
+			if (host && chosen.length) apply(host);
+		});
 	}
 
 	/* ----------------------------------------------------------------- try-on */

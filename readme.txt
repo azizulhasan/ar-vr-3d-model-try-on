@@ -26,6 +26,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **Works with your editor**: the AtlasAR panel in the block editor and the classic editor, an **AtlasAR block** with a live preview, an **Elementor widget**, and the `[atlas_ar]` shortcode for any other page builder.
 * **Virtual try-on for glasses and caps**: a "Try it on" button opens the webcam; the face tracking runs on the shopper's device. Tracking files from the public CDN or, with one click, from your own site.
 * **WooCommerce**: simple and variable products, configurable positions on the product page, HPOS compatible.
+* **Colours for variations**: when a shopper picks a variation (for example "Red"), the 3D model switches to its own colour or material of the same name (glTF material variants), with no setup. A choice made before the 3D view opens is shown when it loads.
 * **Products in Google's 3D results**: each product's 3D model is added to the product data Google reads (WooCommerce, Rank Math or Yoast), and Google Merchant Center feeds can send the 3D file too.
 * **For developers**: a documented REST API (ready for AI agents), WP-CLI (`wp atlas-ar …`) and hooks.
 * **AtlasAR Cloud (optional, free plan)**: connect in one click to optimise big files at their real size on our servers, with the finished model coming back by itself. The free plan includes 20 optimisations a month: each one makes one of your existing models lighter (it does not create a new model).
@@ -37,7 +38,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 
 * **Hotspots**: click on the model to pin labelled points (materials, features, care).
 * **Sizes**: the product's width, height and depth shown on the 3D view and in AR.
-* **More models** on one product, and **variations**: each WooCommerce variation shows its own model or colour.
+* **More models** on one product, and **variations with any names**: link each WooCommerce variation to a colour of the model with a different name, or to a model file of its own.
 * **Try-on fit**: adjust how glasses or a cap sit on the face, and a more realistic 3D try-on.
 * **Make 3D models with AI** from a product photo or a description, with AtlasAR Cloud, Meshy AI or Tripo3D, in the product editor or straight in the 3D Library.
 * **Optimise in bulk** on AtlasAR Cloud, and **AtlasAR Cloud Premium** with your licence (no monthly limit, photo to 3D).
