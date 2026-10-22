@@ -318,6 +318,9 @@ class AR_TRY_ON_Admin_Routes {
 				'edit_url' => get_edit_post_link( $post->ID, 'raw' ),
 				'view_url' => 'publish' === $post->post_status ? get_permalink( $post->ID ) : get_preview_post_link( $post ), // AR-148
 				'thumb'    => (string) get_the_post_thumbnail_url( $post->ID, 'thumbnail' ),
+				// Bulk 3D from product photos: the photo to build from and the product's size in cm.
+				'image'    => (string) get_the_post_thumbnail_url( $post->ID, 'large' ),
+				'size_cm'  => self::size_cm( $post ),
 				'tryon'    => $data['tryon'],
 				'model'    => $model ? array(
 					'id'      => $model['id'],
@@ -334,6 +337,28 @@ class AR_TRY_ON_Admin_Routes {
 		$res->header( 'X-WP-Total', (string) $q->found_posts );
 		$res->header( 'X-WP-TotalPages', (string) $q->max_num_pages );
 		return $res;
+	}
+
+	/**
+	 * A WooCommerce product's width and height in centimetres (from its own dimensions), or null.
+	 *
+	 * @param \WP_Post $post
+	 * @return array|null { width, height } (each a number or null)
+	 */
+	private static function size_cm( $post ) {
+		if ( 'product' !== $post->post_type || ! function_exists( 'wc_get_product' ) || ! function_exists( 'wc_get_dimension' ) ) {
+			return null;
+		}
+		$product = wc_get_product( $post->ID );
+		if ( ! $product ) {
+			return null;
+		}
+		$cm = function ( $v ) {
+			return is_numeric( $v ) && (float) $v > 0 ? round( (float) wc_get_dimension( (float) $v, 'cm' ), 1 ) : null;
+		};
+		$width  = $cm( $product->get_width() );
+		$height = $cm( $product->get_height() );
+		return null === $width && null === $height ? null : array( 'width' => $width, 'height' => $height );
 	}
 
 	public static function get_item( \WP_REST_Request $r ) {

@@ -678,6 +678,43 @@
 		['rug', __('Rug / mat', D), 10], ['tile', __('Tile / panel', D), 8]
 	];
 
+	/** A file into the 3D Library: a new model, or one more file of an existing model. */
+	function uploadToLibrary(blob, filename, modelId) {
+		var f = new File([blob], filename, { type: blob.type });
+		return modelId
+			? api({ path: '/ar_try_on/v1/library/' + modelId + '/files', method: 'POST', body: form('file', f) })
+			: api({ path: '/ar_try_on/v1/library', method: 'POST', body: form('files[]', f) }).then(function (res) {
+				var r = res.results && res.results[0];
+				if (!r || r.error) throw new Error(r ? r.error : '');
+				return res.models[0];
+			});
+	}
+
+	/**
+	 * A flat product's 3D model from its photo, made in this browser and saved to the 3D Library with
+	 * its iPhone file and the photo as poster. One path for the "from a photo" window and bulk.
+	 * @param {File} file   JPEG, PNG or WebP
+	 * @param {object} o    { kind, widthCm, heightCm, frameColor, name }
+	 * @returns Promise<{ model, placement }>  placement: wall | floor (for AR)
+	 */
+	function makeFlat(file, o) {
+		var tools = sdkTools();
+		if (!tools || !tools.flat) return Promise.reject(new Error(__('The 3D tools could not load. Please reload the page.', D)));
+		var spec = FLAT_KINDS.filter(function (k) { return k[0] === o.kind; })[0] || FLAT_KINDS[0];
+		var name = String(o.name || '').trim();
+		var slug = (name || 'flat-product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'flat-product';
+		var ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+		return tools.flat(file, { kind: spec[0], widthCm: parseFloat(o.widthCm), heightCm: parseFloat(o.heightCm), depthMm: spec[2], frameColor: o.frameColor || '#2b2b2b', name: name }).then(function (out) {
+			return uploadToLibrary(out.glb, slug + '.glb').then(function (model) {
+				return uploadToLibrary(out.usdz, slug + '.usdz', model.id)
+					.then(function () { return uploadToLibrary(file, slug + '.' + ext, model.id); })
+					// The name as typed (the file name gives only a slug).
+					.then(function () { return name ? api({ path: '/ar_try_on/v1/library/' + model.id, method: 'POST', data: { name: name } }) : model; })
+					.then(function () { return { model: model, placement: out.placement || 'wall' }; });
+			});
+		});
+	}
+
 	/**
 	 * AR-153: "Make 3D from a photo": a flat product (wall art, poster, canvas, rug, tile) built in
 	 * this browser from one photo, at its real size, with an iPhone file and the photo as poster.
@@ -731,35 +768,11 @@
 			img.src = u;
 		}
 		function setWidth(v) { setW(v); if (ratio && parseFloat(v) > 0) setH((parseFloat(v) * ratio).toFixed(1)); }
-		function upload(blob, filename, modelId) {
-			var f = new File([blob], filename, { type: blob.type });
-			return modelId
-				? api({ path: '/ar_try_on/v1/library/' + modelId + '/files', method: 'POST', body: form('file', f) })
-				: api({ path: '/ar_try_on/v1/library', method: 'POST', body: form('files[]', f) }).then(function (res) {
-					var r = res.results && res.results[0];
-					if (!r || r.error) throw new Error(r ? r.error : '');
-					return res.models[0];
-				});
-		}
 		function make() {
-			var tools = sdkTools();
-			if (!tools || !tools.flat) { setErr(__('The 3D tools could not load. Please reload the page.', D)); return; }
-			var depth = FLAT_KINDS.filter(function (k) { return k[0] === kind; })[0][2];
-			var slug = (name || 'flat-product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'flat-product';
-			var ext = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
 			setBusy(__('Making the 3D model in your browser…', D)); setErr('');
-			tools.flat(file, { kind: kind, widthCm: parseFloat(w), heightCm: parseFloat(h), depthMm: depth, frameColor: frame, name: name }).then(function (out) {
-				setBusy(__('Saving to the 3D Library…', D));
-				return upload(out.glb, slug + '.glb').then(function (model) {
-					return upload(out.usdz, slug + '.usdz', model.id)
-						.then(function () { return upload(file, slug + '.' + ext, model.id); })
-						// The name as typed (the file name gives only a slug).
-						.then(function () { return name.trim() ? api({ path: '/ar_try_on/v1/library/' + model.id, method: 'POST', data: { name: name.trim() } }) : model; })
-						.then(function () { return model; });
-				});
-			}).then(function (model) {
+			makeFlat(file, { kind: kind, widthCm: w, heightCm: h, frameColor: frame, name: name }).then(function (res) {
 				setBusy(''); setFile(null); setUrl(''); setW(''); setH('');
-				props.api.done([model.id], { kind: kind, model: model });
+				props.api.done([res.model.id], { kind: kind, model: res.model });
 			}, function (e) { setBusy(''); setErr(message(e)); });
 		}
 
@@ -1015,6 +1028,9 @@
 	window.AtlasARLibrary = Object.freeze({
 		/** AR-162: optimisation levels [{ value, label, text }] (Settings uses the same list). */
 		levels: LEVELS,
+		/** Flat product kinds [[value, label, depthMm]] and makeFlat(file, { kind, widthCm, heightCm, name }) → { model, placement }. */
+		flatKinds: FLAT_KINDS,
+		makeFlat: makeFlat,
 		/** Open the picker: options { title, selected (model id), onSelect(model) }. */
 		pick: function (options) {
 			options = options || {};

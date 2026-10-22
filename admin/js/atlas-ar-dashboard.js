@@ -148,6 +148,99 @@
 
 	/* -------------------------------------------------------------- pages */
 
+	/**
+	 * 3D for the whole catalogue: every product without a 3D model that has a photo, made into a flat
+	 * product (wall art, poster, canvas, framed picture, rug, tile) at its real size in this browser,
+	 * one after another, each saved to the 3D Library and shown on its product. The size comes from the
+	 * product's WooCommerce dimensions (width x height) when it has them.
+	 */
+	function BulkFlat(props) {
+		var _rows = useState(null), rows = _rows[0], setRows = _rows[1];
+		var _kind = useState('canvas'), kind = _kind[0], setKind = _kind[1];
+		var _run = useState(false), running = _run[0], setRunning = _run[1];
+		var _err = useState(''), err = _err[0], setErr = _err[1];
+		var lib = window.AtlasARLibrary;
+		useEffect(function () {
+			wp.apiFetch({ path: '/ar_try_on/v1/items?filter=without&per_page=100' }).then(function (list) {
+				setRows(list.filter(function (i) { return i.image; }).map(function (i) {
+					var sz = i.size_cm || {};
+					return { id: i.id, title: i.title, thumb: i.thumb || i.image, image: i.image, w: sz.width ? String(sz.width) : '', h: sz.height ? String(sz.height) : '', on: !!sz.width, status: '' };
+				}));
+			}, function (e) { setRows([]); setErr(UI.message(e)); });
+		}, []);
+		function set(id, k, v) {
+			setRows(function (rs) { return rs.map(function (r) { if (r.id !== id) return r; var o = Object.assign({}, r); o[k] = v; return o; }); });
+		}
+		function ready(r) { return r.on && parseFloat(r.w) >= 1 && parseFloat(r.w) <= 1000 && (!r.h || (parseFloat(r.h) >= 1 && parseFloat(r.h) <= 1000)); }
+		var chosen = (rows || []).filter(ready);
+		/** The photo as a file, and the height for the width when the product has only a width. */
+		function photo(r) {
+			return fetch(r.image, { credentials: 'same-origin' }).then(function (res) {
+				if (!res.ok) throw new Error(__('The photo could not be loaded.', D));
+				return res.blob();
+			}).then(function (blob) {
+				var file = new File([blob], (r.image.split('/').pop() || 'photo.jpg').split('?')[0], { type: blob.type });
+				if (r.h) return { file: file, h: r.h };
+				return createImageBitmap(blob).then(function (bmp) { var h = (parseFloat(r.w) * bmp.height / bmp.width).toFixed(1); bmp.close(); return { file: file, h: h }; });
+			});
+		}
+		function runAll() {
+			if (!lib || !lib.makeFlat) { setErr(__('The 3D tools could not load. Please reload the page.', D)); return; }
+			setRunning(true); setErr('');
+			var queue = chosen.slice();
+			(function next() {
+				var r = queue.shift();
+				if (!r) { setRunning(false); props.onDone(); return; }
+				set(r.id, 'status', 'busy');
+				photo(r).then(function (p) {
+					return lib.makeFlat(p.file, { kind: kind, widthCm: r.w, heightCm: p.h, name: r.title });
+				}).then(function (res) {
+					return UI.api('/products/' + r.id + '/model', { method: 'POST', data: { model_id: res.model.id } }).then(function () {
+						return UI.api('/items/' + r.id, { method: 'POST', data: { data: { ar_placement: res.placement === 'floor' ? 'floor' : 'wall' } } });
+					});
+				}).then(function () { set(r.id, 'status', 'done'); set(r.id, 'on', false); next(); }, function (e) { set(r.id, 'status', UI.message(e)); next(); });
+			})();
+		}
+		var done = (rows || []).filter(function (r) { return r.status === 'done'; }).length;
+		function statusCell(r) {
+			if (r.status === 'done') return el('span', { className: 'atlas-ar-ok' }, __('Done', D));
+			if (r.status === 'busy') return el('span', { className: 'atlas-ar-loading' }, el(C.Spinner, null), __('Making…', D));
+			if (r.status) return el('span', { className: 'atlas-ar-error' }, r.status);
+			return r.w ? null : el('span', { className: 'atlas-ar-muted' }, __('Enter its width', D));
+		}
+		var table = el('table', { className: 'widefat striped atlas-ar-table atlas-ar-bulk-table' },
+			el('thead', null, el('tr', null,
+				el('th', { scope: 'col' }, el('span', { className: 'screen-reader-text' }, __('Make', D))),
+				el('th', { scope: 'col' }, __('Product', D)),
+				el('th', { scope: 'col' }, __('Width (cm)', D)),
+				el('th', { scope: 'col' }, __('Height (cm)', D)),
+				el('th', { scope: 'col' }, __('Status', D)))),
+			el('tbody', null, (rows || []).map(function (r) {
+				return el('tr', { key: r.id },
+					el('td', null, el('input', { type: 'checkbox', checked: r.on, disabled: running || r.status === 'done', 'aria-label': sprintf(__('Make a 3D model for “%s”', D), r.title), onChange: function (e) { set(r.id, 'on', e.target.checked); } })),
+					el('td', null, el('span', { className: 'atlas-ar-product-name' }, el('img', { src: r.thumb, alt: '', width: 36, height: 36 }), r.title)),
+					el('td', null, el('input', { type: 'number', min: 1, max: 1000, step: 'any', value: r.w, disabled: running, className: 'small-text', 'aria-label': __('Width (cm)', D), onChange: function (e) { set(r.id, 'w', e.target.value); if (e.target.value) set(r.id, 'on', true); } })),
+					el('td', null, el('input', { type: 'number', min: 1, max: 1000, step: 'any', value: r.h, placeholder: __('from the photo', D), disabled: running, className: 'small-text', 'aria-label': __('Height (cm)', D), onChange: function (e) { set(r.id, 'h', e.target.value); } })),
+					el('td', null, statusCell(r)));
+			})));
+		var body;
+		if (rows === null) body = el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D));
+		else if (!rows.length) body = el('p', { className: 'atlas-ar-empty' }, __('Every product without a 3D model needs a photo (its featured image) first.', D));
+		else body = table;
+		return el(C.Modal, { title: __('Make 3D from product photos', D), onRequestClose: running ? function () {} : props.onClose, className: 'atlas-ar-bulk-flat', size: 'large' },
+			el('p', null, __('For flat products: wall art, posters, canvas prints, framed pictures, rugs and tiles. Each product’s photo becomes a 3D model at its real size, made in this browser, saved to the 3D Library and shown on the product. Keep this window open while it runs.', D)),
+			el('div', { className: 'atlas-ar-row' },
+				el(C.SelectControl, { label: __('What they are', D), value: kind, disabled: running, onChange: setKind, __nextHasNoMarginBottom: true,
+					options: ((lib && lib.flatKinds) || []).map(function (k) { return { value: k[0], label: k[1] }; }) })),
+			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
+			body,
+			el('div', { className: 'atlas-ar-row atlas-ar-bulk-foot' },
+				el(C.Button, { variant: 'primary', isBusy: running, disabled: running || !chosen.length, onClick: runAll },
+					running ? sprintf(__('Making %1$d of %2$d…', D), done + 1, done + chosen.length) : chosen.length ? sprintf(_n('Make %d 3D model', 'Make %d 3D models', chosen.length, D), chosen.length) : __('Make 3D models', D)),
+				el(C.Button, { variant: 'tertiary', disabled: running, onClick: props.onClose }, __('Close', D)),
+				done ? el('span', { className: 'atlas-ar-ok' }, sprintf(_n('%d made', '%d made', done, D), done)) : null));
+	}
+
 	function ProductsPage(ctx) {
 		var _items = useState(null), items = _items[0], setItems = _items[1];
 		var _total = useState(0), total = _total[0], setTotal = _total[1];
@@ -158,6 +251,7 @@
 		var s = ctx.settings;
 
 		var _loading = useState(true), loading = _loading[0], setLoading = _loading[1];
+		var _bulk = useState(false), bulk = _bulk[0], setBulk = _bulk[1];
 		var req = UI.useRef(0);
 		function load() {
 			var mine = ++req.current; // only the newest answer is shown (quick filter clicks)
@@ -246,7 +340,9 @@
 					el('div', { className: 'atlas-ar-filters', role: 'group', 'aria-label': __('Show', D) },
 						[['all', __('All', D)], ['with', __('With 3D', D)], ['without', __('Without 3D', D)], ['tryon', __('Try-on', D)]].map(function (f) {
 							return el('button', { key: f[0], type: 'button', className: 'atlas-ar-filter' + (filter === f[0] ? ' is-on' : ''), 'aria-pressed': filter === f[0] ? 'true' : 'false', onClick: function () { setFilter(f[0]); setPage(1); } }, f[1]);
-						}))),
+						})),
+					window.AtlasARLibrary && window.AtlasARLibrary.makeFlat ? el(C.Button, { variant: 'secondary', onClick: function () { setBulk(true); } }, __('Make 3D from product photos', D)) : null),
+				bulk ? el(BulkFlat, { onClose: function () { setBulk(false); }, onDone: load }) : null,
 				loading && items !== null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 				items === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', D)) : el('div', { className: 'atlas-ar-list' + (loading ? ' is-loading' : ''), 'aria-busy': loading ? 'true' : 'false' }, items.length === 0
