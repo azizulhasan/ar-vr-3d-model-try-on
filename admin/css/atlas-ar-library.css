@@ -162,3 +162,7 @@
 .atlas-ar-toolbar-actions .atlas-ar-toolbar-label{margin-right:4px;color:var(--atlas-ar-muted);font-size:12px}
 .atlas-ar-toolbar-actions .components-button{min-height:36px}
 .atlas-ar-toolbar-actions .is-primary{margin-left:auto}
+/* Page-speed proof: the saving in time on a typical phone connection, and the "% smaller" badge. */
+.atlas-ar-speed{margin:4px 0 8px;padding:8px 10px;border-radius:6px;background:#eef7f3;color:#14532d}
+.atlas-ar-speed.is-slow{background:#fff7ed;color:#7c2d12}
+.atlas-ar-card-saved{display:inline-block;align-self:flex-start;margin:2px 0;padding:1px 7px;border-radius:999px;background:#eef7f3;color:#14532d;font-size:11px;font-weight:600}

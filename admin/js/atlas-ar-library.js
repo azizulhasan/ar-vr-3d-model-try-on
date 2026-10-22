@@ -38,6 +38,17 @@
 		if (!bytes) return '0 KB';
 		return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB';
 	}
+	// Page-speed proof: how long a file takes on a typical phone connection (10 Mbit/s, about 1.25 MB a second).
+	var PHONE_BYTES_PER_S = 1250000;
+	function loadTime(bytes) {
+		var s = (bytes || 0) / PHONE_BYTES_PER_S;
+		return s < 1 ? __('under 1 s', D) : sprintf(__('%s s', D), s < 10 ? s.toFixed(1) : Math.round(s));
+	}
+	/** "92 % smaller" for an optimised model, or ''. */
+	function savedPct(o) {
+		if (!o || !o.before || !o.after || o.after >= o.before) return '';
+		return Math.round(100 * (1 - o.after / o.before));
+	}
 	function message(err) {
 		return (err && err.message) || __('Something went wrong. Please try again.', D);
 	}
@@ -265,6 +276,7 @@
 			el('span', { className: 'atlas-ar-thumb' }, el(Thumb, { model: m })),
 			el('span', { className: 'atlas-ar-card-name' }, m.name),
 			el(Chips, { model: m }),
+			savedPct(m.optimised) ? el('span', { className: 'atlas-ar-card-saved' }, sprintf(__('%s %% smaller', D), savedPct(m.optimised))) : null,
 			el('span', { className: 'atlas-ar-card-meta' }, size(m.size) + ' · ' + usedText(m))
 		);
 	}
@@ -422,6 +434,13 @@
 				sprintf(o.by === 'cloud' ? __('Optimised on AtlasAR Cloud: %1$s → %2$s', D) : __('Optimised in this browser: %1$s → %2$s', D), size(o.before), size(o.after)),
 				o.height_cm ? ' · ' + sprintf(__('real height %s cm', D), o.height_cm) : '',
 				o.level ? ' · ' + (LEVELS.filter(function (l) { return l.value === o.level; })[0] || { label: o.level }).label : '') : null,
+			// The saving in time, not only in megabytes: what shoppers on a phone wait.
+			o && savedPct(o) ? el('p', { className: 'atlas-ar-speed' },
+				el('strong', null, sprintf(__('Loads in %1$s instead of %2$s', D), loadTime(o.after), loadTime(o.before))),
+				' ' + sprintf(__('on a typical phone connection: %s %% smaller.', D), savedPct(o))) : null,
+			!o && m.files.glb.size ? el('p', { className: 'atlas-ar-speed' + (m.large ? ' is-slow' : '') },
+				sprintf(__('Takes about %s to load on a typical phone connection.', D), loadTime(m.files.glb.size)),
+				m.large ? ' ' + __('Optimise usually makes it 5 to 10 times lighter.', D) : '') : null,
 			el('p', { className: 'description' }, config.cloud
 				? __('Smaller files load faster. "Optimise" runs in this browser: nothing is uploaded. "Optimise on AtlasAR Cloud" sends the file to AtlasAR Cloud (also for very big files). The original file is kept.', D)
 				: __('Smaller files load faster. Runs in this browser: nothing is uploaded anywhere. The original file is kept.', D)),
