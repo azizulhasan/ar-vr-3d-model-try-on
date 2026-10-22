@@ -264,6 +264,10 @@ class AR_TRY_ON_Library_Routes {
 				'size'      => array( 'type' => 'integer', 'description' => 'Total size of the files in bytes (without the original).' ),
 				'missing'   => array( 'type' => 'array', 'items' => array( 'type' => 'string', 'enum' => array( 'glb', 'usdz', 'poster' ) ), 'description' => 'Files the model does not have yet.' ),
 				'large'     => array( 'type' => 'boolean', 'description' => 'The GLB is over the "large file" size (5 MB by default).' ),
+				'health'    => array(
+					'type'        => 'object',
+					'description' => 'Health check of the GLB: ok (no errors or warnings), counts { error, warning, info }, issues [ { code, level, title, text, fix } ] (codes: unreadable, textures_outside, unsupported, tiny, huge, no_colour, heavy, triangles, no_poster; fix: optimise, optimise_lower, height, poster, upload), facts (triangles, images, outside, materials, bare, required, unsupported, size_m).',
+				),
 				'used_by'   => array(
 					'type'        => 'array',
 					'description' => 'Products and posts that show this model.',

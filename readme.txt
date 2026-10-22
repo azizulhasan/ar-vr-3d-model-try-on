@@ -21,6 +21,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **3D view on every product**: turn, zoom, auto-rotate, your background, light and AR button colour. As many 3D views per page as you like.
 * **AR on phones**: Android (Scene Viewer), iPhone and iPad (AR Quick Look, from a `.usdz` file or made from the GLB) and WebXR. A QR code on desktop opens the product in AR on a phone.
 * **3D Library**: all your models in one place, kept apart from the Media Library: GLB, `.gltf` (single file), iPhone `.usdz` and poster images. Search, filters (used, not used, missing files, large files) and pages.
+* **Health check for every model**: before shoppers see it, AtlasAR tells you what would make a model show white (textures outside the file), the wrong size (made in millimetres), slow on phones or blank, with a one-click fix.
 * **Make files lighter in your browser**: "Optimise" shrinks a heavy GLB (often by 80–90 %) at its real size; nothing is uploaded. OBJ and FBX files are converted to GLB in the browser.
 * **Where it shows**: over the product gallery (photo or 3D first), as a gallery slide, a button with a popup, a product tab, or after the content; per product or for the whole shop.
 * **Works with your editor**: the AtlasAR panel in the block editor and the classic editor, an **AtlasAR block** with a live preview, an **Elementor widget**, and the `[atlas_ar]` shortcode for any other page builder.

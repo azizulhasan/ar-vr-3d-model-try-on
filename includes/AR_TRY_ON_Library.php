@@ -327,7 +327,7 @@ class AR_TRY_ON_Library {
 		}
 		$used      = is_array( $usage ) ? ( isset( $usage[ (int) $id ] ) ? $usage[ (int) $id ] : array() ) : self::used_by( $id );
 		$optimised = get_post_meta( $id, self::OPTIMISED_META, true );
-		return array(
+		$model     = array(
 			'id'      => (int) $id,
 			'name'    => get_the_title( $post ),
 			'files'   => $files,
@@ -338,6 +338,9 @@ class AR_TRY_ON_Library {
 			'date'      => get_post_time( 'c', true, $post ),
 			'optimised' => is_array( $optimised ) ? $optimised : null,
 		);
+		// What would make it show white, wrong-sized or slow (cached until the GLB changes).
+		$model['health'] = AR_TRY_ON_Health::check( $id, $model );
+		return $model;
 	}
 
 	/**
@@ -616,6 +619,23 @@ class AR_TRY_ON_Library {
 		}
 		$up   = wp_upload_dir( null, false );
 		$path = trailingslashit( $up['basedir'] ) . $entry['file'];
+		return is_file( $path ) ? $path : '';
+	}
+
+	/**
+	 * A stored file's absolute path (inside the uploads folder), or '' when there is none.
+	 *
+	 * @param int    $id
+	 * @param string $kind glb | usdz | poster | source | original
+	 * @return string
+	 */
+	public static function file_path( $id, $kind ) {
+		$files = self::raw_files( $id );
+		if ( empty( $files[ $kind ]['file'] ) ) {
+			return '';
+		}
+		$up   = wp_upload_dir( null, false );
+		$path = trailingslashit( $up['basedir'] ) . $files[ $kind ]['file'];
 		return is_file( $path ) ? $path : '';
 	}
 

@@ -169,3 +169,16 @@
 /* "From a phone scan" guide */
 .atlas-ar-scan{max-width:760px}
 .atlas-ar-scan ol{margin:8px 0 12px 20px;display:grid;gap:6px}
+/* Health check */
+.atlas-ar-health{margin:12px 0;padding:10px 12px;border:1px solid #f0d8b8;border-radius:8px;background:#fffaf2}
+.atlas-ar-health.is-ok{border-color:#cfe8dc;background:#f3faf6}
+.atlas-ar-health h3{margin:0 0 6px}
+.atlas-ar-health ul{margin:0;display:grid;gap:8px}
+.atlas-ar-health-item{display:flex;gap:8px;align-items:flex-start;margin:0}
+.atlas-ar-health-level{flex:0 0 auto;margin-top:1px;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;background:#e5e7eb;color:#374151}
+.atlas-ar-health-item.is-error .atlas-ar-health-level{background:#fde2e1;color:#9b1c1c}
+.atlas-ar-health-item.is-warning .atlas-ar-health-level{background:#fdf0d5;color:#8a4b00}
+.atlas-ar-health-body{display:grid;gap:3px;justify-items:start}
+.atlas-ar-health-body > span{color:#50575e}
+.atlas-ar-health-ok{margin:0;color:#14532d}
+.atlas-ar-chip--error{background:#fde2e1;color:#9b1c1c}

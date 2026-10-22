@@ -250,6 +250,9 @@
 		});
 		if (m.files.source && !m.files.glb) chips.push(el('span', { key: 'src', className: 'atlas-ar-chip atlas-ar-chip--warn' }, __('Waiting to convert', D)));
 		if (m.large) chips.push(el('span', { key: 'large', className: 'atlas-ar-chip atlas-ar-chip--warn' }, __('Large file', D)));
+		// Health check: errors (shows white, wrong size, cannot be read) first; "Large file" says the rest.
+		var h = m.health && m.health.counts;
+		if (h && h.error) chips.push(el('span', { key: 'fix', className: 'atlas-ar-chip atlas-ar-chip--error' }, __('Needs a fix', D)));
 		return el('div', { className: 'atlas-ar-chips' }, chips);
 	}
 
@@ -452,6 +455,7 @@
 				}),
 				el(C.TextControl, {
 					label: __('Real height (cm), optional', D),
+					id: 'atlas-ar-height-' + m.id,
 					type: 'number', min: 0.5, max: 1000, step: 0.1, value: heightCm, onChange: setHeightCm,
 					help: __('E.g. 32 for a 32 cm vase: the model is made exactly that size in AR. Leave it empty to keep the model’s own size.', D)
 				})),
@@ -466,12 +470,37 @@
 			el(C.Button, { variant: 'primary', isBusy: busy === 'convert', disabled: !!busy, onClick: convert }, __('Convert to GLB', D)),
 			step ? el('p', { className: 'atlas-ar-step', role: 'status' }, step) : null) : null;
 
+		// Health check: what would make it show white, wrong-sized, slow or not at all, with the fix.
+		var health = m.health && m.health.issues ? m.health : null;
+		var LEVEL = { error: __('Must fix', D), warning: __('Should fix', D), info: __('Tip', D) };
+		function fix(i) {
+			if (i.fix === 'optimise' || i.fix === 'optimise_lower') return optimise();
+			if (i.fix === 'poster') return posterFromView();
+			if (i.fix === 'height') {
+				var field = document.getElementById('atlas-ar-height-' + m.id);
+				if (field) { field.scrollIntoView({ block: 'center' }); field.focus(); }
+			}
+			return null;
+		}
+		var FIX_LABEL = { optimise: __('Optimise', D), optimise_lower: __('Optimise', D), poster: __('Take one from the 3D view', D), height: __('Enter its real height', D) };
+		var healthBox = health && m.files.glb ? el('div', { className: 'atlas-ar-health' + (health.ok ? ' is-ok' : '') },
+			el('h3', null, __('Health check', D)),
+			health.issues.length ? el('ul', null, health.issues.map(function (i) {
+				return el('li', { key: i.code, className: 'atlas-ar-health-item is-' + i.level },
+					el('span', { className: 'atlas-ar-health-level' }, LEVEL[i.level] || i.level),
+					el('div', { className: 'atlas-ar-health-body' },
+						el('strong', null, i.title),
+						el('span', null, i.text),
+						FIX_LABEL[i.fix] ? el(C.Button, { variant: 'secondary', size: 'small', disabled: !!busy, onClick: function () { fix(i); } }, FIX_LABEL[i.fix]) : null));
+			})) : el('p', { className: 'atlas-ar-health-ok' }, __('All good: it shows with its colours, at its real size, and loads fast.', D))) : null;
+
 		return el('aside', { className: 'atlas-ar-detail', 'aria-label': __('Model details', D) },
 			el(Preview, { model: m, onHost: function (h) { host.current = h; } }),
 			el(C.TextControl, {
 				label: __('Name', D), value: name, onChange: setName, onBlur: rename,
 				onKeyDown: function (e) { if (e.key === 'Enter') { e.preventDefault(); rename(); } }
 			}),
+			healthBox,
 			el('h3', null, __('Files', D)),
 			el('ul', { className: 'atlas-ar-files' }, files, missing),
 			convertBox,
