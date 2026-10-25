@@ -60,7 +60,7 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         $this->client = new \AtlasAiDev\AppService\Client( 'e0212edbb7ce82838c61d71951c5cb2c', ATLAS_AR_PLUGIN_NAME, ATLAS_AR_ROOT_FILE );
         // Load
         $this->insights  = $this->client->insights(); // Plugin Insights
-        $this->promotion = $this->client->promotions(); // Promo offers
+
 
         // AR-172: admin notices from AtlasAiDev's public GitHub file (like AtlasVoice, TTS-262), for
         // news such as the AtlasAR 3.0 beta. Disclosed in the readme (External services); replaces the
@@ -68,6 +68,8 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         // notice has dates and can be dismissed per user. Editing the file publishes or retires a
         // notice without a release. One file in the free plugin serves Pro users too: a notice's
         // `audience` (free | pro | all) is matched against whether AtlasAR Pro is active.
+        // AtlasAR's own class (not the library's shared Promotions, which another plugin may load first).
+        $this->promotion = new AR_TRY_ON_Promotions( $this->client );
         $this->promotion->set_source( 'https://raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json' );
         $this->promotion->init();
         add_filter( $this->client->getSlug() . '_promo_audience', array( __CLASS__, 'promo_audience' ) );
