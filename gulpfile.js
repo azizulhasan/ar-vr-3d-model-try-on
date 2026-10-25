@@ -148,8 +148,9 @@ const config = {
 		// so SVN trunk receives exactly what ships in the release zip.
 		src: 'production/ar-vr-3d-model-try-on/**',
 		base: 'production/ar-vr-3d-model-try-on',
-		output:
-			'D:/xampp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk/'
+		// AR-75: ATLASAR_SVN_TRUNK lets the release run on the Linux VPS too;
+		// unset, the owner's Windows working copy is used as before.
+		output: ( process.env.ATLASAR_SVN_TRUNK || 'D:/xampp/htdocs/wordpress.org/ar-vr-3d-model-try-on/trunk' ).replace( /\/?$/, '/' )
 	},
 	copyProButton: {
 		src: [], // fill when you need it

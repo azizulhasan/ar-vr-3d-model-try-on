@@ -60,15 +60,19 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         $this->client = new \AtlasAiDev\AppService\Client( 'e0212edbb7ce82838c61d71951c5cb2c', ATLAS_AR_PLUGIN_NAME, ATLAS_AR_ROOT_FILE );
         // Load
         $this->insights  = $this->client->insights(); // Plugin Insights
-        $this->promotion = $this->client->promotions(); // Promo offers
 
-        // AR-61 §2.3: the free plugin no longer fetches the
-        // promotional manifest from gist.githubusercontent.com — that
-        // call was flagged by the WordPress.org Plugins Team as an
-        // undisclosed external service (Guideline 6). The promotion
-        // object is kept instantiated so any add-on that reads it
-        // doesn't break, but no source URL is set and init() is not
-        // called, so no remote fetch occurs.
+
+        // AR-172: admin notices from AtlasAiDev's public GitHub file (like AtlasVoice, TTS-262), for
+        // news such as the AtlasAR 3.0 beta. Disclosed in the readme (External services); replaces the
+        // old undisclosed gist (AR-61). Only for administrators, in the admin; cached 12 hours; each
+        // notice has dates and can be dismissed per user. Editing the file publishes or retires a
+        // notice without a release. One file in the free plugin serves Pro users too: a notice's
+        // `audience` (free | pro | all) is matched against whether AtlasAR Pro is active.
+        // AtlasAR's own class (not the library's shared Promotions, which another plugin may load first).
+        $this->promotion = new AR_TRY_ON_Promotions( $this->client );
+        $this->promotion->set_source( 'https://raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json' );
+        $this->promotion->init();
+        add_filter( $this->client->getSlug() . '_promo_audience', array( __CLASS__, 'promo_audience' ) );
 
         // Initialize
         $this->insightInit();
@@ -84,6 +88,27 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
             10,
             1
         );
+    }
+
+    /**
+     * AR-172: who a notice is for. "pro" only for a site whose AtlasAR Pro has a valid licence (it can
+     * unlock the Pro beta); Pro installed without one, or the free plugin alone, is "free". Reads Pro's
+     * own licence state when Pro is loaded; nothing is gated by it, it only picks the notice.
+     *
+     * @return string 'pro' or 'free'
+     */
+    public static function promo_audience() {
+        // Pro running (its constant), not only listed as active.
+        if ( ! defined( 'AR_TRY_ON_PRO_VERSION' ) ) {
+            return 'free';
+        }
+        if ( function_exists( 'av3mto_fs' ) ) {
+            $fs = av3mto_fs();
+            if ( is_object( $fs ) && method_exists( $fs, 'can_use_premium_code' ) ) {
+                return $fs->can_use_premium_code() ? 'pro' : 'free';
+            }
+        }
+        return 'pro';
     }
 
     /**

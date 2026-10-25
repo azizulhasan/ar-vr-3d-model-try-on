@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -260,6 +260,11 @@ icanhazip.com (Cloudflare) — Privacy: https://www.cloudflare.com/privacypolicy
 Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.
 GitHub, Inc. — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
+= AtlasAiDev notices (raw.githubusercontent.com) =
+
+For administrators only, in the WordPress admin: fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json` to show occasional AtlasAR notices, such as an invitation to try a beta (cached 12h; each notice can be dismissed). No site or user data is sent beyond standard HTTP headers.
+GitHub, Inc. — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+
 = Bundled decoders (not an external service) =
 
 The DRACO, KTX2/Basis, and three.js Lottie decoders that `<model-viewer>` needs are bundled under `public/js/vendor/decoders/` and served from your own site, so the plugin never fetches them from `gstatic.com` or `cdn.jsdelivr.net`.
@@ -358,6 +363,9 @@ A: If your Pro subscription expires, the Pro features (dimensions, hotspots, com
 = Q: Can I use Pro on multiple sites? =
 A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sites, and the Business plan ($199/year) covers 10 sites. [See all plans](https://wpaugmentedreality.com/pricing/?utm_source=wordpress.org&utm_medium=readme&utm_campaign=atlastryon_launch&utm_content=pricing_link).
 
+= Q: Where do I report security bugs found in this plugin? =
+A: Please report security bugs found in the source code of the 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/106665f5-7eed-423e-817a-9f00897ab72b). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 == Screenshots ==
 
 1. Settings For Wordpress
@@ -370,6 +378,9 @@ A: Yes! We offer multi-site plans. The Professional plan ($99/year) covers 3 sit
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 2.3.1 ( 25 October 2026 ) =
+* New: Administrators can now see short notices from the AtlasAR team in the WordPress admin, such as an invitation to try the next version early. They show only to administrators, can be closed with one click and stay closed.
 
 = 2.3.0 ( 8 October 2026 ) =
 * New: A setup guide walks you through where 3D appears, adding your first model, previewing it in 3D and AR, page speed, the AR button, compression and virtual try-on. It opens once on new sites and can be run again from the Overview tab.
@@ -699,6 +710,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.3.1 =
+Adds short notices from the AtlasAR team for administrators, such as an invitation to try AtlasAR 3.0 early. Nothing else changes. Safe to update.
 
 = 2.3.0 =
 Adds a setup guide for new and existing sites, and fixes settings being reset when the plugin is re-activated. Your current settings stay as they are. Safe to update.
