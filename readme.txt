@@ -108,6 +108,11 @@ Only when an administrator opens the "Other AtlasAiDev plugins" screen: the list
 GitHub - Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 WordPress.org - Privacy: https://wordpress.org/about/privacy/
 
+= AtlasAiDev notices (raw.githubusercontent.com) =
+
+For administrators only, in the WordPress admin: short AtlasAR notices (for example a beta invitation) are read from `raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json`, cached for 12 hours. Each notice can be dismissed. No site or user data is sent beyond standard HTTP headers.
+GitHub - Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+
 = A model address you enter =
 
 When an administrator adds a model to the 3D Library from a web address, the site downloads that one file from the address the administrator typed. No other data is sent.

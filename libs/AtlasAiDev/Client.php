@@ -21,6 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class Client
  */
 class Client {
+
+	/**
+	 * Short unique prefix of the host plugin. Namespaces every CSS class,
+	 * element id, AJAX action, and nonce this library outputs, so multiple
+	 * plugins bundling the library never collide.
+	 */
+	const PLUGIN_PREFIX = 'atlasar';
 	
 	/**
 	 * The client version.
