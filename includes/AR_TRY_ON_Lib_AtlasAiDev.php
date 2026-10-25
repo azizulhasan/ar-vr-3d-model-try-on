@@ -70,9 +70,7 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         // `audience` (free | pro | all) is matched against whether AtlasAR Pro is active.
         $this->promotion->set_source( 'https://raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json' );
         $this->promotion->init();
-        add_filter( $this->client->getSlug() . '_promo_audience', function () {
-            return AR_TRY_ON_Helper::is_pro_active() ? 'pro' : 'free';
-        } );
+        add_filter( $this->client->getSlug() . '_promo_audience', array( __CLASS__, 'promo_audience' ) );
 
         // Initialize
         $this->insightInit();
@@ -88,6 +86,27 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
             10,
             1
         );
+    }
+
+    /**
+     * AR-172: who a notice is for. "pro" only for a site whose AtlasAR Pro has a valid licence (it can
+     * unlock the Pro beta); Pro installed without one, or the free plugin alone, is "free". Reads Pro's
+     * own licence state when Pro is loaded; nothing is gated by it, it only picks the notice.
+     *
+     * @return string 'pro' or 'free'
+     */
+    public static function promo_audience() {
+        // Pro running (its constant), not only listed as active.
+        if ( ! defined( 'AR_TRY_ON_PRO_VERSION' ) ) {
+            return 'free';
+        }
+        if ( function_exists( 'av3mto_fs' ) ) {
+            $fs = av3mto_fs();
+            if ( is_object( $fs ) && method_exists( $fs, 'can_use_premium_code' ) ) {
+                return $fs->can_use_premium_code() ? 'pro' : 'free';
+            }
+        }
+        return 'pro';
     }
 
     /**
