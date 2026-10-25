@@ -260,6 +260,11 @@ icanhazip.com (Cloudflare) — Privacy: https://www.cloudflare.com/privacypolicy
 Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.
 GitHub, Inc. — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
+= AtlasAiDev notices (raw.githubusercontent.com) =
+
+For administrators only, in the WordPress admin: fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json` to show occasional AtlasAR notices, such as an invitation to try a beta (cached 12h; each notice can be dismissed). No site or user data is sent beyond standard HTTP headers.
+GitHub, Inc. — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+
 = Bundled decoders (not an external service) =
 
 The DRACO, KTX2/Basis, and three.js Lottie decoders that `<model-viewer>` needs are bundled under `public/js/vendor/decoders/` and served from your own site, so the plugin never fetches them from `gstatic.com` or `cdn.jsdelivr.net`.

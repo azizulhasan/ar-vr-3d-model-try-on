@@ -62,13 +62,17 @@ final class AR_TRY_ON_Lib_AtlasAiDev {
         $this->insights  = $this->client->insights(); // Plugin Insights
         $this->promotion = $this->client->promotions(); // Promo offers
 
-        // AR-61 §2.3: the free plugin no longer fetches the
-        // promotional manifest from gist.githubusercontent.com — that
-        // call was flagged by the WordPress.org Plugins Team as an
-        // undisclosed external service (Guideline 6). The promotion
-        // object is kept instantiated so any add-on that reads it
-        // doesn't break, but no source URL is set and init() is not
-        // called, so no remote fetch occurs.
+        // AR-172: admin notices from AtlasAiDev's public GitHub file (like AtlasVoice, TTS-262), for
+        // news such as the AtlasAR 3.0 beta. Disclosed in the readme (External services); replaces the
+        // old undisclosed gist (AR-61). Only for administrators, in the admin; cached 12 hours; each
+        // notice has dates and can be dismissed per user. Editing the file publishes or retires a
+        // notice without a release. One file in the free plugin serves Pro users too: a notice's
+        // `audience` (free | pro | all) is matched against whether AtlasAR Pro is active.
+        $this->promotion->set_source( 'https://raw.githubusercontent.com/atlasaidev/plugins/main/ar-vr-3d-model-try-on-promotions.json' );
+        $this->promotion->init();
+        add_filter( $this->client->getSlug() . '_promo_audience', function () {
+            return AR_TRY_ON_Helper::is_pro_active() ? 'pro' : 'free';
+        } );
 
         // Initialize
         $this->insightInit();
