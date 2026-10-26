@@ -275,6 +275,15 @@ class AR_TRY_ON_Api_Routes
         $api_body = $decoded_data['body'];
 
         /**
+         * Meshy AI retired its meshy-5 model on 10 October 2026: a request that names it is refused
+         * (400). Settings saved with the old default still name it, so it is sent as meshy-6, Meshy's
+         * current model. Any other model a merchant chose is left as it is.
+         */
+        if ( is_array( $api_body ) && isset( $api_body['ai_model'] ) && 'meshy-5' === strtolower( trim( (string) $api_body['ai_model'] ) ) ) {
+            $api_body['ai_model'] = 'meshy-6';
+        }
+
+        /**
          * Move temporary files to permanent folder.
          */
         if(isset($decoded_data['temporary_model_data'])){

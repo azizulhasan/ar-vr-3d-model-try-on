@@ -927,15 +927,15 @@ export const TRIPO_DEFAULT_MODEL_VERSION = "v2.5-20250123";
  * Meshy AI `ai_model` suggestion list — shared by both
  * text_to_model and image_to_model. Renders as the datalist on the
  * `ai_model` body row (open enum — merchant can type any value
- * Meshy releases later). meshy-6 is the current best quality;
+ * Meshy releases later). meshy-6 is the current best quality (meshy-5
+ * was retired by Meshy on 10 October 2026);
  * `latest` always resolves to Meshy's newest model server-side.
  */
 export const MESHY_MODEL_VERSIONS = [
-    {value: "meshy-6", label: "meshy-6 (latest, best quality)"},
-    {value: "meshy-5", label: "meshy-5 (proven default)"},
+    {value: "meshy-6", label: "meshy-6 (default, best quality)"},
     {value: "latest",  label: "latest (Meshy picks newest)"},
 ];
-export const MESHY_DEFAULT_MODEL = "meshy-5";
+export const MESHY_DEFAULT_MODEL = "meshy-6";
 
 /**
  * Meshy forms a DIFFERENT endpoint per task type (unlike Tripo3D,
@@ -1135,7 +1135,7 @@ export const getAPITypes = (api_type = "tripo3d") => {
                             meshyField("ai_model", {
                                 value: MESHY_DEFAULT_MODEL,
                                 suggestions: MESHY_MODEL_VERSIONS,
-                                description: "Meshy generation model. meshy-6 = latest, highest quality; meshy-5 = proven default; latest = Meshy's newest. Type any model id Meshy releases later.",
+                                description: "Meshy generation model. meshy-6 = the default, highest quality (meshy-5 was retired by Meshy); latest = Meshy's newest. Type any model id Meshy releases later.",
                             }),
                             meshyField("art_style", {
                                 value: "realistic",
@@ -1172,7 +1172,7 @@ export const getAPITypes = (api_type = "tripo3d") => {
                             meshyField("ai_model", {
                                 value: MESHY_DEFAULT_MODEL,
                                 suggestions: MESHY_MODEL_VERSIONS,
-                                description: "Meshy generation model. meshy-6 = latest, highest quality; meshy-5 = proven default; latest = Meshy's newest.",
+                                description: "Meshy generation model. meshy-6 = the default, highest quality (meshy-5 was retired by Meshy); latest = Meshy's newest.",
                             }),
                             meshyField("should_texture", {
                                 value: "true",
