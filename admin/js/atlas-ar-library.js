@@ -658,16 +658,20 @@
 					return el('li', { key: m.id, className: 'atlas-ar-free-card' },
 						m.poster_url ? el('img', { src: m.poster_url, alt: '', loading: 'lazy', width: 160, height: 160 }) : el('span', { className: 'atlas-ar-free-noimg', 'aria-hidden': 'true' }, '3D'),
 						el('strong', null, m.name),
+						// A Premium model: AtlasAR Cloud lets Premium sites download it (the service decides).
+						m.premium ? el('span', null, el('span', { className: 'atlas-ar-badge--pro' }, __('Cloud Premium', D))) : null,
 						el('span', { className: 'atlas-ar-muted' }, [m.category, size(m.size), m.height_cm ? sprintf(__('%s cm tall', D), m.height_cm) : ''].filter(Boolean).join(' · ')),
 						el('span', { className: 'atlas-ar-muted', title: m.license_label }, m.credit ? sprintf(__('%1$s · by %2$s', D), m.license, m.credit) : m.license),
 						have ? el('span', { className: 'atlas-ar-saved' }, '✓ ', __('In your 3D Library', D))
-							: el(C.Button, { variant: 'secondary', isBusy: busy === m.id, disabled: !!busy, onClick: function () { download(m); }, 'aria-label': sprintf(__('Download %s', D), m.name) }, busy === m.id ? __('Downloading…', D) : __('Download', D)));
+							: m.available === false
+								? el(C.Button, { variant: 'secondary', href: config.cloudPricingUrl, target: '_blank', rel: 'noopener noreferrer', 'aria-label': sprintf(__('%s is for AtlasAR Cloud Premium sites: see Premium (opens in a new tab)', D), m.name) }, __('See Premium', D), ' ↗')
+								: el(C.Button, { variant: 'secondary', isBusy: busy === m.id, disabled: !!busy, onClick: function () { download(m); }, 'aria-label': sprintf(__('Download %s', D), m.name) }, busy === m.id ? __('Downloading…', D) : __('Download', D)));
 				})),
 			pages > 1 ? el('nav', { className: 'atlas-ar-library-pager', 'aria-label': __('Free 3D models pages', D) },
 				el(C.Button, { variant: 'secondary', disabled: page <= 1, onClick: function () { setPage(page - 1); } }, __('Previous', D)),
 				el('span', { 'aria-live': 'polite' }, sprintf(__('Page %1$d of %2$d', D), page, pages)),
 				el(C.Button, { variant: 'secondary', disabled: page >= pages, onClick: function () { setPage(page + 1); } }, __('Next', D))) : null,
-			el('p', { className: 'description' }, __('Only your search words are sent to AtlasAR Cloud. Downloads are free and do not use your monthly optimisations.', D)));
+			el('p', { className: 'description' }, __('Only your search words are sent to AtlasAR Cloud. Downloads are free and do not use your monthly optimisations. Models marked Cloud Premium are for sites on the AtlasAR Cloud Premium plan.', D)));
 	}
 
 	/* ------------------------------------------- flat products from a photo (AR-153) */

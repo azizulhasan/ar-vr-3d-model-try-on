@@ -608,6 +608,9 @@ class AR_TRY_ON_Cloud {
 				'category' => sanitize_key( (string) $category ),
 				'page'     => max( 1, (int) $page ),
 				'per_page' => 24,
+				// Premium-only models too, each with `available` (this site may download it): the
+				// service decides, the list shows the others with an upgrade link.
+				'include_premium' => 1,
 			)
 		);
 		$res = self::request( 'GET', '/v1/library?' . http_build_query( $query ) );
@@ -638,6 +641,9 @@ class AR_TRY_ON_Cloud {
 				'credit'      => sanitize_text_field( (string) ( $m['credit'] ?? '' ) ),
 				'poster_url'  => isset( $m['poster_url'] ) ? esc_url_raw( (string) $m['poster_url'] ) : '',
 				'imported'    => isset( $have[ $m['id'] ] ) ? $have[ $m['id'] ] : 0,
+				'premium'     => isset( $m['tier'] ) && 'premium' === $m['tier'],
+				// An older service has no tiers: every model is available.
+				'available'   => ! isset( $m['available'] ) || ! empty( $m['available'] ),
 			);
 		}
 		$cats = array();

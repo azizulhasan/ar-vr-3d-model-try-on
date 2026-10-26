@@ -134,7 +134,7 @@
 .atlas-ar-library .atlas-ar-pro-note{margin:16px 0;padding:8px 12px;border-left:3px solid var(--atlas-ar-pro);background:var(--atlas-ar-pro-ground);color:var(--atlas-ar-ink-2)}
 .atlas-ar-library .atlas-ar-pro-note p{margin:4px 0}
 .atlas-ar-library .atlas-ar-pro-note ul{margin:6px 0 8px 18px;list-style:disc}
-.atlas-ar-library .atlas-ar-badge--pro{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--atlas-ar-pro-badge);color:var(--atlas-ar-pro-ink)}
+.atlas-ar-library .atlas-ar-badge--pro,.atlas-ar-free-card .atlas-ar-badge--pro{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--atlas-ar-pro-badge);color:var(--atlas-ar-pro-ink)}
 
 /* AR-153: flat product from a photo */
 .atlas-ar-flat{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;margin-top:12px}

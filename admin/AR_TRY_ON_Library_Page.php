@@ -77,6 +77,8 @@ class AR_TRY_ON_Library_Page {
 				'cloudAvailable'  => \AR_TRY_ON\AR_TRY_ON_Cloud::available(),
 				'canConnect'      => current_user_can( 'manage_options' ),
 				'integrationsUrl' => admin_url( 'admin.php?page=ar-vr-3d-model-try-on#integrations' ),
+				// The AtlasAR Cloud plans page, for library models marked Cloud Premium.
+				'cloudPricingUrl' => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::link( \AR_TRY_ON\AR_TRY_ON_Cloud::links()['pricing'], 'library', 'premium_model' ),
 				'proUrl'          => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::link( \AR_TRY_ON_Admin\AR_TRY_ON_Admin::PRO_URL, 'library', 'library_note' ), // AR-146
 			)
 		);
