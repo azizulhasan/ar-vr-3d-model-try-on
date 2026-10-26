@@ -146,6 +146,10 @@ class AR_TRY_ON_Admin {
 			// `&welcome=1` / `&welcome=pro`; the React entry then renders
 			// the wizard instead of the dashboard tabs.
 			'wizard'                     => AR_TRY_ON_Wizard::instance()->get_client_data(),
+			// AR-84 — AtlasAR Cloud connector status (never the key; no HTTP call).
+			'cloud'                      => \AR_TRY_ON\AR_TRY_ON_Cloud::status(),
+			// AR-93: pre-fills the AtlasAR Cloud sign-up email (administrators only).
+			'admin_email'                => current_user_can( 'manage_options' ) ? (string) get_option( 'admin_email' ) : '',
 		];
 		return $this->localize_data;
 	}
@@ -336,10 +340,12 @@ class AR_TRY_ON_Admin {
 			'window.ModelViewerElement = Object.assign(window.ModelViewerElement || {}, {' .
 			'dracoDecoderLocation: %s,' .
 			'ktx2TranscoderLocation: %s,' .
+			'meshoptDecoderLocation: %s,' .
 			'lottieLoaderLocation: %s' .
 			'});',
 			wp_json_encode( $decoder_base . 'draco/' ),
 			wp_json_encode( $decoder_base . 'basis/' ),
+			wp_json_encode( $decoder_base . 'meshopt/meshopt_decoder.js' ), // AR-97: meshopt-compressed GLBs.
 			wp_json_encode( $decoder_base . 'lottie/LottieLoader.js' )
 		);
 		wp_add_inline_script( 'ar-try-on-google-model-viewer', $inline_decoder_config, 'before' );

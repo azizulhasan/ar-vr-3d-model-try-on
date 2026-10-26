@@ -24,12 +24,13 @@ import {
 } from '@gltf-transform/functions';
 
 /*
- * Webpack's automatic public path climbs one folder too many for this
- * bundle (it ends at wp-content/plugins/), so its lazy chunks were requested
- * from wp-content/plugins/admin/js/build/chunks/… and failed, which broke
- * the compressor's set-up (AR-73). Set it from this script's own URL
- * instead: …/<plugin>/admin/js/build/<file>.js → …/<plugin>/. The try-on
- * bundle does the same with `atlas_ar_tryon.plugin_url`.
+ * Lazy chunks load from the plugin folder: …/<plugin>/admin/js/build/<file>.js
+ * → …/<plugin>/. Webpack's automatic public path does this too since
+ * webpack.mix.js strips Mix's leading slash from entry names (it used to
+ * climb one folder too many and broke the compressor's set-up, AR-73); set
+ * it explicitly anyway, so a script-combining optimisation plugin that
+ * moves this file cannot break it. The try-on bundle does the same with
+ * `atlas_ar_tryon.plugin_url`.
  */
 if (typeof document !== 'undefined' && document.currentScript && document.currentScript.src) {
     // eslint-disable-next-line no-undef, camelcase

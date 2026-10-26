@@ -46,6 +46,7 @@ use AR_TRY_ON\AR_TRY_ON_Tryon;
 use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
 use ATLAS_AR_API\AR_TRY_ON_Tryon_Routes;
+use ATLAS_AR_API\AR_TRY_ON_Cloud_Routes;
 use AR_TRY_ON_Admin\AR_TRY_ON_Wizard;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
@@ -199,6 +200,11 @@ function atlas_ar_run() {
 	add_action( 'rest_api_init', function() {
 		$tryon_routes = new AR_TRY_ON_Tryon_Routes();
 		$tryon_routes->register_routes();
+	} );
+
+	// AtlasAR Cloud connector (AR-84): routes only; nothing calls out until a key is saved.
+	add_action( 'rest_api_init', function() {
+		( new AR_TRY_ON_Cloud_Routes() )->register_routes();
 	} );
 
 	// Initialize Admin Notice System (v1.8.0+)

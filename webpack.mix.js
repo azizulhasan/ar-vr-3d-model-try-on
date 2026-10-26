@@ -37,6 +37,13 @@ mix.webpackConfig({
         // Caught during Pro-active compression smoke-test 2026-06.
         publicPath: 'auto',
 
+        // Mix names entries with a leading slash ("/admin/js/build/x.min"). Webpack's 'auto'
+        // public path counts that empty first segment as a folder and climbs one level too
+        // far (…/wp-content/plugins/ instead of …/<plugin>/), so lazy chunks 404'd unless the
+        // entry set __webpack_public_path__ itself. Same files, same places — only the name
+        // webpack works from loses the slash.
+        filename: (pathData) => `${String(pathData.chunk.name || '[name]').replace(/^[/\\]+/, '')}.js`,
+
         // Route chunks to a path based on chunk name. Try-on chunks
         // include a contenthash in the filename so every rebuild
         // produces a unique URL — prevents browsers from holding on
