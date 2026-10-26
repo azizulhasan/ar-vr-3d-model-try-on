@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -379,6 +379,9 @@ A: Please report security bugs found in the source code of the 3D Viewer – 3D 
 
 == Changelog ==
 
+= 2.3.2 ( 26 October 2026 ) =
+* Fix: Making a 3D model with Meshy AI works again. Meshy retired the model the plugin used by default, so it now uses Meshy's current model (meshy-6), also for settings you saved before. A model you chose yourself stays as it is.
+
 = 2.3.1 ( 25 October 2026 ) =
 * New: Administrators can now see short notices from the AtlasAR team in the WordPress admin, such as an invitation to try the next version early. They show only to administrators, can be closed with one click and stay closed.
 
@@ -710,6 +713,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 2.3.2 =
+Making 3D models with Meshy AI works again: Meshy retired its older model, and the plugin now uses its current one. Nothing else changes. Safe to update.
 
 = 2.3.1 =
 Adds short notices from the AtlasAR team for administrators, such as an invitation to try AtlasAR 3.0 early. Nothing else changes. Safe to update.
