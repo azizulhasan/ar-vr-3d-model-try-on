@@ -60,7 +60,7 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-popup-panel{display:flex;flex-direction:column;width:min(960px,calc(100vw - 32px));max-height:calc(100vh - 32px);border-radius:12px;background:#fff;color:#111;overflow:hidden}
 .atlasar-popup-panel.atlasar-is-fullscreen{width:100vw;max-height:none;height:100vh;border-radius:0}
 .atlasar-popup-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #e5e7eb}
-.atlasar-popup-title{margin:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atlasar-popup .atlasar-popup-title{margin:0;padding:0;border:0;color:#111827;font:inherit;font-size:16px;font-weight:600;line-height:1.3;letter-spacing:normal;text-transform:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .atlasar-popup-actions{display:flex;gap:4px}
 .atlasar-popup-full,.atlasar-popup-x{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:6px;background:none;color:#374151;font-size:22px;cursor:pointer}
 .atlasar-popup-full:hover,.atlasar-popup-x:hover{background:#f3f4f6}

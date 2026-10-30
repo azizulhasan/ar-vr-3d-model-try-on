@@ -2,7 +2,7 @@
 .atlasar-tryon{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:0;border-radius:14px;background:#111;color:#fff;overflow:hidden}
 .atlasar-tryon::backdrop{background:rgba(0,0,0,.7)}
 .atlasar-tryon-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 10px 16px}
-.atlasar-tryon-title{margin:0;font-size:16px;font-weight:600}
+.atlasar-tryon .atlasar-tryon-title{margin:0;padding:0;border:0;color:#fff;font:inherit;font-size:16px;font-weight:600;line-height:1.3;letter-spacing:normal;text-transform:none} /* a theme's h2 colour and font must not show here */
 .atlasar-tryon-x{width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:24px;cursor:pointer}
 .atlasar-tryon-x:focus-visible,.atlasar-tryon button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .atlasar-tryon-stage{position:relative;background:#000;display:flex;align-items:center;justify-content:center;min-height:240px}
