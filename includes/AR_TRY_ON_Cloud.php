@@ -1,0 +1,985 @@
+<?php
+/**
+ * AR-120: the connection to AtlasAR Cloud (optional; API v1, see the service's API-V1.md).
+ *
+ * Nothing is sent to the service until the site owner clicks "Connect" (with the consent box) or
+ * pastes a key. The API key stays on the server: the dashboard only ever gets its prefix.
+ *
+ * The service is at DEFAULT_URL. The ATLAS_AR_CLOUD_URL constant (wp-config.php) or the
+ * `atlas_ar_cloud_url` filter can point it elsewhere (a test service); an empty value turns the
+ * Cloud features off on that site.
+ *
+ * @package AR_TRY_ON
+ */
+
+namespace AR_TRY_ON; // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -- Stable internal namespace (see AR-66).
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+class AR_TRY_ON_Cloud {
+
+	const OPTION    = 'atlas_ar_cloud';
+	const USAGE_TTL = 600; // the usage block is cached 10 minutes
+
+	/** AtlasAR Cloud: website /, dashboard /app, API /v1 on one host. */
+	const DEFAULT_URL = 'https://cloud.wpaugmentedreality.com';
+
+	/** @return string the service's base URL, '' when it is turned off on this site */
+	public static function base_url() {
+		$url = defined( 'ATLAS_AR_CLOUD_URL' ) ? (string) ATLAS_AR_CLOUD_URL : self::DEFAULT_URL;
+		$url = (string) apply_filters( 'atlas_ar_cloud_url', $url );
+		return 'https' === wp_parse_url( $url, PHP_URL_SCHEME ) || self::is_local( $url ) ? untrailingslashit( esc_url_raw( $url ) ) : '';
+	}
+
+	public static function available() {
+		return '' !== self::base_url();
+	}
+
+	/**
+	 * The service's website pages, for the guidance in Integrations. api.example.com → website
+	 * example.com and dashboard app.example.com; one host (a local service) → that host and /app.
+	 * Filter: atlas_ar_cloud_links.
+	 *
+	 * @return array website, dashboard, docs, connect (the WordPress how-to), pricing, terms, privacy
+	 */
+	public static function links() {
+		$base = self::base_url();
+		if ( '' === $base ) {
+			return array_fill_keys( array( 'website', 'dashboard', 'docs', 'connect', 'pricing', 'terms', 'privacy' ), '' );
+		}
+		$split = false !== strpos( $base, '://api.' );
+		$site  = $split ? str_replace( '://api.', '://', $base ) : $base;
+		$links = array(
+			'website'   => $site . '/',
+			'dashboard' => $split ? str_replace( '://api.', '://app.', $base ) . '/' : $base . '/app/',
+			'docs'      => $site . '/docs/',
+			'connect'   => $site . '/docs/#wordpress',
+			'pricing'   => $site . '/pricing/',
+			'terms'     => $site . '/terms/',
+			'privacy'   => $site . '/privacy/',
+		);
+		return array_map( 'esc_url_raw', (array) apply_filters( 'atlas_ar_cloud_links', $links ) );
+	}
+
+	public static function connected() {
+		$c = self::stored();
+		return '' !== $c['key'];
+	}
+
+	/**
+	 * What the dashboard may know (never the key).
+	 *
+	 * @param bool $fresh ask the service for usage now
+	 * @return array
+	 */
+	public static function status( $fresh = false ) {
+		$c   = self::stored();
+		$out = array(
+			'available'     => self::available(),
+			'connected'     => '' !== $c['key'],
+			'key_prefix'    => $c['key_prefix'],
+			'email'         => $c['email'],
+			'plan'          => $c['plan'],
+			'approval'      => $c['approval'],
+			'usage'         => null,
+			'error'         => $c['lost'] ? __( 'This site’s secret keys changed, so the saved AtlasAR Cloud key cannot be read any more. Please connect again.', 'ar-vr-3d-model-try-on' ) : '',
+			'webhook'       => '' !== $c['key'] && '' !== $c['webhook_secret'],
+			'webhook_error' => $c['webhook_error'],
+			'links'         => self::links(),
+			'site_url'      => self::links()['dashboard'],
+			'my_email'      => (string) wp_get_current_user()->user_email,
+		);
+		// AR-134: a site connected before webhooks (or whose last try failed) tries again, at most hourly.
+		if ( $out['connected'] && $out['available'] && ! $out['webhook'] && 'pending' !== $c['approval'] && ! get_transient( self::OPTION . '_webhook_try' ) ) {
+			set_transient( self::OPTION . '_webhook_try', 1, HOUR_IN_SECONDS );
+			$out['webhook']       = self::connect_webhook();
+			$out['webhook_error'] = self::stored()['webhook_error'];
+		}
+		if ( $out['connected'] && $out['available'] ) {
+			$usage = $fresh ? false : get_transient( self::OPTION . '_usage' );
+			if ( false === $usage ) {
+				$res = self::request( 'GET', '/v1/usage' );
+				if ( is_wp_error( $res ) ) {
+					if ( 'approval_required' === $res->get_error_code() ) {
+						$out['approval'] = 'pending'; // the screen explains it once (not an error)
+					} else {
+						$out['error'] = $res->get_error_message();
+					}
+					return $out;
+				}
+				$usage = isset( $res['usage'] ) && is_array( $res['usage'] ) ? $res['usage'] : array();
+				set_transient( self::OPTION . '_usage', $usage, self::USAGE_TTL );
+				// Approved just now. Several dashboard requests can notice it at once: only one runs this.
+				if ( 'pending' === $c['approval'] && ( add_option( self::OPTION . '_approving', time(), '', false ) || time() - (int) get_option( self::OPTION . '_approving' ) > 2 * MINUTE_IN_SECONDS ) ) {
+					self::save( array( 'approval' => 'active' ) );
+					self::connect_webhook(); // AR-134 instant updates
+					do_action( 'atlas_ar_cloud_connected' ); // AtlasAR Pro: the licence makes the site Premium
+					delete_option( self::OPTION . '_approving' );
+					// AR-143: the plan may have changed just now (Premium), so read the usage again.
+					$again = self::request( 'GET', '/v1/usage' );
+					if ( ! is_wp_error( $again ) && isset( $again['usage'] ) && is_array( $again['usage'] ) ) {
+						$usage = $again['usage'];
+						set_transient( self::OPTION . '_usage', $usage, self::USAGE_TTL );
+					}
+					$out['approval'] = 'active';
+					$out['webhook']  = '' !== self::stored()['webhook_secret'];
+				}
+			}
+			$out['usage'] = self::clean_usage( $usage );
+			if ( ! empty( $out['usage']['plan'] ) ) {
+				$out['plan'] = $out['usage']['plan'];
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * AR-174: what AtlasAR Cloud offers right now for this site, e.g. whether photo to 3D is open
+	 * or "coming soon". Asked at most every 30 minutes; null when not connected or the service is
+	 * older than this question (callers then keep their old behaviour).
+	 *
+	 * @param bool $fresh ask now
+	 * @return array|null { photo_to_3d: { open, in_plan, status }, … }
+	 */
+	public static function capabilities( $fresh = false ) {
+		if ( ! self::available() || ! self::connected() ) {
+			return null;
+		}
+		$cache = self::OPTION . '_caps';
+		$hit   = $fresh ? false : get_transient( $cache );
+		if ( is_array( $hit ) ) {
+			return empty( $hit ) ? null : $hit;
+		}
+		$res  = self::request( 'GET', '/v1/capabilities' );
+		$caps = array();
+		if ( ! is_wp_error( $res ) && is_array( $res ) ) {
+			foreach ( array( 'photo_to_3d', 'optimize', 'library' ) as $k ) {
+				if ( isset( $res[ $k ] ) && is_array( $res[ $k ] ) ) {
+					$caps[ $k ] = array(
+						'open'    => ! empty( $res[ $k ]['open'] ),
+						'in_plan' => ! empty( $res[ $k ]['in_plan'] ),
+						'status'  => isset( $res[ $k ]['status'] ) && 'coming_soon' === $res[ $k ]['status'] ? 'coming_soon' : 'open',
+					);
+				}
+			}
+		}
+		// An error (an older service, offline) is remembered briefly too, so pages never wait on it.
+		set_transient( $cache, $caps, is_wp_error( $res ) ? 10 * MINUTE_IN_SECONDS : 30 * MINUTE_IN_SECONDS );
+		return empty( $caps ) ? null : $caps;
+	}
+
+	/** AR-174: photo to 3D is not open on AtlasAR Cloud yet (known only when the service says so). */
+	public static function photo_to_3d_soon() {
+		$caps = self::capabilities();
+		return is_array( $caps ) && isset( $caps['photo_to_3d'] ) && 'coming_soon' === $caps['photo_to_3d']['status'];
+	}
+
+	/**
+	 * Make a free account for this site (or add the site to the account of that email).
+	 *
+	 * @param string $email
+	 * @param bool   $news  AR-135: the separate, unticked "tips and offers" box was ticked
+	 * @return array|\WP_Error status()
+	 */
+	public static function register( $email, $news = false ) {
+		$email = sanitize_email( $email );
+		if ( ! is_email( $email ) ) {
+			return new \WP_Error( 'atlas_ar_email', __( 'Enter a valid email address.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$res = self::request(
+			'POST',
+			'/v1/projects/register',
+			array(
+				'platform'          => 'wordpress',
+				'site_url'          => home_url( '/' ),
+				'email'             => $email,
+				'marketing_consent' => true === $news, // AR-135: only an explicit opt-in; ignored for an existing account
+			),
+			''
+		);
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		if ( empty( $res['api_key'] ) || ! self::valid_key( $res['api_key'] ) ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		self::save(
+			array(
+				'key'        => (string) $res['api_key'],
+				'key_prefix' => isset( $res['key_prefix'] ) ? sanitize_text_field( $res['key_prefix'] ) : substr( (string) $res['api_key'], 0, 12 ),
+				'project_id' => isset( $res['project_id'] ) ? sanitize_text_field( (string) $res['project_id'] ) : '',
+				'plan'       => isset( $res['plan'] ) ? sanitize_key( is_array( $res['plan'] ) ? ( $res['plan']['key'] ?? 'free' ) : $res['plan'] ) : 'free',
+				'approval'   => isset( $res['approval'] ) && 'pending' === $res['approval'] ? 'pending' : 'active',
+				'email'      => $email,
+			)
+		);
+		self::connect_webhook(); // AR-134: instant updates (best effort)
+		/** This site is connected to AtlasAR Cloud (AtlasAR Pro: its licence makes the site Premium). */
+		do_action( 'atlas_ar_cloud_connected' );
+		return self::status( true );
+	}
+
+	/**
+	 * Use a key made in the AtlasAR Cloud dashboard. Checked with the service before it is kept.
+	 *
+	 * @param string $key
+	 * @return array|\WP_Error status()
+	 */
+	public static function use_key( $key ) {
+		$key = trim( (string) $key );
+		if ( ! self::valid_key( $key ) ) {
+			return new \WP_Error( 'atlas_ar_key', __( 'That does not look like an AtlasAR Cloud key (it starts with ar_live_).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$res = self::request( 'GET', '/v1/usage', null, $key );
+		if ( is_wp_error( $res ) && 'approval_required' !== $res->get_error_code() ) {
+			return $res;
+		}
+		self::save(
+			array(
+				'key'        => $key,
+				'key_prefix' => substr( $key, 0, 12 ),
+				'approval'   => is_wp_error( $res ) ? 'pending' : 'active',
+				'email'      => '',
+				'plan'       => is_wp_error( $res ) || empty( $res['usage']['plan'] ) ? 'free' : sanitize_key( $res['usage']['plan'] ),
+			)
+		);
+		self::connect_webhook(); // AR-134: instant updates (best effort)
+		/** This site is connected to AtlasAR Cloud (AtlasAR Pro: its licence makes the site Premium). */
+		do_action( 'atlas_ar_cloud_connected' );
+		return self::status( true );
+	}
+
+	/** Forget the key on this site (the account and its hosted models stay on the service). */
+	public static function disconnect() {
+		if ( self::connected() && '' !== self::stored()['webhook_url'] ) {
+			self::request( 'DELETE', '/v1/webhook' ); // best effort: no more events to this site
+		}
+		delete_option( self::OPTION );
+		delete_transient( self::OPTION . '_usage' );
+		delete_transient( self::OPTION . '_caps' ); // AR-174
+		return self::status();
+	}
+
+	/**
+	 * A call to the service with this site's key.
+	 *
+	 * @param string      $method
+	 * @param string      $path  /v1/…
+	 * @param array|null  $body  JSON body
+	 * @param string|null $key   null = the stored key, '' = none
+	 * @param array       $raw   a binary body instead of JSON: { body, type, headers }
+	 * @return array|\WP_Error the decoded answer
+	 */
+	public static function request( $method, $path, $body = null, $key = null, array $raw = array() ) {
+		$base = self::base_url();
+		if ( '' === $base ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'AtlasAR Cloud is turned off on this site.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$key     = null === $key ? self::stored()['key'] : (string) $key;
+		$headers = array(
+			'Accept'     => 'application/json',
+			'User-Agent' => 'AtlasAR-WordPress/' . ( defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '0' ) . '; ' . home_url( '/' ),
+		);
+		if ( '' !== $key ) {
+			$headers['Authorization'] = 'Bearer ' . $key;
+		}
+		$args = array(
+			'method'      => $method,
+			'timeout'     => 20,
+			'redirection' => 0,
+			'headers'     => $headers,
+		);
+		if ( null !== $body ) {
+			$args['headers']['Content-Type'] = 'application/json';
+			$args['body']                    = wp_json_encode( $body );
+		} elseif ( isset( $raw['body'] ) ) {
+			$args['headers']['Content-Type'] = isset( $raw['type'] ) ? $raw['type'] : 'application/octet-stream';
+			$args['headers']                 = array_merge( $args['headers'], isset( $raw['headers'] ) ? (array) $raw['headers'] : array() );
+			$args['body']                    = $raw['body'];
+			$args['timeout']                 = 120;
+		}
+		// A local development service (http://localhost) is not a "safe" URL for WordPress.
+		$res = self::is_local( $base ) ? wp_remote_request( $base . $path, $args ) : wp_safe_remote_request( $base . $path, $args );
+		if ( is_wp_error( $res ) ) {
+			return new \WP_Error( 'atlas_ar_cloud_down', __( 'AtlasAR Cloud could not be reached. Please try again in a moment.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$code = (int) wp_remote_retrieve_response_code( $res );
+		$data = json_decode( (string) wp_remote_retrieve_body( $res ), true );
+		if ( $code >= 400 || ! is_array( $data ) ) {
+			$err  = is_array( $data ) && isset( $data['error'] ) && is_array( $data['error'] ) ? $data['error'] : array();
+			$more = array( 'status' => $code );
+			if ( is_array( $data ) && isset( $data['owner_hint'] ) ) { // project_exists: whose email has the site (masked by the service)
+				$more['owner_hint'] = sanitize_text_field( (string) $data['owner_hint'] );
+				$more['takeover']   = ! empty( $data['takeover'] );
+			}
+			return new \WP_Error(
+				isset( $err['code'] ) ? sanitize_key( $err['code'] ) : 'atlas_ar_cloud_' . $code,
+				self::error_text( isset( $err['code'] ) ? (string) $err['code'] : '', $code ),
+				$more
+			);
+		}
+		return $data;
+	}
+
+	/* ------------------------------------------------------------------- optimise */
+
+	const JOB_META = '_atlas_ar_cloud_job';
+
+	/**
+	 * AR-121: send a model's GLB (its original, when it has one) to AtlasAR Cloud to optimise.
+	 *
+	 * @param int   $id        3D Library model
+	 * @param float  $height_cm real height (0 = keep the model's size)
+	 * @param string $level     AR-162: maximum | high | balanced | low | minimum ('' = the site's setting)
+	 * @return array|\WP_Error { status, cloud_id }
+	 */
+	public static function optimise_start( $id, $height_cm = 0, $level = '' ) {
+		if ( ! self::connected() ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$path = AR_TRY_ON_Library::source_glb_path( $id );
+		if ( ! $path ) {
+			return new \WP_Error( 'atlas_ar_model', __( 'This model has no GLB file to optimise.', 'ar-vr-3d-model-try-on' ) );
+		}
+		if ( filesize( $path ) > 50 * MB_IN_BYTES ) {
+			return new \WP_Error( 'atlas_ar_size', __( 'AtlasAR Cloud takes GLB files up to 50 MB.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$query = array( 'name' => mb_substr( get_the_title( $id ), 0, 100 ) );
+		// AR-139: with a real height the model is made exactly that size; without one it keeps its
+		// own size (a service before AR-139 answers invalid_height, shown as "enter the height").
+		if ( $height_cm >= 0.5 && $height_cm <= 1000 ) {
+			$query['height_cm'] = round( (float) $height_cm, 2 );
+		}
+		// AR-162: the level (a service from before levels ignores it and uses its own, = high).
+		$level = in_array( $level, array( 'maximum', 'high', 'balanced', 'low', 'minimum' ), true ) ? $level : (string) AR_TRY_ON_Settings::get( 'general.optimise_level', 'high' );
+		$query['level'] = $level;
+		$res = self::request(
+			'POST',
+			'/v1/models/upload?' . http_build_query( $query ),
+			null,
+			null,
+			array(
+				'body'    => file_get_contents( $path ), // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local model file sent as the request body.
+				'type'    => 'model/gltf-binary',
+				// The same file at another level is a new model (high keeps the key it always had).
+				'headers' => array( 'Idempotency-Key' => 'wp' . (int) $id . '-' . substr( md5_file( $path ), 0, 24 ) . ( 'high' === $level ? '' : '-' . $level ) ),
+			)
+		);
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$cloud_id = isset( $res['id'] ) ? sanitize_text_field( (string) $res['id'] ) : '';
+		if ( '' === $cloud_id ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		delete_transient( self::done_key( $id ) );
+		update_post_meta( $id, self::JOB_META, array( 'cloud_id' => $cloud_id, 'status' => 'queued', 'height_cm' => isset( $query['height_cm'] ) ? $query['height_cm'] : 0, 'level' => $level, 'time' => time() ) );
+		// AR-143: the same file sent again (e.g. after "Restore original") is answered with the model
+		// already made (same Idempotency-Key). It is ready, so no webhook will come: fetch it now.
+		if ( isset( $res['status'] ) && 'ready' === $res['status'] ) {
+			$done = self::optimise_poll( $id );
+			if ( ! is_wp_error( $done ) ) {
+				return array( 'status' => $done['status'], 'cloud_id' => $cloud_id );
+			}
+		}
+		return array( 'status' => 'queued', 'cloud_id' => $cloud_id );
+	}
+
+	/**
+	 * AR-121: check the Cloud job; when the model is ready, its GLB replaces the model's GLB.
+	 *
+	 * @param int $id 3D Library model
+	 * @return array|\WP_Error { status, model? }
+	 */
+	public static function optimise_poll( $id ) {
+		$job = get_post_meta( $id, self::JOB_META, true );
+		if ( ! is_array( $job ) || empty( $job['cloud_id'] ) ) {
+			// The job finished a moment ago (often by the webhook, before the screen asked): its result.
+			$done = get_transient( self::done_key( $id ) );
+			if ( is_array( $done ) && 'ready' === $done['status'] ) {
+				return array( 'status' => 'ready', 'model' => AR_TRY_ON_Library::get( $id ) );
+			}
+			if ( is_array( $done ) && 'failed' === $done['status'] ) {
+				return new \WP_Error( 'atlas_ar_cloud_failed', $done['message'] );
+			}
+			return new \WP_Error( 'atlas_ar_cloud_job', __( 'No AtlasAR Cloud job for this model.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$res = self::request( 'GET', '/v1/models/' . rawurlencode( $job['cloud_id'] ) );
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$status = isset( $res['status'] ) ? sanitize_key( $res['status'] ) : '';
+		if ( 'failed' === $status ) {
+			delete_post_meta( $id, self::JOB_META );
+			$why = isset( $res['error']['message'] ) ? sanitize_text_field( $res['error']['message'] ) : '';
+			/* translators: %s: reason from the service */
+			$message = trim( sprintf( __( 'AtlasAR Cloud could not optimise this model. %s', 'ar-vr-3d-model-try-on' ), $why ) );
+			set_transient( self::done_key( $id ), array( 'status' => 'failed', 'message' => $message ), self::DONE_TTL );
+			return new \WP_Error( 'atlas_ar_cloud_failed', $message );
+		}
+		if ( 'ready' !== $status || empty( $res['files']['glb'] ) ) {
+			return array( 'status' => $status ? $status : 'processing' );
+		}
+		$url = is_array( $res['files']['glb'] ) ? (string) ( isset( $res['files']['glb']['url'] ) ? $res['files']['glb']['url'] : '' ) : (string) $res['files']['glb'];
+		$tmp = self::download( $url );
+		if ( is_wp_error( $tmp ) ) {
+			return 'atlas_ar_cloud' === $tmp->get_error_code() ? $tmp : new \WP_Error( 'atlas_ar_cloud_down', __( 'The optimised model could not be downloaded. Please try again.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$model = AR_TRY_ON_Library::put_optimised(
+			$id,
+			array( 'tmp_name' => $tmp, 'name' => sanitize_title( get_the_title( $id ) ) . '.glb' ),
+			array(
+				'by'        => 'cloud',
+				'triangles' => isset( $res['stats']['triangles'] ) ? $res['stats']['triangles'] : 0,
+				'budget'    => isset( $res['budget'] ) ? $res['budget'] : '',
+				'height_cm' => $job['height_cm'],
+				'level'     => isset( $res['stats']['level'] ) ? $res['stats']['level'] : ( isset( $job['level'] ) ? $job['level'] : '' ),
+			)
+		);
+		wp_delete_file( $tmp );
+		if ( is_wp_error( $model ) ) {
+			return $model;
+		}
+		delete_post_meta( $id, self::JOB_META );
+		set_transient( self::done_key( $id ), array( 'status' => 'ready' ), self::DONE_TTL );
+		return array( 'status' => 'ready', 'model' => $model );
+	}
+
+	/** A finished job's result is kept this long, for a screen that asks after the webhook finished it. */
+	const DONE_TTL = 600;
+
+	/** @return string the transient with model $id's last finished Cloud job */
+	private static function done_key( $id ) {
+		return 'atlas_ar_cloud_done_' . (int) $id;
+	}
+
+	/* --------------------------------------------------------------------- helpers */
+
+	private static function stored() {
+		$c = get_option( self::OPTION, array() );
+		$c = wp_parse_args( is_array( $c ) ? $c : array(), array( 'key' => '', 'key_prefix' => '', 'project_id' => '', 'plan' => '', 'approval' => '', 'email' => '', 'webhook_secret' => '', 'webhook_url' => '', 'webhook_error' => '' ) );
+
+		$key                 = self::unseal( $c['key'] );
+		$c['lost']           = '' !== $c['key'] && '' === $key; // sealed with secret keys that changed since
+		$c['key']            = $key;
+		$c['webhook_secret'] = self::unseal( $c['webhook_secret'] );
+		return $c;
+	}
+
+	private static function save( array $patch ) {
+		// AR-143: merge into what is saved now, not this request's older copy (another request may
+		// have saved the webhook secret meanwhile).
+		wp_cache_delete( self::OPTION, 'options' );
+		$c = array_merge( self::stored(), $patch );
+		unset( $c['lost'] );
+		$c['key']            = self::seal( (string) $c['key'] );
+		$c['webhook_secret'] = self::seal( (string) $c['webhook_secret'] );
+		update_option( self::OPTION, $c, false );
+		delete_transient( self::OPTION . '_usage' );
+		delete_transient( self::OPTION . '_caps' ); // AR-174
+	}
+
+	private static function valid_key( $key ) {
+		return (bool) preg_match( '/^ar_(live|test)_[A-Za-z0-9]{20,64}$/', (string) $key );
+	}
+
+	private static function is_local( $url ) {
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+		return 'http' === wp_parse_url( $url, PHP_URL_SCHEME ) && in_array( $host, array( 'localhost', '127.0.0.1' ), true );
+	}
+
+	private static function clean_usage( $u ) {
+		$u = is_array( $u ) ? $u : array();
+		return array(
+			'plan'            => isset( $u['plan'] ) ? sanitize_key( is_array( $u['plan'] ) ? ( $u['plan']['key'] ?? '' ) : $u['plan'] ) : '',
+			'units_used'      => isset( $u['units_used'] ) ? (int) $u['units_used'] : 0,
+			'units_limit'     => isset( $u['units_limit'] ) && null !== $u['units_limit'] ? (int) $u['units_limit'] : null,
+			'units_remaining' => isset( $u['units_remaining'] ) && null !== $u['units_remaining'] ? (int) $u['units_remaining'] : null,
+			'resets_at'       => isset( $u['resets_at'] ) ? sanitize_text_field( (string) $u['resets_at'] ) : '',
+		);
+	}
+
+	/** Plain words for the service's error codes. */
+	private static function error_text( $code, $status ) {
+		switch ( $code ) {
+			case 'missing_api_key':
+			case 'invalid_api_key':
+				return __( 'This AtlasAR Cloud key is not valid (it may have been revoked).', 'ar-vr-3d-model-try-on' );
+			case 'approval_required':
+				return __( 'This site waits for approval: open the email AtlasAR Cloud sent you and approve it.', 'ar-vr-3d-model-try-on' );
+			case 'suspended':
+				return __( 'This AtlasAR Cloud account is suspended. Please contact AtlasAR support.', 'ar-vr-3d-model-try-on' );
+			case 'quota_exceeded':
+				return __( 'This month’s optimisations are used up. More are available next month, or with AtlasAR Pro (no monthly limit).', 'ar-vr-3d-model-try-on' );
+			case 'model_limit':
+				return __( 'Your plan’s number of hosted models is reached.', 'ar-vr-3d-model-try-on' );
+			case 'feature_not_in_plan':
+				return __( 'Your AtlasAR Cloud plan does not include this.', 'ar-vr-3d-model-try-on' );
+			case 'rate_limited':
+			case 'too_many_in_progress':
+			case 'server_busy':
+				return __( 'AtlasAR Cloud is busy. Please try again in a minute.', 'ar-vr-3d-model-try-on' );
+			case 'generation_unavailable':
+				return __( 'Photo to 3D is not switched on at AtlasAR Cloud right now. Please try again later.', 'ar-vr-3d-model-try-on' );
+			case 'file_too_large':
+				return __( 'The file is too large for AtlasAR Cloud (3D models up to 50 MB, photos up to 25 MB).', 'ar-vr-3d-model-try-on' );
+			case 'project_exists':
+				return __( 'This site is already connected to AtlasAR Cloud with another email address.', 'ar-vr-3d-model-try-on' );
+			case 'already_owner':
+				return __( 'This site is already connected with this email: click "Connect this site" instead.', 'ar-vr-3d-model-try-on' );
+			case 'site_unreachable':
+				return __( 'AtlasAR Cloud could not reach this site to confirm you run it. The site must be online and public (a local or private site cannot be moved): use the first email instead, or remove the site from that account in the AtlasAR Cloud dashboard.', 'ar-vr-3d-model-try-on' );
+			case 'site_not_verified':
+				return __( 'AtlasAR Cloud could not confirm this site (a cache or firewall may have hidden the check). Please try again.', 'ar-vr-3d-model-try-on' );
+			case 'challenge_expired':
+				return __( 'That took too long. Please try again.', 'ar-vr-3d-model-try-on' );
+			case 'account_suspended':
+			case 'project_suspended':
+				return __( 'This AtlasAR Cloud account or site is suspended. Please contact AtlasAR support.', 'ar-vr-3d-model-try-on' );
+			case 'invalid_email':
+				return __( 'Enter a valid email address.', 'ar-vr-3d-model-try-on' );
+			case 'invalid_height':
+				return __( 'Enter the product’s real height (0.5–1000 cm): AtlasAR Cloud makes the model exactly that size.', 'ar-vr-3d-model-try-on' );
+			case 'invalid_site_url':
+				return __( 'AtlasAR Cloud did not accept this site’s address (Settings › General › Site Address).', 'ar-vr-3d-model-try-on' );
+		}
+		if ( 0 === strpos( (string) $code, 'invalid_g' ) || in_array( $code, array( 'not_glb', 'external_reference', 'out_of_bounds', 'too_complex', 'no_geometry' ), true ) || 0 === strpos( (string) $code, 'unsupported_' ) ) {
+			return __( 'AtlasAR Cloud could not read this 3D file. Try exporting it again as a single GLB.', 'ar-vr-3d-model-try-on' );
+		}
+		/* translators: %d: HTTP status code */
+		return sprintf( __( 'AtlasAR Cloud answered with an error (%d). Please try again later.', 'ar-vr-3d-model-try-on' ), (int) $status );
+	}
+
+	/**
+	 * Download a file AtlasAR Cloud gave (a finished model): a path or a URL on the configured
+	 * service itself is trusted (also a local development service); any other URL (the CDN)
+	 * must be a safe public https URL. AtlasAR Pro uses this too.
+	 *
+	 * @param string $url
+	 * @return string|\WP_Error a temporary file (the caller deletes it)
+	 */
+	public static function download( $url ) {
+		$base = self::base_url();
+		$url  = (string) $url;
+		if ( '' !== $base && 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+			$url = $base . $url;
+		}
+		$own = '' !== $base && 0 === strpos( $url, $base . '/' );
+		if ( ! $own && ( 'https' !== wp_parse_url( $url, PHP_URL_SCHEME ) || ! wp_http_validate_url( $url ) ) ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		if ( ! ( $own && self::is_local( $base ) ) ) {
+			return download_url( $url, 180 );
+		}
+		// A local development service (http://localhost) is not a "safe" URL for download_url().
+		$tmp = wp_tempnam( 'atlas-ar-cloud' );
+		$res = wp_remote_get( $url, array( 'timeout' => 180, 'stream' => true, 'filename' => $tmp, 'redirection' => 0 ) );
+		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+			wp_delete_file( $tmp );
+			return is_wp_error( $res ) ? $res : new \WP_Error( 'atlas_ar_cloud_down', __( 'The file could not be downloaded from AtlasAR Cloud.', 'ar-vr-3d-model-try-on' ) );
+		}
+		return $tmp;
+	}
+
+	/* ------------------------------------------------------ free 3D model library */
+
+	/** AR-144: post meta of a model downloaded from the free library: { id, license, credit }. */
+	const LIBRARY_META = '_atlas_ar_library_source';
+	/** AR-155: the free model's id alone (lib_…), so a search looks up only the models it shows. */
+	const LIBRARY_ID_META = '_atlas_ar_library_id';
+
+	/**
+	 * AR-144: search AtlasAR Cloud's free 3D model library (any plan; nothing is used). Sends only
+	 * the search words, category and page.
+	 *
+	 * @return array|\WP_Error { data: [ model… ], total, categories }, each model with `imported`
+	 *                         (the 3D Library model ID when this site has it already)
+	 */
+	public static function library_search( $q = '', $category = '', $page = 1 ) {
+		if ( ! self::connected() ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$query = array_filter(
+			array(
+				'q'        => mb_substr( sanitize_text_field( (string) $q ), 0, 100 ),
+				'category' => sanitize_key( (string) $category ),
+				'page'     => max( 1, (int) $page ),
+				'per_page' => 24,
+				// Premium-only models too, each with `available` (this site may download it): the
+				// service decides, the list shows the others with an upgrade link.
+				'include_premium' => 1,
+			)
+		);
+		$res = self::request( 'GET', '/v1/library?' . http_build_query( $query ) );
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		$ids  = array();
+		foreach ( isset( $res['data'] ) && is_array( $res['data'] ) ? $res['data'] : array() as $m ) {
+			if ( is_array( $m ) && ! empty( $m['id'] ) ) {
+				$ids[] = (string) $m['id'];
+			}
+		}
+		$have = self::library_imported( $ids );
+		$out  = array();
+		foreach ( isset( $res['data'] ) && is_array( $res['data'] ) ? $res['data'] : array() as $m ) {
+			if ( ! is_array( $m ) || empty( $m['id'] ) || ! preg_match( '/^lib_[A-Za-z0-9]{22}$/', (string) $m['id'] ) ) {
+				continue;
+			}
+			$out[] = array(
+				'id'          => (string) $m['id'],
+				'name'        => sanitize_text_field( (string) ( $m['name'] ?? '' ) ),
+				'description' => sanitize_text_field( (string) ( $m['description'] ?? '' ) ),
+				'category'    => sanitize_text_field( (string) ( $m['category_label'] ?? '' ) ),
+				'size'        => (int) ( $m['size'] ?? 0 ),
+				'height_cm'   => isset( $m['height_cm'] ) ? (float) $m['height_cm'] : null,
+				'license'     => sanitize_text_field( (string) ( $m['license'] ?? '' ) ),
+				'license_label' => sanitize_text_field( (string) ( $m['license_label'] ?? '' ) ),
+				'credit'      => sanitize_text_field( (string) ( $m['credit'] ?? '' ) ),
+				'poster_url'  => isset( $m['poster_url'] ) ? esc_url_raw( (string) $m['poster_url'] ) : '',
+				'imported'    => isset( $have[ $m['id'] ] ) ? $have[ $m['id'] ] : 0,
+				'premium'     => isset( $m['tier'] ) && 'premium' === $m['tier'],
+				// An older service has no tiers: every model is available.
+				'available'   => ! isset( $m['available'] ) || ! empty( $m['available'] ),
+			);
+		}
+		$cats = array();
+		foreach ( isset( $res['categories'] ) && is_array( $res['categories'] ) ? $res['categories'] : array() as $k => $v ) {
+			$cats[ sanitize_key( $k ) ] = sanitize_text_field( (string) $v );
+		}
+		return array( 'data' => $out, 'total' => isset( $res['total'] ) ? (int) $res['total'] : count( $out ), 'categories' => $cats );
+	}
+
+	/**
+	 * AR-144: download a free library model into this site's 3D Library (with its picture as the
+	 * poster). A model the site has already is not downloaded again.
+	 *
+	 * @param string $lib_id lib_…
+	 * @return array|\WP_Error the 3D Library model
+	 */
+	public static function library_import( $lib_id ) {
+		$lib_id = (string) $lib_id;
+		if ( ! preg_match( '/^lib_[A-Za-z0-9]{22}$/', $lib_id ) ) {
+			return new \WP_Error( 'atlas_ar_library', __( 'This free model was not found.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$have = self::library_imported( array( $lib_id ) );
+		if ( isset( $have[ $lib_id ] ) && AR_TRY_ON_Library::get( $have[ $lib_id ] ) ) {
+			return AR_TRY_ON_Library::get( $have[ $lib_id ] );
+		}
+		if ( ! self::connected() ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		$meta = self::request( 'GET', '/v1/library/' . $lib_id );
+		if ( is_wp_error( $meta ) ) {
+			return $meta;
+		}
+		$tmp = self::fetch_with_key( '/v1/library/' . $lib_id . '/file' );
+		if ( is_wp_error( $tmp ) ) {
+			return $tmp;
+		}
+		$name    = sanitize_text_field( (string) ( $meta['name'] ?? '' ) );
+		$slug    = sanitize_title( (string) ( $meta['slug'] ?? $name ) );
+		$results = AR_TRY_ON_Library::add_uploads( array( array( 'tmp_name' => $tmp, 'name' => ( '' !== $slug ? $slug : 'free-model' ) . '.glb' ) ) );
+		wp_delete_file( $tmp );
+		$res = isset( $results[0] ) ? $results[0] : array();
+		if ( empty( $res['model_id'] ) ) {
+			return new \WP_Error( 'atlas_ar_library', isset( $res['error'] ) ? $res['error'] : __( 'The model could not be added to the 3D Library.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$id = (int) $res['model_id'];
+		if ( '' !== $name ) {
+			AR_TRY_ON_Library::rename( $id, $name );
+		}
+		update_post_meta( $id, self::LIBRARY_ID_META, $lib_id );
+		update_post_meta(
+			$id,
+			self::LIBRARY_META,
+			array(
+				'id'      => $lib_id,
+				'license' => sanitize_text_field( (string) ( $meta['license'] ?? '' ) ),
+				'credit'  => sanitize_text_field( (string) ( $meta['credit'] ?? '' ) ),
+			)
+		);
+		// The picture becomes the poster (best effort: the model works without one).
+		if ( ! empty( $meta['poster_url'] ) ) {
+			$pic = self::download( (string) $meta['poster_url'] );
+			if ( ! is_wp_error( $pic ) ) {
+				$ext = strtolower( pathinfo( (string) wp_parse_url( (string) $meta['poster_url'], PHP_URL_PATH ), PATHINFO_EXTENSION ) );
+				AR_TRY_ON_Library::add_file( $id, array( 'tmp_name' => $pic, 'name' => ( '' !== $slug ? $slug : 'free-model' ) . '.' . ( in_array( $ext, array( 'jpg', 'png', 'webp' ), true ) ? $ext : 'png' ) ) );
+				wp_delete_file( $pic );
+			}
+		}
+		return AR_TRY_ON_Library::get( $id );
+	}
+
+	/**
+	 * lib_… => 3D Library model ID, for these free models when this site has downloaded them
+	 * (AR-155: one query for the ids shown, never every model).
+	 *
+	 * @param string[] $lib_ids
+	 */
+	private static function library_imported( array $lib_ids ) {
+		$lib_ids = array_values( array_filter( $lib_ids, function ( $v ) { return (bool) preg_match( '/^lib_[A-Za-z0-9]{22}$/', (string) $v ); } ) );
+		if ( ! $lib_ids ) {
+			return array();
+		}
+		$ids = get_posts(
+			array(
+				'post_type'      => AR_TRY_ON_Library::POST_TYPE,
+				'post_status'    => 'any',
+				'posts_per_page' => count( $lib_ids ),
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'meta_query'     => array( array( 'key' => self::LIBRARY_ID_META, 'value' => $lib_ids, 'compare' => 'IN' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query -- admin screen only; at most one page of free models.
+			)
+		);
+		$out = array();
+		foreach ( $ids as $id ) {
+			$out[ (string) get_post_meta( $id, self::LIBRARY_ID_META, true ) ] = (int) $id;
+		}
+		return $out;
+	}
+
+	/** A file from AtlasAR Cloud that needs this site's key (a free library model): a temp file. */
+	private static function fetch_with_key( $path ) {
+		$base = self::base_url();
+		$key  = self::stored()['key'];
+		if ( '' === $base || '' === $key ) {
+			return new \WP_Error( 'atlas_ar_cloud_off', __( 'Connect AtlasAR Cloud first (AtlasAR › Integrations).', 'ar-vr-3d-model-try-on' ) );
+		}
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		$tmp  = wp_tempnam( 'atlas-ar-library' );
+		$args = array(
+			'timeout'     => 180,
+			'stream'      => true,
+			'filename'    => $tmp,
+			'redirection' => 0,
+			'headers'     => array( 'Authorization' => 'Bearer ' . $key, 'Accept' => 'model/gltf-binary' ),
+		);
+		$res  = self::is_local( $base ) ? wp_remote_get( $base . $path, $args ) : wp_safe_remote_get( $base . $path, $args );
+		$code = is_wp_error( $res ) ? 0 : (int) wp_remote_retrieve_response_code( $res );
+		if ( 200 !== $code ) {
+			$body = $code && is_readable( $tmp ) ? json_decode( (string) file_get_contents( $tmp ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the error answer just written to the temp file.
+			wp_delete_file( $tmp );
+			if ( ! $code ) {
+				return new \WP_Error( 'atlas_ar_cloud_down', __( 'AtlasAR Cloud could not be reached. Please try again in a moment.', 'ar-vr-3d-model-try-on' ) );
+			}
+			if ( 429 === $code ) {
+				return new \WP_Error( 'rate_limited', __( 'This site downloaded many free models today. Please try again tomorrow.', 'ar-vr-3d-model-try-on' ) );
+			}
+			$err = is_array( $body ) && isset( $body['error']['code'] ) ? sanitize_key( $body['error']['code'] ) : 'atlas_ar_cloud_' . $code;
+			return new \WP_Error( $err, 404 === $code ? __( 'This free model is not in the library any more.', 'ar-vr-3d-model-try-on' ) : self::error_text( $err, $code ) );
+		}
+		return $tmp;
+	}
+
+	/* ---------------------------------------------------------------- webhooks */
+
+	/** The address AtlasAR Cloud sends model.ready / model.failed to. */
+	public static function webhook_url() {
+		return rest_url( 'ar_try_on/v1/cloud/webhook' );
+	}
+
+	/**
+	 * AR-134: ask AtlasAR Cloud to tell this site when a model is ready, so a model arrives even
+	 * when no AtlasAR page is open. Best effort: the plugin still checks while a page is open.
+	 * The secret (shown once by the service) is kept sealed like the key.
+	 *
+	 * @return bool on
+	 */
+	public static function connect_webhook() {
+		$c = self::stored();
+		if ( '' === $c['key'] || 'pending' === $c['approval'] ) {
+			return false;
+		}
+		$url = self::webhook_url();
+		$res = self::request( 'PUT', '/v1/webhook', array( 'url' => $url ) );
+		if ( ! is_wp_error( $res ) && empty( $res['secret'] ) && ( '' === $c['webhook_secret'] || $url !== $c['webhook_url'] ) ) {
+			$res = self::request( 'POST', '/v1/webhook/rotate-secret' ); // there was one already, but not with a secret this site has
+		}
+		if ( is_wp_error( $res ) ) {
+			self::save( array( 'webhook_error' => $res->get_error_message() ) );
+			return false;
+		}
+		$patch = array( 'webhook_url' => $url, 'webhook_error' => '' );
+		if ( ! empty( $res['secret'] ) && is_string( $res['secret'] ) ) {
+			$patch['webhook_secret'] = $res['secret'];
+		}
+		self::save( $patch );
+		return true;
+	}
+
+	/**
+	 * An event from AtlasAR Cloud (REST, no login: it is signed). Checked on the raw body with
+	 * this site's secret (HMAC-SHA256 of "<t>.<body>", at most 5 minutes old); each event is
+	 * handled once. model.ready / model.failed finish the 3D Library's "Optimise on AtlasAR
+	 * Cloud" jobs; add-ons get the action atlas_ar_cloud_event( $type, $model ).
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function receive( \WP_REST_Request $r ) {
+		$secret = self::stored()['webhook_secret'];
+		$body   = (string) $r->get_body();
+		parse_str( str_replace( ',', '&', (string) $r->get_header( 'atlasar_signature' ) ), $sig );
+		$fresh = isset( $sig['t'] ) && abs( time() - (int) $sig['t'] ) <= 300;
+		$valid = '' !== $secret && isset( $sig['v1'] ) && is_string( $sig['v1'] ) && hash_equals( hash_hmac( 'sha256', $sig['t'] . '.' . $body, $secret ), $sig['v1'] );
+		if ( ! $fresh || ! $valid ) {
+			return new \WP_Error( 'atlas_ar_signature', 'Invalid signature.', array( 'status' => 401 ) );
+		}
+		$event = sanitize_text_field( (string) $r->get_header( 'atlasar_event_id' ) );
+		$seen  = 'atlas_ar_cloud_evt_' . md5( $event );
+		if ( '' !== $event && get_transient( $seen ) ) {
+			return new \WP_REST_Response( array( 'ok' => true, 'duplicate' => true ), 200 ); // at-least-once delivery
+		}
+		$data  = json_decode( $body, true );
+		$type  = sanitize_key( str_replace( '.', '_', (string) $r->get_header( 'atlasar_event_type' ) ) );
+		$model = is_array( $data ) && isset( $data['data']['model'] ) && is_array( $data['data']['model'] ) ? $data['data']['model'] : array();
+		$done  = 0;
+		if ( in_array( $type, array( 'model_ready', 'model_failed' ), true ) && ! empty( $model['id'] ) ) {
+			foreach ( self::models_waiting_for( (string) $model['id'] ) as $id ) {
+				self::optimise_poll( $id ); // downloads the finished file (or clears a failed job)
+				++$done;
+			}
+			/**
+			 * An AtlasAR Cloud model finished (AtlasAR Pro: "Make 3D" jobs).
+			 *
+			 * @param string $type  model_ready | model_failed
+			 * @param array  $model the model as GET /v1/models/:id answers it
+			 */
+			do_action( 'atlas_ar_cloud_event', $type, $model );
+		}
+		if ( '' !== $event ) {
+			set_transient( $seen, 1, 2 * DAY_IN_SECONDS );
+		}
+		return new \WP_REST_Response( array( 'ok' => true, 'handled' => $done ), 200 );
+	}
+
+	/** 3D Library models whose "Optimise on AtlasAR Cloud" job is this Cloud model. */
+	private static function models_waiting_for( $cloud_id ) {
+		if ( ! preg_match( '/^[A-Za-z0-9_-]{4,64}$/', $cloud_id ) ) {
+			return array();
+		}
+		return get_posts(
+			array(
+				'post_type'      => AR_TRY_ON_Library::POST_TYPE,
+				'post_status'    => 'any',
+				'posts_per_page' => 5,
+				'fields'         => 'ids',
+				'meta_query'     => array( array( 'key' => self::JOB_META, 'value' => '"' . $cloud_id . '"', 'compare' => 'LIKE' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query -- rare: one AtlasAR Cloud event.
+			)
+		);
+	}
+
+	/* ------------------------------------------------------------- move the site */
+
+	/** The query argument AtlasAR Cloud reads the one-time code from (the core's verifyParam). */
+	const VERIFY_PARAM = 'atlasar_cloud_verify';
+	const VERIFY_TTL   = 900; // the service's challenge lasts 15 minutes
+
+	/**
+	 * AR-133: this site is registered with another email (a former owner, an old address): move
+	 * it to $email by proving this site is yours. The service gives a one-time code, this site
+	 * shows it at ?atlasar_cloud_verify=<id> for 15 minutes, the service reads it from the site's
+	 * registered address, then moves the site to $email (its old key stops working; a new key,
+	 * which may wait for approval when $email already has an account; the old owner is told).
+	 *
+	 * @param string $email
+	 * @return array|\WP_Error status()
+	 */
+	public static function take_over( $email ) {
+		$email = sanitize_email( $email );
+		if ( ! is_email( $email ) ) {
+			return new \WP_Error( 'atlas_ar_email', __( 'Enter a valid email address.', 'ar-vr-3d-model-try-on' ) );
+		}
+		$start = self::request( 'POST', '/v1/projects/takeover', array( 'platform' => 'wordpress', 'site_url' => home_url( '/' ), 'email' => $email ), '' );
+		if ( is_wp_error( $start ) ) {
+			return $start;
+		}
+		$id    = isset( $start['challenge_id'] ) ? (string) $start['challenge_id'] : '';
+		$token = isset( $start['token'] ) ? (string) $start['token'] : '';
+		if ( ! preg_match( '/^[a-f0-9]{32}$/', $id ) || ! preg_match( '/^[A-Za-z0-9_-]{16,128}$/', $token ) ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		set_transient( self::VERIFY_PARAM . '_' . $id, $token, self::VERIFY_TTL );
+		$res = self::request( 'POST', '/v1/projects/takeover/verify', array( 'challenge_id' => $id ), '' );
+		delete_transient( self::VERIFY_PARAM . '_' . $id ); // used once, whatever the answer
+		if ( is_wp_error( $res ) ) {
+			return $res;
+		}
+		if ( empty( $res['api_key'] ) || ! self::valid_key( $res['api_key'] ) ) {
+			return new \WP_Error( 'atlas_ar_cloud', __( 'AtlasAR Cloud gave an unexpected answer. Please try again later.', 'ar-vr-3d-model-try-on' ) );
+		}
+		self::save(
+			array(
+				'key'        => (string) $res['api_key'],
+				'key_prefix' => isset( $res['key_prefix'] ) ? sanitize_text_field( $res['key_prefix'] ) : substr( (string) $res['api_key'], 0, 12 ),
+				'project_id' => isset( $res['project_id'] ) ? sanitize_text_field( (string) $res['project_id'] ) : '',
+				'plan'       => isset( $res['plan'] ) ? sanitize_key( is_array( $res['plan'] ) ? ( $res['plan']['key'] ?? 'free' ) : $res['plan'] ) : 'free',
+				'approval'   => isset( $res['approval'] ) && 'pending' === $res['approval'] ? 'pending' : 'active',
+				'email'      => $email,
+			)
+		);
+		self::connect_webhook(); // AR-134: instant updates (best effort)
+		/** This site is connected to AtlasAR Cloud (AtlasAR Pro: its licence makes the site Premium). */
+		do_action( 'atlas_ar_cloud_connected' );
+		return self::status( true );
+	}
+
+	/**
+	 * Show the one-time code to AtlasAR Cloud (front end, before WordPress renders anything).
+	 * Only while this site is moving a site (a 15-minute code, known by its 32-character id);
+	 * otherwise the request carries on as a normal page.
+	 */
+	public static function answer_verify() {
+		if ( ! isset( $_GET[ self::VERIFY_PARAM ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a public check by AtlasAR Cloud, answered only for a live one-time challenge.
+			return;
+		}
+		$id = sanitize_text_field( wp_unslash( $_GET[ self::VERIFY_PARAM ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! preg_match( '/^[a-f0-9]{32}$/', $id ) ) {
+			return;
+		}
+		$token = get_transient( self::VERIFY_PARAM . '_' . $id );
+		if ( ! is_string( $token ) || '' === $token ) {
+			return;
+		}
+		nocache_headers();
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		header( 'X-Robots-Tag: noindex' );
+		echo esc_html( $token ); // [A-Za-z0-9_-] only (checked when it was stored)
+		exit;
+	}
+
+	/* ------------------------------------------------------------- key at rest */
+
+	/** The stored key is sealed with this site's secret keys (wp-config.php salts). */
+	private static function seal( $key ) {
+		if ( '' === $key || ! function_exists( 'sodium_crypto_secretbox' ) ) {
+			return $key;
+		}
+		$nonce = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
+		return 'enc1:' . base64_encode( $nonce . sodium_crypto_secretbox( $key, $nonce, self::secret() ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- binary ciphertext stored as text.
+	}
+
+	/** The key back; '' when the site's secret keys changed (the site then asks to reconnect). */
+	private static function unseal( $stored ) {
+		$stored = (string) $stored;
+		if ( 0 !== strpos( $stored, 'enc1:' ) ) {
+			return $stored; // a key saved before AR-133: still plain, sealed on its next save
+		}
+		if ( ! function_exists( 'sodium_crypto_secretbox_open' ) ) {
+			return '';
+		}
+		$raw = base64_decode( substr( $stored, 5 ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+		if ( false === $raw || strlen( $raw ) <= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ) {
+			return '';
+		}
+		$key = sodium_crypto_secretbox_open( substr( $raw, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ), substr( $raw, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ), self::secret() );
+		return false === $key ? '' : $key;
+	}
+
+	private static function secret() {
+		return sodium_crypto_generichash( wp_salt( 'auth' ) . '|atlas_ar_cloud', '', SODIUM_CRYPTO_SECRETBOX_KEYBYTES );
+	}
+}

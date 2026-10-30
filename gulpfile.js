@@ -24,6 +24,7 @@ const productionSrc = [
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
+	'!scripts/**', // build tools (copy the viewer SDK, build check), not part of the plugin
 	'!src/**',
 	'!.browserslistrc',
 	'!.eslintrc',
@@ -36,22 +37,15 @@ const productionSrc = [
 	'!README.md',
 	'!*.md',
 	'!admin/js/build/*.LICENSE.txt',
-	'!public/js/build/*.LICENSE.txt',
-	'!public/js/build/chunks/*.LICENSE.txt',
-	'!public/js/tryon/*.LICENSE.txt',
 	'!package-lock.json',
 	'!mix-manifest.json',
 	'!webpack.mix.js',
 	'!tailwind.config.js',
-	'!public/js/ar-vr-3d-model-try-on-public.js',
 	'!admin/js/ar-try-on-media-library.js',
 	'!admin/js/ar-vr-3d-model-try-on-preview.js',
-	'!public/js/AtlasAR.js',
 	'!tailwind.config.modal.js',
 	'!admin/images/.DS_Store',
 	'!*.DS_Store',
-	'!public/js/single-product.js', // TODO:: this file is might be necessary in the near future.
-	'!public/js/variation-handler.js',
 	'!admin/js/ar-compression-client.js',
 	// Internal docs that should never reach customer installs.
 	'!plan/**',
@@ -61,20 +55,6 @@ const productionSrc = [
 	// the dev working tree for historical reference, but it must NOT
 	// land in the production zip.
 	'!vendor/freemius/**',
-	// Try-On JS sources — webpack bundles these into
-	// `public/js/build/tryon-bootstrap.dist.js` + chunks at build
-	// time. The raw sources are never loaded by customers, only by
-	// developers running `npm run watch`. Ship only the minified
-	// runtime artifacts.
-	'!public/js/tryon/tryon-bootstrap.js',
-	'!public/js/tryon/tryon-anchors.js',
-	'!public/js/tryon/tryon-controller.js',
-	'!public/js/tryon/tryon-ui.js',
-	'!public/js/tryon/workers/face-landmarker.worker.js',
-	// `glb-anatomy.js` IS loaded at runtime (dynamic-imported by
-	// the Pro renderer), but only the `.min.js` sibling is used in
-	// production — PHP resolves the URL to the minified file.
-	'!public/js/tryon/glb-anatomy.js',
 ]
 
 const config = {

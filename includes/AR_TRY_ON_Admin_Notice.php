@@ -58,15 +58,10 @@ class AR_TRY_ON_Admin_Notice {
 		add_action( 'wp_ajax_atlas_ar_track_notice_action', array( $this, 'ajax_track_notice_action' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
-		// Register default promo notice
-		$this->register_promo_notice();
-
-		// Register the smart review-request notice
+		// AR-165: the 2.x "14-day free trial" and "Speed up your pages" notices are retired (no trial;
+		// the loading setting they pointed to is gone, and the 2.x move keeps each shop's choice).
+		// Only the review request stays.
 		$this->register_review_notice();
-
-		// AR-70: nudge existing installs (on the legacy 'auto' load strategy)
-		// to switch to the faster on-interaction loading.
-		$this->register_faster_loading_notice();
 	}
 
 	/**
@@ -131,6 +126,12 @@ class AR_TRY_ON_Admin_Notice {
 	 * Display all active notices
 	 */
 	public function display_notices() {
+		// AR-165: not on AtlasAR's own full-window screens (dashboard, 3D Library): they have their own
+		// guidance, and a notice there pushes the app out of the window.
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen && ( 'toplevel_page_ar-vr-3d-model-try-on' === $screen->id || false !== strpos( (string) $screen->id, 'atlas-ar-library' ) ) ) {
+			return;
+		}
 		foreach ( $this->notices as $notice_id => $notice ) {
 			$this->display_notice( $notice_id, $notice );
 		}
@@ -417,54 +418,6 @@ class AR_TRY_ON_Admin_Notice {
 	}
 
 	/**
-	 * Register the default promo notice — 14-day Pro free trial.
-	 *
-	 * Shown only when the merchant is on the Free plan (Pro not active)
-	 * and they haven't already used the trial. The CTA opens the
-	 * Freemius-managed trial activation page baked into the plugin so
-	 * the trial starts with one click — no payment, no credit card.
-	 */
-	private function register_promo_notice() {
-		$this->register_notice(
-			array(
-				'id'            => 'promo_notice',
-				'title'         => __( '🎁 Try AtlasAR Pro Free for 14 Days — No Card Required', 'ar-vr-3d-model-try-on' ),
-				'message'       => __( 'Unlock the full Pro feature set for 2 weeks on us: <strong>3D depth-occluded overlay</strong>, <strong>watermark-free HD snapshots</strong>, <strong>live per-product calibration</strong>, <strong>server-side compression for large GLBs</strong>, <strong>FBX / OBJ / USDZ format conversion</strong>, <strong>interactive hotspots editor</strong>, <strong>real-world dimensions in AR</strong>, and <strong>per-variation model swap</strong>. Cancel any time — no automatic charge after the trial.', 'ar-vr-3d-model-try-on' ),
-				'type'          => 'info',
-				'icon'          => '🎁',
-				'dismissible'   => true,
-				'condition'     => function() {
-					// Hide once Pro is active. The trial-utilized check that
-					// used to live here was driven by Free's Freemius SDK,
-					// which AR-61 §1.1 removed — the trial workflow now lives
-					// entirely in the Pro plugin, so Free can only know
-					// "Pro is here or not" via the constant check below.
-					if ( AR_TRY_ON_Helper::is_pro_active() ) {
-						return false;
-					}
-					return true;
-				},
-				'track_clicks'  => false,
-				'buttons'       => array(
-					array(
-						'text' => __( 'Start 14-day Free Trial', 'ar-vr-3d-model-try-on' ),
-						'type' => 'primary',
-						'icon' => 'star-filled',
-						'url'  => 'https://wpaugmentedreality.com/pricing/',
-					),
-					array(
-						'text' => __( 'Read Try-On Docs', 'ar-vr-3d-model-try-on' ),
-						'type' => 'secondary',
-						'icon' => 'book',
-						'url'  => 'https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/',
-					),
-				),
-				'footer_text'   => __( 'No credit card required. The trial ends after 14 days — your store automatically reverts to the Free plan unless you choose to subscribe.', 'ar-vr-3d-model-try-on' ),
-			)
-		);
-	}
-
-	/**
 	 * Register the smart review-request notice.
 	 *
 	 * Shown only to admins on the Free plan who have actually got value from
@@ -590,89 +543,6 @@ class AR_TRY_ON_Admin_Notice {
 	}
 
 	/**
-	 * Register the "switch to faster loading" nudge.
-	 *
-	 * Fresh installs (2.2.5+) already default to the on-interaction load
-	 * strategy, so the ~1 MB model-viewer library never blocks initial page
-	 * render. Sites installed earlier were seeded with the legacy 'auto'
-	 * strategy and keep it on update (by design — we don't change live sites
-	 * silently). This one-time, dismissible nudge lets those admins opt into
-	 * the faster behaviour with a single click. It only appears once the site
-	 * actually has a model (so the speed-up is relevant) and disappears for
-	 * everyone the moment the strategy is switched.
-	 */
-	private function register_faster_loading_notice() {
-		$this->register_notice(
-			array(
-				'id'                => 'faster_loading',
-				'title'             => __( '⚡ Speed up your pages', 'ar-vr-3d-model-try-on' ),
-				'message'           => __( 'Your 3D models currently load the viewer library with the page (about 1 MB). Switch to <strong>load on click</strong> so it only downloads when a shopper opens a model — faster pages, same experience. You can change this anytime under Settings → Model Loading Behavior.', 'ar-vr-3d-model-try-on' ),
-				'type'              => 'info',
-				'icon'              => '⚡',
-				'dismissible'       => true,
-				'reshow_after_days' => 0,
-				'condition'         => function () {
-					if ( ! current_user_can( 'manage_options' ) ) {
-						return false;
-					}
-					// Only when the site is still on the legacy 'auto' global
-					// strategy (existing installs). Fresh installs default to
-					// 'interaction' and never see this.
-					if ( AR_TRY_ON_Helper::get_model_load_strategy( 0 ) !== 'auto' ) {
-						return false;
-					}
-					// Only once a real model exists, so the speed-up is relevant.
-					if ( $this->get_cached_user_model_count() < 1 ) {
-						return false;
-					}
-					return true;
-				},
-				'click_action'      => array( $this, 'handle_faster_loading_action' ),
-				'buttons'           => array(
-					array(
-						'text'   => __( 'Switch to faster loading', 'ar-vr-3d-model-try-on' ),
-						'type'   => 'primary',
-						'icon'   => 'performance',
-						'action' => 'switch',
-					),
-					array(
-						'text'   => __( 'Keep current', 'ar-vr-3d-model-try-on' ),
-						'type'   => 'secondary',
-						'action' => 'keep',
-					),
-				),
-				'footer_text'       => __( 'This only changes when the 3D viewer downloads — your models and settings are untouched.', 'ar-vr-3d-model-try-on' ),
-			)
-		);
-	}
-
-	/**
-	 * Handle the faster-loading nudge actions (switch / keep).
-	 *
-	 * @param string   $notice_id   Notice ID.
-	 * @param string   $action_name Action key.
-	 * @param \WP_User $user        Current user.
-	 * @return array
-	 */
-	public function handle_faster_loading_action( $notice_id, $action_name, $user ) {
-		$result = array( 'dismiss' => true );
-
-		// Hide it for this admin either way.
-		update_user_meta( $user->ID, 'ar_try_on_dismiss_' . $notice_id, true );
-
-		if ( 'switch' === $action_name ) {
-			$settings = (array) get_option( 'ar_try_on_settings', array() );
-			$settings['model_load_strategy'] = 'interaction';
-			update_option( 'ar_try_on_settings', $settings );
-			AR_TRY_ON_Helper::clear_settings_cache();
-			AR_TRY_ON_Cache::set( 'settings', $settings );
-			$result['message'] = __( 'Done — 3D models now load on click for faster pages.', 'ar-vr-3d-model-try-on' );
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Whether a notice is dismissed for the current user.
 	 *
 	 * Honours a timed re-show: when reshow_after_days is set, the notice is
@@ -728,35 +598,14 @@ class AR_TRY_ON_Admin_Notice {
 	/**
 	 * Count posts/products that have a real 3D model assigned.
 	 *
-	 * Excludes the demo model the activator seeds so the review gate only
-	 * trips once the merchant has added a model of their own. Scans a capped
-	 * number of rows to stay light on large sites.
+	 * AR-165: a product or post linked to a 3D Library model (2.x data counts once it was moved).
 	 *
 	 * @return int
 	 */
 	private function query_user_model_count() {
-		$demo_src = 'https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb';
-
-		$query = new \WP_Query(
-			array(
-				'post_type'              => 'any',
-				'post_status'            => 'any',
-				'posts_per_page'         => 20,
-				'fields'                 => 'ids',
-				'no_found_rows'          => true,
-				'update_post_term_cache' => false,
-				'meta_key'               => 'ar_try_on_product_settings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			)
-		);
-
-		$count = 0;
-		foreach ( $query->posts as $post_id ) {
-			$settings = (array) get_post_meta( $post_id, 'ar_try_on_product_settings', true );
-			if ( ! empty( $settings['src'] ) && $settings['src'] !== $demo_src ) {
-				$count++;
-			}
-		}
-
-		return $count;
+		global $wpdb;
+		// AR-165: products and posts showing a 3D Library model (one indexed query, at most 1 row).
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- cached a day by the caller.
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM ( SELECT 1 FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value > 0 LIMIT 1 ) one", '_atlas_ar_model_id' ) );
 	}
 }
