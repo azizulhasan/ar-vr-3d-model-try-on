@@ -24,6 +24,7 @@ const productionSrc = [
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
+	'!scripts/**', // build tools (copy the viewer SDK, build check), not part of the plugin
 	'!src/**',
 	'!.browserslistrc',
 	'!.eslintrc',
@@ -36,22 +37,15 @@ const productionSrc = [
 	'!README.md',
 	'!*.md',
 	'!admin/js/build/*.LICENSE.txt',
-	'!public/js/build/*.LICENSE.txt',
-	'!public/js/build/chunks/*.LICENSE.txt',
-	'!public/js/tryon/*.LICENSE.txt',
 	'!package-lock.json',
 	'!mix-manifest.json',
 	'!webpack.mix.js',
 	'!tailwind.config.js',
-	'!public/js/ar-vr-3d-model-try-on-public.js',
 	'!admin/js/ar-try-on-media-library.js',
 	'!admin/js/ar-vr-3d-model-try-on-preview.js',
-	'!public/js/AtlasAR.js',
 	'!tailwind.config.modal.js',
 	'!admin/images/.DS_Store',
 	'!*.DS_Store',
-	'!public/js/single-product.js', // TODO:: this file is might be necessary in the near future.
-	'!public/js/variation-handler.js',
 	'!admin/js/ar-compression-client.js',
 	// Internal docs that should never reach customer installs.
 	'!plan/**',
@@ -61,20 +55,6 @@ const productionSrc = [
 	// the dev working tree for historical reference, but it must NOT
 	// land in the production zip.
 	'!vendor/freemius/**',
-	// Try-On JS sources — webpack bundles these into
-	// `public/js/build/tryon-bootstrap.dist.js` + chunks at build
-	// time. The raw sources are never loaded by customers, only by
-	// developers running `npm run watch`. Ship only the minified
-	// runtime artifacts.
-	'!public/js/tryon/tryon-bootstrap.js',
-	'!public/js/tryon/tryon-anchors.js',
-	'!public/js/tryon/tryon-controller.js',
-	'!public/js/tryon/tryon-ui.js',
-	'!public/js/tryon/workers/face-landmarker.worker.js',
-	// `glb-anatomy.js` IS loaded at runtime (dynamic-imported by
-	// the Pro renderer), but only the `.min.js` sibling is used in
-	// production — PHP resolves the URL to the minified file.
-	'!public/js/tryon/glb-anatomy.js',
 ]
 
 const config = {
@@ -271,11 +251,14 @@ gulp.task('copy', () => {
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }));
 });
 
-// Zip directly from original sources (productionSrc)
-// This avoids re-reading from a potentially broken production folder.
+// Zip the production folder that `copy` has just built (makeZip = clean → copy → zip), with
+// `ar-vr-3d-model-try-on/` at the top of the archive: WordPress (Plugins › Add New › Upload) and
+// WP-CLI install a zip into the folder at its top. Zipped from the sources, the files sat at the
+// root, so an uploaded zip spilled into wp-content/plugins (or got a random folder name).
+// `encoding: false` keeps binary files intact (see `copy`).
 gulp.task('zip', () => {
 	return gulp
-		.src(config.zip.src, { base: '.', allowEmpty: true, encoding: false })
+		.src(['production/ar-vr-3d-model-try-on/**'], { base: 'production', allowEmpty: true, encoding: false })
 		.pipe(zip(config.zip.file_name + '.zip', config.zip.options))
 		.pipe(gulp.dest(config.zip.dist))
 		.pipe(

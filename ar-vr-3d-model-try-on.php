@@ -14,7 +14,7 @@
  * Plugin Name:       3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On
  * Plugin URI:        https://atlasaidev.com/
  * Description:       3D Model Viewer & WordPress AR Plugin lets you upload and display 3D models with built-in AR on iOS & Android—no extra apps needed.
- * Version:           2.3.2
+ * Version:           3.0.0
  * Author:            AtlasAiDev
  * Author URI:        https://atlasaidev.com/
  * License:           GPL-3.0+
@@ -22,7 +22,7 @@
  * Text Domain:       ar-vr-3d-model-try-on
  * Domain Path:       /languages
  * Requires PHP:      7.4
- * Requires at least: 5.6
+ * Requires at least: 5.7
  */
 
 // Absolute path to the WordPress directory.
@@ -40,13 +40,6 @@ require_once 'vendor/autoload.php';
 use AR_TRY_ON\AR_TRY_ON;
 use AR_TRY_ON\AR_TRY_ON_Activator;
 use AR_TRY_ON\AR_TRY_ON_Deactivate;
-use AR_TRY_ON\AR_TRY_ON_Compression;
-use AR_TRY_ON\AR_TRY_ON_Compression_DB;
-use AR_TRY_ON\AR_TRY_ON_Tryon;
-use ATLAS_AR_API\AR_TRY_ON_Api_Routes;
-use ATLAS_AR_API\AR_TRY_ON_Compression_Routes;
-use ATLAS_AR_API\AR_TRY_ON_Tryon_Routes;
-use AR_TRY_ON_Admin\AR_TRY_ON_Wizard;
 use AR_TRY_ON\AR_TRY_ON_Lib_AtlasAiDev;
 use AR_TRY_ON\AR_TRY_ON_Helper;
 use AR_TRY_ON\AR_TRY_ON_Admin_Notice;
@@ -110,7 +103,6 @@ if ( ! defined( 'ATLAS_AR_DEBUG_MODE' ) ) {
 	define( 'ATLAS_AR_DEBUG_MODE', 0 );
 }
 
-
 if ( ! defined( 'ATLAS_AR_PLUGIN_URL' ) ) {
 	$atlas_ar_https        = 'https://playground.wordpress.net';
 	$atlas_ar_http_preview = 'http://playground.wordpress.net';
@@ -149,15 +141,23 @@ if ( ! defined( 'ATLAS_AR_PLUGIN_PATH' ) ) {
 class AR_TRY_ON_Init {
 
 	public function __construct() {
+		self::define_constants();
+
+		$this->run();
+	}
+
+	/**
+	 * Version + name constants. Defined on `init` (so the filters can still change them), and
+	 * by the activation hook, which runs before `init` ever loads the plugin.
+	 */
+	public static function define_constants() {
 		if ( ! defined( 'ATLAS_AR_VERSION' ) ) {
-			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '2.3.2' ) );
+			define( 'ATLAS_AR_VERSION', apply_filters( 'ATLAS_AR_version', '3.0.0' ) );
 		}
 
 		if ( ! defined( 'ATLAS_AR_PLUGIN_NAME' ) ) {
 			define( 'ATLAS_AR_PLUGIN_NAME', apply_filters( 'ATLAS_AR_plugin_name', 'AtlasAR' ) );
 		}
-
-		$this->run();
 	}
 
 	public function run() {
@@ -174,59 +174,41 @@ class AR_TRY_ON_Init {
 	}
 }
 
-
 function atlas_ar_run() {
 	new AR_TRY_ON_Init();
 //	if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
 		AR_TRY_ON_Lib_AtlasAiDev::instance()->init();
 //	}
-	new AR_TRY_ON_Api_Routes();
 
-	// Initialize Compression feature (v1.8.0+)
-    AR_TRY_ON_Compression::init();
+	// AR-121: model optimisation is the Optimise module (AtlasAR.tools in the browser, AtlasAR Cloud
+	// for big files) in the 3D Library; the old compression system is gone.
 
-
-    // Register Compression REST API routes
-	add_action( 'rest_api_init', function() {
-		$compression_routes = new AR_TRY_ON_Compression_Routes();
-		$compression_routes->register_routes();
-	} );
-
-	// Initialize Try-On feature (v1.10.0+) — face try-on, lazy-loaded.
-	$atlas_ar_tryon = new AR_TRY_ON_Tryon( ATLAS_AR_VERSION );
-	$atlas_ar_tryon->register();
-
-	add_action( 'rest_api_init', function() {
-		$tryon_routes = new AR_TRY_ON_Tryon_Routes();
-		$tryon_routes->register_routes();
-	} );
+	// AR-116: the 3D Library and the shop front end on the viewer SDK (try-on included; the old
+	// try-on runtime and its routes are no longer loaded).
+	\AR_TRY_ON\AR_TRY_ON_Library::register();
+	\AR_TRY_ON\AR_TRY_ON_Migration::init(); // AR-160: once, 2.x data into the 3D Library
+	\AR_TRY_ON\AR_TRY_ON_Stats::init(); // AR-161: shopper analytics, kept on this site
+	\AR_TRY_ON\AR_TRY_ON_Frontend::init();
+	\AR_TRY_ON\AR_TRY_ON_Search::init(); // Products in Google's 3D results (structured data + feed field)
+	// AR-133: AtlasAR Cloud checking this site (moving it to another email). atlas_ar_run() runs on
+	// `init`, before any output: answered here, then the request ends.
+	\AR_TRY_ON\AR_TRY_ON_Cloud::answer_verify();
+	\AR_TRY_ON\AR_TRY_ON_Elementor::init(); // AR-129: widget + live preview (only acts when Elementor runs)
+	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Library_Routes', 'register' ) );
+	add_action( 'rest_api_init', array( '\ATLAS_AR_API\AR_TRY_ON_Admin_Routes', 'register' ) );
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		\AR_TRY_ON\AR_TRY_ON_CLI::register(); // AR-126: wp atlas-ar …
+	}
+	if ( is_admin() ) {
+		// AR-120: dashboard + setup wizard, 3D Library page, product panel.
+		\AR_TRY_ON_Admin\AR_TRY_ON_Dashboard::init();
+		\AR_TRY_ON_Admin\AR_TRY_ON_Library_Page::init();
+		\AR_TRY_ON_Admin\AR_TRY_ON_Product_Panel::init();
+	}
 
 	// Initialize Admin Notice System (v1.8.0+)
 	AR_TRY_ON_Admin_Notice::instance();
 
-	// Setup wizard: flags, first-activation redirect, notice, save route (AR-72).
-	AR_TRY_ON_Wizard::instance()->init();
-
-	// Admin action to manually create compression database tables.
-	add_action( 'admin_init', function() {
-		// Read-only superglobal access guarded by capability + nonce checks below;
-		// the GET flag itself carries no untrusted payload — just toggles the action.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified on the next line.
-		if ( ! isset( $_GET['atlas_ar_create_compression_tables'] ) ) {
-			return;
-		}
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified explicitly below.
-		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'atlas_ar_create_compression_tables' ) ) {
-			return;
-		}
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		AR_TRY_ON_Compression_DB::init();
-		wp_safe_redirect( admin_url( 'admin.php?page=ar-vr-3d-model-try-on&compression_tables_created=1' ) );
-		exit;
-	} );
 
 	/**
 	 * Action: atlas_ar_loaded
@@ -264,7 +246,6 @@ function atlas_ar_run() {
  * domain. Removing the unused schedule removes the notice.
  */
 
-
 //add_action( 'wp', [ $this, 'add_frontend_ar_button' ] );
 
 add_action( 'init', function () {
@@ -280,13 +261,12 @@ add_action( 'atlas_ar_sweep_orphan_temp_files', array( 'AR_TRY_ON\\AR_TRY_ON_Hel
  * This action is documented in includes/AR_TRY_ON_Activator.php
  */
 register_activation_hook( __FILE__, function () {
-	// Read before activate() stores the first-activation time (AR-72).
-	$is_fresh_install = false === get_option( 'ar_try_on_activated_at' );
 	// No "renew": re-activating used to reset every saved setting to the
 	// defaults. Defaults are still written when nothing is saved yet, and
 	// the demo post is still seeded when missing (AR-72).
+	AR_TRY_ON_Init::define_constants(); // the plugin has not run `init` yet on this request
 	AR_TRY_ON_Activator::activate();
-	AR_TRY_ON_Wizard::on_activation( $is_fresh_install );
+	\AR_TRY_ON_Admin\AR_TRY_ON_Dashboard::on_activation();
 } );
 /**
  * The code that runs during plugin deactivation.
@@ -296,44 +276,9 @@ register_deactivation_hook( __FILE__, function () {
 	AR_TRY_ON_Deactivate::deactivate();
 } );
 
-
 // The `atlas/ar-shortcode` block is registered on `init` by
 // AR_TRY_ON_Admin::register_block() — not here at file load, which ran
 // before `init` (AR-71).
 
-/**
- *
- * Create short code for qr code.
- * Example [atlasvoice]
- *
- * @param $atts
- *
- * @return string
- */
-function atlas_ar_create_shortcode( $atts ) {
-
-    return AR_TRY_ON_Helper::create_shortcode( $atts );
-
-}
-
-add_shortcode( 'atlas_ar', 'atlas_ar_create_shortcode' );
-
-
-// Filter to allow shortcodes in HTML tags
-add_filter( 'do_shortcode_tag', 'atlas_ar_allow_shortcode_in_html_tag', 10, 4 );
-function atlas_ar_allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
-    if ( $tag == 'atlas_ar' && ! empty( $attr ) ) {
-        if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-            $content = AR_TRY_ON_Helper::create_shortcode( $attr,  $m[5] ) . $m[5];
-        } else {
-            $content = $m[5] . AR_TRY_ON_Helper::create_shortcode( $attr, $m[5] );
-        }
-
-        //Get the content wrapped by the shortcode.
-        return $content;
-    }
-
-    return $output;
-}
-
+// AR-116: [atlas_ar] is registered by AR_TRY_ON_Frontend (the viewer SDK draws it).
 
