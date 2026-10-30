@@ -58,7 +58,7 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-popup-panel{display:flex;flex-direction:column;width:min(960px,calc(100vw - 32px));max-height:calc(100vh - 32px);border-radius:12px;background:#fff;color:#111;overflow:hidden}
 .atlasar-popup-panel.atlasar-is-fullscreen{width:100vw;max-height:none;height:100vh;border-radius:0}
 .atlasar-popup-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #e5e7eb}
-.atlasar-popup-title{margin:0;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atlasar-popup .atlasar-popup-title{margin:0;padding:0;border:0;color:#111827;font:inherit;font-size:16px;font-weight:600;line-height:1.3;letter-spacing:normal;text-transform:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .atlasar-popup-actions{display:flex;gap:4px}
 .atlasar-popup-full,.atlasar-popup-x{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:0;border-radius:6px;background:none;color:#374151;font-size:22px;cursor:pointer}
 .atlasar-popup-full:hover,.atlasar-popup-x:hover{background:#f3f4f6}
@@ -67,11 +67,19 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-is-fullscreen .atlasar-popup-body .atlasar-box{height:calc(100vh - 110px)!important}
 .atlasar-popup-foot{display:flex;justify-content:flex-end;padding:10px 14px;border-top:1px solid #e5e7eb}
 .atlasar-popup-close{min-height:36px;padding:6px 16px;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:#111;font:inherit;cursor:pointer}
+/* Themes style every <button> and its :hover / :focus (Astra: blue): ours keep their own look in every
+   state (two classes outrank a theme's "button:hover"), and no theme uppercase or letter-spacing. */
+:is(.atlasar-start,.atlasar-trigger,.atlasar-ar-button,.atlasar-tryon-button,.atlasar-qr-button,.atlasar-popup-full,.atlasar-popup-x,.atlasar-popup-close){text-transform:none;letter-spacing:normal;text-shadow:none;line-height:1.3}
+:is(.atlasar-start,.atlasar-trigger,.atlasar-ar-button,.atlasar-tryon-button):is(:hover,:focus,:active){background:var(--atlasar-button-bg);color:var(--atlasar-button-fg);border-color:transparent}
+.atlasar-qr-button:is(:hover,:focus,:active){background:rgba(255,255,255,.95);color:#111}
+:is(.atlasar-popup-full,.atlasar-popup-x):is(:focus,:active){background:none;color:#374151}
+:is(.atlasar-popup-full,.atlasar-popup-x):hover{background:#f3f4f6;color:#374151}
+.atlasar-popup-close:is(:hover,:focus,:active){background:#fff;color:#111;border-color:#d1d5db}
 @media (max-width:600px){.atlasar-popup{width:100%;max-width:100%;height:100%;max-height:100%;margin:0;border-radius:0}.atlasar-popup-panel{width:100%;height:100%;max-height:100%;border-radius:0}.atlasar-popup-body{display:flex}.atlasar-popup-body .atlasar-box{flex:1;height:auto!important}}
 .atlasar-tryon{width:min(720px,calc(100vw - 24px));max-height:calc(100vh - 24px);padding:0;border:0;border-radius:14px;background:#111;color:#fff;overflow:hidden}
 .atlasar-tryon::backdrop{background:rgba(0,0,0,.7)}
 .atlasar-tryon-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 10px 16px}
-.atlasar-tryon-title{margin:0;font-size:16px;font-weight:600}
+.atlasar-tryon .atlasar-tryon-title{margin:0;padding:0;border:0;color:#fff;font:inherit;font-size:16px;font-weight:600;line-height:1.3;letter-spacing:normal;text-transform:none} /* a theme's h2 colour and font must not show here */
 .atlasar-tryon-x{width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:24px;cursor:pointer}
 .atlasar-tryon-x:focus-visible,.atlasar-tryon button:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .atlasar-tryon-stage{position:relative;background:#000;display:flex;align-items:center;justify-content:center;min-height:240px}
@@ -101,4 +109,12 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])) .atlasar-tryon-tools{grid-column:2;grid-row:1 / span 99;max-height:calc(100vh - 24px)}
 .atlasar-tryon:has(.atlasar-tryon-tools:not([hidden])) .atlasar-tryon-canvas{max-height:calc(100vh - 100px)}
 }
+/* Themes style every <button> and its :hover / :focus: the try-on buttons keep their own look. */
+:is(.atlasar-tryon-x,.atlasar-tryon-allow,.atlasar-tryon-cancel,.atlasar-tryon-sample,.atlasar-tryon-shutter){text-transform:none;letter-spacing:normal;text-shadow:none;box-shadow:none}
+.atlasar-tryon-x:is(:focus,:active){background:transparent;color:#fff}
+.atlasar-tryon-x:hover{background:rgba(255,255,255,.12);color:#fff}
+.atlasar-tryon-allow:is(:hover,:focus,:active){background:var(--atlasar-accent,#fff);color:var(--atlasar-accent-text,#111)}
+.atlasar-tryon-cancel:is(:hover,:focus,:active){background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.5)}
+.atlasar-tryon-sample:is(:hover,:focus,:active){background:transparent;color:#fff}
+.atlasar-tryon-shutter:is(:hover,:focus,:active){background:rgba(255,255,255,.35);border-color:#fff}
 @media (max-width:600px){.atlasar-tryon{width:100vw;max-height:100vh;height:100vh;border-radius:0}}
