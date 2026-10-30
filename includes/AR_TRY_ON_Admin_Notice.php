@@ -444,7 +444,7 @@ class AR_TRY_ON_Admin_Notice {
 		$this->register_notice(
 			array(
 				'id'                => 'review',
-				'title'             => __( 'Enjoying 3D Viewer & AtlasTryOn?', 'ar-vr-3d-model-try-on' ),
+				'title'             => __( 'Enjoying AtlasAR?', 'ar-vr-3d-model-try-on' ),
 				'message'           => __( 'You\'ve set up 3D models on your site — nice work! If the plugin is helping your shoppers, would you consider leaving a quick review? It takes about 30 seconds and genuinely helps us keep building free features.', 'ar-vr-3d-model-try-on' ),
 				'type'              => 'success',
 				'icon'              => '⭐',
@@ -500,7 +500,7 @@ class AR_TRY_ON_Admin_Notice {
 						'track'  => true,
 					),
 				),
-				'footer_text'       => __( 'Thank you for using 3D Viewer & AtlasTryOn.', 'ar-vr-3d-model-try-on' ),
+				'footer_text'       => __( 'Thank you for using AtlasAR.', 'ar-vr-3d-model-try-on' ),
 			)
 		);
 	}
