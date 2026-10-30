@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 3.0.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -202,6 +202,17 @@ Please report security bugs found in the source code of the 3D Viewer – 3D Mod
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 3.0.0 ( 30 October 2026 ) =
+* New: AtlasAR 3.0 is a complete rebuild. Your products, models and settings move over by themselves after the update, and your old data is kept.
+* New: The 3D Library keeps all your 3D models and their files in one place, apart from the Media Library. Add a model once and use it on any product.
+* New: Choose where shoppers see 3D: in the product gallery, behind a "View in 3D" button that opens a window, or in a product tab. It works with block themes and classic themes.
+* New: Virtual try-on for glasses and caps with the camera, and a sample face for shoppers without a camera. A product without a 3D model can use a straight-on photo for try-on.
+* New: Make a 3D model in your browser from a photo of a flat product (wall art, posters, framed prints, rugs, tiles) at its real size, also for many products at once.
+* New: Free 3D models: search a library of ready-made models and add one to your 3D Library with one click (with a free AtlasAR Cloud account).
+* New: Optional AtlasAR Cloud: make models lighter and faster to load, at their real size, without leaving WordPress.
+* New: Faster pages: the 3D viewer can load only when a shopper opens a model, and a health check points out models that are too heavy or have missing parts.
+* New: A setup guide, a new dashboard and simpler settings for the 3D view, the AR button and try-on.
 
 = 2.3.2 ( 26 October 2026 ) =
 * Fix: Making a 3D model with Meshy AI works again. Meshy retired the model the plugin used by default, so it now uses Meshy's current model (meshy-6), also for settings you saved before. A model you chose yourself stays as it is.
@@ -537,6 +548,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+A new AtlasAR: the 3D Library, 3D in the gallery or a popup, try-on for glasses and caps, 3D from flat-product photos and free 3D models. Your models and settings move over by themselves. AtlasAR Pro users: update Pro to 4.0 too. Back up your site first.
 
 = 2.3.2 =
 Making 3D models with Meshy AI works again: Meshy retired its older model, and the plugin now uses its current one. Nothing else changes. Safe to update.
