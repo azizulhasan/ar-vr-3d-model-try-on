@@ -236,7 +236,8 @@ class AR_TRY_ON_Stats {
 				$out['products'][] = array(
 					'id'       => $id,
 					'title'    => get_post( $id ) ? html_entity_decode( get_the_title( $id ), ENT_QUOTES, 'UTF-8' ) : sprintf( /* translators: %d: post ID */ __( 'Deleted (#%d)', 'ar-vr-3d-model-try-on' ), $id ),
-					'edit_url' => get_post( $id ) && current_user_can( 'edit_post', $id ) ? get_edit_post_link( $id, 'raw' ) : '',
+					// A product of a switched-off WooCommerce: its type is not registered, so no edit link (WordPress would log a notice).
+					'edit_url' => get_post( $id ) && post_type_exists( get_post_type( $id ) ) && current_user_can( 'edit_post', $id ) ? get_edit_post_link( $id, 'raw' ) : '',
 					'counts'   => isset( $by[ $id ] ) ? $by[ $id ] : array(),
 				);
 			}
