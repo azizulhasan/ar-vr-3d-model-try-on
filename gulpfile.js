@@ -251,11 +251,14 @@ gulp.task('copy', () => {
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }));
 });
 
-// Zip directly from original sources (productionSrc)
-// This avoids re-reading from a potentially broken production folder.
+// Zip the production folder that `copy` has just built (makeZip = clean → copy → zip), with
+// `ar-vr-3d-model-try-on/` at the top of the archive: WordPress (Plugins › Add New › Upload) and
+// WP-CLI install a zip into the folder at its top. Zipped from the sources, the files sat at the
+// root, so an uploaded zip spilled into wp-content/plugins (or got a random folder name).
+// `encoding: false` keeps binary files intact (see `copy`).
 gulp.task('zip', () => {
 	return gulp
-		.src(config.zip.src, { base: '.', allowEmpty: true, encoding: false })
+		.src(['production/ar-vr-3d-model-try-on/**'], { base: 'production', allowEmpty: true, encoding: false })
 		.pipe(zip(config.zip.file_name + '.zip', config.zip.options))
 		.pipe(gulp.dest(config.zip.dist))
 		.pipe(
