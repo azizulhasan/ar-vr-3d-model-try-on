@@ -131,14 +131,24 @@
 			if (typeof host.resetVariant === 'function') host.resetVariant(); // the SDK's variants module
 		});
 	}
+	var variationsReady = false;
 	function setupVariations() {
 		var $ = window.jQuery;
-		if (!$) return;
+		if (variationsReady) return;
+		if (!$) {
+			// Caching and optimisation plugins (Autoptimize, WP Rocket…) often load jQuery deferred, in
+			// their own bundle, after this script: wait until every script has run.
+			if (document.readyState !== 'complete') window.addEventListener('load', setupVariations, { once: true });
+			return;
+		}
+		variationsReady = true;
 		$(document).on('found_variation', '.variations_form', function (e, variation) {
 			var attrs = (variation && variation.attributes) || {};
 			pick(Object.keys(attrs).map(function (k) { return String(attrs[k] || ''); }));
 		});
 		$(document).on('reset_data', '.variations_form', original);
+		// A colour chosen before this ran (or a default one) still counts: WooCommerce looks again.
+		$('.variations_form').each(function () { $(this).trigger('check_variations'); });
 		document.addEventListener('atlasar:load', function (e) {
 			var host = e.target && e.target.closest ? e.target.closest('atlasar-viewer') : null;
 			if (host && chosen.length) apply(host);
