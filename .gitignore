@@ -117,3 +117,6 @@ admin/css/minify/
 
 # Plans live in the private atlasaidev-internal repo — never commit them here.
 plan/
+
+# PHPUnit
+.phpunit.result.cache
