@@ -514,31 +514,40 @@ class AR_TRY_ON_Cards {
 	/* ------------------------------------------------------------------ shortcode */
 
 	/**
-	 * [atlas_ar_button id="123" label="…"] — the card button for any product, for cards a theme or
-	 * page builder draws itself. Shows whenever the product has a 3D model or a try-on.
+	 * [atlas_ar_button id="123" label="…" class="…"] — the card button for any product, for cards a
+	 * theme or page builder draws itself. Shows whenever the product has a 3D model or a try-on.
+	 * `class` adds classes to the button, e.g. the theme's size preset (has-small-font-size) so it
+	 * matches the card's other buttons.
 	 */
 	public static function shortcode( $atts ) {
-		$atts    = shortcode_atts( array( 'id' => 0, 'label' => '' ), (array) $atts, 'atlas_ar_button' );
+		$atts    = shortcode_atts( array( 'id' => 0, 'label' => '', 'class' => '' ), (array) $atts, 'atlas_ar_button' );
 		$post_id = (int) $atts['id'] ? (int) $atts['id'] : AR_TRY_ON_Helper::current_post_id();
 		if ( ! $post_id ) {
 			return '';
 		}
-		if ( '' !== $atts['label'] ) {
-			$label = sanitize_text_field( $atts['label'] );
-			$set   = function ( $d, $id ) use ( $post_id, $label ) {
-				if ( (int) $id === $post_id ) {
-					$d['label'] = $label;
-				}
-				return $d;
-			};
-			add_filter( 'atlas_ar_card', $set, 20, 2 );
-			unset( self::$decided[ $post_id . ':f' ] );
-			$html = self::button( $post_id, true );
-			remove_filter( 'atlas_ar_card', $set, 20 );
-			unset( self::$decided[ $post_id . ':f' ] );
+		$label   = sanitize_text_field( $atts['label'] );
+		$classes = implode( ' ', array_filter( array_map( 'sanitize_html_class', preg_split( '/\s+/', (string) $atts['class'] ) ) ) );
+		$set     = function ( $d, $id ) use ( $post_id, $label ) {
+			if ( (int) $id === $post_id && '' !== $label ) {
+				$d['label'] = $label;
+			}
+			return $d;
+		};
+		$add     = function ( $html, $id ) use ( $post_id, $classes ) {
+			if ( (int) $id === $post_id && '' !== $classes ) {
+				// The button's own class list (not the wrapper's "atlas-ar-card-button-wrap").
+				$html = preg_replace( '/class="((?:[^"]*\s)?atlas-ar-card-button(?:\s[^"]*)?)"/', 'class="$1 ' . esc_attr( $classes ) . '"', (string) $html, 1 );
+			}
 			return $html;
-		}
-		return self::button( $post_id, true );
+		};
+		add_filter( 'atlas_ar_card', $set, 20, 2 );
+		add_filter( 'atlas_ar_card_button_html', $add, 20, 2 );
+		unset( self::$decided[ $post_id . ':f' ] );
+		$html = self::button( $post_id, true );
+		remove_filter( 'atlas_ar_card', $set, 20 );
+		remove_filter( 'atlas_ar_card_button_html', $add, 20 );
+		unset( self::$decided[ $post_id . ':f' ] );
+		return $html;
 	}
 
 	/* ----------------------------------------------------------------------- kses */

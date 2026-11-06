@@ -242,6 +242,10 @@ final class CardsTest extends TestCase {
 		$this->assertStringContainsString( '>Open in 3D<', $html );
 		$this->assertSame( '', AR_TRY_ON_Cards::button( $id ), 'the site setting is still off for the loops' );
 		$this->assertSame( '', do_shortcode( '[atlas_ar_button id="' . $this->product( 0 ) . '"]' ) );
+		// class="" adds the theme's size preset (or any class) to the button; it is cleaned.
+		$html = do_shortcode( '[atlas_ar_button id="' . $id . '" class="has-small-font-size x/y"]' );
+		$this->assertMatchesRegularExpression( '/class="[^"]*atlas-ar-card-button atlas-ar-card-button--3d has-small-font-size xy"/', $html );
+		$this->assertStringContainsString( '>View in 3D and AR<', $html, 'the default label again (the earlier label was for that call only)' );
 	}
 
 	public function test_the_atlas_ar_card_filter_changes_the_decision(): void {
