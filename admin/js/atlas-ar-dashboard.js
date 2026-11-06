@@ -410,7 +410,40 @@
 				p.mode !== 'tab' ? el(C.ToggleControl, { label: __('Add a “3D view” tab to the product tabs', D), checked: !!p.product_tab, onChange: function (v) { set('product_tab', v); } }) : null,
 				el(C.ToggleControl, { label: __('On computers, show a QR code to open AR on a phone', D), checked: !!p.qr, onChange: function (v) { set('qr', v); } }),
 				el('p', { className: 'description' }, __('Anywhere else (posts, pages, page builders): use the “AtlasAR 3D view” block or the shortcode [atlas_ar]. Help › Shortcode builder makes one for you.', D)),
-				ctx.saveBar));
+				ctx.saveBar),
+			el(CardsFields, ctx));
+	}
+
+	/** AR-176: Placement › Product cards (the shop, category pages, related products, product blocks). */
+	function CardsFields(ctx) {
+		var c = ctx.settings.cards, set = function (k, v) { ctx.set('cards', k, v); };
+		return el(UI.Section, { title: __('Product cards', D), lead: __('On the shop and category pages, related products and product blocks, for every product that has a 3D model. The product page itself is not changed.', D) },
+			el(C.ToggleControl, {
+				label: __('Show a “View in 3D and AR” button on product cards', D), checked: !!c.button, onChange: function (v) { set('button', v); },
+				help: __('It opens the 3D view in a window, with AR on phones. Glasses and caps get the “Try it on” button instead; wall art opens on the wall.', D)
+			}),
+			c.button ? el(Fragment, null,
+				el(C.TextControl, { label: __('Button text', D), value: c.button_text, maxLength: 60, onChange: function (v) { set('button_text', v); }, help: __('Try-on products use the button text from the Try-on page.', D) }),
+				el(C.SelectControl, {
+					label: __('Where in the card', D), value: c.button_position, __nextHasNoMarginBottom: true, onChange: function (v) { set('button_position', v); },
+					options: [{ value: 'after', label: __('After the card’s buttons (“Add to cart”)', D) }, { value: 'before', label: __('Before them', D) }]
+				}),
+				boot.blockTheme ? el(C.SelectControl, {
+					label: __('Style', D), value: c.button_style, __nextHasNoMarginBottom: true, onChange: function (v) { set('button_style', v); },
+					options: [{ value: 'outline', label: __('Outline (your theme’s secondary button)', D) }, { value: 'fill', label: __('Filled (your theme’s main button)', D) }],
+					help: __('The button follows your theme’s button styles.', D)
+				}) : el('p', { className: 'description' }, __('The button looks like your theme’s “Add to cart” button.', D))) : null,
+			el('h3', null, __('Card picture', D)),
+			el(C.SelectControl, {
+				label: __('What the card shows', D), value: c.media, __nextHasNoMarginBottom: true, onChange: function (v) { set('media', v); },
+				options: [{ value: 'image', label: __('The product image', D) }, { value: '3d', label: __('The 3D view first (its poster; the model loads when a shopper clicks)', D) }],
+				help: __('Pages stay fast: no 3D model is downloaded before a shopper interacts.', D)
+			}),
+			c.media === 'image' ? el(C.ToggleControl, { label: __('A small 3D badge on the image that opens the 3D view or the try-on', D), checked: !!c.badge, onChange: function (v) { set('badge', v); } }) : null,
+			UI.filters('atlasAr.placement.cards', [], ctx),
+			el(UI.ProNote, { where: 'placement', spot: 'cards' }, __('With AtlasAR Pro each product can have its own card button, button text and card picture.', D)),
+			el('p', { className: 'description' }, __('For cards your theme or page builder draws itself: the shortcode [atlas_ar_button id="123"] prints the same button for product 123.', D)),
+			ctx.saveBar);
 	}
 
 	function TryonPage(ctx) {
@@ -828,7 +861,9 @@
 		else if (step.id === 'place') body = el(Fragment, null,
 			el('h2', null, __('Where should shoppers see the 3D view?', D)),
 			el('p', null, __('On your WooCommerce product pages. Posts and pages use the block or shortcode.', D)),
-			el(UI.Choice, { label: __('Placement', D), value: s.placement.mode, options: PLACEMENTS.slice(0, 4), onChange: function (v) { ctx.set('placement', 'mode', v); } }));
+			el(UI.Choice, { label: __('Placement', D), value: s.placement.mode, options: PLACEMENTS.slice(0, 4), onChange: function (v) { ctx.set('placement', 'mode', v); } }),
+			// AR-176: the card button is a choice here, off until the merchant turns it on.
+			el(C.ToggleControl, { label: __('Also show a “View in 3D and AR” button on product cards (the shop and category pages)', D), checked: !!s.cards.button, onChange: function (v) { ctx.set('cards', 'button', v); } }));
 		else if (step.id === 'look') body = el(Fragment, null,
 			el('h2', null, __('Make it look like your shop', D)),
 			el('p', null, __('Pick a background and the colour of the “View in your room” button.', D)),

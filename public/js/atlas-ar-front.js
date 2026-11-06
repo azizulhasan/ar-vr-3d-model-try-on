@@ -156,25 +156,99 @@
 	}
 
 	/* ----------------------------------------------------------------- try-on */
+	function openTryon(btn) {
+		var core = sdk();
+		if (!core || !core.tryon) return;
+		var opts;
+		try {
+			opts = JSON.parse(btn.getAttribute('data-atlas-ar-tryon') || '{}');
+		} catch (err) {
+			return;
+		}
+		btn.disabled = true;
+		core.tryon.open(opts, { target: btn, returnFocus: btn }).then(function () {
+			btn.disabled = false;
+		}, function () {
+			btn.disabled = false;
+		});
+	}
 	function setupTryon() {
 		document.addEventListener('click', function (e) {
 			var btn = e.target.closest && e.target.closest('.atlas-ar-tryon-button');
 			if (!btn || btn.disabled) return;
 			e.preventDefault();
-			var core = sdk();
-			if (!core || !core.tryon) return;
-			var opts;
-			try {
-				opts = JSON.parse(btn.getAttribute('data-atlas-ar-tryon') || '{}');
-			} catch (err) {
+			openTryon(btn);
+		});
+	}
+
+	/* ---------------------------------------------------------- product cards */
+	// AR-176: a card button or badge carries the viewer's options as attributes; the popup element
+	// is built on the first click (one per model) and opened. Cards hold no viewer and no model
+	// loads until a shopper asks. A try-on card button opens the try-on like the product page's.
+	var cardPopups = {};
+	function openCardPopup(btn) {
+		var json = btn.getAttribute('data-atlas-ar-popup') || '{}', attrs;
+		try {
+			attrs = JSON.parse(json);
+		} catch (err) {
+			return;
+		}
+		if (!attrs.src) return;
+		var host = cardPopups[json];
+		if (!host) {
+			host = document.createElement('atlasar-viewer');
+			Object.keys(attrs).forEach(function (k) { host.setAttribute(k, attrs[k]); });
+			host.setAttribute('display', 'popup');
+			host.className = 'atlas-ar-viewer atlas-ar-viewer--card-popup';
+			document.body.appendChild(host);
+			cardPopups[json] = host;
+		}
+		// The SDK builds the popup when the element renders (a moment after it is added): open once
+		// its trigger is there; on later clicks it is there already.
+		function open() {
+			var tries = 0;
+			(function check() {
+				if (host.querySelector('.atlasar-trigger')) {
+					if (typeof host.open === 'function') host.open();
+					return;
+				}
+				if (++tries < 180) requestAnimationFrame(check); // ~3 s, then give up quietly
+			})();
+		}
+		if (!window.customElements) return;
+		if (customElements.get('atlasar-viewer')) open();
+		else customElements.whenDefined('atlasar-viewer').then(open);
+	}
+	// Classic loops: themes print "Add to cart" inside boxes of their own that close before our
+	// hook runs (Astra), so the button lands under the link instead of next to it. Put it beside
+	// the link, before or after as set, inside whatever box the theme used.
+	function placeLoopButtons() {
+		Array.prototype.forEach.call(document.querySelectorAll('li.product .atlas-ar-card-button-wrap'), function (wrap) {
+			if (wrap.closest('.atlas-ar-card-actions')) return; // a block card: already in its row
+			var card = wrap.closest('li.product');
+			// WooCommerce's own link: the last one shown (a theme's hover quick-add link comes first).
+			var links = card ? Array.prototype.filter.call(card.querySelectorAll('.add_to_cart_button, a.button[data-product_id]'), function (a) { return a.offsetParent !== null; }) : [];
+			var cart = links[links.length - 1];
+			if (!cart || cart.closest('.atlas-ar-card-button-wrap') || cart.parentNode === wrap.parentNode) return;
+			if (wrap.classList.contains('atlas-ar-card-button-wrap--before')) cart.parentNode.insertBefore(wrap, cart);
+			else cart.parentNode.insertBefore(wrap, cart.nextSibling);
+		});
+	}
+	function setupCards() {
+		placeLoopButtons();
+		document.addEventListener('click', function (e) {
+			var el = e.target.closest && e.target.closest('[data-atlas-ar-card]');
+			if (el) {
+				e.preventDefault(); // a badge inside the card's link (classic themes) must not open the product
+				if (el.disabled) return;
+				if (el.getAttribute('data-atlas-ar-card') === 'tryon') openTryon(el);
+				else openCardPopup(el);
 				return;
 			}
-			btn.disabled = true;
-			core.tryon.open(opts, { target: btn, returnFocus: btn }).then(function () {
-				btn.disabled = false;
-			}, function () {
-				btn.disabled = false;
-			});
+			// A 3D-first card on a theme that keeps its link around the picture: a tap on the 3D view
+			// turns the model; it does not open the product (the title still does).
+			var viewer = e.target.closest && e.target.closest('atlasar-viewer');
+			if (viewer && viewer.closest('.atlas-ar-card-media') && viewer.closest('a')) e.preventDefault();
 		});
 	}
 
@@ -183,6 +257,7 @@
 		Array.prototype.forEach.call(document.querySelectorAll('.atlas-ar-slide'), setupSlideThumb);
 		setupVariations();
 		setupTryon();
+		setupCards();
 	}
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
 	else start();
