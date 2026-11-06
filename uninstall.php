@@ -30,6 +30,7 @@ function atlas_ar_uninstall_site() {
 			update_option( 'atlas_ar_settings', $settings );
 		}
 		delete_option( 'atlas_ar_setup_offered' );
+		delete_option( 'atlas_ar_cards_intro' ); // AR-176: the product-cards first contact
 		return;
 	}
 

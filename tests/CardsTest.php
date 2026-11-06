@@ -262,6 +262,43 @@ final class CardsTest extends TestCase {
 		$this->assertSame( '3d', $d['media'] );
 	}
 
+	public function test_a_new_install_gets_the_button_and_an_updated_site_a_notice(): void {
+		$intro    = get_option( AR_TRY_ON_Cards::INTRO_OPTION );
+		$settings = get_option( AR_TRY_ON_Settings::OPTION );
+		$old      = get_option( 'ar_try_on_settings' );
+		try {
+			// A site that already has settings (updated): nothing changes, the notice is due.
+			delete_option( AR_TRY_ON_Cards::INTRO_OPTION );
+			AR_TRY_ON_Cards::intro();
+			$this->assertSame( 'notice', get_option( AR_TRY_ON_Cards::INTRO_OPTION ) );
+			$this->assertFalse( AR_TRY_ON_Settings::get( 'cards.button' ) );
+			AR_TRY_ON_Cards::intro(); // once only
+			$this->assertSame( 'notice', get_option( AR_TRY_ON_Cards::INTRO_OPTION ) );
+
+			// A 2.x site that has not moved its settings yet: still an existing site.
+			delete_option( AR_TRY_ON_Cards::INTRO_OPTION );
+			AR_TRY_ON_Settings::reset(); // no 3.x settings, cache cleared (update() would write the option again)
+			update_option( 'ar_try_on_settings', array( 'ar_try_on_ar_button' => 'activate' ), false );
+			AR_TRY_ON_Cards::intro();
+			$this->assertSame( 'notice', get_option( AR_TRY_ON_Cards::INTRO_OPTION ) );
+			$this->assertFalse( AR_TRY_ON_Settings::get( 'cards.button' ) );
+
+			// A new install: the button is on.
+			delete_option( AR_TRY_ON_Cards::INTRO_OPTION );
+			AR_TRY_ON_Settings::reset();
+			delete_option( 'ar_try_on_settings' );
+			AR_TRY_ON_Cards::intro();
+			$this->assertSame( 'done', get_option( AR_TRY_ON_Cards::INTRO_OPTION ) );
+			$this->assertTrue( AR_TRY_ON_Settings::get( 'cards.button' ) );
+			$this->assertSame( 'image', AR_TRY_ON_Settings::get( 'cards.media' ), 'only the button; the picture stays the image' );
+		} finally {
+			false === $intro ? delete_option( AR_TRY_ON_Cards::INTRO_OPTION ) : update_option( AR_TRY_ON_Cards::INTRO_OPTION, $intro, true );
+			false === $old ? delete_option( 'ar_try_on_settings' ) : update_option( 'ar_try_on_settings', $old, false );
+			false === $settings ? delete_option( AR_TRY_ON_Settings::OPTION ) : update_option( AR_TRY_ON_Settings::OPTION, $settings, true );
+			AR_TRY_ON_Settings::update( array() );
+		}
+	}
+
 	public function test_settings_are_cleaned(): void {
 		$this->cards( array( 'button' => 'yes', 'button_text' => str_repeat( 'x', 80 ) . '<b>', 'button_position' => 'left', 'media' => 'video', 'button_style' => 'weird' ) );
 		$c = AR_TRY_ON_Settings::get( 'cards' );

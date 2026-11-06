@@ -173,7 +173,7 @@ AtlasAR adds each product's 3D model to the product data Google reads on the pro
 
 = Can shoppers open the 3D view from the shop page, before they open a product? =
 
-Yes. In AtlasAR › Placement › Product cards, turn on the "View in 3D and AR" button: it appears on every product card that has a 3D model, on the shop and category pages, related products and the Product Collection block, in your theme's button style. Glasses and caps get the "Try it on" button. You can also show a small 3D badge on the product image, or show the 3D view itself first. Nothing is downloaded before a shopper clicks, so the pages stay fast. Nothing changes on your shop until you turn it on.
+Yes. In AtlasAR › Placement › Product cards, turn on the "View in 3D and AR" button: it appears on every product card that has a 3D model, on the shop and category pages, related products and the Product Collection block, in your theme's button style. Glasses and caps get the "Try it on" button. You can also show a small 3D badge on the product image, or show the 3D view itself first. Nothing is downloaded before a shopper clicks, so the pages stay fast. New installs start with the button on; a shop that updates keeps everything as it is until you turn it on (a one-time notice points you to the setting).
 
 = Will 3D views slow my site down? =
 The viewer loads only on pages that show a 3D view, the model only when it comes into view, and the try-on only after a click. Lighter files load faster: use Optimise.

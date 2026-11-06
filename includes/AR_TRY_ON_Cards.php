@@ -30,6 +30,12 @@ class AR_TRY_ON_Cards {
 	/** What the card button opens. */
 	const KINDS = array( '3d', 'wall', 'glasses', 'hat' );
 
+	/**
+	 * Whether this site met the card feature yet: 'done' (a new install: the button is on) or
+	 * 'notice' (a site updated to it: nothing changed, a one-time notice points to the setting).
+	 */
+	const INTRO_OPTION = 'atlas_ar_cards_intro';
+
 	/** @var array decision per post for this request */
 	private static $decided = array();
 
@@ -59,6 +65,53 @@ class AR_TRY_ON_Cards {
 		add_filter( 'render_block_woocommerce/product-image', array( __CLASS__, 'block_image' ), 10, 3 );
 		// Any card a theme or page builder draws itself.
 		add_shortcode( 'atlas_ar_button', array( __CLASS__, 'shortcode' ) );
+		// New installs get the button; sites that update keep their shop as it is and get a notice.
+		add_action( 'admin_init', array( __CLASS__, 'intro' ), 5 );
+		add_action( 'admin_init', array( __CLASS__, 'register_intro_notice' ), 6 );
+	}
+
+	/* ------------------------------------------------------------ first contact */
+
+	/**
+	 * Once per site (owner's decision, AR-176): a new install gets the card button on (the setup
+	 * wizard shows the choice); a site that updates to this version changes nothing and gets the
+	 * one-time notice below. A site is new when it has neither 3.x nor 2.x settings yet.
+	 */
+	public static function intro() {
+		if ( false !== get_option( self::INTRO_OPTION ) ) {
+			return;
+		}
+		$fresh = false === get_option( AR_TRY_ON_Settings::OPTION ) && false === get_option( 'ar_try_on_settings' );
+		if ( $fresh ) {
+			AR_TRY_ON_Settings::update( array( 'cards' => array( 'button' => true ) ) );
+			update_option( self::INTRO_OPTION, 'done', true );
+		} else {
+			update_option( self::INTRO_OPTION, 'notice', true );
+		}
+	}
+
+	/** The one-time, dismissible notice for sites that updated (admins; gone once the button is on). */
+	public static function register_intro_notice() {
+		if ( 'notice' !== get_option( self::INTRO_OPTION ) || ! class_exists( __NAMESPACE__ . '\AR_TRY_ON_Admin_Notice' ) ) {
+			return;
+		}
+		AR_TRY_ON_Admin_Notice::instance()->register_notice(
+			array(
+				'id'          => 'cards_intro',
+				'title'       => __( 'New: 3D on your product cards', 'ar-vr-3d-model-try-on' ),
+				'message'     => sprintf(
+					/* translators: %s: link to AtlasAR › Placement */
+					__( 'Shoppers can now open the 3D view, AR or the try-on straight from the shop and category pages: a "View in 3D and AR" button on every product card that has a 3D model, in your theme\'s button style, and a small 3D badge on the product image. Nothing has changed on your shop yet: turn it on under %s.', 'ar-vr-3d-model-try-on' ),
+					'<a href="' . esc_url( admin_url( 'admin.php?page=ar-vr-3d-model-try-on#placement' ) ) . '">' . esc_html__( 'AtlasAR › Placement › Product cards', 'ar-vr-3d-model-try-on' ) . '</a>'
+				),
+				'type'        => 'info',
+				'icon'        => '🧊',
+				'dismissible' => true,
+				'condition'   => function () {
+					return current_user_can( 'manage_options' ) && ! AR_TRY_ON_Settings::get( 'cards.button' );
+				},
+			)
+		);
 	}
 
 	/* ------------------------------------------------------------------ decision */
