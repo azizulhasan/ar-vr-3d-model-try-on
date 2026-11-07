@@ -1,6 +1,6 @@
 <?php
 /**
- * AR-176: PHPUnit bootstrap. The tests are integration tests: they load a local WordPress site
+ * AR-176 / AR-177: PHPUnit bootstrap. The tests are integration tests: they load a local WordPress site
  * (with WooCommerce) where this copy of the plugin is installed and active, and work on posts
  * they create and delete themselves. Nothing else on the site is changed; settings are put back.
  *
@@ -47,11 +47,11 @@ foreach ( array_reverse( $atlas_ar_loaders ) as $atlas_ar_loader ) {
 }
 unset( $atlas_ar_loaders, $atlas_ar_loader );
 
-if ( ! class_exists( '\AR_TRY_ON\AR_TRY_ON_Cards' ) ) {
-	fwrite( STDERR, "AtlasAR (with product cards, AR-176) is not active on {$root}: install this copy of the plugin there first.\n" );
+if ( ! class_exists( '\AR_TRY_ON\AR_TRY_ON_Cards' ) || ! method_exists( '\AR_TRY_ON\AR_TRY_ON_Library', 'user_can_see' ) ) {
+	fwrite( STDERR, "AtlasAR (with product cards, AR-176, and the 3D Library access rule, AR-177) is not active on {$root}: install this copy of the plugin there first.\n" );
 	exit( 1 );
 }
 if ( ! class_exists( 'WooCommerce' ) ) {
-	fwrite( STDERR, "WooCommerce is not active on {$root}: the card tests need it.\n" );
+	fwrite( STDERR, "WooCommerce is not active on {$root}: the tests need it.\n" );
 	exit( 1 );
 }

@@ -347,7 +347,8 @@ class AR_TRY_ON_Library {
 	 * Models, newest first, with a filter, one page at a time. No cap on the library size: only
 	 * the page shown is built in full.
 	 *
-	 * @param array $args search, filter (all | used | unused | missing | large), paged, per_page
+	 * @param array $args search, filter (all | used | unused | missing | large), paged, per_page,
+	 *                    author (only this user's models; AR-177: see visible_author())
 	 * @return array [ items, total ]
 	 */
 	public static function query( array $args = array() ) {
@@ -358,6 +359,7 @@ class AR_TRY_ON_Library {
 			'post_type'              => self::POST_TYPE,
 			'post_status'            => 'publish',
 			's'                      => isset( $args['search'] ) ? sanitize_text_field( $args['search'] ) : '',
+			'author'                 => ! empty( $args['author'] ) ? (int) $args['author'] : '',
 			'orderby'                => 'date',
 			'order'                  => 'DESC',
 			'fields'                 => 'ids',
@@ -445,6 +447,53 @@ class AR_TRY_ON_Library {
 			}
 		}
 		return $map;
+	}
+
+	/* ------------------------------------------------- who may see what (AR-177) */
+
+	/**
+	 * Whether the current user may see a model (its files, name and where it is used): the
+	 * people who may edit it. Authors see the models they added; Editors, Shop managers and
+	 * Administrators see every model. The one rule every route and screen uses.
+	 *
+	 * @param int $id model ID
+	 * @return bool
+	 */
+	public static function user_can_see( $id ) {
+		return self::POST_TYPE === get_post_type( (int) $id ) && current_user_can( 'edit_post', (int) $id );
+	}
+
+	/**
+	 * For lists: 0 when the current user sees every model, else their own user ID (the list is
+	 * then limited to the models they added, the same people user_can_see() lets through).
+	 *
+	 * @return int
+	 */
+	public static function visible_author() {
+		return current_user_can( 'edit_others_posts' ) ? 0 : (int) get_current_user_id();
+	}
+
+	/**
+	 * A model as the current user may see it: its "used by" list keeps only the posts they may
+	 * read (no titles of someone else's private or draft posts). Server-side code that needs the
+	 * full list (WP-CLI, migrations) keeps using get().
+	 *
+	 * @param array|mixed $model a model from get(), or anything else (returned as it is)
+	 * @return array|mixed
+	 */
+	public static function for_user( $model ) {
+		if ( ! is_array( $model ) || ! isset( $model['used_by'] ) || ! is_array( $model['used_by'] ) ) {
+			return $model;
+		}
+		$model['used_by'] = array_values(
+			array_filter(
+				$model['used_by'],
+				function ( $post ) {
+					return isset( $post['id'] ) && current_user_can( 'read_post', (int) $post['id'] );
+				}
+			)
+		);
+		return $model;
 	}
 
 	/**
