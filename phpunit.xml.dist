@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AR-176 / AR-177: integration tests. They run against a local WordPress site where THIS copy of the
+     plugin is installed and active (see tests/bootstrap.php; ATLAS_AR_WP_ROOT picks the site). -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         failOnWarning="true"
+         displayDetailsOnTestsThatTriggerWarnings="true">
+	<testsuites>
+		<testsuite name="atlasar">
+			<directory>tests</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

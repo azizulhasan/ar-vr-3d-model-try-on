@@ -55,6 +55,9 @@ const productionSrc = [
 	// the dev working tree for historical reference, but it must NOT
 	// land in the production zip.
 	'!vendor/freemius/**',
+	// AR-176: the PHPUnit suite (run against a local site) is not part of the plugin.
+	'!tests/**',
+	'!phpunit.xml.dist',
 ]
 
 const config = {

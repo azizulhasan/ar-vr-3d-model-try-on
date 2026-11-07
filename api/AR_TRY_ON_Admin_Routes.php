@@ -381,7 +381,7 @@ class AR_TRY_ON_Admin_Routes {
 			'thumb_id' => (int) get_post_thumbnail_id( $id ),
 			'tryon_image_url' => $data['tryon_image'] ? (string) wp_get_attachment_image_url( (int) $data['tryon_image'], 'large' ) : '',
 			'data'  => $data,
-			'model' => $data['model_id'] ? AR_TRY_ON_Library::get( $data['model_id'] ) : null,
+			'model' => $data['model_id'] ? AR_TRY_ON_Library::for_user( AR_TRY_ON_Library::get( $data['model_id'] ) ) : null, // AR-177
 		);
 	}
 
