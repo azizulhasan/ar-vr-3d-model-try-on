@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -202,6 +202,9 @@ Please report security bugs found in the source code of the 3D Viewer – 3D Mod
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 3.0.1 ( 7 November 2026 ) =
+* Security: Authors and other users who can upload files but not edit other people's posts now see only their own 3D models in the 3D Library and the product panel, and no longer see the titles of private or draft posts that use a model. Editors and administrators see everything as before. Thanks to the security researcher who reported this privately.
 
 = 3.0.0 ( 30 October 2026 ) =
 * New: AtlasAR 3.0 is a complete rebuild. Your products, models and settings move over by themselves after the update, and your old data is kept.
@@ -548,6 +551,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 3.0.1 =
+Security update: users who can upload files only see their own 3D models and no longer see titles of private or draft posts. Nothing else changes. Please update.
 
 = 3.0.0 =
 A new AtlasAR: the 3D Library, 3D in the gallery or a popup, try-on for glasses and caps, 3D from flat-product photos and free 3D models. Your models and settings move over by themselves. AtlasAR Pro users: update Pro to 4.0 too. Back up your site first.
