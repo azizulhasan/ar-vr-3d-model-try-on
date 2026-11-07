@@ -78,7 +78,7 @@ class AR_TRY_ON_Library_Routes {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( __CLASS__, 'get_model' ),
-					'permission_callback' => array( __CLASS__, 'can_use' ),
+					'permission_callback' => array( __CLASS__, 'can_read' ),
 					'label'               => __( 'Get a 3D model', 'ar-vr-3d-model-try-on' ),
 					'description'         => __( 'One 3D Library model: its name, files with URLs and sizes, missing files, whether it was optimised, and the products that show it.', 'ar-vr-3d-model-try-on' ),
 					'args'                => $id,
@@ -284,9 +284,17 @@ class AR_TRY_ON_Library_Routes {
 
 	/* ------------------------------------------------------------------ permissions */
 
-	/** See and add models: anyone who may upload files. */
+	/**
+	 * Use the 3D Library (add models, list them): anyone who may upload files. What a list shows
+	 * is limited to the models the user may see (AR-177: AR_TRY_ON_Library::visible_author()).
+	 */
 	public static function can_use() {
 		return current_user_can( 'upload_files' );
+	}
+
+	/** AR-177: read one model: only a model the user may see (an Author's own; every model for Editors). */
+	public static function can_read( \WP_REST_Request $r ) {
+		return self::can_use() && AR_TRY_ON_Library::user_can_see( (int) $r['id'] );
 	}
 
 	public static function can_edit( \WP_REST_Request $r ) {
@@ -315,16 +323,17 @@ class AR_TRY_ON_Library_Routes {
 				'filter'   => $r['filter'],
 				'paged'    => $r['page'],
 				'per_page' => $r['per_page'],
+				'author'   => AR_TRY_ON_Library::visible_author(), // AR-177: an Author lists only their own models
 			)
 		);
-		$out = rest_ensure_response( $res['items'] );
+		$out = rest_ensure_response( array_map( array( AR_TRY_ON_Library::class, 'for_user' ), $res['items'] ) );
 		$out->header( 'X-WP-Total', (string) $res['total'] );
 		return $out;
 	}
 
 	public static function get_model( \WP_REST_Request $r ) {
 		$model = AR_TRY_ON_Library::get( (int) $r['id'] );
-		return $model ? $model : new \WP_Error( 'atlas_ar_model', __( 'Unknown model.', 'ar-vr-3d-model-try-on' ), array( 'status' => 404 ) );
+		return $model ? AR_TRY_ON_Library::for_user( $model ) : new \WP_Error( 'atlas_ar_model', __( 'Unknown model.', 'ar-vr-3d-model-try-on' ), array( 'status' => 404 ) );
 	}
 
 	public static function upload( \WP_REST_Request $r ) {
@@ -352,7 +361,7 @@ class AR_TRY_ON_Library_Routes {
 		}
 		return array(
 			'results' => $results,
-			'models'  => array_values( array_filter( $models ) ),
+			'models'  => array_map( array( AR_TRY_ON_Library::class, 'for_user' ), array_values( array_filter( $models ) ) ),
 		);
 	}
 
@@ -425,10 +434,14 @@ class AR_TRY_ON_Library_Routes {
 		if ( $model && ! self::is_model( $model ) ) {
 			return new \WP_Error( 'atlas_ar_model', __( 'Unknown model.', 'ar-vr-3d-model-try-on' ), array( 'status' => 404 ) );
 		}
+		// AR-177: only a model this user may see (linking someone else's would hand its files over).
+		if ( $model && ! AR_TRY_ON_Library::user_can_see( $model ) ) {
+			return new \WP_Error( 'atlas_ar_model_forbidden', __( 'You cannot use this 3D model.', 'ar-vr-3d-model-try-on' ), array( 'status' => rest_authorization_required_code() ) );
+		}
 		AR_TRY_ON_Product::update( (int) $r['id'], array( 'model_id' => $model ) );
 		return array(
 			'product' => AR_TRY_ON_Product::get( (int) $r['id'] ),
-			'model'   => $model ? AR_TRY_ON_Library::get( $model ) : null,
+			'model'   => $model ? AR_TRY_ON_Library::for_user( AR_TRY_ON_Library::get( $model ) ) : null,
 		);
 	}
 
@@ -501,6 +514,6 @@ class AR_TRY_ON_Library_Routes {
 			$code = $result->get_error_code();
 			return new \WP_Error( $code, $result->get_error_message(), array( 'status' => 'atlas_ar_in_use' === $code ? 409 : 400 ) );
 		}
-		return $result;
+		return AR_TRY_ON_Library::for_user( $result ); // AR-177: no titles of posts the user may not read
 	}
 }
