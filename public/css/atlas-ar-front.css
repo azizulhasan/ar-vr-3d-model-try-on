@@ -41,16 +41,19 @@ html body button.atlas-ar-tryon-button.atlas-ar-tryon-button:focus-visible{outli
    The button carries the theme's own button classes (block themes: wp-element-button /
    wp-block-button__link with the outline or fill style; classic themes: WooCommerce's .button),
    so colours, radius and type come from the theme. Only layout is set here. */
-.atlas-ar-card-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.atlas-ar-card-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;container-type:inline-size}
+/* Narrow cards (phones, 2 a row): each button on its own full-width line, a little less side padding, so the label fits. */
+@container (max-width:240px){.atlas-ar-card-actions>*{flex:1 1 100%}.atlas-ar-card-actions>* .wp-block-button__link,.atlas-ar-card-actions>* .button{width:100%}.atlas-ar-card-actions .atlas-ar-card-button{padding-left:.75em;padding-right:.75em}.atlas-ar-card-actions .atlas-ar-card-button .atlas-ar-card-icon{display:none}}
 /* Cards that are flex columns (WooCommerce's product blocks): the row sits at the bottom, level across cards whose titles wrap differently. */
 .wc-block-product>.atlas-ar-card-actions{margin-top:auto}
-.atlas-ar-card-actions>.wp-block-button,.atlas-ar-card-actions>.wc-block-components-product-button,.atlas-ar-card-actions>.atlas-ar-card-button-wrap{margin:0;width:auto}
-.atlas-ar-card-button-wrap{display:inline-flex;vertical-align:middle}
+.atlas-ar-card-actions>.wp-block-button,.atlas-ar-card-actions>.wc-block-components-product-button,.atlas-ar-card-actions>.atlas-ar-card-button-wrap{margin:0;width:auto;min-width:0;max-width:100%}
+/* Never wider than the card (phones: 2 cards a row, ~150 px each): the label wraps instead. */
+.atlas-ar-card-button-wrap{display:inline-flex;vertical-align:middle;min-width:0;max-width:100%}
 /* Classic loops: next to the theme's "Add to cart" link (before or after it); a gap when it wraps to its own line. */
 li.product .atlas-ar-card-button-wrap{margin:4px 0}
 li.product .button+.atlas-ar-card-button-wrap,li.product .atlas-ar-card-button-wrap+.button{margin-left:8px}
 /* Type, size, padding and colours come from the theme's button styles: nothing of our own here. */
-.atlas-ar-card-button{display:inline-flex;align-items:center;gap:.45em;height:auto;white-space:nowrap;cursor:pointer}
+.atlas-ar-card-button{display:inline-flex;align-items:center;justify-content:center;gap:.45em;height:auto;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center;cursor:pointer}
 /* The same text size as the card's "Add to cart" (WooCommerce's block sets a preset size). */
 .atlas-ar-card-actions:has(.has-small-font-size) .atlas-ar-card-button{font-size:var(--wp--preset--font-size--small,inherit)}
 .atlas-ar-card-actions:has(.has-medium-font-size) .atlas-ar-card-button{font-size:var(--wp--preset--font-size--medium,inherit)}
