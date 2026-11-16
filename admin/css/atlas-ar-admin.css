@@ -135,12 +135,25 @@
 .atlas-ar-panel-status{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none}
 .atlas-ar-panel-status li{margin:0}
 .atlas-ar-panel-status .atlas-ar-chip{font-size:12px;padding:2px 8px}
-.atlas-ar-panel{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;color:var(--atlas-ar-ink)}
+.atlas-ar-panel{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:16px;color:var(--atlas-ar-ink)}
 .atlas-ar-panel-view{display:flex;flex-direction:column;gap:8px;min-width:0}
+/* The preview never draws outside its box (e.g. AtlasAR Pro's measurement labels near an edge). */
+.atlas-ar-panel-view .atlas-ar-viewer-box,.atlas-ar-panel-view .atlas-ar-viewer-empty{overflow:hidden}
 .atlas-ar-panel-side{display:flex;flex-direction:column;min-width:0}
-.atlas-ar-panel-tabs .components-tab-panel__tabs{flex-wrap:nowrap;overflow-x:auto;border-bottom:1px solid var(--atlas-ar-line);scrollbar-width:thin}
+/*
+ * Rules of the panel's tabs (AR-182 review): the tabs wrap onto more rows rather than scroll
+ * (every tab stays visible; a narrow box gets a select instead, see atlas-ar-product.js); the tab
+ * content takes its natural height and never scrolls, sideways least of all; nothing in it is
+ * wider than its column.
+ */
+/* More specific than the frame's .atlas-ar-tabs-panel rules (atlas-ar-shell.css), which may be on the same page. */
+.atlas-ar-panel-wrap .atlas-ar-panel-tabs>.components-tab-panel__tabs{flex-wrap:wrap;overflow:visible;border-bottom:1px solid var(--atlas-ar-line)}
 .atlas-ar-panel-tabs .components-tab-panel__tabs-item{flex:none;white-space:nowrap}
-.atlas-ar-panel-tabs .components-tab-panel__tab-content{padding-top:12px}
+.atlas-ar-panel-tabs .components-tab-panel__tab-content,.atlas-ar-panel-side>.atlas-ar-tab-body{padding-top:12px;overflow:visible;min-width:0}
+.atlas-ar-panel .atlas-ar-tab-body,.atlas-ar-panel .atlas-ar-tab-body>*{min-width:0;max-width:100%;box-sizing:border-box}
+/* A field's room for its search mark lies inside the column here (no negative margin past the edge). */
+.atlas-ar-panel .atlas-ar-field{margin-inline:0;padding-inline:4px}
+.atlas-ar-panel-pick{margin:0 0 4px}
 .atlas-ar-panel-heading{margin:16px 0 4px;font-size:13px;font-weight:600}
 .atlas-ar-tab-body>.atlas-ar-panel-heading:first-child{margin-top:0}
 .atlas-ar-panel-empty{padding:20px 12px}
@@ -163,17 +176,14 @@
 	.atlas-ar-split{grid-template-columns:1fr}
 }
 
-/* AR-128, now by the box's width: a wide panel keeps its preview in view and the tab content scrolls inside it. */
+/*
+ * A wide box: the preview beside the tabs, and it stays in view while the page scrolls past a long
+ * tab (sticky, instead of a fixed-height box with its own scroll). Without a model there is no
+ * preview column: the tabs (with the "No 3D model yet" card) take the whole width.
+ */
 @container atlasarpanel (min-width:640px){
-	.atlas-ar-panel{grid-template-columns:minmax(0,1fr) minmax(0,1fr);height:min(640px,calc(100vh - 180px));min-height:460px}
-	.atlas-ar-panel-view{overflow:hidden}
-	.atlas-ar-panel-side{min-height:0}
-	.atlas-ar-panel-tabs{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
-	.atlas-ar-panel-tabs .components-tab-panel__tabs{flex:none}
-	.atlas-ar-panel-tabs .components-tab-panel__tab-content{flex:1 1 auto;min-height:0;overflow:auto;padding-inline-end:6px}
-	.atlas-ar-panel-side .atlas-ar-tab-body>*{flex-shrink:0}
-	.atlas-ar-panel-side>.atlas-ar-tab-body{flex:1 1 auto;min-height:0;overflow:auto}
-	.atlas-ar-panel-foot{flex:none}
+	.atlas-ar-panel:not(.is-single){grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+	.atlas-ar-panel-view{position:sticky;top:calc(var(--wp-admin--admin-bar--height,32px) + 16px)}
 }
 
 /* AR-156: quick styles above the Appearance settings */

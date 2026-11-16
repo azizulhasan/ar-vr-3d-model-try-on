@@ -195,7 +195,7 @@
 	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance-main{display:flex;flex-direction:column;min-height:0}
 	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance .atlas-ar-head,.atlas-ar-app:not(.is-phone) .atlas-ar-appearance .atlas-ar-presets{flex:none}
 	.atlas-ar-app:not(.is-phone) .atlas-ar-tabs-fill{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
-	.atlas-ar-app:not(.is-phone) .atlas-ar-tabs-fill .components-tab-panel__tab-content{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-tabs-fill .components-tab-panel__tab-content{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
 	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance-preview{align-self:start;max-height:100%;overflow:auto}
 }
 

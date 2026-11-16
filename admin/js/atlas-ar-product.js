@@ -246,6 +246,9 @@
 			chips.map(function (c, i) { return el('li', { key: i }, el(UI.Chip, { tone: c[1] }, c[0])); }));
 	}
 
+	/** AR-182 review: below this panel width the tabs become a select (about three tabs fit a 280 px column). */
+	var NARROW = 360;
+
 	function Panel() {
 		var _item = useState(boot.item), item = _item[0], setItem = _item[1];
 		var address = useRef(panelAddress(window.location.hash));
@@ -271,6 +274,21 @@
 				if (a.field && UI.search && UI.search.focusField) UI.search.focusField({ field: a.field, label: '' });
 			}, 300);
 			return function () { clearTimeout(t); };
+		}, []);
+
+		// AR-182 review: the panel's own width decides the tab form (a narrow side column gets a
+		// select; the window width says nothing about the meta box).
+		var _narrow = useState(false), narrow = _narrow[0], setNarrow = _narrow[1];
+		(wp.element.useLayoutEffect || useEffect)(function () {
+			var node = rootRef.current;
+			if (!node) return;
+			// Measured now, before the first paint (a ResizeObserver reports only at a rendering
+			// step, which a background tab may hold back); the observer follows later changes.
+			setNarrow(node.getBoundingClientRect().width < NARROW);
+			if (!window.ResizeObserver) return;
+			var ro = new ResizeObserver(function (entries) { setNarrow(entries[0].contentRect.width < NARROW); });
+			ro.observe(node);
+			return function () { ro.disconnect(); };
 		}, []);
 
 		// AR-182: an add-on whose script runs after the panel started (deferred or loaded later)
@@ -320,9 +338,18 @@
 		// AtlasAR Pro adds hotspots, sizes and more models to the preview.
 		var options = UI.filters('atlasAr.product.viewerOptions', viewerOptions(item, boot.look), ctx);
 
-		// WordPress's TabPanel (arrow keys, one tab stop), from the kit; a plain row of buttons next
-		// to an older kit that has no Tabs part.
-		var tabsPart = UI.Tabs
+		// Below NARROW px all tabs cannot be seen at once: a labelled select of the same sections
+		// (no hidden tabs, no sideways scrolling). Wider: WordPress's TabPanel (ARIA tabs, arrow
+		// keys, one tab stop), its tabs wrapping onto more rows; a plain row of buttons next to an
+		// older kit that has no Tabs part.
+		var tabsPart = narrow
+			? el(Fragment, null,
+				el(C.SelectControl, {
+					className: 'atlas-ar-panel-pick', label: __('Section', 'ar-vr-3d-model-try-on'), value: byId(tab).id, __nextHasNoMarginBottom: true,
+					options: tabs.map(function (t) { return { value: t.id, label: t.label }; }), onChange: setTab
+				}),
+				el('div', { className: 'atlas-ar-tab-body', role: 'region', 'aria-label': byId(tab).label }, el(byId(tab).render, ctx)))
+			: UI.Tabs
 			? el(UI.Tabs, { className: 'atlas-ar-panel-tabs', tabs: tabs.map(function (t) { return { name: t.id, title: t.label }; }), tab: byId(tab).id, onTab: setTab }, function (name) {
 				return el('div', { className: 'atlas-ar-tab-body' }, el(byId(name).render, ctx));
 			})
@@ -334,11 +361,12 @@
 
 		return el('div', { className: 'atlas-ar-panel-wrap', ref: rootRef },
 			el(Status, { item: item }),
-			el('div', { className: 'atlas-ar-panel' },
-				el('div', { className: 'atlas-ar-panel-view' },
+			// No model: no preview column (the Model tab's "No 3D model yet" card says it once, full width).
+			el('div', { className: 'atlas-ar-panel' + (options.src ? '' : ' is-single') },
+				options.src ? el('div', { className: 'atlas-ar-panel-view' },
 					el(UI.Viewer, { options: Object.assign({ qr: !!boot.qr }, options), height: '340px', reloadKey: JSON.stringify(options) + ':' + rev, innerRef: viewerRef, empty: __('No 3D model yet.', 'ar-vr-3d-model-try-on') }),
-					options.src ? el('div', { className: 'atlas-ar-row' },
-						el(C.Button, { variant: 'secondary', onClick: function () { var h = viewerRef.current; if (h && h.requestFullscreen) h.requestFullscreen().catch(function () {}); } }, __('Full screen', 'ar-vr-3d-model-try-on'))) : null),
+					el('div', { className: 'atlas-ar-row' },
+						el(C.Button, { variant: 'secondary', onClick: function () { var h = viewerRef.current; if (h && h.requestFullscreen) h.requestFullscreen().catch(function () {}); } }, __('Full screen', 'ar-vr-3d-model-try-on')))) : null,
 				el('div', { className: 'atlas-ar-panel-side' },
 					tabsPart,
 					el('div', { className: 'atlas-ar-panel-foot' },
