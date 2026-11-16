@@ -1,0 +1,263 @@
+/*
+ * AR-180: the AtlasAR desktop-app frame, on the dashboard and the 3D Library page: side menu
+ * (rail), top bar (title, search, notices bell, help), one pane that scrolls inside itself, and a
+ * thin status bar. The same frame as AtlasMCP's admin (one design family): 232 px menu, 64 px top
+ * bar, 28 px status bar; at 1280 px the menu becomes icons, at 960 px the search becomes an icon,
+ * below 782 px (or lower than 560 px) the page scrolls normally and the menu slides in.
+ *
+ * Light only, like wp-admin. Colours are the AR-168 tokens (atlas-ar-library.css); the six frame
+ * tokens are below. Logical properties (inline-start / end), so right-to-left needs no second sheet.
+ */
+:root{--atlas-ar-rail:232px;--atlas-ar-rail-compact:56px;--atlas-ar-header:64px;--atlas-ar-statusbar:28px;--atlas-ar-pane-pad:24px;--atlas-ar-shadow:0 8px 24px rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.08)}
+
+.atlas-ar-icon{fill:currentColor;flex:none}
+.atlas-ar-wrap,.atlas-ar-library-wrap{color:var(--atlas-ar-ink)}
+
+/* ------------------------------------------------------------------ the grid */
+.atlas-ar-app{position:relative;display:grid;grid-template-columns:var(--atlas-ar-rail) minmax(0,1fr);grid-template-rows:var(--atlas-ar-header) minmax(0,1fr) var(--atlas-ar-statusbar);grid-template-areas:"rail header" "rail work" "status status";min-height:0;background:var(--atlas-ar-surface-2);color:var(--atlas-ar-ink);font-size:13px}
+.atlas-ar-app.is-compact{grid-template-columns:var(--atlas-ar-rail-compact) minmax(0,1fr)}
+
+.atlas-ar-skip{position:absolute;inset-inline-start:-9999px;top:8px;z-index:30;padding:8px 12px;border-radius:var(--atlas-ar-radius-md);background:var(--atlas-ar-surface);color:var(--atlas-ar-action);box-shadow:var(--atlas-ar-shadow);font-weight:600}
+.atlas-ar-skip:focus{inset-inline-start:8px}
+
+/* ------------------------------------------------------------------ side menu */
+.atlas-ar-rail{grid-area:rail;display:flex;flex-direction:column;min-height:0;overflow:auto;background:var(--atlas-ar-surface);border-inline-end:1px solid var(--atlas-ar-line)}
+.atlas-ar-rail-brand{display:flex;align-items:center;gap:10px;flex:none;min-height:var(--atlas-ar-header);padding:0 16px;box-sizing:border-box;border-bottom:1px solid var(--atlas-ar-line)}
+.atlas-ar-rail-logo{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;border-radius:var(--atlas-ar-radius-lg);background:var(--atlas-ar-brand);color:#fff;font-size:13px;font-weight:700;letter-spacing:.02em}
+.atlas-ar-rail-text{display:flex;flex-direction:column;min-width:0}
+.atlas-ar-rail-name{font-size:15px;font-weight:600;line-height:1.3}
+.atlas-ar-rail-badge{display:inline-block;margin-inline-start:6px;padding:1px 6px;border-radius:999px;background:var(--atlas-ar-pro-badge);color:var(--atlas-ar-pro-ink);font-size:10px;font-weight:700;line-height:1.5;text-transform:uppercase;vertical-align:middle}
+.atlas-ar-rail-version{color:var(--atlas-ar-muted);font-size:11px;line-height:1.4}
+.atlas-ar-app .atlas-ar-nav{flex:1 1 auto;padding:8px}
+.atlas-ar-nav-group+.atlas-ar-nav-group{margin-top:6px}
+.atlas-ar-nav-heading{padding:10px 12px 4px;color:var(--atlas-ar-muted);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.atlas-ar-app .atlas-ar-nav-item,.atlas-ar-rail.is-drawer .atlas-ar-nav-item{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;margin:1px 0;padding:6px 10px;box-sizing:border-box;border:0;border-radius:var(--atlas-ar-radius-md);background:transparent;color:var(--atlas-ar-ink);font-size:13px;line-height:1.4;text-align:start;text-decoration:none;cursor:pointer}
+.atlas-ar-nav-item .atlas-ar-icon{width:20px;height:20px}
+.atlas-ar-nav-item:hover{background:var(--atlas-ar-surface-3);color:var(--atlas-ar-ink)}
+.atlas-ar-nav-item.is-current{background:var(--atlas-ar-brand-ground);color:var(--atlas-ar-brand);font-weight:600}
+.atlas-ar-rail-foot{flex:none;padding:12px 16px;border-top:1px solid var(--atlas-ar-line);font-size:12px}
+.atlas-ar-rail-foot a{color:var(--atlas-ar-action)}
+
+/* Icon-only menu (960–1279 px): names stay for screen readers, a tooltip shows them. */
+.atlas-ar-app.is-compact .atlas-ar-rail-brand{justify-content:center;padding:0}
+.atlas-ar-app.is-compact .atlas-ar-rail-text,.atlas-ar-app.is-compact .atlas-ar-rail-foot{display:none}
+.atlas-ar-app.is-compact .atlas-ar-nav-item{justify-content:center;padding:8px}
+.atlas-ar-app.is-compact .atlas-ar-nav-label,.atlas-ar-app.is-compact .atlas-ar-nav-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.atlas-ar-app.is-compact .atlas-ar-nav-group+.atlas-ar-nav-group{padding-top:6px;border-top:1px solid var(--atlas-ar-line)}
+
+/* ------------------------------------------------------------------ top bar */
+.atlas-ar-header{grid-area:header;position:relative;display:flex;align-items:center;gap:16px;min-width:0;padding-block:0;padding-inline:24px 12px;background:var(--atlas-ar-surface);border-bottom:1px solid var(--atlas-ar-line)}
+.atlas-ar-header-title{display:flex;align-items:center;gap:10px;flex:1 1 0;min-width:0}
+.atlas-ar-app .atlas-ar-header h1{margin:0;padding:0;overflow:hidden;font-size:20px;font-weight:600;line-height:1.3;text-overflow:ellipsis;white-space:nowrap}
+.atlas-ar-app .atlas-ar-header h1:focus{outline:0}
+.atlas-ar-app .atlas-ar-header h1:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px}
+.atlas-ar-header .atlas-ar-chip{flex:none}
+.atlas-ar-header-search{flex:0 1 480px;min-width:220px}
+.atlas-ar-header-end{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex:1 1 0}
+.atlas-ar-header-button{position:relative}
+.atlas-ar-count{position:absolute;top:2px;inset-inline-end:0;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:var(--atlas-ar-action);color:#fff;font-size:10px;font-weight:600;line-height:16px;text-align:center}
+.atlas-ar-count.is-alert{background:var(--atlas-ar-danger)}
+
+/* Search box (WAI-ARIA combobox) */
+.atlas-ar-hsearch{position:relative;display:flex;align-items:center;width:100%}
+.atlas-ar-hsearch-icon{position:absolute;inset-inline-start:10px;display:flex;color:var(--atlas-ar-muted);pointer-events:none}
+.atlas-ar-app input.atlas-ar-hsearch-input{width:100%;height:36px;min-height:36px;margin:0;padding-block:0;padding-inline:36px 64px;border:1px solid var(--atlas-ar-line-strong);border-radius:var(--atlas-ar-radius-md);background:var(--atlas-ar-surface-2);color:var(--atlas-ar-ink);font-size:13px;line-height:1.4;box-shadow:none}
+.atlas-ar-app input.atlas-ar-hsearch-input:focus{border-color:var(--atlas-ar-action);background:var(--atlas-ar-surface);box-shadow:0 0 0 1px var(--atlas-ar-action);outline:2px solid transparent}
+.atlas-ar-hsearch-input::-webkit-search-cancel-button{display:none}
+.atlas-ar-hsearch-kbd{position:absolute;inset-inline-end:8px;padding:0 6px;border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-sm);background:var(--atlas-ar-surface);color:var(--atlas-ar-muted);font-family:inherit;font-size:11px;line-height:18px;pointer-events:none}
+.atlas-ar-hsearch-pop{position:absolute;top:calc(100% + 4px);inset-inline:0;z-index:40;max-height:min(440px,70vh);overflow:auto;padding:6px;box-sizing:border-box;border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-lg);background:var(--atlas-ar-surface);box-shadow:var(--atlas-ar-shadow)}
+.atlas-ar-hsearch-pop[hidden]{display:none}
+.atlas-ar-hsearch-heading{padding:8px 10px 4px;color:var(--atlas-ar-muted);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.atlas-ar-hsearch-option{display:flex;flex-direction:column;gap:1px;padding:7px 10px;border-radius:var(--atlas-ar-radius-md);cursor:pointer}
+.atlas-ar-hsearch-option.is-active{background:var(--atlas-ar-action-ground);box-shadow:inset 3px 0 0 var(--atlas-ar-action)}
+.atlas-ar-hsearch-label{color:var(--atlas-ar-ink);font-size:13px}
+.atlas-ar-hsearch-where{color:var(--atlas-ar-muted);font-size:12px}
+.atlas-ar-hsearch-empty{padding:8px 10px}
+.atlas-ar-hsearch-empty p{margin:0 0 8px;color:var(--atlas-ar-ink-2)}
+/* Below 960 px: an icon; the box opens across the top bar. */
+.atlas-ar-hsearch.is-floating{position:absolute;top:12px;inset-inline:16px;z-index:35;width:auto}
+
+/* Notices bell */
+.atlas-ar-notices-pop .components-popover__content{width:min(480px,92vw);max-height:min(520px,70vh);overflow:auto}
+.atlas-ar-notices{padding:12px}
+.atlas-ar-notices-list>*{margin:0 0 8px!important}
+.atlas-ar-notices-empty{margin:0 0 8px;color:var(--atlas-ar-muted)}
+.atlas-ar-notices-note{margin:4px 0 0;color:var(--atlas-ar-muted);font-size:12px}
+
+/* ------------------------------------------------------------------ the pane */
+.atlas-ar-work{grid-area:work;display:flex;flex-direction:column;min-width:0;min-height:0}
+.atlas-ar-pane{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+.atlas-ar-pane:focus{outline:0}
+.atlas-ar-pane:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:-2px}
+.atlas-ar-pane-body{flex:1 1 auto;min-height:0;overflow:auto;padding:var(--atlas-ar-pane-pad) 28px}
+.atlas-ar-pane-foot{flex:none;padding:10px 28px;background:var(--atlas-ar-surface);border-top:1px solid var(--atlas-ar-line)}
+.atlas-ar-savefoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:12px}
+.atlas-ar-savefoot-status{margin-inline-end:auto;color:var(--atlas-ar-muted)}
+.atlas-ar-savefoot-status.is-dirty{color:var(--atlas-ar-pro-ink);font-weight:600}
+.atlas-ar-pane .atlas-ar-head p{max-width:760px}
+
+/* Sub-tabs (WordPress TabPanel) with the fields under them */
+.atlas-ar-tabs-panel .components-tab-panel__tabs{flex:none;overflow-x:auto;background:var(--atlas-ar-surface);border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-lg) var(--atlas-ar-radius-lg) 0 0}
+.atlas-ar-tabs-panel .components-tab-panel__tab-content{padding:8px 20px 16px;background:var(--atlas-ar-surface);border:1px solid var(--atlas-ar-line);border-top:0;border-radius:0 0 var(--atlas-ar-radius-lg) var(--atlas-ar-radius-lg)}
+.atlas-ar-tab-fields h3{margin:20px 0 8px;font-size:13px}
+.atlas-ar-tab-fields h3:not(:first-child){margin-top:24px;padding-top:16px;border-top:1px solid var(--atlas-ar-surface-3)}
+.atlas-ar-tab-fields>.atlas-ar-field:first-child{margin-top:12px}
+
+/* A setting (UI.Field) and its 2-second mark: in atlas-ar-admin.css (AR-182: the product panel uses them too). */
+
+/* Appearance: Quick styles and tabs on the left, the live preview on the right. */
+.atlas-ar-appearance-preview{padding:16px;box-sizing:border-box;background:var(--atlas-ar-surface);border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-lg)}
+.atlas-ar-appearance-preview .atlas-ar-pro-note{margin-bottom:0}
+@media (max-width:1099px){
+	.atlas-ar-appearance-preview{margin-top:16px}
+}
+
+/* AR-182: the other screens on the new design */
+.atlas-ar-field.is-inline{display:inline-flex;margin:0;padding:0;border-radius:var(--atlas-ar-radius-sm)}
+.atlas-ar-field.is-inline.is-found{box-shadow:0 0 0 2px var(--atlas-ar-action),0 0 0 4px var(--atlas-ar-action-ground)}
+.atlas-ar-field-note{margin:4px 0 0}
+.atlas-ar-field>.atlas-ar-pro-note{margin-bottom:0}
+.atlas-ar-files-row{margin-top:8px}
+.atlas-ar-checkgroup{margin:0;padding:0;border:0}
+.atlas-ar-checkgroup .components-checkbox-control{margin-bottom:8px}
+.atlas-ar-tab-lead{max-width:760px;margin:12px 0 4px;color:var(--atlas-ar-muted)}
+.atlas-ar-tools h3:first-child{margin-top:12px}
+.atlas-ar-tools .atlas-ar-row{margin-top:8px}
+.atlas-ar-fields-box>.atlas-ar-field:first-child{margin-top:0}
+.atlas-ar-fields-box h3{margin:20px 0 8px;font-size:13px}
+.atlas-ar-integrations{max-width:880px}
+.atlas-ar-field.atlas-ar-card-field{margin:0 0 16px;padding:0;border-radius:var(--atlas-ar-radius-lg)}
+.atlas-ar-field.atlas-ar-card-field>.atlas-ar-section{margin-bottom:0}
+.atlas-ar-shortcode-size>*{flex:1 1 160px}
+/* Help › Guides: one plain line under each link. */
+.atlas-ar-guides li{margin:0 0 12px}
+.atlas-ar-guide-about{display:block;margin-top:2px;color:var(--atlas-ar-muted)}
+/* Tabs of a screen that scrolls as a whole: the tab bar stays at the top of the pane. */
+.atlas-ar-pane:not(.is-fill)>.atlas-ar-pane-body .atlas-ar-tabs-panel>.components-tab-panel__tabs{position:sticky;top:0;z-index:5}
+.atlas-ar-app.is-phone .atlas-ar-pane:not(.is-fill)>.atlas-ar-pane-body .atlas-ar-tabs-panel>.components-tab-panel__tabs{top:calc(var(--wp-admin--admin-bar--height,46px) + 56px)}
+@media (max-width:600px){.atlas-ar-app.is-phone .atlas-ar-pane:not(.is-fill)>.atlas-ar-pane-body .atlas-ar-tabs-panel>.components-tab-panel__tabs{top:56px}}
+/* The setup wizard in the frame: the step in the pane, Back / Continue in its footer. */
+.atlas-ar-pane--wizard .atlas-ar-wizard{max-width:880px;margin:0 auto}
+.atlas-ar-pane--wizard .atlas-ar-wizard-head{justify-content:space-between}
+.atlas-ar-pane--wizard .atlas-ar-wizard-head p{flex:initial}
+.atlas-ar-pane--wizard .atlas-ar-pane-foot .atlas-ar-wizard-nav{max-width:880px;margin:0 auto}
+/* Snackbars (WordPress SnackbarList): bottom of the window, above the status bar. */
+.atlas-ar-snackbars{position:fixed;bottom:calc(var(--atlas-ar-statusbar) + 12px);inset-inline-end:16px;z-index:100;width:auto;max-width:min(420px,calc(100vw - 32px))}
+
+/* ------------------------------------------------------------------ status bar */
+.atlas-ar-status{grid-area:status;display:flex;align-items:center;min-width:0;padding:0 16px;overflow:hidden;background:var(--atlas-ar-surface);border-top:1px solid var(--atlas-ar-line);color:var(--atlas-ar-muted);font-size:12px}
+.atlas-ar-status ul{display:flex;gap:20px;margin:0;padding:0;list-style:none;white-space:nowrap}
+.atlas-ar-status li{margin:0}
+.atlas-ar-status-link{padding:0;border:0;background:none;color:inherit;font:inherit;text-decoration:none;cursor:pointer}
+.atlas-ar-status-link:hover{color:var(--atlas-ar-action);text-decoration:underline}
+
+/* Focus ring on everything this sheet styles (WordPress components keep their own). */
+.atlas-ar-app .atlas-ar-nav-item:focus-visible,.atlas-ar-rail.is-drawer .atlas-ar-nav-item:focus-visible,.atlas-ar-status-link:focus-visible,.atlas-ar-skip:focus-visible,.atlas-ar-rail-foot a:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px;box-shadow:none}
+
+/* ------------------------------------------------------------------ pinned to the window */
+/*
+ * AR-128, kept: from 783 px wide and 560 px tall the frame is pinned under the admin bar, beside
+ * WordPress's menu (160 px; 36 px folded, and auto-folded at 960 px and narrower). When that menu
+ * is taller than the window, only the page behind it scrolls. #wpbody-content stays a flex
+ * column: anything still above the app keeps its height and the app takes the rest, so nothing is
+ * ever cut off (also before the bell has collected the notices).
+ */
+@media (min-width:783px) and (min-height:560px){
+	body.atlas-ar-fullscreen #wpfooter{display:none}
+	body.atlas-ar-fullscreen #wpcontent{padding-bottom:0}
+	body.atlas-ar-fullscreen #wpbody-content{position:fixed;top:var(--wp-admin--admin-bar--height,32px);bottom:0;inset-inline-start:160px;inset-inline-end:0;z-index:1;display:flex;flex-direction:column;width:auto;height:auto;float:none;padding:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto}
+	body.atlas-ar-fullscreen.folded #wpbody-content{inset-inline-start:36px}
+	body.atlas-ar-fullscreen #wpbody-content>*{flex:none}
+	/*
+	 * The WordPress menu scrolls inside itself, so the page never scrolls, even when that menu is
+	 * taller than the window (the references let the page scroll then). Its column is pinned and
+	 * wide enough for WordPress's hover fly-out submenus, which would be cut off by a scroll box of
+	 * the menu's own width; the empty part lets clicks through to the app. !important: WordPress's
+	 * menu-pinning script (common.js) writes position and top inline on a tall menu.
+	 */
+	body.atlas-ar-fullscreen #adminmenuwrap{position:fixed!important;top:var(--wp-admin--admin-bar--height,32px)!important;bottom:0!important;inset-inline-start:0;height:auto!important;width:440px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:transparent;pointer-events:none}
+	body.atlas-ar-fullscreen #adminmenuwrap::-webkit-scrollbar{display:none}
+	body.atlas-ar-fullscreen #adminmenu{pointer-events:auto}
+	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-wrap,
+	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-library-wrap{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;margin:0;padding:0;background:var(--atlas-ar-surface-2)}
+	body.atlas-ar-fullscreen #atlas-ar-dashboard,
+	body.atlas-ar-fullscreen #atlas-ar-library{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:auto}
+	body.atlas-ar-fullscreen .atlas-ar-app{flex:1 1 auto;min-height:0}
+}
+@media (min-width:783px) and (max-width:960px) and (min-height:560px){
+	body.atlas-ar-fullscreen.auto-fold #wpbody-content{inset-inline-start:36px}
+}
+
+/* Appearance (1100 px and wider): the tab's fields and the preview scroll inside themselves; the tabs, Quick styles and Save bar stay. */
+@media (min-width:1100px) and (min-height:560px){
+	.atlas-ar-app:not(.is-phone) .atlas-ar-pane--appearance .atlas-ar-pane-body{display:flex;flex-direction:column;overflow:hidden}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance{display:grid;flex:1 1 auto;grid-template-columns:minmax(0,1fr) minmax(300px,400px);gap:20px;min-height:0}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance-main{display:flex;flex-direction:column;min-height:0}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance .atlas-ar-head,.atlas-ar-app:not(.is-phone) .atlas-ar-appearance .atlas-ar-presets{flex:none}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-tabs-fill{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-tabs-fill .components-tab-panel__tab-content{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
+	.atlas-ar-app:not(.is-phone) .atlas-ar-appearance-preview{align-self:start;max-height:100%;overflow:auto}
+}
+
+/* 3D Library (961 px and wider): the grid and the details pane scroll inside themselves (AR-128). */
+@media (min-width:961px) and (min-height:560px){
+	.atlas-ar-app:not(.is-phone) .atlas-ar-pane--library .atlas-ar-pane-body{display:flex;flex-direction:column;overflow:hidden;padding-bottom:12px}
+	.atlas-ar-pane--library .atlas-ar-library{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;max-width:none}
+	.atlas-ar-pane--library .atlas-ar-library>*{flex:none}
+	.atlas-ar-pane--library .atlas-ar-browser{display:flex;flex:1 1 auto;flex-direction:column;min-height:0}
+	.atlas-ar-pane--library .atlas-ar-browser>*{flex:none}
+	.atlas-ar-pane--library .atlas-ar-upload,
+	.atlas-ar-pane--library .atlas-ar-library-action{max-height:40vh;overflow:auto}
+	.atlas-ar-pane--library .atlas-ar-browser>.atlas-ar-body{flex:1 1 auto;min-height:0}
+	.atlas-ar-pane--library .atlas-ar-grid-wrap{height:100%;overflow:auto;padding:2px 6px 12px 2px;box-sizing:border-box;align-content:start}
+	.atlas-ar-pane--library .atlas-ar-detail{position:static;height:100%;overflow:auto;box-sizing:border-box}
+	.atlas-ar-pane--library .atlas-ar-detail>*{flex-shrink:0}
+	.atlas-ar-pane--library .atlas-ar-library>.atlas-ar-pro-note{margin:12px 0 0}
+}
+
+/* ------------------------------------------------------------------ phones (below 783 px, or lower than 560 px) */
+.atlas-ar-app.is-phone{display:block}
+.atlas-ar-app.is-phone .atlas-ar-header{position:sticky;top:var(--wp-admin--admin-bar--height,46px);z-index:20;height:56px;gap:4px;padding-inline:4px 8px}
+.atlas-ar-app.is-phone .atlas-ar-header h1{font-size:16px}
+.atlas-ar-app.is-phone .atlas-ar-header .atlas-ar-chip{display:none}
+.atlas-ar-app.is-phone .atlas-ar-header-search{flex:none;min-width:0}
+.atlas-ar-app.is-phone .atlas-ar-header-end{flex:none;gap:0}
+.atlas-ar-app.is-phone .atlas-ar-hsearch.is-floating{top:8px;inset-inline:8px}
+.atlas-ar-app.is-phone .atlas-ar-hsearch-option{min-height:44px;justify-content:center;box-sizing:border-box}
+.atlas-ar-app.is-phone .atlas-ar-pane-body{overflow:visible;padding:16px 12px}
+.atlas-ar-app.is-phone .atlas-ar-pane-foot{position:sticky;bottom:var(--atlas-ar-statusbar);z-index:15;padding:8px 12px}
+.atlas-ar-app.is-phone .atlas-ar-status{position:sticky;bottom:0;z-index:15;height:var(--atlas-ar-statusbar);padding:0 12px}
+.atlas-ar-app.is-phone .atlas-ar-status li:nth-child(n+3){display:none}
+.atlas-ar-app.is-phone .atlas-ar-tabs-panel .components-tab-panel__tabs{position:sticky;top:calc(var(--wp-admin--admin-bar--height,46px) + 56px);z-index:10;flex-wrap:nowrap}
+.atlas-ar-app.is-phone .atlas-ar-tabs-panel .components-tab-panel__tab-content{padding:8px 12px 16px}
+/* WordPress lets the admin bar scroll away at 600 px and narrower. */
+@media (max-width:600px){
+	.atlas-ar-app.is-phone .atlas-ar-header{top:0}
+	.atlas-ar-app.is-phone .atlas-ar-tabs-panel .components-tab-panel__tabs{top:56px}
+}
+@media (max-width:782px){
+	.atlas-ar-wrap,.atlas-ar-library-wrap{margin:0 0 0 -10px}
+	body.rtl .atlas-ar-wrap,body.rtl .atlas-ar-library-wrap{margin:0 -10px 0 0}
+}
+
+/* The slide-in menu (a dialog) */
+.atlas-ar-menu-backdrop{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.35)}
+.atlas-ar-rail.is-drawer{position:fixed;top:0;bottom:0;inset-inline-start:0;z-index:100001;display:flex;flex-direction:column;width:min(300px,86vw);overflow:auto;background:var(--atlas-ar-surface);border-inline-end:1px solid var(--atlas-ar-line);box-shadow:var(--atlas-ar-shadow);animation:atlas-ar-slide .2s ease-out}
+.atlas-ar-rail.is-drawer .atlas-ar-nav{flex:1 1 auto;padding:8px}
+.atlas-ar-rail.is-drawer .atlas-ar-nav-item{min-height:44px}
+.atlas-ar-rail.is-drawer .atlas-ar-rail-brand{order:-1}
+.atlas-ar-drawer-close{position:absolute;top:12px;inset-inline-end:8px}
+@keyframes atlas-ar-slide{from{transform:translateX(-100%)}to{transform:none}}
+@keyframes atlas-ar-slide-rtl{from{transform:translateX(100%)}to{transform:none}}
+body.rtl .atlas-ar-rail.is-drawer{animation-name:atlas-ar-slide-rtl}
+
+/* ------------------------------------------------------------------ reduced motion, high contrast */
+@media (prefers-reduced-motion:reduce){
+	.atlas-ar-rail.is-drawer{animation:none}
+	.atlas-ar-app *,.atlas-ar-rail.is-drawer *{transition:none!important;scroll-behavior:auto!important}
+}
+@media (forced-colors:active){
+	.atlas-ar-nav-item.is-current,.atlas-ar-hsearch-option.is-active{outline:2px solid Highlight;outline-offset:-2px}
+	.atlas-ar-count,.atlas-ar-rail-logo,.atlas-ar-chip{border:1px solid CanvasText}
+	.atlas-ar-app .atlas-ar-nav-item:focus-visible,.atlas-ar-status-link:focus-visible,.atlas-ar-pane:focus-visible{outline-color:Highlight}
+}

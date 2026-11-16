@@ -7,7 +7,11 @@
  * This check makes sure what ships is complete and clean:
  *   - every shipped script parses (node --check),
  *   - the SDK copy has all its files,
- *   - no console.log in the plugin's own scripts (wp.org review).
+ *   - no console.log in the plugin's own scripts (wp.org review),
+ *   - AR-180: the admin scripts pass the text domain as a literal ('ar-vr-3d-model-try-on'), not
+ *     as the old variable D: `wp i18n make-pot` skips strings whose domain is a variable,
+ *   - AR-180: no file under admin/ asks whether AtlasAR Pro is active (wp.org guideline 5: the
+ *     free plugin reads filters only; Pro adds its parts through them).
  */
 const fs = require('fs');
 const path = require('path');
@@ -31,6 +35,33 @@ for (const rel of own) {
         console.error(`✗ ${rel} has console.log`);
     }
 }
+// AR-180: __( 'Text', D ) and the like: the old variable text domain.
+const listJs = (dir) => fs.readdirSync(path.join(root, dir)).filter((n) => n.endsWith('.js')).map((n) => `${dir}/${n}`);
+for (const rel of listJs('admin/js')) {
+    fs.readFileSync(path.join(root, rel), 'utf8').split(/\r?\n/).forEach((line, i) => {
+        if (/,\s*D\s*\)/.test(line)) {
+            failed++;
+            console.error(`✗ ${rel}:${i + 1} passes the text domain as a variable; write 'ar-vr-3d-model-try-on'`);
+        }
+    });
+}
+
+// AR-180: the free plugin never checks for Pro. atlas-plugins.js is exempt: it is the shared
+// "our plugins" page of every AtlasAiDev plugin and reads whether the Pro add-ons of OTHER
+// products are installed to label their cards; it gates nothing in AtlasAR.
+const proWords = /\b(is_pro\w*|isPro\w*|\w*PRO_VERSION)\b/;
+const proExempt = ['admin/js/atlas-plugins.js'];
+const adminFiles = fs.readdirSync(path.join(root, 'admin')).filter((n) => n.endsWith('.php')).map((n) => `admin/${n}`).concat(listJs('admin/js'));
+for (const rel of adminFiles.filter((r) => !proExempt.includes(r))) {
+    fs.readFileSync(path.join(root, rel), 'utf8').split(/\r?\n/).forEach((line, i) => {
+        const hit = line.match(proWords);
+        if (hit) {
+            failed++;
+            console.error(`✗ ${rel}:${i + 1} checks for AtlasAR Pro (${hit[0]}); read a filter instead`);
+        }
+    });
+}
+
 for (const f of sdkFiles) {
     if (!fs.existsSync(path.join(root, 'public/js/atlasar-sdk', f))) {
         failed++;
