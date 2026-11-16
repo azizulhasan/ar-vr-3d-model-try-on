@@ -201,11 +201,13 @@
 		// Free's per-product settings, and those an add-on adds with atlasAr.fields (kind "product", e.g. Pro's tabs).
 		var perProduct = (UI.map.productFields || []).concat(UI.map.allFields().filter(function (f) { return f.kind === 'product'; }));
 		var asked = ctx.route && ctx.route.field ? perProduct.filter(function (f) { return f.id === ctx.route.field; })[0] : null;
+		// AR-182: Edit opens the product's AtlasAR panel at the tab (and setting) that was asked for.
+		var panelHash = '#atlas-ar-panel' + (asked && asked.panelTabId ? ':' + asked.panelTabId + '/' + asked.id : '');
 		return el(Fragment, null,
 			el(UI.Head, { lead: __('Your products and their 3D, AR and try-on status. Add a model right from here.', 'ar-vr-3d-model-try-on') }),
 			asked ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' },
 				/* translators: 1: a setting, e.g. "AR placement (floor or wall)", 2: a tab of the product's AtlasAR panel, e.g. "Display". */
-				sprintf(__('“%1$s” is set for each product: open a product and look under %2$s in its AtlasAR panel.', 'ar-vr-3d-model-try-on'), asked.label, asked.panelTab)) : null,
+				sprintf(__('“%1$s” is set for each product: Edit on a product below opens its AtlasAR panel at %2$s.', 'ar-vr-3d-model-try-on'), asked.label, asked.panelTab)) : null,
 			// AR-160: the one-time move from AtlasAR 2.x.
 			mig.status === 'running' ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' },
 				sprintf(__('Moving your 3D models from AtlasAR 2 into the 3D Library (%d so far). It runs in the background; your shop keeps working.', 'ar-vr-3d-model-try-on'), mig.moved || 0)) : null,
@@ -274,7 +276,7 @@
 								// icon button of the same height (a draft opens its preview).
 								el('td', { className: 'atlas-ar-actions' }, el('span', { className: 'atlas-ar-row-actions' },
 									m
-										? el(C.Button, { variant: 'secondary', href: i.edit_url + '#atlas-ar-panel' }, __('Edit', 'ar-vr-3d-model-try-on'))
+										? el(C.Button, { variant: 'secondary', href: i.edit_url + panelHash }, __('Edit', 'ar-vr-3d-model-try-on'))
 										: el(C.Button, { variant: 'primary', onClick: function () { addModel(i); } }, __('Add 3D', 'ar-vr-3d-model-try-on')),
 									i.view_url ? el(C.Button, {
 										variant: 'secondary', className: 'atlas-ar-view', icon: 'external', href: i.view_url, target: '_blank', rel: 'noopener',
@@ -699,7 +701,11 @@
 			if (!navigator.clipboard) { failed(); return; }
 			navigator.clipboard.writeText(code).then(function () { UI.shell.notify(__('Copied', 'ar-vr-3d-model-try-on')); }, failed);
 		}
-		var guide = function (href, text) { return el('li', null, el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, text, el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', 'ar-vr-3d-model-try-on')))); };
+		var guide = function (href, text, about) {
+			return el('li', null,
+				el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, text, el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', 'ar-vr-3d-model-try-on'))),
+				el('span', { className: 'atlas-ar-guide-about' }, about));
+		};
 		return el(Fragment, null,
 			el(UI.Head, { lead: __('Guides, a shortcode builder and a quick check of your site.', 'ar-vr-3d-model-try-on') }),
 			el(UI.shell.Tabs, { tabs: tabsOf('help'), tab: ctx.tab, onTab: function (t) { ctx.go('help', t, '', { replace: true }); } }, function (t) {
@@ -723,10 +729,14 @@
 				}
 				return el('div', { className: 'atlas-ar-tab-fields' },
 					el('ul', { className: 'atlas-ar-guides' },
-						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Getting started — from install to your first 3D product', 'ar-vr-3d-model-try-on')),
-						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Good 3D models — size, files for iPhone and Android', 'ar-vr-3d-model-try-on')),
-						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Try-on setup — glasses and caps that fit', 'ar-vr-3d-model-try-on')),
-						guide(UI.link(UI.LINKS.support, 'help', 'help_support'), __('Contact support — we answer within one working day', 'ar-vr-3d-model-try-on'))));
+						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Getting started — from install to your first 3D product', 'ar-vr-3d-model-try-on'),
+							__('Install, choose where the 3D view shows, add a model to a product and check it on a phone.', 'ar-vr-3d-model-try-on')),
+						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Good 3D models — size, files for iPhone and Android', 'ar-vr-3d-model-try-on'),
+							__('Which files to upload (GLB, USDZ, a poster), how big they may be, and how to make them lighter.', 'ar-vr-3d-model-try-on')),
+						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Try-on setup — glasses and caps that fit', 'ar-vr-3d-model-try-on'),
+							__('Mark a product as glasses or a cap, test it with your camera, and fix the fit.', 'ar-vr-3d-model-try-on')),
+						guide(UI.link(UI.LINKS.support, 'help', 'help_support'), __('Contact support — we answer within one working day', 'ar-vr-3d-model-try-on'),
+							__('Write to us with your site address and what you see; a screenshot helps.', 'ar-vr-3d-model-try-on'))));
 			}));
 	}
 

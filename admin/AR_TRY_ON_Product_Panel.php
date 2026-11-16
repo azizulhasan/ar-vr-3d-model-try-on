@@ -57,7 +57,13 @@ class AR_TRY_ON_Product_Panel {
 		if ( ! $screen || ! $post || ! in_array( $screen->post_type, self::types(), true ) ) {
 			return;
 		}
-		wp_register_script( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-product.js', array( AR_TRY_ON_Dashboard::UI, AR_TRY_ON_Library_Page::HANDLE ), (string) filemtime( ATLAS_AR_PLUGIN_PATH . 'admin/js/atlas-ar-product.js' ), true );
+		// AR-182: the search part too: an address like #atlas-ar-panel:display/product.ar_placement
+		// (from the dashboard's search and its Products list) opens the tab and marks the setting.
+		$deps = array( AR_TRY_ON_Dashboard::UI, AR_TRY_ON_Library_Page::HANDLE );
+		if ( wp_script_is( AR_TRY_ON_Dashboard::SEARCH, 'registered' ) ) {
+			$deps[] = AR_TRY_ON_Dashboard::SEARCH;
+		}
+		wp_register_script( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-product.js', $deps, (string) filemtime( ATLAS_AR_PLUGIN_PATH . 'admin/js/atlas-ar-product.js' ), true );
 		wp_set_script_translations( self::HANDLE, 'ar-vr-3d-model-try-on' );
 		$tryon = AR_TRY_ON_Settings::get( 'tryon' );
 		wp_localize_script(

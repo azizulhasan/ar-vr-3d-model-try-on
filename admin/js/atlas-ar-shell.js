@@ -376,27 +376,8 @@
 			props.footer ? el('div', { className: 'atlas-ar-pane-foot' }, props.footer) : null);
 	}
 
-	/**
-	 * Sub-tabs on WordPress's TabPanel (arrow keys, one tab stop; the content is drawn inside its
-	 * role="tabpanel"). TabPanel only takes a first tab, so it is drawn again (a new key) only
-	 * when the tab is changed from outside (the search, an address), never on a click, so focus
-	 * stays on the tab the user picked.
-	 * props: tabs [ { name, title } ], tab, onTab( name ), className, children( tab ) → content
-	 */
-	function Tabs(props) {
-		var picked = useRef(null), key = useRef(0);
-		var wanted = props.tabs.some(function (t) { return t.name === props.tab; }) ? props.tab : props.tabs[0].name;
-		if (wanted !== picked.current) { picked.current = wanted; key.current++; }
-		return el(C.TabPanel, {
-			key: key.current, className: 'atlas-ar-tabs-panel' + (props.className ? ' ' + props.className : ''),
-			tabs: props.tabs, initialTabName: wanted,
-			onSelect: function (name) {
-				if (name === picked.current) return;
-				picked.current = name;
-				props.onTab(name);
-			}
-		}, function (t) { return props.children(t.name); });
-	}
+	/** Sub-tabs: the kit's part (AR-182: moved to atlas-ar-ui.js for the product panel; same name here). */
+	var Tabs = UI.Tabs;
 
 	/** The Save bar in the pane's footer: a status line in words, and the one primary button. status: { busy, saved, error, dirty } */
 	function SaveFooter(props) {

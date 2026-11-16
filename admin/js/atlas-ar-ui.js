@@ -236,6 +236,8 @@
 		menu: [['M5 5v1.5h14V5H5zm0 7.8h14v-1.5H5v1.5zM5 19h14v-1.5H5V19z']],
 		close: [['m13.06 12 6.47-6.47-1.06-1.06L12 10.94 5.53 4.47 4.47 5.53 10.94 12l-6.47 6.47 1.06 1.06L12 13.06l6.47 6.47 1.06-1.06L13.06 12Z']],
 		search: [['M13 5c-3.3 0-6 2.7-6 6 0 1.4.5 2.7 1.3 3.7l-3.8 3.8 1.1 1.1 3.8-3.8c1 .8 2.3 1.3 3.7 1.3 3.3 0 6-2.7 6-6S16.3 5 13 5zm0 10.5c-2.5 0-4.5-2-4.5-4.5s2-4.5 4.5-4.5 4.5 2 4.5 4.5-2 4.5-4.5 4.5z']],
+		// AR-182: the Licence item (AtlasAR Pro's link).
+		key: [['M9 13.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM9 16a4.002 4.002 0 003.8-2.75H15V16h2.5v-2.75H19v-2.5h-6.2A4.002 4.002 0 005 12a4 4 0 004 4z', 1]],
 		bell: [['M17 11.5c0 1.353.17 2.368.976 3 .266.209.602.376 1.024.5v1H5v-1c.422-.124.757-.291 1.024-.5.806-.632.976-1.647.976-3V9c0-2.8 2.2-5 5-5s5 2.2 5 5v2.5ZM15.5 9v2.5c0 .93.066 1.98.515 2.897l.053.103H7.932a4.018 4.018 0 0 0 .053-.103c.449-.917.515-1.967.515-2.897V9c0-1.972 1.528-3.5 3.5-3.5s3.5 1.528 3.5 3.5Zm-5.492 9.008c0-.176.023-.346.065-.508h3.854A1.996 1.996 0 0 1 12 20c-1.1 0-1.992-.892-1.992-1.992Z', 1]]
 	});
 
@@ -250,7 +252,7 @@
 			}));
 	}
 
-	/** A small word label ("Unsaved changes"). tone: '' | 'note' | 'warn'. Always words, never colour alone. */
+	/** A small word label ("Unsaved changes", "3D: Ready"). tone: '' | 'ok' | 'note' | 'warn'. Always words, never colour alone. */
 	function Chip(props) {
 		return el('span', { className: 'atlas-ar-chip' + (props.tone ? ' atlas-ar-chip--' + props.tone : '') }, props.children);
 	}
@@ -414,9 +416,43 @@
 	 */
 	function Empty(props) {
 		var a = props.action;
-		return el('div', { className: 'atlas-ar-empty-state' },
+		return el('div', { className: 'atlas-ar-empty-state' + (props.className ? ' ' + props.className : '') },
+			props.title ? el('strong', null, props.title) : null,
 			el('p', null, props.text),
-			a ? el(C.Button, { variant: 'secondary', href: a.href, onClick: a.onClick }, a.label) : null);
+			a ? el(C.Button, { variant: a.primary ? 'primary' : 'secondary', href: a.href, onClick: a.onClick, isBusy: a.busy, disabled: a.disabled }, a.label) : null,
+			props.children);
+	}
+
+	/**
+	 * Sub-tabs on WordPress's TabPanel (arrow keys, one tab stop; the content is drawn inside its
+	 * role="tabpanel"). TabPanel only takes a first tab, so it is drawn again (a new key) only
+	 * when the tab is changed from outside (the search, an address), never on a click, so focus
+	 * stays on the tab the user picked. AR-182: in the kit (was UI.shell.Tabs), so the product
+	 * panel, which has no app frame, uses the same part.
+	 * props: tabs [ { name, title } ], tab, onTab( name ), className, children( tab ) → content
+	 */
+	function Tabs(props) {
+		var picked = useRef(null), key = useRef(0), box = useRef(null);
+		var wanted = props.tabs.some(function (t) { return t.name === props.tab; }) ? props.tab : props.tabs[0].name;
+		if (wanted !== picked.current) { picked.current = wanted; key.current++; }
+		// AR-182: a tab bar that scrolls sideways (many tabs in a narrow box) shows the chosen tab.
+		useEffect(function () {
+			var list = box.current && box.current.querySelector('.components-tab-panel__tabs');
+			var on = list && list.querySelector('[aria-selected="true"]');
+			if (!on || list.scrollWidth <= list.clientWidth) return;
+			var l = on.getBoundingClientRect().left - list.getBoundingClientRect().left + list.scrollLeft, r = l + on.offsetWidth;
+			if (l < list.scrollLeft) list.scrollLeft = l;
+			else if (r > list.scrollLeft + list.clientWidth) list.scrollLeft = r - list.clientWidth;
+		}, [wanted, props.tabs.length]);
+		return el(C.TabPanel, {
+			ref: box, key: key.current, className: 'atlas-ar-tabs-panel' + (props.className ? ' ' + props.className : ''),
+			tabs: props.tabs, initialTabName: wanted,
+			onSelect: function (name) {
+				if (name === picked.current) return;
+				picked.current = name;
+				props.onTab(name);
+			}
+		}, function (t) { return props.children(t.name); });
 	}
 
 	window.AtlasARAdminUI = Object.freeze({
@@ -425,7 +461,7 @@
 		Section: Section, Head: Head, Choice: Choice, ProNote: ProNote, Viewer: Viewer, SaveBar: SaveBar,
 		lookOptions: lookOptions, useSettings: useSettings,
 		// AR-180: kit version 2.
-		version: 2, icons: icons, Icon: Icon, Chip: Chip, Count: Count, Swatches: Swatches, Field: Field, Fields: Fields, Empty: Empty,
+		version: 2, icons: icons, Icon: Icon, Chip: Chip, Count: Count, Swatches: Swatches, Field: Field, Fields: Fields, Empty: Empty, Tabs: Tabs,
 		valueOf: valueOf,
 		// Filled and frozen by atlas-ar-shell.js, atlas-ar-search.js and atlas-ar-map.js.
 		shell: {}, search: {}, map: {}

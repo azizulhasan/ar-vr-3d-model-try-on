@@ -57,7 +57,6 @@
 .atlas-ar-header-button{position:relative}
 .atlas-ar-count{position:absolute;top:2px;inset-inline-end:0;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:var(--atlas-ar-action);color:#fff;font-size:10px;font-weight:600;line-height:16px;text-align:center}
 .atlas-ar-count.is-alert{background:var(--atlas-ar-danger)}
-.atlas-ar-chip--note{background:var(--atlas-ar-pro-ground);color:var(--atlas-ar-pro-ink)}
 
 /* Search box (WAI-ARIA combobox) */
 .atlas-ar-hsearch{position:relative;display:flex;align-items:center;width:100%}
@@ -104,12 +103,7 @@
 .atlas-ar-tab-fields h3:not(:first-child){margin-top:24px;padding-top:16px;border-top:1px solid var(--atlas-ar-surface-3)}
 .atlas-ar-tab-fields>.atlas-ar-field:first-child{margin-top:12px}
 
-/* A setting (UI.Field): the search scrolls to it, focuses it and marks it for 2 seconds. */
-.atlas-ar-field{margin-block:0 8px;margin-inline:-8px;padding:6px 8px;border-radius:var(--atlas-ar-radius-md);scroll-margin:24px}
-.atlas-ar-field>.components-base-control{max-width:640px;margin-bottom:0}
-.atlas-ar-field>.atlas-ar-swatches{margin-bottom:0}
-.atlas-ar-field.is-found{box-shadow:0 0 0 2px var(--atlas-ar-action);animation:atlas-ar-found 2s ease-out forwards}
-@keyframes atlas-ar-found{0%,55%{background-color:var(--atlas-ar-action-ground)}100%{background-color:transparent}}
+/* A setting (UI.Field) and its 2-second mark: in atlas-ar-admin.css (AR-182: the product panel uses them too). */
 
 /* Appearance: Quick styles and tabs on the left, the live preview on the right. */
 .atlas-ar-appearance-preview{padding:16px;box-sizing:border-box;background:var(--atlas-ar-surface);border:1px solid var(--atlas-ar-line);border-radius:var(--atlas-ar-radius-lg)}
@@ -135,8 +129,9 @@
 .atlas-ar-field.atlas-ar-card-field{margin:0 0 16px;padding:0;border-radius:var(--atlas-ar-radius-lg)}
 .atlas-ar-field.atlas-ar-card-field>.atlas-ar-section{margin-bottom:0}
 .atlas-ar-shortcode-size>*{flex:1 1 160px}
-.atlas-ar-empty-state{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 16px;border:1px dashed var(--atlas-ar-line-strong);border-radius:var(--atlas-ar-radius-lg);background:var(--atlas-ar-surface);text-align:center}
-.atlas-ar-empty-state p{max-width:520px;margin:0;color:var(--atlas-ar-ink-2)}
+/* Help › Guides: one plain line under each link. */
+.atlas-ar-guides li{margin:0 0 12px}
+.atlas-ar-guide-about{display:block;margin-top:2px;color:var(--atlas-ar-muted)}
 /* Tabs of a screen that scrolls as a whole: the tab bar stays at the top of the pane. */
 .atlas-ar-pane:not(.is-fill)>.atlas-ar-pane-body .atlas-ar-tabs-panel>.components-tab-panel__tabs{position:sticky;top:0;z-index:5}
 .atlas-ar-app.is-phone .atlas-ar-pane:not(.is-fill)>.atlas-ar-pane-body .atlas-ar-tabs-panel>.components-tab-panel__tabs{top:calc(var(--wp-admin--admin-bar--height,46px) + 56px)}
@@ -259,11 +254,10 @@ body.rtl .atlas-ar-rail.is-drawer{animation-name:atlas-ar-slide-rtl}
 /* ------------------------------------------------------------------ reduced motion, high contrast */
 @media (prefers-reduced-motion:reduce){
 	.atlas-ar-rail.is-drawer{animation:none}
-	.atlas-ar-field.is-found{animation:none} /* a still outline, no flash */
 	.atlas-ar-app *,.atlas-ar-rail.is-drawer *{transition:none!important;scroll-behavior:auto!important}
 }
 @media (forced-colors:active){
-	.atlas-ar-nav-item.is-current,.atlas-ar-hsearch-option.is-active,.atlas-ar-field.is-found{outline:2px solid Highlight;outline-offset:-2px}
+	.atlas-ar-nav-item.is-current,.atlas-ar-hsearch-option.is-active{outline:2px solid Highlight;outline-offset:-2px}
 	.atlas-ar-count,.atlas-ar-rail-logo,.atlas-ar-chip{border:1px solid CanvasText}
 	.atlas-ar-app .atlas-ar-nav-item:focus-visible,.atlas-ar-status-link:focus-visible,.atlas-ar-pane:focus-visible{outline-color:Highlight}
 }

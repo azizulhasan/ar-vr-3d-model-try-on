@@ -141,4 +141,39 @@ final class AdminShellTest extends TestCase {
 		// Old Pro 4.0.0 depends on atlas-ar-ui only: it must not need a new handle.
 		$this->assertNotContains( 'atlas-ar-shell', $scripts->registered['atlas-ar-ui']->deps );
 	}
+
+	/**
+	 * AR-182: the product panel's markup and save field are unchanged (the hidden field the
+	 * save_post handler reads, its nonce, the root), and its script loads the search part for the
+	 * #atlas-ar-panel:<tab>/<setting> address.
+	 */
+	public function test_product_panel_keeps_its_save_field_and_loads_the_search(): void {
+		// The admin screen API is not loaded on the command line.
+		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
+		require_once ABSPATH . 'wp-admin/includes/screen.php';
+		wp_set_current_user( $this->user( 'administrator' ) );
+		$post_id = wp_insert_post( array( 'post_type' => 'product', 'post_title' => 'AR-182 panel test', 'post_status' => 'draft' ) );
+		try {
+			ob_start();
+			\AR_TRY_ON_Admin\AR_TRY_ON_Product_Panel::render( get_post( $post_id ) );
+			$html = (string) ob_get_clean();
+			$this->assertStringContainsString( 'id="atlas-ar-panel-data" name="atlas_ar_panel"', $html );
+			$this->assertStringContainsString( 'name="atlas_ar_panel_nonce"', $html );
+			$this->assertStringContainsString( 'id="atlas-ar-panel-root"', $html );
+
+			$GLOBALS['post'] = get_post( $post_id );
+			set_current_screen( 'product' );
+			AR_TRY_ON_Dashboard::register();
+			\AR_TRY_ON_Admin\AR_TRY_ON_Product_Panel::enqueue( 'post.php' );
+			$deps = wp_scripts()->registered['atlas-ar-product']->deps;
+			$this->assertContains( 'atlas-ar-ui', $deps );
+			$this->assertContains( 'atlas-ar-search', $deps );
+			$this->assertNotContains( 'atlas-ar-shell', $deps, 'no app frame in the editor' );
+		} finally {
+			wp_dequeue_script( 'atlas-ar-product' );
+			unset( $GLOBALS['post'] );
+			set_current_screen( 'front' );
+			wp_delete_post( $post_id, true );
+		}
+	}
 }

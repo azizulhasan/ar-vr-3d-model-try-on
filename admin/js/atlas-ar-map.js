@@ -650,22 +650,23 @@
 
 	/**
 	 * AR-182: the settings each product has in its AtlasAR panel (post meta, edited on the product).
-	 * Search entries only: a pick opens Products and says where to find the setting.
+	 * Search entries only: a pick opens Products and says where to find the setting; a product's
+	 * Edit link then opens its panel at that tab and setting (#atlas-ar-panel:<panelTabId>/<id>).
 	 */
 	var PANEL_MODEL = __('3D model', 'ar-vr-3d-model-try-on'), PANEL_DISPLAY = __('Display', 'ar-vr-3d-model-try-on'), PANEL_TRYON = __('Try-on', 'ar-vr-3d-model-try-on');
 	var productFields = [
-		{ id: 'product.model', panelTab: PANEL_MODEL, label: __('A product’s 3D model', 'ar-vr-3d-model-try-on'), en: 'product model glb file add change remove' },
-		{ id: 'product.use_site', panelTab: PANEL_DISPLAY, label: __('Use the site settings (Appearance)', 'ar-vr-3d-model-try-on'), en: 'product use site settings own look' },
-		{ id: 'product.background', panelTab: PANEL_DISPLAY, label: __('A product’s own background', 'ar-vr-3d-model-try-on'), en: 'product background colour color' },
-		{ id: 'product.placement', panelTab: PANEL_DISPLAY, label: __('Where one product shows its 3D view', 'ar-vr-3d-model-try-on'), en: 'product placement show it gallery button tab slide' },
-		{ id: 'product.ar_placement', panelTab: PANEL_DISPLAY, label: __('AR placement (floor or wall)', 'ar-vr-3d-model-try-on'), en: 'product ar placement floor table wall' },
-		{ id: 'product.ar_scale', panelTab: PANEL_DISPLAY, label: __('Shoppers can change the size in AR', 'ar-vr-3d-model-try-on'), en: 'product ar scale size resize real size' },
-		{ id: 'product.height', panelTab: PANEL_DISPLAY, label: __('Height of a product’s 3D view', 'ar-vr-3d-model-try-on'), en: 'product height size view' },
-		{ id: 'product.ar_text', panelTab: PANEL_DISPLAY, label: __('A product’s AR button text', 'ar-vr-3d-model-try-on'), en: 'product ar button text label' },
-		{ id: 'product.load', panelTab: PANEL_DISPLAY, label: __('When a product’s 3D view loads', 'ar-vr-3d-model-try-on'), en: 'product load loading click scroll' },
-		{ id: 'product.tryon', panelTab: PANEL_TRYON, label: __('Can shoppers try this product on?', 'ar-vr-3d-model-try-on'), en: 'product try on glasses cap hat type' },
-		{ id: 'product.tryon_viewer', panelTab: PANEL_TRYON, label: __('Also show the 3D view on a try-on product', 'ar-vr-3d-model-try-on'), en: 'product try on 3d view ar button also' },
-		{ id: 'product.tryon_image', panelTab: PANEL_TRYON, label: __('Try-on picture of a product', 'ar-vr-3d-model-try-on'), en: 'product try on picture image png photo' }
+		{ id: 'product.model', panelTab: PANEL_MODEL, panelTabId: 'model', label: __('A product’s 3D model', 'ar-vr-3d-model-try-on'), en: 'product model glb file add change remove' },
+		{ id: 'product.use_site', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('Use the site settings (Appearance)', 'ar-vr-3d-model-try-on'), en: 'product use site settings own look' },
+		{ id: 'product.background', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('A product’s own background', 'ar-vr-3d-model-try-on'), en: 'product background colour color' },
+		{ id: 'product.placement', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('Where one product shows its 3D view', 'ar-vr-3d-model-try-on'), en: 'product placement show it gallery button tab slide' },
+		{ id: 'product.ar_placement', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('AR placement (floor or wall)', 'ar-vr-3d-model-try-on'), en: 'product ar placement floor table wall' },
+		{ id: 'product.ar_scale', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('Shoppers can change the size in AR', 'ar-vr-3d-model-try-on'), en: 'product ar scale size resize real size' },
+		{ id: 'product.height', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('Height of a product’s 3D view', 'ar-vr-3d-model-try-on'), en: 'product height size view' },
+		{ id: 'product.ar_text', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('A product’s AR button text', 'ar-vr-3d-model-try-on'), en: 'product ar button text label' },
+		{ id: 'product.load', panelTab: PANEL_DISPLAY, panelTabId: 'display', label: __('When a product’s 3D view loads', 'ar-vr-3d-model-try-on'), en: 'product load loading click scroll' },
+		{ id: 'product.tryon', panelTab: PANEL_TRYON, panelTabId: 'tryon', label: __('Can shoppers try this product on?', 'ar-vr-3d-model-try-on'), en: 'product try on glasses cap hat type' },
+		{ id: 'product.tryon_viewer', panelTab: PANEL_TRYON, panelTabId: 'tryon', label: __('Also show the 3D view on a try-on product', 'ar-vr-3d-model-try-on'), en: 'product try on 3d view ar button also' },
+		{ id: 'product.tryon_image', panelTab: PANEL_TRYON, panelTabId: 'tryon', label: __('Try-on picture of a product', 'ar-vr-3d-model-try-on'), en: 'product try on picture image png photo' }
 	].map(function (f) {
 		return Object.assign({ kind: 'product', screen: 'products', control: 'none' }, f, {
 			/* translators: %s: a tab of the product's AtlasAR panel, e.g. "Display". */
