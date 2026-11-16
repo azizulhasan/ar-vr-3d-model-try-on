@@ -17,6 +17,10 @@
 	if (!UI || !boot) return;
 	var el = UI.el, Fragment = UI.Fragment, useState = UI.useState, useEffect = UI.useEffect, useRef = UI.useRef, C = UI.C, __ = UI.__;
 	var sprintf = wp.i18n.sprintf;
+	// AR-182: the panel is on WooCommerce products and on posts, pages and other post types (AR-154).
+	// Words that say "product" are for products only; elsewhere the panel says what it is on.
+	var onProduct = !boot.postType || boot.postType === 'product';
+	var typeLabel = boot.typeLabel || __('Page', 'ar-vr-3d-model-try-on');
 
 	var PLACEMENT = [
 		{ value: 'site', label: __('Like the site setting', 'ar-vr-3d-model-try-on') },
@@ -119,7 +123,7 @@
 			m ? el('div', { className: 'atlas-ar-row' },
 				el(C.Button, { variant: 'secondary', isBusy: busy === 'link', disabled: !!busy, onClick: pick }, __('Change model', 'ar-vr-3d-model-try-on')),
 				window.AtlasARLibrary.flat ? el(C.Button, { variant: 'secondary', disabled: !!busy, onClick: fromPhoto }, __('Make a 3D model from a photo', 'ar-vr-3d-model-try-on')) : null,
-				el(C.Button, { variant: 'tertiary', isDestructive: true, disabled: !!busy, onClick: function () { link(0); } }, __('Remove from this product', 'ar-vr-3d-model-try-on')),
+				el(C.Button, { variant: 'tertiary', isDestructive: true, disabled: !!busy, onClick: function () { link(0); } }, onProduct ? __('Remove from this product', 'ar-vr-3d-model-try-on') : __('Unlink the model', 'ar-vr-3d-model-try-on')),
 				el('a', { className: 'button-link', href: boot.libraryUrl }, __('Open in the 3D Library', 'ar-vr-3d-model-try-on')))
 				// AR-182: no model yet: one sentence and one main action; the other ways stay below it.
 				: el(UI.Empty, {
@@ -133,7 +137,7 @@
 				onDrop: function (e) { e.preventDefault(); setDrag(false); var fs = Array.prototype.slice.call(e.dataTransfer.files || []); if (fs.length) upload(fs); }
 			},
 				el('strong', null, __('Drop .glb, .gltf, .usdz files and a poster image here', 'ar-vr-3d-model-try-on')),
-				el('span', null, __('They go into your 3D Library and are linked to this product.', 'ar-vr-3d-model-try-on')),
+				el('span', null, onProduct ? __('They go into your 3D Library and are linked to this product.', 'ar-vr-3d-model-try-on') : __('They go into your 3D Library and are linked here.', 'ar-vr-3d-model-try-on')),
 				el(C.Button, { variant: 'secondary', isBusy: busy === 'upload', disabled: !!busy, onClick: function () { fileRef.current.click(); } }, __('Choose files', 'ar-vr-3d-model-try-on')),
 				el('input', { ref: fileRef, type: 'file', multiple: true, hidden: true, accept: boot.accept, onChange: function (e) { var fs = Array.prototype.slice.call(e.target.files || []); e.target.value = ''; if (fs.length) upload(fs); } })),
 			err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
@@ -151,15 +155,19 @@
 				el('span', { className: 'atlas-ar-label', 'aria-hidden': 'true' }, __('Background', 'ar-vr-3d-model-try-on')),
 				el(UI.Swatches, { label: __('Background', 'ar-vr-3d-model-try-on'), colors: ['#ffffff', '#f6f7f7', '#1d2327'], value: d.background, onChange: function (v) { set('background', v); } }))) : null,
 			el('h3', { className: 'atlas-ar-panel-heading' }, __('Where it shows', 'ar-vr-3d-model-try-on')),
-			F('placement', el(C.SelectControl, { label: __('Show it', 'ar-vr-3d-model-try-on'), value: d.placement, options: PLACEMENT, onChange: function (v) { set('placement', v); }, __nextHasNoMarginBottom: true })),
+			// The placements are WooCommerce product-page places; posts and pages place the view themselves.
+			onProduct ? F('placement', el(C.SelectControl, { label: __('Show it', 'ar-vr-3d-model-try-on'), value: d.placement, options: PLACEMENT, onChange: function (v) { set('placement', v); }, __nextHasNoMarginBottom: true }))
+				: el('p', { className: 'description' }, __('Add the “AtlasAR 3D view” block, or the shortcode [atlas_ar], where the 3D view should appear.', 'ar-vr-3d-model-try-on')),
 			el('h3', { className: 'atlas-ar-panel-heading' }, __('In AR', 'ar-vr-3d-model-try-on')),
 			F('ar_placement', el(C.RadioControl, {
-				label: __('In AR the product goes', 'ar-vr-3d-model-try-on'), selected: d.ar_placement, onChange: function (v) { set('ar_placement', v); },
+				label: onProduct ? __('In AR the product goes', 'ar-vr-3d-model-try-on') : __('In AR the model goes', 'ar-vr-3d-model-try-on'), selected: d.ar_placement, onChange: function (v) { set('ar_placement', v); },
 				options: [{ value: 'floor', label: __('On the floor or a table', 'ar-vr-3d-model-try-on') }, { value: 'wall', label: __('On a wall', 'ar-vr-3d-model-try-on') }]
 			})),
 			F('ar_scale', el(C.ToggleControl, { label: __('Shoppers can change the size in AR', 'ar-vr-3d-model-try-on'), checked: d.ar_scale === 'auto', onChange: function (v) { set('ar_scale', v ? 'auto' : 'fixed'); } })),
 			// AR-156: for this product only; empty = the site's Appearance setting.
-			el('h3', { className: 'atlas-ar-panel-heading' }, __('Only for this product', 'ar-vr-3d-model-try-on')),
+			el('h3', { className: 'atlas-ar-panel-heading' }, onProduct ? __('Only for this product', 'ar-vr-3d-model-try-on')
+				/* translators: %s: the post type's singular name, e.g. "Page". */
+				: sprintf(__('This %s only', 'ar-vr-3d-model-try-on'), typeLabel)),
 			F('height', el(C.TextControl, { label: __('Height of the 3D view (px)', 'ar-vr-3d-model-try-on'), type: 'number', min: 0, max: 1200, value: d.height || '', placeholder: __('site setting', 'ar-vr-3d-model-try-on'), onChange: function (v) { set('height', parseInt(v, 10) || 0); }, help: __('Empty = the height set in Appearance.', 'ar-vr-3d-model-try-on') })),
 			F('ar_text', el(C.TextControl, { label: __('AR button text', 'ar-vr-3d-model-try-on'), value: d.ar_text, maxLength: 60, placeholder: __('site setting', 'ar-vr-3d-model-try-on'), onChange: function (v) { set('ar_text', v); } })),
 			F('load', el(C.SelectControl, {
@@ -214,9 +222,9 @@
 				]
 			})),
 			d.tryon ? el(Fragment, null,
-				el(UI.Field, { id: 'product.tryon_viewer' }, el(C.ToggleControl, { label: __('Also show the 3D view and AR button for this product', 'ar-vr-3d-model-try-on'), checked: !!d.tryon_viewer, onChange: function (v) { set('tryon_viewer', v); } })),
+				el(UI.Field, { id: 'product.tryon_viewer' }, el(C.ToggleControl, { label: onProduct ? __('Also show the 3D view and AR button for this product', 'ar-vr-3d-model-try-on') : __('Also show the 3D view and AR button here', 'ar-vr-3d-model-try-on'), checked: !!d.tryon_viewer, onChange: function (v) { set('tryon_viewer', v); } })),
 				!boot.tryonEnabled ? el(C.Notice, { status: 'warning', isDismissible: false }, __('Try-on is turned off in AtlasAR › Try-on, so the button does not show.', 'ar-vr-3d-model-try-on')) : null,
-				el('p', { className: 'description' }, __('The product sits on the face automatically.', 'ar-vr-3d-model-try-on')),
+				el('p', { className: 'description' }, onProduct ? __('The product sits on the face automatically.', 'ar-vr-3d-model-try-on') : __('It sits on the face automatically.', 'ar-vr-3d-model-try-on')),
 				photoBox,
 				hasModel || photoUrl ? el(C.Button, { variant: 'secondary', onClick: test }, __('Test try-on with my camera', 'ar-vr-3d-model-try-on')) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
@@ -242,7 +250,7 @@
 			d.tryon === 'glasses' ? [__('Try-on: glasses', 'ar-vr-3d-model-try-on'), boot.tryonEnabled ? 'ok' : 'note']
 				: d.tryon === 'hat' ? [__('Try-on: cap', 'ar-vr-3d-model-try-on'), boot.tryonEnabled ? 'ok' : 'note'] : [__('Try-on: off', 'ar-vr-3d-model-try-on'), '']
 		];
-		return el('ul', { className: 'atlas-ar-panel-status', 'aria-label': __('AtlasAR status of this product', 'ar-vr-3d-model-try-on') },
+		return el('ul', { className: 'atlas-ar-panel-status', 'aria-label': onProduct ? __('AtlasAR status of this product', 'ar-vr-3d-model-try-on') : __('AtlasAR status', 'ar-vr-3d-model-try-on') },
 			chips.map(function (c, i) { return el('li', { key: i }, el(UI.Chip, { tone: c[1] }, c[0])); }));
 	}
 
@@ -371,7 +379,7 @@
 					tabsPart,
 					el('div', { className: 'atlas-ar-panel-foot' },
 						el(UI.SaveBar, { label: __('Save 3D settings', 'ar-vr-3d-model-try-on'), busy: st.busy, saved: st.saved, error: st.error, onSave: save }),
-						el('p', { className: 'description' }, __('Also saved when you update the product.', 'ar-vr-3d-model-try-on'))))));
+						el('p', { className: 'description' }, onProduct ? __('Also saved when you update the product.', 'ar-vr-3d-model-try-on') : __('Also saved when you save or update in the editor.', 'ar-vr-3d-model-try-on'))))));
 	}
 
 	function start() {

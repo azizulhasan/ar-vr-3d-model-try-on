@@ -176,4 +176,38 @@ final class AdminShellTest extends TestCase {
 			wp_delete_post( $post_id, true );
 		}
 	}
+
+	/**
+	 * AR-182: on a page (or post, or another post type) the panel gets the post type and its
+	 * singular name, so its words name what it is on instead of "product".
+	 */
+	public function test_product_panel_names_the_post_type_it_is_on(): void {
+		require_once ABSPATH . 'wp-admin/includes/class-wp-screen.php';
+		require_once ABSPATH . 'wp-admin/includes/screen.php';
+		wp_set_current_user( $this->user( 'administrator' ) );
+		$saved = \AR_TRY_ON\AR_TRY_ON_Settings::all();
+		\AR_TRY_ON\AR_TRY_ON_Settings::update( array( 'general' => array( 'post_types' => array( 'product', 'page' ) ) ) );
+		$ids = array();
+		try {
+			foreach ( array( 'page' => 'Page', 'product' => 'Product' ) as $type => $label ) {
+				$ids[] = $post_id = wp_insert_post( array( 'post_type' => $type, 'post_title' => 'AR-182 type test', 'post_status' => 'draft' ) );
+				$GLOBALS['post'] = get_post( $post_id );
+				set_current_screen( $type );
+				wp_scripts()->remove( 'atlas-ar-product' );
+				AR_TRY_ON_Dashboard::register();
+				\AR_TRY_ON_Admin\AR_TRY_ON_Product_Panel::enqueue( 'post.php' );
+				$data = (string) wp_scripts()->get_data( 'atlas-ar-product', 'data' );
+				$this->assertStringContainsString( '"postType":"' . $type . '"', $data, $type );
+				$this->assertStringContainsString( '"typeLabel":"' . $label . '"', $data, $type );
+				wp_dequeue_script( 'atlas-ar-product' );
+			}
+		} finally {
+			unset( $GLOBALS['post'] );
+			set_current_screen( 'front' );
+			foreach ( $ids as $id ) {
+				wp_delete_post( $id, true );
+			}
+			\AR_TRY_ON\AR_TRY_ON_Settings::update( array( 'general' => array( 'post_types' => $saved['general']['post_types'] ) ) );
+		}
+	}
 }

@@ -71,6 +71,9 @@ class AR_TRY_ON_Product_Panel {
 			'atlasArProduct',
 			array(
 				'item'          => AR_TRY_ON_Admin_Routes::item( $post->ID ),
+				// AR-182: the panel is on posts, pages and other types too: its words name what it is on.
+				'postType'      => $post->post_type,
+				'typeLabel'     => self::type_label( $post->post_type ),
 				'look'          => AR_TRY_ON_Settings::get( 'look' ),
 				'qr'            => (bool) AR_TRY_ON_Settings::get( 'placement.qr' ),
 				'tryonEnabled'  => (bool) $tryon['enabled'],
@@ -113,6 +116,12 @@ class AR_TRY_ON_Product_Panel {
 			unset( $data['model_id'] ); // the model is linked by the panel's own route only
 			AR_TRY_ON_Product::update( $post_id, $data );
 		}
+	}
+
+	/** AR-182: the post type's singular name ("Page", "Post", "Product"), from WordPress. */
+	private static function type_label( $post_type ) {
+		$type = get_post_type_object( $post_type );
+		return $type && ! empty( $type->labels->singular_name ) ? (string) $type->labels->singular_name : '';
 	}
 
 	/**
