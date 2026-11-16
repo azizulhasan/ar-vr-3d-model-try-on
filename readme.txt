@@ -4,7 +4,7 @@ Tags: 3d model viewer, augmented reality, virtual try on, woocommerce, 3d viewer
 Requires at least: 5.7
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 3.0.1
+Stable tag: 3.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -208,6 +208,14 @@ Please report security bugs found in the source code of the 3D Viewer – 3D Mod
 8. Pro Features - Compression Settings
 
 == Changelog ==
+
+= 3.1.0 ( 16 November 2026 ) =
+* New: A new AtlasAR admin that works like a desktop app: a side menu with groups and icons, one screen at a time, and the WordPress page no longer scrolls under it. On phones the menu slides in.
+* New: Search every screen and setting from the top bar. Press Ctrl+K (⌘K on a Mac) or "/", type a word, and AtlasAR opens the right screen and tab and points at the setting.
+* New: Notices from WordPress and other plugins are gathered in a bell at the top instead of pushing the page down. Nothing is hidden: open the bell to read them.
+* New: A redesigned AtlasAR panel in the product editor: the 3D, AR and try-on status at a glance, clear tabs, and a layout that fits both the wide editor and a narrow side column. On pages and posts it uses words for pages and posts.
+* New: A "View in 3D and AR" button and a small 3D badge on the product cards of your shop, category pages, related products and product blocks, with button text you can change. New shops start with the button on; a shop that updates keeps everything as it is, and a one-time notice shows where to turn it on.
+* Improvement: Every AtlasAR screen has the same look, and the Save button is always in view.
 
 = 3.0.1 ( 7 November 2026 ) =
 * Security: Authors and other users who can upload files but not edit other people's posts now see only their own 3D models in the 3D Library and the product panel, and no longer see the titles of private or draft posts that use a model. Editors and administrators see everything as before. Thanks to the security researcher who reported this privately.
@@ -557,6 +565,9 @@ Fixed bug on helper file.
 * Initial release
 
 == Upgrade Notice ==
+
+= 3.1.0 =
+A new desktop-style admin with a search for every setting (Ctrl+K), notices in a bell, a redesigned product panel, and an optional "View in 3D and AR" button on shop product cards. Your settings stay as they are. AtlasAR Pro users: update Pro to 4.1 too.
 
 = 3.0.1 =
 Security update: users who can upload files only see their own 3D models and no longer see titles of private or draft posts. Nothing else changes. Please update.
