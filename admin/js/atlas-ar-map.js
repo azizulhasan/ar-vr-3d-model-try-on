@@ -21,8 +21,9 @@
  *
  * Extension points (wp.hooks): atlasAr.fields (more definitions: drawn and searchable).
  *
- * Preview scope (AR-179): the Appearance screen is fully on the map. The other screens are in
- * the map as screens (rail and search find them); their settings join the map in AR-182.
+ * AR-182: every setting of option atlas_ar_settings that has a control is here (47: Placement 4,
+ * Product cards 6, Appearance 26, Try-on 5, General 6). productFields are the settings each
+ * product has in its AtlasAR panel: the search finds them and says where they are.
  */
 (function (UI, wp) {
 	'use strict';
@@ -78,7 +79,23 @@
 			label: __('Placement', 'ar-vr-3d-model-try-on'),
 			/* translators: search words for this screen, comma separated. */
 			keywords: __('where, position, gallery, button, tab, QR code, product cards', 'ar-vr-3d-model-try-on'),
-			en: 'placement where position gallery button popup tab slide product page qr code cards shop category'
+			en: 'placement where position gallery button popup tab slide product page qr code cards shop category',
+			tabs: [
+				{
+					id: 'page', label: __('Product page', 'ar-vr-3d-model-try-on'),
+					sections: [
+						{ id: '', label: __('Where the 3D view appears', 'ar-vr-3d-model-try-on') },
+						{ id: 'also', label: __('Also', 'ar-vr-3d-model-try-on') }
+					]
+				},
+				{
+					id: 'cards', label: __('Product cards', 'ar-vr-3d-model-try-on'),
+					sections: [
+						{ id: '', label: __('Button on the cards', 'ar-vr-3d-model-try-on') },
+						{ id: 'picture', label: __('Card picture', 'ar-vr-3d-model-try-on') }
+					]
+				}
+			]
 		},
 		{
 			id: 'appearance', page: 'dashboard', group: 'shop', icon: 'styles', cap: 'manage',
@@ -111,7 +128,14 @@
 			label: __('Try-on', 'ar-vr-3d-model-try-on'),
 			/* translators: search words for this screen, comma separated. */
 			keywords: __('try on, camera, face, glasses, caps', 'ar-vr-3d-model-try-on'),
-			en: 'try on tryon virtual camera face glasses sunglasses caps hats'
+			en: 'try on tryon virtual camera face glasses sunglasses caps hats',
+			// One pane, four groups (no tabs).
+			sections: [
+				{ id: '', label: '' },
+				{ id: 'types', label: __('Product types', 'ar-vr-3d-model-try-on') },
+				{ id: 'shown', label: __('What shoppers see', 'ar-vr-3d-model-try-on') },
+				{ id: 'files', label: __('Face-tracking files', 'ar-vr-3d-model-try-on') }
+			]
 		},
 		{
 			id: 'analytics', page: 'dashboard', group: 'care', icon: 'chartBar', cap: 'manage',
@@ -125,14 +149,30 @@
 			label: __('Settings', 'ar-vr-3d-model-try-on'),
 			/* translators: search words for this screen, comma separated. */
 			keywords: __('post types, optimise, privacy, export, import, reset', 'ar-vr-3d-model-try-on'),
-			en: 'settings post types optimise optimize privacy telemetry usage data delete export import reset tools'
+			en: 'settings post types optimise optimize privacy telemetry usage data delete export import reset tools',
+			tabs: [
+				{
+					id: 'general', label: __('General', 'ar-vr-3d-model-try-on'),
+					sections: [
+						{ id: '', label: __('Show the AtlasAR panel on', 'ar-vr-3d-model-try-on') },
+						{ id: 'optimise', label: __('Optimisation', 'ar-vr-3d-model-try-on') }
+					]
+				},
+				{ id: 'privacy', label: __('Privacy', 'ar-vr-3d-model-try-on') },
+				{ id: 'tools', label: __('Tools', 'ar-vr-3d-model-try-on') }
+			]
 		},
 		{
 			id: 'help', page: 'dashboard', group: 'care', icon: 'help', cap: 'manage',
 			label: __('Help', 'ar-vr-3d-model-try-on'),
 			/* translators: search words for this screen, comma separated. */
 			keywords: __('guides, documentation, support, shortcode, site check', 'ar-vr-3d-model-try-on'),
-			en: 'help guides docs documentation support contact shortcode builder site check'
+			en: 'help guides docs documentation support contact shortcode builder site check',
+			tabs: [
+				{ id: 'guides', label: __('Guides', 'ar-vr-3d-model-try-on') },
+				{ id: 'shortcode', label: __('Shortcode builder', 'ar-vr-3d-model-try-on') },
+				{ id: 'check', label: __('Site check', 'ar-vr-3d-model-try-on') }
+			]
 		},
 		{
 			id: 'plugins', href: 'plugins', group: 'care', icon: 'external', cap: 'manage',
@@ -391,18 +431,261 @@
 		}
 	];
 
+
+	/** AR-182: the placements (Placement › Product page; the wizard shows the first four). */
+	var PLACEMENTS = [
+		{ value: 'gallery', title: __('In the gallery, image first', 'ar-vr-3d-model-try-on'), text: __('A 3D button on the main product image switches to the 3D view.', 'ar-vr-3d-model-try-on'), badge: __('Recommended', 'ar-vr-3d-model-try-on') },
+		{ value: 'gallery3d', title: __('In the gallery, 3D first', 'ar-vr-3d-model-try-on'), text: __('The 3D view replaces the main image; the image is one click away.', 'ar-vr-3d-model-try-on') },
+		{ value: 'button', title: __('A button that opens a popup', 'ar-vr-3d-model-try-on'), text: __('Keeps the gallery as it is; the 3D view opens in a window.', 'ar-vr-3d-model-try-on') },
+		{ value: 'tab', title: __('Only in a product tab', 'ar-vr-3d-model-try-on'), text: __('The 3D view sits with the description and reviews.', 'ar-vr-3d-model-try-on') },
+		{ value: 'slide', title: __('As a gallery slide', 'ar-vr-3d-model-try-on'), text: __('The 3D view is one more slide among the product images.', 'ar-vr-3d-model-try-on') }
+	];
+	function cardsButtonOn(s) { return !!s.cards.button; }
+	var cardsHint = __('It shows when the card button is on.', 'ar-vr-3d-model-try-on');
+	var blockTheme = function () { return !!(UI.boot && UI.boot.blockTheme); };
+
+	/** AR-182: Placement, Product cards (AR-176), Try-on and General. */
+	fields = fields.concat([
+		/* Placement › Product page */
+		{
+			id: 'placement.mode', screen: 'placement', tab: 'page', control: 'choice', options: PLACEMENTS, hideLabel: true,
+			label: __('Placement', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. Add the words people use in your language. */
+			keywords: __('where, gallery, popup, tab, slide', 'ar-vr-3d-model-try-on'),
+			en: 'placement where position gallery image first 3d first button popup window tab slide'
+		},
+		{
+			id: 'placement.button_position', screen: 'placement', tab: 'page', control: 'select',
+			showIf: function (s) { return s.placement.mode === 'button'; }, needs: 'placement.mode',
+			needsHint: __('It shows when the placement is “A button that opens a popup”.', 'ar-vr-3d-model-try-on'),
+			label: __('Show the button', 'ar-vr-3d-model-try-on'),
+			options: [
+				{ value: 'after_cart', label: __('After the “Add to cart” button', 'ar-vr-3d-model-try-on') },
+				{ value: 'before_cart', label: __('Before the “Add to cart” button', 'ar-vr-3d-model-try-on') },
+				{ value: 'after_summary', label: __('After the product summary', 'ar-vr-3d-model-try-on') },
+				{ value: 'under_images', label: __('Under the product images', 'ar-vr-3d-model-try-on') }
+			],
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('button position, add to cart', 'ar-vr-3d-model-try-on'),
+			en: 'button position add to cart summary under images popup'
+		},
+		{
+			id: 'placement.product_tab', screen: 'placement', tab: 'page', section: 'also', control: 'toggle',
+			showIf: function (s) { return s.placement.mode !== 'tab'; }, needs: 'placement.mode',
+			needsHint: __('It shows when the placement is not “Only in a product tab”.', 'ar-vr-3d-model-try-on'),
+			label: __('Add a “3D view” tab to the product tabs', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('product tab, 3D view tab', 'ar-vr-3d-model-try-on'),
+			en: 'product tab tabs 3d view description reviews'
+		},
+		{
+			id: 'placement.qr', screen: 'placement', tab: 'page', section: 'also', control: 'toggle',
+			label: __('On computers, show a QR code to open AR on a phone', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('QR code, phone, computer', 'ar-vr-3d-model-try-on'),
+			en: 'qr code phone mobile computer desktop scan ar'
+		},
+		/* Placement › Product cards (AR-176) */
+		{
+			id: 'cards.button', screen: 'placement', tab: 'cards', control: 'toggle',
+			label: __('Show a “View in 3D and AR” button on product cards', 'ar-vr-3d-model-try-on'),
+			help: __('It opens the 3D view in a window, with AR on phones. Glasses and caps get the “Try it on” button instead; wall art opens on the wall.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('product cards, shop page, category, button', 'ar-vr-3d-model-try-on'),
+			en: 'product cards shop category archive loop button view in 3d and ar'
+		},
+		{
+			id: 'cards.button_text', screen: 'placement', tab: 'cards', control: 'text', showIf: cardsButtonOn, needs: 'cards.button', needsHint: cardsHint,
+			label: __('Button text', 'ar-vr-3d-model-try-on'),
+			help: __('Try-on products use the button text from the Try-on page.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('card button text, label', 'ar-vr-3d-model-try-on'),
+			en: 'card button text label words'
+		},
+		{
+			id: 'cards.button_position', screen: 'placement', tab: 'cards', control: 'select', showIf: cardsButtonOn, needs: 'cards.button', needsHint: cardsHint,
+			label: __('Where in the card', 'ar-vr-3d-model-try-on'),
+			options: [
+				{ value: 'after', label: __('After the card’s buttons (“Add to cart”)', 'ar-vr-3d-model-try-on') },
+				{ value: 'before', label: __('Before them', 'ar-vr-3d-model-try-on') }
+			],
+			// Without a block theme there is no style choice: say how the button looks.
+			note: function () { return blockTheme() ? '' : __('The button looks like your theme’s “Add to cart” button.', 'ar-vr-3d-model-try-on'); },
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('card button position', 'ar-vr-3d-model-try-on'),
+			en: 'card button position before after add to cart'
+		},
+		{
+			id: 'cards.button_style', screen: 'placement', tab: 'cards', control: 'select',
+			showIf: function (s) { return !!s.cards.button && blockTheme(); }, needs: 'cards.button',
+			needsHint: __('It shows when the card button is on, with a block theme.', 'ar-vr-3d-model-try-on'),
+			label: __('Style', 'ar-vr-3d-model-try-on'),
+			options: [
+				{ value: 'outline', label: __('Outline (your theme’s secondary button)', 'ar-vr-3d-model-try-on') },
+				{ value: 'fill', label: __('Filled (your theme’s main button)', 'ar-vr-3d-model-try-on') }
+			],
+			help: __('The button follows your theme’s button styles.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('card button style, outline, filled', 'ar-vr-3d-model-try-on'),
+			en: 'card button style outline filled fill block theme'
+		},
+		{
+			id: 'cards.media', screen: 'placement', tab: 'cards', section: 'picture', control: 'select',
+			label: __('What the card shows', 'ar-vr-3d-model-try-on'),
+			options: [
+				{ value: 'image', label: __('The product image', 'ar-vr-3d-model-try-on') },
+				{ value: '3d', label: __('The 3D view first (its poster; the model loads when a shopper clicks)', 'ar-vr-3d-model-try-on') }
+			],
+			help: __('Pages stay fast: no 3D model is downloaded before a shopper interacts.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('card picture, image, poster', 'ar-vr-3d-model-try-on'),
+			en: 'card picture image media poster 3d first'
+		},
+		{
+			id: 'cards.badge', screen: 'placement', tab: 'cards', section: 'picture', control: 'toggle',
+			showIf: function (s) { return s.cards.media === 'image'; }, needs: 'cards.media',
+			needsHint: __('It shows when the card shows the product image.', 'ar-vr-3d-model-try-on'),
+			label: __('A small 3D badge on the image that opens the 3D view or the try-on', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('badge, 3D badge, icon', 'ar-vr-3d-model-try-on'),
+			en: 'badge 3d icon card image'
+		},
+		/* Try-on */
+		{
+			id: 'tryon.enabled', screen: 'tryon', control: 'toggle',
+			label: __('Show the “Try it on” button on try-on products', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('try on, turn on, button', 'ar-vr-3d-model-try-on'),
+			en: 'try on tryon enable turn on button camera'
+		},
+		{
+			id: 'tryon.label', screen: 'tryon', section: 'shown', control: 'text',
+			label: __('Button text', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('try-on button text, label', 'ar-vr-3d-model-try-on'),
+			en: 'try on button text label'
+		},
+		{
+			id: 'tryon.consent', screen: 'tryon', section: 'shown', control: 'textarea', rows: 3,
+			label: __('Camera message (shown before the camera starts)', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('camera message, consent, privacy', 'ar-vr-3d-model-try-on'),
+			en: 'camera message consent permission privacy'
+		},
+		{
+			id: 'tryon.snapshot', screen: 'tryon', section: 'shown', control: 'toggle',
+			label: __('Let shoppers save a photo of themselves wearing it', 'ar-vr-3d-model-try-on'),
+			help: __('Saved photos show a small “Powered by AtlasAR” label.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('photo, snapshot, picture, save', 'ar-vr-3d-model-try-on'),
+			en: 'photo snapshot picture save download selfie'
+		},
+		{
+			id: 'tryon.tracker', screen: 'tryon', section: 'files', control: 'radio', hideLabel: true,
+			label: __('Load the face-tracking files', 'ar-vr-3d-model-try-on'),
+			options: [
+				{ value: 'cdn', label: __('From the public CDN (default) — jsDelivr and Google; listed under External services in the readme', 'ar-vr-3d-model-try-on') },
+				{ value: 'self', label: __('From this site — downloaded once into your uploads folder; no third-party request', 'ar-vr-3d-model-try-on') }
+			],
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('face tracking files, CDN, download, this site', 'ar-vr-3d-model-try-on'),
+			en: 'face tracking files tracker cdn jsdelivr google self host download local mediapipe'
+		},
+		/* Settings › General */
+		{
+			id: 'general.post_types', screen: 'settings', tab: 'general', control: 'checklist', hideLabel: true, fallback: ['product'],
+			label: __('Show the AtlasAR panel on', 'ar-vr-3d-model-try-on'),
+			options: function () { return ((UI.boot && UI.boot.postTypes) || []).map(function (t) { return { value: t.name, label: t.label }; }); },
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('post types, products, posts, pages', 'ar-vr-3d-model-try-on'),
+			en: 'post types products posts pages panel where'
+		},
+		{
+			id: 'general.auto_optimise', screen: 'settings', tab: 'general', section: 'optimise', control: 'toggle',
+			label: __('Optimise every new model when it is added', 'ar-vr-3d-model-try-on'),
+			help: __('Smaller files load faster. Runs in your browser when you upload a GLB to the 3D Library (files over 0.5 MB); the original is kept and can be restored.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('optimise, compress, smaller files', 'ar-vr-3d-model-try-on'),
+			en: 'optimise optimize compress compression smaller files automatic upload'
+		},
+		{
+			id: 'general.optimise_level', screen: 'settings', tab: 'general', section: 'optimise', control: 'select',
+			// The levels come from the 3D Library script (AR-162), the same list it uses.
+			showIf: function () { return !!(window.AtlasARLibrary && window.AtlasARLibrary.levels); },
+			label: __('Optimisation level', 'ar-vr-3d-model-try-on'),
+			options: function () { return ((window.AtlasARLibrary && window.AtlasARLibrary.levels) || []).map(function (l) { return { value: l.value, label: l.label }; }); },
+			help: function (s) {
+				var level = s.general.optimise_level || 'high';
+				return (((window.AtlasARLibrary && window.AtlasARLibrary.levels) || []).filter(function (l) { return l.value === level; })[0] || {}).text;
+			},
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('optimisation level, quality, compression', 'ar-vr-3d-model-try-on'),
+			en: 'optimisation optimization level quality compression maximum high balanced low'
+		},
+		/* Settings › Privacy */
+		{
+			id: 'general.stats', screen: 'settings', tab: 'privacy', control: 'toggle', onByDefault: true,
+			label: __('Count how shoppers use the 3D view (Analytics)', 'ar-vr-3d-model-try-on'),
+			help: __('Daily totals per product, kept on this site: 3D views, AR, try-on. No cookies and no personal data; nothing is sent to us or anyone else.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('analytics, statistics, counting', 'ar-vr-3d-model-try-on'),
+			en: 'analytics statistics stats count counting views tracking shoppers'
+		},
+		{
+			id: 'general.telemetry', screen: 'settings', tab: 'privacy', control: 'toggle',
+			label: __('Share usage data with AtlasAiDev to help improve AtlasAR', 'ar-vr-3d-model-try-on'),
+			help: __('Off unless you turn it on. Sent once a week: this site’s address and name, the admin’s name and email, the IP address, WordPress, PHP and server versions, active plugins and the theme. Never your products, files or visitors.', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('usage data, telemetry, share', 'ar-vr-3d-model-try-on'),
+			en: 'usage data telemetry share tracking improve'
+		},
+		{
+			id: 'general.remove_data', screen: 'settings', tab: 'privacy', control: 'toggle',
+			label: __('Delete all AtlasAR settings, 3D Library models and product data when the plugin is deleted', 'ar-vr-3d-model-try-on'),
+			/* translators: search words for this setting, comma separated. */
+			keywords: __('delete data, uninstall, remove', 'ar-vr-3d-model-try-on'),
+			en: 'delete remove data uninstall clean up'
+		}
+	]);
+
+	/**
+	 * AR-182: the settings each product has in its AtlasAR panel (post meta, edited on the product).
+	 * Search entries only: a pick opens Products and says where to find the setting.
+	 */
+	var PANEL_MODEL = __('3D model', 'ar-vr-3d-model-try-on'), PANEL_DISPLAY = __('Display', 'ar-vr-3d-model-try-on'), PANEL_TRYON = __('Try-on', 'ar-vr-3d-model-try-on');
+	var productFields = [
+		{ id: 'product.model', panelTab: PANEL_MODEL, label: __('A product’s 3D model', 'ar-vr-3d-model-try-on'), en: 'product model glb file add change remove' },
+		{ id: 'product.use_site', panelTab: PANEL_DISPLAY, label: __('Use the site settings (Appearance)', 'ar-vr-3d-model-try-on'), en: 'product use site settings own look' },
+		{ id: 'product.background', panelTab: PANEL_DISPLAY, label: __('A product’s own background', 'ar-vr-3d-model-try-on'), en: 'product background colour color' },
+		{ id: 'product.placement', panelTab: PANEL_DISPLAY, label: __('Where one product shows its 3D view', 'ar-vr-3d-model-try-on'), en: 'product placement show it gallery button tab slide' },
+		{ id: 'product.ar_placement', panelTab: PANEL_DISPLAY, label: __('AR placement (floor or wall)', 'ar-vr-3d-model-try-on'), en: 'product ar placement floor table wall' },
+		{ id: 'product.ar_scale', panelTab: PANEL_DISPLAY, label: __('Shoppers can change the size in AR', 'ar-vr-3d-model-try-on'), en: 'product ar scale size resize real size' },
+		{ id: 'product.height', panelTab: PANEL_DISPLAY, label: __('Height of a product’s 3D view', 'ar-vr-3d-model-try-on'), en: 'product height size view' },
+		{ id: 'product.ar_text', panelTab: PANEL_DISPLAY, label: __('A product’s AR button text', 'ar-vr-3d-model-try-on'), en: 'product ar button text label' },
+		{ id: 'product.load', panelTab: PANEL_DISPLAY, label: __('When a product’s 3D view loads', 'ar-vr-3d-model-try-on'), en: 'product load loading click scroll' },
+		{ id: 'product.tryon', panelTab: PANEL_TRYON, label: __('Can shoppers try this product on?', 'ar-vr-3d-model-try-on'), en: 'product try on glasses cap hat type' },
+		{ id: 'product.tryon_viewer', panelTab: PANEL_TRYON, label: __('Also show the 3D view on a try-on product', 'ar-vr-3d-model-try-on'), en: 'product try on 3d view ar button also' },
+		{ id: 'product.tryon_image', panelTab: PANEL_TRYON, label: __('Try-on picture of a product', 'ar-vr-3d-model-try-on'), en: 'product try on picture image png photo' }
+	].map(function (f) {
+		return Object.assign({ kind: 'product', screen: 'products', control: 'none' }, f, {
+			/* translators: %s: a tab of the product's AtlasAR panel, e.g. "Display". */
+			where: wp.i18n.sprintf(__('Each product › AtlasAR panel › %s', 'ar-vr-3d-model-try-on'), f.panelTab)
+		});
+	});
+
 	/**
 	 * Actions the search can open. An action opens its place (a screen, or another page); it
 	 * never runs the action itself.
 	 */
 	var actions = [
 		{ id: 'action.wizard', href: 'wizard', cap: 'manage', label: __('Run the setup wizard', 'ar-vr-3d-model-try-on'), en: 'setup wizard start onboarding again' },
+		{ id: 'action.shortcode', screen: 'help', tab: 'shortcode', target: 'help.shortcode', cap: 'manage', label: __('Make a shortcode', 'ar-vr-3d-model-try-on'), en: 'shortcode atlas_ar embed page post builder elementor' },
 		{ id: 'action.upload', href: 'library', cap: 'upload', label: __('Upload 3D files', 'ar-vr-3d-model-try-on'), en: 'upload add glb usdz gltf model file' },
-		{ id: 'action.flat', screen: 'products', cap: 'manage', label: __('Make 3D from product photos', 'ar-vr-3d-model-try-on'), en: 'photo image picture flat wall art poster canvas rug bulk 3d from photo' },
-		{ id: 'action.cloud', screen: 'integrations', cap: 'manage', label: __('Connect AtlasAR Cloud', 'ar-vr-3d-model-try-on'), en: 'cloud connect account api key optimise' },
-		{ id: 'action.export', screen: 'settings', cap: 'manage', label: __('Export settings', 'ar-vr-3d-model-try-on'), en: 'export backup download settings json' },
-		{ id: 'action.import', screen: 'settings', cap: 'manage', label: __('Import settings', 'ar-vr-3d-model-try-on'), en: 'import restore upload settings json' },
-		{ id: 'action.reset', screen: 'settings', cap: 'manage', label: __('Reset to defaults', 'ar-vr-3d-model-try-on'), en: 'reset defaults restore factory' }
+		{ id: 'action.flat', screen: 'products', target: 'action.flat', cap: 'manage', label: __('Make 3D from product photos', 'ar-vr-3d-model-try-on'), en: 'photo image picture flat wall art poster canvas rug bulk 3d from photo' },
+		{ id: 'action.cloud', screen: 'integrations', target: 'card.cloud', cap: 'manage', label: __('Connect AtlasAR Cloud', 'ar-vr-3d-model-try-on'), en: 'cloud connect account api key optimise' },
+		{ id: 'action.export', screen: 'settings', tab: 'tools', target: 'action.export', cap: 'manage', label: __('Export settings', 'ar-vr-3d-model-try-on'), en: 'export backup download settings json' },
+		{ id: 'action.import', screen: 'settings', tab: 'tools', target: 'action.import', cap: 'manage', label: __('Import settings', 'ar-vr-3d-model-try-on'), en: 'import restore upload settings json' },
+		{ id: 'action.reset', screen: 'settings', tab: 'tools', target: 'action.reset', cap: 'manage', label: __('Reset to defaults', 'ar-vr-3d-model-try-on'), en: 'reset defaults restore factory' }
 	];
 
 	var ID = /^[a-z0-9_-]+(\.[a-z0-9_-]+)*$/i;
@@ -439,7 +722,8 @@
 	function sectionsOf(where) {
 		var s = screen(where.screen);
 		var tab = s && s.tabs ? s.tabs.filter(function (t) { return t.id === where.tab; })[0] : null;
-		var list = tab && tab.sections ? tab.sections.slice() : [{ id: '', label: '' }];
+		var own = tab ? tab.sections : (s && !s.tabs ? s.sections : null);
+		var list = own ? own.slice() : [{ id: '', label: '' }];
 		fieldsAt({ screen: where.screen, tab: where.tab }).forEach(function (f) {
 			var id = f.section || '';
 			if (!list.some(function (x) { return x.id === id; })) list.push({ id: id, label: '' });
@@ -448,7 +732,7 @@
 	}
 
 	Object.assign(UI.map, {
-		groups: groups, screens: screens, fields: fields, actions: actions,
+		groups: groups, screens: screens, fields: fields, actions: actions, productFields: productFields, placements: PLACEMENTS,
 		allFields: allFields, field: field, screen: screen, fieldsAt: fieldsAt, sectionsOf: sectionsOf
 	});
 	Object.freeze(UI.map);

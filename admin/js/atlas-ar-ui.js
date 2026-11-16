@@ -302,10 +302,15 @@
 		return def.onByDefault ? v !== false : v;
 	}
 
-	/** The options of a select or radio field, limited to what the schema allows. */
-	function optionsOf(def) {
+	/** A definition's value that may be a function of the settings (help, options): AR-182. */
+	function resolve(v, settings) {
+		return typeof v === 'function' ? v(settings || {}) : v;
+	}
+
+	/** The options of a select, radio, choice or checklist field, limited to what the schema allows. */
+	function optionsOf(def, settings) {
 		var allowed = schemaOf(def).options;
-		var list = def.options || [];
+		var list = resolve(def.options, settings) || [];
 		return Array.isArray(allowed) ? list.filter(function (o) { return allowed.indexOf(o.value) !== -1; }) : list;
 	}
 
@@ -317,28 +322,52 @@
 		var p = pathOf(def);
 		var set = function (v) { props.set(p[0], p[1], v); };
 		var text = value === undefined || value === null ? '' : value;
+		var help = resolve(def.help, props.settings);
+		var options = optionsOf(def, props.settings);
 		// A tab heading can name a field (hideLabel); a short form without headings shows the label (showLabels).
 		var hideLabel = !!def.hideLabel && !props.showLabels;
 		switch (def.control) {
 			case 'toggle':
-				return el(C.ToggleControl, { label: label, help: def.help, checked: !!value, onChange: set });
+				return el(C.ToggleControl, { label: label, help: help, checked: !!value, onChange: set });
 			case 'text':
 			case 'url':
-				return el(C.TextControl, { label: label, help: def.help, type: def.control === 'url' ? 'url' : 'text', value: text, maxLength: def.control === 'text' ? schema.max : undefined, onChange: set });
+				return el(C.TextControl, { label: label, help: help, type: def.control === 'url' ? 'url' : 'text', value: text, maxLength: def.control === 'text' ? schema.max : undefined, onChange: set });
 			case 'number':
-				return el(C.TextControl, { label: label, help: def.help, type: 'number', min: schema.min, max: schema.max, value: text, onChange: set });
+				return el(C.TextControl, { label: label, help: help, type: 'number', min: schema.min, max: schema.max, value: text, onChange: set });
 			case 'textarea':
-				return el(C.TextareaControl, { label: label, help: def.help, value: text, rows: def.rows || 3, onChange: set });
+				return el(C.TextareaControl, { label: label, help: help, value: text, rows: def.rows || 3, onChange: set });
 			case 'select':
-				return el(C.SelectControl, { label: label, help: def.help, value: value, options: optionsOf(def), onChange: set, __nextHasNoMarginBottom: true });
+				return el(C.SelectControl, { label: label, help: help, value: value, options: options, onChange: set, __nextHasNoMarginBottom: true });
 			case 'radio':
-				return el(C.RadioControl, { label: label, help: def.help, hideLabelFromVision: hideLabel, selected: value, options: optionsOf(def), onChange: set });
+				return el(C.RadioControl, { label: label, help: help, hideLabelFromVision: hideLabel, selected: value, options: options, onChange: set });
 			case 'range':
-				return el(C.RangeControl, { label: label, help: def.help, value: Number(value), min: schema.min, max: schema.max, step: def.step || 1, onChange: set });
+				return el(C.RangeControl, { label: label, help: help, value: Number(value), min: schema.min, max: schema.max, step: def.step || 1, onChange: set });
 			case 'swatches':
 				return el(Fragment, null,
 					hideLabel ? null : el('span', { className: 'atlas-ar-label', 'aria-hidden': 'true' }, label),
 					el(Swatches, { label: label, colors: def.colors || [], value: value, onChange: set }));
+			case 'choice':
+				// AR-182: cards to choose one of (a radio group), e.g. Placement.
+				return el(Fragment, null,
+					hideLabel ? null : el('span', { className: 'atlas-ar-label', 'aria-hidden': 'true' }, label),
+					el(Choice, { label: label, value: value, options: options, compact: def.compact, onChange: set }));
+			case 'checklist': {
+				// AR-182: several of a list (Settings › post types); def.fallback when none is left.
+				var list = Array.isArray(value) ? value : [];
+				return el('fieldset', { className: 'atlas-ar-checkgroup' },
+					el('legend', { className: hideLabel ? 'screen-reader-text' : 'atlas-ar-label' }, label),
+					options.map(function (o) {
+						return el(C.CheckboxControl, {
+							key: o.value, label: o.label, checked: list.indexOf(o.value) !== -1, __nextHasNoMarginBottom: true,
+							onChange: function (on) {
+								var next = list.filter(function (x) { return x !== o.value; });
+								if (on) next.push(o.value);
+								set(next.length ? next : (def.fallback || []));
+							}
+						});
+					}),
+					help ? el('p', { className: 'description' }, help) : null);
+			}
 			case 'custom':
 				return typeof def.render === 'function' ? def.render(props) : null;
 		}
@@ -353,7 +382,10 @@
 	 * props: where { screen, tab } (every field of that tab, under its section headings) or ids [ … ];
 	 *        settings; set( group, key, value ); labels { id: label } (words that differ, e.g. in
 	 *        the wizard); always (true: ignore showIf) and showLabels (true: every label visible),
- *        both for the wizard's short form.
+ *        both for the wizard's short form. AR-182: intros { sectionId: element } under a section's
+ *        heading, after { fieldId: element } inside a field's wrapper, under its control (a
+ *        screen's own parts: a Pro note, the try-on files row); a definition's note( settings )
+ *        is one more line under the control.
 	 */
 	function Fields(props) {
 		var map = window.AtlasARAdminUI && window.AtlasARAdminUI.map;
@@ -361,13 +393,30 @@
 		var list = props.ids ? props.ids.map(map.field).filter(Boolean) : map.fieldsAt(props.where || {});
 		var shown = list.filter(function (def) { return props.always || !def.showIf || def.showIf(props.settings); });
 		var sections = props.ids ? [{ id: '', label: '' }] : map.sectionsOf(props.where || {});
+		var intros = props.intros || {}, after = props.after || {};
 		return el(Fragment, null, sections.map(function (sec) {
 			var mine = props.ids ? shown : shown.filter(function (d) { return (d.section || '') === sec.id; });
-			if (!mine.length) return null;
+			if (!mine.length && !intros[sec.id]) return null;
 			return el(Fragment, { key: sec.id || '_' },
 				sec.label ? el('h3', null, sec.label) : null,
-				mine.map(function (def) { return el(Field, { key: def.id, id: def.id }, control(def, props)); }));
+				intros[sec.id] || null,
+				mine.map(function (def) {
+					var note = resolve(def.note, props.settings);
+					return el(Field, { key: def.id, id: def.id }, control(def, props),
+						note ? el('p', { className: 'description atlas-ar-field-note' }, note) : null,
+						after[def.id] || null);
+				}));
 		}));
+	}
+
+	/**
+	 * AR-182: an empty state: one sentence and at most one action ({ label, onClick | href }).
+	 */
+	function Empty(props) {
+		var a = props.action;
+		return el('div', { className: 'atlas-ar-empty-state' },
+			el('p', null, props.text),
+			a ? el(C.Button, { variant: 'secondary', href: a.href, onClick: a.onClick }, a.label) : null);
 	}
 
 	window.AtlasARAdminUI = Object.freeze({
@@ -376,7 +425,7 @@
 		Section: Section, Head: Head, Choice: Choice, ProNote: ProNote, Viewer: Viewer, SaveBar: SaveBar,
 		lookOptions: lookOptions, useSettings: useSettings,
 		// AR-180: kit version 2.
-		version: 2, icons: icons, Icon: Icon, Chip: Chip, Count: Count, Swatches: Swatches, Field: Field, Fields: Fields,
+		version: 2, icons: icons, Icon: Icon, Chip: Chip, Count: Count, Swatches: Swatches, Field: Field, Fields: Fields, Empty: Empty,
 		valueOf: valueOf,
 		// Filled and frozen by atlas-ar-shell.js, atlas-ar-search.js and atlas-ar-map.js.
 		shell: {}, search: {}, map: {}

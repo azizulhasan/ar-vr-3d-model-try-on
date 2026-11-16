@@ -131,6 +131,20 @@
 
 	/* ------------------------------------------------------------ the index */
 
+	/** Words of a definition part that may be a function (AR-182: options and help that depend on the site). */
+	function words(v) {
+		if (typeof v === 'function') {
+			try { v = v({ placement: {}, look: {}, cards: {}, tryon: {}, general: {} }); } catch (e) { return ''; }
+		}
+		return typeof v === 'string' ? v : '';
+	}
+	function optionWords(v) {
+		if (typeof v === 'function') {
+			try { v = v(); } catch (e) { return []; }
+		}
+		return Array.isArray(v) ? v.map(function (o) { return o && (o.label || o.title) ? String(o.label || o.title) : ''; }) : [];
+	}
+
 	/** An address from a filter: this site's admin page (relative) or http(s). Never javascript: or data:. */
 	function safeHref(href) {
 		if (typeof href !== 'string' || !href) return false;
@@ -164,19 +178,20 @@
 		});
 		var map = opts.map;
 		if (map && can.manage) {
-			map.allFields().forEach(function (f) {
-				var where = [labels[f.screen], tabLabels[f.screen + ':' + f.tab]].filter(Boolean).join(' › ');
+			map.allFields().concat(map.productFields || []).forEach(function (f) {
+				var where = f.where || [labels[f.screen], tabLabels[f.screen + ':' + f.tab]].filter(Boolean).join(' › ');
 				entries.push({
 					id: f.id, kind: f.kind === 'product' ? 'product' : 'setting', screen: f.screen, tab: f.tab || '', field: f.id,
-					label: f.label, help: f.help, keywords: f.keywords, en: f.en, where: where, needs: f.needs || '', needsHint: f.needsHint || '',
-					options: (f.options || []).map(function (o) { return o.label; })
+					label: f.label, help: words(f.help), keywords: f.keywords, en: f.en, where: where, needs: f.needs || '', needsHint: f.needsHint || '',
+					options: optionWords(f.options)
 				});
 			});
 		}
 		if (map) {
 			(map.actions || []).forEach(function (a) {
 				if ((a.cap === 'manage' && !can.manage) || (a.cap === 'upload' && !can.upload)) return;
-				entries.push({ id: a.id, kind: 'action', screen: a.screen || '', href: a.href ? (opts.urls || {})[a.href] || '' : '', label: a.label, en: a.en, where: a.screen ? labels[a.screen] : '' });
+				var where = [labels[a.screen], tabLabels[a.screen + ':' + a.tab]].filter(Boolean).join(' › ');
+				entries.push({ id: a.id, kind: 'action', screen: a.screen || '', tab: a.tab || '', field: a.target || '', href: a.href ? (opts.urls || {})[a.href] || '' : '', label: a.label, en: a.en, where: where });
 			});
 		}
 		var all = UI.filters('atlasAr.search.items', entries, { can: can });

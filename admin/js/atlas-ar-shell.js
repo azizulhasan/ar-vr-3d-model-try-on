@@ -4,7 +4,8 @@
  * at a time in the middle (only that pane scrolls), and a thin status bar with facts. On phones
  * the side menu becomes a slide-in menu. Fills window.AtlasARAdminUI.shell:
  *
- *   parseHash, formatHash, useRoute, useMedia, railItems, Shell, Pane, Tabs, SaveFooter
+ *   parseHash, formatHash, useRoute, useMedia, railItems, Shell, Pane, Tabs, SaveFooter,
+ *   notify, Snackbars (AR-182)
  *
  * Plain JavaScript on WordPress's own React and components (no build step), like the rest of the
  * AtlasAR admin. The same frame as AtlasMCP's admin (one design family), with these differences:
@@ -409,6 +410,31 @@
 			el(C.Button, { variant: 'primary', isBusy: s.busy, disabled: s.busy, onClick: props.onSave }, props.label || __('Save changes', 'ar-vr-3d-model-try-on')));
 	}
 
+	/* ------------------------------------------------------------ snackbars */
+
+	/**
+	 * AR-182: a short message for a result that has no place of its own ("Copied", "Settings
+	 * imported"). WordPress's SnackbarList shows it, says it to screen readers and hides it again.
+	 */
+	var snacks = [], listeners = [];
+	function emit() { listeners.forEach(function (fn) { fn(snacks); }); }
+	function notify(text, opts) {
+		snacks = snacks.concat([{ id: 'atlas-ar-' + Date.now() + '-' + snacks.length, content: String(text), status: (opts && opts.type) || 'success' }]).slice(-3);
+		emit();
+	}
+	function Snackbars() {
+		var _s = useState(snacks), list = _s[0], setList = _s[1];
+		useEffect(function () {
+			listeners.push(setList);
+			return function () { listeners = listeners.filter(function (fn) { return fn !== setList; }); };
+		}, []);
+		if (!C.SnackbarList) return null;
+		return el(C.SnackbarList, {
+			className: 'atlas-ar-snackbars', notices: list,
+			onRemove: function (id) { snacks = snacks.filter(function (n) { return n.id !== id; }); emit(); }
+		});
+	}
+
 	/* ------------------------------------------------------------ the frame */
 
 	/**
@@ -460,7 +486,9 @@
 			var tries = 0;
 			(function attempt() {
 				if (UI.search.focusField(entry)) return;
-				if (entry.field && ++tries < 20) { setTimeout(attempt, 60); return; }
+				// A setting or an action's button may need a moment while its tab draws; a product's
+				// setting is never on this screen (Products says where it is).
+				if (entry.field && entry.kind !== 'product' && ++tries < 20) { setTimeout(attempt, 60); return; }
 				/* translators: 1: a setting or action, 2: where it is, e.g. "Appearance › Look". */
 				focusTitle(entry.where ? sprintf(__('%1$s is in %2$s.', 'ar-vr-3d-model-try-on'), entry.label, entry.where) : props.title);
 			})();
@@ -474,7 +502,7 @@
 			if (r.source === 'search' && pending.current) {
 				var entry = pending.current;
 				pending.current = null;
-				if (entry.kind === 'setting' || entry.kind === 'product') land(entry);
+				if (entry.field) land(entry);
 				else setTimeout(function () { focusTitle(props.title); }, 0);
 			} else if (r.source === 'load' && r.field) {
 				var hit = getIndex().entries.filter(function (e) { return e.field === r.field && e.screen === r.screen; })[0];
@@ -509,12 +537,13 @@
 					el(HelpMenu, { onScreen: function (s) { openScreen(s, '', '', 'search'); } }))),
 			el('div', { className: 'atlas-ar-work' }, props.children),
 			el(StatusBar, { facts: props.facts, onScreen: function (s) { openScreen(s, '', '', 'rail'); } }),
+			el(Snackbars),
 			phone && menuOpen ? el(MenuDialog, { onClose: function () { setMenuOpen(false); } }, rail) : null);
 	}
 
 	Object.assign(UI.shell, {
 		parseHash: parseHash, formatHash: formatHash, useRoute: useRoute, useMedia: useMedia, railItems: railItems,
-		Shell: Shell, Pane: Pane, Tabs: Tabs, SaveFooter: SaveFooter
+		Shell: Shell, Pane: Pane, Tabs: Tabs, SaveFooter: SaveFooter, notify: notify, Snackbars: Snackbars
 	});
 	Object.freeze(UI.shell);
 })(window.AtlasARAdminUI, window.wp);

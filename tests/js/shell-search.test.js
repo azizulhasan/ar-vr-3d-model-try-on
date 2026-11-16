@@ -257,3 +257,51 @@ test('the side menu: groups from the map, Setup only while the wizard is not don
 	const onLibrary = UI.shell.railItems();
 	assert.equal(onLibrary.filter((i) => i.id === 'appearance')[0].href, 'admin.php?page=ar-vr-3d-model-try-on#appearance');
 });
+
+/* ------------------------------------------------------------------ AR-182: every screen on the map */
+
+test('AR-182: all 47 settings with a control are on the map, each in an existing tab and section', () => {
+	const UI = load();
+	const all = UI.map.allFields();
+	assert.equal(all.length, 47);
+	const groups = {};
+	all.forEach((f) => { const g = f.id.split('.')[0]; groups[g] = (groups[g] || 0) + 1; });
+	same(groups, { look: 26, placement: 4, cards: 6, tryon: 5, general: 6 });
+	all.forEach((f) => {
+		const screen = UI.map.screen(f.screen);
+		assert.ok(screen, f.id + ' screen');
+		if (screen.tabs) assert.ok(screen.tabs.some((t) => t.id === f.tab), f.id + ' tab ' + f.tab);
+		const where = screen.tabs ? { screen: f.screen, tab: f.tab } : { screen: f.screen };
+		const sections = UI.map.sectionsOf(where).map((x) => x.id);
+		assert.ok(sections.includes(f.section || ''), f.id + ' section');
+		if (f.needs) assert.ok(UI.map.field(f.needs), f.id + ' needs');
+	});
+	// The flags without a control stay off the map (set by Skip, Fold, Save, "Not now").
+	['general.wizard_done', 'general.checklist_off', 'general.placed', 'general.styled', 'general.cloud_tip_off'].forEach((id) => assert.equal(UI.map.field(id), null, id));
+});
+
+test('AR-182: the search finds every screen\'s settings, per-product settings and action targets', () => {
+	const UI = load();
+	const index = indexFor(UI);
+	assert.equal(top(UI, index, 'qr', 'setting').id, 'placement.qr');
+	assert.equal(top(UI, index, 'telemetry', 'setting').id, 'general.telemetry');
+	assert.equal(top(UI, index, 'card button text', 'setting').id, 'cards.button_text');
+	assert.equal(top(UI, index, 'camera message', 'setting').id, 'tryon.consent');
+	assert.equal(top(UI, index, 'jsdelivr', 'setting').id, 'tryon.tracker');
+	const wall = top(UI, index, 'wall', 'product');
+	assert.equal(wall.id, 'product.ar_placement');
+	assert.equal(wall.screen, 'products');
+	assert.match(wall.where, /Display/);
+	const exp = top(UI, index, 'export', 'action');
+	assert.equal(exp.field, 'action.export');
+	assert.equal(exp.tab, 'tools');
+	assert.equal(top(UI, index, 'connect cloud', 'action').field, 'card.cloud');
+	// Options and help that are functions are not read as text.
+	assert.equal(UI.search.find(index, 'return').total, 0);
+});
+
+test('AR-182: the placements are one list (Placement, the wizard and the search read it)', () => {
+	const UI = load();
+	same(UI.map.placements.map((p) => p.value), ['gallery', 'gallery3d', 'button', 'tab', 'slide']);
+	assert.equal(UI.map.field('placement.mode').options, UI.map.placements);
+});
