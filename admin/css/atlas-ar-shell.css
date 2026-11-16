@@ -142,6 +142,16 @@
 	body.atlas-ar-fullscreen #wpbody-content{position:fixed;top:var(--wp-admin--admin-bar--height,32px);bottom:0;inset-inline-start:160px;inset-inline-end:0;z-index:1;display:flex;flex-direction:column;width:auto;height:auto;float:none;padding:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto}
 	body.atlas-ar-fullscreen.folded #wpbody-content{inset-inline-start:36px}
 	body.atlas-ar-fullscreen #wpbody-content>*{flex:none}
+	/*
+	 * The WordPress menu scrolls inside itself, so the page never scrolls, even when that menu is
+	 * taller than the window (the references let the page scroll then). Its column is pinned and
+	 * wide enough for WordPress's hover fly-out submenus, which would be cut off by a scroll box of
+	 * the menu's own width; the empty part lets clicks through to the app. !important: WordPress's
+	 * menu-pinning script (common.js) writes position and top inline on a tall menu.
+	 */
+	body.atlas-ar-fullscreen #adminmenuwrap{position:fixed!important;top:var(--wp-admin--admin-bar--height,32px)!important;bottom:0!important;inset-inline-start:0;height:auto!important;width:440px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:transparent;pointer-events:none}
+	body.atlas-ar-fullscreen #adminmenuwrap::-webkit-scrollbar{display:none}
+	body.atlas-ar-fullscreen #adminmenu{pointer-events:auto}
 	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-wrap,
 	body.atlas-ar-fullscreen #wpbody-content>.atlas-ar-library-wrap{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;margin:0;padding:0;background:var(--atlas-ar-surface-2)}
 	body.atlas-ar-fullscreen #atlas-ar-dashboard,

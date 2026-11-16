@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html class="js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AtlasAR admin frame (AR-179)</title>
 <!--
   AR-180 / AR-181 browser regression test: the AtlasAR admin frame, the notices bell, the header
@@ -19,17 +19,16 @@
 <style>
 html{--wp-admin--admin-bar--height:32px}
 #fake-adminbar{position:fixed;top:0;left:0;right:0;height:32px;background:#1d2327;color:#f0f0f1;font:13px/32px sans-serif;padding:0 12px;z-index:99999}
-#adminmenuback,#adminmenuwrap{position:fixed;top:32px;bottom:0;left:0;width:160px;background:#1d2327}
 #results{position:fixed;right:8px;bottom:36px;z-index:200000;max-width:460px;max-height:45vh;overflow:auto;margin:0;padding:8px 10px;background:#fff;border:2px solid #1d2327;font:12px/1.5 monospace;white-space:pre-wrap}
 #results button{font:inherit}
-@media (max-width:782px){html{--wp-admin--admin-bar--height:46px}#fake-adminbar{height:46px}#adminmenuback,#adminmenuwrap{display:none}}
+@media (max-width:782px){html{--wp-admin--admin-bar--height:46px}#fake-adminbar{height:46px}}
 @media (max-width:600px){#fake-adminbar{position:absolute}} /* as WordPress: the admin bar scrolls away */
 </style>
 </head>
 <body class="wp-admin wp-core-ui atlas-ar-fullscreen auto-fold toplevel_page_ar-vr-3d-model-try-on">
 <div id="fake-adminbar">WordPress admin bar (stand-in)</div>
 <div id="wpwrap">
-	<div id="adminmenumain"><div id="adminmenuback"></div><div id="adminmenuwrap"></div></div>
+	<div id="adminmenumain"><div id="adminmenuback"></div><div id="adminmenuwrap"><ul id="adminmenu"><li class="menu-top wp-has-submenu opensub" id="fixture-fly"><a class="menu-top" href="#fly"><div class="wp-menu-name">Has a fly-out</div></a><ul class="wp-submenu wp-submenu-wrap"><li><a href="#fly1">Fly-out item</a></li></ul></li><li class="menu-top"><a class="menu-top" href="#m1"><div class="wp-menu-name">Menu item 1</div></a></li><li class="menu-top"><a class="menu-top" href="#m2"><div class="wp-menu-name">Menu item 2</div></a></li><li class="menu-top"><a class="menu-top" href="#m3"><div class="wp-menu-name">Menu item 3</div></a></li><li class="menu-top"><a class="menu-top" href="#m4"><div class="wp-menu-name">Menu item 4</div></a></li><li class="menu-top"><a class="menu-top" href="#m5"><div class="wp-menu-name">Menu item 5</div></a></li><li class="menu-top"><a class="menu-top" href="#m6"><div class="wp-menu-name">Menu item 6</div></a></li><li class="menu-top"><a class="menu-top" href="#m7"><div class="wp-menu-name">Menu item 7</div></a></li><li class="menu-top"><a class="menu-top" href="#m8"><div class="wp-menu-name">Menu item 8</div></a></li><li class="menu-top"><a class="menu-top" href="#m9"><div class="wp-menu-name">Menu item 9</div></a></li><li class="menu-top"><a class="menu-top" href="#m10"><div class="wp-menu-name">Menu item 10</div></a></li><li class="menu-top"><a class="menu-top" href="#m11"><div class="wp-menu-name">Menu item 11</div></a></li><li class="menu-top"><a class="menu-top" href="#m12"><div class="wp-menu-name">Menu item 12</div></a></li><li class="menu-top"><a class="menu-top" href="#m13"><div class="wp-menu-name">Menu item 13</div></a></li><li class="menu-top"><a class="menu-top" href="#m14"><div class="wp-menu-name">Menu item 14</div></a></li><li class="menu-top"><a class="menu-top" href="#m15"><div class="wp-menu-name">Menu item 15</div></a></li><li class="menu-top"><a class="menu-top" href="#m16"><div class="wp-menu-name">Menu item 16</div></a></li><li class="menu-top"><a class="menu-top" href="#m17"><div class="wp-menu-name">Menu item 17</div></a></li><li class="menu-top"><a class="menu-top" href="#m18"><div class="wp-menu-name">Menu item 18</div></a></li><li class="menu-top"><a class="menu-top" href="#m19"><div class="wp-menu-name">Menu item 19</div></a></li><li class="menu-top"><a class="menu-top" href="#m20"><div class="wp-menu-name">Menu item 20</div></a></li><li class="menu-top"><a class="menu-top" href="#m21"><div class="wp-menu-name">Menu item 21</div></a></li><li class="menu-top"><a class="menu-top" href="#m22"><div class="wp-menu-name">Menu item 22</div></a></li><li class="menu-top"><a class="menu-top" href="#m23"><div class="wp-menu-name">Menu item 23</div></a></li><li class="menu-top"><a class="menu-top" href="#m24"><div class="wp-menu-name">Menu item 24</div></a></li><li class="menu-top"><a class="menu-top" href="#m25"><div class="wp-menu-name">Menu item 25</div></a></li><li class="menu-top"><a class="menu-top" href="#m26"><div class="wp-menu-name">Menu item 26</div></a></li><li class="menu-top"><a class="menu-top" href="#m27"><div class="wp-menu-name">Menu item 27</div></a></li><li class="menu-top"><a class="menu-top" href="#m28"><div class="wp-menu-name">Menu item 28</div></a></li><li class="menu-top"><a class="menu-top" href="#m29"><div class="wp-menu-name">Menu item 29</div></a></li><li class="menu-top"><a class="menu-top" href="#m30"><div class="wp-menu-name">Menu item 30</div></a></li><li class="menu-top"><a class="menu-top" href="#m31"><div class="wp-menu-name">Menu item 31</div></a></li><li class="menu-top"><a class="menu-top" href="#m32"><div class="wp-menu-name">Menu item 32</div></a></li><li class="menu-top"><a class="menu-top" href="#m33"><div class="wp-menu-name">Menu item 33</div></a></li><li class="menu-top"><a class="menu-top" href="#m34"><div class="wp-menu-name">Menu item 34</div></a></li><li class="menu-top"><a class="menu-top" href="#m35"><div class="wp-menu-name">Menu item 35</div></a></li><li class="menu-top"><a class="menu-top" href="#m36"><div class="wp-menu-name">Menu item 36</div></a></li><li class="menu-top"><a class="menu-top" href="#m37"><div class="wp-menu-name">Menu item 37</div></a></li><li class="menu-top"><a class="menu-top" href="#m38"><div class="wp-menu-name">Menu item 38</div></a></li><li class="menu-top"><a class="menu-top" href="#m39"><div class="wp-menu-name">Menu item 39</div></a></li><li class="menu-top"><a class="menu-top" href="#m40"><div class="wp-menu-name">Menu item 40</div></a></li><li id="collapse-menu"><button type="button" id="collapse-button">Collapse menu</button></li></ul></div></div>
 	<div id="wpcontent"><div id="wpbody" role="main"><div id="wpbody-content">
 		<div id="screen-meta" style="display:none"></div>
 		<div class="notice notice-warning is-dismissible"><p>A notice from another plugin (test fixture).</p></div>
@@ -49,7 +48,7 @@ html{--wp-admin--admin-bar--height:32px}
 	// One page at a time, as WordPress prints it.
 	document.getElementById(libraryPage ? 'fixture-dashboard' : 'fixture-library').remove();
 	var plugin = site + '/wp-content/plugins/ar-vr-3d-model-try-on/';
-	var css = [site + '/wp-includes/css/dashicons.min.css', site + '/wp-admin/css/common.min.css', site + '/wp-admin/css/forms.min.css', site + '/wp-includes/css/buttons.min.css', site + '/wp-includes/css/dist/components/style.min.css',
+	var css = [site + '/wp-includes/css/dashicons.min.css', site + '/wp-admin/css/common.min.css', site + '/wp-admin/css/admin-menu.min.css', site + '/wp-admin/css/forms.min.css', site + '/wp-includes/css/buttons.min.css', site + '/wp-includes/css/dist/components/style.min.css',
 		plugin + 'admin/css/atlas-ar-library.css', plugin + 'admin/css/atlas-ar-admin.css', plugin + 'admin/css/atlas-ar-shell.css'];
 	// WordPress's dependency order for wp-element, wp-components, wp-api-fetch, wp-a11y, wp-compose (WP 7.1).
 	var core = ['vendor/react.min.js', 'vendor/react-dom.min.js', 'escape-html.min.js', 'element.min.js', 'vendor/react-jsx-runtime.min.js', 'dom-ready.min.js', 'hooks.min.js', 'i18n.min.js', 'a11y.min.js', 'deprecated.min.js', 'dom.min.js', 'is-shallow-equal.min.js', 'keycodes.min.js', 'priority-queue.min.js', 'private-apis.min.js', 'undo-manager.min.js', 'compose.min.js', 'vendor/moment.min.js', 'date.min.js', 'html-entities.min.js', 'primitives.min.js', 'redux-routine.min.js', 'data.min.js', 'rich-text.min.js', 'theme.min.js', 'warning.min.js', 'components.min.js', 'url.min.js', 'api-fetch.min.js']
@@ -108,6 +107,28 @@ html{--wp-admin--admin-bar--height:32px}
 		window.atlasArShellResults = { ok: ok, out: out };
 	}
 
+	/**
+	 * A WordPress menu taller than the window: it scrolls inside itself (its last item can be
+	 * reached), a hover fly-out is not cut off, and the app under the menu's wide scroll box still
+	 * gets the clicks.
+	 */
+	function menuChecks(check) {
+		var wrap = document.getElementById('adminmenuwrap');
+		var last = document.getElementById('collapse-menu');
+		check('a tall WordPress menu scrolls inside itself', wrap.scrollHeight > wrap.clientHeight + 1, wrap.scrollHeight + ' / ' + wrap.clientHeight);
+		wrap.scrollTop = wrap.scrollHeight;
+		var lr = last.getBoundingClientRect();
+		check('… and its last item can be reached', lr.bottom <= innerHeight + 1 && lr.top >= 0, Math.round(lr.top) + '–' + Math.round(lr.bottom));
+		wrap.scrollTop = 0;
+		var fly = document.querySelector('#fixture-fly .wp-submenu');
+		var fr = fly.getBoundingClientRect();
+		var hit = document.elementFromPoint(fr.left + 10, fr.top + 8);
+		check('a hover fly-out is visible, not cut off', fr.width > 0 && hit && fly.contains(hit), hit && hit.outerHTML.slice(0, 50));
+		var app = document.querySelector('.atlas-ar-app').getBoundingClientRect();
+		var under = document.elementFromPoint(app.left + 120, app.bottom - 60);
+		check('the app gets clicks beside the menu', under && document.querySelector('.atlas-ar-app').contains(under), under && under.outerHTML.slice(0, 50));
+	}
+
 	/** The 3D Library page in the frame (its own REST calls fail here: no site session). */
 	async function runLibrary() {
 		var out = [], ok = true;
@@ -125,6 +146,7 @@ html{--wp-admin--admin-bar--height:32px}
 		check('notices moved into the bell', holder && holder.children.length === 2);
 		check('status bar: the Cloud fact only (no counts query on this page)', document.querySelectorAll('.atlas-ar-status li').length === 1);
 		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1, document.scrollingElement.scrollHeight + ' / ' + innerHeight);
+		if (wide) menuChecks(check);
 		key(document.body, 'k', { ctrlKey: true });
 		await wait(80);
 		var input = document.querySelector('.atlas-ar-hsearch-input');
@@ -162,6 +184,7 @@ html{--wp-admin--admin-bar--height:32px}
 		check('status bar facts', facts.length === 3 && /12 products show 3D/.test(facts[0]), facts.join(' | '));
 		if (wide) check('rail groups', Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-heading'), function (h) { return h.textContent; }).join('|') === '3D models|Shop display|Look after');
 		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1, document.scrollingElement.scrollHeight + ' / ' + innerHeight);
+		if (wide) menuChecks(check);
 
 		// Search by keyboard: Ctrl+K, type, Enter.
 		key(document.body, 'k', { ctrlKey: true });
