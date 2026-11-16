@@ -37,6 +37,45 @@ html body button.atlas-ar-tryon-button.atlas-ar-tryon-button:focus-visible{outli
 .atlas-ar-tryon-icon{width:18px;height:18px;border:1.5px solid currentColor;border-radius:50%;box-sizing:border-box;position:relative}
 .atlas-ar-tryon-icon::after{content:"";position:absolute;left:3px;right:3px;top:6px;height:3px;border-top:1.5px solid currentColor}
 
+/* AR-176: product cards (shop, category pages, related products, product blocks).
+   The button carries the theme's own button classes (block themes: wp-element-button /
+   wp-block-button__link with the outline or fill style; classic themes: WooCommerce's .button),
+   so colours, radius and type come from the theme. Only layout is set here. */
+.atlas-ar-card-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;container-type:inline-size}
+/* Narrow cards (phones, 2 a row): each button on its own full-width line, a little less side padding, so the label fits. */
+@container (max-width:240px){.atlas-ar-card-actions>*{flex:1 1 100%}.atlas-ar-card-actions>* .wp-block-button__link,.atlas-ar-card-actions>* .button{width:100%}.atlas-ar-card-actions .atlas-ar-card-button{padding-left:.75em;padding-right:.75em}.atlas-ar-card-actions .atlas-ar-card-button .atlas-ar-card-icon{display:none}}
+/* Cards that are flex columns (WooCommerce's product blocks): the row sits at the bottom, level across cards whose titles wrap differently. */
+.wc-block-product>.atlas-ar-card-actions{margin-top:auto}
+.atlas-ar-card-actions>.wp-block-button,.atlas-ar-card-actions>.wc-block-components-product-button,.atlas-ar-card-actions>.atlas-ar-card-button-wrap{margin:0;width:auto;min-width:0;max-width:100%}
+/* Never wider than the card (phones: 2 cards a row, ~150 px each): the label wraps instead. */
+.atlas-ar-card-button-wrap{display:inline-flex;vertical-align:middle;min-width:0;max-width:100%}
+/* Classic loops: next to the theme's "Add to cart" link (before or after it); a gap when it wraps to its own line. */
+li.product .atlas-ar-card-button-wrap{margin:4px 0}
+li.product .button+.atlas-ar-card-button-wrap,li.product .atlas-ar-card-button-wrap+.button{margin-left:8px}
+/* Type, size, padding and colours come from the theme's button styles: nothing of our own here. */
+.atlas-ar-card-button{display:inline-flex;align-items:center;justify-content:center;gap:.45em;height:auto;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center;cursor:pointer}
+/* The same text size as the card's "Add to cart" (WooCommerce's block sets a preset size). */
+.atlas-ar-card-actions:has(.has-small-font-size) .atlas-ar-card-button{font-size:var(--wp--preset--font-size--small,inherit)}
+.atlas-ar-card-actions:has(.has-medium-font-size) .atlas-ar-card-button{font-size:var(--wp--preset--font-size--medium,inherit)}
+.atlas-ar-card-icon{flex:none;width:1em;height:1em}
+.atlas-ar-card-button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+/* The picture with the 3D badge (bottom right; WooCommerce's sale badge is top left). Dark on white: 14.9:1. */
+.atlas-ar-card-media{position:relative;display:block}
+.atlas-ar-card-media--image>.wc-block-components-product-image{margin-bottom:0}
+html body .atlas-ar-card-badge,html body .atlas-ar-card-badge:is(:hover,:focus,:active){position:absolute;right:10px;bottom:10px;z-index:2;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;margin:0;padding:0;border:0;border-radius:999px;background:#1d2327;color:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);line-height:1}
+html body .atlas-ar-card-badge:hover{background:#2c3338}
+html body .atlas-ar-card-badge:focus-visible{outline:2px solid #fff;outline-offset:0;box-shadow:0 0 0 4px #1d2327}
+.atlas-ar-card-badge .atlas-ar-card-icon{width:20px;height:20px}
+/* Classic loops: the badge sits next to the card's link, pinned to the top-right corner of the picture. */
+li.product{position:relative}
+html body li.product .atlas-ar-card-badge--corner{top:10px;right:10px;bottom:auto;z-index:3}
+/* The 3D view first: a square like the product pictures; the poster shows, the model loads on a click. */
+.atlas-ar-card-media--3d{aspect-ratio:1/1;overflow:hidden;background:#f6f7f7}
+.atlas-ar-card-media--3d .atlas-ar-viewer{position:absolute;inset:0;width:100%;height:100%;--atlas-ar-h-now:100%}
+/* The popup element a card builds on the first click: only its window shows. */
+.atlas-ar-viewer--card-popup{display:block;width:0;height:0;overflow:visible;border:0;box-shadow:none}
+.atlas-ar-viewer--card-popup>.atlasar-trigger-wrap{display:none}
+
 /* AR-156: size and frame from the settings (CSS variables set on the element by the plugin). */
 .atlas-ar-viewer{--atlas-ar-h-now:var(--atlas-ar-h,420px);border:var(--atlas-ar-border,0) solid var(--atlas-ar-border-color,transparent);border-radius:var(--atlas-ar-radius,0);box-shadow:var(--atlas-ar-shadow,none);overflow:var(--atlas-ar-overflow,visible);box-sizing:border-box}
 @media (max-width:600px){.atlas-ar-viewer{--atlas-ar-h-now:var(--atlas-ar-h-mobile,var(--atlas-ar-h,420px))}}

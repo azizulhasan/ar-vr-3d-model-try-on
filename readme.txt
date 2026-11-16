@@ -24,6 +24,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **Health check for every model**: before shoppers see it, AtlasAR tells you what would make a model show white (textures outside the file), the wrong size (made in millimetres), slow on phones or blank, with a one-click fix.
 * **Make files lighter in your browser**: "Optimise" shrinks a heavy GLB (often by 80–90 %) at its real size; nothing is uploaded. OBJ and FBX files are converted to GLB in the browser.
 * **Where it shows**: over the product gallery (photo or 3D first), as a gallery slide, a button with a popup, a product tab, or after the content; per product or for the whole shop.
+* **3D on product cards**: a "View in 3D and AR" button on every product card that has a model, on the shop and category pages, related products and product blocks, styled like your theme's buttons; glasses and caps get "Try it on". Show the product image with a small 3D badge, or the 3D view first (its poster; the model loads only when a shopper clicks). The shortcode `[atlas_ar_button id="123"]` prints the same button in cards your theme or page builder draws itself.
 * **Works with your editor**: the AtlasAR panel in the block editor and the classic editor, an **AtlasAR block** with a live preview, an **Elementor widget**, and the `[atlas_ar]` shortcode for any other page builder.
 * **Virtual try-on for glasses and caps**: a "Try it on" button opens the webcam; the face tracking runs on the shopper's device. Tracking files from the public CDN or, with one click, from your own site.
 * **Try-on from a photo**: no 3D model of the glasses or cap? Choose a straight-on photo in the product's Try-on tab; its plain background is removed and it sits on the face.
@@ -43,6 +44,7 @@ A **3D model viewer for WordPress and WooCommerce** with augmented reality and a
 * **Sizes**: the product's width, height and depth shown on the 3D view and in AR.
 * **More models** on one product, and **variations with any names**: link each WooCommerce variation to a colour of the model with a different name, or to a model file of its own.
 * **Try-on fit**: adjust how glasses or a cap sit on the face, and a more realistic 3D try-on.
+* **Product cards, per product**: show or hide the card button, give it its own text, and choose the image or the 3D view for each product.
 * **Make 3D models with AI** from a product photo or a description, with AtlasAR Cloud, Meshy AI or Tripo3D, in the product editor or straight in the 3D Library.
 * **Optimise in bulk** on AtlasAR Cloud, and **AtlasAR Cloud Premium** with your licence (no monthly limit, photo to 3D).
 
@@ -168,6 +170,10 @@ AtlasAR adds ready-made text to Settings › Privacy › Policy Guide: no cookie
 
 = Can my products show in 3D on Google? =
 AtlasAR adds each product's 3D model to the product data Google reads on the product page (WooCommerce's own, Rank Math or Yoast). For Google Shopping, map the custom field `atlas_ar_virtual_model_link` to Merchant Center's `virtual_model_link` in your product feed plugin: it gives the model's GLB file (15 MB or less; use Optimise). Google decides when to show a 3D result. To turn this off: `add_filter( 'atlas_ar_structured_data', '__return_false' );`.
+
+= Can shoppers open the 3D view from the shop page, before they open a product? =
+
+Yes. In AtlasAR › Placement › Product cards, turn on the "View in 3D and AR" button: it appears on every product card that has a 3D model, on the shop and category pages, related products and the Product Collection block, in your theme's button style. Glasses and caps get the "Try it on" button. You can also show a small 3D badge on the product image, or show the 3D view itself first. Nothing is downloaded before a shopper clicks, so the pages stay fast. New installs start with the button on; a shop that updates keeps everything as it is until you turn it on (a one-time notice points you to the setting).
 
 = Will 3D views slow my site down? =
 The viewer loads only on pages that show a 3D view, the model only when it comes into view, and the try-on only after a click. Lighter files load faster: use Optimise.

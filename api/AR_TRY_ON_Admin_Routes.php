@@ -51,7 +51,7 @@ class AR_TRY_ON_Admin_Routes {
 					'POST', 'save_config', $admin,
 					__( 'Change AtlasAR settings', 'ar-vr-3d-model-try-on' ),
 					__( 'Saves any part of the settings, e.g. {"settings":{"placement":{"mode":"button"}}}. Unknown fields are ignored; every value is cleaned by its type (enums keep their allowed values, numbers stay in range). Returns all settings.', 'ar-vr-3d-model-try-on' ),
-					array( 'settings' => self::arg( 'object', 'Settings to change, by group: placement { mode: gallery|gallery3d|button|tab|slide, button_position: after_cart|before_cart|after_summary|under_images, product_tab, qr }, look { background, lighting: neutral|bright|custom, environment_url, exposure 0.5–2, shadow 0–2, auto_rotate, zoom, ar_button: default|custom, ar_text, ar_color, load: scroll|click }, tryon { enabled, label, consent, snapshot, tracker: cdn|self }, general { post_types, auto_optimise, telemetry, remove_data }.', array( 'required' => true ) ) ),
+					array( 'settings' => self::arg( 'object', 'Settings to change, by group: placement { mode: gallery|gallery3d|button|tab|slide, button_position: after_cart|before_cart|after_summary|under_images, product_tab, qr }, look { background, lighting: neutral|bright|custom, environment_url, exposure 0.5–2, shadow 0–2, auto_rotate, zoom, ar_button: default|custom, ar_text, ar_color, load: scroll|click }, cards { button, button_text, button_position: after|before, button_style: outline|fill, media: image|3d, badge }, tryon { enabled, label, consent, snapshot, tracker: cdn|self }, general { post_types, auto_optimise, telemetry, remove_data }.', array( 'required' => true ) ) ),
 				),
 			),
 			'/config/reset'      => array(
@@ -197,6 +197,7 @@ class AR_TRY_ON_Admin_Routes {
 			// AR-160: the move from AtlasAR 2.x (Products shows its progress / what failed).
 			'migration'  => array_intersect_key( \AR_TRY_ON\AR_TRY_ON_Migration::state(), array_flip( array( 'status', 'moved', 'failed', 'finished' ) ) ),
 			'woo'        => class_exists( 'WooCommerce' ),
+			'blockTheme' => wp_is_block_theme(), // AR-176: the card button's style choice
 			'counts'     => array(
 				'models'   => (int) wp_count_posts( AR_TRY_ON_Library::POST_TYPE )->publish,
 				'with3d'   => self::count_with_model(),
