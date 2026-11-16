@@ -1,14 +1,7 @@
 /* AR-120: AtlasAR dashboard, setup wizard and product panel. Builds on atlas-ar-library.css. */
-.atlas-ar-wrap{margin:16px 20px 0 2px;color:var(--atlas-ar-ink)}
-.atlas-ar-app{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;max-width:1400px}
-.atlas-ar-nav{position:sticky;top:46px;display:flex;flex-direction:column;gap:2px;align-self:start}
-.atlas-ar-brand{display:flex;align-items:baseline;gap:8px;padding:4px 12px 12px;font-size:18px;font-weight:700}
-.atlas-ar-brand span{font-size:12px;font-weight:400;color:var(--atlas-ar-muted)}
-.atlas-ar-nav-item{min-height:40px;padding:10px 12px;border:0;border-radius:6px;background:transparent;color:var(--atlas-ar-ink);font-size:14px;text-align:left;text-decoration:none;cursor:pointer}
-.atlas-ar-nav-item:hover{background:var(--atlas-ar-surface-3);color:var(--atlas-ar-ink)}
-.atlas-ar-nav-item.is-current{background:var(--atlas-ar-brand-ground);color:var(--atlas-ar-brand);font-weight:600}
-.atlas-ar-nav-item:focus-visible,.atlas-ar-choice-item:focus-visible,.atlas-ar-swatch:focus-visible,.atlas-ar-tab:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px}
-.atlas-ar-main{min-width:0}
+/* AR-180: the app frame (side menu, header, pane, status bar) is in atlas-ar-shell.css. */
+.atlas-ar-wrap{color:var(--atlas-ar-ink)}
+.atlas-ar-choice-item:focus-visible,.atlas-ar-swatch:focus-visible,.atlas-ar-tab:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px}
 .atlas-ar-head{margin-bottom:16px}
 .atlas-ar-head h1{margin:0 0 4px;font-size:23px;font-weight:400;line-height:1.3}
 .atlas-ar-head p{margin:0;color:var(--atlas-ar-muted);font-size:14px}
@@ -130,20 +123,7 @@
 .atlas-ar-model-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
 
 @media (max-width:960px){
-	.atlas-ar-app{grid-template-columns:1fr}
-	.atlas-ar-nav{position:static;flex-direction:row;flex-wrap:wrap}
-	.atlas-ar-brand{width:100%}
 	.atlas-ar-split,.atlas-ar-panel{grid-template-columns:1fr}
-}
-
-/* AR-128: desktop-app layout (with the shared rules in atlas-ar-library.css). */
-@media (min-width:961px) and (min-height:560px){
-	body.atlas-ar-fullscreen .atlas-ar-wrap{display:flex;margin:0 0 0 -20px;border-top:1px solid var(--atlas-ar-line);background:var(--atlas-ar-surface-2)}
-	body.atlas-ar-fullscreen #atlas-ar-dashboard{flex:1 1 auto;min-height:0;overflow:auto}
-	body.atlas-ar-fullscreen .atlas-ar-app{height:100%;max-width:none;gap:0;grid-template-columns:210px minmax(0,1fr)}
-	body.atlas-ar-fullscreen .atlas-ar-nav{position:static;height:100%;box-sizing:border-box;overflow:auto;padding:16px 10px;border-right:1px solid var(--atlas-ar-line);background:#fff}
-	body.atlas-ar-fullscreen .atlas-ar-main{height:100%;box-sizing:border-box;overflow:auto;padding:20px 28px 28px}
-	body.atlas-ar-fullscreen .atlas-ar-wizard{padding:20px 0}
 }
 
 /* AR-128: the product panel keeps its preview in view; the tab content scrolls inside the box. */
@@ -163,15 +143,8 @@
 .atlas-ar-presets .atlas-ar-label{margin:0 4px 0 0}
 .atlas-ar-subhead{margin:20px 0 8px;padding-top:12px;border-top:1px solid var(--atlas-ar-surface-3);font-size:13px}
 
-/* AR-156: Appearance as two panes. The "Your style" fields get room under their choice. */
+/* AR-156: the "Your style" fields get room under their choice. (AR-180: Appearance's two panes are in atlas-ar-shell.css.) */
 .atlas-ar-subgroup{display:grid;gap:12px;margin-top:16px;padding-top:4px}
-.atlas-ar-split--preview .atlas-ar-pane-sticky{position:sticky;top:0}
-@media (min-width:961px) and (min-height:560px){
-	/* Full window: the settings column scrolls by itself; the preview never moves. */
-	body.atlas-ar-fullscreen .atlas-ar-split--preview{height:calc(100vh - 220px);min-height:420px;align-items:stretch}
-	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-scroll{overflow:auto;overscroll-behavior:contain;max-height:100%}
-	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-sticky{align-self:start}
-}
 /* Design system › RowActions: the actions of a row as one right-aligned group of equal height. */
 .atlas-ar-row-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:8px}
 .atlas-ar-row-actions .components-button{height:32px;min-height:32px}

@@ -1,0 +1,212 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AtlasAR admin frame (AR-179)</title>
+<!--
+  AR-180 / AR-181 browser regression test: the AtlasAR admin frame, the notices bell, the header
+  search and jump-to-field, on WordPress's own scripts, without logging in.
+
+  It loads WordPress's script and style files (public files) and this plugin's admin files from a
+  local site where this copy of the plugin is installed, then draws the real dashboard with a
+  fixture boot (no request reaches the site's database: REST calls fail and show their error).
+
+  Run: serve this folder over http (e.g. `python -m http.server 8765` in tests/browser) and open
+  http://localhost:8765/AR-179-shell.html?site=http://localhost/tts
+  (site: the WordPress address; default http://localhost/tts). Add &page=library for the 3D Library
+  page in the frame, and &author=1 for a user who may upload files but not manage AtlasAR.
+  The page runs its checks and shows
+  PASS or FAIL per check (and in the title). Resize to 1440, 1100, 900, 768 and 375 px and press
+  "Run the checks" again; checks that need a wide window say so.
+-->
+<style>
+html{--wp-admin--admin-bar--height:32px}
+#fake-adminbar{position:fixed;top:0;left:0;right:0;height:32px;background:#1d2327;color:#f0f0f1;font:13px/32px sans-serif;padding:0 12px;z-index:99999}
+#adminmenuback,#adminmenuwrap{position:fixed;top:32px;bottom:0;left:0;width:160px;background:#1d2327}
+#results{position:fixed;right:8px;bottom:36px;z-index:200000;max-width:460px;max-height:45vh;overflow:auto;margin:0;padding:8px 10px;background:#fff;border:2px solid #1d2327;font:12px/1.5 monospace;white-space:pre-wrap}
+#results button{font:inherit}
+@media (max-width:782px){html{--wp-admin--admin-bar--height:46px}#fake-adminbar{height:46px}#adminmenuback,#adminmenuwrap{display:none}}
+@media (max-width:600px){#fake-adminbar{position:absolute}} /* as WordPress: the admin bar scrolls away */
+</style>
+</head>
+<body class="wp-admin wp-core-ui atlas-ar-fullscreen auto-fold toplevel_page_ar-vr-3d-model-try-on">
+<div id="fake-adminbar">WordPress admin bar (stand-in)</div>
+<div id="wpwrap">
+	<div id="adminmenumain"><div id="adminmenuback"></div><div id="adminmenuwrap"></div></div>
+	<div id="wpcontent"><div id="wpbody" role="main"><div id="wpbody-content">
+		<div id="screen-meta" style="display:none"></div>
+		<div class="notice notice-warning is-dismissible"><p>A notice from another plugin (test fixture).</p></div>
+		<div class="notice notice-error"><p>An error notice from another plugin (test fixture).</p></div>
+		<div class="hidden-thing" style="display:none">A hidden element of another plugin: stays where it is.</div>
+		<div class="wrap atlas-ar-wrap" id="fixture-dashboard"><hr class="wp-header-end"><div id="atlas-ar-dashboard"></div></div>
+		<div class="wrap atlas-ar-library-wrap" id="fixture-library"><hr class="wp-header-end"><div id="atlas-ar-library"></div></div>
+		<div class="clear"></div>
+	</div></div></div>
+</div>
+<pre id="results">Loading…</pre>
+<script>
+(function () {
+	var params = new URLSearchParams(location.search);
+	var site = (params.get('site') || 'http://localhost/tts').replace(/\/$/, '');
+	var libraryPage = params.get('page') === 'library', author = params.get('author') === '1';
+	// One page at a time, as WordPress prints it.
+	document.getElementById(libraryPage ? 'fixture-dashboard' : 'fixture-library').remove();
+	var plugin = site + '/wp-content/plugins/ar-vr-3d-model-try-on/';
+	var css = [site + '/wp-includes/css/dashicons.min.css', site + '/wp-admin/css/common.min.css', site + '/wp-admin/css/forms.min.css', site + '/wp-includes/css/buttons.min.css', site + '/wp-includes/css/dist/components/style.min.css',
+		plugin + 'admin/css/atlas-ar-library.css', plugin + 'admin/css/atlas-ar-admin.css', plugin + 'admin/css/atlas-ar-shell.css'];
+	// WordPress's dependency order for wp-element, wp-components, wp-api-fetch, wp-a11y, wp-compose (WP 7.1).
+	var core = ['vendor/react.min.js', 'vendor/react-dom.min.js', 'escape-html.min.js', 'element.min.js', 'vendor/react-jsx-runtime.min.js', 'dom-ready.min.js', 'hooks.min.js', 'i18n.min.js', 'a11y.min.js', 'deprecated.min.js', 'dom.min.js', 'is-shallow-equal.min.js', 'keycodes.min.js', 'priority-queue.min.js', 'private-apis.min.js', 'undo-manager.min.js', 'compose.min.js', 'vendor/moment.min.js', 'date.min.js', 'html-entities.min.js', 'primitives.min.js', 'redux-routine.min.js', 'data.min.js', 'rich-text.min.js', 'theme.min.js', 'warning.min.js', 'components.min.js', 'url.min.js', 'api-fetch.min.js']
+		.map(function (f) { return site + '/wp-includes/js/dist/' + f; });
+	// The order WordPress prints them in (AR_TRY_ON_Library_Page::enqueue_shell(): the map only for managers).
+	var ours = (libraryPage ? ['atlas-ar-ui.js'].concat(author ? [] : ['atlas-ar-map.js'], ['atlas-ar-search.js', 'atlas-ar-shell.js', 'atlas-ar-library.js']) : ['atlas-ar-library.js', 'atlas-ar-ui.js', 'atlas-ar-map.js', 'atlas-ar-search.js', 'atlas-ar-shell.js', 'atlas-ar-dashboard.js']).map(function (f) { return plugin + 'admin/js/' + f + '?v=' + Date.now(); });
+
+	// Fixture boot: the shape of AR_TRY_ON_Admin_Routes::boot() (defaults of AR_TRY_ON_Settings::schema()).
+	var look = { background: '#ffffff', lighting: 'neutral', environment_url: '', exposure: 1, shadow: 1, auto_rotate: true, zoom: true, ar_button: 'custom', ar_text: 'View in your room', ar_color: '#0e6b5c', load: 'scroll', height: 420, mobile_height: 420, max_width: 0, align: 'left', border_width: 0, border_color: '#dcdcde', radius: 0, frame_shadow: 'none', camera: 'auto', prompt: true, tone: 'neutral', skybox: false, ar: true, xr_environment: true, ar_text_color: '#ffffff' };
+	var schemaLook = { lighting: { type: 'enum', options: ['neutral', 'bright', 'custom'] }, exposure: { min: 0.5, max: 2 }, shadow: { min: 0, max: 2 }, ar_button: { options: ['default', 'custom'] }, ar_text: { max: 60 }, load: { options: ['scroll', 'click'] }, height: { min: 200, max: 1200 }, mobile_height: { min: 200, max: 1200 }, max_width: { min: 0, max: 3000 }, align: { options: ['left', 'center', 'right'] }, border_width: { min: 0, max: 10 }, radius: { min: 0, max: 40 }, frame_shadow: { options: ['none', 'soft', 'strong'] }, camera: { options: ['auto', 'front', 'side', 'top'] }, tone: { options: ['neutral', 'aces', 'agx'] } };
+	Object.keys(look).forEach(function (k) { schemaLook[k] = Object.assign({ default: look[k] }, schemaLook[k] || {}); });
+	var dash = 'admin.php?page=ar-vr-3d-model-try-on';
+	window.atlasArAdmin = {
+		settings: { placement: { mode: 'gallery', button_position: 'after_cart', product_tab: false, qr: true }, look: look, cards: { button: false, button_text: 'View in 3D and AR', button_position: 'after', button_style: 'outline', media: 'image', badge: false }, tryon: { enabled: false, label: 'Try it on', consent: '', snapshot: true, tracker: 'cdn' }, general: { post_types: ['product'], wizard_done: false, telemetry: false, stats: true } },
+		schema: { look: schemaLook }, cloud: { available: true, connected: true, usage: { units_used: 17, units_limit: 20 }, links: {} }, tracker: {}, postTypes: [{ name: 'product', label: 'Products' }],
+		migration: {}, woo: true, blockTheme: true, counts: { models: 34, with3d: 12 }, version: '3.0.1', brand: { name: 'AtlasAR', version: '3.0.1' }, demoModel: {},
+		dashboardUrl: dash, libraryUrl: 'admin.php?page=atlas-ar-library', pluginsUrl: 'admin.php?page=atlas-ar-other-plugins', suggested: [],
+		shell: { brand: { name: 'AtlasAR', version: '3.0.1' }, version: '3.0.1', urls: { dashboard: dash, wizard: dash + '&setup=1', library: 'admin.php?page=atlas-ar-library', plugins: 'admin.php?page=atlas-ar-other-plugins' }, can: { manage: true, upload: true }, links: [] }
+	};
+	window.atlasArLibrary = { maxBytes: 52428800, largeBytes: 5242880, accept: '.glb,.gltf,.usdz', pageUrl: 'admin.php?page=atlas-ar-library', brand: { name: 'AtlasAR' }, autoOptimise: false, optimiseLevel: 'high', cloud: false, cloudAvailable: true, canConnect: true, integrationsUrl: dash + '#integrations', cloudPricingUrl: '#', proUrl: '#' };
+	if (libraryPage) {
+		// The light boot of the 3D Library page: no settings, no Cloud details (AR_TRY_ON_Admin_Routes::shell_boot()).
+		window.atlasArAdmin = { version: '3.0.1', shell: Object.assign({}, window.atlasArAdmin.shell, { can: { manage: !author, upload: true } }) };
+	} else history.replaceState(null, '', '#appearance:frame/look.radius'); // the checks start from this deep link
+
+	css.forEach(function (href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); });
+	var errors = [];
+	window.addEventListener('error', function (e) { errors.push(String(e.message)); });
+	(function next(list) {
+		if (!list.length) { setTimeout(run, 900); return; }
+		var s = document.createElement('script');
+		s.src = list[0];
+		s.onload = function () { next(list.slice(1)); };
+		s.onerror = function () { errors.push('could not load ' + list[0]); next(list.slice(1)); };
+		document.body.appendChild(s);
+	})(core.concat(ours));
+
+	function setInput(input, value) {
+		var setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+		setter.call(input, value);
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+	}
+	function key(target, k, extra) {
+		target.dispatchEvent(new KeyboardEvent('keydown', Object.assign({ key: k, bubbles: true, cancelable: true }, extra || {})));
+	}
+	function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+	function report(ok, out, wide) {
+		document.title = (ok ? 'PASS' : 'FAIL') + ' AtlasAR admin frame';
+		var pre = document.getElementById('results');
+		pre.textContent = out.join('\n') + '\n\n' + innerWidth + ' × ' + innerHeight + (wide ? '' : ' (narrow: wide-only checks skipped)') + '\n';
+		var again = document.createElement('button');
+		again.textContent = 'Run the checks again';
+		again.onclick = function () { location.reload(); };
+		pre.appendChild(again);
+		window.atlasArShellResults = { ok: ok, out: out };
+	}
+
+	/** The 3D Library page in the frame (its own REST calls fail here: no site session). */
+	async function runLibrary() {
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var wide = innerWidth >= 783 && innerHeight >= 560;
+		var phone = !!document.querySelector('.atlas-ar-app.is-phone');
+		check('the frame draws around the 3D Library', !!document.querySelector('#atlas-ar-library .atlas-ar-app .atlas-ar-pane--library .atlas-ar-library'));
+		check('one h1: 3D Library', document.querySelectorAll('h1').length === 1 && document.querySelector('h1').textContent === '3D Library');
+		var cur = document.querySelector('.atlas-ar-nav-item[aria-current="page"]');
+		if (!phone) check('the menu marks 3D Library', cur && /3D Library/.test(cur.textContent));
+		var items = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-item'), function (a) { return a.getAttribute('href') || ''; });
+		if (author && !phone) check('a user without manage_options sees only the 3D Library', items.length === 1, items.join(' '));
+		else if (!phone) check('dashboard screens link back to the dashboard', items.some(function (h) { return /#appearance$/.test(h); }), items.length + ' items');
+		var holder = document.querySelector('.atlas-ar-notices-holder');
+		check('notices moved into the bell', holder && holder.children.length === 2);
+		check('status bar: the Cloud fact only (no counts query on this page)', document.querySelectorAll('.atlas-ar-status li').length === 1);
+		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1, document.scrollingElement.scrollHeight + ' / ' + innerHeight);
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		var input = document.querySelector('.atlas-ar-hsearch-input');
+		if (input) {
+			setInput(input, 'radius');
+			await wait(80);
+			var opts = Array.prototype.map.call(document.querySelectorAll('[role="option"]'), function (o) { return o.textContent; });
+			if (author) check('an Author finds no settings', !opts.some(function (t) { return /Rounded corners/.test(t); }), opts.join(' | '));
+			else check('settings are found from the Library page', opts.some(function (t) { return /Rounded corners/.test(t); }), opts.join(' | '));
+		}
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, wide);
+	}
+
+	async function run() {
+		if (libraryPage) return runLibrary();
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var wide = innerWidth >= 783 && innerHeight >= 560;
+		var app = document.querySelector('.atlas-ar-app');
+		check('the frame draws', !!app);
+		check('one h1, the screen title', document.querySelectorAll('h1').length === 1 && document.querySelector('h1').textContent === 'Appearance', document.querySelector('h1') && document.querySelector('h1').textContent);
+		var tabs = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-tabs-panel [role="tab"]'), function (t) { return t.textContent; });
+		check('four Appearance tabs', tabs.join('|') === 'Look|Starting view|Size and frame|AR button', tabs.join('|'));
+		check('the address opens tab "Size and frame"', (document.querySelector('.atlas-ar-tabs-panel [role="tab"][aria-selected="true"]') || {}).textContent === 'Size and frame');
+		var radius = document.querySelector('[data-atlas-ar-field="look.radius"]');
+		check('#appearance:frame/look.radius focuses the field', radius && radius.contains(document.activeElement), document.activeElement && document.activeElement.outerHTML.slice(0, 60));
+		check('… and marks it', radius && radius.classList.contains('is-found'));
+		var holder = document.querySelector('.atlas-ar-notices-holder');
+		check('notices moved into the bell (kept in the page)', holder && holder.children.length === 2 && !document.querySelector('#wpbody-content > .notice'), holder ? holder.children.length + ' in the holder' : 'no holder');
+		check('a hidden element of another plugin stays where it is', !!document.querySelector('#wpbody-content > .hidden-thing'));
+		var bell = document.querySelector('.atlas-ar-bell button');
+		check('the bell says it in words', bell && /Notices: 2, 1 error/.test(bell.getAttribute('aria-label')), bell && bell.getAttribute('aria-label'));
+		var facts = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-status li'), function (l) { return l.textContent; });
+		check('status bar facts', facts.length === 3 && /12 products show 3D/.test(facts[0]), facts.join(' | '));
+		if (wide) check('rail groups', Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-heading'), function (h) { return h.textContent; }).join('|') === '3D models|Shop display|Look after');
+		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1, document.scrollingElement.scrollHeight + ' / ' + innerHeight);
+
+		// Search by keyboard: Ctrl+K, type, Enter.
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		var input = document.querySelector('.atlas-ar-hsearch-input');
+		check('Ctrl+K focuses the search box', input && document.activeElement === input);
+		if (input) {
+			setInput(input, 'border colour');
+			await wait(80);
+			check('combobox expanded with results', input.getAttribute('aria-expanded') === 'true' && document.querySelectorAll('[role="option"]').length > 0);
+			key(input, 'ArrowDown');
+			await wait(50);
+			var activeId = input.getAttribute('aria-activedescendant');
+			check('ArrowDown sets aria-activedescendant', !!activeId && document.getElementById(activeId).getAttribute('aria-selected') === 'true');
+			// "Border colour" shows only when the border is above 0: the search lands on "Border (px)" and says why.
+			key(input, 'Enter');
+			await wait(1500);
+			var bw = document.querySelector('[data-atlas-ar-field="look.border_width"]');
+			check('a hidden field jumps to the field that shows it', bw && bw.contains(document.activeElement) && location.hash === '#appearance:frame/look.border_color', location.hash);
+			// Another tab, by typing a word from the English fallback.
+			key(document.body, 'k', { ctrlKey: true });
+			await wait(80);
+			setInput(input = document.querySelector('.atlas-ar-hsearch-input'), 'exposure');
+			await wait(80);
+			key(input, 'Enter');
+			await wait(1500);
+			var ex = document.querySelector('[data-atlas-ar-field="look.exposure"]');
+			check('"exposure" opens Look and focuses Brightness', ex && ex.contains(document.activeElement) && (document.querySelector('.atlas-ar-tabs-panel [role="tab"][aria-selected="true"]') || {}).textContent === 'Look');
+			key(document.body, 'k', { ctrlKey: true });
+			await wait(80);
+			input = document.querySelector('.atlas-ar-hsearch-input');
+			setInput(input, '<img src=x onerror=alert(1)>');
+			await wait(80);
+			check('typed HTML is text: no result, no element', !document.querySelector('.atlas-ar-hsearch img') && /Nothing matches/.test(document.querySelector('.atlas-ar-hsearch-empty').textContent));
+			// One key per render: the list closes, then the text clears, then focus leaves the box.
+			key(input, 'Escape'); await wait(60);
+			check('Escape 1 closes the list', input.getAttribute('aria-expanded') === 'false');
+			key(input, 'Escape'); await wait(60);
+			check('Escape 2 clears the text', input.value === '');
+			key(input, 'Escape'); await wait(80);
+			check('Escape closes, clears, then leaves the box', document.activeElement !== input);
+		}
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, wide);
+	}
+})();
+</script>
+</body></html>

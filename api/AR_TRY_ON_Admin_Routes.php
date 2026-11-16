@@ -205,6 +205,8 @@ class AR_TRY_ON_Admin_Routes {
 			'version'    => defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '',
 			'brand'      => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::brand(), // AR-138: "AtlasAR Pro" with Pro
 			'demoModel'  => self::demo_model(),
+			// AR-180: the desktop-app frame (rail, header, search, status bar).
+			'shell'      => self::shell_boot(),
 		);
 
 		/**
@@ -213,6 +215,69 @@ class AR_TRY_ON_Admin_Routes {
 		 * @param array $data
 		 */
 		return (array) apply_filters( 'atlas_ar_admin_boot', $data );
+	}
+
+	/**
+	 * AR-180: what the app frame needs on both AtlasAR screens (the dashboard and the 3D Library).
+	 *
+	 * Safe for every user who may open the 3D Library (upload_files): no settings, no AtlasAR
+	 * Cloud details, no email. The rail shows only what the user may open; the server still
+	 * decides (page capabilities, REST permission callbacks).
+	 *
+	 * @return array
+	 */
+	public static function shell_boot() {
+		$dashboard = admin_url( 'admin.php?page=ar-vr-3d-model-try-on' );
+		return array(
+			'brand'   => \AR_TRY_ON_Admin\AR_TRY_ON_Admin::brand(),
+			'version' => defined( 'ATLAS_AR_VERSION' ) ? ATLAS_AR_VERSION : '',
+			'urls'    => array(
+				'dashboard' => $dashboard,
+				'wizard'    => $dashboard . '&setup=1',
+				'library'   => admin_url( 'admin.php?page=atlas-ar-library' ),
+				'plugins'   => admin_url( 'admin.php?page=atlas-ar-other-plugins' ),
+			),
+			'can'     => array(
+				'manage' => current_user_can( 'manage_options' ),
+				'upload' => current_user_can( 'upload_files' ),
+			),
+			'links'   => self::shell_links(),
+		);
+	}
+
+	/**
+	 * AR-180: link items for the rail and the search from other plugins (AtlasAR Pro's Licence
+	 * page, for example). Each item: { id, label, href, group, icon, keywords }. Broken items are
+	 * dropped; an href must be an admin address of this site or http(s).
+	 *
+	 * @return array
+	 */
+	private static function shell_links() {
+		/**
+		 * Link items for the AtlasAR side menu and search.
+		 *
+		 * @param array $links [ { id, label, href, group?, icon?, keywords? } ]
+		 */
+		$raw   = (array) apply_filters( 'atlas_ar_shell_links', array() );
+		$links = array();
+		foreach ( $raw as $item ) {
+			if ( ! is_array( $item ) || empty( $item['id'] ) || empty( $item['label'] ) || empty( $item['href'] ) ) {
+				continue;
+			}
+			$href = esc_url_raw( (string) $item['href'], array( 'http', 'https' ) );
+			if ( '' === $href ) {
+				continue;
+			}
+			$links[] = array(
+				'id'       => sanitize_key( (string) $item['id'] ),
+				'label'    => sanitize_text_field( (string) $item['label'] ),
+				'href'     => $href,
+				'group'    => isset( $item['group'] ) ? sanitize_key( (string) $item['group'] ) : 'more',
+				'icon'     => isset( $item['icon'] ) ? sanitize_key( (string) $item['icon'] ) : 'external',
+				'keywords' => isset( $item['keywords'] ) ? sanitize_text_field( (string) $item['keywords'] ) : '',
+			);
+		}
+		return $links;
 	}
 
 	public static function get_config() {
