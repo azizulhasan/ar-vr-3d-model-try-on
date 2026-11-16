@@ -11,7 +11,8 @@
   Run: serve this folder over http (e.g. `python -m http.server 8765` in tests/browser) and open
   http://localhost:8765/AR-179-shell.html?site=http://localhost/tts
   (site: the WordPress address; default http://localhost/tts). Add &page=library for the 3D Library
-  page in the frame, and &author=1 for a user who may upload files but not manage AtlasAR.
+  page in the frame, and &author=1 for a user who may upload files but not manage AtlasAR;
+  &setup=1 for the setup wizard in the frame.
   The page runs its checks and shows
   PASS or FAIL per check (and in the title). Resize to 1440, 1100, 900, 768 and 375 px and press
   "Run the checks" again; checks that need a wide window say so.
@@ -72,7 +73,8 @@ html{--wp-admin--admin-bar--height:32px}
 	if (libraryPage) {
 		// The light boot of the 3D Library page: no settings, no Cloud details (AR_TRY_ON_Admin_Routes::shell_boot()).
 		window.atlasArAdmin = { version: '3.0.1', shell: Object.assign({}, window.atlasArAdmin.shell, { can: { manage: !author, upload: true } }) };
-	} else history.replaceState(null, '', '#appearance:frame/look.radius'); // the checks start from this deep link
+	} else if (!params.get('setup')) history.replaceState(null, '', '#appearance:frame/look.radius'); // the checks start from this deep link
+	else history.replaceState(null, '', location.pathname + location.search);
 
 	css.forEach(function (href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href; document.head.appendChild(l); });
 	var errors = [];
@@ -129,6 +131,80 @@ html{--wp-admin--admin-bar--height:32px}
 		check('the app gets clicks beside the menu', under && document.querySelector('.atlas-ar-app').contains(under), under && under.outerHTML.slice(0, 50));
 	}
 
+
+	/** AR-182: every screen and tab draws its settings from the map, with the Save bar where it belongs. */
+	async function screenChecks(check) {
+		var expect = [
+			['products', '', 1, false], ['integrations', '', 2, false], ['placement', 'page', 3, true], ['placement', 'cards', 3, true],
+			['tryon', '', 5, true], ['analytics', '', 0, false], ['settings', 'general', 3, true], ['settings', 'privacy', 3, true],
+			['settings', 'tools', 3, true], ['help', 'guides', 0, false], ['help', 'shortcode', 1, false], ['help', 'check', 0, false]
+		];
+		for (var n = 0; n < expect.length; n++) {
+			var e = expect[n];
+			location.hash = '#' + e[0] + (e[1] ? ':' + e[1] : '');
+			await wait(250);
+			var pane = document.getElementById('atlas-ar-pane');
+			var fields = pane ? pane.querySelectorAll('[data-atlas-ar-field]').length : -1;
+			var tab = document.querySelector('.atlas-ar-tabs-panel [role="tab"][aria-selected="true"]');
+			var save = !!document.querySelector('.atlas-ar-pane-foot .atlas-ar-savefoot');
+			var ok = document.querySelectorAll('h1').length === 1 && fields === e[2] && save === e[3] && (!e[1] || !!tab);
+			check('screen ' + e[0] + (e[1] ? ' › ' + e[1] : ''), ok, fields + ' fields, Save bar ' + (save ? 'yes' : 'no') + (tab ? ', tab ' + tab.textContent : ''));
+		}
+		// A setting on another screen and tab, picked with the mouse.
+		async function pick(query, text) {
+			key(document.body, 'k', { ctrlKey: true });
+			await wait(80);
+			var input = document.querySelector('.atlas-ar-hsearch-input');
+			setInput(input, query);
+			await wait(100);
+			var opt = Array.prototype.filter.call(document.querySelectorAll('[role="option"]'), function (o) { return o.textContent.indexOf(text) !== -1; })[0];
+			if (opt) { opt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true })); opt.click(); }
+			await wait(1400);
+			return !!opt;
+		}
+		var found = await pick('qr', 'QR code');
+		var qr = document.querySelector('[data-atlas-ar-field="placement.qr"]');
+		check('"qr" → Placement › Product page, QR setting focused', found && qr && qr.contains(document.activeElement), location.hash);
+		found = await pick('export', 'Export settings');
+		var ex = document.querySelector('[data-atlas-ar-field="action.export"]');
+		check('"export" → Settings › Tools, its button focused', found && ex && ex.contains(document.activeElement), location.hash);
+		found = await pick('wall', 'AR placement');
+		var note = document.querySelector('.atlas-ar-page-notice');
+		check('a per-product setting opens Products and says where it is', found && location.hash.indexOf('#products') === 0 && note && /Display/.test(note.textContent), note && note.textContent.slice(0, 80));
+		location.hash = '#help:shortcode';
+		await wait(250);
+		var copy = Array.prototype.filter.call(document.querySelectorAll('.atlas-ar-code button'), function (b) { return /Copy/.test(b.textContent); })[0];
+		if (copy) {
+			copy.click();
+			await wait(400);
+			// "Copied", or (a window without focus may refuse the clipboard) the message saying so.
+			check('Copy shows a snackbar', /Copied|Copying did not work/.test((document.querySelector('.atlas-ar-snackbars') || {}).textContent || ''), ((document.querySelector('.atlas-ar-snackbars') || {}).textContent || '').slice(0, 60));
+		}
+	}
+
+	/** AR-182: the setup wizard inside the frame. */
+	async function runWizard() {
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var wide = innerWidth >= 783 && innerHeight >= 560;
+		check('the wizard draws in the frame', !!document.querySelector('.atlas-ar-app .atlas-ar-pane--wizard .atlas-ar-wizard'));
+		check('one h1: Set up AtlasAR', document.querySelectorAll('h1').length === 1 && document.querySelector('h1').textContent === 'Set up AtlasAR');
+		var cur = document.querySelector('.atlas-ar-nav-item[aria-current="page"]');
+		if (wide) check('the menu marks Setup', cur && /Setup/.test(cur.textContent));
+		var links = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-item'), function (a) { return a.getAttribute('href') || 'button'; });
+		if (wide) check('menu items lead back to the dashboard', links.indexOf('button') === -1 && links.some(function (h) { return /#placement$/.test(h); }));
+		var cont = Array.prototype.filter.call(document.querySelectorAll('.atlas-ar-pane-foot button'), function (b) { return /Continue/.test(b.textContent); })[0];
+		check('Back / Step / Continue in the pane footer', !!cont && /Step 1 of/.test(document.querySelector('.atlas-ar-pane-foot').textContent));
+		check('step 1: the placement cards and the card button', document.querySelectorAll('.atlas-ar-choice-item').length === 4 && !!document.querySelector('[data-atlas-ar-field="cards.button"]'));
+		if (cont) cont.click();
+		await wait(300);
+		var ids = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-wizard [data-atlas-ar-field]'), function (n) { return n.getAttribute('data-atlas-ar-field'); });
+		check('step 2: Look draws the same definitions as Appearance', ids.join() === 'look.background,look.ar_text,look.ar_color', ids.join());
+		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1);
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, wide);
+	}
+
 	/** The 3D Library page in the frame (its own REST calls fail here: no site session). */
 	async function runLibrary() {
 		var out = [], ok = true;
@@ -163,6 +239,7 @@ html{--wp-admin--admin-bar--height:32px}
 
 	async function run() {
 		if (libraryPage) return runLibrary();
+		if (params.get('setup')) return runWizard();
 		var out = [], ok = true;
 		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
 		var wide = innerWidth >= 783 && innerHeight >= 560;
@@ -227,6 +304,7 @@ html{--wp-admin--admin-bar--height:32px}
 			key(input, 'Escape'); await wait(80);
 			check('Escape closes, clears, then leaves the box', document.activeElement !== input);
 		}
+		await screenChecks(check);
 		check('no script errors', !errors.length, errors.join('; '));
 		report(ok, out, wide);
 	}

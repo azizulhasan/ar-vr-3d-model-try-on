@@ -17,19 +17,8 @@
 
 	/* ------------------------------------------------------------- shared */
 
-	var PLACEMENTS = [
-		{ value: 'gallery', title: __('In the gallery, image first', 'ar-vr-3d-model-try-on'), text: __('A 3D button on the main product image switches to the 3D view.', 'ar-vr-3d-model-try-on'), badge: __('Recommended', 'ar-vr-3d-model-try-on') },
-		{ value: 'gallery3d', title: __('In the gallery, 3D first', 'ar-vr-3d-model-try-on'), text: __('The 3D view replaces the main image; the image is one click away.', 'ar-vr-3d-model-try-on') },
-		{ value: 'button', title: __('A button that opens a popup', 'ar-vr-3d-model-try-on'), text: __('Keeps the gallery as it is; the 3D view opens in a window.', 'ar-vr-3d-model-try-on') },
-		{ value: 'tab', title: __('Only in a product tab', 'ar-vr-3d-model-try-on'), text: __('The 3D view sits with the description and reviews.', 'ar-vr-3d-model-try-on') },
-		{ value: 'slide', title: __('As a gallery slide', 'ar-vr-3d-model-try-on'), text: __('The 3D view is one more slide among the product images.', 'ar-vr-3d-model-try-on') }
-	];
-	var BUTTON_POSITIONS = [
-		{ value: 'after_cart', label: __('After the “Add to cart” button', 'ar-vr-3d-model-try-on') },
-		{ value: 'before_cart', label: __('Before the “Add to cart” button', 'ar-vr-3d-model-try-on') },
-		{ value: 'after_summary', label: __('After the product summary', 'ar-vr-3d-model-try-on') },
-		{ value: 'under_images', label: __('Under the product images', 'ar-vr-3d-model-try-on') }
-	];
+	// AR-182: the placements and button positions are in the map (atlas-ar-map.js).
+
 	/** AR-156: one-click styles for the frame, and back to the defaults (Appearance only). */
 	var PRESETS = {
 		clean: { border_width: 0, radius: 0, frame_shadow: 'none' },
@@ -208,8 +197,13 @@
 		var doneCount = checklist.filter(function (c) { return done[c.key]; }).length;
 		var mig = boot.migration || {};
 
+		// AR-182: a search pick of a per-product setting opens this screen and says where it is.
+		var asked = ctx.route && ctx.route.field ? (UI.map.productFields || []).filter(function (f) { return f.id === ctx.route.field; })[0] : null;
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Products', 'ar-vr-3d-model-try-on'), lead: __('Your products and their 3D, AR and try-on status. Add a model right from here.', 'ar-vr-3d-model-try-on') }),
+			el(UI.Head, { lead: __('Your products and their 3D, AR and try-on status. Add a model right from here.', 'ar-vr-3d-model-try-on') }),
+			asked ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' },
+				/* translators: 1: a setting, e.g. "AR placement (floor or wall)", 2: a tab of the product's AtlasAR panel, e.g. "Display". */
+				sprintf(__('“%1$s” is set for each product: open a product and look under %2$s in its AtlasAR panel.', 'ar-vr-3d-model-try-on'), asked.label, asked.panelTab)) : null,
 			// AR-160: the one-time move from AtlasAR 2.x.
 			mig.status === 'running' ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' },
 				sprintf(__('Moving your 3D models from AtlasAR 2 into the 3D Library (%d so far). It runs in the background; your shop keeps working.', 'ar-vr-3d-model-try-on'), mig.moved || 0)) : null,
@@ -255,12 +249,14 @@
 						[['all', __('All', 'ar-vr-3d-model-try-on')], ['with', __('With 3D', 'ar-vr-3d-model-try-on')], ['without', __('Without 3D', 'ar-vr-3d-model-try-on')], ['tryon', __('Try-on', 'ar-vr-3d-model-try-on')]].map(function (f) {
 							return el('button', { key: f[0], type: 'button', className: 'atlas-ar-filter' + (filter === f[0] ? ' is-on' : ''), 'aria-pressed': filter === f[0] ? 'true' : 'false', onClick: function () { setFilter(f[0]); setPage(1); } }, f[1]);
 						})),
-					window.AtlasARLibrary && window.AtlasARLibrary.makeFlat ? el(C.Button, { variant: 'secondary', onClick: function () { setBulk(true); } }, __('Make 3D from product photos', 'ar-vr-3d-model-try-on')) : null),
+					window.AtlasARLibrary && window.AtlasARLibrary.makeFlat ? el(UI.Field, { id: 'action.flat', className: 'is-inline' }, el(C.Button, { variant: 'secondary', onClick: function () { setBulk(true); } }, __('Make 3D from product photos', 'ar-vr-3d-model-try-on'))) : null),
 				bulk ? el(BulkFlat, { onClose: function () { setBulk(false); }, onDone: load }) : null,
 				loading && items !== null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', 'ar-vr-3d-model-try-on')) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 				items === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Loading…', 'ar-vr-3d-model-try-on')) : el('div', { className: 'atlas-ar-list' + (loading ? ' is-loading' : ''), 'aria-busy': loading ? 'true' : 'false' }, items.length === 0
-					? el('p', { className: 'atlas-ar-empty' }, search || filter !== 'all' ? __('No products match.', 'ar-vr-3d-model-try-on') : __('No products yet.', 'ar-vr-3d-model-try-on'))
+					? (search || filter !== 'all'
+							? el(UI.Empty, { text: __('No products match.', 'ar-vr-3d-model-try-on'), action: { label: __('Show all products', 'ar-vr-3d-model-try-on'), onClick: function () { setSearch(''); setFilter('all'); setPage(1); } } })
+							: el(UI.Empty, { text: __('No products yet. Add a product, then give it a 3D model here.', 'ar-vr-3d-model-try-on') }))
 					: el('table', { className: 'widefat striped atlas-ar-table' },
 						el('thead', null, el('tr', null,
 							el('th', { scope: 'col' }, __('Product', 'ar-vr-3d-model-try-on')), el('th', { scope: 'col' }, __('Model', 'ar-vr-3d-model-try-on')),
@@ -325,59 +321,38 @@
 					el(UI.ProNote, { where: 'appearance', spot: 'appearance_extras' }, __('AtlasAR Pro adds hotspots, the real measurements on the view, and several models with thumbnails to switch between.', 'ar-vr-3d-model-try-on')))));
 	}
 
+	/** The sub-tabs of a screen in the map, as WordPress's TabPanel wants them. */
+	function tabsOf(id) {
+		return (UI.map.screen(id).tabs || []).map(function (t) { return { name: t.id, title: t.label }; });
+	}
+
+	/**
+	 * AR-182: Placement on the new design: tabs Product page and Product cards (AR-176). Every
+	 * setting comes from the map; the slot atlasAr.placement.cards stays under the card settings.
+	 * Save is in the pane's footer and still ticks Get started (general.placed, AR-148).
+	 */
 	function PlacementPage(ctx) {
-		var p = ctx.settings.placement, set = function (k, v) { ctx.set('placement', k, v); };
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Placement', 'ar-vr-3d-model-try-on'), lead: __('Where the 3D view appears on WooCommerce product pages.', 'ar-vr-3d-model-try-on') }),
-			!boot.woo ? el(C.Notice, { status: 'info', isDismissible: false }, __('WooCommerce is not active. Posts and pages show the 3D view with the block or the shortcode.', 'ar-vr-3d-model-try-on')) : null,
-			el(UI.Section, null,
-				el(UI.Choice, { label: __('Placement', 'ar-vr-3d-model-try-on'), value: p.mode, options: PLACEMENTS, onChange: function (v) { set('mode', v); } }),
-				p.mode === 'button' ? el(C.SelectControl, {
-					label: __('Show the button', 'ar-vr-3d-model-try-on'), value: p.button_position, options: BUTTON_POSITIONS, __nextHasNoMarginBottom: true,
-					onChange: function (v) { set('button_position', v); }
-				}) : null,
-				el('h3', null, __('Also', 'ar-vr-3d-model-try-on')),
-				p.mode !== 'tab' ? el(C.ToggleControl, { label: __('Add a “3D view” tab to the product tabs', 'ar-vr-3d-model-try-on'), checked: !!p.product_tab, onChange: function (v) { set('product_tab', v); } }) : null,
-				el(C.ToggleControl, { label: __('On computers, show a QR code to open AR on a phone', 'ar-vr-3d-model-try-on'), checked: !!p.qr, onChange: function (v) { set('qr', v); } }),
-				el('p', { className: 'description' }, __('Anywhere else (posts, pages, page builders): use the “AtlasAR 3D view” block or the shortcode [atlas_ar]. Help › Shortcode builder makes one for you.', 'ar-vr-3d-model-try-on')),
-				ctx.saveBar),
-			el(CardsFields, ctx));
+			el(UI.Head, { lead: __('Where the 3D view appears: on product pages and on the product cards of your shop.', 'ar-vr-3d-model-try-on') }),
+			!boot.woo ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' }, __('WooCommerce is not active. Posts and pages show the 3D view with the block or the shortcode.', 'ar-vr-3d-model-try-on')) : null,
+			el(UI.shell.Tabs, { tabs: tabsOf('placement'), tab: ctx.tab, onTab: function (t) { ctx.go('placement', t, '', { replace: true }); } }, function (t) {
+				if (t === 'cards') {
+					return el('div', { className: 'atlas-ar-tab-fields' },
+						el('p', { className: 'atlas-ar-tab-lead' }, __('On the shop and category pages, related products and product blocks, for every product that has a 3D model. The product page itself is not changed.', 'ar-vr-3d-model-try-on')),
+						el(UI.Fields, { where: { screen: 'placement', tab: 'cards' }, settings: ctx.settings, set: ctx.set }),
+						UI.filters('atlasAr.placement.cards', [], ctx),
+						el(UI.ProNote, { where: 'placement', spot: 'cards' }, __('With AtlasAR Pro each product can have its own card button, button text and card picture.', 'ar-vr-3d-model-try-on')),
+						el('p', { className: 'description' }, __('For cards your theme or page builder draws itself: the shortcode [atlas_ar_button id="123"] prints the same button for product 123.', 'ar-vr-3d-model-try-on')));
+				}
+				return el('div', { className: 'atlas-ar-tab-fields' },
+					el(UI.Fields, { where: { screen: 'placement', tab: 'page' }, settings: ctx.settings, set: ctx.set }),
+					el('p', { className: 'description' }, __('Anywhere else (posts, pages, page builders): use the “AtlasAR 3D view” block or the shortcode [atlas_ar]. Help › Shortcode builder makes one for you.', 'ar-vr-3d-model-try-on')));
+			}));
 	}
 
-	/** AR-176: Placement › Product cards (the shop, category pages, related products, product blocks). */
-	function CardsFields(ctx) {
-		var c = ctx.settings.cards, set = function (k, v) { ctx.set('cards', k, v); };
-		return el(UI.Section, { title: __('Product cards', 'ar-vr-3d-model-try-on'), lead: __('On the shop and category pages, related products and product blocks, for every product that has a 3D model. The product page itself is not changed.', 'ar-vr-3d-model-try-on') },
-			el(C.ToggleControl, {
-				label: __('Show a “View in 3D and AR” button on product cards', 'ar-vr-3d-model-try-on'), checked: !!c.button, onChange: function (v) { set('button', v); },
-				help: __('It opens the 3D view in a window, with AR on phones. Glasses and caps get the “Try it on” button instead; wall art opens on the wall.', 'ar-vr-3d-model-try-on')
-			}),
-			c.button ? el(Fragment, null,
-				el(C.TextControl, { label: __('Button text', 'ar-vr-3d-model-try-on'), value: c.button_text, maxLength: 60, onChange: function (v) { set('button_text', v); }, help: __('Try-on products use the button text from the Try-on page.', 'ar-vr-3d-model-try-on') }),
-				el(C.SelectControl, {
-					label: __('Where in the card', 'ar-vr-3d-model-try-on'), value: c.button_position, __nextHasNoMarginBottom: true, onChange: function (v) { set('button_position', v); },
-					options: [{ value: 'after', label: __('After the card’s buttons (“Add to cart”)', 'ar-vr-3d-model-try-on') }, { value: 'before', label: __('Before them', 'ar-vr-3d-model-try-on') }]
-				}),
-				boot.blockTheme ? el(C.SelectControl, {
-					label: __('Style', 'ar-vr-3d-model-try-on'), value: c.button_style, __nextHasNoMarginBottom: true, onChange: function (v) { set('button_style', v); },
-					options: [{ value: 'outline', label: __('Outline (your theme’s secondary button)', 'ar-vr-3d-model-try-on') }, { value: 'fill', label: __('Filled (your theme’s main button)', 'ar-vr-3d-model-try-on') }],
-					help: __('The button follows your theme’s button styles.', 'ar-vr-3d-model-try-on')
-				}) : el('p', { className: 'description' }, __('The button looks like your theme’s “Add to cart” button.', 'ar-vr-3d-model-try-on'))) : null,
-			el('h3', null, __('Card picture', 'ar-vr-3d-model-try-on')),
-			el(C.SelectControl, {
-				label: __('What the card shows', 'ar-vr-3d-model-try-on'), value: c.media, __nextHasNoMarginBottom: true, onChange: function (v) { set('media', v); },
-				options: [{ value: 'image', label: __('The product image', 'ar-vr-3d-model-try-on') }, { value: '3d', label: __('The 3D view first (its poster; the model loads when a shopper clicks)', 'ar-vr-3d-model-try-on') }],
-				help: __('Pages stay fast: no 3D model is downloaded before a shopper interacts.', 'ar-vr-3d-model-try-on')
-			}),
-			c.media === 'image' ? el(C.ToggleControl, { label: __('A small 3D badge on the image that opens the 3D view or the try-on', 'ar-vr-3d-model-try-on'), checked: !!c.badge, onChange: function (v) { set('badge', v); } }) : null,
-			UI.filters('atlasAr.placement.cards', [], ctx),
-			el(UI.ProNote, { where: 'placement', spot: 'cards' }, __('With AtlasAR Pro each product can have its own card button, button text and card picture.', 'ar-vr-3d-model-try-on')),
-			el('p', { className: 'description' }, __('For cards your theme or page builder draws itself: the shortcode [atlas_ar_button id="123"] prints the same button for product 123.', 'ar-vr-3d-model-try-on')),
-			ctx.saveBar);
-	}
-
+	/** AR-182: Try-on on the new design: one pane, four groups, every setting from the map. */
 	function TryonPage(ctx) {
-		var t = ctx.settings.tryon, set = function (k, v) { ctx.set('tryon', k, v); };
+		var t = ctx.settings.tryon;
 		var _busy = useState(''), busy = _busy[0], setBusy = _busy[1];
 		var _tr = useState(boot.tracker || {}), tracker = _tr[0], setTracker = _tr[1];
 		var _err = useState(''), err = _err[0], setErr = _err[1];
@@ -392,39 +367,33 @@
 			[__('Lips and make-up', 'ar-vr-3d-model-try-on'), __('Lipstick shades on the lips', 'ar-vr-3d-model-try-on'), false],
 			[__('Rings and watches', 'ar-vr-3d-model-try-on'), __('On the hand and wrist', 'ar-vr-3d-model-try-on'), false]
 		];
+		// The face-tracking files on this site: download, again, or remove (its own REST calls, as before).
+		var filesRow = t.tracker === 'self' ? el('div', { className: 'atlas-ar-row atlas-ar-files-row' },
+			tracker.present
+				? el(Fragment, null, el('span', { className: 'atlas-ar-saved' }, sprintf(__('On this site (%s).', 'ar-vr-3d-model-try-on'), UI.size(tracker.size))),
+					el(C.Button, { variant: 'secondary', isBusy: busy === 'POST', disabled: !!busy, onClick: function () { files('POST'); } }, __('Download again', 'ar-vr-3d-model-try-on')),
+					el(C.Button, { variant: 'tertiary', isDestructive: true, disabled: !!busy, onClick: function () { files('DELETE'); } }, __('Remove', 'ar-vr-3d-model-try-on')))
+				: el(Fragment, null, el(C.Button, { variant: 'secondary', isBusy: busy === 'POST', disabled: !!busy, onClick: function () { files('POST'); } }, __('Download the files to this site', 'ar-vr-3d-model-try-on')),
+					el('span', { className: 'description' }, __('Until they are here, the CDN is used.', 'ar-vr-3d-model-try-on')))) : null;
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Virtual try-on', 'ar-vr-3d-model-try-on'), lead: __('Shoppers see your product on their own face with the camera. Everything happens on their device; no picture or video is sent anywhere.', 'ar-vr-3d-model-try-on') }),
-			el(UI.Section, null,
-				el(C.ToggleControl, { label: __('Show the “Try it on” button on try-on products', 'ar-vr-3d-model-try-on'), checked: !!t.enabled, onChange: function (v) { set('enabled', v); } }),
-				el('h3', null, __('Product types', 'ar-vr-3d-model-try-on')),
-				el('p', { className: 'description' }, __('Choose the type in each product’s AtlasAR panel.', 'ar-vr-3d-model-try-on')),
-				el('div', { className: 'atlas-ar-cats' }, cats.map(function (c) {
-					return el('div', { key: c[0], className: 'atlas-ar-cat' + (c[2] ? ' is-on' : '') },
-						el('strong', null, c[0]), el('span', { className: 'atlas-ar-badge' + (c[2] ? '' : ' atlas-ar-badge--muted') }, c[2] ? __('Included', 'ar-vr-3d-model-try-on') : __('Coming later', 'ar-vr-3d-model-try-on')), el('span', null, c[1]));
-				})),
-				el('h3', null, __('What shoppers see', 'ar-vr-3d-model-try-on')),
-				el(C.TextControl, { label: __('Button text', 'ar-vr-3d-model-try-on'), value: t.label, maxLength: 60, onChange: function (v) { set('label', v); } }),
-				el(C.TextareaControl, { label: __('Camera message (shown before the camera starts)', 'ar-vr-3d-model-try-on'), value: t.consent, rows: 3, onChange: function (v) { set('consent', v); } }),
-				el(C.ToggleControl, { label: __('Let shoppers save a photo of themselves wearing it', 'ar-vr-3d-model-try-on'), checked: !!t.snapshot, onChange: function (v) { set('snapshot', v); }, help: __('Saved photos show a small “Powered by AtlasAR” label.', 'ar-vr-3d-model-try-on') }),
-				el(UI.ProNote, { where: 'tryon', spot: 'tryon_hd' }, __('AtlasAR Pro removes the label, saves photos in HD and shows the product in real 3D that turns with the head.', 'ar-vr-3d-model-try-on')),
-				el('h3', null, __('Face-tracking files', 'ar-vr-3d-model-try-on')),
-				el('p', { className: 'description' }, __('About 15 MB, loaded only after the shopper allows the camera.', 'ar-vr-3d-model-try-on')),
-				el(C.RadioControl, {
-					label: __('Load them', 'ar-vr-3d-model-try-on'), hideLabelFromVision: true, selected: t.tracker, onChange: function (v) { set('tracker', v); },
-					options: [
-						{ value: 'cdn', label: __('From the public CDN (default) — jsDelivr and Google; listed under External services in the readme', 'ar-vr-3d-model-try-on') },
-						{ value: 'self', label: __('From this site — downloaded once into your uploads folder; no third-party request', 'ar-vr-3d-model-try-on') }
-					]
-				}),
-				t.tracker === 'self' ? el('div', { className: 'atlas-ar-row' },
-					tracker.present
-						? el(Fragment, null, el('span', { className: 'atlas-ar-saved' }, sprintf(__('On this site (%s).', 'ar-vr-3d-model-try-on'), UI.size(tracker.size))),
-							el(C.Button, { variant: 'secondary', isBusy: busy === 'POST', disabled: !!busy, onClick: function () { files('POST'); } }, __('Download again', 'ar-vr-3d-model-try-on')),
-							el(C.Button, { variant: 'tertiary', isDestructive: true, disabled: !!busy, onClick: function () { files('DELETE'); } }, __('Remove', 'ar-vr-3d-model-try-on')))
-						: el(Fragment, null, el(C.Button, { variant: 'secondary', isBusy: busy === 'POST', disabled: !!busy, onClick: function () { files('POST'); } }, __('Download the files to this site', 'ar-vr-3d-model-try-on')),
-							el('span', { className: 'description' }, __('Until they are here, the CDN is used.', 'ar-vr-3d-model-try-on')))) : null,
-				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
-				ctx.saveBar));
+			el(UI.Head, { lead: __('Shoppers see your product on their own face with the camera. Everything happens on their device; no picture or video is sent anywhere.', 'ar-vr-3d-model-try-on') }),
+			el(UI.Section, { className: 'atlas-ar-fields-box' },
+				el(UI.Fields, {
+					where: { screen: 'tryon' }, settings: ctx.settings, set: ctx.set,
+					intros: {
+						types: el(Fragment, null,
+							el('p', { className: 'description' }, __('Choose the type in each product’s AtlasAR panel.', 'ar-vr-3d-model-try-on')),
+							el('div', { className: 'atlas-ar-cats' }, cats.map(function (c) {
+								return el('div', { key: c[0], className: 'atlas-ar-cat' + (c[2] ? ' is-on' : '') },
+									el('strong', null, c[0]), el('span', { className: 'atlas-ar-badge' + (c[2] ? '' : ' atlas-ar-badge--muted') }, c[2] ? __('Included', 'ar-vr-3d-model-try-on') : __('Coming later', 'ar-vr-3d-model-try-on')), el('span', null, c[1]));
+							}))),
+						files: el('p', { className: 'description' }, __('About 15 MB, loaded only after the shopper allows the camera.', 'ar-vr-3d-model-try-on'))
+					},
+					after: {
+						'tryon.snapshot': el(UI.ProNote, { where: 'tryon', spot: 'tryon_hd' }, __('AtlasAR Pro removes the label, saves photos in HD and shows the product in real 3D that turns with the head.', 'ar-vr-3d-model-try-on')),
+						'tryon.tracker': el(Fragment, null, filesRow, err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null)
+					}
+				})));
 	}
 
 	function CloudCard(ctx) {
@@ -557,6 +526,10 @@
 			body, err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null);
 	}
 
+	/**
+	 * AR-182: the cards stacked (880 px at most). Each card sits in UI.Field ("card.<id>"), so the
+	 * search's "Connect AtlasAR Cloud" lands on it. Cards from atlasAr.integrations.cards as before.
+	 */
 	function IntegrationsPage(ctx) {
 		var cards = UI.filters('atlasAr.integrations.cards', [
 			{ id: 'cloud', render: CloudCard },
@@ -569,20 +542,20 @@
 			}
 		], ctx);
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Integrations', 'ar-vr-3d-model-try-on'), lead: __('Services that make, optimise and host 3D models. Nothing is sent to a service until you click its button.', 'ar-vr-3d-model-try-on') }),
-			cards.map(function (c) { return el(c.render, Object.assign({ key: c.id }, ctx)); }));
+			el(UI.Head, { lead: __('Services that make, optimise and host 3D models. Nothing is sent to a service until you click its button.', 'ar-vr-3d-model-try-on') }),
+			el('div', { className: 'atlas-ar-integrations' }, cards.map(function (c) {
+				return el(UI.Field, { key: c.id, id: 'card.' + c.id, className: 'atlas-ar-card-field' }, el(c.render, ctx));
+			})));
 	}
 
+	/**
+	 * AR-182: Settings on the new design: tabs General, Privacy and Tools. The settings come from
+	 * the map; Tools keeps export, import and reset as they were (results in a snackbar).
+	 */
 	function SettingsPage(ctx) {
-		var g = ctx.settings.general;
 		var _msg = useState(''), msg = _msg[0], setMsg = _msg[1];
 		var _confirm = useState(false), confirm = _confirm[0], setConfirm = _confirm[1];
 		var fileRef = UI.useRef(null);
-		function toggleType(name, on) {
-			var list = (g.post_types || []).filter(function (t) { return t !== name; });
-			if (on) list.push(name);
-			ctx.set('general', 'post_types', list.length ? list : ['product']);
-		}
 		function exportSettings() {
 			var blob = new Blob([JSON.stringify({ atlasar: 1, settings: ctx.settings }, null, 2)], { type: 'application/json' });
 			var a = document.createElement('a');
@@ -590,49 +563,49 @@
 			setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
 		}
 		function importSettings(file) {
+			setMsg('');
 			file.text().then(function (txt) {
 				var data = JSON.parse(txt);
 				if (!data || !data.settings) throw new Error(__('This is not an AtlasAR settings file.', 'ar-vr-3d-model-try-on'));
 				return ctx.save(data.settings);
-			}).then(function () { setMsg(__('Settings imported.', 'ar-vr-3d-model-try-on')); }, function (e) { setMsg(UI.message(e)); });
+			}).then(function () { UI.shell.notify(__('Settings imported.', 'ar-vr-3d-model-try-on')); }, function (e) { setMsg(UI.message(e)); });
+		}
+		function reset() {
+			UI.api('/config/reset', { method: 'POST' }).then(function (r) {
+				ctx.replace(r.settings); setConfirm(false); UI.shell.notify(__('Settings reset.', 'ar-vr-3d-model-try-on'));
+			}, function (e) { setMsg(UI.message(e)); });
 		}
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Settings', 'ar-vr-3d-model-try-on'), lead: __('Where AtlasAR works, privacy and tools.', 'ar-vr-3d-model-try-on') }),
-			el(UI.Section, { title: __('Show the AtlasAR panel on', 'ar-vr-3d-model-try-on') },
-				(boot.postTypes || []).map(function (t) {
-					return el(C.CheckboxControl, { key: t.name, label: t.label, checked: (g.post_types || []).indexOf(t.name) !== -1, onChange: function (v) { toggleType(t.name, v); } });
-				}),
-				el(UI.ProNote, { where: 'settings', spot: 'post_types' }, __('AtlasAR Pro adds custom post types from any plugin (portfolios, listings, courses…).', 'ar-vr-3d-model-try-on'))),
-			el(UI.Section, { title: __('Optimisation', 'ar-vr-3d-model-try-on') },
-				el(C.ToggleControl, {
-					label: __('Optimise every new model when it is added', 'ar-vr-3d-model-try-on'), checked: !!g.auto_optimise, onChange: function (v) { ctx.set('general', 'auto_optimise', v); },
-					help: __('Smaller files load faster. Runs in your browser when you upload a GLB to the 3D Library (files over 0.5 MB); the original is kept and can be restored.', 'ar-vr-3d-model-try-on')
-				}),
-				// AR-162: the level Optimise uses (each model can still pick its own in the 3D Library).
-				window.AtlasARLibrary && window.AtlasARLibrary.levels ? el(C.SelectControl, {
-					label: __('Optimisation level', 'ar-vr-3d-model-try-on'), value: g.optimise_level || 'high', __nextHasNoMarginBottom: true,
-					options: window.AtlasARLibrary.levels.map(function (l) { return { value: l.value, label: l.label }; }),
-					help: (window.AtlasARLibrary.levels.filter(function (l) { return l.value === (g.optimise_level || 'high'); })[0] || {}).text,
-					onChange: function (v) { ctx.set('general', 'optimise_level', v); }
-				}) : null,
-				ctx.cloud.connected ? el('p', { className: 'description' }, __('Big files can also be optimised on AtlasAR Cloud from the 3D Library.', 'ar-vr-3d-model-try-on')) : null),
-			el(UI.Section, { title: __('Privacy', 'ar-vr-3d-model-try-on') },
-				// AR-161: shopper analytics (Analytics page).
-				el(C.ToggleControl, { label: __('Count how shoppers use the 3D view (Analytics)', 'ar-vr-3d-model-try-on'), help: __('Daily totals per product, kept on this site: 3D views, AR, try-on. No cookies and no personal data; nothing is sent to us or anyone else.', 'ar-vr-3d-model-try-on'), checked: g.stats !== false, onChange: function (v) { ctx.set('general', 'stats', v); } }),
-				el(C.ToggleControl, { label: __('Share usage data with AtlasAiDev to help improve AtlasAR', 'ar-vr-3d-model-try-on'), help: __('Off unless you turn it on. Sent once a week: this site’s address and name, the admin’s name and email, the IP address, WordPress, PHP and server versions, active plugins and the theme. Never your products, files or visitors.', 'ar-vr-3d-model-try-on'), checked: !!g.telemetry, onChange: function (v) { ctx.set('general', 'telemetry', v); } }),
-				el(C.ToggleControl, { label: __('Delete all AtlasAR settings, 3D Library models and product data when the plugin is deleted', 'ar-vr-3d-model-try-on'), checked: !!g.remove_data, onChange: function (v) { ctx.set('general', 'remove_data', v); } })),
-			ctx.saveBar,
-			el(UI.Section, { title: __('Tools', 'ar-vr-3d-model-try-on') },
-				el('div', { className: 'atlas-ar-row' },
-					el('a', { className: 'button', href: ctx.wizardUrl }, __('Run the setup wizard', 'ar-vr-3d-model-try-on')),
-					el(C.Button, { variant: 'secondary', onClick: exportSettings }, __('Export settings', 'ar-vr-3d-model-try-on')),
-					el(C.Button, { variant: 'secondary', onClick: function () { fileRef.current.click(); } }, __('Import settings', 'ar-vr-3d-model-try-on')),
-					el('input', { ref: fileRef, type: 'file', accept: 'application/json,.json', hidden: true, onChange: function (e) { var f = e.target.files[0]; e.target.value = ''; if (f) importSettings(f); } }),
-					!confirm ? el(C.Button, { variant: 'tertiary', isDestructive: true, onClick: function () { setConfirm(true); } }, __('Reset to defaults', 'ar-vr-3d-model-try-on'))
-						: el(Fragment, null, el('span', null, __('Reset every setting?', 'ar-vr-3d-model-try-on')),
-							el(C.Button, { variant: 'primary', isDestructive: true, onClick: function () { UI.api('/config/reset', { method: 'POST' }).then(function (r) { ctx.replace(r.settings); setConfirm(false); setMsg(__('Settings reset.', 'ar-vr-3d-model-try-on')); }); } }, __('Reset', 'ar-vr-3d-model-try-on')),
-							el(C.Button, { variant: 'tertiary', onClick: function () { setConfirm(false); } }, __('Cancel', 'ar-vr-3d-model-try-on')))),
-				msg ? el('p', { role: 'status' }, msg) : null));
+			el(UI.Head, { lead: __('Where AtlasAR works, privacy and tools.', 'ar-vr-3d-model-try-on') }),
+			el(UI.shell.Tabs, { tabs: tabsOf('settings'), tab: ctx.tab, onTab: function (t) { ctx.go('settings', t, '', { replace: true }); } }, function (t) {
+				if (t === 'tools') {
+					return el('div', { className: 'atlas-ar-tab-fields atlas-ar-tools' },
+						el('h3', null, __('Setup wizard', 'ar-vr-3d-model-try-on')),
+						el('p', { className: 'description' }, __('Choose the placement, the look and try-on again, step by step.', 'ar-vr-3d-model-try-on')),
+						el('a', { className: 'button', href: ctx.wizardUrl }, __('Run the setup wizard', 'ar-vr-3d-model-try-on')),
+						el('h3', null, __('Back up or move to another site', 'ar-vr-3d-model-try-on')),
+						el('p', { className: 'description' }, __('Save your AtlasAR settings in a file, or load them from one.', 'ar-vr-3d-model-try-on')),
+						el('div', { className: 'atlas-ar-row' },
+							el(UI.Field, { id: 'action.export', className: 'is-inline' }, el(C.Button, { variant: 'secondary', onClick: exportSettings }, __('Export settings', 'ar-vr-3d-model-try-on'))),
+							el(UI.Field, { id: 'action.import', className: 'is-inline' }, el(C.Button, { variant: 'secondary', onClick: function () { fileRef.current.click(); } }, __('Import settings', 'ar-vr-3d-model-try-on'))),
+							el('input', { ref: fileRef, type: 'file', accept: 'application/json,.json', hidden: true, onChange: function (e) { var f = e.target.files[0]; e.target.value = ''; if (f) importSettings(f); } })),
+						el('h3', null, __('Start over', 'ar-vr-3d-model-try-on')),
+						el(UI.Field, { id: 'action.reset', className: 'is-inline' },
+							!confirm ? el(C.Button, { variant: 'tertiary', isDestructive: true, onClick: function () { setConfirm(true); } }, __('Reset to defaults', 'ar-vr-3d-model-try-on'))
+								: el('span', { className: 'atlas-ar-row' }, el('span', null, __('Reset every setting?', 'ar-vr-3d-model-try-on')),
+									el(C.Button, { variant: 'primary', isDestructive: true, onClick: reset }, __('Reset', 'ar-vr-3d-model-try-on')),
+									el(C.Button, { variant: 'tertiary', onClick: function () { setConfirm(false); } }, __('Cancel', 'ar-vr-3d-model-try-on')))),
+						msg ? el('p', { className: 'atlas-ar-error', role: 'alert' }, msg) : null);
+				}
+				return el('div', { className: 'atlas-ar-tab-fields' },
+					el(UI.Fields, {
+						where: { screen: 'settings', tab: t }, settings: ctx.settings, set: ctx.set,
+						after: {
+							'general.post_types': el(UI.ProNote, { where: 'settings', spot: 'post_types' }, __('AtlasAR Pro adds custom post types from any plugin (portfolios, listings, courses…).', 'ar-vr-3d-model-try-on')),
+							'general.optimise_level': ctx.cloud.connected ? el('p', { className: 'description' }, __('Big files can also be optimised on AtlasAR Cloud from the 3D Library.', 'ar-vr-3d-model-try-on')) : null
+						}
+					}));
+			}));
 	}
 
 	/* ---------------------------------------------------------- analytics */
@@ -669,7 +642,7 @@
 		var pages = data ? Math.max(1, Math.ceil(data.total / 20)) : 1;
 
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Analytics', 'ar-vr-3d-model-try-on'), lead: __('How shoppers use your 3D views: counted on this site only, without cookies or personal data.', 'ar-vr-3d-model-try-on') }),
+			el(UI.Head, { lead: __('How shoppers use your 3D views: counted on this site only, without cookies or personal data.', 'ar-vr-3d-model-try-on') }),
 			el('div', { className: 'atlas-ar-filters atlas-ar-range', role: 'group', 'aria-label': __('Period', 'ar-vr-3d-model-try-on') },
 				[[7, __('7 days', 'ar-vr-3d-model-try-on')], [30, __('30 days', 'ar-vr-3d-model-try-on')], [90, __('90 days', 'ar-vr-3d-model-try-on')], [365, __('12 months', 'ar-vr-3d-model-try-on')]].map(function (r) {
 					return el('button', { key: r[0], type: 'button', className: 'atlas-ar-filter' + (days === r[0] ? ' is-on' : ''), 'aria-pressed': days === r[0] ? 'true' : 'false', onClick: function () { setDays(r[0]); setPage(1); } }, r[1]);
@@ -693,7 +666,7 @@
 					el('div', { className: 'atlas-ar-bars-axis' }, el('span', null, dayList[0]), el('span', null, dayList[dayList.length - 1]))),
 				el(UI.Section, { title: __('Products', 'ar-vr-3d-model-try-on') },
 					data.products.length === 0
-						? el('p', { className: 'atlas-ar-empty' }, __('Nothing counted yet in this period. Counting starts when shoppers open a product with a 3D model.', 'ar-vr-3d-model-try-on'))
+						? el(UI.Empty, { text: __('Nothing counted yet in this period. Counting starts when shoppers open a product with a 3D model.', 'ar-vr-3d-model-try-on') })
 						: el('table', { className: 'widefat striped atlas-ar-table atlas-ar-stats-table' },
 							el('thead', null, el('tr', null,
 								el('th', { scope: 'col' }, __('Product', 'ar-vr-3d-model-try-on')),
@@ -710,36 +683,49 @@
 				el(UI.ProNote, { where: 'analytics', spot: 'pro_events' }, __('AtlasAR Pro also counts hotspot clicks, switches to other models and variant changes.', 'ar-vr-3d-model-try-on'))) : null);
 	}
 
-	function HelpPage() {
+	/** AR-182: Help on the new design: tabs Guides, Shortcode builder and Site check. */
+	function HelpPage(ctx) {
 		var _w = useState(''), width = _w[0], setWidth = _w[1];
 		var _h = useState(''), height = _h[0], setHeight = _h[1];
 		var _id = useState(''), id = _id[0], setId = _id[1];
 		var _b = useState(false), btn = _b[0], setBtn = _b[1];
-		var _copied = useState(false), copied = _copied[0], setCopied = _copied[1];
 		var _checks = useState(null), checks = _checks[0], setChecks = _checks[1];
 		useEffect(function () { UI.api('/check').then(setChecks, function () { setChecks([]); }); }, []);
 		var code = '[atlas_ar' + (id ? ' id="' + parseInt(id, 10) + '"' : '') + (width ? ' width="' + width.replace(/["\]]/g, '') + '"' : '') + (height ? ' height="' + height.replace(/["\]]/g, '') + '"' : '') + (btn ? ' reveal="false"' : '') + ']';
+		function copy() {
+			var failed = function () { UI.shell.notify(__('Copying did not work here: select the shortcode and copy it.', 'ar-vr-3d-model-try-on'), { type: 'error' }); };
+			if (!navigator.clipboard) { failed(); return; }
+			navigator.clipboard.writeText(code).then(function () { UI.shell.notify(__('Copied', 'ar-vr-3d-model-try-on')); }, failed);
+		}
+		var guide = function (href, text) { return el('li', null, el('a', { href: href, target: '_blank', rel: 'noopener noreferrer' }, text, el('span', { className: 'screen-reader-text' }, __('(opens in a new tab)', 'ar-vr-3d-model-try-on')))); };
 		return el(Fragment, null,
-			el(UI.Head, { title: __('Help', 'ar-vr-3d-model-try-on'), lead: __('Guides, a shortcode builder and a quick check of your site.', 'ar-vr-3d-model-try-on') }),
-			el('div', { className: 'atlas-ar-split' },
-				el(UI.Section, { title: __('Shortcode builder', 'ar-vr-3d-model-try-on') },
-					el(C.TextControl, { label: __('Product or post ID (empty = the page it is on)', 'ar-vr-3d-model-try-on'), type: 'number', value: id, onChange: setId }),
-					el('div', { className: 'atlas-ar-row' },
-						el(C.TextControl, { label: __('Width', 'ar-vr-3d-model-try-on'), placeholder: '100%', value: width, onChange: setWidth }),
-						el(C.TextControl, { label: __('Height', 'ar-vr-3d-model-try-on'), placeholder: '420px', value: height, onChange: setHeight })),
-					el(C.ToggleControl, { label: __('Show a button instead of the 3D view', 'ar-vr-3d-model-try-on'), checked: btn, onChange: setBtn }),
-					el('div', { className: 'atlas-ar-code' }, el('code', null, code),
-						el(C.Button, { variant: 'secondary', onClick: function () { navigator.clipboard && navigator.clipboard.writeText(code).then(function () { setCopied(true); setTimeout(function () { setCopied(false); }, 2000); }); } }, copied ? __('Copied', 'ar-vr-3d-model-try-on') : __('Copy', 'ar-vr-3d-model-try-on')))),
-				el(UI.Section, { title: __('Site check', 'ar-vr-3d-model-try-on') },
-					checks === null ? el(C.Spinner, null) : el('ul', { className: 'atlas-ar-checks' }, checks.map(function (c, i) {
-						return el('li', { key: i, className: c.ok ? 'is-ok' : 'is-warn' }, el('span', { 'aria-hidden': 'true' }, c.ok ? '✓' : '!'), ' ', c.text);
-					})))),
-			el(UI.Section, { title: __('Guides', 'ar-vr-3d-model-try-on') },
-				el('ul', { className: 'atlas-ar-guides' },
-					el('li', null, el('a', { href: UI.link(UI.LINKS.docs, 'help', 'help_docs'), target: '_blank', rel: 'noopener noreferrer' }, __('Getting started — from install to your first 3D product', 'ar-vr-3d-model-try-on'))),
-					el('li', null, el('a', { href: UI.link(UI.LINKS.docs, 'help', 'help_docs'), target: '_blank', rel: 'noopener noreferrer' }, __('Good 3D models — size, files for iPhone and Android', 'ar-vr-3d-model-try-on'))),
-					el('li', null, el('a', { href: UI.link(UI.LINKS.docs, 'help', 'help_docs'), target: '_blank', rel: 'noopener noreferrer' }, __('Try-on setup — glasses and caps that fit', 'ar-vr-3d-model-try-on'))),
-					el('li', null, el('a', { href: UI.link(UI.LINKS.support, 'help', 'help_support'), target: '_blank', rel: 'noopener noreferrer' }, __('Contact support — we answer within one working day', 'ar-vr-3d-model-try-on'))))));
+			el(UI.Head, { lead: __('Guides, a shortcode builder and a quick check of your site.', 'ar-vr-3d-model-try-on') }),
+			el(UI.shell.Tabs, { tabs: tabsOf('help'), tab: ctx.tab, onTab: function (t) { ctx.go('help', t, '', { replace: true }); } }, function (t) {
+				if (t === 'shortcode') {
+					return el('div', { className: 'atlas-ar-tab-fields' },
+						el('p', { className: 'atlas-ar-tab-lead' }, __('Show a 3D view anywhere: paste the shortcode into a post, a page or a page builder.', 'ar-vr-3d-model-try-on')),
+						el(UI.Field, { id: 'help.shortcode' }, el(C.TextControl, { label: __('Product or post ID (empty = the page it is on)', 'ar-vr-3d-model-try-on'), type: 'number', value: id, onChange: setId })),
+						el('div', { className: 'atlas-ar-row atlas-ar-shortcode-size' },
+							el(C.TextControl, { label: __('Width', 'ar-vr-3d-model-try-on'), placeholder: '100%', value: width, onChange: setWidth }),
+							el(C.TextControl, { label: __('Height', 'ar-vr-3d-model-try-on'), placeholder: '420px', value: height, onChange: setHeight })),
+						el(C.ToggleControl, { label: __('Show a button instead of the 3D view', 'ar-vr-3d-model-try-on'), checked: btn, onChange: setBtn }),
+						el('div', { className: 'atlas-ar-code' }, el('code', null, code), el(C.Button, { variant: 'secondary', onClick: copy }, __('Copy', 'ar-vr-3d-model-try-on'))));
+				}
+				if (t === 'check') {
+					return el('div', { className: 'atlas-ar-tab-fields' },
+						el('p', { className: 'atlas-ar-tab-lead' }, __('What AtlasAR needs from this site, checked now.', 'ar-vr-3d-model-try-on')),
+						checks === null ? el('p', { className: 'atlas-ar-loading', role: 'status' }, el(C.Spinner, null), __('Checking…', 'ar-vr-3d-model-try-on'))
+							: checks.length ? el('ul', { className: 'atlas-ar-checks' }, checks.map(function (c, i) {
+								return el('li', { key: i, className: c.ok ? 'is-ok' : 'is-warn' }, el('span', { 'aria-hidden': 'true' }, c.ok ? '✓' : '!'), ' ', el('span', { className: 'screen-reader-text' }, c.ok ? __('OK:', 'ar-vr-3d-model-try-on') : __('Check:', 'ar-vr-3d-model-try-on')), ' ', c.text);
+							})) : el(UI.Empty, { text: __('The site check could not run. Reload the page to try again.', 'ar-vr-3d-model-try-on') }));
+				}
+				return el('div', { className: 'atlas-ar-tab-fields' },
+					el('ul', { className: 'atlas-ar-guides' },
+						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Getting started — from install to your first 3D product', 'ar-vr-3d-model-try-on')),
+						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Good 3D models — size, files for iPhone and Android', 'ar-vr-3d-model-try-on')),
+						guide(UI.link(UI.LINKS.docs, 'help', 'help_docs'), __('Try-on setup — glasses and caps that fit', 'ar-vr-3d-model-try-on')),
+						guide(UI.link(UI.LINKS.support, 'help', 'help_support'), __('Contact support — we answer within one working day', 'ar-vr-3d-model-try-on'))));
+			}));
 	}
 
 	/* ------------------------------------------------------------- wizard */
@@ -766,6 +752,11 @@
 			boot.pluginsUrl ? el('p', null, el('a', { href: boot.pluginsUrl }, __('See all our plugins', 'ar-vr-3d-model-try-on'))) : null);
 	}
 
+	/**
+	 * The setup wizard (?page=…&setup=1). AR-182: drawn inside the app frame: the steps and the
+	 * step in the pane, Back / Step n of m / Continue in the pane's footer. Step ids stay (Pro
+	 * inserts its step before "done" with atlasAr.wizard.steps), and so does wizard_done.
+	 */
 	function Wizard(ctx) {
 		var steps = UI.filters('atlasAr.wizard.steps', [
 			{ id: 'place', label: __('Placement', 'ar-vr-3d-model-try-on') },
@@ -791,9 +782,9 @@
 		else if (step.id === 'place') body = el(Fragment, null,
 			el('h2', null, __('Where should shoppers see the 3D view?', 'ar-vr-3d-model-try-on')),
 			el('p', null, __('On your WooCommerce product pages. Posts and pages use the block or shortcode.', 'ar-vr-3d-model-try-on')),
-			el(UI.Choice, { label: __('Placement', 'ar-vr-3d-model-try-on'), value: s.placement.mode, options: PLACEMENTS.slice(0, 4), onChange: function (v) { ctx.set('placement', 'mode', v); } }),
+			el(UI.Choice, { label: __('Placement', 'ar-vr-3d-model-try-on'), value: s.placement.mode, options: UI.map.placements.slice(0, 4), onChange: function (v) { ctx.set('placement', 'mode', v); } }),
 			// AR-176: the card button is a choice here, off until the merchant turns it on.
-			el(C.ToggleControl, { label: __('Also show a “View in 3D and AR” button on product cards (the shop and category pages)', 'ar-vr-3d-model-try-on'), checked: !!s.cards.button, onChange: function (v) { ctx.set('cards', 'button', v); } }));
+			el(UI.Fields, { ids: ['cards.button'], settings: s, set: ctx.set, always: true, labels: { 'cards.button': __('Also show a “View in 3D and AR” button on product cards (the shop and category pages)', 'ar-vr-3d-model-try-on') } }));
 		else if (step.id === 'look') body = el(Fragment, null,
 			el('h2', null, __('Make it look like your shop', 'ar-vr-3d-model-try-on')),
 			el('p', null, __('Pick a background and the colour of the “View in your room” button.', 'ar-vr-3d-model-try-on')),
@@ -836,22 +827,25 @@
 				el(C.Button, { variant: 'secondary', onClick: function () { finish(true); } }, __('Go to the dashboard', 'ar-vr-3d-model-try-on'))),
 			el(Suggested, null));
 
-		return el('div', { className: 'atlas-ar-wizard' },
-			el('div', { className: 'atlas-ar-wizard-head' },
-				el('h1', null, __('Set up AtlasAR', 'ar-vr-3d-model-try-on')),
-				el('p', null, __('About 2 minutes — you can change everything later', 'ar-vr-3d-model-try-on')),
-				el(C.Button, { variant: 'link', onClick: function () { finish(true); } }, __('Skip setup', 'ar-vr-3d-model-try-on'))),
-			el('ol', { className: 'atlas-ar-steps' }, steps.map(function (st, n) {
-				return el('li', { key: st.id, className: n === i ? 'is-current' : n < i ? 'is-done' : '', 'aria-current': n === i ? 'step' : undefined }, st.label);
-			})),
-			el(UI.Section, null, body),
-			step.id !== 'done' ? el('div', { className: 'atlas-ar-wizard-nav' },
-				i > 0 ? el(C.Button, { variant: 'secondary', onClick: function () { setI(i - 1); } }, __('Back', 'ar-vr-3d-model-try-on')) : el('span'),
-				el('span', { className: 'atlas-ar-muted' }, sprintf(__('Step %1$d of %2$d', 'ar-vr-3d-model-try-on'), i + 1, steps.length)),
-				el(C.Button, { variant: 'primary', onClick: next }, step.id === 'cloud' && !ctx.cloud.connected ? __('Skip for now', 'ar-vr-3d-model-try-on') : __('Continue', 'ar-vr-3d-model-try-on'))) : null);
+		var nav = step.id !== 'done' ? el('div', { className: 'atlas-ar-wizard-nav' },
+			i > 0 ? el(C.Button, { variant: 'secondary', onClick: function () { setI(i - 1); } }, __('Back', 'ar-vr-3d-model-try-on')) : el('span'),
+			el('span', { className: 'atlas-ar-muted', 'aria-live': 'polite' }, sprintf(__('Step %1$d of %2$d', 'ar-vr-3d-model-try-on'), i + 1, steps.length)),
+			el(C.Button, { variant: 'primary', onClick: next }, step.id === 'cloud' && !ctx.cloud.connected ? __('Skip for now', 'ar-vr-3d-model-try-on') : __('Continue', 'ar-vr-3d-model-try-on'))) : null;
+		return el(UI.shell.Pane, { footer: nav, className: 'atlas-ar-pane--wizard' },
+			el('div', { className: 'atlas-ar-wizard' },
+				el('div', { className: 'atlas-ar-wizard-head' },
+					el('p', null, __('About 2 minutes — you can change everything later', 'ar-vr-3d-model-try-on')),
+					el(C.Button, { variant: 'link', onClick: function () { finish(true); } }, __('Skip setup', 'ar-vr-3d-model-try-on'))),
+				el('ol', { className: 'atlas-ar-steps' }, steps.map(function (st, n) {
+					return el('li', { key: st.id, className: n === i ? 'is-current' : n < i ? 'is-done' : '', 'aria-current': n === i ? 'step' : undefined }, st.label);
+				})),
+				el(UI.Section, null, body)));
 	}
 
 	/* -------------------------------------------------------------- app */
+
+	/** AR-182: the screens whose settings the Save bar saves (it shows on the others only while something is unsaved). */
+	var SETTINGS_SCREENS = ['placement', 'tryon', 'settings'];
 
 	/** AR-180: the status bar's facts, from data the page already has (no request). */
 	function statusFacts(cloud) {
@@ -920,14 +914,21 @@
 			return function () { window.removeEventListener('beforeunload', warn); };
 		}, [status.dirty]);
 
-		if (params.get('setup')) return el(Wizard, ctx);
+		if (params.get('setup')) {
+			// AR-182: the wizard in the frame. Its menu items lead back to the dashboard (no screen is drawn here).
+			return el(UI.shell.Shell, {
+				items: UI.shell.railItems({ settings: settings }), current: 'setup', title: __('Set up AtlasAR', 'ar-vr-3d-model-try-on'),
+				facts: statusFacts(cloud), dirty: false
+			}, el(Wizard, ctx));
+		}
 
+		var footer = SETTINGS_SCREENS.indexOf(current.id) !== -1 || status.dirty ? el(UI.shell.SaveFooter, { status: status, onSave: saveNow }) : null;
 		return el(UI.shell.Shell, {
 			items: UI.shell.railItems({ pages: pages, settings: settings }), current: current.id, title: current.label,
 			onGo: go, route: route, facts: statusFacts(cloud), dirty: status.dirty
 		},
 			// A new key per screen: the pane starts at the top, as a new page would.
-			current.ownPane ? el(current.render, Object.assign({ key: current.id }, ctx)) : el(UI.shell.Pane, { key: current.id }, el(current.render, ctx)));
+			current.ownPane ? el(current.render, Object.assign({ key: current.id }, ctx)) : el(UI.shell.Pane, { key: current.id, footer: footer }, el(current.render, ctx)));
 	}
 
 	function start() {
