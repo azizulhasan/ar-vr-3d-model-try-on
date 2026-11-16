@@ -305,3 +305,30 @@ test('AR-182: the placements are one list (Placement, the wizard and the search 
 	same(UI.map.placements.map((p) => p.value), ['gallery', 'gallery3d', 'button', 'tab', 'slide']);
 	assert.equal(UI.map.field('placement.mode').options, UI.map.placements);
 });
+
+/* ------------------------------------------------------------------ AR-183: an add-on (AtlasAR Pro) through the hooks */
+
+test('AR-183: an add-on\'s settings, actions and per-product tabs join the search through the filters', () => {
+	const pro = {
+		items: [
+			{ id: 'pro.meshy_key', kind: 'setting', cap: 'manage', screen: 'integrations', field: 'pro.meshy_key', where: 'Integrations', label: 'Meshy AI API key', en: 'meshy ai api key' },
+			{ id: 'pro.make_ai', kind: 'action', cap: 'upload', href: 'http://localhost/tts/wp-admin/admin.php?page=atlas-ar-library', label: 'Make a 3D model with AI', en: 'make with ai generate' }
+		],
+		productFields: [{ id: 'product.pro_hotspots', kind: 'product', screen: 'products', control: 'none', panelTab: 'Hotspots', label: 'Hotspots with labels on a product’s 3D view', en: 'hotspots labels', where: 'Each product › AtlasAR panel › Hotspots' }]
+	};
+	const UI = load({ filters: {
+		'atlasAr.search.items': (items) => items.concat(pro.items),
+		'atlasAr.fields': (fields) => fields.concat(pro.productFields)
+	} });
+	const index = indexFor(UI);
+	const meshy = top(UI, index, 'meshy', 'setting');
+	assert.equal(meshy.id, 'pro.meshy_key');
+	assert.equal(meshy.field, 'pro.meshy_key');
+	assert.equal(top(UI, index, 'make with ai', 'action').href, pro.items[1].href);
+	const hot = top(UI, index, 'hotspots', 'product');
+	assert.equal(hot.id, 'product.pro_hotspots');
+	assert.equal(hot.where, 'Each product › AtlasAR panel › Hotspots');
+	// Never drawn on a screen, and the screens' settings are unchanged.
+	assert.equal(UI.map.fieldsAt({ screen: 'appearance' }).length, 26);
+	assert.equal(UI.map.allFields().filter((f) => f.kind !== 'product').length, 47);
+});

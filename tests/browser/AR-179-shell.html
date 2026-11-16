@@ -13,6 +13,10 @@
   (site: the WordPress address; default http://localhost/tts). Add &page=library for the 3D Library
   page in the frame, and &author=1 for a user who may upload files but not manage AtlasAR;
   &setup=1 for the setup wizard in the frame.
+  AR-183: &pro=<address of AtlasAR Pro's atlas-ar-pro-admin.js> adds Pro's dashboard script with a
+  fixture config, e.g. the site's copy (…/ar-vr-3d-model-try-on-premium/Assets/js/atlas-ar-pro-admin.js)
+  or an older release's file, to check both work inside the frame (&proversion=old skips the checks
+  of what only the new Pro adds).
   The page runs its checks and shows
   PASS or FAIL per check (and in the title). Resize to 1440, 1100, 900, 768 and 375 px and press
   "Run the checks" again; checks that need a wide window say so.
@@ -55,7 +59,24 @@ html{--wp-admin--admin-bar--height:32px}
 	var core = ['vendor/react.min.js', 'vendor/react-dom.min.js', 'escape-html.min.js', 'element.min.js', 'vendor/react-jsx-runtime.min.js', 'dom-ready.min.js', 'hooks.min.js', 'i18n.min.js', 'a11y.min.js', 'deprecated.min.js', 'dom.min.js', 'is-shallow-equal.min.js', 'keycodes.min.js', 'priority-queue.min.js', 'private-apis.min.js', 'undo-manager.min.js', 'compose.min.js', 'vendor/moment.min.js', 'date.min.js', 'html-entities.min.js', 'primitives.min.js', 'redux-routine.min.js', 'data.min.js', 'rich-text.min.js', 'theme.min.js', 'warning.min.js', 'components.min.js', 'url.min.js', 'api-fetch.min.js']
 		.map(function (f) { return site + '/wp-includes/js/dist/' + f; });
 	// The order WordPress prints them in (AR_TRY_ON_Library_Page::enqueue_shell(): the map only for managers).
+	var proUrl = params.get('pro') || '', proOld = params.get('proversion') === 'old';
 	var ours = (libraryPage ? ['atlas-ar-ui.js'].concat(author ? [] : ['atlas-ar-map.js'], ['atlas-ar-search.js', 'atlas-ar-shell.js', 'atlas-ar-library.js']) : ['atlas-ar-library.js', 'atlas-ar-ui.js', 'atlas-ar-map.js', 'atlas-ar-search.js', 'atlas-ar-shell.js', 'atlas-ar-dashboard.js']).map(function (f) { return plugin + 'admin/js/' + f + '?v=' + Date.now(); });
+	if (proUrl && !libraryPage) {
+		// Pro's dashboard script after the free plugin's (as atlas_ar_dashboard_enqueue prints it), and its AI helper before it.
+		ours.splice(ours.length - 1, 0, proUrl.replace(/atlas-ar-pro-admin\.js.*$/, 'atlas-ar-pro-ai.js'), proUrl + (proUrl.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now());
+		window.atlasArPro = {
+			screen: 'dashboard', canKeys: true, premium: { licensed: true }, ai: { auto_optimise: false },
+			providers: { meshy: { name: 'Meshy AI', ready: false }, tripo: { name: 'Tripo3D', ready: false } },
+			// The shape of AR_TRY_ON_Pro_Admin::search() (a few entries).
+			search: {
+				items: [
+					{ id: 'pro.meshy_key', kind: 'setting', cap: 'manage', screen: 'integrations', field: 'pro.meshy_key', where: 'Integrations', label: 'Meshy AI API key', en: 'meshy ai api key' },
+					{ id: 'pro.cloud_premium', kind: 'setting', cap: 'manage', screen: 'integrations', field: 'card.cloud-premium', where: 'Integrations', label: 'AtlasAR Cloud Premium', en: 'cloud premium licence' }
+				],
+				productFields: [{ id: 'product.pro_hotspots', kind: 'product', screen: 'products', control: 'none', panelTab: 'Hotspots', label: 'Hotspots with labels on a product’s 3D view', en: 'hotspots labels', where: 'Each product › AtlasAR panel › Hotspots' }]
+			}
+		};
+	}
 
 	// Fixture boot: the shape of AR_TRY_ON_Admin_Routes::boot() (defaults of AR_TRY_ON_Settings::schema()).
 	var look = { background: '#ffffff', lighting: 'neutral', environment_url: '', exposure: 1, shadow: 1, auto_rotate: true, zoom: true, ar_button: 'custom', ar_text: 'View in your room', ar_color: '#0e6b5c', load: 'scroll', height: 420, mobile_height: 420, max_width: 0, align: 'left', border_width: 0, border_color: '#dcdcde', radius: 0, frame_shadow: 'none', camera: 'auto', prompt: true, tone: 'neutral', skybox: false, ar: true, xr_environment: true, ar_text_color: '#ffffff' };
@@ -131,6 +152,39 @@ html{--wp-admin--admin-bar--height:32px}
 		check('the app gets clicks beside the menu', under && document.querySelector('.atlas-ar-app').contains(under), under && under.outerHTML.slice(0, 50));
 	}
 
+
+
+	/** AR-183: AtlasAR Pro's dashboard parts inside the frame (new Pro, or an older one with &proversion=old). */
+	async function proChecks(check) {
+		location.hash = '#integrations';
+		await wait(400);
+		var cards = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-integrations > [data-atlas-ar-field]'), function (n) { return n.getAttribute('data-atlas-ar-field'); });
+		check('Pro: its Integrations cards in the stacked pane', cards.indexOf('card.meshy') !== -1 && cards.indexOf('card.tripo') !== -1 && cards.indexOf('card.cloud-premium') !== -1 && cards.indexOf('card.ai') === -1, cards.join(' '));
+		check('Pro: no "See AtlasAR Pro" in the menu', !document.querySelector('.atlas-ar-rail-foot'));
+		if (proOld) return;
+		check('Pro: its key fields are search targets', !!document.querySelector('[data-atlas-ar-field="pro.meshy_key"]') && !!document.querySelector('[data-atlas-ar-field="pro.ai_auto_optimise"]'));
+		location.hash = '#placement:cards';
+		await wait(300);
+		check('Pro: a line on the per-product Shop card under the card settings', /Shop card/.test(document.getElementById('atlas-ar-pane').textContent));
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		var input = document.querySelector('.atlas-ar-hsearch-input');
+		setInput(input, 'meshy key');
+		await wait(100);
+		var opt = Array.prototype.filter.call(document.querySelectorAll('[role="option"]'), function (o) { return /Meshy AI API key/.test(o.textContent); })[0];
+		if (opt) { opt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true })); opt.click(); }
+		await wait(1400);
+		var f = document.querySelector('[data-atlas-ar-field="pro.meshy_key"]');
+		check('Pro: "meshy key" lands on the Meshy AI key field', !!opt && f && f.contains(document.activeElement), location.hash);
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		setInput(document.querySelector('.atlas-ar-hsearch-input'), 'hotspots');
+		await wait(100);
+		check('Pro: its product tabs are found as per-product settings', Array.prototype.some.call(document.querySelectorAll('[role="option"]'), function (o) { return /Hotspots/.test(o.textContent) && /AtlasAR panel/.test(o.textContent); }));
+		key(document.querySelector('.atlas-ar-hsearch-input'), 'Escape'); await wait(60);
+		key(document.querySelector('.atlas-ar-hsearch-input'), 'Escape'); await wait(60);
+		key(document.querySelector('.atlas-ar-hsearch-input'), 'Escape'); await wait(60);
+	}
 
 	/** AR-182: every screen and tab draws its settings from the map, with the Save bar where it belongs. */
 	async function screenChecks(check) {
@@ -304,7 +358,8 @@ html{--wp-admin--admin-bar--height:32px}
 			key(input, 'Escape'); await wait(80);
 			check('Escape closes, clears, then leaves the box', document.activeElement !== input);
 		}
-		await screenChecks(check);
+		if (proUrl) await proChecks(check);
+		else await screenChecks(check);
 		check('no script errors', !errors.length, errors.join('; '));
 		report(ok, out, wide);
 	}

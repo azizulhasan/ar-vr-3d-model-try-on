@@ -198,7 +198,9 @@
 		var mig = boot.migration || {};
 
 		// AR-182: a search pick of a per-product setting opens this screen and says where it is.
-		var asked = ctx.route && ctx.route.field ? (UI.map.productFields || []).filter(function (f) { return f.id === ctx.route.field; })[0] : null;
+		// Free's per-product settings, and those an add-on adds with atlasAr.fields (kind "product", e.g. Pro's tabs).
+		var perProduct = (UI.map.productFields || []).concat(UI.map.allFields().filter(function (f) { return f.kind === 'product'; }));
+		var asked = ctx.route && ctx.route.field ? perProduct.filter(function (f) { return f.id === ctx.route.field; })[0] : null;
 		return el(Fragment, null,
 			el(UI.Head, { lead: __('Your products and their 3D, AR and try-on status. Add a model right from here.', 'ar-vr-3d-model-try-on') }),
 			asked ? el(C.Notice, { status: 'info', isDismissible: false, className: 'atlas-ar-page-notice' },
