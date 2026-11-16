@@ -71,6 +71,16 @@ class AR_TRY_ON_Settings {
 				'xr_environment'  => array( 'type' => 'bool', 'default' => true ),
 				'ar_text_color'   => array( 'type' => 'color', 'default' => '#ffffff' ),
 			),
+			// AR-176: product cards on the shop and category pages (site-wide; AtlasAR Pro adds
+			// per-product choices). Everything off by default: a site that updates sees no change.
+			'cards'      => array(
+				'button'          => array( 'type' => 'bool', 'default' => false ),
+				'button_text'     => array( 'type' => 'text', 'default' => __( 'View in 3D and AR', 'ar-vr-3d-model-try-on' ), 'max' => 60 ),
+				'button_position' => array( 'type' => 'enum', 'default' => 'after', 'options' => array( 'after', 'before' ) ),
+				'button_style'    => array( 'type' => 'enum', 'default' => 'outline', 'options' => array( 'outline', 'fill' ) ),
+				'media'           => array( 'type' => 'enum', 'default' => 'image', 'options' => array( 'image', '3d' ) ),
+				'badge'           => array( 'type' => 'bool', 'default' => false ),
+			),
 			'tryon'      => array(
 				'enabled'  => array( 'type' => 'bool', 'default' => true ),
 				'label'    => array( 'type' => 'text', 'default' => __( 'Try it on', 'ar-vr-3d-model-try-on' ), 'max' => 60 ),

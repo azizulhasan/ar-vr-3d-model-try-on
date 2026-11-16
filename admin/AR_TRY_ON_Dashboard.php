@@ -21,6 +21,12 @@ class AR_TRY_ON_Dashboard {
 	const SLUG     = 'ar-vr-3d-model-try-on';
 	const UI       = 'atlas-ar-ui';
 	const HANDLE   = 'atlas-ar-dashboard';
+	/** AR-180: the desktop-app frame (rail, header, notices bell, status bar). Script and style share the handle. */
+	const SHELL    = 'atlas-ar-shell';
+	/** AR-181: the header search (index, matching, combobox). */
+	const SEARCH   = 'atlas-ar-search';
+	/** AR-181: the one map of the admin: screens, tabs, settings, actions (the rail, the screens and the search read it). */
+	const MAP      = 'atlas-ar-map';
 	const REDIRECT = 'atlas_ar_setup_redirect';
 	/** AR-158: the version the wizard was offered in (set once, on activation or the first admin page after an update). */
 	const OFFERED  = 'atlas_ar_setup_offered';
@@ -35,13 +41,35 @@ class AR_TRY_ON_Dashboard {
 		add_filter( 'admin_body_class', array( __CLASS__, 'body_class' ) );
 	}
 
-	/** AR-128: the dashboard and the 3D Library are full-window app screens (atlas-ar-admin.css). */
+	/** AR-128: the dashboard and the 3D Library are full-window app screens (atlas-ar-shell.css). */
 	public static function body_class( $classes ) {
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( $screen && in_array( $screen->id, array( 'toplevel_page_' . self::SLUG, 'atlasar_page_' . AR_TRY_ON_Library_Page::SLUG ), true ) ) {
+		if ( self::is_app_screen() ) {
 			$classes .= ' atlas-ar-fullscreen';
 		}
 		return $classes;
+	}
+
+	/**
+	 * AR-180: is this request one of our two app screens (the dashboard or the 3D Library)?
+	 *
+	 * Compared with the hook names WordPress returned when the pages were added, not with a
+	 * screen id built by hand: WordPress builds a submenu's screen id from the parent menu's
+	 * title, and that title changes with the atlas_ar_brand filter ("AtlasAR Pro"), so the old
+	 * fixed id "atlasar_page_atlas-ar-library" missed the 3D Library on such sites.
+	 *
+	 * @param string $hook the admin_enqueue_scripts hook suffix; empty = the current screen
+	 * @return bool
+	 */
+	public static function is_app_screen( $hook = '' ) {
+		if ( '' === $hook ) {
+			$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+			$hook   = $screen ? (string) $screen->id : '';
+		}
+		if ( '' === $hook ) {
+			return false;
+		}
+		$library = AR_TRY_ON_Library_Page::hook();
+		return 'toplevel_page_' . self::SLUG === $hook || ( '' !== $library && $library === $hook );
 	}
 
 	/** The page's URL (the wizard: setup=1). */
@@ -58,7 +86,9 @@ class AR_TRY_ON_Dashboard {
 			return;
 		}
 		self::$rendered = true;
-		echo '<div class="wrap atlas-ar-wrap"><div id="atlas-ar-dashboard"></div><noscript>' . esc_html__( 'The AtlasAR dashboard needs JavaScript.', 'ar-vr-3d-model-try-on' ) . '</noscript></div>';
+		// AR-180: WordPress's own script moves admin notices right after .wp-header-end, so they land
+		// in a known place outside the app (the shell then collects them into its notices bell).
+		echo '<div class="wrap atlas-ar-wrap"><hr class="wp-header-end"><div id="atlas-ar-dashboard"></div><noscript>' . esc_html__( 'The AtlasAR dashboard needs JavaScript.', 'ar-vr-3d-model-try-on' ) . '</noscript></div>';
 	}
 
 	public static function register() {
@@ -70,7 +100,16 @@ class AR_TRY_ON_Dashboard {
 		$sdk = wp_script_is( AR_TRY_ON_Frontend::SDK_HANDLE, 'registered' ) ? array( AR_TRY_ON_Frontend::SDK_HANDLE ) : array();
 		wp_register_script( self::UI, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-ui.js', array_merge( array( 'wp-element', 'wp-components', 'wp-api-fetch', 'wp-i18n', 'wp-hooks' ), $sdk ), $ver( 'admin/js/atlas-ar-ui.js' ), true );
 		wp_set_script_translations( self::UI, 'ar-vr-3d-model-try-on' );
-		wp_register_script( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-dashboard.js', array( self::UI, AR_TRY_ON_Library_Page::HANDLE ), $ver( 'admin/js/atlas-ar-dashboard.js' ), true );
+		// AR-180 / AR-181: the frame, the search and the map are plain scripts on the kit (no build step).
+		// The map and the search fill parts of window.AtlasARAdminUI; the shell reads both.
+		wp_register_script( self::MAP, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-map.js', array( self::UI ), $ver( 'admin/js/atlas-ar-map.js' ), true );
+		wp_set_script_translations( self::MAP, 'ar-vr-3d-model-try-on' );
+		wp_register_script( self::SEARCH, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-search.js', array( self::UI, 'wp-a11y' ), $ver( 'admin/js/atlas-ar-search.js' ), true );
+		wp_set_script_translations( self::SEARCH, 'ar-vr-3d-model-try-on' );
+		wp_register_script( self::SHELL, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-shell.js', array( self::UI, self::SEARCH, 'wp-a11y', 'wp-compose' ), $ver( 'admin/js/atlas-ar-shell.js' ), true );
+		wp_set_script_translations( self::SHELL, 'ar-vr-3d-model-try-on' );
+		wp_register_style( self::SHELL, ATLAS_AR_PLUGIN_URL . 'admin/css/atlas-ar-shell.css', array( 'wp-components', AR_TRY_ON_Library_Page::HANDLE ), $ver( 'admin/css/atlas-ar-shell.css' ) );
+		wp_register_script( self::HANDLE, ATLAS_AR_PLUGIN_URL . 'admin/js/atlas-ar-dashboard.js', array( self::UI, self::MAP, self::SHELL, AR_TRY_ON_Library_Page::HANDLE ), $ver( 'admin/js/atlas-ar-dashboard.js' ), true );
 		wp_set_script_translations( self::HANDLE, 'ar-vr-3d-model-try-on' );
 		wp_register_style( self::UI, ATLAS_AR_PLUGIN_URL . 'admin/css/atlas-ar-admin.css', array( 'wp-components', AR_TRY_ON_Library_Page::HANDLE ), $ver( 'admin/css/atlas-ar-admin.css' ) );
 	}
@@ -89,6 +128,7 @@ class AR_TRY_ON_Dashboard {
 		wp_localize_script( self::UI, 'atlasArAdmin', $boot );
 		wp_enqueue_script( self::HANDLE );
 		wp_enqueue_style( self::UI );
+		wp_enqueue_style( self::SHELL ); // AR-180
 		/** Lets AtlasAR Pro add its dashboard parts (wp.hooks filters, see atlas-ar-ui.js). */
 		do_action( 'atlas_ar_dashboard_enqueue' );
 	}

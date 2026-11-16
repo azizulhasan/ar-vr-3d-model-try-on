@@ -1,14 +1,7 @@
 /* AR-120: AtlasAR dashboard, setup wizard and product panel. Builds on atlas-ar-library.css. */
-.atlas-ar-wrap{margin:16px 20px 0 2px;color:var(--atlas-ar-ink)}
-.atlas-ar-app{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;max-width:1400px}
-.atlas-ar-nav{position:sticky;top:46px;display:flex;flex-direction:column;gap:2px;align-self:start}
-.atlas-ar-brand{display:flex;align-items:baseline;gap:8px;padding:4px 12px 12px;font-size:18px;font-weight:700}
-.atlas-ar-brand span{font-size:12px;font-weight:400;color:var(--atlas-ar-muted)}
-.atlas-ar-nav-item{min-height:40px;padding:10px 12px;border:0;border-radius:6px;background:transparent;color:var(--atlas-ar-ink);font-size:14px;text-align:left;text-decoration:none;cursor:pointer}
-.atlas-ar-nav-item:hover{background:var(--atlas-ar-surface-3);color:var(--atlas-ar-ink)}
-.atlas-ar-nav-item.is-current{background:var(--atlas-ar-brand-ground);color:var(--atlas-ar-brand);font-weight:600}
-.atlas-ar-nav-item:focus-visible,.atlas-ar-choice-item:focus-visible,.atlas-ar-swatch:focus-visible,.atlas-ar-tab:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px}
-.atlas-ar-main{min-width:0}
+/* AR-180: the app frame (side menu, header, pane, status bar) is in atlas-ar-shell.css. */
+.atlas-ar-wrap{color:var(--atlas-ar-ink)}
+.atlas-ar-choice-item:focus-visible,.atlas-ar-swatch:focus-visible,.atlas-ar-tab:focus-visible{outline:2px solid var(--atlas-ar-action);outline-offset:2px}
 .atlas-ar-head{margin-bottom:16px}
 .atlas-ar-head h1{margin:0 0 4px;font-size:23px;font-weight:400;line-height:1.3}
 .atlas-ar-head p{margin:0;color:var(--atlas-ar-muted);font-size:14px}
@@ -118,44 +111,79 @@
 .atlas-ar-wizard .atlas-ar-section h2{margin:0 0 4px;font-size:18px}
 .atlas-ar-wizard-nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
 
-/* Product panel */
+/* A setting (UI.Field): the search scrolls to it, focuses it and marks it for 2 seconds (dashboard and product panel). */
+.atlas-ar-field{margin-block:0 8px;margin-inline:-8px;padding:6px 8px;border-radius:var(--atlas-ar-radius-md);scroll-margin:24px}
+.atlas-ar-field>.components-base-control{max-width:640px;margin-bottom:0}
+.atlas-ar-field>.atlas-ar-swatches{margin-bottom:0}
+.atlas-ar-field.is-found{box-shadow:0 0 0 2px var(--atlas-ar-action);animation:atlas-ar-found 2s ease-out forwards}
+@keyframes atlas-ar-found{0%,55%{background-color:var(--atlas-ar-action-ground)}100%{background-color:transparent}}
+@media (prefers-reduced-motion:reduce){.atlas-ar-field.is-found{animation:none}}
+@media (forced-colors:active){.atlas-ar-field.is-found{outline:2px solid Highlight;outline-offset:-2px}}
+.atlas-ar-chip--ok{background:var(--atlas-ar-brand-ground);color:var(--atlas-ar-brand)}
+.atlas-ar-chip--note{background:var(--atlas-ar-pro-ground);color:var(--atlas-ar-pro-ink)}
+.atlas-ar-empty-state{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 16px;border:1px dashed var(--atlas-ar-line-strong);border-radius:var(--atlas-ar-radius-lg);background:var(--atlas-ar-surface);text-align:center}
+.atlas-ar-empty-state p{max-width:520px;margin:0;color:var(--atlas-ar-ink-2)}
+
+/*
+ * Product panel (AR-182): inside the editor, no app frame. One column by default; beside each
+ * other (preview | tabs) when the box is wide enough. A container query on the panel itself, so
+ * it follows the box (block editor meta box, classic editor main column or narrow side column),
+ * not the window.
+ */
 #atlas-ar-panel .inside{margin:0;padding:12px}
-.atlas-ar-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;color:var(--atlas-ar-ink)}
-.atlas-ar-panel-view{display:flex;flex-direction:column;gap:8px}
+.atlas-ar-panel-wrap{container-type:inline-size;container-name:atlasarpanel;color:var(--atlas-ar-ink)}
+.atlas-ar-panel-status{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;padding:0;list-style:none}
+.atlas-ar-panel-status li{margin:0}
+.atlas-ar-panel-status .atlas-ar-chip{font-size:12px;padding:2px 8px}
+.atlas-ar-panel{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:16px;color:var(--atlas-ar-ink)}
+.atlas-ar-panel-view{display:flex;flex-direction:column;gap:8px;min-width:0}
+/* The preview never draws outside its box (e.g. AtlasAR Pro's measurement labels near an edge). */
+.atlas-ar-panel-view .atlas-ar-viewer-box,.atlas-ar-panel-view .atlas-ar-viewer-empty{overflow:hidden}
+.atlas-ar-panel-side{display:flex;flex-direction:column;min-width:0}
+/*
+ * Rules of the panel's tabs (AR-182 review): the tabs wrap onto more rows rather than scroll
+ * (every tab stays visible; a narrow box gets a select instead, see atlas-ar-product.js); the tab
+ * content takes its natural height and never scrolls, sideways least of all; nothing in it is
+ * wider than its column.
+ */
+/* More specific than the frame's .atlas-ar-tabs-panel rules (atlas-ar-shell.css), which may be on the same page. */
+.atlas-ar-panel-wrap .atlas-ar-panel-tabs>.components-tab-panel__tabs{flex-wrap:wrap;overflow:visible;border-bottom:1px solid var(--atlas-ar-line)}
+.atlas-ar-panel-tabs .components-tab-panel__tabs-item{flex:none;white-space:nowrap}
+.atlas-ar-panel-tabs .components-tab-panel__tab-content,.atlas-ar-panel-side>.atlas-ar-tab-body{padding-top:12px;overflow:visible;min-width:0}
+.atlas-ar-panel .atlas-ar-tab-body,.atlas-ar-panel .atlas-ar-tab-body>*{min-width:0;max-width:100%;box-sizing:border-box}
+/* A field's room for its search mark lies inside the column here (no negative margin past the edge). */
+.atlas-ar-panel .atlas-ar-field{margin-inline:0;padding-inline:4px}
+.atlas-ar-panel-pick{margin:0 0 4px}
+.atlas-ar-panel-heading{margin:16px 0 4px;font-size:13px;font-weight:600}
+.atlas-ar-tab-body>.atlas-ar-panel-heading:first-child{margin-top:0}
+.atlas-ar-panel-empty{padding:20px 12px}
+.atlas-ar-panel-empty strong{font-size:14px}
+.atlas-ar-panel-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--atlas-ar-surface-3)}
+.atlas-ar-panel-foot .atlas-ar-savebar{margin:0}
+.atlas-ar-panel-foot>.description{margin:4px 0 0}
+.atlas-ar-panel .atlas-ar-model-line{margin-bottom:8px}
+.atlas-ar-panel .atlas-ar-row .components-button{white-space:normal;height:auto;min-height:36px;text-align:start}
+/* A plain row of tab buttons: only next to an older kit without UI.Tabs. */
 .atlas-ar-tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;border-bottom:1px solid var(--atlas-ar-line)}
 .atlas-ar-tab{min-height:40px;margin-bottom:-1px;padding:8px 12px;border:0;border-bottom:3px solid transparent;background:none;color:var(--atlas-ar-muted);font-size:13px;cursor:pointer}
 .atlas-ar-tab.is-current{border-color:var(--atlas-ar-action);color:var(--atlas-ar-ink);font-weight:600}
 .atlas-ar-tab-body{display:flex;flex-direction:column;gap:10px}
+.atlas-ar-tab-body>.atlas-ar-field{margin-block:0}
 .atlas-ar-panel .atlas-ar-drop{padding:16px}
 .atlas-ar-model-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
 
 @media (max-width:960px){
-	.atlas-ar-app{grid-template-columns:1fr}
-	.atlas-ar-nav{position:static;flex-direction:row;flex-wrap:wrap}
-	.atlas-ar-brand{width:100%}
-	.atlas-ar-split,.atlas-ar-panel{grid-template-columns:1fr}
+	.atlas-ar-split{grid-template-columns:1fr}
 }
 
-/* AR-128: desktop-app layout (with the shared rules in atlas-ar-library.css). */
-@media (min-width:961px) and (min-height:560px){
-	body.atlas-ar-fullscreen .atlas-ar-wrap{display:flex;margin:0 0 0 -20px;border-top:1px solid var(--atlas-ar-line);background:var(--atlas-ar-surface-2)}
-	body.atlas-ar-fullscreen #atlas-ar-dashboard{flex:1 1 auto;min-height:0;overflow:auto}
-	body.atlas-ar-fullscreen .atlas-ar-app{height:100%;max-width:none;gap:0;grid-template-columns:210px minmax(0,1fr)}
-	body.atlas-ar-fullscreen .atlas-ar-nav{position:static;height:100%;box-sizing:border-box;overflow:auto;padding:16px 10px;border-right:1px solid var(--atlas-ar-line);background:#fff}
-	body.atlas-ar-fullscreen .atlas-ar-main{height:100%;box-sizing:border-box;overflow:auto;padding:20px 28px 28px}
-	body.atlas-ar-fullscreen .atlas-ar-wizard{padding:20px 0}
-}
-
-/* AR-128: the product panel keeps its preview in view; the tab content scrolls inside the box. */
-@media (min-width:961px){
-	.atlas-ar-panel{height:min(640px,calc(100vh - 140px));min-height:460px}
-	.atlas-ar-panel-view{overflow:hidden}
-	.atlas-ar-panel-side{display:flex;flex-direction:column;min-height:0}
-	.atlas-ar-panel-side .atlas-ar-tabs{flex:none}
-	.atlas-ar-panel-side .atlas-ar-tab-body{flex:1 1 auto;min-height:0;overflow:auto;padding-right:6px}
-	.atlas-ar-panel-side .atlas-ar-tab-body>*{flex-shrink:0}
-	.atlas-ar-panel-side .atlas-ar-savebar{flex:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--atlas-ar-surface-3)}
-	.atlas-ar-panel-side>.description{flex:none;margin:4px 0 0}
+/*
+ * A wide box: the preview beside the tabs, and it stays in view while the page scrolls past a long
+ * tab (sticky, instead of a fixed-height box with its own scroll). Without a model there is no
+ * preview column: the tabs (with the "No 3D model yet" card) take the whole width.
+ */
+@container atlasarpanel (min-width:640px){
+	.atlas-ar-panel:not(.is-single){grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+	.atlas-ar-panel-view{position:sticky;top:calc(var(--wp-admin--admin-bar--height,32px) + 16px)}
 }
 
 /* AR-156: quick styles above the Appearance settings */
@@ -163,15 +191,8 @@
 .atlas-ar-presets .atlas-ar-label{margin:0 4px 0 0}
 .atlas-ar-subhead{margin:20px 0 8px;padding-top:12px;border-top:1px solid var(--atlas-ar-surface-3);font-size:13px}
 
-/* AR-156: Appearance as two panes. The "Your style" fields get room under their choice. */
+/* AR-156: the "Your style" fields get room under their choice. (AR-180: Appearance's two panes are in atlas-ar-shell.css.) */
 .atlas-ar-subgroup{display:grid;gap:12px;margin-top:16px;padding-top:4px}
-.atlas-ar-split--preview .atlas-ar-pane-sticky{position:sticky;top:0}
-@media (min-width:961px) and (min-height:560px){
-	/* Full window: the settings column scrolls by itself; the preview never moves. */
-	body.atlas-ar-fullscreen .atlas-ar-split--preview{height:calc(100vh - 220px);min-height:420px;align-items:stretch}
-	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-scroll{overflow:auto;overscroll-behavior:contain;max-height:100%}
-	body.atlas-ar-fullscreen .atlas-ar-split--preview .atlas-ar-pane-sticky{align-self:start}
-}
 /* Design system › RowActions: the actions of a row as one right-aligned group of equal height. */
 .atlas-ar-row-actions{display:inline-flex;align-items:center;justify-content:flex-end;gap:8px}
 .atlas-ar-row-actions .components-button{height:32px;min-height:32px}

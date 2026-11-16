@@ -33,6 +33,11 @@ class AR_TRY_ON_Viewer {
 		return self::$used;
 	}
 
+	/** Something printed needs the SDK (AR-176: a card button or badge, which draws no viewer yet). */
+	public static function mark_used() {
+		self::$used = true;
+	}
+
 	/**
 	 * The SDK options for a post's 3D view.
 	 *
@@ -144,17 +149,39 @@ class AR_TRY_ON_Viewer {
 	 * @return string HTML
 	 */
 	public static function tryon_button( $post_id ) {
+		$opts = self::tryon_options( $post_id );
+		if ( ! $opts ) {
+			return '';
+		}
+		$tryon = AR_TRY_ON_Settings::get( 'tryon' );
+		return sprintf(
+			'<button type="button" class="button atlas-ar-tryon-button" data-atlas-ar-tryon="%1$s"%3$s><span class="atlas-ar-tryon-icon" aria-hidden="true"></span>%2$s</button>',
+			esc_attr( wp_json_encode( $opts ) ),
+			esc_html( $tryon['label'] ),
+			AR_TRY_ON_Stats::button_attributes( $post_id ) // AR-161: the try-on counts too (escaped there)
+		);
+	}
+
+	/**
+	 * The SDK's try-on options for a product: the model (or the try-on picture), the site's try-on
+	 * settings and, through the filter, Pro's fit. Null when the product has no try-on, try-on is
+	 * off, or there is nothing to try on. (AR-176: the card button uses the same options.)
+	 *
+	 * @param int $post_id
+	 * @return array|null
+	 */
+	public static function tryon_options( $post_id ) {
 		$product = AR_TRY_ON_Product::get( $post_id );
 		$tryon   = AR_TRY_ON_Settings::get( 'tryon' );
 		if ( ! $tryon['enabled'] || '' === $product['tryon'] ) {
-			return '';
+			return null;
 		}
 		$model = $product['model_id'] ? AR_TRY_ON_Library::get( $product['model_id'] ) : null;
 		$glb   = $model && ! empty( $model['files']['glb']['url'] ) ? $model['files']['glb']['url'] : '';
 		// No 3D file: the product's try-on picture (a front photo; its plain background is removed).
 		$photo = $glb || ! $product['tryon_image'] ? '' : (string) wp_get_attachment_image_url( (int) $product['tryon_image'], 'large' );
 		if ( ! $glb && ! $photo ) {
-			return '';
+			return null;
 		}
 		self::$used = true;
 		$opts       = array(
@@ -170,14 +197,7 @@ class AR_TRY_ON_Viewer {
 		);
 
 		/** @see atlas_ar_viewer_options — the same for the try-on (Pro adds the saved fit). */
-		$opts = (array) apply_filters( 'atlas_ar_tryon_options', $opts, (int) $post_id );
-
-		return sprintf(
-			'<button type="button" class="button atlas-ar-tryon-button" data-atlas-ar-tryon="%1$s"%3$s><span class="atlas-ar-tryon-icon" aria-hidden="true"></span>%2$s</button>',
-			esc_attr( wp_json_encode( $opts ) ),
-			esc_html( $tryon['label'] ),
-			AR_TRY_ON_Stats::button_attributes( $post_id ) // AR-161: the try-on counts too (escaped there)
-		);
+		return (array) apply_filters( 'atlas_ar_tryon_options', $opts, (int) $post_id );
 	}
 
 	/**
@@ -209,6 +229,22 @@ class AR_TRY_ON_Viewer {
 	 */
 	public static function attributes( array $opts ) {
 		$out = '';
+		foreach ( self::attribute_map( $opts ) as $name => $value ) {
+			$out .= ' ' . $name . '="' . esc_attr( $value ) . '"';
+		}
+		return $out;
+	}
+
+	/**
+	 * Options as an attribute map (kebab-case name => string value), the same rules as
+	 * attributes(). AR-176: a card button carries this map and atlas-ar-front.js builds the popup
+	 * element from it on the first click.
+	 *
+	 * @param array $opts
+	 * @return array<string,string>
+	 */
+	public static function attribute_map( array $opts ) {
+		$out = array();
 		foreach ( $opts as $key => $value ) {
 			if ( null === $value || '' === $value || array() === $value ) {
 				continue;
@@ -222,7 +258,7 @@ class AR_TRY_ON_Viewer {
 			} elseif ( is_array( $value ) || is_object( $value ) ) {
 				$value = wp_json_encode( $value );
 			}
-			$out .= ' ' . $name . '="' . esc_attr( (string) $value ) . '"';
+			$out[ $name ] = (string) $value;
 		}
 		return $out;
 	}

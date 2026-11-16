@@ -45,8 +45,14 @@ class AR_TRY_ON_Library_Page {
 		);
 	}
 
+	/** AR-180: the hook name WordPress gave the page ('' before the menu is built). */
+	public static function hook() {
+		return self::$hook;
+	}
+
 	public static function render() {
-		echo '<div class="wrap atlas-ar-library-wrap"><div id="atlas-ar-library"></div></div>';
+		// AR-180: .wp-header-end tells WordPress where to put admin notices (the shell's bell collects them).
+		echo '<div class="wrap atlas-ar-library-wrap"><hr class="wp-header-end"><div id="atlas-ar-library"></div></div>';
 	}
 
 	/** Register the library script (the page and the product editor's picker use it). */
@@ -88,6 +94,7 @@ class AR_TRY_ON_Library_Page {
 	/** On the 3D Library page only. */
 	public static function enqueue_page( $hook ) {
 		if ( self::$hook && $hook === self::$hook ) {
+			self::enqueue_shell();
 			self::enqueue();
 			/**
 			 * The 3D Library page is loading: add-ons enqueue their scripts here (AtlasAR Pro's
@@ -95,6 +102,33 @@ class AR_TRY_ON_Library_Page {
 			 */
 			do_action( 'atlas_ar_library_enqueue' );
 		}
+	}
+
+	/**
+	 * AR-180: the same desktop-app frame as the dashboard, around the 3D Library. Enqueued before
+	 * the library script, so Page() finds window.AtlasARAdminUI.shell when it starts.
+	 *
+	 * The light boot holds no settings, no AtlasAR Cloud details and no email: users with
+	 * upload_files only (Authors) open this page too. The map (every setting's name, for the
+	 * search) is loaded only for users who may open the settings.
+	 */
+	private static function enqueue_shell() {
+		if ( ! wp_script_is( AR_TRY_ON_Dashboard::SHELL, 'registered' ) ) {
+			return;
+		}
+		wp_localize_script(
+			AR_TRY_ON_Dashboard::UI,
+			'atlasArAdmin',
+			array(
+				'version' => ATLAS_AR_VERSION,
+				'shell'   => \ATLAS_AR_API\AR_TRY_ON_Admin_Routes::shell_boot(),
+			)
+		);
+		if ( current_user_can( 'manage_options' ) ) {
+			wp_enqueue_script( AR_TRY_ON_Dashboard::MAP );
+		}
+		wp_enqueue_script( AR_TRY_ON_Dashboard::SHELL );
+		wp_enqueue_style( AR_TRY_ON_Dashboard::SHELL );
 	}
 
 	/** Load the library script and style (also for the picker on product screens). */

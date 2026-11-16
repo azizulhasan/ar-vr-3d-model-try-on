@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AtlasAR card button: narrow cards</title>
+<!-- AR-176 regression test: the product-card button must stay inside narrow cards (phones, 2 cards a row).
+     Serve the plugin folder over http (e.g. `python -m http.server` in the plugin root) and open
+     /tests/browser/narrow-cards.html: the page tests 320, 375, 414 and 768 px wide grids and shows PASS or FAIL. -->
+<style>
+/* Stand-ins for the theme + WooCommerce block styles measured on staging (atlaslaunch, 375 px phone) */
+body{margin:0;font:16px/1.5 system-ui,sans-serif}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:16px;max-width:375px;box-sizing:border-box}
+.wc-block-product{display:flex;flex-direction:column;min-width:0;border:1px solid #ddd;padding:6px;box-sizing:border-box}
+.wc-block-product img{width:100%;aspect-ratio:1;background:#eee;display:block}
+.wp-block-button__link{display:inline-block;padding:15px 22px;border-radius:12px;font-size:15px;line-height:1.65;text-decoration:none;box-sizing:border-box;background:#0067ff;color:#fff;border:0}
+.is-style-outline>.wp-block-button__link{background:#fff;color:#0f172a;border:1px solid #8a96a8}
+h3{font-size:15px;margin:8px 0}
+</style>
+<link id="plugin-css" rel="stylesheet" href="../../public/css/atlas-ar-front.css">
+</head><body>
+<div class="grid" id="grid"></div>
+<script>
+const card = (title, label) => `<div class="wc-block-product"><img alt=""><h3>${title}</h3>
+<div class="atlas-ar-card-actions"><div class="wp-block-button wc-block-components-product-button"><button class="wp-block-button__link wp-element-button add_to_cart_button has-small-font-size">Add to cart</button></div>
+<div class="atlas-ar-card-button-wrap wp-block-button is-style-outline"><button type="button" class="wp-block-button__link wp-element-button atlas-ar-card-button atlas-ar-card-button--3d"><svg class="atlas-ar-card-icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z" fill="none" stroke="currentColor"/></svg><span class="atlas-ar-card-button-text">${label}</span></button></div></div></div>`;
+document.getElementById('grid').innerHTML = card('Armchair', 'View in 3D and AR') + card('Sunglasses', 'Try it on') + card('Wall art with a long title', 'View in 3D and AR') + card('Lamp', 'View in 3D and AR');
+window.measure = () => { const vw = document.documentElement.clientWidth; const out = { viewport: vw, scrollWidth: document.documentElement.scrollWidth, cards: [] };
+  document.querySelectorAll('.wc-block-product').forEach(c => { const cr = c.getBoundingClientRect(); const b = c.querySelector('.atlas-ar-card-button'); const br = b.getBoundingClientRect(); out.cards.push({ cardRight: Math.round(cr.right), buttonRight: Math.round(br.right), fits: br.right <= cr.right + 0.5, buttonH: Math.round(br.height) }); });
+  out.allFit = out.cards.every(c => c.fits) && out.scrollWidth <= vw; return out; };
+window.addEventListener('load', async () => { const grid = document.getElementById('grid'); const res = []; for (const w of [320, 375, 414, 768]) { grid.style.maxWidth = w + 'px'; await new Promise(r => setTimeout(r, 50)); const m = measure(); res.push(w + ' px: ' + (m.cards.every(c => c.fits) && grid.scrollWidth <= grid.clientWidth ? 'PASS' : 'FAIL')); } grid.style.maxWidth = '375px'; const ok = res.every(x => x.endsWith('PASS')); document.title = (ok ? 'PASS' : 'FAIL') + ' narrow cards'; const p = document.createElement('pre'); p.id = 'result'; p.textContent = res.join('\n'); document.body.prepend(p); });
+</script></body></html>

@@ -1,0 +1,563 @@
+<!doctype html><html class="js"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AtlasAR admin frame (AR-179)</title>
+<!--
+  AR-180 / AR-181 browser regression test: the AtlasAR admin frame, the notices bell, the header
+  search and jump-to-field, on WordPress's own scripts, without logging in.
+
+  It loads WordPress's script and style files (public files) and this plugin's admin files from a
+  local site where this copy of the plugin is installed, then draws the real dashboard with a
+  fixture boot (no request reaches the site's database: REST calls fail and show their error).
+
+  Run: serve this folder over http (e.g. `python -m http.server 8765` in tests/browser) and open
+  http://localhost:8765/AR-179-shell.html?site=http://localhost/tts
+  (site: the WordPress address; default http://localhost/tts). Add &page=library for the 3D Library
+  page in the frame, and &author=1 for a user who may upload files but not manage AtlasAR;
+  &setup=1 for the setup wizard in the frame.
+  AR-183: &pro=<address of AtlasAR Pro's atlas-ar-pro-admin.js> adds Pro's dashboard script with a
+  fixture config, e.g. the site's copy (…/ar-vr-3d-model-try-on-premium/Assets/js/atlas-ar-pro-admin.js)
+  or an older release's file, to check both work inside the frame (&proversion=old skips the checks
+  of what only the new Pro adds).
+  AR-182: &page=product draws the product panel (the editor's AtlasAR meta box) in a box &w=280 or
+  &w=760 px wide (a narrow side column, a wide meta box); &model=1 gives the product a model;
+  &type=page puts the panel on a page instead of a WooCommerce product; &pro=
+  as above loads Pro's script for the product screen (its seven tabs).
+  The page runs its checks and shows
+  PASS or FAIL per check (and in the title). Resize to 1440, 1100, 900, 768 and 375 px and press
+  "Run the checks" again; checks that need a wide window say so.
+-->
+<style>
+html{--wp-admin--admin-bar--height:32px}
+#fake-adminbar{position:fixed;top:0;left:0;right:0;height:32px;background:#1d2327;color:#f0f0f1;font:13px/32px sans-serif;padding:0 12px;z-index:99999}
+#results{position:fixed;right:8px;bottom:36px;z-index:200000;max-width:460px;max-height:45vh;overflow:auto;margin:0;padding:8px 10px;background:#fff;border:2px solid #1d2327;font:12px/1.5 monospace;white-space:pre-wrap}
+#results button{font:inherit}
+/* The viewer SDK is not loaded here: <atlasar-viewer> gets the size it has on the site (its height attribute). */
+atlasar-viewer[height]{display:block;position:relative;height:340px;background:#eceff1}
+@media (max-width:782px){html{--wp-admin--admin-bar--height:46px}#fake-adminbar{height:46px}}
+@media (max-width:600px){#fake-adminbar{position:absolute}} /* as WordPress: the admin bar scrolls away */
+</style>
+</head>
+<body class="wp-admin wp-core-ui atlas-ar-fullscreen auto-fold toplevel_page_ar-vr-3d-model-try-on">
+<div id="fake-adminbar">WordPress admin bar (stand-in)</div>
+<div id="wpwrap">
+	<div id="adminmenumain"><div id="adminmenuback"></div><div id="adminmenuwrap"><ul id="adminmenu"><li class="menu-top wp-has-submenu opensub" id="fixture-fly"><a class="menu-top" href="#fly"><div class="wp-menu-name">Has a fly-out</div></a><ul class="wp-submenu wp-submenu-wrap"><li><a href="#fly1">Fly-out item</a></li></ul></li><li class="menu-top"><a class="menu-top" href="#m1"><div class="wp-menu-name">Menu item 1</div></a></li><li class="menu-top"><a class="menu-top" href="#m2"><div class="wp-menu-name">Menu item 2</div></a></li><li class="menu-top"><a class="menu-top" href="#m3"><div class="wp-menu-name">Menu item 3</div></a></li><li class="menu-top"><a class="menu-top" href="#m4"><div class="wp-menu-name">Menu item 4</div></a></li><li class="menu-top"><a class="menu-top" href="#m5"><div class="wp-menu-name">Menu item 5</div></a></li><li class="menu-top"><a class="menu-top" href="#m6"><div class="wp-menu-name">Menu item 6</div></a></li><li class="menu-top"><a class="menu-top" href="#m7"><div class="wp-menu-name">Menu item 7</div></a></li><li class="menu-top"><a class="menu-top" href="#m8"><div class="wp-menu-name">Menu item 8</div></a></li><li class="menu-top"><a class="menu-top" href="#m9"><div class="wp-menu-name">Menu item 9</div></a></li><li class="menu-top"><a class="menu-top" href="#m10"><div class="wp-menu-name">Menu item 10</div></a></li><li class="menu-top"><a class="menu-top" href="#m11"><div class="wp-menu-name">Menu item 11</div></a></li><li class="menu-top"><a class="menu-top" href="#m12"><div class="wp-menu-name">Menu item 12</div></a></li><li class="menu-top"><a class="menu-top" href="#m13"><div class="wp-menu-name">Menu item 13</div></a></li><li class="menu-top"><a class="menu-top" href="#m14"><div class="wp-menu-name">Menu item 14</div></a></li><li class="menu-top"><a class="menu-top" href="#m15"><div class="wp-menu-name">Menu item 15</div></a></li><li class="menu-top"><a class="menu-top" href="#m16"><div class="wp-menu-name">Menu item 16</div></a></li><li class="menu-top"><a class="menu-top" href="#m17"><div class="wp-menu-name">Menu item 17</div></a></li><li class="menu-top"><a class="menu-top" href="#m18"><div class="wp-menu-name">Menu item 18</div></a></li><li class="menu-top"><a class="menu-top" href="#m19"><div class="wp-menu-name">Menu item 19</div></a></li><li class="menu-top"><a class="menu-top" href="#m20"><div class="wp-menu-name">Menu item 20</div></a></li><li class="menu-top"><a class="menu-top" href="#m21"><div class="wp-menu-name">Menu item 21</div></a></li><li class="menu-top"><a class="menu-top" href="#m22"><div class="wp-menu-name">Menu item 22</div></a></li><li class="menu-top"><a class="menu-top" href="#m23"><div class="wp-menu-name">Menu item 23</div></a></li><li class="menu-top"><a class="menu-top" href="#m24"><div class="wp-menu-name">Menu item 24</div></a></li><li class="menu-top"><a class="menu-top" href="#m25"><div class="wp-menu-name">Menu item 25</div></a></li><li class="menu-top"><a class="menu-top" href="#m26"><div class="wp-menu-name">Menu item 26</div></a></li><li class="menu-top"><a class="menu-top" href="#m27"><div class="wp-menu-name">Menu item 27</div></a></li><li class="menu-top"><a class="menu-top" href="#m28"><div class="wp-menu-name">Menu item 28</div></a></li><li class="menu-top"><a class="menu-top" href="#m29"><div class="wp-menu-name">Menu item 29</div></a></li><li class="menu-top"><a class="menu-top" href="#m30"><div class="wp-menu-name">Menu item 30</div></a></li><li class="menu-top"><a class="menu-top" href="#m31"><div class="wp-menu-name">Menu item 31</div></a></li><li class="menu-top"><a class="menu-top" href="#m32"><div class="wp-menu-name">Menu item 32</div></a></li><li class="menu-top"><a class="menu-top" href="#m33"><div class="wp-menu-name">Menu item 33</div></a></li><li class="menu-top"><a class="menu-top" href="#m34"><div class="wp-menu-name">Menu item 34</div></a></li><li class="menu-top"><a class="menu-top" href="#m35"><div class="wp-menu-name">Menu item 35</div></a></li><li class="menu-top"><a class="menu-top" href="#m36"><div class="wp-menu-name">Menu item 36</div></a></li><li class="menu-top"><a class="menu-top" href="#m37"><div class="wp-menu-name">Menu item 37</div></a></li><li class="menu-top"><a class="menu-top" href="#m38"><div class="wp-menu-name">Menu item 38</div></a></li><li class="menu-top"><a class="menu-top" href="#m39"><div class="wp-menu-name">Menu item 39</div></a></li><li class="menu-top"><a class="menu-top" href="#m40"><div class="wp-menu-name">Menu item 40</div></a></li><li id="collapse-menu"><button type="button" id="collapse-button">Collapse menu</button></li></ul></div></div>
+	<div id="wpcontent"><div id="wpbody" role="main"><div id="wpbody-content">
+		<div id="screen-meta" style="display:none"></div>
+		<div class="notice notice-warning is-dismissible"><p>A notice from another plugin (test fixture).</p></div>
+		<div class="notice notice-error"><p>An error notice from another plugin (test fixture).</p></div>
+		<div class="hidden-thing" style="display:none">A hidden element of another plugin: stays where it is.</div>
+		<div class="wrap atlas-ar-wrap" id="fixture-dashboard"><hr class="wp-header-end"><div id="atlas-ar-dashboard"></div></div>
+		<div class="wrap atlas-ar-library-wrap" id="fixture-library"><hr class="wp-header-end"><div id="atlas-ar-library"></div></div>
+		<div id="fixture-product" class="metabox-holder"><div id="atlas-ar-panel" class="postbox"><div class="postbox-header"><h2 class="hndle">AtlasAR — 3D, AR and try-on</h2></div><div class="inside">
+			<input type="hidden" id="atlas-ar-panel-nonce" name="atlas_ar_panel_nonce" value="fixture"><input type="hidden" id="atlas-ar-panel-data" name="atlas_ar_panel" value=""><div id="atlas-ar-panel-root"></div></div></div></div>
+		<div class="clear"></div>
+	</div></div></div>
+</div>
+<pre id="results">Loading…</pre>
+<script>
+(function () {
+	var params = new URLSearchParams(location.search);
+	var site = (params.get('site') || 'http://localhost/tts').replace(/\/$/, '');
+	var libraryPage = params.get('page') === 'library', author = params.get('author') === '1';
+	var productPage = params.get('page') === 'product';
+	// One page at a time, as WordPress prints it.
+	['fixture-dashboard', 'fixture-library', 'fixture-product'].forEach(function (id) {
+		var keep = productPage ? 'fixture-product' : libraryPage ? 'fixture-library' : 'fixture-dashboard';
+		if (id !== keep) document.getElementById(id).remove();
+	});
+	if (productPage) {
+		// The editor's meta box: a narrow side column (280) or the wide main column (760).
+		document.body.className = 'wp-admin wp-core-ui post-php';
+		var box = document.getElementById('fixture-product');
+		box.style.cssText = 'width:' + (parseInt(params.get('w'), 10) || 760) + 'px;margin:48px 0 0 20px'; // #wpcontent already leaves room for the menu
+	}
+	var plugin = site + '/wp-content/plugins/ar-vr-3d-model-try-on/';
+	var css = [site + '/wp-includes/css/dashicons.min.css', site + '/wp-admin/css/common.min.css', site + '/wp-admin/css/admin-menu.min.css', site + '/wp-admin/css/forms.min.css', site + '/wp-includes/css/buttons.min.css', site + '/wp-includes/css/dist/components/style.min.css',
+		plugin + 'admin/css/atlas-ar-library.css', plugin + 'admin/css/atlas-ar-admin.css', plugin + 'admin/css/atlas-ar-shell.css'];
+	// WordPress's dependency order for wp-element, wp-components, wp-api-fetch, wp-a11y, wp-compose (WP 7.1).
+	var core = ['vendor/react.min.js', 'vendor/react-dom.min.js', 'escape-html.min.js', 'element.min.js', 'vendor/react-jsx-runtime.min.js', 'dom-ready.min.js', 'hooks.min.js', 'i18n.min.js', 'a11y.min.js', 'deprecated.min.js', 'dom.min.js', 'is-shallow-equal.min.js', 'keycodes.min.js', 'priority-queue.min.js', 'private-apis.min.js', 'undo-manager.min.js', 'compose.min.js', 'vendor/moment.min.js', 'date.min.js', 'html-entities.min.js', 'primitives.min.js', 'redux-routine.min.js', 'data.min.js', 'rich-text.min.js', 'theme.min.js', 'warning.min.js', 'components.min.js', 'url.min.js', 'api-fetch.min.js']
+		.map(function (f) { return site + '/wp-includes/js/dist/' + f; });
+	// The order WordPress prints them in (AR_TRY_ON_Library_Page::enqueue_shell(): the map only for managers).
+	var proUrl = params.get('pro') || '', proOld = params.get('proversion') === 'old';
+	var ours = (productPage ? ['atlas-ar-library.js', 'atlas-ar-ui.js', 'atlas-ar-search.js', 'atlas-ar-product.js'] : libraryPage ? ['atlas-ar-ui.js'].concat(author ? [] : ['atlas-ar-map.js'], ['atlas-ar-search.js', 'atlas-ar-shell.js', 'atlas-ar-library.js']) : ['atlas-ar-library.js', 'atlas-ar-ui.js', 'atlas-ar-map.js', 'atlas-ar-search.js', 'atlas-ar-shell.js', 'atlas-ar-dashboard.js']).map(function (f) { return plugin + 'admin/js/' + f + '?v=' + Date.now(); });
+	if (proUrl && productPage) {
+		// Pro's product-screen script after the panel's (as atlas_ar_product_panel_enqueue prints it).
+		ours.push(proUrl.replace(/atlas-ar-pro-admin\.js.*$/, 'atlas-ar-pro-ai.js'), proUrl + (proUrl.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now());
+		if (!proOld) css.push(proUrl.replace(/Assets\/js\/atlas-ar-pro-admin\.js.*$/, 'Assets/css/atlas-ar-pro-admin.css'));
+		window.atlasArPro = { screen: 'product', postType: params.get('type') || 'product', postId: 101, nonce: 'fixture', field: 'atlas_ar_pro_panel', nonceName: 'atlas_ar_pro_panel_nonce', thumbId: 0, thumbUrl: '', canKeys: true, providers: { meshy: { name: 'Meshy AI', ready: false }, tripo: { name: 'Tripo3D', ready: false } } };
+	} else if (proUrl && !libraryPage) {
+		// Pro's dashboard script after the free plugin's (as atlas_ar_dashboard_enqueue prints it), and its AI helper before it.
+		ours.splice(ours.length - 1, 0, proUrl.replace(/atlas-ar-pro-admin\.js.*$/, 'atlas-ar-pro-ai.js'), proUrl + (proUrl.indexOf('?') === -1 ? '?' : '&') + 'v=' + Date.now());
+		window.atlasArPro = {
+			screen: 'dashboard', canKeys: true, premium: { licensed: true }, ai: { auto_optimise: false },
+			providers: { meshy: { name: 'Meshy AI', ready: false }, tripo: { name: 'Tripo3D', ready: false } },
+			// The shape of AR_TRY_ON_Pro_Admin::search() (a few entries).
+			search: {
+				items: [
+					{ id: 'pro.meshy_key', kind: 'setting', cap: 'manage', screen: 'integrations', field: 'pro.meshy_key', where: 'Integrations', label: 'Meshy AI API key', en: 'meshy ai api key' },
+					{ id: 'pro.cloud_premium', kind: 'setting', cap: 'manage', screen: 'integrations', field: 'card.cloud-premium', where: 'Integrations', label: 'AtlasAR Cloud Premium', en: 'cloud premium licence' }
+				],
+				productFields: [{ id: 'product.pro_hotspots', kind: 'product', screen: 'products', control: 'none', panelTab: 'Hotspots', label: 'Hotspots with labels on a product’s 3D view', en: 'hotspots labels', where: 'Each product › AtlasAR panel › Hotspots' }]
+			}
+		};
+	}
+
+	// Fixture boot: the shape of AR_TRY_ON_Admin_Routes::boot() (defaults of AR_TRY_ON_Settings::schema()).
+	var look = { background: '#ffffff', lighting: 'neutral', environment_url: '', exposure: 1, shadow: 1, auto_rotate: true, zoom: true, ar_button: 'custom', ar_text: 'View in your room', ar_color: '#0e6b5c', load: 'scroll', height: 420, mobile_height: 420, max_width: 0, align: 'left', border_width: 0, border_color: '#dcdcde', radius: 0, frame_shadow: 'none', camera: 'auto', prompt: true, tone: 'neutral', skybox: false, ar: true, xr_environment: true, ar_text_color: '#ffffff' };
+	var schemaLook = { lighting: { type: 'enum', options: ['neutral', 'bright', 'custom'] }, exposure: { min: 0.5, max: 2 }, shadow: { min: 0, max: 2 }, ar_button: { options: ['default', 'custom'] }, ar_text: { max: 60 }, load: { options: ['scroll', 'click'] }, height: { min: 200, max: 1200 }, mobile_height: { min: 200, max: 1200 }, max_width: { min: 0, max: 3000 }, align: { options: ['left', 'center', 'right'] }, border_width: { min: 0, max: 10 }, radius: { min: 0, max: 40 }, frame_shadow: { options: ['none', 'soft', 'strong'] }, camera: { options: ['auto', 'front', 'side', 'top'] }, tone: { options: ['neutral', 'aces', 'agx'] } };
+	Object.keys(look).forEach(function (k) { schemaLook[k] = Object.assign({ default: look[k] }, schemaLook[k] || {}); });
+	var dash = 'admin.php?page=ar-vr-3d-model-try-on';
+	window.atlasArAdmin = {
+		settings: { placement: { mode: 'gallery', button_position: 'after_cart', product_tab: false, qr: true }, look: look, cards: { button: false, button_text: 'View in 3D and AR', button_position: 'after', button_style: 'outline', media: 'image', badge: false }, tryon: { enabled: false, label: 'Try it on', consent: '', snapshot: true, tracker: 'cdn' }, general: { post_types: ['product'], wizard_done: false, telemetry: false, stats: true } },
+		schema: { look: schemaLook }, cloud: { available: true, connected: true, usage: { units_used: 17, units_limit: 20 }, links: {} }, tracker: {}, postTypes: [{ name: 'product', label: 'Products' }],
+		migration: {}, woo: true, blockTheme: true, counts: { models: 34, with3d: 12 }, version: '3.0.1', brand: { name: 'AtlasAR', version: '3.0.1' }, demoModel: {},
+		dashboardUrl: dash, libraryUrl: 'admin.php?page=atlas-ar-library', pluginsUrl: 'admin.php?page=atlas-ar-other-plugins', suggested: [],
+		shell: { brand: { name: 'AtlasAR', version: '3.0.1' }, version: '3.0.1', urls: { dashboard: dash, wizard: dash + '&setup=1', library: 'admin.php?page=atlas-ar-library', plugins: 'admin.php?page=atlas-ar-other-plugins' }, can: { manage: true, upload: true }, links: [] }
+	};
+	window.atlasArLibrary = { maxBytes: 52428800, largeBytes: 5242880, accept: '.glb,.gltf,.usdz', pageUrl: 'admin.php?page=atlas-ar-library', brand: { name: 'AtlasAR' }, autoOptimise: false, optimiseLevel: 'high', cloud: false, cloudAvailable: true, canConnect: true, integrationsUrl: dash + '#integrations', cloudPricingUrl: '#', proUrl: '#' };
+	if (productPage) {
+		// The shape of AR_TRY_ON_Product_Panel::enqueue()'s atlasArProduct (one product, no request needed).
+		window.atlasArAdmin = { version: '3.0.1' };
+		window.atlasArProduct = {
+			item: {
+				id: 101, title: 'Armchair', thumb: '', thumb_id: 0, tryon_image_url: '',
+				data: { use_site: true, background: '#ffffff', placement: 'site', ar_placement: 'floor', ar_scale: 'auto', tryon: '', tryon_viewer: true, tryon_image: 0, height: 0, ar_text: '', load: '' },
+				model: params.get('model') ? { id: 5, name: 'Armchair', large: false, files: { glb: { url: 'about:blank#armchair.glb', size: 1843200 }, usdz: null, poster: null } } : null
+			},
+			postType: params.get('type') || 'product', typeLabel: { product: 'Product', page: 'Page', post: 'Post' }[params.get('type') || 'product'],
+			look: { ar: true }, qr: false, tryonEnabled: true, tryon: {}, libraryUrl: 'admin.php?page=atlas-ar-library', photo: null, accept: '.glb,.gltf,.usdz'
+		};
+	} else if (libraryPage) {
+		// The light boot of the 3D Library page: no settings, no Cloud details (AR_TRY_ON_Admin_Routes::shell_boot()).
+		window.atlasArAdmin = { version: '3.0.1', shell: Object.assign({}, window.atlasArAdmin.shell, { can: { manage: !author, upload: true } }) };
+	} else if (!params.get('setup')) history.replaceState(null, '', '#appearance:frame/look.radius'); // the checks start from this deep link
+	else history.replaceState(null, '', location.pathname + location.search);
+
+	// The product screen loads the kit's sheets, not the frame's (AR_TRY_ON_Product_Panel::enqueue()).
+	if (productPage) css = css.filter(function (h) { return !/atlas-ar-shell\.css$/.test(h); });
+	css.forEach(function (href) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = href + (/\/plugins\//.test(href) ? '?v=' + Date.now() : ''); /* our sheets fresh, never from the cache */ document.head.appendChild(l); });
+	var errors = [];
+	window.addEventListener('error', function (e) { errors.push(String(e.message)); });
+	(function next(list) {
+		if (!list.length) { setTimeout(run, 900); return; }
+		var s = document.createElement('script');
+		s.src = list[0];
+		s.onload = function () {
+			// Product mode: Pro's panel data for the fixture product (the shape of GET ar_try_on_pro/v1/items/<id>,
+			// read from the local site), so its tabs draw their content instead of a spinner.
+			if (productPage && /api-fetch\.min\.js/.test(list[0]) && window.wp && wp.apiFetch) {
+				wp.apiFetch.use(function (options, nextMw) {
+					if (/\/ar_try_on_pro\/v1\/items\/101$/.test(options.path || '') && (!options.method || options.method === 'GET')) {
+						return Promise.resolve({ data: { hotspots: [], dimensions: { show: false, unit: 'cm', mode: 'auto', width: '', height: '', length: '' }, items: [], variants: { mapping: [], models: [] }, fit: null, anatomy: null, card: { button: '', label: '', media: '' } }, options: [], job: null });
+					}
+					return nextMw(options);
+				});
+			}
+			next(list.slice(1));
+		};
+		s.onerror = function () { errors.push('could not load ' + list[0]); next(list.slice(1)); };
+		document.body.appendChild(s);
+	})(core.concat(ours));
+
+	function setInput(input, value) {
+		var setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+		setter.call(input, value);
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+	}
+	function key(target, k, extra) {
+		target.dispatchEvent(new KeyboardEvent('keydown', Object.assign({ key: k, bubbles: true, cancelable: true }, extra || {})));
+	}
+	function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+	function report(ok, out, wide) {
+		document.title = (ok ? 'PASS' : 'FAIL') + ' AtlasAR admin frame';
+		var pre = document.getElementById('results');
+		pre.textContent = out.join('\n') + '\n\n' + innerWidth + ' × ' + innerHeight + (wide ? '' : ' (narrow: wide-only checks skipped)') + '\n';
+		var again = document.createElement('button');
+		again.textContent = 'Run the checks again';
+		again.onclick = function () { location.reload(); };
+		pre.appendChild(again);
+		window.atlasArShellResults = { ok: ok, out: out };
+	}
+
+	/**
+	 * A WordPress menu taller than the window: it scrolls inside itself (its last item can be
+	 * reached), a hover fly-out is not cut off, and the app under the menu's wide scroll box still
+	 * gets the clicks.
+	 */
+	function menuChecks(check) {
+		var wrap = document.getElementById('adminmenuwrap');
+		var last = document.getElementById('collapse-menu');
+		check('a tall WordPress menu scrolls inside itself', wrap.scrollHeight > wrap.clientHeight + 1, wrap.scrollHeight + ' / ' + wrap.clientHeight);
+		wrap.scrollTop = wrap.scrollHeight;
+		var lr = last.getBoundingClientRect();
+		check('… and its last item can be reached', lr.bottom <= innerHeight + 1 && lr.top >= 0, Math.round(lr.top) + '–' + Math.round(lr.bottom));
+		wrap.scrollTop = 0;
+		var fly = document.querySelector('#fixture-fly .wp-submenu');
+		var fr = fly.getBoundingClientRect();
+		var hit = document.elementFromPoint(fr.left + 10, fr.top + 8);
+		check('a hover fly-out is visible, not cut off', fr.width > 0 && hit && fly.contains(hit), hit && hit.outerHTML.slice(0, 50));
+		var app = document.querySelector('.atlas-ar-app').getBoundingClientRect();
+		var under = document.elementFromPoint(app.left + 120, app.bottom - 60);
+		check('the app gets clicks beside the menu', under && document.querySelector('.atlas-ar-app').contains(under), under && under.outerHTML.slice(0, 50));
+	}
+
+
+
+	/** AR-183: AtlasAR Pro's dashboard parts inside the frame (new Pro, or an older one with &proversion=old). */
+	async function proChecks(check) {
+		location.hash = '#integrations';
+		await wait(400);
+		var cards = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-integrations > [data-atlas-ar-field]'), function (n) { return n.getAttribute('data-atlas-ar-field'); });
+		check('Pro: its Integrations cards in the stacked pane', cards.indexOf('card.meshy') !== -1 && cards.indexOf('card.tripo') !== -1 && cards.indexOf('card.cloud-premium') !== -1 && cards.indexOf('card.ai') === -1, cards.join(' '));
+		check('Pro: no "See AtlasAR Pro" in the menu', !document.querySelector('.atlas-ar-rail-foot'));
+		if (proOld) return;
+		check('Pro: its key fields are search targets', !!document.querySelector('[data-atlas-ar-field="pro.meshy_key"]') && !!document.querySelector('[data-atlas-ar-field="pro.ai_auto_optimise"]'));
+		location.hash = '#placement:cards';
+		await wait(300);
+		check('Pro: a line on the per-product Shop card under the card settings', /Shop card/.test(document.getElementById('atlas-ar-pane').textContent));
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		var input = document.querySelector('.atlas-ar-hsearch-input');
+		setInput(input, 'meshy key');
+		await wait(100);
+		var opt = Array.prototype.filter.call(document.querySelectorAll('[role="option"]'), function (o) { return /Meshy AI API key/.test(o.textContent); })[0];
+		if (opt) { opt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true })); opt.click(); }
+		await wait(1400);
+		var f = document.querySelector('[data-atlas-ar-field="pro.meshy_key"]');
+		check('Pro: "meshy key" lands on the Meshy AI key field', !!opt && f && f.contains(document.activeElement), location.hash);
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		setInput(document.querySelector('.atlas-ar-hsearch-input'), 'hotspots');
+		await wait(100);
+		check('Pro: its product tabs are found as per-product settings', Array.prototype.some.call(document.querySelectorAll('[role="option"]'), function (o) { return /Hotspots/.test(o.textContent) && /AtlasAR panel/.test(o.textContent); }));
+		key(document.querySelector('.atlas-ar-hsearch-input'), 'Escape'); await wait(60);
+		key(document.querySelector('.atlas-ar-hsearch-input'), 'Escape'); await wait(60);
+		key(document.querySelector('.atlas-ar-hsearch-input'), 'Escape'); await wait(60);
+	}
+
+
+	/** AR-182: the product panel inside the editor (no app frame). */
+	async function runProduct() {
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var w = parseInt(params.get('w'), 10) || 760, model = !!params.get('model');
+		var root = document.getElementById('atlas-ar-panel-root');
+		var wrap = root.querySelector('.atlas-ar-panel-wrap');
+		var narrow = w < 360;
+		check('the panel draws inside the meta box, without an app frame', !!wrap && !document.querySelector('.atlas-ar-app'));
+		var chips = Array.prototype.map.call(root.querySelectorAll('.atlas-ar-panel-status li'), function (l) { return l.textContent; });
+		check('status chips in words: 3D, AR, Try-on', chips.length === 3 && /^3D: /.test(chips[0]) && /^AR: /.test(chips[1]) && /^Try-on: /.test(chips[2]), chips.join(' | '));
+		var viewEl = root.querySelector('.atlas-ar-panel-view'), side = root.querySelector('.atlas-ar-panel-side').getBoundingClientRect();
+		// Review 4: without a model there is no preview column, and "No 3D model yet" is said once.
+		if (!model) {
+			check('no model: no preview column; the tabs take the full width', !viewEl && side.width >= root.querySelector('.atlas-ar-panel').getBoundingClientRect().width - 1);
+			check('no model: "No 3D model yet" is said once', (wrap.textContent.match(/No 3D model yet/g) || []).length === 1);
+		} else {
+			var view = viewEl.getBoundingClientRect();
+			if (w < 640) check('narrow box: one column (preview above the tabs)', side.top >= view.bottom - 1, Math.round(view.bottom) + ' / ' + Math.round(side.top));
+			else check('wide box: preview beside the tabs, sticky', side.left >= view.right - 1 && getComputedStyle(viewEl).position === 'sticky', Math.round(view.right) + ' / ' + Math.round(side.left));
+		}
+		var box = document.getElementById('atlas-ar-panel');
+		check('nothing wider than the box', wrap.scrollWidth <= box.clientWidth && document.scrollingElement.scrollWidth <= innerWidth, wrap.scrollWidth + ' / ' + box.clientWidth);
+
+		/** Review 1 and 3: no element in the panel scrolls sideways or sticks out of its column. */
+		function sideways() {
+			var bad = [];
+			Array.prototype.forEach.call(wrap.querySelectorAll('*'), function (n) {
+				var cs = getComputedStyle(n);
+				if (/auto|scroll/.test(cs.overflowX) && n.scrollWidth > n.clientWidth + 0.5) bad.push('scrolls: ' + n.className);
+			});
+			var col = root.querySelector('.atlas-ar-panel-side').getBoundingClientRect();
+			Array.prototype.forEach.call(root.querySelectorAll('.atlas-ar-panel-side *'), function (n) {
+				var r = n.getBoundingClientRect();
+				if (r.width && (r.right > col.right + 1 || r.left < col.left - 1) && !n.closest('.screen-reader-text')) bad.push('out: ' + (n.className || n.tagName));
+			});
+			return bad;
+		}
+		/** Review 2: the tab content takes its natural height (no inner scroll box, no blank gap above Save). */
+		function naturalHeight() {
+			var content = root.querySelector('.components-tab-panel__tab-content') || root.querySelector('.atlas-ar-panel-side > .atlas-ar-tab-body');
+			var foot = root.querySelector('.atlas-ar-panel-foot').getBoundingClientRect();
+			var cs = getComputedStyle(content), r = content.getBoundingClientRect();
+			return { ok: !/auto|scroll/.test(cs.overflowY) && content.scrollHeight <= content.clientHeight + 1 && foot.top - r.bottom < 40, note: Math.round(foot.top - r.bottom) + ' px gap, overflow-y ' + cs.overflowY };
+		}
+
+		var tablist = root.querySelector('[role="tablist"]'), pick = root.querySelector('.atlas-ar-panel-pick select');
+		var onPage = (params.get('type') || 'product') !== 'product';
+		// AR-183 review: Variations and Shop card are WooCommerce product tabs (the new Pro leaves them out elsewhere).
+		var want = ['model', 'display', 'tryon'].concat(proUrl ? ['hotspots', 'sizes', 'models', 'variations', 'card', 'fit', 'make'].filter(function (id) { return !(onPage && !proOld && (id === 'variations' || id === 'card')); }) : []);
+		var ids = tablist ? Array.prototype.map.call(root.querySelectorAll('[role="tab"]'), function (t) { return t.id.replace(/^.*-(\w+)$/, '$1'); })
+			: pick ? Array.prototype.map.call(pick.options, function (o) { return o.value; }) : [];
+		check('sections: the same ids, in order (atlasAr.product.tabs)', ids.join() === want.join(), ids.join());
+		// Review 3: every section can be reached without scrolling a tab bar.
+		if (narrow) {
+			var lab = pick && root.querySelector('label[for="' + pick.id + '"]');
+			check('narrow box: a labelled select of the sections instead of the tab bar', !!pick && !tablist && lab && /Section/.test(lab.textContent));
+		} else {
+			var bar = tablist.getBoundingClientRect();
+			var hidden = Array.prototype.filter.call(root.querySelectorAll('[role="tab"]'), function (t) { var r = t.getBoundingClientRect(); return r.right > bar.right + 1 || r.left < bar.left - 1; });
+			check('wide box: ARIA tabs, wrapping onto more rows; every tab in view, no scrollbar', !pick && hidden.length === 0 && !/auto|scroll/.test(getComputedStyle(tablist).overflowX), hidden.length + ' hidden');
+		}
+		if (!model) {
+			var empty = root.querySelector('.atlas-ar-panel-empty');
+			var btn = empty && empty.querySelector('.components-button.is-primary');
+			check('empty state: "No 3D model yet" and one main action', empty && /No 3D model yet/.test(empty.textContent) && btn && /Choose from the 3D Library/.test(btn.textContent));
+		} else {
+			check('with a model: its name and Change model', /Armchair/.test(root.querySelector('.atlas-ar-model-line').textContent) && /Change model/.test(root.textContent));
+		}
+		var hiddenField = document.getElementById('atlas-ar-panel-data');
+		check('the save field holds the product data (as before)', JSON.parse(hiddenField.value || '{}').placement === 'site');
+
+		function choose(i) {
+			if (narrow) {
+				var sel = root.querySelector('.atlas-ar-panel-pick select');
+				Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(sel, want[i]);
+				sel.dispatchEvent(new Event('change', { bubbles: true }));
+			} else root.querySelectorAll('[role="tab"]')[i].click();
+		}
+		// Every section draws, with no sideways scrolling and at its natural height.
+		var side1 = [], tall = [], freeText = '';
+		for (var i = 0; i < want.length; i++) {
+			choose(i);
+			await wait(150);
+			var panel = narrow ? root.querySelector('.atlas-ar-panel-side > [role="region"]') : root.querySelector('[role="tabpanel"]');
+			var on = narrow ? root.querySelector('.atlas-ar-panel-pick select').value === want[i] : root.querySelectorAll('[role="tab"]')[i].getAttribute('aria-selected') === 'true';
+			check('section ' + want[i] + ' draws', on && panel && panel.textContent.length > 0);
+			if (i < 3) freeText += ' ' + panel.textContent;
+			side1 = side1.concat(sideways().map(function (x) { return want[i] + ' ' + x; }));
+			var nh = naturalHeight();
+			if (!nh.ok) tall.push(want[i] + ': ' + nh.note);
+		}
+		check('no section scrolls sideways or sticks out of its column', !side1.length, side1.slice(0, 3).join('; '));
+		if (onPage && proUrl && !proOld) check('a page lists no product-only tabs (Variations, Shop card)', ids.indexOf('variations') === -1 && ids.indexOf('card') === -1, ids.join());
+		check('each section at its natural height (no inner scroll box, no gap above Save)', !tall.length, tall.slice(0, 3).join('; '));
+
+		// Review 5: AtlasAR Pro's measurement labels (light DOM in the viewer) never stick out of the preview.
+		if (model && proUrl && !proOld) {
+			var viewer = root.querySelector('.atlas-ar-panel-view atlasar-viewer') || root.querySelector('.atlas-ar-viewer-box');
+			var dim = document.createElement('span');
+			dim.className = 'atlasar-dim';
+			dim.textContent = '120 cm';
+			dim.style.cssText = 'position:absolute;top:10px;right:-23px';
+			viewer.appendChild(dim);
+			await wait(50);
+			var vb = root.querySelector('.atlas-ar-viewer-box');
+			if (w <= 320) check('narrow box: measurement labels hidden (never cut in half)', getComputedStyle(dim).display === 'none');
+			else check('measurement labels clipped by the preview box', getComputedStyle(vb).overflow === 'hidden');
+			dim.remove();
+		}
+
+		// AR-182 review: on a page the panel never says "this product", and the product-page placement is not offered.
+		if (onPage) {
+			var words = freeText + ' ' + root.querySelector('.atlas-ar-panel-status').getAttribute('aria-label') + ' ' + root.querySelector('.atlas-ar-panel-foot').textContent;
+			var hits = words.match(/(this|the) product\b|update the product/gi) || [];
+			check('on a page the panel says what it is on, never "this product"', !hits.length && /linked here/.test(freeText) && /This Page only/.test(freeText), hits.join(', '));
+			check('on a page: no product-page placement; the block or shortcode instead', !root.querySelector('[data-atlas-ar-field="product.placement"]') && /block, or the shortcode/.test(freeText));
+		}
+
+		// A change reaches the save field (the save flow is unchanged).
+		choose(1);
+		await wait(150);
+		var toggle = root.querySelector('[data-atlas-ar-field="product.use_site"] input[type="checkbox"]');
+		if (toggle) toggle.click();
+		await wait(150);
+		check('a change on Display reaches the save field', JSON.parse(hiddenField.value).use_site === false);
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, true);
+	}
+
+	/** AR-182: #atlas-ar-panel:<tab>/<setting> opens the tab and marks the setting. */
+	async function runProductAddress() {
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var root = document.getElementById('atlas-ar-panel-root');
+		await wait(400);
+		var sel = root.querySelector('[role="tab"][aria-selected="true"]'), pick = root.querySelector('.atlas-ar-panel-pick select');
+		check('the address opens the Display section', pick ? pick.value === 'display' : sel && /Display/.test(sel.textContent));
+		var f = root.querySelector('[data-atlas-ar-field="product.ar_placement"]');
+		check('… and marks the setting', f && (f.classList.contains('is-found') || f.contains(document.activeElement)));
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, true);
+	}
+
+	/** AR-182: every screen and tab draws its settings from the map, with the Save bar where it belongs. */
+	async function screenChecks(check) {
+		var expect = [
+			['products', '', 1, false], ['integrations', '', 2, false], ['placement', 'page', 3, true], ['placement', 'cards', 3, true],
+			['tryon', '', 5, true], ['analytics', '', 0, false], ['settings', 'general', 3, true], ['settings', 'privacy', 3, true],
+			['settings', 'tools', 3, true], ['help', 'guides', 0, false], ['help', 'shortcode', 1, false], ['help', 'check', 0, false]
+		];
+		for (var n = 0; n < expect.length; n++) {
+			var e = expect[n];
+			location.hash = '#' + e[0] + (e[1] ? ':' + e[1] : '');
+			await wait(250);
+			var pane = document.getElementById('atlas-ar-pane');
+			var fields = pane ? pane.querySelectorAll('[data-atlas-ar-field]').length : -1;
+			var tab = document.querySelector('.atlas-ar-tabs-panel [role="tab"][aria-selected="true"]');
+			var save = !!document.querySelector('.atlas-ar-pane-foot .atlas-ar-savefoot');
+			var ok = document.querySelectorAll('h1').length === 1 && fields === e[2] && save === e[3] && (!e[1] || !!tab);
+			check('screen ' + e[0] + (e[1] ? ' › ' + e[1] : ''), ok, fields + ' fields, Save bar ' + (save ? 'yes' : 'no') + (tab ? ', tab ' + tab.textContent : ''));
+		}
+		// A setting on another screen and tab, picked with the mouse.
+		async function pick(query, text) {
+			key(document.body, 'k', { ctrlKey: true });
+			await wait(80);
+			var input = document.querySelector('.atlas-ar-hsearch-input');
+			setInput(input, query);
+			await wait(100);
+			var opt = Array.prototype.filter.call(document.querySelectorAll('[role="option"]'), function (o) { return o.textContent.indexOf(text) !== -1; })[0];
+			if (opt) { opt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true })); opt.click(); }
+			await wait(1400);
+			return !!opt;
+		}
+		var found = await pick('qr', 'QR code');
+		var qr = document.querySelector('[data-atlas-ar-field="placement.qr"]');
+		check('"qr" → Placement › Product page, QR setting focused', found && qr && qr.contains(document.activeElement), location.hash);
+		found = await pick('export', 'Export settings');
+		var ex = document.querySelector('[data-atlas-ar-field="action.export"]');
+		check('"export" → Settings › Tools, its button focused', found && ex && ex.contains(document.activeElement), location.hash);
+		found = await pick('wall', 'AR placement');
+		var note = document.querySelector('.atlas-ar-page-notice');
+		check('a per-product setting opens Products and says where it is', found && location.hash.indexOf('#products') === 0 && note && /Display/.test(note.textContent), note && note.textContent.slice(0, 80));
+		location.hash = '#help:shortcode';
+		await wait(250);
+		var copy = Array.prototype.filter.call(document.querySelectorAll('.atlas-ar-code button'), function (b) { return /Copy/.test(b.textContent); })[0];
+		if (copy) {
+			copy.click();
+			await wait(400);
+			// "Copied", or (a window without focus may refuse the clipboard) the message saying so.
+			check('Copy shows a snackbar', /Copied|Copying did not work/.test((document.querySelector('.atlas-ar-snackbars') || {}).textContent || ''), ((document.querySelector('.atlas-ar-snackbars') || {}).textContent || '').slice(0, 60));
+		}
+	}
+
+	/** AR-182: the setup wizard inside the frame. */
+	async function runWizard() {
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var wide = innerWidth >= 783 && innerHeight >= 560;
+		check('the wizard draws in the frame', !!document.querySelector('.atlas-ar-app .atlas-ar-pane--wizard .atlas-ar-wizard'));
+		check('one h1: Set up AtlasAR', document.querySelectorAll('h1').length === 1 && document.querySelector('h1').textContent === 'Set up AtlasAR');
+		var cur = document.querySelector('.atlas-ar-nav-item[aria-current="page"]');
+		if (wide) check('the menu marks Setup', cur && /Setup/.test(cur.textContent));
+		var links = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-item'), function (a) { return a.getAttribute('href') || 'button'; });
+		if (wide) check('menu items lead back to the dashboard', links.indexOf('button') === -1 && links.some(function (h) { return /#placement$/.test(h); }));
+		var cont = Array.prototype.filter.call(document.querySelectorAll('.atlas-ar-pane-foot button'), function (b) { return /Continue/.test(b.textContent); })[0];
+		check('Back / Step / Continue in the pane footer', !!cont && /Step 1 of/.test(document.querySelector('.atlas-ar-pane-foot').textContent));
+		check('step 1: the placement cards and the card button', document.querySelectorAll('.atlas-ar-choice-item').length === 4 && !!document.querySelector('[data-atlas-ar-field="cards.button"]'));
+		if (cont) cont.click();
+		await wait(300);
+		var ids = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-wizard [data-atlas-ar-field]'), function (n) { return n.getAttribute('data-atlas-ar-field'); });
+		check('step 2: Look draws the same definitions as Appearance', ids.join() === 'look.background,look.ar_text,look.ar_color', ids.join());
+		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1);
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, wide);
+	}
+
+	/** The 3D Library page in the frame (its own REST calls fail here: no site session). */
+	async function runLibrary() {
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var wide = innerWidth >= 783 && innerHeight >= 560;
+		var phone = !!document.querySelector('.atlas-ar-app.is-phone');
+		check('the frame draws around the 3D Library', !!document.querySelector('#atlas-ar-library .atlas-ar-app .atlas-ar-pane--library .atlas-ar-library'));
+		check('one h1: 3D Library', document.querySelectorAll('h1').length === 1 && document.querySelector('h1').textContent === '3D Library');
+		var cur = document.querySelector('.atlas-ar-nav-item[aria-current="page"]');
+		if (!phone) check('the menu marks 3D Library', cur && /3D Library/.test(cur.textContent));
+		var items = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-item'), function (a) { return a.getAttribute('href') || ''; });
+		if (author && !phone) check('a user without manage_options sees only the 3D Library', items.length === 1, items.join(' '));
+		else if (!phone) check('dashboard screens link back to the dashboard', items.some(function (h) { return /#appearance$/.test(h); }), items.length + ' items');
+		var holder = document.querySelector('.atlas-ar-notices-holder');
+		check('notices moved into the bell', holder && holder.children.length === 2);
+		check('status bar: the Cloud fact only (no counts query on this page)', document.querySelectorAll('.atlas-ar-status li').length === 1);
+		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1, document.scrollingElement.scrollHeight + ' / ' + innerHeight);
+		if (wide) menuChecks(check);
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		var input = document.querySelector('.atlas-ar-hsearch-input');
+		if (input) {
+			setInput(input, 'radius');
+			await wait(80);
+			var opts = Array.prototype.map.call(document.querySelectorAll('[role="option"]'), function (o) { return o.textContent; });
+			if (author) check('an Author finds no settings', !opts.some(function (t) { return /Rounded corners/.test(t); }), opts.join(' | '));
+			else check('settings are found from the Library page', opts.some(function (t) { return /Rounded corners/.test(t); }), opts.join(' | '));
+		}
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, wide);
+	}
+
+	async function run() {
+		if (productPage) return /^#atlas-ar-panel:/.test(location.hash) ? runProductAddress() : runProduct();
+		if (libraryPage) return runLibrary();
+		if (params.get('setup')) return runWizard();
+		var out = [], ok = true;
+		function check(name, pass, note) { ok = ok && !!pass; out.push((pass ? 'PASS ' : 'FAIL ') + name + (note ? ' — ' + note : '')); }
+		var wide = innerWidth >= 783 && innerHeight >= 560;
+		var app = document.querySelector('.atlas-ar-app');
+		check('the frame draws', !!app);
+		check('one h1, the screen title', document.querySelectorAll('h1').length === 1 && document.querySelector('h1').textContent === 'Appearance', document.querySelector('h1') && document.querySelector('h1').textContent);
+		var tabs = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-tabs-panel [role="tab"]'), function (t) { return t.textContent; });
+		check('four Appearance tabs', tabs.join('|') === 'Look|Starting view|Size and frame|AR button', tabs.join('|'));
+		check('the address opens tab "Size and frame"', (document.querySelector('.atlas-ar-tabs-panel [role="tab"][aria-selected="true"]') || {}).textContent === 'Size and frame');
+		var radius = document.querySelector('[data-atlas-ar-field="look.radius"]');
+		check('#appearance:frame/look.radius focuses the field', radius && radius.contains(document.activeElement), document.activeElement && document.activeElement.outerHTML.slice(0, 60));
+		check('… and marks it', radius && radius.classList.contains('is-found'));
+		var holder = document.querySelector('.atlas-ar-notices-holder');
+		check('notices moved into the bell (kept in the page)', holder && holder.children.length === 2 && !document.querySelector('#wpbody-content > .notice'), holder ? holder.children.length + ' in the holder' : 'no holder');
+		check('a hidden element of another plugin stays where it is', !!document.querySelector('#wpbody-content > .hidden-thing'));
+		var bell = document.querySelector('.atlas-ar-bell button');
+		check('the bell says it in words', bell && /Notices: 2, 1 error/.test(bell.getAttribute('aria-label')), bell && bell.getAttribute('aria-label'));
+		var facts = Array.prototype.map.call(document.querySelectorAll('.atlas-ar-status li'), function (l) { return l.textContent; });
+		check('status bar facts', facts.length === 3 && /12 products show 3D/.test(facts[0]), facts.join(' | '));
+		if (wide) check('rail groups', Array.prototype.map.call(document.querySelectorAll('.atlas-ar-nav-heading'), function (h) { return h.textContent; }).join('|') === '3D models|Shop display|Look after');
+		if (wide) check('the WordPress page does not scroll (wide window)', document.scrollingElement.scrollHeight <= innerHeight + 1, document.scrollingElement.scrollHeight + ' / ' + innerHeight);
+		if (wide) menuChecks(check);
+
+		// Search by keyboard: Ctrl+K, type, Enter.
+		key(document.body, 'k', { ctrlKey: true });
+		await wait(80);
+		var input = document.querySelector('.atlas-ar-hsearch-input');
+		check('Ctrl+K focuses the search box', input && document.activeElement === input);
+		if (input) {
+			setInput(input, 'border colour');
+			await wait(80);
+			check('combobox expanded with results', input.getAttribute('aria-expanded') === 'true' && document.querySelectorAll('[role="option"]').length > 0);
+			key(input, 'ArrowDown');
+			await wait(50);
+			var activeId = input.getAttribute('aria-activedescendant');
+			check('ArrowDown sets aria-activedescendant', !!activeId && document.getElementById(activeId).getAttribute('aria-selected') === 'true');
+			// "Border colour" shows only when the border is above 0: the search lands on "Border (px)" and says why.
+			key(input, 'Enter');
+			await wait(1500);
+			var bw = document.querySelector('[data-atlas-ar-field="look.border_width"]');
+			check('a hidden field jumps to the field that shows it', bw && bw.contains(document.activeElement) && location.hash === '#appearance:frame/look.border_color', location.hash);
+			// Another tab, by typing a word from the English fallback.
+			key(document.body, 'k', { ctrlKey: true });
+			await wait(80);
+			setInput(input = document.querySelector('.atlas-ar-hsearch-input'), 'exposure');
+			await wait(80);
+			key(input, 'Enter');
+			await wait(1500);
+			var ex = document.querySelector('[data-atlas-ar-field="look.exposure"]');
+			check('"exposure" opens Look and focuses Brightness', ex && ex.contains(document.activeElement) && (document.querySelector('.atlas-ar-tabs-panel [role="tab"][aria-selected="true"]') || {}).textContent === 'Look');
+			key(document.body, 'k', { ctrlKey: true });
+			await wait(80);
+			input = document.querySelector('.atlas-ar-hsearch-input');
+			setInput(input, '<img src=x onerror=alert(1)>');
+			await wait(80);
+			check('typed HTML is text: no result, no element', !document.querySelector('.atlas-ar-hsearch img') && /Nothing matches/.test(document.querySelector('.atlas-ar-hsearch-empty').textContent));
+			// One key per render: the list closes, then the text clears, then focus leaves the box.
+			key(input, 'Escape'); await wait(60);
+			check('Escape 1 closes the list', input.getAttribute('aria-expanded') === 'false');
+			key(input, 'Escape'); await wait(60);
+			check('Escape 2 clears the text', input.value === '');
+			key(input, 'Escape'); await wait(80);
+			check('Escape closes, clears, then leaves the box', document.activeElement !== input);
+		}
+		if (proUrl) await proChecks(check);
+		else await screenChecks(check);
+		check('no script errors', !errors.length, errors.join('; '));
+		report(ok, out, wide);
+	}
+})();
+</script>
+</body></html>

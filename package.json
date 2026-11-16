@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "production": "node scripts/build-check.js",
+    "test": "node --test \"tests/js/*.test.js\"",
     "makeZip": "gulp makeZip",
     "copy": "gulp copy",
     "zip": "gulp zip",
