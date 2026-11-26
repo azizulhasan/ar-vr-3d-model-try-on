@@ -136,6 +136,18 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-tryon-combine button{flex:0 0 auto;width:48px;height:48px;padding:4px;border:2px solid rgba(255,255,255,.25);border-radius:10px;background:#fff;cursor:pointer}
 .atlasar-tryon-combine button[aria-pressed="true"]{border-color:var(--atlasar-accent,#3ee0b4);box-shadow:0 0 0 2px var(--atlasar-accent,#3ee0b4)}
 .atlasar-tryon-combine img{width:100%;height:100%;object-fit:contain;display:block}
+/* AR-189: measuring with a bank card: a card-shaped frame in the middle of the picture, the help, two buttons. */
+.atlasar-tryon-cardbtn{position:absolute;left:12px;bottom:calc(24px + env(safe-area-inset-bottom,0px));min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.atlasar-tryon-cardbtn:is(:hover,:focus,:active){background:rgba(0,0,0,.75);color:#fff}
+.atlasar-tryon-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none}
+.atlasar-tryon-card[hidden]{display:none}
+.atlasar-tryon-card-frame{width:46%;aspect-ratio:85.6/53.98;border:3px dashed #fff;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.35)}
+.atlasar-tryon-card p{max-width:calc(100% - 32px);margin:0;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.7);font-size:14px;line-height:1.4;text-align:center}
+.atlasar-tryon-card div{display:flex;gap:10px;pointer-events:auto}
+.atlasar-tryon-card button{min-height:44px;padding:0 18px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.atlasar-tryon-card .go{border:0;background:var(--atlasar-accent,#fff);color:var(--atlasar-accent-text,#111)}
+.atlasar-tryon-card .no{border:1px solid rgba(255,255,255,.6);background:rgba(0,0,0,.4);color:#fff}
+[dir="rtl"] .atlasar-tryon-cardbtn{left:auto;right:12px}
 /* AR-189: "Other side" (nose pin), top left of the picture. */
 .atlasar-tryon-side{position:absolute;left:12px;top:12px;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .atlasar-tryon-side:is(:hover,:focus,:active){background:rgba(0,0,0,.75);color:#fff}
