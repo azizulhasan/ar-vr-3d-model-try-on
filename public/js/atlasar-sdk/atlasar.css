@@ -129,5 +129,9 @@ html.atlasar-popup-open{overflow:hidden}
 .atlasar-tryon-flip{position:absolute;right:16px;bottom:24px;width:48px;height:48px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:22px;line-height:1;cursor:pointer}
 .atlasar-tryon-flip:is(:hover,:focus,:active){background:rgba(0,0,0,.7);color:#fff}
 [dir="rtl"] .atlasar-tryon-flip{right:auto;left:16px}
+/* AR-189: "Other side" (nose pin), top left of the picture. */
+.atlasar-tryon-side{position:absolute;left:12px;top:12px;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.atlasar-tryon-side:is(:hover,:focus,:active){background:rgba(0,0,0,.75);color:#fff}
+[dir="rtl"] .atlasar-tryon-side{left:auto;right:12px}
 .atlasar-tryon-shutter:is(:hover,:focus,:active){background:rgba(255,255,255,.35);border-color:#fff}
 @media (max-width:600px){.atlasar-tryon{width:100vw;max-height:100vh;height:100vh;border-radius:0}}
