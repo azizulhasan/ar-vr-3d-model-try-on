@@ -1,7 +1,9 @@
 # Third-party software in the AtlasAR viewer SDK
 
-All files are served from AtlasAR Cloud (or your own server); the SDK loads nothing from other
-CDNs.
+All files are served from AtlasAR Cloud (or your own server). One exception: when a visitor opens
+the try-on, the SDK served from AtlasAR Cloud loads MediaPipe's WebAssembly runtime and face model
+from jsDelivr and Google (the same files, much faster), and from AtlasAR Cloud if those are blocked.
+A self-hosted SDK, or one with `tryonModels` set, doesn't use those CDNs.
 
 | Component | Version | Licence | Where |
 |---|---|---|---|

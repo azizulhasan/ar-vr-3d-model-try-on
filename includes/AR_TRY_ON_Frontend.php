@@ -367,8 +367,13 @@ class AR_TRY_ON_Frontend {
 			'atlas_ar'
 		);
 		$post_id = (int) $atts['id'] ? (int) $atts['id'] : AR_TRY_ON_Helper::current_post_id();
-		if ( ! $post_id || ! AR_TRY_ON_Product::has_model( $post_id ) ) {
+		if ( ! $post_id ) {
 			return '';
+		}
+		if ( ! AR_TRY_ON_Product::has_model( $post_id ) ) {
+			// AR-189: a product tried on from a photo has no 3D view, but its "Try it on" button works
+			// anywhere (block themes, page builders, landing pages), as on its product page.
+			return self::photo_tryon( $post_id ) ? wp_kses( AR_TRY_ON_Viewer::tryon_button( $post_id ), AR_TRY_ON_Viewer::allowed_html() ) : '';
 		}
 		$reveal = filter_var( $atts['reveal'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 		if ( false === $reveal ) {

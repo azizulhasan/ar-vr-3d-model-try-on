@@ -188,7 +188,10 @@
 			if (!sdk || !sdk.tryon || (!hasModel && !photoUrl)) return;
 			setErr('');
 			var src = hasModel ? { src: m.files.glb.url } : { tryonImage: photoUrl };
-			sdk.tryon.open(Object.assign(src, { tryon: d.tryon }, boot.tryon || {}), {}).catch(function (e) { setErr(UI.message(e)); });
+			var opts = Object.assign(src, { tryon: d.tryon }, boot.tryon || {});
+			// AR-189: add-ons pass their product settings to the test (AtlasAR Pro: real size, side, finger).
+			if (wp.hooks) opts = wp.hooks.applyFilters('atlasAr.product.tryonTestOptions', opts, d, ctx);
+			sdk.tryon.open(opts, {}).catch(function (e) { setErr(UI.message(e)); });
 		}
 		function choosePhoto() {
 			if (!wp.media) return;
@@ -204,9 +207,22 @@
 			set('tryon_image', ctx.item.thumb_id);
 			setPhotoUrl(ctx.item.thumb);
 		}
+		// AR-189: what can be tried on. Add-ons add their own (AtlasAR Pro: nose pin, earrings, rings, watches…).
+		var tryonChoices = [
+			{ value: '', title: __('No', 'ar-vr-3d-model-try-on'), text: __('A normal 3D view.', 'ar-vr-3d-model-try-on') },
+			{ value: 'glasses', title: __('Glasses', 'ar-vr-3d-model-try-on'), text: __('Sunglasses and frames on the nose.', 'ar-vr-3d-model-try-on') },
+			{ value: 'hat', title: __('Cap or hat', 'ar-vr-3d-model-try-on'), text: __('On the head, above the forehead.', 'ar-vr-3d-model-try-on') }
+		];
+		if (wp.hooks) tryonChoices = wp.hooks.applyFilters('atlasAr.product.tryonCategories', tryonChoices, ctx);
+		// AR-189: settings an add-on shows for the chosen kind (elements; AtlasAR Pro: real size, side, finger).
+		var extraFields = d.tryon && wp.hooks ? wp.hooks.applyFilters('atlasAr.product.tryonFields', [], ctx) : [];
+		var faceKind = d.tryon === 'glasses' || d.tryon === 'hat'; // the free plugin's own kinds keep their words
 		var photoBox = !hasModel ? el(UI.Field, { id: 'product.tryon_image', className: 'atlas-ar-tryon-photo' },
 			el('h3', null, __('No 3D model? Use a photo', 'ar-vr-3d-model-try-on')),
-			el('p', { className: 'description' }, __('A straight-on photo of the glasses or cap is enough: its plain background is removed and it sits on the face. Best on a white background, or a PNG with a transparent background (clear lenses look best that way). With a 3D model, the model is used instead.', 'ar-vr-3d-model-try-on')),
+			el('p', { className: 'description' }, faceKind
+				? __('A straight-on photo of the glasses or cap is enough: its plain background is removed and it sits on the face. Best on a white background, or a PNG with a transparent background (clear lenses look best that way). With a 3D model, the model is used instead.', 'ar-vr-3d-model-try-on')
+				// AR-189: kinds an add-on added (jewellery, rings, watches…).
+				: __('A photo of the product on a plain background is enough: the background is removed. A PNG with a transparent background looks best. With a 3D model, the model is used instead.', 'ar-vr-3d-model-try-on')),
 			photoUrl ? el('img', { src: photoUrl, alt: '', className: 'atlas-ar-tryon-photo-preview' }) : null,
 			el('div', { className: 'atlas-ar-row' },
 				wp.media ? el(C.Button, { variant: 'secondary', onClick: choosePhoto }, photoUrl ? __('Choose another picture', 'ar-vr-3d-model-try-on') : __('Choose a picture', 'ar-vr-3d-model-try-on')) : null,
@@ -215,17 +231,16 @@
 		return el(Fragment, null,
 			el(UI.Field, { id: 'product.tryon' }, el('span', { className: 'atlas-ar-label', 'aria-hidden': 'true' }, __('Can shoppers try this on?', 'ar-vr-3d-model-try-on')), el(UI.Choice, {
 				label: __('Can shoppers try this on?', 'ar-vr-3d-model-try-on'), value: d.tryon, compact: true, onChange: function (v) { set('tryon', v); },
-				options: [
-					{ value: '', title: __('No', 'ar-vr-3d-model-try-on'), text: __('A normal 3D view.', 'ar-vr-3d-model-try-on') },
-					{ value: 'glasses', title: __('Glasses', 'ar-vr-3d-model-try-on'), text: __('Sunglasses and frames on the nose.', 'ar-vr-3d-model-try-on') },
-					{ value: 'hat', title: __('Cap or hat', 'ar-vr-3d-model-try-on'), text: __('On the head, above the forehead.', 'ar-vr-3d-model-try-on') }
-				]
+				options: tryonChoices
 			})),
 			d.tryon ? el(Fragment, null,
 				el(UI.Field, { id: 'product.tryon_viewer' }, el(C.ToggleControl, { label: onProduct ? __('Also show the 3D view and AR button for this product', 'ar-vr-3d-model-try-on') : __('Also show the 3D view and AR button here', 'ar-vr-3d-model-try-on'), checked: !!d.tryon_viewer, onChange: function (v) { set('tryon_viewer', v); } })),
 				!boot.tryonEnabled ? el(C.Notice, { status: 'warning', isDismissible: false }, __('Try-on is turned off in AtlasAR › Try-on, so the button does not show.', 'ar-vr-3d-model-try-on')) : null,
-				el('p', { className: 'description' }, onProduct ? __('The product sits on the face automatically.', 'ar-vr-3d-model-try-on') : __('It sits on the face automatically.', 'ar-vr-3d-model-try-on')),
+				el('p', { className: 'description' }, faceKind
+					? (onProduct ? __('The product sits on the face automatically.', 'ar-vr-3d-model-try-on') : __('It sits on the face automatically.', 'ar-vr-3d-model-try-on'))
+					: __('It is placed automatically where it is worn.', 'ar-vr-3d-model-try-on')),
 				photoBox,
+				extraFields.length ? el.apply(null, [Fragment, null].concat(extraFields)) : null,
 				hasModel || photoUrl ? el(C.Button, { variant: 'secondary', onClick: test }, __('Test try-on with my camera', 'ar-vr-3d-model-try-on')) : null,
 				err ? el(C.Notice, { status: 'error', isDismissible: false }, err) : null,
 				el(UI.ProNote, { where: 'product_panel', spot: 'tryon_fit' }, __('AtlasAR Pro lets you fine-tune the fit and shows the product in real 3D.', 'ar-vr-3d-model-try-on'))) : null);
@@ -235,6 +250,13 @@
 	function panelAddress(hash) {
 		var m = /^#atlas-ar-panel(?::([a-z0-9_-]+))?(?:\/([a-z0-9_.-]+))?$/i.exec(String(hash || ''));
 		return m ? { open: true, tab: m[1] || '', field: m[2] || '' } : { open: false, tab: '', field: '' };
+	}
+
+	/** AR-189: the name of a try-on kind an add-on added (its choice title), or the kind itself. */
+	function tryonName(value) {
+		var list = wp.hooks ? wp.hooks.applyFilters('atlasAr.product.tryonCategories', [], {}) : [];
+		for (var i = 0; i < list.length; i++) if (list[i] && list[i].value === value) return String(list[i].title).toLowerCase();
+		return value;
 	}
 
 	/** AR-182: what a shopper gets on this product, in words (never colour alone). */
@@ -248,7 +270,9 @@
 				: arOff ? [__('AR: off (Appearance)', 'ar-vr-3d-model-try-on'), '']
 					: m.files.usdz ? [__('AR: iPhone and Android', 'ar-vr-3d-model-try-on'), 'ok'] : [__('AR: Android; iPhone from the GLB', 'ar-vr-3d-model-try-on'), 'ok'],
 			d.tryon === 'glasses' ? [__('Try-on: glasses', 'ar-vr-3d-model-try-on'), boot.tryonEnabled ? 'ok' : 'note']
-				: d.tryon === 'hat' ? [__('Try-on: cap', 'ar-vr-3d-model-try-on'), boot.tryonEnabled ? 'ok' : 'note'] : [__('Try-on: off', 'ar-vr-3d-model-try-on'), '']
+				: d.tryon === 'hat' ? [__('Try-on: cap', 'ar-vr-3d-model-try-on'), boot.tryonEnabled ? 'ok' : 'note']
+					// AR-189: a kind an add-on added: say it with the add-on's own name for it.
+					: d.tryon ? [__('Try-on:', 'ar-vr-3d-model-try-on') + ' ' + tryonName(d.tryon), boot.tryonEnabled ? 'ok' : 'note'] : [__('Try-on: off', 'ar-vr-3d-model-try-on'), '']
 		];
 		return el('ul', { className: 'atlas-ar-panel-status', 'aria-label': onProduct ? __('AtlasAR status of this product', 'ar-vr-3d-model-try-on') : __('AtlasAR status', 'ar-vr-3d-model-try-on') },
 			chips.map(function (c, i) { return el('li', { key: i }, el(UI.Chip, { tone: c[1] }, c[0])); }));
